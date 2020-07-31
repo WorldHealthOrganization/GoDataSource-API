@@ -2100,9 +2100,15 @@ const paginateResultSet = function (filter, resultSet) {
  * @param fullPeriodInterval period interval limits (max start date/max end date)
  * @param periodType enum: ['day', 'week', 'month']
  * @param date
+ * @param weekType iso / sunday / epi (default: iso)
  * @return {['startDate', 'endDate']}
  */
-const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date) {
+const getPeriodIntervalForDate = function (
+  fullPeriodInterval,
+  periodType,
+  date,
+  weekType
+) {
   // get period in which the case needs to be included
   let startDay, endDay;
   switch (periodType) {
@@ -2113,8 +2119,24 @@ const getPeriodIntervalForDate = function (fullPeriodInterval, periodType, date)
       break;
     case 'week':
       // get week interval for date
-      startDay = getDate(date).startOf('isoWeek');
-      endDay = getDateEndOfDay(date).endOf('isoWeek');
+      weekType = weekType || 'iso';
+      switch (weekType) {
+        case 'iso':
+          startDay = getDate(date).startOf('isoWeek');
+          endDay = getDateEndOfDay(date).endOf('isoWeek');
+          break;
+        case 'sunday':
+          startDay = getDate(date).startOf('week');
+          endDay = getDateEndOfDay(date).endOf('week');
+          break;
+        case 'epi':
+          date = getDate(date);
+          const epiWeek = EpiWeek(date.clone().toDate());
+          startDay = date.clone().week(epiWeek.week).startOf('week');
+          endDay = date.clone().week(epiWeek.week).endOf('week');
+          break;
+      }
+
       break;
     case 'month':
       // get month period interval for date

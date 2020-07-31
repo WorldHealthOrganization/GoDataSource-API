@@ -8,6 +8,7 @@ const helpers = require('../helpers');
  * @param cases
  * @param periodInterval
  * @param periodType
+ * @param weekType
  * @param periodMap
  * @param timePropertyName
  * @param exportedPropertyName
@@ -15,11 +16,16 @@ const helpers = require('../helpers');
  * @param categoryList
  * @returns {*}
  */
-function countCategoryOverTime(cases, periodInterval, periodType, periodMap, timePropertyName, exportedPropertyName, categoryPropertyName, categoryList) {
+function countCategoryOverTime(cases, periodInterval, periodType, weekType, periodMap, timePropertyName, exportedPropertyName, categoryPropertyName, categoryList) {
   // go through all the cases
   cases.forEach(function (caseRecord) {
     // get interval based on date of onset
-    const caseOnsetInterval = helpers.getPeriodIntervalForDate(periodInterval, periodType, _.get(caseRecord, timePropertyName));
+    const caseOnsetInterval = helpers.getPeriodIntervalForDate(
+      periodInterval,
+      periodType,
+      _.get(caseRecord, timePropertyName),
+      weekType
+    );
     // build period map index for onset interval
     const periodMapIndex = `${caseOnsetInterval[0]} - ${caseOnsetInterval[1]}`;
     // if an index was found outside built periodMap (this usually happens when dateOfOnset is before outbreak startDate)
@@ -52,15 +58,17 @@ const worker = {
    * @param cases
    * @param periodInterval
    * @param periodType
+   * @param weekType
    * @param periodMap
    * @param caseClassifications
    * @return {*}
    */
-  countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, periodMap, caseClassifications) {
+  countStratifiedByClassificationOverTime: function (cases, periodInterval, periodType, weekType, periodMap, caseClassifications) {
     return countCategoryOverTime(
       cases,
       periodInterval,
       periodType,
+      weekType,
       periodMap,
       'dateOfOnset',
       'classification',
@@ -73,15 +81,17 @@ const worker = {
    * @param cases
    * @param periodInterval
    * @param periodType
+   * @param weekType
    * @param periodMap
    * @param caseOutcomeList
    * @return {*}
    */
-  countStratifiedByOutcomeOverTime: function (cases, periodInterval, periodType, periodMap, caseOutcomeList) {
+  countStratifiedByOutcomeOverTime: function (cases, periodInterval, periodType, weekType, periodMap, caseOutcomeList) {
     return countCategoryOverTime(
       cases,
       periodInterval,
       periodType,
+      weekType,
       periodMap,
       'dateOfOutcome',
       'outcome',
@@ -94,15 +104,17 @@ const worker = {
    * @param cases
    * @param periodInterval
    * @param periodType
+   * @param weekType
    * @param periodMap
    * @param caseClassifications
    * @return {*}
    */
-  countStratifiedByClassificationOverReportingTime: function (cases, periodInterval, periodType, periodMap, caseClassifications) {
+  countStratifiedByClassificationOverReportingTime: function (cases, periodInterval, periodType, weekType, periodMap, caseClassifications) {
     return countCategoryOverTime(
       cases,
       periodInterval,
       periodType,
+      weekType,
       periodMap,
       'dateOfReporting',
       'classification',
