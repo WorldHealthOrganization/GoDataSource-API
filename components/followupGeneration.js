@@ -17,6 +17,9 @@ const _createFollowUpEntry = function (props, contact) {
 
   // set follow up address to match contact's current address
   props.address = App.models.person.getCurrentAddress(contact);
+  props.usualPlaceOfResidenceLocationId = props.address && props.address.locationId ?
+    props.address.locationId :
+    null;
 
   return props;
 };
