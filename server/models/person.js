@@ -328,8 +328,6 @@ module.exports = function (Person) {
       if (
         // address was removed entirely
         personInstance.address === null ||
-        // address is not usual place of residence
-        personInstance.address.typeId !== addressConstants.usualPlaceOfResidenceType ||
         // locationId was removed or not set
         !personInstance.address.locationId
       ) {
@@ -361,8 +359,6 @@ module.exports = function (Person) {
     personInstance.usualPlaceOfResidenceLocationId = usualPlaceOfResidenceAddress && usualPlaceOfResidenceAddress.locationId ?
       usualPlaceOfResidenceAddress.locationId :
       null;
-
-    return;
   }
 
   /**

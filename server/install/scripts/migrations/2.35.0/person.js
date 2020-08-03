@@ -368,21 +368,10 @@ const setUsualPlaceOfResidenceLocationIdOnPerson = (options, callback) => {
       };
 
       const itemAction = (data) => {
-        // get person addresses
-        let personAddresses = data.addresses ?
-          // addresses for case/contact/contact of contact
-          data.addresses :
-          (
-            // address for event
-            data.address ?
-              // normalize to an array
-              [data.address] :
-              // no address set on person
-              []
-          );
-
         // get usual place of residence address
-        let usualPlaceOfResidenceAddress = personAddresses.find(address => address.typeId === AddressConstants.usualPlaceOfResidenceType);
+        let usualPlaceOfResidenceAddress = data.addresses ?
+          data.addresses.find(address => address.typeId === AddressConstants.usualPlaceOfResidenceType) :
+          data.address;
 
         // get locationId from usual place of residence address
         let usualPlaceOfResidenceLocationId = usualPlaceOfResidenceAddress && usualPlaceOfResidenceAddress.locationId ?

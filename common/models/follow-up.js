@@ -309,6 +309,9 @@ module.exports = function (FollowUp) {
    * Before save hooks
    */
   FollowUp.observe('before save', function (ctx, next) {
+    // set usual place of residence locationId
+    setUsualPlaceOfResidenceLocationId(ctx);
+
     // sort multi answer questions
     const data = ctx.isNewInstance ? ctx.instance : ctx.data;
     helpers.sortMultiAnswerQuestions(data);
@@ -1026,4 +1029,49 @@ module.exports = function (FollowUp) {
         return followUps;
       });
   };
+
+  /**
+   * Set usualPlaceOfResidenceLocationId when address is updated
+   * @param context
+   */
+  function setUsualPlaceOfResidenceLocationId(context) {
+    // define follow-up instance
+    let followUpInstance;
+
+    // if this is a new record
+    if (context.isNewInstance) {
+      // get instance data from the instance
+      followUpInstance = context.instance;
+
+      // set usualPlaceOfResidenceLocationId as null by default
+      followUpInstance.usualPlaceOfResidenceLocationId = null;
+    } else {
+      // existing instance, we're interested only in what is modified
+      followUpInstance = context.data;
+    }
+
+    // check if address field was touched
+    if (followUpInstance.address === undefined) {
+      return;
+    }
+
+    // follow-up address was touched; get new usualPlaceOfResidenceLocationId
+    // follow-up address was changed
+    if (
+      // address was removed entirely
+      followUpInstance.address === null ||
+      // locationId was removed or not set
+      !followUpInstance.address.locationId
+    ) {
+      // set usualPlaceOfResidenceLocationId
+      followUpInstance.usualPlaceOfResidenceLocationId = null;
+      return;
+    }
+    // address was updated, is usual place of residence and locationId was set
+    else {
+      // set usualPlaceOfResidenceLocationId
+      followUpInstance.usualPlaceOfResidenceLocationId = followUpInstance.address.locationId;
+      return;
+    }
+  }
 };
