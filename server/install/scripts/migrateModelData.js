@@ -96,6 +96,12 @@ const migrationVersions = [{
       name: 'addMissingDefaultValues',
       buildNo: 1
     }]
+  }, {
+    fileName: 'followUp.js',
+    actions: [{
+      name: 'setUsualPlaceOfResidenceLocationIdOnFollowUp',
+      buildNo: 1
+    }]
   }]
 }];
 

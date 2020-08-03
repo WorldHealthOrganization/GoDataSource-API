@@ -22,6 +22,10 @@
     "address": {
       "type": "address"
     },
+    "usualPlaceOfResidenceLocationId": {
+      "description": "Location ID for the usual place of residence address.",
+      "type": "string"
+    },
     "questionnaireAnswers": {
       "type": "object"
     },
@@ -70,6 +74,9 @@
     },
     "date_index": {
       "date": 1
+    },
+    "usualPlaceOfResidenceLocationId_index": {
+      "usualPlaceOfResidenceLocationId": 1
     }
   },
   "validations": [],
