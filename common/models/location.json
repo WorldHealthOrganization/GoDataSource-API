@@ -368,6 +368,36 @@
           "path": "/propagate-geo-location"
         }
       ]
+    },
+    "find": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "description": "List of locations that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries locations.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/"
+        }, {
+          "verb": "post",
+          "path": "/filter"
+        }
+      ]
     }
   }
 }
