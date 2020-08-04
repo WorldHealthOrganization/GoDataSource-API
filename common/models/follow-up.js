@@ -1074,4 +1074,52 @@ module.exports = function (FollowUp) {
       return;
     }
   }
+
+  /**
+   * Add geographical restriction in where prop of the filter for logged in user
+   * Note: The updated where filter is returned by the Promise; If there filter doesn't need to be updated nothing will be returned
+   * @param context Remoting context from which to get logged in user and outbreak
+   * @param where Where filter from which to start
+   * @returns {Promise<unknown>|Promise<T>|Promise<void>}
+   */
+  FollowUp.addGeographicalRestrictions = (context, where) => {
+    let loggedInUser = context.req.authData.user;
+    let outbreak = context.instance;
+
+    if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+      // no need to apply geographic restrictions
+      return Promise.resolve();
+    }
+
+    // get user allowed locations
+    return app.models.user.cache
+      .getUserLocationsIds(loggedInUser.id)
+      .then(userAllowedLocationsIds => {
+        if (!userAllowedLocationsIds.length) {
+          // need to get data from all locations
+          return Promise.resolve();
+        }
+
+        // get query for allowed locations
+        let allowedLocationsQuery = {
+          // get models for the calculated locations and the ones that don't have a usual place of residence location set
+          usualPlaceOfResidenceLocationId: {
+            inq: userAllowedLocationsIds.concat([null])
+          }
+        };
+
+        // append input query
+        if (where && Object.keys(where).length) {
+          allowedLocationsQuery = {
+            and: [
+              allowedLocationsQuery,
+              where
+            ]
+          };
+        }
+
+        // update where to only query for allowed locations
+        return Promise.resolve(allowedLocationsQuery);
+      });
+  };
 };

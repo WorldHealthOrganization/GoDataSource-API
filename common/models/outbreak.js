@@ -2064,7 +2064,20 @@ module.exports = function (Outbreak) {
       // use that old version
       _.set(filter, 'where.contact', query.contact);
     }
-    next();
+
+    // add geographical restriction to filter if needed
+    app.models.followUp
+      .addGeographicalRestrictions(context, filter.where)
+      .then(updatedFilter => {
+        // update where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // handles default lodsh value => _.get(context, 'args.filter', ===> {} <====);
+        context.args.filter = filter;
+
+        // finished
+        next();
+      });
   };
 
   /**
