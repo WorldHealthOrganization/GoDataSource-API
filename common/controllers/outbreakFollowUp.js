@@ -753,9 +753,10 @@ module.exports = function (Outbreak) {
   /**
    * Count the contacts that have followups scheduled and the contacts with successful followups
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, callback) {
+  Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, options, callback) {
     filter = filter || {};
     const FollowUp = app.models.followUp;
 
@@ -870,17 +871,25 @@ module.exports = function (Outbreak) {
     // find the contacts
     findContacts = findContacts
       .then(() => {
-        // no contact query
-        if (!contactQuery) {
-          return;
-        }
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
 
-        // if a contact query was specified
-        return app.models.contact
-          .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
-          .then(function (contacts) {
-            // return a list of contact ids
-            return contacts.map(contact => contact.id);
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return app.models.contact
+              .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
           });
       });
 
