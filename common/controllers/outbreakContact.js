@@ -213,6 +213,19 @@ module.exports = function (Outbreak) {
       app.models.followUp
         .preFilterForOutbreak(self, filter)
         .then(function (filter) {
+          // add geographical restriction to filter if needed
+          return app.models.followUp
+            .addGeographicalRestrictions(options.remotingContext, filter.where)
+            .then(updatedFilter => {
+              // update where if needed
+              updatedFilter && (filter.where = updatedFilter);
+
+              // finished
+              return filter;
+            });
+
+        })
+        .then(function (filter) {
           // find follow-ups using filter
           return app.models.followUp.rawFind({
             $and: [

@@ -252,9 +252,10 @@ module.exports = function (Outbreak) {
   /**
    * Find outbreak follow-ups
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.findFollowUps = function (filter, callback) {
+  Outbreak.prototype.findFollowUps = function (filter, options, callback) {
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
@@ -268,10 +269,18 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // find follow-ups using filter
-        return app.models.followUp.findAggregate(
-          filter
-        );
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // find follow-ups using filter
+            return app.models.followUp.findAggregate(
+              filter
+            );
+          });
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -286,9 +295,10 @@ module.exports = function (Outbreak) {
   /**
    * Count outbreak follow-ups
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
+  Outbreak.prototype.filteredCountFollowUps = function (filter, options, callback) {
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
@@ -302,11 +312,19 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // count using query
-        return app.models.followUp.findAggregate(
-          filter,
-          true
-        );
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // count using query
+            return app.models.followUp.findAggregate(
+              filter,
+              true
+            );
+          });
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -361,6 +379,18 @@ module.exports = function (Outbreak) {
               dictionary: dictionary,
               filter: filter
             };
+          });
+      })
+      .then(function (data) {
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, data.filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (data.filter.where = updatedFilter);
+
+            // finished
+            return data;
           });
       })
       .then(function (data) {
@@ -1214,13 +1244,26 @@ module.exports = function (Outbreak) {
   /**
    * Count follow-ups grouped by associated team. Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, options, callback) {
     const self = this;
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // finished
+            return filter;
+          });
+      })
       .then(function (filter) {
         // find follow-ups using filter
         return app.models.followUp
