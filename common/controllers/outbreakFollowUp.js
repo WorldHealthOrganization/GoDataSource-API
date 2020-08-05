@@ -1235,18 +1235,20 @@ module.exports = function (Outbreak) {
   /**
    * Get follow ups grouped by contact
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, callback) {
-    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, false, callback);
+  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, options, callback) {
+    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, options, false, callback);
   };
 
   /**
    * Count follow ups grouped by contact
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, callback) {
-    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, true, callback);
+  Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, options, callback) {
+    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, options, true, callback);
   };
 };

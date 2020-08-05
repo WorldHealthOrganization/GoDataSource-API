@@ -725,10 +725,11 @@ module.exports = function (FollowUp) {
    * Also 'countOnly' flag is supported, in this case only the count of groups is returned as result
    * @param outbreakId
    * @param filter Supports 'where.contact' MongoDB compatible queries besides follow-ups conditions which are on the first level
+   * @param options
    * @param countOnly
    * @param callback
    */
-  FollowUp.getOrCountGroupedByPerson = function (outbreakId, filter, countOnly, callback) {
+  FollowUp.getOrCountGroupedByPerson = function (outbreakId, filter, options, countOnly, callback) {
     // convert filter to mongodb filter structure
     filter = filter || {};
     filter.where = filter.where || {};
@@ -757,6 +758,20 @@ module.exports = function (FollowUp) {
       // no need to send contact filter further, since this one is handled separately
       delete filter.where.contact;
     }
+
+    // add geographical restriction to filter if needed
+    buildQuery = buildQuery
+      .then((contactIds) => {
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // finished
+            return contactIds;
+          });
+      });
 
     // retrieve range follow-ups
     buildQuery
@@ -862,16 +877,9 @@ module.exports = function (FollowUp) {
             // discard follow ups with contacts soft deleted
             {
               $match: {
-                $or: [
-                  {
-                    'contact.deleted': false
-                  },
-                  {
-                    'contact.deleted': {
-                      $eq: null
-                    }
-                  }
-                ]
+                'contact.deleted': {
+                  $ne: true
+                }
               }
             }
           );
