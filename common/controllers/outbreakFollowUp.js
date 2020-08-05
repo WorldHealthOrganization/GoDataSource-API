@@ -1053,7 +1053,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsPerTeamPerDay = function (filter, callback) {
+  Outbreak.prototype.countFollowUpsPerTeamPerDay = function (filter, options, callback) {
     // initialize result
     let result = {
       totalFollowupsCount: 0,
@@ -1084,23 +1084,47 @@ module.exports = function (Outbreak) {
     }
 
     // retrieve all teams to make sure that follow-ups teams still exist
+    // - there is no need right now to restrict teams by locations to which I have access since there will be just a small number of teams and they will be filter out further
     let existingTeamsMap = {};
     app.models.team
-      .find()
+      .find({
+        fields: {
+          id: true
+        }
+      })
       .then(function (teams) {
         // map teams
         teams.forEach((team) => {
-          existingTeamsMap[team.id] = team;
+          existingTeamsMap[team.id] = true;
         });
 
+        // construct follow-up filter
+        const followUpFilter = app.utils.remote.mergeFilters(
+          defaultFilter,
+          filter || {}
+        );
+
+        // define fields that we always need to retrieve
+        // there is no point why frontend will request other fields since we don't return follow-ups
+        followUpFilter.fields = {
+          personId: true,
+          teamId: true,
+          date: true,
+          statusId: true
+        };
+
         // get all the followups for the filtered period
+        // add geographical restriction to filter if needed
         return app.models.followUp
-          .find(
-            app.utils.remote.mergeFilters(
-              defaultFilter,
-              filter || {}
-            )
-          );
+          .addGeographicalRestrictions(options.remotingContext, followUpFilter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (followUpFilter.where = updatedFilter);
+
+            // retrieve follow-ups
+            return app.models.followUp
+              .find(followUpFilter);
+          });
       })
       .then(function (followups) {
         // filter by relation properties
