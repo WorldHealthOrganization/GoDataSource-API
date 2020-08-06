@@ -213,6 +213,19 @@ module.exports = function (Outbreak) {
       app.models.followUp
         .preFilterForOutbreak(self, filter)
         .then(function (filter) {
+          // add geographical restriction to filter if needed
+          return app.models.followUp
+            .addGeographicalRestrictions(options.remotingContext, filter.where)
+            .then(updatedFilter => {
+              // update where if needed
+              updatedFilter && (filter.where = updatedFilter);
+
+              // finished
+              return filter;
+            });
+
+        })
+        .then(function (filter) {
           // find follow-ups using filter
           return app.models.followUp.rawFind({
             $and: [
@@ -2115,7 +2128,7 @@ module.exports = function (Outbreak) {
    * @param dateRange
    * @param callback
    */
-  Outbreak.prototype.getContactFollowUpReport = function (filter, dateRange, callback) {
+  Outbreak.prototype.getContactFollowUpReport = function (filter, dateRange, options, callback) {
     // endData can be received from filter or body
     // body has priority
     let endDate = dateRange.endDate || _.get(filter, 'where.endDate', null);
@@ -2123,15 +2136,23 @@ module.exports = function (Outbreak) {
       delete filter.where.endDate;
     }
 
-    WorkerRunner
-      .getContactFollowUpReport(
-        this.id,
-        dateRange.startDate,
-        endDate,
-        _.get(filter, 'where')
-      )
-      .then(result => callback(null, result))
-      .catch(callback);
+    // add geographical restriction to filter if needed
+    app.models.followUp
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // update where if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        WorkerRunner
+          .getContactFollowUpReport(
+            this.id,
+            dateRange.startDate,
+            endDate,
+            _.get(filter, 'where')
+          )
+          .then(result => callback(null, result))
+          .catch(callback);
+      });
   };
 
   /**

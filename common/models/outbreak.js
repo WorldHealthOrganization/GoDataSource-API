@@ -865,14 +865,15 @@ module.exports = function (Outbreak) {
   /**
    * Count the contacts by follow-up filter
    * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
-   * @param options Object containing outbreakId, follow-up flag name and result property
+   * @param data Object containing outbreakId, follow-up flag name and result property
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.helpers.countContactsByFollowUpFilter = function (options, filter, callback) {
+  Outbreak.helpers.countContactsByFollowUpFilter = function (data, filter, options, callback) {
     filter = filter || {};
     // get options
-    let resultProperty = options.resultProperty;
+    let resultProperty = data.resultProperty;
 
     // initialize result
     let results = {
@@ -903,7 +904,7 @@ module.exports = function (Outbreak) {
             .rawFind({
               and: [
                 caseQuery, {
-                  outbreakId: options.outbreakId,
+                  outbreakId: data.outbreakId,
                   deleted: {
                     $ne: true
                   }
@@ -923,7 +924,7 @@ module.exports = function (Outbreak) {
           // retrieve relationships
           return app.models.relationship
             .rawFind({
-              outbreakId: options.outbreakId,
+              outbreakId: data.outbreakId,
               deleted: {
                 $ne: true
               },
@@ -981,17 +982,25 @@ module.exports = function (Outbreak) {
     // find the contacts
     findContacts = findContacts
       .then(() => {
-        // no contact query
-        if (!contactQuery) {
-          return;
-        }
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
 
-        // if a contact query was specified
-        return app.models.contact
-          .rawFind({and: [contactQuery, {outbreakId: options.outbreakId}]}, {projection: {_id: 1}})
-          .then(function (contacts) {
-            // return a list of contact ids
-            return contacts.map(contact => contact.id);
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return app.models.contact
+              .rawFind({and: [contactQuery, {outbreakId: data.outbreakId}]}, {projection: {_id: 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
           });
       });
 
@@ -1003,9 +1012,9 @@ module.exports = function (Outbreak) {
           where: {
             and: [
               {
-                outbreakId: options.outbreakId
+                outbreakId: data.outbreakId
               },
-              options.followUpFilter
+              data.followUpFilter
             ]
           }
         };
@@ -2064,6 +2073,8 @@ module.exports = function (Outbreak) {
       // use that old version
       _.set(filter, 'where.contact', query.contact);
     }
+
+    // finished
     next();
   };
 

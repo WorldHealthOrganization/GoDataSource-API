@@ -270,7 +270,8 @@ module.exports = function (ExtendedPersistedModel) {
       _.get(context, 'req.method') === 'GET' || (
         (
           _.get(context, 'req.method') === 'PUT' ||
-          _.get(context, 'req.method') === 'PATCH'
+          _.get(context, 'req.method') === 'PATCH' ||
+          _.get(context, 'req.method') === 'POST'
         ) &&
         _.get(context, 'req.query.retrieveCreatedUpdatedBy')
       )

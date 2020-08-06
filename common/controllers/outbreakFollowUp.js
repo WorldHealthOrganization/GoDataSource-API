@@ -6,7 +6,6 @@
  */
 
 const app = require('../../server/server');
-const helpers = require('../../components/helpers');
 const FollowupGeneration = require('../../components/followupGeneration');
 const PromisePool = require('es6-promise-pool');
 const _ = require('lodash');
@@ -36,8 +35,8 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = helpers.getDate(data.startDate);
-    let followupEndDate = helpers.getDateEndOfDay(data.endDate);
+    let followupStartDate = genericHelpers.getDate(data.startDate);
+    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -95,7 +94,8 @@ module.exports = function (Outbreak) {
       .countContactsEligibleForFollowup(
         followupStartDate.toDate(),
         followupEndDate.toDate(),
-        outbreakId
+        outbreakId,
+        options
       )
       .then(contactsCount => {
         if (!contactsCount) {
@@ -119,11 +119,13 @@ module.exports = function (Outbreak) {
                   followupEndDate.toDate(),
                   outbreakId,
                   (batchNo - 1) * batchSize,
-                  batchSize
+                  batchSize,
+                  options
                 );
             };
             const batchItemsAction = function (contacts) {
               // get follow ups list for all contacts
+              // we don't need to retrieve only follow-ups from a specific location since we might want to overwrite them with the new address ?
               return FollowupGeneration
                 .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
                 .then((followUpGroups) => {
@@ -176,7 +178,7 @@ module.exports = function (Outbreak) {
                 });
             };
 
-            return helpers.handleActionsInBatches(
+            return genericHelpers.handleActionsInBatches(
               getActionsCount,
               getBatchData,
               batchItemsAction,
@@ -231,7 +233,7 @@ module.exports = function (Outbreak) {
       return followUpRecord.updateAttributes(data, options);
     };
 
-    helpers.handleActionsInBatches(
+    genericHelpers.handleActionsInBatches(
       getActionsCount,
       getBatchData,
       null,
@@ -253,9 +255,10 @@ module.exports = function (Outbreak) {
   /**
    * Find outbreak follow-ups
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.findFollowUps = function (filter, callback) {
+  Outbreak.prototype.findFollowUps = function (filter, options, callback) {
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
@@ -269,10 +272,18 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // find follow-ups using filter
-        return app.models.followUp.findAggregate(
-          filter
-        );
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // find follow-ups using filter
+            return app.models.followUp.findAggregate(
+              filter
+            );
+          });
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -287,9 +298,10 @@ module.exports = function (Outbreak) {
   /**
    * Count outbreak follow-ups
    * @param filter Supports 'where.contact', 'where.case' MongoDB compatible queries
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.filteredCountFollowUps = function (filter, callback) {
+  Outbreak.prototype.filteredCountFollowUps = function (filter, options, callback) {
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
@@ -303,11 +315,19 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // count using query
-        return app.models.followUp.findAggregate(
-          filter,
-          true
-        );
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // count using query
+            return app.models.followUp.findAggregate(
+              filter,
+              true
+            );
+          });
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -365,6 +385,18 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (data) {
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, data.filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (data.filter.where = updatedFilter);
+
+            // finished
+            return data;
+          });
+      })
+      .then(function (data) {
         const dictionary = data.dictionary;
         const filter = data.filter;
 
@@ -403,9 +435,10 @@ module.exports = function (Outbreak) {
   /**
    * Count the contacts that are lost to follow-up
    * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
+   * @param options
    * @param filter
    */
-  Outbreak.prototype.countContactsLostToFollowup = function (filter) {
+  Outbreak.prototype.countContactsLostToFollowup = function (filter, options) {
     // get outbreakId
     let outbreakId = this.id;
 
@@ -504,14 +537,22 @@ module.exports = function (Outbreak) {
     // get contacts that are available for follow up generation
     return promise
       .then(() => {
-        // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
-        return app.models.contact
-          .rawFind(_filter.where)
-          .then(function (contacts) {
-            return {
-              contactsLostToFollowupCount: contacts.length,
-              contactIDs: contacts.map((contact) => contact.id)
-            };
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, _filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (_filter.where = updatedFilter);
+
+            // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
+            return app.models.contact
+              .rawFind(_filter.where)
+              .then(function (contacts) {
+                return {
+                  contactsLostToFollowupCount: contacts.length,
+                  contactIDs: contacts.map((contact) => contact.id)
+                };
+              });
           });
       });
   };
@@ -519,9 +560,10 @@ module.exports = function (Outbreak) {
   /**
    * Count the contacts not seen in the past X days
    * @param filter Besides the default filter properties this request also accepts 'noDaysNotSeen': number on the first level in 'where'
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactsNotSeenInXDays = function (filter, callback) {
+  Outbreak.prototype.countContactsNotSeenInXDays = function (filter, options, callback) {
     filter = filter || {};
     // initialize noDaysNotSeen filter
     let noDaysNotSeen;
@@ -641,22 +683,30 @@ module.exports = function (Outbreak) {
     // find the contacts
     findContacts = findContacts
       .then(() => {
-        // no contact query
-        if (!contactQuery) {
-          return;
-        }
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
 
-        // if a contact query was specified
-        return app.models.contact
-          .rawFind({
-            and: [
-              {outbreakId: outbreakId},
-              contactQuery
-            ]
-          })
-          .then(function (contacts) {
-            // return a list of contact ids
-            return contacts.map(contact => contact.id);
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return app.models.contact
+              .rawFind({
+                and: [
+                  {outbreakId: outbreakId},
+                  contactQuery
+                ]
+              }, {projection: {'_id': 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
           });
       });
 
@@ -679,6 +729,7 @@ module.exports = function (Outbreak) {
             ]
           }
         };
+
         // if a list of contact ids was specified
         if (contactIds) {
           // restrict list of follow-ups to the list fo contact ids
@@ -688,6 +739,7 @@ module.exports = function (Outbreak) {
             }
           });
         }
+
         // get follow-ups
         return app.models.followUp.rawFind(
           app.utils.remote.mergeFilters(followUpQuery, filter || {}).where,
@@ -720,22 +772,24 @@ module.exports = function (Outbreak) {
    * Count the seen contacts
    * Note: The contacts are counted in total and per team. If a contact is seen by 2 teams it will be counted once in total and once per each team.
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactsSeen = function (filter, callback) {
-    helpers.countContactsByFollowUpFilter({
+  Outbreak.prototype.countContactsSeen = function (filter, options, callback) {
+    Outbreak.helpers.countContactsByFollowUpFilter({
       outbreakId: this.id,
       followUpFilter: app.models.followUp.seenFilter,
       resultProperty: 'contactsSeenCount'
-    }, filter, callback);
+    }, filter, options, callback);
   };
 
   /**
    * Count the contacts that have followups scheduled and the contacts with successful followups
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, callback) {
+  Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, options, callback) {
     filter = filter || {};
     const FollowUp = app.models.followUp;
 
@@ -850,17 +904,25 @@ module.exports = function (Outbreak) {
     // find the contacts
     findContacts = findContacts
       .then(() => {
-        // no contact query
-        if (!contactQuery) {
-          return;
-        }
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
 
-        // if a contact query was specified
-        return app.models.contact
-          .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
-          .then(function (contacts) {
-            // return a list of contact ids
-            return contacts.map(contact => contact.id);
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return app.models.contact
+              .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
           });
       });
 
@@ -1024,7 +1086,7 @@ module.exports = function (Outbreak) {
    * @param filter
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsPerTeamPerDay = function (filter, callback) {
+  Outbreak.prototype.countFollowUpsPerTeamPerDay = function (filter, options, callback) {
     // initialize result
     let result = {
       totalFollowupsCount: 0,
@@ -1055,23 +1117,47 @@ module.exports = function (Outbreak) {
     }
 
     // retrieve all teams to make sure that follow-ups teams still exist
+    // - there is no need right now to restrict teams by locations to which I have access since there will be just a small number of teams and they will be filter out further
     let existingTeamsMap = {};
     app.models.team
-      .find()
+      .find({
+        fields: {
+          id: true
+        }
+      })
       .then(function (teams) {
         // map teams
         teams.forEach((team) => {
-          existingTeamsMap[team.id] = team;
+          existingTeamsMap[team.id] = true;
         });
 
+        // construct follow-up filter
+        const followUpFilter = app.utils.remote.mergeFilters(
+          defaultFilter,
+          filter || {}
+        );
+
+        // define fields that we always need to retrieve
+        // there is no point why frontend will request other fields since we don't return follow-ups
+        followUpFilter.fields = {
+          personId: true,
+          teamId: true,
+          date: true,
+          statusId: true
+        };
+
         // get all the followups for the filtered period
+        // add geographical restriction to filter if needed
         return app.models.followUp
-          .find(
-            app.utils.remote.mergeFilters(
-              defaultFilter,
-              filter || {}
-            )
-          );
+          .addGeographicalRestrictions(options.remotingContext, followUpFilter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (followUpFilter.where = updatedFilter);
+
+            // retrieve follow-ups
+            return app.models.followUp
+              .find(followUpFilter);
+          });
       })
       .then(function (followups) {
         // filter by relation properties
@@ -1161,13 +1247,26 @@ module.exports = function (Outbreak) {
   /**
    * Count follow-ups grouped by associated team. Supports 'where.contact', 'where.case' MongoDB compatible queries
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsByTeam = function (filter, callback) {
+  Outbreak.prototype.countFollowUpsByTeam = function (filter, options, callback) {
     const self = this;
     // pre-filter using related data (case, contact)
     app.models.followUp
       .preFilterForOutbreak(this, filter)
+      .then(function (filter) {
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (filter.where = updatedFilter);
+
+            // finished
+            return filter;
+          });
+      })
       .then(function (filter) {
         // find follow-ups using filter
         return app.models.followUp
@@ -1182,18 +1281,20 @@ module.exports = function (Outbreak) {
   /**
    * Get follow ups grouped by contact
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, callback) {
-    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, false, callback);
+  Outbreak.prototype.getFollowUpsGroupedByContact = function (filter, options, callback) {
+    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, options, false, callback);
   };
 
   /**
    * Count follow ups grouped by contact
    * @param filter
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, callback) {
-    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, true, callback);
+  Outbreak.prototype.countFollowUpsGroupedByContact = function (filter, options, callback) {
+    app.models.followUp.getOrCountGroupedByPerson(this.id, filter, options, true, callback);
   };
 };
