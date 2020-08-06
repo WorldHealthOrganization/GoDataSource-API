@@ -94,7 +94,8 @@ module.exports = function (Outbreak) {
       .countContactsEligibleForFollowup(
         followupStartDate.toDate(),
         followupEndDate.toDate(),
-        outbreakId
+        outbreakId,
+        options
       )
       .then(contactsCount => {
         if (!contactsCount) {
@@ -118,11 +119,13 @@ module.exports = function (Outbreak) {
                   followupEndDate.toDate(),
                   outbreakId,
                   (batchNo - 1) * batchSize,
-                  batchSize
+                  batchSize,
+                  options
                 );
             };
             const batchItemsAction = function (contacts) {
               // get follow ups list for all contacts
+              // we don't need to retrieve only follow-ups from a specific location since we might want to overwrite them with the new address ?
               return FollowupGeneration
                 .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
                 .then((followUpGroups) => {
