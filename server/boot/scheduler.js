@@ -128,7 +128,8 @@ module.exports = function (app) {
               location: null,
               userId: null,
               status: backupModel.status.PENDING,
-              automatic: true
+              automatic: true,
+              description: backupSettings.description
             })
             .then((record) => {
               // start the backup process
@@ -370,9 +371,9 @@ module.exports = function (app) {
             const removeDirectoryRecursive = (dirPath) => {
               if (fs.existsSync(dirPath)) {
                 // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
-                fs.readdirSync(dirPath).forEach(function(fileOrDirToRemovePath) {
-                  const currentPath =  `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
-                  if(fs.lstatSync(currentPath).isDirectory()) {
+                fs.readdirSync(dirPath).forEach(function (fileOrDirToRemovePath) {
+                  const currentPath = `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
+                  if (fs.lstatSync(currentPath).isDirectory()) {
                     // remove directory content
                     removeDirectoryRecursive(currentPath);
                   } else {
@@ -434,7 +435,7 @@ module.exports = function (app) {
           };
 
           // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
-          fs.readdirSync(tmp.tmpdir).forEach(function(fileOrDir) {
+          fs.readdirSync(tmp.tmpdir).forEach(function (fileOrDir) {
             // snapshot zip files
             deleteFileOrDirIfMatches(
               fileOrDir,
