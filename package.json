@@ -19,6 +19,7 @@
     "dump-language-data": "node ./server/install/install.js dump-language-data",
     "dump-outbreak-template-data": "node ./server/install/install.js dump-outbreak-template-data",
     "remove-unused-language-tokens": "node ./server/install/install.js remove-unused-language-tokens",
+    "remove-language-tokens-of-deleted-outbreaks": "node ./server/install/install.js remove-language-tokens-of-deleted-outbreaks",
     "populate-with-dummy-data": "node ./server/install/install.js populate-with-dummy-data",
     "determine-and-dump-reference-data-items": "node ./server/install/install.js determine-and-dump-reference-data-items"
   },

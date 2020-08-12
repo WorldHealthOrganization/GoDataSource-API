@@ -87,7 +87,97 @@ const addMissingTokenSortKeys = (callback) => {
     .catch(callback);
 };
 
+/**
+ * Remove the language tokens of deleted outbreaks
+ * @param [options] Optional
+ * @param [options.outbreakName] Outbreak for which to delete language tokens
+ * @param callback
+ */
+const removeTokensOfDeletedOutbreak = (options, callback) => {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
+  let outbreakCollection, languageTokenCollection;
+
+  // create Mongo DB connection
+  return MongoDBHelper
+    .getMongoDBConnection()
+    .then(dbConn => {
+      outbreakCollection = dbConn.collection('outbreak');
+      languageTokenCollection = dbConn.collection('languageToken');
+
+      // depending on given options we might just want to delete tokens of a given outbreak
+      let getOutbreakIds;
+      if (options.outbreakName && options.outbreakName.length) {
+        getOutbreakIds = outbreakCollection
+          .findOne({
+            name: options.outbreakName,
+            deleted: true
+          }, {
+            projection: {
+              _id: 1
+            }
+          })
+          .then(outbreak => {
+            if (!outbreak) {
+              return Promise.reject(`Given outbreak ${options.outbreakName} was not found in system or is not deleted`);
+            }
+
+            return [outbreak._id];
+          });
+      } else {
+        getOutbreakIds = outbreakCollection
+          .find({
+            deleted: true
+          }, {
+            projection: {
+              _id: 1
+            }
+          })
+          .toArray()
+          .then(outbreaks => {
+            return outbreaks.map(outbreak => outbreak._id);
+          });
+      }
+
+      return getOutbreakIds;
+    })
+    .then(outbreakIds => {
+      if (!outbreakIds.length) {
+        console.log('No deleted outbreaks were found in the system');
+        return Promise.resolve(0);
+      }
+
+      // delete all outbreak related language tokens
+      return languageTokenCollection
+        .updateMany({
+          deleted: {
+            $ne: true
+          },
+          token: {
+            $regex: new RegExp(`${outbreakIds.join('|')}`, 'i')
+          }
+        }, {
+          '$set': {
+            deleted: true,
+            deletedAt: new Date()
+          }
+        })
+        .then(result => {
+          return Promise.resolve(result.modifiedCount);
+        });
+    })
+    .then(tokensNo => {
+      console.log(`Removed ${tokensNo} language tokens`);
+      callback();
+    })
+    .catch(callback);
+};
+
 // export list of migration jobs; functions that receive a callback
 module.exports = {
-  addMissingTokenSortKeys
+  addMissingTokenSortKeys,
+  removeTokensOfDeletedOutbreak
 };

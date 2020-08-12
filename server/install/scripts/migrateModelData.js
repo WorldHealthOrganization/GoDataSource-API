@@ -83,6 +83,9 @@ const migrationVersions = [{
     actions: [{
       name: 'addMissingTokenSortKeys',
       buildNo: 1
+    }, {
+      name: 'removeTokensOfDeletedOutbreak',
+      buildNo: 1
     }]
   }, {
     fileName: 'outbreak.js',
