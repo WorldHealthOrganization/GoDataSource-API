@@ -71,7 +71,7 @@ module.exports = function (Outbreak) {
   // initialize model helpers
   Outbreak.helpers = {};
   // set a higher limit for event listeners to avoid warnings (we have quite a few listeners)
-  Outbreak.setMaxListeners(70);
+  Outbreak.setMaxListeners(80);
 
   // The permissions that influence an user's ability to see a person's data
   Outbreak.personReadPermissions = [
@@ -2101,6 +2101,30 @@ module.exports = function (Outbreak) {
         return next();
       })
       .catch(next);
+  });
+
+  /**
+   * Outbreak after delete hook
+   * Remove related language tokens
+   * @param ctx
+   * @param next
+   */
+  Outbreak.observe('after delete', (ctx, next) => {
+    const outbreakId = ctx.instance.id;
+
+    // don't wait for the hook actions to finish
+    next();
+
+    // remove related language tokens
+    app.models.languageToken
+      .destroyAll({
+        token: {
+          regexp: new RegExp(outbreakId, 'i')
+        }
+      })
+      .catch(err => {
+        app.logger.debug(`Failed to remove outbreak related language tokens. Error: ${err}`);
+      });
   });
 
   /**
