@@ -351,5 +351,24 @@
       "user_modify_own_account",
       "user_list_for_filters"
     ]
+  },
+  "Contact of Contact - all permissions": {
+    "id": "ROLE_CONTACT_OF_CONTACT_MANAGER",
+    "migrateDate": "2020-08-14T00:02:00.000Z",
+    "description": "",
+    "permissionIds": [
+      "contact_of_contact_all",
+
+      "outbreak_view",
+      "user_list_for_filters",
+      "relationship_bulk_delete",
+      "relationship_create",
+      "cluster_list",
+      "relationship_delete",
+      "relationship_export",
+      "relationship_list",
+      "relationship_modify",
+      "relationship_view"
+    ]
   }
 }
