@@ -16,6 +16,7 @@ const supportedArguments = [
   'dump-language-data',
   'dump-outbreak-template-data',
   'remove-unused-language-tokens',
+  'remove-language-tokens-of-deleted-outbreaks',
   'populate-with-dummy-data',
   'set-relationships-information-on-person',
   'determine-and-dump-reference-data-items',
@@ -204,6 +205,20 @@ const routines = {
       require('./scripts/removeUnusedLanguageTokens')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(confirmRemoval));
+    });
+  },
+  removeLanguageTokensOfDeletedOutbreaks: function () {
+    // accept outbreak name
+    const allowedArgs = [
+      'outbreakName'
+    ];
+
+    let methodRelevantArgs = parseArgumentValues(allowedArgs);
+
+    // populate database
+    console.log('Removing language tokens of deleted outbreaks');
+    runFunctions.push((cb) => {
+      require('./scripts/migrations/2.35.0/languageToken').removeTokensOfDeletedOutbreak(methodRelevantArgs, cb);
     });
   },
   populateWithDummyData: function () {
