@@ -136,6 +136,6 @@
     }
   },
   "cot": {
-    "maxRelationships": 1000
+    "maxRelationships": 9999999
   }
 }
