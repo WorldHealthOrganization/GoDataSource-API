@@ -2353,7 +2353,19 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('**', function (context, modelInstance, next) {
     if (context.args.filter) {
       genericHelpers.convertPropsToDate(context.args.filter);
-      genericHelpers.includeSubLocationsInLocationFilter(app, context.args.filter, next);
+      genericHelpers.includeSubLocationsInLocationFilter(
+        app,
+        context.args.filter,
+        next
+      );
+    } else if (context.args.where) {
+      genericHelpers.convertPropsToDate(context.args.where);
+      genericHelpers.includeSubLocationsInLocationFilter(
+        app, {
+          where: context.args.where
+        },
+        next
+      );
     } else {
       return next();
     }
