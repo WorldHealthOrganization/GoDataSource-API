@@ -52,7 +52,7 @@ const migrationVersions = [{
     fileName: 'migrateRolesAndUsers.js',
     actions: [{
       name: 'run',
-      buildNo: 1
+      buildNo: 2
     }]
   }, {
     fileName: 'populateMissingLanguageTokens.js',
