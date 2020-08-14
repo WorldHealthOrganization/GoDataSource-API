@@ -7653,11 +7653,6 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
-        },
-        {
-          "arg": "options",
-          "type": "object",
-          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -7794,6 +7789,11 @@
           "arg": "filter",
           "type": "object",
           "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
@@ -7824,6 +7824,11 @@
           "arg": "where",
           "type": "object",
           "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
         }
       ],
       "returns": [
