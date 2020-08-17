@@ -104,6 +104,7 @@ function getMongoDBConnection() {
 function exportCollectionInBatches(dbConnection, mongoCollectionName, collectionName, filter, batchSize, tmpDirName, archivesDirName, options, callback) {
   // should we exclude deleted records ?
   if (
+    options.applyExcludeDeletedRecordsRules &&
     dbSync.collectionsExcludeDeletedRecords &&
     dbSync.collectionsExcludeDeletedRecords[collectionName]
   ) {
@@ -662,7 +663,17 @@ const worker = {
                       logger.debug(`Exporting collection: ${collectionName}`);
 
                       // export collection
-                      exportCollectionInBatches(dbConnection, collections[collectionName], collectionName, mongoDBFilter, options.chunkSize || 10000, tmpDirName, archivesDirName, options, callback);
+                      exportCollectionInBatches(
+                        dbConnection,
+                        collections[collectionName],
+                        collectionName,
+                        mongoDBFilter,
+                        options.chunkSize || 10000,
+                        tmpDirName,
+                        archivesDirName,
+                        options,
+                        callback
+                      );
                     };
                   }),
                   (err) => {
