@@ -90,6 +90,11 @@ let syncModels = syncCollections.concat(['case', 'contact', 'event']);
 // eg: person model - visualId
 const collectionsToSyncInSeries = ['person'];
 
+// for which records we should always retrieve only NOT deleted records?
+const collectionsExcludeDeletedRecords = {
+  languageToken: true
+};
+
 /**
  * Add outbreakId filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
@@ -778,6 +783,7 @@ module.exports = {
   collectionsFilterMap: collectionsFilterMap,
   collectionsImportFilterMap: collectionsImportFilterMap,
   collectionsToSyncInSeries: collectionsToSyncInSeries,
+  collectionsExcludeDeletedRecords: collectionsExcludeDeletedRecords,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,

@@ -102,6 +102,31 @@ function getMongoDBConnection() {
  * @returns {Promise<any>}
  */
 function exportCollectionInBatches(dbConnection, mongoCollectionName, collectionName, filter, batchSize, tmpDirName, archivesDirName, options, callback) {
+  // should we exclude deleted records ?
+  if (
+    dbSync.collectionsExcludeDeletedRecords &&
+    dbSync.collectionsExcludeDeletedRecords[collectionName]
+  ) {
+    // query
+    const notDeletedQuery = {
+      deleted: {
+        $ne: true
+      }
+    };
+
+    // add to filter
+    if (_.isEmpty(filter)) {
+      filter = notDeletedQuery;
+    } else {
+      filter = {
+        $and: [
+          notDeletedQuery,
+          filter
+        ]
+      };
+    }
+  }
+
   /**
    * Get next batch from collection
    * @param skip
@@ -109,6 +134,7 @@ function exportCollectionInBatches(dbConnection, mongoCollectionName, collection
   function getNextBatch(skip = 0) {
     let batchNumber = skip ? skip / batchSize : 0;
 
+    // retrieve data
     let cursor = dbConnection
       .collection(mongoCollectionName)
       .find(filter, {
