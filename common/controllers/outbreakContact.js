@@ -474,12 +474,13 @@ module.exports = function (Outbreak) {
                         lastName: _.get(record, 'contact.lastName', ''),
                         firstName: _.get(record, 'contact.firstName', ''),
                         middleName: _.get(record, 'contact.middleName', ''),
-                        age: pdfUtils.displayAge(record, dictionary),
+                        age: pdfUtils.displayAge(record.contact, dictionary),
                         gender: record.gender,
                         location: record.address && record.address.locationId && record.address.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.address.locationId] ?
                           locationsMap[record.address.locationId].name :
                           unknownLocationName,
                         address: app.models.address.getHumanReadableAddress(record.address),
+                        phoneNumber: _.get(record, 'address.phoneNumber', ''),
                         day: record.index,
                         from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
                         to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
@@ -539,6 +540,9 @@ module.exports = function (Outbreak) {
                 ...[{
                   id: 'address',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS')
+                }, {
+                  id: 'phoneNumber',
+                  header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_PHONE_NUMBER')
                 }, {
                   id: 'day',
                   header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_DAY')

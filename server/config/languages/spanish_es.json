@@ -15163,6 +15163,9 @@
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS": {
         "translation": "Dirección"
       },
+      "LNG_REPORT_DAILY_FOLLOW_UP_LIST_PHONE_NUMBER": {
+        "translation": "Phone number"
+      },
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE": {
         "translation": "Edad"
       },

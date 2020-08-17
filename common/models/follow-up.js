@@ -76,6 +76,7 @@ module.exports = function (FollowUp) {
     'address.geoLocation.lng': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG',
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+    'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'fillLocation': 'LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION',
     'fillLocation.geoLocation': 'LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION',
@@ -335,7 +336,7 @@ module.exports = function (FollowUp) {
       .then(() => {
         // set follow-up index (if needed)
         setFollowUpIndexIfNeeded(ctx)
-        // set follow-up address (if needed)
+          // set follow-up address (if needed)
           .then(() => setFollowUpAddressIfNeeded(ctx))
           .then(() => setFollowUpTeamIfNeeded(ctx))
           .then(() => next())
