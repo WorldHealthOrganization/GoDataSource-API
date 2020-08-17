@@ -350,7 +350,8 @@ module.exports = function (Sync) {
                 {
                   password: password,
                   chunkSize: chunkSize,
-                  exportEmptyCollections: false
+                  exportEmptyCollections: false,
+                  applyExcludeDeletedRecordsRules: true
                 },
                 (err, fileName) => {
                   // send the done function as the response needs to be returned
@@ -368,7 +369,8 @@ module.exports = function (Sync) {
                 {
                   password: password,
                   chunkSize: chunkSize,
-                  exportEmptyCollections: false
+                  exportEmptyCollections: false,
+                  applyExcludeDeletedRecordsRules: true
                 },
                 (err, fileName) => {
                   // don't send the done function as the response was already sent
