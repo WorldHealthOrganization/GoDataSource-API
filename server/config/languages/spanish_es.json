@@ -6091,9 +6091,6 @@
       "LNG_PAGE_CREATE_CASE_TAB_PERSONAL_TITLE": {
         "translation": "Personal"
       },
-      "LNG_PAGE_CREATE_CASE_TAB_QUESTIONNAIRE_TITLE": {
-        "translation": "Cuestionario"
-      },
       "LNG_PAGE_CREATE_CASE_TITLE": {
         "translation": "Crear caso"
       },
@@ -6706,9 +6703,6 @@
       },
       "LNG_PAGE_CREATE_CONTACT_TAB_PERSONAL_SECTION_FLAG_CONTACT_TITLE": {
         "translation": "Marque este contacto con un nivel de riesgo para atención adicional"
-      },
-      "LNG_PAGE_CREATE_CONTACT_TAB_QUESTIONNAIRE_TITLE": {
-        "translation": "Questionnaire"
       },
       "LNG_PAGE_CREATE_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
         "translation": "You need Team - list permission to change contact follow-up team"
@@ -12206,6 +12200,15 @@
       },
       "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
         "translation": "Please make sure that EPI chart is visible"
+      },
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_ISO": {
+        "translation": "Global Week"
+      },
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_EPI": {
+        "translation": "Epi Week"
+      },
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_SUNDAY": {
+        "translation": "Week starting on Sunday"
       }
     },
     "uiChainsOfTransmission": {
@@ -16284,9 +16287,6 @@
       },
       "LNG_PAGE_CREATE_LAB_RESULT_TAB_DETAILS": {
         "translation": "Detalles"
-      },
-      "LNG_PAGE_CREATE_LAB_RESULT_TAB_QUESTIONNAIRE_TITLE": {
-        "translation": "Cuestionario"
       },
       "LNG_PAGE_CREATE_LAB_RESULT_TITLE": {
         "translation": "Crear resultados de laboratorio"
