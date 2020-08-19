@@ -24,6 +24,7 @@ module.exports = function (Relationship) {
     const personFieldLabelsMap = {
       'id': 'LNG_ENTITY_FIELD_LABEL_ID',
       'visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
+      'type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
       'name': 'LNG_ENTITY_FIELD_LABEL_NAME',
       'lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
       'firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
@@ -46,6 +47,7 @@ module.exports = function (Relationship) {
         },
         {}
       ), {
+        'sourcePerson.source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
         'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
       }
     );
@@ -61,6 +63,7 @@ module.exports = function (Relationship) {
         },
         {}
       ), {
+        'targetPerson.target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
         'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
       }
     );
@@ -99,7 +102,8 @@ module.exports = function (Relationship) {
     exposureTypeId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE',
     exposureFrequencyId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY',
     exposureDurationId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION',
-    socialRelationshipTypeId: 'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION'
+    socialRelationshipTypeId: 'LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION',
+    'persons[].type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
   };
 
   Relationship.referenceDataFields = Object.keys(Relationship.referenceDataFieldsToCategoryMap);

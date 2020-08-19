@@ -1715,21 +1715,80 @@ const isValidDate = function (date) {
  * @param dataSet [object|array]
  */
 const convertBooleanProperties = function (Model, dataSet) {
+  // used in getReferencedValue function
+  const arrayIdentifier = '[].';
+
+  /**
+   * Check Model definition for boolean properties and get their references
+   * Also checks for nested definitions
+   * @param model Model definition
+   * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
+   * @returns {[]}
+   */
+  const getModelBooleanProperties = function (model, prefix = '') {
+    let result = [];
+
+    if (
+      !model ||
+      typeof model !== 'function' ||
+      !model.forEachProperty) {
+      // not a loopback model
+      return result;
+    }
+
+    // go through all model properties, from model definition
+    model.forEachProperty(function (propertyName) {
+      // check if the property is supposed to be boolean
+      if (model.definition.properties[propertyName].type) {
+        // check for simple boolean prop
+        if (model.definition.properties[propertyName].type.name === 'Boolean') {
+          // store property name
+          result.push(prefix + propertyName);
+        }
+          // check for model definition
+        // eg: address: "address"
+        else if (typeof model.definition.properties[propertyName].type === 'function') {
+          result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type, propertyName + '.'));
+        }
+          // check for array of model definitions
+        // eg: persons: ["relationshipParticipant"]
+        else if (
+          Array.isArray(model.definition.properties[propertyName].type) &&
+          typeof model.definition.properties[propertyName].type[0] === 'function'
+        ) {
+          result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type[0], propertyName + arrayIdentifier));
+        }
+      }
+    });
+
+    return result;
+  };
+
+  /**
+   * Set property boolean value on a record given its reference
+   * Also accepts array references
+   * @param record Record to be updated
+   * @param propRef Property reference
+   */
+  const setValueOnRecordProperty = function (record, propRef) {
+    let propRefValues = getReferencedValue(record, propRef);
+    // if it's single value, convert it to array (simplify the code)
+    if (!Array.isArray(propRefValues)) {
+      propRefValues = [propRefValues];
+    }
+    // go through all the found values
+    propRefValues.forEach(refValue => {
+      // if it has a value but the value is not boolean
+      if (refValue.value != null && typeof refValue.value !== 'boolean') {
+        _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
+      }
+    });
+  };
+
   // init model boolean properties, if not already done
   if (!Model._booleanProperties) {
     // keep a list of boolean properties
-    Model._booleanProperties = [];
-    // go through all model properties, from model definition
-    Model.forEachProperty(function (propertyName) {
-      // check if the property is supposed to be boolean
-      if (
-        Model.definition.properties[propertyName].type &&
-        Model.definition.properties[propertyName].type.name === 'Boolean'
-      ) {
-        // store property name
-        Model._booleanProperties.push(propertyName);
-      }
-    });
+    Model._booleanProperties = getModelBooleanProperties(Model);
   }
 
   /**
@@ -1739,11 +1798,7 @@ const convertBooleanProperties = function (Model, dataSet) {
   function convertBooleanModelProperties(record) {
     // check each property that is supposed to be boolean
     Model._booleanProperties.forEach(function (booleanProperty) {
-      // if it has a value but the value is not boolean
-      if (record[booleanProperty] != null && typeof record[booleanProperty] !== 'boolean') {
-        // convert it to boolean value
-        record[booleanProperty] = ['1', 'true'].includes(record[booleanProperty].toString().toLowerCase());
-      }
+      setValueOnRecordProperty(record, booleanProperty);
     });
   }
 
