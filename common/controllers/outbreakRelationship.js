@@ -475,12 +475,22 @@ module.exports = function (Outbreak) {
                     }
                   }
 
+                  // add source and target flags
+                  relationship.sourcePerson.source = true;
+                  relationship.targetPerson.target = true;
+
                   // translate data
                   if (relationship.sourcePerson.gender) {
                     relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
                   }
                   if (relationship.targetPerson.gender) {
                     relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
+                  }
+                  if (relationship.sourcePerson.type) {
+                    relationship.sourcePerson.type = dictionary.getTranslation(relationship.sourcePerson.type);
+                  }
+                  if (relationship.targetPerson.type) {
+                    relationship.targetPerson.type = dictionary.getTranslation(relationship.targetPerson.type);
                   }
                 });
 
