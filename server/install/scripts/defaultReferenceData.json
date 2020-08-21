@@ -415,6 +415,10 @@
     "Event": {
       "readOnly": true,
       "colorCode": "#a638ab"
+    },
+    "Contact Of Contact": {
+      "readOnly": true,
+      "colorCode": "#424380"
     }
   },
   "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE": {
