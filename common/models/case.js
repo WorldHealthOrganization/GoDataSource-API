@@ -74,7 +74,17 @@ module.exports = function (Case) {
       });
   };
 
+  /**
+   * Case after delete
+   * Actions:
+   * Remove any contacts that remain isolated after the case deletion
+   */
   Case.observe('after delete', (context, next) => {
+    if (context.options.mergeDuplicatesAction) {
+      // don't remove isolated contacts when merging two cases
+      return next();
+    }
+
     const caseId = context.instance.id;
     Case.getIsolatedContacts(caseId, (err, isolatedContacts) => {
       if (err) {

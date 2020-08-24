@@ -2233,6 +2233,9 @@ module.exports = function (Outbreak) {
         data.model = Object.assign({}, data.model, {id: winnerId, outbreakId: outbreakId});
 
         // make changes into database
+        // set flag to not remove isolated contacts when removing the cases that are being merged
+        // those isolated contacts will be immediately included in the new relationships
+        options.mergeDuplicatesAction = true;
         Promise
           // delete all the merge candidates
           .all(modelsIds.map((id) => targetModel.destroyById(id, options)))
