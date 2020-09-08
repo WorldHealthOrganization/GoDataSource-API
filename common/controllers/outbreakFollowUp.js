@@ -108,6 +108,12 @@ module.exports = function (Outbreak) {
         return FollowupGeneration
           .getAllTeamsWithLocationsIncluded(outbreakTeamAssignmentAlgorithm === 'LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT')
           .then((teams) => {
+            // since each contact will have its own pool of eligible teams we might reach the scenario where
+            // in a day only a team is assigned to all contacts and in the next day another team is assigned to all contacts
+            // eg: all contacts have the same 2 teams assigned and we generate follow-ups for 2 days; following normal round robin we would reach the above scenario
+            // in order to randomize the assignment we need to keep a map of team assignments per day
+            let teamAssignmentPerDay = {};
+
             // create functions to be used in handleActionsInBatches
             const getActionsCount = function () {
               return Promise.resolve(contactsCount);
@@ -153,7 +159,8 @@ module.exports = function (Outbreak) {
                             outbreakFollowUpFreq,
                             outbreakFollowUpPerDay,
                             targeted,
-                            overwriteExistingFollowUps
+                            overwriteExistingFollowUps,
+                            teamAssignmentPerDay
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);

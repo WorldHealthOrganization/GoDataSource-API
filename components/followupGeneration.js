@@ -2,7 +2,6 @@
 
 // dependencies
 const App = require('../server/server');
-const RoundRobin = require('rr');
 const Helpers = require('./helpers');
 const Moment = require('moment');
 const _ = require('lodash');
@@ -135,7 +134,7 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
 // get contacts that have follow up period between the passed start/end dates
 module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, skip, limit, options) {
   // where condition used to count eligible contacts
-  let where= {
+  let where = {
     $and: [
       {
         outbreakId: outbreakId,
@@ -522,9 +521,58 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLa
  * @param freqPerDay
  * @param targeted
  * @param overwriteExistingFollowUps flag specifying whether exiting follow-ups should be overwritten
+ * @param teamAssignmentPerDay map of team assignment per day; used to not rely only on round-robin as we may reach odd scenarios
  * @returns {{add: [], update: {}}}
  */
-module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted, overwriteExistingFollowUps) {
+module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted, overwriteExistingFollowUps, teamAssignmentPerDay) {
+  /**
+   * Get ID of the team with the smallest number of assignments for the day
+   */
+  const getTeamIdToAssign = function (followUpDate) {
+    if (!teams.length) {
+      return;
+    }
+
+    // get teams with the smallest number of assignments for the day
+    let eligibleTeams = [];
+    let lowestAssignments;
+    for (let i = 0; i < teams.length; i++) {
+      let teamId = teams[i];
+
+      if (!teamAssignmentPerDay[followUpDate][teamId]) {
+        // team was not yet assigned on this day
+        eligibleTeams = [teamId];
+
+        // stop at first team which was not assigned on this day
+        break;
+      } else if (
+        typeof lowestAssignments === 'undefined' ||
+        lowestAssignments >= teamAssignmentPerDay[followUpDate][teamId]
+      ) {
+        // found team with less or equal number of assignments
+        if (!lowestAssignments || lowestAssignments > teamAssignmentPerDay[followUpDate][teamId]) {
+          // set new low
+          lowestAssignments = teamAssignmentPerDay[followUpDate][teamId];
+          // reinitialize eligible teams
+          eligibleTeams = [teamId];
+        } else {
+          // same number of assignments as the teams already in the pool
+          eligibleTeams.push(teamId);
+        }
+      }
+    }
+
+    // get team for the follow-up
+    const teamIdToAssign = eligibleTeams[0];
+    if (teamAssignmentPerDay[followUpDate][teamIdToAssign]) {
+      teamAssignmentPerDay[followUpDate][teamIdToAssign]++;
+    } else {
+      teamAssignmentPerDay[followUpDate][teamIdToAssign] = 1;
+    }
+
+    return teamIdToAssign;
+  };
+
   let followUpsToAdd = [];
   let followUpsToUpdate = {};
 
@@ -541,6 +589,9 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
   // generate follow up, starting from today
   for (let followUpDate = period.startDate.clone(); followUpDate <= period.endDate; followUpDate.add(freq, 'day')) {
+    // initialize team assignment map entry
+    !teamAssignmentPerDay[followUpDate] && (teamAssignmentPerDay[followUpDate] = {});
+
     // number of follow ups to be generated per day
     let numberOfFollowUpsPerDay = freqPerDay;
 
@@ -559,7 +610,18 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
     // recreate the follow ups that are not performed
     if (overwriteExistingFollowUps && followUpDate.isSameOrAfter(Helpers.getDateEndOfDay(), 'day')) {
       followUpIdsToUpdateForDate.push(...followUpsInThisDay
-        .filter(f => f.statusId === 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED')
+        .filter(f => {
+          if (f.statusId !== 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED') {
+            // this followup will not be regenerated; add team assignment to map
+            if (teamAssignmentPerDay[followUpDate][f.teamId]) {
+              teamAssignmentPerDay[followUpDate][f.teamId]++;
+            } else {
+              teamAssignmentPerDay[followUpDate][f.teamId] = 1;
+            }
+          } else {
+            return true;
+          }
+        })
         .map(f => f.id)
       );
     }
@@ -574,7 +636,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
         date: followUpDate.toDate(),
         targeted: targeted,
         // split the follow ups work equally across teams
-        teamId: RoundRobin(teams),
+        teamId: getTeamIdToAssign(followUpDate),
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
       }, contact);
     });
@@ -588,7 +650,7 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
         date: followUpDate.toDate(),
         targeted: targeted,
         // split the follow ups work equally across teams
-        teamId: RoundRobin(teams),
+        teamId: getTeamIdToAssign(followUpDate),
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
       }, contact);
 
