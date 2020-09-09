@@ -83,8 +83,6 @@ module.exports = function (Outbreak) {
     // remove custom filter options
     context.args = context.args || {};
     context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
-    // handle custom filter options
-    context.args.filter = genericHelpers.attachCustomDeleteFilterOption(context.args.filter);
 
     Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
   });
@@ -116,6 +114,9 @@ module.exports = function (Outbreak) {
         .addGeographicalRestrictions(options.remotingContext, filter.where)
         .then(updatedFilter => {
           updatedFilter && (filter.where = updatedFilter);
+
+          // handle custom filter options
+          filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
           return app.models.event.count(filter.where);
         });
