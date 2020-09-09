@@ -3388,8 +3388,8 @@ module.exports = function (Outbreak) {
                   options.remotingContext.req.logger.debug(`Failed to delete outbreak after the related language tokens restore failed. Error: ${err}`);
                 }
 
-                // outbreak was restored; return success even though the language tokens restore failed
-                callback();
+                // failed to reverts the changes
+                callback(err);
               });
             });
         });
