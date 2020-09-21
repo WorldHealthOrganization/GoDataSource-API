@@ -15160,6 +15160,39 @@
       },
       "LNG_MOBILE_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": {
         "translation": "Estado final del seguimiento"
+      },
+      "LNG_NAVIGATION_DRAWER_ADD_LANGUAGE_PACKS": {
+        "translation": "Add language packs"
+      },
+      "LNG_MOBILE_LANGUAGE_MODAL_COMPONENT_INFO_MESSAGE": {
+        "translation": "Please select the packs that you want to download. \\nClicking download means that a new sync will start so please make sure that you are connected to the internet before proceeding."
+      },
+      "LNG_MOBILE_LANGUAGE_MODAL_COMPONENT_DOWNLOAD_BUTTON": {
+        "translation": "Download language packs"
+      },
+      "LNG_MOBILE_LANGUAGE_MODAL_COMPONENT_ALERT_NO_LANGUAGE": {
+        "translation": "Please select at least one language before proceeding to download"
+      },
+      "LNG_HUB_CONFIGURATION_SCREEN_DELETE_HUB": {
+        "translation": "Delete Hub"
+      },
+      "LNG_HUB_CONFIGURATION_SCREEN_CONFIRM_DELETE_HUB": {
+        "translation": "Are you sure you want to delete the hub?"
+      },
+      "LNG_HUB_CONFIGURATION_SCREEN_REPLACEMENT_HUBS": {
+        "translation": "Replacement Hubs"
+      },
+      "LNG_HUB_CONFIGURATION_SCREEN_REPLACEMENT_HUBS_LABEL": {
+        "translation": "Please select the Hub that you would like to switch to"
+      },
+      "LNG_CONTACT_OF_CONTACT_LIST_SCREEN_TITLE": {
+        "translation": "Contacts of contacts"
+      },
+      "LNG_CONTACT_OF_CONTACT_LIST_SCREEN_NO_CONTACTS": {
+        "translation": "There are no contacts of contacts to display"
+      },
+      "LNG_QUESTIONNAIRE_LABEL_ADDITIONAL_QUESTIONS": {
+        "translation": "Additional Questions"
       }
     },
     "reportDailyFollowUpList": {
