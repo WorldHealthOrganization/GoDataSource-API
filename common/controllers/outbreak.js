@@ -3356,7 +3356,43 @@ module.exports = function (Outbreak) {
         }
 
         // undo outbreak delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(options, (err) => {
+          if (err) {
+            return callback(err);
+          }
+
+          // restore related language tokens
+          return app.dataSources.mongoDb.connector
+            .collection('languageToken')
+            .updateMany({
+              deleted: true,
+              token: {
+                $regex: new RegExp(outbreakId, 'i')
+              }
+            }, {
+              '$unset': {
+                deleted: '',
+                deletedAt: ''
+              }
+            })
+            .then(() => {
+              // restore succeeded
+              callback();
+            })
+            .catch(err => {
+              options.remotingContext.req.logger.debug(`Failed to restore outbreak related language tokens. Error: ${err}`);
+
+              // revert outbreak restore
+              instance.destroy(err => {
+                if (err) {
+                  options.remotingContext.req.logger.debug(`Failed to delete outbreak after the related language tokens restore failed. Error: ${err}`);
+                }
+
+                // failed to reverts the changes
+                callback(err);
+              });
+            });
+        });
       })
       .catch(callback);
   };
