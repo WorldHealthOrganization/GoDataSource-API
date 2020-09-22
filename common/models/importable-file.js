@@ -215,7 +215,7 @@ module.exports = function (ImportableFile) {
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
     let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
-      dateNF: "YYYY-MM-DD"
+      dateNF: 'YYYY-MM-DD'
     });
     // get columns by walking through the keys and using only the first row
     const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
