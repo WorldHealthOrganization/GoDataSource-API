@@ -38,7 +38,7 @@ module.exports = function (ImportableFile) {
    * @param data
    * @param callback
    */
-  function getJsonHeaders({ data }, callback) {
+  function getJsonHeaders({data}, callback) {
     // try and parse as a JSON
     try {
       const jsonObj = JSON.parse(data);
@@ -71,8 +71,7 @@ module.exports = function (ImportableFile) {
 
       // send back the parsed object and its headers
       callback(null, {obj: jsonObj, headers: headers});
-    }
-    catch (error) {
+    } catch (error) {
       // handle JSON.parse errors
       callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
         contentType: 'JSON',
@@ -89,7 +88,7 @@ module.exports = function (ImportableFile) {
    * @param questionnaire
    * @param callback
    */
-  function getXmlHeaders({ data, modelName, dictionary, questionnaire }, callback) {
+  function getXmlHeaders({data, modelName, dictionary, questionnaire}, callback) {
     const parserOpts = {
       explicitArray: true,
       explicitRoot: false
@@ -197,7 +196,7 @@ module.exports = function (ImportableFile) {
    * @param data
    * @param callback
    */
-  function getSpreadSheetHeaders({ data, extension }, callback) {
+  function getSpreadSheetHeaders({data, extension}, callback) {
     // parse XLS data
     const parseOptions = {
       cellText: false
@@ -215,7 +214,9 @@ module.exports = function (ImportableFile) {
     // extract first sheet name (we only care about first sheet)
     let sheetName = parsedData.SheetNames.shift();
     // convert data to JSON
-    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName]);
+    let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
+      dateNF: "YYYY-MM-DD"
+    });
     // get columns by walking through the keys and using only the first row
     const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
       // ignore ref property
@@ -335,7 +336,7 @@ module.exports = function (ImportableFile) {
       decryptFile
         .then(function (buffer) {
           // get file headers
-          getHeaders({ data: buffer, modelName, dictionary, questionnaire, extension }, function (error, result) {
+          getHeaders({data: buffer, modelName, dictionary, questionnaire, extension}, function (error, result) {
             // handle error
             if (error) {
               return callback(error);
