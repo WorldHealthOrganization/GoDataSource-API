@@ -3,6 +3,7 @@
 // deps
 const App = require('../../server/server');
 const Moment = require('moment');
+const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
 
 module.exports = function (OAuth) {
   OAuth.createToken = function (data, opts, next) {
@@ -22,7 +23,7 @@ module.exports = function (OAuth) {
       return next(App.utils.apiError.getError(
         'REQUEST_VALIDATION_ERROR',
         {
-          errorMessages: 'Missing required parameter: pasword'
+          errorMessages: 'Missing required parameter: password'
         })
       );
     }
@@ -59,10 +60,17 @@ module.exports = function (OAuth) {
         }
       })
       .then(() => {
-        userModel.login({
+        const loginPayload = {
           email: username,
           password: pw
-        }, (err, token) => {
+        };
+
+        if (twoFactorAuthentication.isEnabled('oauth')) {
+          // add flag to be verified on access token generation
+          loginPayload.twoFactorAuthentication = true;
+        }
+
+        userModel.login(loginPayload, (err, token) => {
           if (err) {
             const now = Moment().toDate();
             const userAttributesToUpdate = {};

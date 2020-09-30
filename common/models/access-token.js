@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const authTokenConfig = require('../../server/config').authToken;
+const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
 
 module.exports = function (AccessToken) {
   // set flag to not get controller
@@ -23,7 +24,7 @@ module.exports = function (AccessToken) {
   // its a copy of the original function signature
   // but instead of destroying expired tokens
   // it refreshes its expiration time using the configured ttl in the user model
-  AccessToken.prototype.validate = function(cb) {
+  AccessToken.prototype.validate = function (cb) {
     try {
       assert(
         this.created && typeof this.created.getTime === 'function',
@@ -41,7 +42,7 @@ module.exports = function (AccessToken) {
       if (this.principalType) {
         User = AccessToken.registry.findModel(this.principalType);
         if (!User) {
-          process.nextTick(function() {
+          process.nextTick(function () {
             return cb(null, false);
           });
         }
@@ -67,16 +68,16 @@ module.exports = function (AccessToken) {
           // save token
           this.save();
         }
-        process.nextTick(function() {
+        process.nextTick(function () {
           cb(null, isValid);
         });
       } else {
-        this.destroy(function(err) {
+        this.destroy(function (err) {
           cb(err, isValid);
         });
       }
     } catch (e) {
-      process.nextTick(function() {
+      process.nextTick(function () {
         cb(e);
       });
     }
@@ -96,6 +97,10 @@ module.exports = function (AccessToken) {
       data.ttl !== authTokenConfig.ttl
     ) {
       data.ttl = authTokenConfig.ttl;
+    }
+
+    if (context.options.twoFactorAuthentication) {
+      twoFactorAuthentication.setInfoInAccessToken(data);
     }
 
     // finished
