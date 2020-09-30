@@ -34,6 +34,11 @@ module.exports = function (AccessToken) {
       assert(this.ttl, 'token.ttl must exist');
       assert(this.ttl >= -1, 'token.ttl must be >= -1');
 
+      // check for two-factor authentication token
+      if (twoFactorAuthentication.isAccessTokenDisabled(this)) {
+        return cb(null, false);
+      }
+
       const AccessToken = this.constructor;
       const userRelation = AccessToken.relations.user; // may not be set up
       let User = userRelation && userRelation.modelTo;

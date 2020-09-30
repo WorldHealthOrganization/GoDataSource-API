@@ -498,5 +498,5 @@ module.exports = function (app) {
     } catch (readErr) {
       app.logger.error(`Failed to read routines configuration. ${readErr}`);
     }
-  }, 120000);
+  }, 120000000);
 };

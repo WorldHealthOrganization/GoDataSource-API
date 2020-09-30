@@ -5,7 +5,10 @@ const app = require('../server/server');
 const _ = require('lodash');
 const randomize = require('randomatic');
 const moment = require('moment');
+const fs = require('fs');
+const path = require('path');
 const config = _.get(require('../server/config'), 'login.twoFactorAuthentication', {});
+const baseLanguageModel = require('./baseModelOptions/language');
 
 /**
  * Check if 2FA is enabled for the given loginType
@@ -64,24 +67,39 @@ const setInfoInAccessToken = (accessToken) => {
   // update payload
   accessToken.disabled = true;
   accessToken.twoFACode = randomize('?', config.length, {chars: config.charset});
-  accessToken.twoFACodeExpirationDate = moment().add(config.ttlMinutes, 'm');
+  accessToken.twoFACodeExpirationDate = moment().add(config.ttlMinutes, 'm').toDate();
 }
 
 const verifyInfoFromAccessToken = (accessToken) => {
 };
 
-const sendEmail = (user, accessToken) => {
-  return new Promise((resolve, reject) => {
-    // load user language dictionary
-    app.models.language.getLanguageDictionary(user.languageId, function (error, dictionary) {
-      if (error) {
-        app.logger.error(`Failed to retrieve tokens for the following language: ${user.languageId}`);
-        return reject(err);
-      }
+/**
+ * Check if access token is disabled via 2FA logic
+ * @param accessToken
+ * @returns {boolean}
+ */
+const isAccessTokenDisabled = (accessToken) => {
+  return !!accessToken.disabled;
+};
 
-      return resolve(dictionary);
+/**
+ * Send 2FA code via email
+ * @param user
+ * @param accessToken
+ * @returns {*}
+ */
+const sendEmail = (user, accessToken) => {
+  return baseLanguageModel.helpers
+    .getLanguageDictionary(user.languageId, {
+      token: {
+        $in: [
+          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING',
+          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT',
+          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH1',
+          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH2'
+        ]
+      }
     })
-  })
     .then(dictionary => {
       // translate email body params
       let heading = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING');
@@ -90,7 +108,7 @@ const sendEmail = (user, accessToken) => {
       let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH2');
 
       // load the html email template
-      const htmlTemplate = _.template(fs.readFileSync(path.resolve(`${__dirname}/../server/views/passwordResetEmail.ejs`)));
+      const htmlTemplate = _.template(fs.readFileSync(path.resolve(`${__dirname}/../server/views/twoFactorAuthenticationCodeEmail.ejs`)));
 
       // resolve template params
       const html = htmlTemplate({
@@ -113,7 +131,7 @@ const sendEmail = (user, accessToken) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName
-      })
+      });
 
       return new Promise((resolve, reject) => {
         app.models.Email.send({
@@ -136,5 +154,6 @@ module.exports = {
   isEnabled,
   getConfig,
   setInfoInAccessToken,
+  isAccessTokenDisabled,
   sendEmail
 };
