@@ -108,7 +108,7 @@ module.exports = function (OAuth) {
                 .catch(next);
             }
 
-            next(null, {
+            return next(null, {
               token_type: 'bearer',
               expires_in: token.ttl,
               access_token: token.id
