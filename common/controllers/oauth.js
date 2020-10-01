@@ -65,9 +65,12 @@ module.exports = function (OAuth) {
           password: pw
         };
 
+        // check for two-factor authentication flow
+        let twoFactorAuthenticationEnabled = false;
         if (twoFactorAuthentication.isEnabled('oauth')) {
           // add flag to be verified on access token generation
           loginPayload.twoFactorAuthentication = true;
+          twoFactorAuthenticationEnabled = true;
         }
 
         userModel.login(loginPayload, (err, token) => {
@@ -92,11 +95,25 @@ module.exports = function (OAuth) {
           currentUser.updateAttributes({
             loginRetriesCount: 0,
             lastLoginDate: null
-          }).then(() => next(null, {
-            token_type: 'bearer',
-            expires_in: token.ttl,
-            access_token: token.id
-          }));
+          }).then(user => {
+            if (twoFactorAuthenticationEnabled) {
+              return twoFactorAuthentication
+                .sendEmail(user, token)
+                .then(() => {
+                  // update response
+                  return next(null, {
+                    '2FA': true
+                  });
+                })
+                .catch(next);
+            }
+
+            next(null, {
+              token_type: 'bearer',
+              expires_in: token.ttl,
+              access_token: token.id
+            });
+          });
         });
       })
       .catch(err => next(err));

@@ -379,5 +379,9 @@
   "personDuplicateParams": {
     "dataSource": null,
     "public": false
+  },
+  "twoFactorAuthenticationStep2": {
+    "dataSource": null,
+    "public": false
   }
 }

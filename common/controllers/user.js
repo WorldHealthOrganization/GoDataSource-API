@@ -198,14 +198,19 @@ module.exports = function (User) {
           })
           .then(() => {
             if (twoFactorAuthentication.isEnabled()) {
-              return twoFactorAuthentication.sendEmail(user, instance);
+              return twoFactorAuthentication
+                .sendEmail(user, instance)
+                .then(() => {
+                  // update response
+                  ctx.result = {
+                    '2FA': true
+                  };
+                });
             }
 
             return Promise.resolve();
           })
-          .then(() => {
-            return next();
-          });
+          .then(() => next());
       })
       .catch(next);
   });
@@ -742,5 +747,20 @@ module.exports = function (User) {
         }));
       }
     });
+  };
+
+  /**
+   * Two-factor authentication step 2
+   * @param data
+   * @param options
+   * @param callback
+   */
+  User.twoFactorAuthenticationStep2 = function (data, options, callback) {
+    twoFactorAuthentication
+      .verifyStep2Data(data, options)
+      .then(accessToken => {
+        return callback(null, accessToken);
+      })
+      .catch(callback);
   };
 };

@@ -65,12 +65,9 @@ const setInfoInAccessToken = (accessToken) => {
   const config = getConfig();
 
   // update payload
-  accessToken.disabled = true;
+  accessToken.twoFADisabled = true;
   accessToken.twoFACode = randomize('?', config.length, {chars: config.charset});
   accessToken.twoFACodeExpirationDate = moment().add(config.ttlMinutes, 'm').toDate();
-}
-
-const verifyInfoFromAccessToken = (accessToken) => {
 };
 
 /**
@@ -79,7 +76,7 @@ const verifyInfoFromAccessToken = (accessToken) => {
  * @returns {boolean}
  */
 const isAccessTokenDisabled = (accessToken) => {
-  return !!accessToken.disabled;
+  return !!accessToken.twoFADisabled;
 };
 
 /**
@@ -150,10 +147,82 @@ const sendEmail = (user, accessToken) => {
     });
 };
 
+/**
+ * Verify 2FA step 2 data; Returns a promise which resolves with the update access-token if all checks have passed
+ * @param data
+ * @param options - options from request
+ * @returns {Promise<never>|Promise<unknown>}
+ */
+const verifyStep2Data = (data, options) => {
+  // shorter reference for error builder
+  const buildError = app.utils.apiError.getError;
+
+  // validation error messages
+  let validationErrors = [];
+
+  // make sure email and code are in the request
+  if (!data.hasOwnProperty('email')) {
+    validationErrors.push('Email is mandatory');
+  }
+  if (!data.hasOwnProperty('code')) {
+    validationErrors.push('Code is mandatory');
+  }
+
+  // if there are any validation errors, stop
+  if (validationErrors.length) {
+    return Promise.reject(buildError('REQUEST_VALIDATION_ERROR', {errorMessages: validationErrors.join()}));
+  }
+
+  const email = data.email;
+  const code = data.code;
+
+  // cache access-token
+  let accessToken;
+
+  return app.models.accessToken
+    .findOne({
+      where: {
+        twoFADisabled: true,
+        twoFACode: code,
+        twoFACodeExpirationDate: {
+          gte: moment().utc().toDate()
+        }
+      }
+    })
+    .then(result => {
+      if (!result) {
+        options.remotingContext.req.logger.debug(`Access-token not found for code '${code}' or code has already expired`);
+        return Promise.reject(buildError('AUTHORIZATION_REQUIRED'));
+      }
+
+      // access-token found; check if the userId corresponds to the given email
+      accessToken = result;
+      return app.models.user
+        .findOne({
+          where: {
+            id: accessToken.userId,
+            email: email
+          }
+        });
+    })
+    .then(user => {
+      if (!user) {
+        options.remotingContext.req.logger.debug(`Given code '${code}' is not generated for given email '${email}'`);
+        return Promise.reject(buildError('AUTHORIZATION_REQUIRED'));
+      }
+
+      // code and email combination is valid; update access-token
+      return accessToken.updateAttributes({
+        twoFADisabled: false
+      });
+    });
+};
+
 module.exports = {
   isEnabled,
   getConfig,
   setInfoInAccessToken,
   isAccessTokenDisabled,
-  sendEmail
+  sendEmail,
+  verifyStep2Data
 };
