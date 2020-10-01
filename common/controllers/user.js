@@ -753,14 +753,14 @@ module.exports = function (User) {
    * Two-factor authentication step 2
    * @param data
    * @param options
-   * @param callback
+   * @param next
    */
-  User.twoFactorAuthenticationStep2 = function (data, options, callback) {
+  User.twoFactorAuthenticationStep2 = function (data, options, next) {
     twoFactorAuthentication
       .verifyStep2Data(data, options)
       .then(accessToken => {
-        return callback(null, accessToken);
+        return next(null, accessToken);
       })
-      .catch(callback);
+      .catch(next);
   };
 };

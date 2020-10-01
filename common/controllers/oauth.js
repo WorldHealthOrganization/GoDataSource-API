@@ -118,4 +118,23 @@ module.exports = function (OAuth) {
       })
       .catch(err => next(err));
   };
+
+  /**
+   * Two-factor authentication step 2
+   * @param data
+   * @param options
+   * @param next
+   */
+  OAuth.twoFactorAuthenticationStep2 = function (data, options, next) {
+    twoFactorAuthentication
+      .verifyStep2Data(data, options)
+      .then(accessToken => {
+        return next(null, {
+          token_type: 'bearer',
+          expires_in: accessToken.ttl,
+          access_token: accessToken.id
+        });
+      })
+      .catch(next);
+  };
 };
