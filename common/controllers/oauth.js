@@ -101,9 +101,7 @@ module.exports = function (OAuth) {
                 .sendEmail(user, token)
                 .then(() => {
                   // update response
-                  return next(null, {
-                    '2FA': true
-                  });
+                  return next(null, twoFactorAuthentication.getStep1Response());
                 })
                 .catch(next);
             }

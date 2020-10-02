@@ -213,9 +213,21 @@ const verifyStep2Data = (data, options) => {
 
       // code and email combination is valid; update access-token
       return accessToken.updateAttributes({
-        twoFADisabled: false
+        twoFADisabled: null,
+        twoFACode: null,
+        twoFACodeExpirationDate: null
       });
     });
+};
+
+/**
+ * Create 2FA step 2 response body
+ * @returns {{twoFA: boolean}}
+ */
+const getStep1Response = () => {
+  return {
+    'twoFA': true
+  }
 };
 
 module.exports = {
@@ -224,5 +236,6 @@ module.exports = {
   setInfoInAccessToken,
   isAccessTokenDisabled,
   sendEmail,
-  verifyStep2Data
+  verifyStep2Data,
+  getStep1Response
 };

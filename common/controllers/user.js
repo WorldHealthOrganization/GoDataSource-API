@@ -202,9 +202,7 @@ module.exports = function (User) {
                 .sendEmail(user, instance)
                 .then(() => {
                   // update response
-                  ctx.result = {
-                    '2FA': true
-                  };
+                  ctx.result = twoFactorAuthentication.getStep1Response();
                 });
             }
 
