@@ -25,7 +25,7 @@ const isEnabled = (loginType = 'default') => {
   }
 
   return enabled;
-}
+};
 
 /**
  * Retrieve 2FA code generation configuration
@@ -227,7 +227,7 @@ const verifyStep2Data = (data, options) => {
 const getStep1Response = () => {
   return {
     'twoFA': true
-  }
+  };
 };
 
 module.exports = {
