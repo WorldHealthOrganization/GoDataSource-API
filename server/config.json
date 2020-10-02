@@ -112,7 +112,7 @@
       "code": {
         "length": 6,
         "charset": "0123456789",
-        "ttlMinutes": 5
+        "ttlMinutes": 30
       },
       "emailFrom": "no-reply@who.int"
     }
