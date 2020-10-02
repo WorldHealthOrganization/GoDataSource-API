@@ -3,6 +3,7 @@
 // deps
 const App = require('../../server/server');
 const Moment = require('moment');
+const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
 
 module.exports = function (OAuth) {
   OAuth.createToken = function (data, opts, next) {
@@ -22,7 +23,7 @@ module.exports = function (OAuth) {
       return next(App.utils.apiError.getError(
         'REQUEST_VALIDATION_ERROR',
         {
-          errorMessages: 'Missing required parameter: pasword'
+          errorMessages: 'Missing required parameter: password'
         })
       );
     }
@@ -59,10 +60,20 @@ module.exports = function (OAuth) {
         }
       })
       .then(() => {
-        userModel.login({
+        const loginPayload = {
           email: username,
           password: pw
-        }, (err, token) => {
+        };
+
+        // check for two-factor authentication flow
+        let twoFactorAuthenticationEnabled = false;
+        if (twoFactorAuthentication.isEnabled('oauth')) {
+          // add flag to be verified on access token generation
+          loginPayload.twoFactorAuthentication = true;
+          twoFactorAuthenticationEnabled = true;
+        }
+
+        userModel.login(loginPayload, (err, token) => {
           if (err) {
             const now = Moment().toDate();
             const userAttributesToUpdate = {};
@@ -84,13 +95,44 @@ module.exports = function (OAuth) {
           currentUser.updateAttributes({
             loginRetriesCount: 0,
             lastLoginDate: null
-          }).then(() => next(null, {
-            token_type: 'bearer',
-            expires_in: token.ttl,
-            access_token: token.id
-          }));
+          }).then(user => {
+            if (twoFactorAuthenticationEnabled) {
+              return twoFactorAuthentication
+                .sendEmail(user, token)
+                .then(() => {
+                  // update response
+                  return next(null, twoFactorAuthentication.getStep1Response());
+                })
+                .catch(next);
+            }
+
+            return next(null, {
+              token_type: 'bearer',
+              expires_in: token.ttl,
+              access_token: token.id
+            });
+          });
         });
       })
       .catch(err => next(err));
+  };
+
+  /**
+   * Two-factor authentication step 2
+   * @param data
+   * @param options
+   * @param next
+   */
+  OAuth.twoFactorAuthenticationStep2 = function (data, options, next) {
+    twoFactorAuthentication
+      .verifyStep2Data(data, options)
+      .then(accessToken => {
+        return next(null, {
+          token_type: 'bearer',
+          expires_in: accessToken.ttl,
+          access_token: accessToken.id
+        });
+      })
+      .catch(next);
   };
 };

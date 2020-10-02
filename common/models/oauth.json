@@ -18,6 +18,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "createToken"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "twoFactorAuthenticationStep2"
     }
   ],
   "methods": {
@@ -54,6 +60,7 @@
               "type": "string"
             }
           },
+          "root": true,
           "required": true
         }
       ],
@@ -61,6 +68,46 @@
       "http": {
         "verb": "post",
         "path": "/token"
+      }
+    },
+    "twoFactorAuthenticationStep2": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "twoFactorAuthenticationStep2",
+          "http": {
+            "source": "body"
+          }
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "description": "OAuth Token information",
+          "type": {
+            "token_type": {
+              "type": "string"
+            },
+            "expires_in": {
+              "type": "number"
+            },
+            "access_token": {
+              "type": "string"
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Step 2 of the Two-Factor Authentication process",
+      "http": {
+        "verb": "post",
+        "path": "/two-factor-authentication-step-2"
       }
     }
   }

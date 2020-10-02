@@ -10315,6 +10315,20 @@
         "translation": "Resetar a senha"
       }
     },
+    "twoFactorAuthentication": {
+      "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH1": {
+        "translation": "A temporary pin code has been generated for your Authentication request."
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH2": {
+        "translation": "Code: {{twoFACode}}"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING": {
+        "translation": "Two-Factor Authentication"
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT": {
+        "translation": "Two-Factor Authentication"
+      }
+    },
     "backupStatus": {
       "LNG_BACKUP_STATUS_FAILED": {
         "translation": "Falhou"

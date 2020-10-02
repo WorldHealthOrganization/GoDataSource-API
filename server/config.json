@@ -101,7 +101,21 @@
   "login": {
     "maxRetries": 10,
     "resetTime": 30,
-    "resetTimeUnit": "minutes"
+    "resetTimeUnit": "minutes",
+    "twoFactorAuthentication": {
+      "defaultLogin": {
+        "enabled": false
+      },
+      "oauthLogin": {
+        "enabled": false
+      },
+      "code": {
+        "length": 6,
+        "charset": "0123456789",
+        "ttlMinutes": 5
+      },
+      "emailFrom": "no-reply@who.int"
+    }
   },
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,

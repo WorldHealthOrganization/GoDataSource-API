@@ -190,6 +190,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "twoFactorAuthenticationStep2"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "user_export",
       "permission": "ALLOW",
       "property": "export"
@@ -329,6 +335,35 @@
       "http": {
         "verb": "post",
         "path": "/import"
+      }
+    },
+    "twoFactorAuthenticationStep2": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "twoFactorAuthenticationStep2",
+          "http": {
+            "source": "body"
+          }
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": "accessToken",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Step 2 of the Two-Factor Authentication process",
+      "http": {
+        "verb": "post",
+        "path": "/two-factor-authentication-step-2"
       }
     }
   }
