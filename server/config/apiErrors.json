@@ -97,7 +97,7 @@
   },
   "INVALID_CASE_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "The case `<%= id %>` needs to be related to another case in order to be able to convert it to a contact"
+    "messagePattern": "The case `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
   },
   "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
