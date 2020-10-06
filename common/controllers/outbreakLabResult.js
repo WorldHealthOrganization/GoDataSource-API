@@ -192,6 +192,7 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // retrieve lab results with person data
         app.models.labResult.retrieveAggregateLabResults(
           this,
           filter,
@@ -204,6 +205,14 @@ module.exports = function (Outbreak) {
             options.questionnaire = self.labResultsTemplate;
             options.dictionary = dictionary;
             options.useQuestionVariable = useQuestionVariable;
+
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
+
             options.records = results;
 
             app.utils.remote.helpers.exportFilteredModelsList(
@@ -216,11 +225,10 @@ module.exports = function (Outbreak) {
               encryptPassword,
               anonymizeFields,
               options,
-              data => Promise.resolve(data),
+              null,
               callback
             );
-          }
-        );
+          });
       })
       .catch(callback);
   };
@@ -284,23 +292,43 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        // retrieve lab results with person data
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
-        );
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
+
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              null,
+              callback
+            );
+          });
       })
       .catch(callback);
   };
@@ -364,23 +392,43 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        // retrieve lab results with person data
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
-        );
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
+
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              null,
+              callback
+            );
+          });
       })
       .catch(callback);
   };

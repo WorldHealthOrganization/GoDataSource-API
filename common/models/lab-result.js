@@ -8,6 +8,9 @@ module.exports = function (LabResult) {
   // set flag to not get controller
   LabResult.hasController = false;
 
+  // initialize model helpers
+  LabResult.helpers = {};
+
   LabResult.fieldLabelsMap = Object.assign({}, LabResult.fieldLabelsMap, {
     personId: 'LNG_LAB_RESULT_FIELD_LABEL_PERSON_ID',
     dateSampleTaken: 'LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN',
@@ -33,7 +36,10 @@ module.exports = function (LabResult) {
     sampleType: 'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE',
     testType: 'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST',
     result: 'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT',
-    status: 'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS'
+    status: 'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS',
+    // person properties
+    'person.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
+    'person.address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
   };
 
   LabResult.referenceDataFields = Object.keys(LabResult.referenceDataFieldsToCategoryMap);
@@ -54,12 +60,77 @@ module.exports = function (LabResult) {
     'notes'
   ];
 
+  LabResult.locationFields = [
+    // person field
+    'person.address.locationId'
+  ];
+
+  LabResult.foreignKeyResolverMap = {
+    // person properties
+    'person.address.locationId': {
+      modelName: 'location',
+      collectionName: 'location',
+      useProperty: 'name'
+    }
+  };
+
   LabResult.extendedForm = {
     template: 'labResultsTemplate',
     containerProperty: 'questionnaireAnswers',
     isBasicArray: (variable) => {
       return variable.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS';
     }
+  };
+
+  /**
+   * Return a list of field labels map that are allowed for export
+   */
+  LabResult.helpers.sanitizeFieldLabelsMapForExport = () => {
+    // make sure we don't alter the original array
+    const fieldLabelsMap = {};
+
+    // relationship person labels
+    const personFieldLabelsMap = {
+      'visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
+      'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
+      'lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
+      'firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
+      'middleName': 'LNG_ENTITY_FIELD_LABEL_MIDDLE_NAME',
+      'dateOfOnset': 'LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET',
+      'dateOfReporting': 'LNG_ENTITY_FIELD_LABEL_DATE_OF_REPORTING',
+      'address': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
+      'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
+      'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
+      'address.city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
+      'address.addressLine1': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_ADDRESS_LINE_1',
+      'address.postalCode': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_POSTAL_CODE',
+      'address.locationId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID',
+      'address.geoLocation': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION',
+      'address.geoLocation.lat': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT',
+      'address.geoLocation.lng': 'LNG_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG',
+      'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
+      'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
+      'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
+      'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
+    };
+
+    // append person export fields
+    Object.assign(
+      fieldLabelsMap,
+      LabResult.fieldLabelsMap,
+      _.transform(
+        personFieldLabelsMap,
+        (tokens, token, property) => {
+          tokens[`person.${property}`] = token;
+        },
+        {}
+      ), {
+        'person': 'LNG_LAB_RESULT_FIELD_LABEL_PERSON'
+      }
+    );
+
+    // finished
+    return fieldLabelsMap;
   };
 
   /**
@@ -233,7 +304,7 @@ module.exports = function (LabResult) {
   };
 
   /**
-   * Aggregate fiind lab-results
+   * Aggregate find lab-results
    * @param outbreak
    * @param filter
    * @param countOnly

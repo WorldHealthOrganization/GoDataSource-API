@@ -5543,6 +5543,9 @@
       "LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET": {
         "translation": "تاريخ البداية  "
       },
+      "LNG_ENTITY_FIELD_LABEL_DATE_OF_REPORTING": {
+        "translation": "Date of reporting"
+      },
       "LNG_ENTITY_FIELD_LABEL_VACCINE": {
         "translation": "لقاح"
       },
@@ -16323,6 +16326,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_ID": {
         "translation": "ID"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_PERSON": {
+        "translation": "Person"
       }
     },
     "uiCreateLabResultPage": {
