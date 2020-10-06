@@ -304,7 +304,7 @@ module.exports = function (LabResult) {
   };
 
   /**
-   * Aggregate fiind lab-results
+   * Aggregate find lab-results
    * @param outbreak
    * @param filter
    * @param countOnly

@@ -192,6 +192,7 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // retrieve lab results with person data
         app.models.labResult.retrieveAggregateLabResults(
           this,
           filter,
@@ -205,78 +206,29 @@ module.exports = function (Outbreak) {
             options.dictionary = dictionary;
             options.useQuestionVariable = useQuestionVariable;
 
-            // add person information
-            // construct unique list of persons that we need to retrieve
-            let personIds = results.reduce((acc, labResult) => {
-              acc.add(labResult.personId);
-              return acc;
-            }, new Set());
-            personIds = [...personIds];
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
 
-            // start with a resolved promise (so we can link others)
-            let buildQuery = Promise.resolve(results);
+            options.records = results;
 
-            // retrieve list of persons
-            if (personIds.length) {
-              buildQuery = app.models.person
-                .rawFind({
-                  id: {
-                    inq: personIds
-                  }
-                }, {
-                  projection: {
-                    'visualId': 1,
-                    'type': 1,
-                    'lastName': 1,
-                    'firstName': 1,
-                    'middleName': 1,
-                    'dateOfOnset': 1,
-                    'dateOfReporting': 1,
-                    'addresses': 1
-                  }
-                })
-                .then((personRecords) => {
-                  // map list of persons ( ID => persons model )
-                  const mappedPersons = {};
-                  personRecords.forEach((personData) => {
-                    // keep only the usual place of residence in the addresses array
-                    personData.address = (personData.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
-                    delete personData.addresses;
-                    // translate person values
-                    // personData.type = dictionary.getTranslation(personData.type);
-                    // personData.address.typeId = dictionary.getTranslation(personData.address.typeId);
-                    mappedPersons[personData.id] = personData;
-                  });
-
-                  // attach persons to the list of lab results
-                  results.forEach(labResult => {
-                    labResult.person = labResult.personId ? mappedPersons[labResult.personId] : {};
-                  });
-
-                  return results;
-                });
-            }
-
-            buildQuery
-              .then(results => {
-                options.records = results;
-
-                app.utils.remote.helpers.exportFilteredModelsList(
-                  app,
-                  app.models.labResult,
-                  {},
-                  filter,
-                  exportType,
-                  'LabResult-List',
-                  encryptPassword,
-                  anonymizeFields,
-                  options,
-                  null,
-                  callback
-                );
-              });
-          }
-        );
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              null,
+              callback
+            );
+          });
       })
       .catch(callback);
   };
@@ -340,23 +292,43 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        // retrieve lab results with person data
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
-        );
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
+
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              null,
+              callback
+            );
+          });
       })
       .catch(callback);
   };
@@ -420,23 +392,43 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        options.questionnaire = self.labResultsTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.labResult,
-          {},
+        // retrieve lab results with person data
+        app.models.labResult.retrieveAggregateLabResults(
+          this,
           filter,
-          exportType,
-          'LabResult-List',
-          encryptPassword,
-          anonymizeFields,
-          options,
-          data => Promise.resolve(data),
-          callback
-        );
+          false,
+          (err, results) => {
+            if (err) {
+              return callback(err);
+            }
+
+            options.questionnaire = self.labResultsTemplate;
+            options.dictionary = dictionary;
+            options.useQuestionVariable = useQuestionVariable;
+
+            // need to export only the usual place of residence for the person
+            results.forEach((labResult) => {
+              !labResult.person && (labResult.person = {});
+              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
+              delete labResult.person.addresses;
+            });
+
+            options.records = results;
+
+            app.utils.remote.helpers.exportFilteredModelsList(
+              app,
+              app.models.labResult,
+              {},
+              filter,
+              exportType,
+              'LabResult-List',
+              encryptPassword,
+              anonymizeFields,
+              options,
+              null,
+              callback
+            );
+          });
       })
       .catch(callback);
   };
