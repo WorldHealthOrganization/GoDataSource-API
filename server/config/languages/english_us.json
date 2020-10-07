@@ -5019,7 +5019,7 @@
         ]
       },
       "LNG_API_ERROR_CODE_INVALID_CASE_RELATIONSHIP": {
-        "translation": "Case needs to be related to another case in order to be able to convert it to a contact",
+        "translation": "Case needs to be exposed to another case or event in order to be able to convert it to a contact",
         "modules": [
           "unauthenticated"
         ]

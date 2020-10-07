@@ -1226,7 +1226,7 @@ module.exports = function (Outbreak) {
     // pre-filter using related data (case)
     // IMPORTANT: required to add geographical restrictions filters
     app.models.case
-      .preFilterForOutbreak(this, { where: where }, options)
+      .preFilterForOutbreak(this, {where: where}, options)
       .then(function (filter) {
         // retrieve in bulks
         filter = filter || {};
@@ -1371,5 +1371,97 @@ module.exports = function (Outbreak) {
       .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model, options)
       .then(duplicates => callback(null, duplicates))
       .catch(callback);
+  };
+
+  /**
+   * Convert a case to a contact
+   * @param caseId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
+    let updateRelations = [];
+    let convertedContact;
+    let caseInstance;
+
+    // override default scope to allow switching the type
+    const defaultScope = app.models.case.defaultScope;
+    app.models.case.defaultScope = function () {
+    };
+
+    app.models.case
+      .findOne({
+        where: {
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+          id: caseId
+        }
+      })
+      .then(function (caseModel) {
+        if (!caseModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: caseId});
+        }
+
+        // keep the caseModel as we will do actions on it
+        caseInstance = caseModel;
+
+        // in order for a case to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
+        // check relations
+        return app.models.relationship
+          .count({
+            'persons': {
+              'elemMatch': {
+                'id': caseId,
+                'target': true
+              }
+            }
+          });
+      })
+      .then(function (relationsNumber) {
+        if (!relationsNumber) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return caseInstance.updateAttributes({
+          dateBecomeContact: app.utils.helpers.getDate().toDate(),
+          wasCase: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        }, options);
+      })
+      .then(function (contact) {
+        convertedContact = contact;
+        // after updating the case, find it's relations
+        return app.models.relationship
+          .find({
+            where: {
+              'persons.id': caseId
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === caseId) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedContact);
+      })
+      .catch(callback)
+      .finally(function () {
+        // restore default scope
+        app.models.case.defaultScope = defaultScope;
+      });
   };
 };
