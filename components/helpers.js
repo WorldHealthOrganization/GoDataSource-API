@@ -2337,13 +2337,18 @@ function migrateModelDataInBatches(
  *   lng: number
  * }
  * @param modelInstance
+ * @param {string} customModelAddressField - custom path for address field
  */
-function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
+function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModelAddressField) {
   // check if modelInstance has address/addresses; nothing to do in case an address is not set
   if (
     !modelInstance.address &&
     !modelInstance.addresses &&
-    !modelInstance.fillLocation
+    !modelInstance.fillLocation &&
+    (
+      !customModelAddressField ||
+      !_.get(modelInstance, customModelAddressField)
+    )
   ) {
     return;
   }
@@ -2363,6 +2368,23 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}) {
       ...addressesToUpdate,
       modelInstance.fillLocation
     ];
+  }
+
+  // check for customModelAddressField
+  if (
+    customModelAddressField &&
+    _.get(modelInstance, customModelAddressField)
+  ) {
+    if (addressesToUpdate) {
+      addressesToUpdate = [
+        ...addressesToUpdate,
+        _.get(modelInstance, customModelAddressField)
+      ];
+    } else {
+      addressesToUpdate = [
+        _.get(modelInstance, customModelAddressField)
+      ];
+    }
   }
 
   // loop through the addresses and update then if needed
