@@ -85,6 +85,7 @@ module.exports = function (Relationship) {
     'persons[].id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
     'persons[].target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
     'persons[].source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
+    dateOfFirstContact: 'LNG_RELATIONSHIP_FIELD_LABEL_DATE_OF_FIRST_CONTACT',
     contactDate: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
     contactDateEstimated: 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
     certaintyLevelId: 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -125,11 +126,20 @@ module.exports = function (Relationship) {
     }
   };
 
+  // used on importable file logic
+  Relationship.foreignKeyFields = {
+    clusterId: {
+      modelName: 'cluster',
+      labelProperty: 'name'
+    }
+  };
+
   Relationship.relatedFieldLabelsMap = {
     'person': 'LNG_RELATIONSHIP_PDF_FIELD_LABEL_PERSON'
   };
 
   Relationship.printFieldsinOrder = [
+    'dateOfFirstContact',
     'contactDate',
     'contactDateEstimated',
     'certaintyLevelId',
