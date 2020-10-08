@@ -118,7 +118,7 @@ function exportFilteredModelsList(
     .then(function (results) {
       // convert geo-points (if any)
       results.forEach(function (result) {
-        helpers.covertAddressesGeoPointToLoopbackFormat(result);
+        helpers.covertAddressesGeoPointToLoopbackFormat(result, Model.exportAddressField);
       });
 
       // get max number of answers for each questionnaire question

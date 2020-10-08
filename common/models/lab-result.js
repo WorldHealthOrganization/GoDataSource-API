@@ -82,6 +82,8 @@ module.exports = function (LabResult) {
     }
   };
 
+  LabResult.exportAddressField = 'person.address';
+
   /**
    * Return a list of field labels map that are allowed for export
    */
