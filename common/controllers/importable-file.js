@@ -323,10 +323,11 @@ function getReferenceDataAvailableValuesForModel(outbreakId, modelName) {
 
 /**
  * Get available values for foreign keys
- * @param foreignKeysMap Map in format {foreignKey: {modelName: ..., labelProperty: ...}}
+ * @param foreignKeysMap Map in format {foreignKey: {modelName: ..., labelProperty: ..., filter: ...}}
+ * @param outbreak Outbreak instance; there might be cases where it is not present
  * @returns {Promise<unknown>}
  */
-const getForeignKeysValues = function (foreignKeysMap) {
+const getForeignKeysValues = function (foreignKeysMap, outbreak) {
   let foreignKeys = Object.keys(foreignKeysMap);
 
   // initialize list of functions to be executed async
@@ -341,12 +342,32 @@ const getForeignKeysValues = function (foreignKeysMap) {
       return;
     }
 
+    // check if a filter needs to be applied for the foreign key
+    // Note: Currently we are only supporting filtering by outbreak properties and only checking first level properties
+    let foreignKeyQuery = {};
+    if (foreignKeyInfo.filter) {
+      foreignKeyQuery = _.cloneDeep(foreignKeyInfo.filter);
+      if (outbreak) {
+        // we have the outbreak instance; check filter for outbreak properties
+        Object.keys(foreignKeyQuery).forEach(prop => {
+          if (
+            typeof foreignKeyQuery[prop] === 'string' &&
+            foreignKeyQuery[prop].indexOf('outbreak.') === 0
+          ) {
+            // replace the filter value with the outbreak property value only if found
+            const value = _.get(outbreak, foreignKeyQuery[prop].substring(9));
+            value && (foreignKeyQuery[prop] = value);
+          }
+        });
+      }
+    }
+
     jobs[fKey] = function (callback) {
       // Note: This query will retrieve all data from the related model
       // depending on data quantity might cause javascript heap out of memory error
       // should be used only for models with limited number of instances
       return app.models[foreignKeyInfo.modelName]
-        .rawFind({}, {
+        .rawFind(foreignKeyQuery, {
           projection: {[foreignKeyInfo.labelProperty]: 1}
         })
         .then(items => {
@@ -595,7 +616,7 @@ module.exports = function (ImportableFile) {
                         }
                         steps.push(function (callback) {
                           // get foreign keys values
-                          getForeignKeysValues(app.models[modelName].foreignKeyFields)
+                          getForeignKeysValues(app.models[modelName].foreignKeyFields, outbreak)
                             .then(foreignKeysValues => {
                               // update result
                               results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, foreignKeysValues)});
