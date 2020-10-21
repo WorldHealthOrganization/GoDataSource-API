@@ -9,7 +9,9 @@
     "outbreakId"
   ],
   "scope": {
-    "order": ["name ASC"]
+    "order": [
+      "name ASC"
+    ]
   },
   "properties": {
     "name": {
@@ -17,6 +19,12 @@
       "required": true
     },
     "description": {
+      "type": "string"
+    },
+    "iconId": {
+      "type": "string"
+    },
+    "colorCode": {
       "type": "string"
     }
   },
