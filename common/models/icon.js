@@ -58,6 +58,7 @@ module.exports = function (Icon) {
 
   /**
    * Do not allow removal of items that are in use
+   * Check reference data and cluster
    * @param ctx
    * @param next
    */
@@ -70,8 +71,19 @@ module.exports = function (Icon) {
       })
       .then(function (count) {
         if (count) {
-          return next(app.utils.apiError.getError('MODEL_IN_USE', { model: Icon.name, id: iconId }));
+          return Promise.reject(app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.name, id: iconId}));
         }
+
+        return app.models.cluster
+          .count({
+            iconId: iconId
+          });
+      })
+      .then(function (count) {
+        if (count) {
+          return Promise.reject(app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.name, id: iconId}));
+        }
+
         // store the instance that's about to be deleted to remove the resource from the disk later
         return Icon.findById(iconId)
           .then(function (icon) {
