@@ -3,6 +3,7 @@
 const app = require('./../server/server');
 const _ = require('lodash');
 const uuid = require('uuid');
+const helpers = require('./helpers');
 const subTemplates = [
   'caseInvestigationTemplate',
   'contactInvestigationTemplate',
@@ -394,54 +395,6 @@ function afterHook(context, next) {
 }
 
 /**
- * Extract a list of variables and their answers (if any) from a template
- * @param template
- * @return {Array}
- */
-function extractVariablesAndAnswerOptions(template) {
-  // store a list of variables
-  let variables = [];
-  // template should be an array of questions
-  if (Array.isArray(template)) {
-    // go through all the questions
-    template.forEach(function (question) {
-      // start building the variable
-      const variable = {
-        name: question.variable,
-        text: question.text,
-        answerType: question.answerType
-      };
-      // store variable in the list of variables
-      variables.push(variable);
-      // if the question has predefined answers
-      if (
-        ['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER',
-          'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
-        ].includes(question.answerType) &&
-        Array.isArray(question.answers)
-      ) {
-        // store a list of variables
-        variable.answers = [];
-        // go through the list of answers
-        question.answers.forEach(function (answer) {
-          // store them
-          variable.answers.push({
-            label: answer.label,
-            value: answer.value
-          });
-          // if there are additional questions inside an answer
-          if (Array.isArray(answer.additionalQuestions)) {
-            // parse them recursively
-            variables = variables.concat(extractVariablesAndAnswerOptions(answer.additionalQuestions));
-          }
-        });
-      }
-    });
-  }
-  return variables;
-}
-
-/**
  * Order questions
  * @param questions
  */
@@ -479,6 +432,6 @@ function orderQuestions(questions) {
 module.exports = {
   beforeHook: beforeHook,
   afterHook: afterHook,
-  extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
+  extractVariablesAndAnswerOptions: helpers.extractVariablesAndAnswerOptions,
   orderQuestions: orderQuestions
 };

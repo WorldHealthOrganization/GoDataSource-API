@@ -340,6 +340,18 @@ module.exports = {
           resolve(result);
         });
       });
+    },
+    uploadImportableFile: function () {
+      let originalArguments = arguments;
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('helpers', 'uploadImportableFile', [...originalArguments], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+
+          resolve(result);
+        });
+      });
     }
   },
   getContactFollowUpReport: function (

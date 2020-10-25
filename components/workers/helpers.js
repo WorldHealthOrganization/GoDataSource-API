@@ -4,6 +4,7 @@ const helpers = require('../helpers');
 const fileCrypto = require('../fileCrypto');
 const aesCrypto = require('../aesCrypto');
 const pdfDoc = require('../pdfDoc');
+const importableFile = require('../importableFile');
 
 const worker = {
   /**
@@ -75,7 +76,11 @@ const worker = {
   /**
    * Export a filtered list of models
    */
-  exportFilteredModelsList: helpers.exportFilteredModelsList
+  exportFilteredModelsList: helpers.exportFilteredModelsList,
+  /**
+   * Upload an importable file
+   */
+  uploadImportableFile: importableFile.upload
 };
 
 process.on('message', function (message) {
