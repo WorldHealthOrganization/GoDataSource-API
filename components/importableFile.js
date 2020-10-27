@@ -46,6 +46,32 @@ const isExtensionSupported = function (extension) {
 };
 
 /**
+ * Get JSON file using file id
+ * @param {string} fileId - File ID
+ * @returns {Promise<unknown>}
+ */
+const getTemporaryFileById = function (fileId) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.join(os.tmpdir(), fileId), (err, data) => {
+      if (err) {
+        return reject(err);
+      }
+
+      try {
+        // send back JSON file
+        resolve(JSON.parse(data));
+      } catch (error) {
+        // handle JSON.parse errors
+        reject(apiError.getError('INVALID_CONTENT_OF_TYPE', {
+          contentType: 'JSON',
+          details: error.message
+        }));
+      }
+    });
+  });
+};
+
+/**
  * Get JSON content and headers
  * @param data
  * @param callback
@@ -580,7 +606,7 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
  * @param normalizedHeaders
  * @param languageDictionary
  * @param dataset
- * @return {Promise.<T>}
+ * @return {Object}
  */
 const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType, modelExtendedForm, headers, normalizedHeaders, languageDictionary, dataset, fieldsMap) {
   // make sure we have a valid type
@@ -912,19 +938,16 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
             }
             // get mapping suggestions for extended form
             steps.push(function (callback) {
-              getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap)
-                .then(function (_result) {
-                  // update result
-                  results[modelName] = Object.assign(
-                    {}, results[modelName],
-                    {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, _result.suggestedFieldMapping)},
-                    {modelProperties: Object.assign(results[modelName].modelProperties, _result.modelProperties)},
-                    {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, _result.modelPropertyValues)},
-                    {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, _result.modelArrayProperties)}
-                  );
-                  callback(null, results[modelName]);
-                })
-                .catch(callback);
+              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap);
+              // update result
+              results[modelName] = Object.assign(
+                {}, results[modelName],
+                {suggestedFieldMapping: Object.assign(results[modelName].suggestedFieldMapping, extendedFormSuggestions.suggestedFieldMapping)},
+                {modelProperties: Object.assign(results[modelName].modelProperties, extendedFormSuggestions.modelProperties)},
+                {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, extendedFormSuggestions.modelPropertyValues)},
+                {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, extendedFormSuggestions.modelArrayProperties)}
+              );
+              callback(null, results[modelName]);
             });
           }
 
@@ -997,6 +1020,23 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
     });
 };
 
+/**
+ * Get distinct values from file for given headers
+ * @param {string} fileId - File ID
+ * @param {Array} headers - Headers list for which to get distinct values
+ * @returns {Promise<{distinctFileColumnValues: {}}>}
+ */
+const getDistinctValuesForHeaders = function (fileId, headers) {
+  // get JSON
+  return getTemporaryFileById(fileId)
+    .then(dataset => {
+      return {
+        distinctFileColumnValues: getDistinctPropertyValues(dataset)
+      };
+    });
+};
+
 module.exports = {
-  upload
+  upload,
+  getDistinctValuesForHeaders
 };

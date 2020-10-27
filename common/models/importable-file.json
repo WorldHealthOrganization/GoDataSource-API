@@ -31,6 +31,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getJsonById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getJsonDistinctValuesById"
     }
   ],
   "methods": {
@@ -80,26 +86,32 @@
             },
             "modelProperties": {
               "type": {
-                "<modelProperty>": [{
-                  "type": "string",
-                  "description": "Model property label"
-                }]
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Model property label"
+                  }
+                ]
               }
             },
             "modelPropertyValues": {
               "type": {
-                "<modelProperty>": [{
-                  "type": "string",
-                  "description": "Available values for a model property"
-                }]
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Available values for a model property"
+                  }
+                ]
               }
             },
             "distinctFileColumnValues": {
               "type": {
-                "<fileHeader>": [{
-                  "type": "string",
-                  "description": "Distinct values for column"
-                }]
+                "<fileHeader>": [
+                  {
+                    "type": "string",
+                    "description": "Distinct values for column"
+                  }
+                ]
               }
             }
           },
@@ -124,7 +136,9 @@
       "returns": [
         {
           "arg": "json",
-          "type": ["any"],
+          "type": [
+            "any"
+          ],
           "required": true,
           "root": true
         }
@@ -133,6 +147,45 @@
       "http": {
         "verb": "get",
         "path": "/:id/json"
+      }
+    },
+    "getJsonDistinctValuesById": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "importableFileHeaders",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": [
+            "any"
+          ],
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve distinct values from an uploaded file",
+      "http": {
+        "verb": "post",
+        "path": "/:id/distinct-values-json"
       }
     }
   }

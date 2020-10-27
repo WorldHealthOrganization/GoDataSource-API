@@ -76,11 +76,7 @@ const worker = {
   /**
    * Export a filtered list of models
    */
-  exportFilteredModelsList: helpers.exportFilteredModelsList,
-  /**
-   * Upload an importable file
-   */
-  uploadImportableFile: importableFile.upload
+  exportFilteredModelsList: helpers.exportFilteredModelsList
 };
 
 process.on('message', function (message) {

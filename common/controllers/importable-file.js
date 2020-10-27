@@ -81,7 +81,7 @@ module.exports = function (ImportableFile) {
           }
         })
         .then(outbreak => {
-          return WorkerRunner.helpers.uploadImportableFile(
+          return WorkerRunner.importableFile.upload(
             file,
             decryptPassword,
             outbreak,
@@ -143,5 +143,21 @@ module.exports = function (ImportableFile) {
         }));
       }
     });
+  };
+
+  /**
+   * Get a file distinct values for given headers using file id
+   * @param {string} id - file ID
+   * @param {Object} data - request body; should contain headers
+   * @param {Object} options - options from request
+   * @param callback
+   */
+  ImportableFile.getJsonDistinctValuesById = function (id, data, options, callback) {
+    return WorkerRunner.importableFile.getDistinctValuesForHeaders(
+      id,
+      data.headers
+    )
+      .then(result => callback(null, result))
+      .catch(callback);
   };
 };

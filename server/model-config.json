@@ -216,6 +216,10 @@
     "dataSource": null,
     "public": false
   },
+  "importableFileHeaders": {
+    "dataSource": null,
+    "public": false
+  },
   "securityQuestionsTemplate": {
     "dataSource": null,
     "public": false

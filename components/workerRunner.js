@@ -340,11 +340,25 @@ module.exports = {
           resolve(result);
         });
       });
-    },
-    uploadImportableFile: function () {
+    }
+  },
+  importableFile: {
+    upload: function () {
       let originalArguments = arguments;
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'uploadImportableFile', [...originalArguments], function (error, result) {
+        invokeWorkerMethod('importableFile', 'upload', [...originalArguments], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+
+          resolve(result);
+        });
+      });
+    },
+    getDistinctValuesForHeaders: function () {
+      let originalArguments = arguments;
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('importableFile', 'getDistinctValuesForHeaders', [...originalArguments], function (error, result) {
           if (error) {
             return reject(error);
           }
