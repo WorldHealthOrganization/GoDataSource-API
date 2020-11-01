@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const WorkerRunner = require('./../../components/workerRunner');
+const importableFileHelpers = require('./../../components/importableFile');
 
 /**
  * Get a list of model names associated with passed model name
@@ -127,22 +128,13 @@ module.exports = function (ImportableFile) {
    */
   ImportableFile.getJsonById = function (id, callback) {
     // read file
-    ImportableFile.getTemporaryFileById(id, function (error, buffer) {
-      // handle read errors
-      if (error) {
-        return callback(error);
-      }
-      try {
+    importableFileHelpers
+      .getTemporaryFileById(id)
+      .then(result => {
         // send back JSON file
-        callback(null, JSON.parse(buffer));
-      } catch (error) {
-        // handle JSON.parse errors
-        callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-          contentType: 'JSON',
-          details: error.message
-        }));
-      }
-    });
+        callback(null, result.data);
+      })
+      .catch(callback);
   };
 
   /**

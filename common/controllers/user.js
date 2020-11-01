@@ -9,6 +9,7 @@ const _ = require('lodash');
 const Moment = require('moment');
 const uuid = require('uuid');
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
+const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (User) {
 
@@ -617,12 +618,10 @@ module.exports = function (User) {
   User.import = function (data, options, callback) {
     options._sync = false;
 
-    app.models.importableFile.getTemporaryFileById(data.fileId, (err, fileData) => {
-      if (err) {
-        return callback(err);
-      }
-      try {
-        const rawUsersList = JSON.parse(fileData);
+    importableFileHelpers
+      .getTemporaryFileById(data.fileId)
+      .then(file => {
+        const rawUsersList = file.data;
         const usersList = app.utils.helpers.convertBooleanProperties(
           app.models.user,
           app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
@@ -737,14 +736,8 @@ module.exports = function (User) {
             return callback(null, results);
           });
         });
-      } catch (error) {
-        // handle parse error
-        callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-          contentType: 'JSON',
-          details: error.message
-        }));
-      }
-    });
+      })
+      .catch(callback);
   };
 
   /**

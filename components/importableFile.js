@@ -90,10 +90,13 @@ const getJsonHeaders = function ({data}, callback) {
     }
     // build a list of headers
     const headers = [];
+    // store list of properties for each header
+    const headersToPropsMap = {};
     // build the list by looking at the properties of all elements (not all items have all properties)
     jsonObj.forEach(function (item) {
       // go through all properties of flatten item
-      Object.keys(helpers.getFlatObject(item)).forEach(function (property) {
+      const flatItem = helpers.getFlatObject(item);
+      Object.keys(flatItem).forEach(function (property) {
         const sanitizedProperty = property
           // don't replace basic types arrays ( string, number, dates etc )
           .replace(/\[\d+]$/g, '')
@@ -101,14 +104,21 @@ const getJsonHeaders = function ({data}, callback) {
           .replace(/\[\d+]/g, '[]')
           .replace(/^\[]\.*/, '');
         // add the header if not already included
-        if (!headers.includes(sanitizedProperty)) {
+        if (!headersToPropsMap[sanitizedProperty]) {
           headers.push(sanitizedProperty);
+          headersToPropsMap[sanitizedProperty] = new Set();
+        }
+
+        // add prop to headers map if simple property; null values are skipped
+        // children of object properties will be added separately
+        if (typeof flatItem[property] !== 'object') {
+          headersToPropsMap[sanitizedProperty].add(property);
         }
       });
     });
 
     // send back the parsed object and its headers
-    callback(null, {obj: jsonObj, headers: headers});
+    callback(null, {obj: jsonObj, headers: headers, headersToPropsMap: headersToPropsMap});
   } catch (error) {
     // handle JSON.parse errors
     callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
@@ -151,7 +161,7 @@ const getXmlHeaders = function ({data, modelOptions, dictionary, questionnaire},
             }
           }
         });
-      })(questionnaire.toJSON());
+      })(questionnaire);
     }
   }
 
@@ -172,6 +182,8 @@ const getXmlHeaders = function ({data, modelOptions, dictionary, questionnaire},
 
     // build a list of headers
     const headers = [];
+    // store list of properties for each header
+    const headersToPropsMap = {};
     records = records.map(record => {
       // convert array properties to correct format
       // this is needed because XML might contain a single element of type array props
@@ -209,7 +221,8 @@ const getXmlHeaders = function ({data, modelOptions, dictionary, questionnaire},
       }
 
       // go through all properties of flatten item
-      Object.keys(helpers.getFlatObject(record))
+      const flatRecord = helpers.getFlatObject(record);
+      Object.keys(flatRecord)
         .forEach(function (property) {
           const sanitizedProperty = property
             // don't replace basic types arrays ( string, number, dates etc )
@@ -218,14 +231,20 @@ const getXmlHeaders = function ({data, modelOptions, dictionary, questionnaire},
             .replace(/\[\d+]/g, '[]')
             .replace(/^\[]\.*/, '');
           // add the header if not already included
-          if (!headers.includes(sanitizedProperty)) {
+          if (!headersToPropsMap[sanitizedProperty]) {
             headers.push(sanitizedProperty);
+            headersToPropsMap[sanitizedProperty] = new Set();
+          }
+
+          // add prop to headers map if simple property; children of object properties will be added separately
+          if (typeof flatRecord[property] !== 'object') {
+            headersToPropsMap[sanitizedProperty].add(property);
           }
         });
       return record;
     });
     // send back the parsed object and its headers
-    callback(null, {obj: records, headers: headers});
+    callback(null, {obj: records, headers: headers, headersToPropsMap: headersToPropsMap});
   });
 };
 
@@ -333,18 +352,22 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
 
   // use appropriate content handler for file type
   let getHeaders;
+  let headersFormat;
   switch (extension) {
     case '.json':
       getHeaders = getJsonHeaders;
+      headersFormat = 'json';
       break;
     case '.xml':
       getHeaders = getXmlHeaders;
+      headersFormat = 'xml';
       break;
     case '.csv':
     case '.xls':
     case '.xlsx':
     case '.ods':
       getHeaders = getSpreadSheetHeaders;
+      headersFormat = 'xlsx';
       break;
   }
 
@@ -371,8 +394,23 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
             if (error) {
               return reject(error);
             }
-            // store file on dist
-            temporaryStoreFileOnDisk(JSON.stringify(result.obj), function (error, fileId) {
+
+            // construct file contents
+            const contents = {
+              data: result.obj,
+              headersFormat: headersFormat
+            };
+
+            // add headers to prop map in file
+            if (result.headersToPropsMap) {
+              contents.headersToPropMap = {};
+              result.headers.forEach(header => {
+                contents.headersToPropMap[header] = [...result.headersToPropsMap[header]];
+              });
+            }
+
+            // store file on disk
+            temporaryStoreFileOnDisk(JSON.stringify(contents), function (error, fileId) {
               // handle error
               if (error) {
                 return reject(error);
@@ -423,6 +461,102 @@ const getDistinctPropertyValues = function (dataSet) {
     distinctValuesMap[propName] = Object.keys(distinctValuesMap[propName]);
   });
   return distinctValuesMap;
+};
+
+/**
+ * TODO Duplicated from getDistinctPropertyValues
+ * Get a list of distinct values for the given properties of the dataset
+ * @param {Object} fileContents - Imported file contents as saved by the storeFileAndGetHeaders function
+ * {
+ * data: [{
+ *   "simple prop on first level or nested": ...
+ *   "simple prop in an array of objects [1]": ...
+ *   "Addresses Location [1] Location Geographical Level [1]"
+ * }]
+ * headersFormat: 'json/xml/xlsx',
+ * headersToPropMap: {
+ *   'header': ['prop1', 'prop2']
+ * }
+ * }
+ * @param {Array} properties - List of properties for which to return the distinct values
+ * @returns {{}}
+ */
+const getDistinctPropertyValuesNew = function (fileContents, properties) {
+  // initialize result
+  const result = {};
+
+  if (!properties || !properties.length || !fileContents || !fileContents.data || !fileContents.data.length) {
+    return result;
+  }
+
+  const dataset = fileContents.data;
+
+  // initialize a set for each needed property
+  properties.forEach(prop => {
+    result[prop] = new Set();
+  });
+
+  // check for the format of the headers in file
+  switch (fileContents.headersFormat) {
+    case 'json':
+    case 'xml': {
+      // for JSON the properties for each header were stored when the file was imported
+      const headersToPropMap = fileContents.headersToPropMap;
+      // get each requested property values from the dataset
+      dataset.forEach(entry => {
+        properties.forEach(prop => {
+          if (!headersToPropMap[prop]) {
+            // requested prop is not valid
+            return;
+          }
+
+          // get the values from all paths for the prop
+          headersToPropMap[prop].forEach(pathToValue => {
+            const value = _.get(entry, pathToValue);
+            (value !== undefined) && result[prop].add(value);
+          });
+        });
+      });
+
+      break;
+    }
+    case 'xlsx': {
+      // get each requested property values from the dataset
+      dataset.forEach(entry => {
+        Object.keys(entry).forEach(prop => {
+          // check if the requested prop is an actual entry prop
+          if (result[prop]) {
+            result[prop].add(entry[prop]);
+            return;
+          }
+
+          // sanitize key (remove array markers)
+          const sanitizedProperty = prop
+            // don't replace basic types arrays ( string, number, dates etc )
+            .replace(/\[\d+]$/g, '')
+            // sanitize arrays containing objects
+            .replace(/\[\d+]/g, '[]');
+
+          if (result[sanitizedProperty]) {
+            result[sanitizedProperty].add(entry[prop]);
+            return;
+          }
+
+          // at this point we have handled flat files
+          // requested prop is not valid
+        });
+      });
+      break;
+    }
+    default:
+      break;
+  }
+
+  // when done, transform results to arrays
+  Object.keys(result).forEach(prop => {
+    result[prop] = [...result[prop]];
+  });
+  return result;
 };
 
 /**
@@ -1029,14 +1163,15 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 const getDistinctValuesForHeaders = function (fileId, headers) {
   // get JSON
   return getTemporaryFileById(fileId)
-    .then(dataset => {
+    .then(fileContents => {
       return {
-        distinctFileColumnValues: getDistinctPropertyValues(dataset)
+        distinctFileColumnValues: getDistinctPropertyValuesNew(fileContents, headers)
       };
     });
 };
 
 module.exports = {
   upload,
-  getDistinctValuesForHeaders
+  getDistinctValuesForHeaders,
+  getTemporaryFileById
 };
