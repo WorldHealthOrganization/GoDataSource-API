@@ -49,7 +49,9 @@ const getSystemAndOutbreakReferenceData = function (outbreakId, filter) {
     'find',
     [
       query,
-      projection
+      {
+        projection: projection
+      }
     ]);
 };
 

@@ -619,14 +619,18 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
         'find',
         [
           query,
-          {[foreignKeyInfo.labelProperty]: 1}
+          {
+            projection: {
+              [foreignKeyInfo.labelProperty]: 1
+            }
+          }
         ])
         .then(items => {
           return callback(null, items.map(item => {
             return {
-              id: item._id,
+              id: item.id,
               label: item[foreignKeyInfo.labelProperty],
-              value: item._id
+              value: item.id
             };
           }));
         })
