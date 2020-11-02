@@ -480,7 +480,7 @@ const getDistinctPropertyValues = function (fileContents, properties) {
           headersToPropMap[prop].forEach(pathToValue => {
             const value = _.get(entry, pathToValue);
             // stringify value and add it in set
-            (value !== undefined) && result[prop].add(value + "");
+            (value !== undefined) && result[prop].add(value + '');
           });
         });
       });
@@ -523,7 +523,7 @@ const getDistinctPropertyValues = function (fileContents, properties) {
   Object.keys(result).forEach(prop => {
     if (!result[prop].size) {
       // add single "null" value to be consistent with old functionality
-      result[prop] = [null + ""]
+      result[prop] = [null + ''];
     } else {
       result[prop] = [...result[prop]];
     }

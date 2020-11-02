@@ -41,7 +41,7 @@ const getSystemAndOutbreakReferenceData = function (outbreakId, filter) {
     projection = {};
     loopbackFilter.fields.forEach(field => {
       projection[field] = 1;
-    })
+    });
   }
 
   return MongoDBHelper.executeAction(
