@@ -431,40 +431,6 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
 };
 
 /**
- * Get a list of distinct values for each property of the dataset
- * @param dataSet
- */
-const getDistinctPropertyValues = function (dataSet) {
-  // flatten object
-  const flatDataSet = helpers.getFlatObject(dataSet);
-  // keep a map of distinct values (to ensure unicity)
-  let distinctValuesMap = {};
-  // go through all the keys
-  Object.keys(flatDataSet).forEach(function (property) {
-    // sanitize key (remove array markers and leading '.' if present)
-    const sanitizedProperty = property
-      // don't replace basic types arrays ( string, number, dates etc )
-      .replace(/\[\d+]$/g, '')
-      // sanitize arrays containing objects object
-      .replace(/\[\d+]/g, '[]')
-      .replace(/^\[]\.*/, '');
-    // if the property was not present in the set
-    if (!distinctValuesMap[sanitizedProperty]) {
-      // add it
-      distinctValuesMap[sanitizedProperty] = {};
-    }
-    // add the value as a key (to ensure unicity)
-    distinctValuesMap[sanitizedProperty][flatDataSet[property]] = true;
-  });
-  // when done, transform results to arrays
-  Object.keys(distinctValuesMap).forEach(function (propName) {
-    distinctValuesMap[propName] = Object.keys(distinctValuesMap[propName]);
-  });
-  return distinctValuesMap;
-};
-
-/**
- * TODO Duplicated from getDistinctPropertyValues
  * Get a list of distinct values for the given properties of the dataset
  * @param {Object} fileContents - Imported file contents as saved by the storeFileAndGetHeaders function
  * {
@@ -481,7 +447,7 @@ const getDistinctPropertyValues = function (dataSet) {
  * @param {Array} properties - List of properties for which to return the distinct values
  * @returns {{}}
  */
-const getDistinctPropertyValuesNew = function (fileContents, properties) {
+const getDistinctPropertyValues = function (fileContents, properties) {
   // initialize result
   const result = {};
 
@@ -513,7 +479,8 @@ const getDistinctPropertyValuesNew = function (fileContents, properties) {
           // get the values from all paths for the prop
           headersToPropMap[prop].forEach(pathToValue => {
             const value = _.get(entry, pathToValue);
-            (value !== undefined) && result[prop].add(value);
+            // stringify value and add it in set
+            (value !== undefined) && result[prop].add(value + "");
           });
         });
       });
@@ -554,7 +521,12 @@ const getDistinctPropertyValuesNew = function (fileContents, properties) {
 
   // when done, transform results to arrays
   Object.keys(result).forEach(prop => {
-    result[prop] = [...result[prop]];
+    if (!result[prop].size) {
+      // add single "null" value to be consistent with old functionality
+      result[prop] = [null + ""]
+    } else {
+      result[prop] = [...result[prop]];
+    }
   });
   return result;
 };
@@ -949,8 +921,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
       // define main result
       result = {
         id: result.id,
-        fileHeaders: result.headers,
-        distinctFileColumnValues: {}
+        fileHeaders: result.headers
       };
 
       // store results for multiple models
@@ -1032,8 +1003,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 
           // if the model uses reference data for its properties
           if (assocModelOptions.referenceDataFieldsToCategoryMap) {
-            // get distinct property values
-            result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
             steps.push(function (callback) {
               // get reference data
               getReferenceDataAvailableValuesForModel(outbreakId, assocModelOptions.referenceDataFieldsToCategoryMap)
@@ -1048,10 +1017,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 
           // if the model has fk for its properties
           if (assocModelOptions.foreignKeyFields) {
-            // get distinct property values (if not taken already)
-            if (!Object.keys(result.distinctFileColumnValues).length) {
-              result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-            }
             steps.push(function (callback) {
               // get foreign keys values
               getForeignKeysValues(assocModelOptions.foreignKeyFields, outbreak)
@@ -1066,10 +1031,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 
           // if outbreakId was sent (templates are stored at outbreak level) and the model uses extended form template
           if (outbreakId !== undefined && assocModelOptions.extendedForm && assocModelOptions.extendedForm.template) {
-            // get distinct property values (if not taken already)
-            if (!Object.keys(result.distinctFileColumnValues).length) {
-              result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-            }
             // get mapping suggestions for extended form
             steps.push(function (callback) {
               const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap);
@@ -1096,10 +1057,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           // reference data has categoryId as a 'reference data' type but is not related to other reference data, it is reference data
           if (modelName === options.referenceDataModelName) {
             steps.push(function (callback) {
-              // get distinct column values (if not taken already) (to map categoyId)
-              if (!Object.keys(result.distinctFileColumnValues).length) {
-                result.distinctFileColumnValues = getDistinctPropertyValues(dataSet);
-              }
               // add categoryId as a reference data item
               results[modelName] = Object.assign({}, results[modelName], {
                 modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, {
@@ -1165,7 +1122,7 @@ const getDistinctValuesForHeaders = function (fileId, headers) {
   return getTemporaryFileById(fileId)
     .then(fileContents => {
       return {
-        distinctFileColumnValues: getDistinctPropertyValuesNew(fileContents, headers)
+        distinctFileColumnValues: getDistinctPropertyValues(fileContents, headers)
       };
     });
 };

@@ -145,7 +145,7 @@ module.exports = function (ImportableFile) {
    * @param callback
    */
   ImportableFile.getJsonDistinctValuesById = function (id, data, options, callback) {
-    return WorkerRunner.importableFile.getDistinctValuesForHeaders(
+    WorkerRunner.importableFile.getDistinctValuesForHeaders(
       id,
       data.headers
     )
