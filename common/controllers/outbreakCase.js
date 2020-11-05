@@ -15,6 +15,7 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const moment = require('moment');
 const Config = require('../../server/config.json');
+const Platform = require('../../components/platform');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -1463,5 +1464,185 @@ module.exports = function (Outbreak) {
         // restore default scope
         app.models.case.defaultScope = defaultScope;
       });
+  };
+
+  /**
+   * Import an importable cases file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
+    // initialize functions containers for child process communication
+    let sendMessageToWorker, stopWorker;
+
+    const self = this;
+    const logger = options.remotingContext.req.logger;
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    // define a container for results
+    const createResults = [];
+    // define a container for error results
+    const createErrors = [];
+    // define a toString function to be used by error handler
+    createErrors.toString = function () {
+      return JSON.stringify(this);
+    };
+
+    // define data counters
+    let processed = 0;
+    let total;
+
+    // initialize flag to know if we stopped the child process
+    let stoppedWorker = false;
+
+    // initialize flag to know if we have a batch in progress
+    let batchInProgress = false;
+
+    /**
+     * Action to be executed when a message is sent from the child process
+     * @param message
+     */
+    const actionOnMessageFromChild = function (message) {
+      // depending on message we need to make different actions
+      switch (message.subject) {
+        case 'start': {
+          // data contains total number of cases; save them
+          total = message.data;
+          logger.debug(`Cases to be imported: ${total}`);
+
+          break;
+        }
+        case 'data': {
+          // starting batch processing
+          batchInProgress = true;
+
+          // get data
+          const casesList = message.data;
+          const batchSize = casesList.length;
+
+          // build a list of create operations for this batch
+          const createCases = [];
+
+          // go through all entries received from child process
+          casesList.forEach(function (caseData, index) {
+            createCases.push(function (callback) {
+              // sync the case
+              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData.save, options)
+                .then(function (result) {
+                  callback(null, result.record);
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  createErrors.push({
+                    message: `Failed to import case ${index + 1}`,
+                    error: error,
+                    recordNo: index + 1,
+                    data: {
+                      file: caseData.raw,
+                      save: caseData.save
+                    }
+                  });
+                  callback(null, null);
+                });
+            });
+          });
+
+          // start importing cases
+          async.series(createCases, function (error, results) {
+            createResults.push(...results.filter(result => result !== null));
+
+            // increase processed counter
+            processed += batchSize;
+            logger.debug(`Cases processed: ${processed}/${total}`);
+
+            // finished batch
+            batchInProgress = false;
+
+            // check if we still have data to process
+            if (processed < total) {
+              logger.debug(`Processing next batch`);
+              // get next batch
+              sendMessageToWorker({
+                subject: 'nextBatch'
+              });
+              return;
+            }
+
+            // all data has been processed
+            logger.debug(`All cases processed`);
+            // stop child process if not already stopped
+            if (!stoppedWorker) {
+              stoppedWorker = true;
+              stopWorker();
+            }
+
+            // if import errors were found
+            if (createErrors.length) {
+              // define a toString function to be used by error handler
+              createResults.toString = function () {
+                return JSON.stringify(this);
+              };
+              // return error with partial success
+              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                model: app.models.case.modelName,
+                failed: createErrors,
+                success: createResults
+              }));
+            }
+            // send the result
+            callback(null, results);
+          });
+
+          break;
+        }
+        case 'finished': {
+          // child process will send this message once it has processed all data
+          if (!stoppedWorker) {
+            stoppedWorker = true;
+            stopWorker();
+          }
+          break;
+        }
+        default:
+          // errors with the child process; we received errors or closing messages when we stop the child process
+          if (!stoppedWorker) {
+            // we didn't stop the process and it was an actual error
+            logger.debug(`Worker error. Err: ${message}`);
+
+            if (batchInProgress) {
+              // processing will stop once current batch is finished
+            } else {
+              // send response with the data that we have until now
+            }
+          }
+      }
+    };
+
+    // construct options needed by the import worker
+    if (!app.models.case._booleanProperties) {
+      app.models.case._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.case);
+    }
+
+    try {
+      // start child process
+      const workerCommunication = WorkerRunner.cases
+        .importImportableCasesFileUsingMap(
+          Object.assign({
+            outbreakId: self.id,
+            modelBooleanProperties: app.models.case._booleanProperties
+          }, body),
+          actionOnMessageFromChild
+        );
+
+      // cache child process communication functions
+      sendMessageToWorker = workerCommunication.sendMessageToWorker;
+      stopWorker = workerCommunication.stopWorker;
+    } catch (err) {
+      callback(err);
+    }
   };
 };

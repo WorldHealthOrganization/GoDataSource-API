@@ -50,6 +50,53 @@ function invokeWorkerMethod(workerName, method, args, callback) {
   });
 }
 
+/**
+ * Invoke worker method
+ * @param {string} workerName - name of the file to be executed
+ * @param {Object} options - Options
+ * @param {function} actionOnMessage - Function to be executed anytime a message is received from child process
+ * @returns {{sendMessageToWorker: sendMessageToWorker, stopWorker: stopWorker}}
+ */
+function startWorkerWithCommunication(workerName, options, actionOnMessage) {
+  // fork the worker
+  const worker = fork(`${workersPath}/${workerName}`, [], {
+    execArgv: [],
+    windowsHide: true
+  });
+
+  let workerStopped = false;
+
+  // wait for its response and process it
+  worker.on('message', function (message) {
+    actionOnMessage(message);
+  });
+
+  // in case of failure, stop with error
+  ['close', 'disconnect', 'error', 'exit'].forEach(function (event) {
+    worker.on(event, function () {
+      workerStopped = true;
+      actionOnMessage(new Error(`Processing failed. Worker stopped. Event: ${event}, details: ${JSON.stringify(arguments)}`));
+    });
+  });
+
+  // start worker functionality
+  worker.send({
+    subject: 'start',
+    options: options
+  });
+
+  return {
+    sendMessageToWorker: (message) => {
+      worker.send(message);
+    },
+    stopWorker: () => {
+      if (!workerStopped) {
+        workerStopped = true;
+        worker.kill();
+      }
+    }
+  };
+}
 
 module.exports = {
   transmissionChain: {
@@ -169,6 +216,23 @@ module.exports = {
         callback
       );
     },
+    /**
+     * Import cases from importable file given using given map
+     * @param cases
+     * @param periodInterval
+     * @param periodType
+     * @param weekType
+     * @param periodMap
+     * @param caseClassifications
+     * @param callback
+     */
+    importImportableCasesFileUsingMap: function (options, actionOnMessage) {
+      return startWorkerWithCommunication(
+        'casesImport',
+        options,
+        actionOnMessage
+      );
+    }
   },
   sync: {
     /**

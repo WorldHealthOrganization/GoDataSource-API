@@ -175,9 +175,8 @@
       "returns": [
         {
           "arg": "json",
-          "type": [
-            "any"
-          ],
+          "type": "object",
+          "model": "importableFileDistinctValues",
           "required": true,
           "root": true
         }

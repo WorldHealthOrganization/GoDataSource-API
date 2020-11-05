@@ -220,6 +220,10 @@
     "dataSource": null,
     "public": false
   },
+  "importableFileDistinctValues": {
+    "dataSource": null,
+    "public": false
+  },
   "securityQuestionsTemplate": {
     "dataSource": null,
     "public": false
