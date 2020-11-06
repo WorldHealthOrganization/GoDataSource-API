@@ -67,8 +67,15 @@ function startWorkerWithCommunication(workerName, options, actionOnMessage) {
   let workerStopped = false;
 
   // wait for its response and process it
-  worker.on('message', function (message) {
-    actionOnMessage(message);
+  worker.on('message', function (args) {
+    if (args[0]) {
+      actionOnMessage(args[0]);
+      // stop worker on error
+      worker.kill();
+      workerStopped = true;
+      return;
+    }
+    actionOnMessage(null, args[1]);
   });
 
   // in case of failure, stop with error

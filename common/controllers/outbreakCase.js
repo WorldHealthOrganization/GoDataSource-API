@@ -16,6 +16,7 @@ const AdmZip = require('adm-zip');
 const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
+const async = require('async');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -1487,36 +1488,102 @@ module.exports = function (Outbreak) {
     const createResults = [];
     // define a container for error results
     const createErrors = [];
-    // define a toString function to be used by error handler
-    createErrors.toString = function () {
-      return JSON.stringify(this);
-    };
 
     // define data counters
     let processed = 0;
     let total;
 
-    // initialize flag to know if we stopped the child process
+    // initialize flag to know if the worker is stopped (by us or error)
     let stoppedWorker = false;
 
     // initialize flag to know if we have a batch in progress
     let batchInProgress = false;
 
     /**
+     * Create and send response; Either success or error response
+     * Handles premature failure of import; Can happen when the worked stops before sending all data
+     * @returns {*}
+     */
+    const sendResponse = function () {
+      // check for premature failure
+      if (processed !== total) {
+        // add errors for all rows not processed
+        const notProcessedError = app.utils.apiError.getError('IMPORT_DATA_NOT_PROCESSED');
+        for (let i = processed + 1; i <= total; i++) {
+          createErrors.push({
+            message: `Failed to import case ${i}`,
+            error: notProcessedError,
+            recordNo: i
+          });
+        }
+      }
+
+      // if import errors were found
+      if (createErrors.length) {
+        // define a toString function to be used by error handler
+        createResults.toString = function () {
+          return JSON.stringify(this);
+        };
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // return error with partial success
+        return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+          model: app.models.case.modelName,
+          failed: createErrors,
+          success: createResults
+        }));
+      }
+      // send the result
+      callback(null, createResults);
+    };
+
+    /**
      * Action to be executed when a message is sent from the child process
      * @param message
      */
-    const actionOnMessageFromChild = function (message) {
+    const actionOnMessageFromChild = function (err, message) {
+      if (err) {
+        // errors with the child process; we received errors or closing messages when we stop the child process
+        if (!stoppedWorker) {
+          // we didn't stop the process and it was an actual error
+          logger.debug(`Worker error. Err: ${JSON.stringify(err)}`);
+          stoppedWorker = true;
+
+          if (batchInProgress) {
+            // processing will stop once in progress batch is finished
+          } else {
+            if (!total) {
+              // error was encountered before worker started processing
+              return callback(err);
+            }
+
+            // send response with the data that we have until now
+            sendResponse();
+          }
+        } else {
+          // worker is already stopped; this is a close/disconnect error; nothing to do as we closed the worker
+        }
+
+        return;
+      }
+
       // depending on message we need to make different actions
       switch (message.subject) {
         case 'start': {
-          // data contains total number of cases; save them
-          total = message.data;
+          // save total number of cases
+          total = message.totalCasesNo;
           logger.debug(`Cases to be imported: ${total}`);
+
+          // get next batch
+          sendMessageToWorker({
+            subject: 'nextBatch'
+          });
 
           break;
         }
-        case 'data': {
+        case 'nextBatch': {
           // starting batch processing
           batchInProgress = true;
 
@@ -1538,9 +1605,9 @@ module.exports = function (Outbreak) {
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
                   createErrors.push({
-                    message: `Failed to import case ${index + 1}`,
+                    message: `Failed to import case ${processed + index + 1}`,
                     error: error,
-                    recordNo: index + 1,
+                    recordNo: processed + index + 1,
                     data: {
                       file: caseData.raw,
                       save: caseData.save
@@ -1564,61 +1631,64 @@ module.exports = function (Outbreak) {
 
             // check if we still have data to process
             if (processed < total) {
-              logger.debug(`Processing next batch`);
-              // get next batch
-              sendMessageToWorker({
-                subject: 'nextBatch'
-              });
+              // check if worker is still active
+              if (!stoppedWorker) {
+                logger.debug('Processing next batch');
+                // get next batch
+                sendMessageToWorker({
+                  subject: 'nextBatch'
+                });
+              } else {
+                // send response with data that we have until now
+                sendResponse();
+              }
+
               return;
             }
 
             // all data has been processed
-            logger.debug(`All cases processed`);
+            logger.debug('All cases processed');
             // stop child process if not already stopped
             if (!stoppedWorker) {
               stoppedWorker = true;
               stopWorker();
             }
 
-            // if import errors were found
-            if (createErrors.length) {
-              // define a toString function to be used by error handler
-              createResults.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.case.modelName,
-                failed: createErrors,
-                success: createResults
-              }));
-            }
-            // send the result
-            callback(null, results);
+            sendResponse();
           });
 
           break;
         }
         case 'finished': {
-          // child process will send this message once it has processed all data
+          // worker will send this message once it has processed all data
           if (!stoppedWorker) {
             stoppedWorker = true;
             stopWorker();
           }
           break;
         }
+        case 'log': {
+          logger.debug(message.log);
+          break;
+        }
         default:
-          // errors with the child process; we received errors or closing messages when we stop the child process
-          if (!stoppedWorker) {
-            // we didn't stop the process and it was an actual error
-            logger.debug(`Worker error. Err: ${message}`);
+          // unhandled message
+          logger.debug(`Worker sent invalid message subject '${message.subject}'`);
+          stopWorker();
 
-            if (batchInProgress) {
-              // processing will stop once current batch is finished
-            } else {
-              // send response with the data that we have until now
+          if (batchInProgress) {
+            // processing will stop once current batch is finished
+          } else {
+            if (!total) {
+              // error was encountered before worker started processing
+              return callback(err);
             }
+
+            // send response with the data that we have until now
+            sendResponse();
           }
+
+          break;
       }
     };
 
@@ -1632,6 +1702,7 @@ module.exports = function (Outbreak) {
       const workerCommunication = WorkerRunner.cases
         .importImportableCasesFileUsingMap(
           Object.assign({
+            batchSize: 2,
             outbreakId: self.id,
             modelBooleanProperties: app.models.case._booleanProperties
           }, body),

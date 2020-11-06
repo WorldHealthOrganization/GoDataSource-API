@@ -12625,6 +12625,9 @@
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_INVALID_VISUAL_ID_MASK": {
         "translation": "Error al importar registro {{recordNo}} debido a la máscara del identificador"
       },
+      "LNG_PAGE_IMPORT_DATA_IMPORT_DATA_NOT_PROCESSED": {
+        "translation": "Import worker stopped with error before processing data"
+      },
       "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_NOT_IMPORTED": {
         "translation": "No se pudo importar el registro {{recordNo}} debido a: {{Fields}}"
       },

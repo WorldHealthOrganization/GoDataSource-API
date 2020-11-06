@@ -2,118 +2,174 @@
 
 const importableFileHelpers = require('./../importableFile');
 const helpers = require('./../helpers');
+const async = require('async');
 
-console.log('in process');
-
-const importCases = function () {
-  let count = 0;
-  process.send({
-    childStarted: true,
-    childCount: count
-  });
-  process.on('message', function (message) {
-    console.log('child ' + JSON.stringify(message));
-    count++;
-
-    process.send({childCount: count});
-  });
-
-  const self = this;
-  // treat the sync as a regular operation, not really a sync
-  options._sync = false;
-  // inject platform identifier
-  options.platform = Platform.IMPORT;
-  // get importable file
-  importableFileHelpers
-    .getTemporaryFileById(body.fileId)
-    .then(file => {
-      // get file content
-      const rawCasesList = file.data;
-      // remap properties & values
-      const casesList = helpers.convertBooleanProperties(
-        app.models.case,
-        helpers.remapProperties(rawCasesList, body.map, body.valuesMap));
-      // build a list of create operations
-      const createCases = [];
-      // define a container for error results
-      const createErrors = [];
-      // define a toString function to be used by error handler
-      createErrors.toString = function () {
-        return JSON.stringify(this);
-      };
-      // go through all entries
-      casesList.forEach(function (caseData, index) {
-        createCases.push(function (callback) {
-          // set outbreak id
-          caseData.outbreakId = self.id;
-
-          // filter out empty addresses
-          const addresses = app.models.person.sanitizeAddresses(caseData);
-          if (addresses) {
-            caseData.addresses = addresses;
-          }
-
-          // sanitize questionnaire answers
-          if (caseData.questionnaireAnswers) {
-            // convert properties that should be date to actual date objects
-            caseData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(caseData.questionnaireAnswers);
-          }
-
-          // sanitize visual ID
-          if (caseData.visualId) {
-            caseData.visualId = app.models.person.sanitizeVisualId(caseData.visualId);
-          }
-
-          // sync the case
-          return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
-            .then(function (result) {
-              callback(null, result.record);
-            })
-            .catch(function (error) {
-              // on error, store the error, but don't stop, continue with other items
-              createErrors.push({
-                message: `Failed to import case ${index + 1}`,
-                error: error,
-                recordNo: index + 1,
-                data: {
-                  file: rawCasesList[index],
-                  save: caseData
-                }
-              });
-              callback(null, null);
-            });
-        });
-      });
-      // start importing cases
-      async.series(createCases, function (error, results) {
-        // handle errors (should not be any)
-        if (error) {
-          return callback(error);
-        }
-        // if import errors were found
-        if (createErrors.length) {
-          // remove results that failed to be added
-          results = results.filter(result => result !== null);
-          // define a toString function to be used by error handler
-          results.toString = function () {
-            return JSON.stringify(this);
-          };
-          // return error with partial success
-          return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-            model: app.models.case.modelName,
-            failed: createErrors,
-            success: results
-          }));
-        }
-        // send the result
-        callback(null, results);
-      });
-    })
-    .catch(callback);
+/**
+ * Send message to parent
+ * @param message
+ */
+const sendMessageToParent = function (message) {
+  process.send([null, message]);
 };
 
-importCases();
+/**
+ * Send error message to parent
+ * @param error
+ */
+const sendErrorToParent = function (error) {
+  process.send([error instanceof Error ? {
+    message: error.message,
+    stack: error.stack
+  } : error]);
+};
 
-process.on('exit', () => {
-  console.log('child exit');
-});
+/**
+ * Read from file and format case data
+ */
+const readAndFormatCases = function () {
+  // initialize cache for processed data
+  const casesToSend = [];
+
+  // initialize variable to cache batch size
+  let batchSize;
+
+  // initialize variable to know when all data has been processed
+  let allDataProcessed = false;
+
+  // handle messages from parent process
+  process.on('message', function (message) {
+    // depending on message we need to make different actions
+    switch (message.subject) {
+      case 'start': {
+        // get options
+        const options = message.options;
+
+        // cache batch size
+        batchSize = options.batchSize;
+
+        // get importable file
+        importableFileHelpers
+          .getTemporaryFileById(options.fileId)
+          .then(file => {
+            // get file content
+            const rawCasesList = file.data;
+
+            // send message to parent to know that processing has started
+            sendMessageToParent({
+              subject: 'start',
+              // send total number of cases to import
+              totalCasesNo: rawCasesList.length
+            });
+
+            // remap properties & values
+            const casesList = helpers.convertBooleanPropertiesNoModel(
+              options.modelBooleanProperties || [],
+              helpers.remapProperties(rawCasesList, options.map, options.valuesMap));
+
+            sendMessageToParent({
+              subject: 'log',
+              log: 'Finished boolean properties conversion'
+            });
+
+            async.eachOfSeries(
+              casesList,
+              (formattedData, index, callback) => {
+                // set outbreak id
+                formattedData.outbreakId = options.outbreakId;
+
+                // filter out empty addresses
+                const addresses = helpers.sanitizePersonAddresses(formattedData);
+                if (addresses) {
+                  formattedData.addresses = addresses;
+                }
+
+                // sanitize questionnaire answers
+                if (formattedData.questionnaireAnswers) {
+                  // convert properties that should be date to actual date objects
+                  formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+                }
+
+                // sanitize visual ID
+                if (formattedData.visualId) {
+                  formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+                }
+
+                // add case entry in the list to be sent to parent
+                casesToSend.push({
+                  raw: rawCasesList[index],
+                  save: formattedData
+                });
+
+                sendMessageToParent({
+                  subject: 'log',
+                  log: 'Pushed case ' + index
+                });
+
+                callback();
+              },
+              () => {
+                allDataProcessed = true;
+                sendMessageToParent({
+                  subject: 'log',
+                  log: 'All data was processed'
+                });
+              });
+            // go through all entries
+            // casesList.forEach(function (formattedData, index) {
+            //   // set outbreak id
+            //   formattedData.outbreakId = options.outbreakId;
+            //
+            //   // filter out empty addresses
+            //   const addresses = helpers.sanitizePersonAddresses(formattedData);
+            //   if (addresses) {
+            //     formattedData.addresses = addresses;
+            //   }
+            //
+            //   // sanitize questionnaire answers
+            //   if (formattedData.questionnaireAnswers) {
+            //     // convert properties that should be date to actual date objects
+            //     formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+            //   }
+            //
+            //   // sanitize visual ID
+            //   if (formattedData.visualId) {
+            //     formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+            //   }
+            //
+            //   // add case entry in the list to be sent to parent
+            //   casesToSend.push({
+            //     raw: rawCasesList[index],
+            //     save: formattedData
+            //   });
+            // });
+            //
+            // allDataProcessed = true;
+          })
+          .catch(sendErrorToParent);
+
+        break;
+      }
+      case 'nextBatch': {
+        sendMessageToParent({
+          subject: 'nextBatch',
+          // send cases for this batch; max batchSize items will be send
+          data: casesToSend.splice(0, batchSize)
+        });
+
+        if (allDataProcessed && !casesToSend.length) {
+          sendMessageToParent({
+            subject: 'finished'
+          });
+        }
+
+        break;
+      }
+      default:
+        // unhandled subject
+        sendErrorToParent(new Error(`Worker received an invalid message subject '${message.subject}'`));
+        break;
+    }
+  });
+};
+
+readAndFormatCases();

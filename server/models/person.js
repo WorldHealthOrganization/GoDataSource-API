@@ -5,7 +5,6 @@ const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
-const moment = require('moment');
 const escapeStringRegexp = require('escape-string-regexp');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
@@ -1535,13 +1534,13 @@ module.exports = function (Person) {
         // update where to only query for allowed locations
         return Promise.resolve(
           where && Object.keys(where).length ?
-            {
-              and: [
-                allowedLocationsQuery,
-                where
-              ]
-            } :
-            allowedLocationsQuery
+          {
+            and: [
+              allowedLocationsQuery,
+              where
+            ]
+          } :
+          allowedLocationsQuery
         );
       });
   };

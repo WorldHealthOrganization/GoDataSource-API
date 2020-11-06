@@ -354,5 +354,9 @@
   "MULTIPLE_CONTACTS_OF_CONTACT_CREATION_PARTIAL_SUCCESS": {
     "defaultStatusCode": 422,
     "messagePattern": "Multiple contact of contact creation partial Success. Some contact instances failed to be created."
+  },
+  "IMPORT_DATA_NOT_PROCESSED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Import worker stopped with error before processing data"
   }
 }
