@@ -1778,7 +1778,7 @@ module.exports = function (Outbreak) {
       stopWorker = () => {
         stoppedWorker = true;
         workerCommunication.stopWorker();
-      }
+      };
     } catch (err) {
       callback(err);
     }

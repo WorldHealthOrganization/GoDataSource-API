@@ -141,7 +141,7 @@
       "batchSize": 10000
     },
     "importResources": {
-      "batchSize": 10000
+      "batchSize": 100
     }
   },
   "caching": {
