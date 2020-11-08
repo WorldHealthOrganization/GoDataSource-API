@@ -139,6 +139,9 @@
     },
     "caseCountMap": {
       "batchSize": 10000
+    },
+    "importResources": {
+      "batchSize": 10000
     }
   },
   "caching": {
