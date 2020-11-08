@@ -4198,5 +4198,7 @@ Object.assign(module.exports, {
   exportFilteredModelsList: exportFilteredModelsList,
   extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
   sanitizePersonAddresses: sanitizePersonAddresses,
-  sanitizePersonVisualId: sanitizePersonVisualId
+  sanitizePersonVisualId: sanitizePersonVisualId,
+  processMapLists: processMapLists,
+  remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap
 });

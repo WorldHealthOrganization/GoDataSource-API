@@ -61,89 +61,57 @@ const readAndFormatCases = function () {
               totalCasesNo: rawCasesList.length
             });
 
-            // remap properties & values
-            const casesList = helpers.convertBooleanPropertiesNoModel(
-              options.modelBooleanProperties || [],
-              helpers.remapProperties(rawCasesList, options.map, options.valuesMap));
-
-            sendMessageToParent({
-              subject: 'log',
-              log: 'Finished boolean properties conversion'
-            });
+            const processedMap = helpers.processMapLists(options.map);
 
             async.eachOfSeries(
-              casesList,
-              (formattedData, index, callback) => {
-                // set outbreak id
-                formattedData.outbreakId = options.outbreakId;
+              rawCasesList,
+              (rawData, index, callback) => {
+                // run the code async in order to allow sending processed items to parent while still processing other items
+                setTimeout(() => {
+                  // remap properties
+                  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([rawData], processedMap, options.valuesMap);
 
-                // filter out empty addresses
-                const addresses = helpers.sanitizePersonAddresses(formattedData);
-                if (addresses) {
-                  formattedData.addresses = addresses;
-                }
+                  // process boolean values
+                  const formattedData = helpers.convertBooleanPropertiesNoModel(
+                    options.modelBooleanProperties || [],
+                    remappedProperties)[0];
 
-                // sanitize questionnaire answers
-                if (formattedData.questionnaireAnswers) {
-                  // convert properties that should be date to actual date objects
-                  formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
-                }
+                  // set outbreak id
+                  formattedData.outbreakId = options.outbreakId;
 
-                // sanitize visual ID
-                if (formattedData.visualId) {
-                  formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
-                }
+                  // filter out empty addresses
+                  const addresses = helpers.sanitizePersonAddresses(formattedData);
+                  if (addresses) {
+                    formattedData.addresses = addresses;
+                  }
 
-                // add case entry in the list to be sent to parent
-                casesToSend.push({
-                  raw: rawCasesList[index],
-                  save: formattedData
-                });
+                  // sanitize questionnaire answers
+                  if (formattedData.questionnaireAnswers) {
+                    // convert properties that should be date to actual date objects
+                    formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+                  }
 
-                sendMessageToParent({
-                  subject: 'log',
-                  log: 'Pushed case ' + index
-                });
+                  // sanitize visual ID
+                  if (formattedData.visualId) {
+                    formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+                  }
 
-                callback();
+                  // add case entry in the list to be sent to parent
+                  casesToSend.push({
+                    raw: rawData,
+                    save: formattedData
+                  });
+
+                  callback();
+                }, 0);
               },
               () => {
                 allDataProcessed = true;
                 sendMessageToParent({
                   subject: 'log',
-                  log: 'All data was processed'
+                  log: 'All data was formatted'
                 });
               });
-            // go through all entries
-            // casesList.forEach(function (formattedData, index) {
-            //   // set outbreak id
-            //   formattedData.outbreakId = options.outbreakId;
-            //
-            //   // filter out empty addresses
-            //   const addresses = helpers.sanitizePersonAddresses(formattedData);
-            //   if (addresses) {
-            //     formattedData.addresses = addresses;
-            //   }
-            //
-            //   // sanitize questionnaire answers
-            //   if (formattedData.questionnaireAnswers) {
-            //     // convert properties that should be date to actual date objects
-            //     formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
-            //   }
-            //
-            //   // sanitize visual ID
-            //   if (formattedData.visualId) {
-            //     formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
-            //   }
-            //
-            //   // add case entry in the list to be sent to parent
-            //   casesToSend.push({
-            //     raw: rawCasesList[index],
-            //     save: formattedData
-            //   });
-            // });
-            //
-            // allDataProcessed = true;
           })
           .catch(sendErrorToParent);
 

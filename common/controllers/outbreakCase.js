@@ -21,6 +21,9 @@ const async = require('async');
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
 
+// used in case import
+const caseImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 10000);
+
 module.exports = function (Outbreak) {
   /**
    * Attach before remote hooks for GET outbreaks/{id}/cases/count
@@ -1478,7 +1481,8 @@ module.exports = function (Outbreak) {
     let sendMessageToWorker, stopWorker;
 
     const self = this;
-    const logger = options.remotingContext.req.logger;
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
     // inject platform identifier
@@ -1499,12 +1503,15 @@ module.exports = function (Outbreak) {
     // initialize flag to know if we have a batch in progress
     let batchInProgress = false;
 
+    // initialize cache for import log entry
+    let importLogEntry;
+
     /**
      * Create and send response; Either success or error response
      * Handles premature failure of import; Can happen when the worked stops before sending all data
      * @returns {*}
      */
-    const sendResponse = function () {
+    const updateImportLogEntry = function () {
       // check for premature failure
       if (processed !== total) {
         // add errors for all rows not processed
@@ -1518,6 +1525,12 @@ module.exports = function (Outbreak) {
         }
       }
 
+      // initialize update payload
+      let updatePayload = {
+        actionCompletionDate: new Date(),
+        processedNo: total
+      };
+
       // if import errors were found
       if (createErrors.length) {
         // define a toString function to be used by error handler
@@ -1528,15 +1541,27 @@ module.exports = function (Outbreak) {
         createErrors.toString = function () {
           return JSON.stringify(this);
         };
-        // return error with partial success
-        return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+        // error with partial success
+        updatePayload.status = createResults.length ? 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS' : 'LNG_SYNC_STATUS_FAILED';
+        updatePayload.result = app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
           model: app.models.case.modelName,
           failed: createErrors,
           success: createResults
-        }));
+        });
+      } else {
+        updatePayload.status = 'LNG_SYNC_STATUS_SUCCESS';
+        updatePayload.result = createResults;
       }
-      // send the result
-      callback(null, createResults);
+
+      // save log entry
+      importLogEntry
+        .updateAttributes(updatePayload)
+        .then(() => {
+          logger.debug(`Import finished and import log entry (${importLogEntry.id}) update succeeded`);
+        })
+        .catch(err => {
+          logger.debug(`Import finished but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
+        });
     };
 
     /**
@@ -1545,7 +1570,7 @@ module.exports = function (Outbreak) {
      */
     const actionOnMessageFromChild = function (err, message) {
       if (err) {
-        // errors with the child process; we received errors or closing messages when we stop the child process
+        // errors with the child process; we received errors or closing messages when we stopped the child process
         if (!stoppedWorker) {
           // we didn't stop the process and it was an actual error
           logger.debug(`Worker error. Err: ${JSON.stringify(err)}`);
@@ -1560,7 +1585,7 @@ module.exports = function (Outbreak) {
             }
 
             // send response with the data that we have until now
-            sendResponse();
+            updateImportLogEntry();
           }
         } else {
           // worker is already stopped; this is a close/disconnect error; nothing to do as we closed the worker
@@ -1576,10 +1601,36 @@ module.exports = function (Outbreak) {
           total = message.totalCasesNo;
           logger.debug(`Cases to be imported: ${total}`);
 
-          // get next batch
-          sendMessageToWorker({
-            subject: 'nextBatch'
-          });
+          // create import log entry
+          app.models.importLog
+            .create({
+              actionStartDate: new Date(),
+              status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+              resourceType: app.models.case.modelName,
+              totalNo: total,
+              processedNo: 0,
+              outbreakIDs: [self.id]
+            })
+            .then(result => {
+              // cache log entry
+              importLogEntry = result;
+
+              // send response; don't wait for import
+              callback(null, importLogEntry.id);
+
+              // get next batch
+              sendMessageToWorker({
+                subject: 'nextBatch'
+              });
+            })
+            .catch(err => {
+              // failed creating import log entry
+              // stop worker
+              stopWorker();
+
+              // return error
+              callback(err);
+            });
 
           break;
         }
@@ -1591,16 +1642,18 @@ module.exports = function (Outbreak) {
           const casesList = message.data;
           const batchSize = casesList.length;
 
+          logger.debug(`Received ${batchSize} items from worker`);
+
           // build a list of create operations for this batch
           const createCases = [];
 
           // go through all entries received from child process
           casesList.forEach(function (caseData, index) {
-            createCases.push(function (callback) {
+            createCases.push(function (asyncCallback) {
               // sync the case
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData.save, options)
+              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
                 .then(function (result) {
-                  callback(null, result.record);
+                  asyncCallback(null, result.record.toJSON());
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
@@ -1613,7 +1666,7 @@ module.exports = function (Outbreak) {
                       save: caseData.save
                     }
                   });
-                  callback(null, null);
+                  asyncCallback(null, null);
                 });
             });
           });
@@ -1634,13 +1687,25 @@ module.exports = function (Outbreak) {
               // check if worker is still active
               if (!stoppedWorker) {
                 logger.debug('Processing next batch');
-                // get next batch
-                sendMessageToWorker({
-                  subject: 'nextBatch'
-                });
+
+                // save log entry
+                const updatePayload = {
+                  processedNo: processed
+                };
+                importLogEntry
+                  .updateAttributes(updatePayload)
+                  .catch(err => {
+                    logger.debug(`Import in progress but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
+                  })
+                  .then(() => {
+                    // get next batch; doesn't matter if import log entry update succeeded or failed
+                    sendMessageToWorker({
+                      subject: 'nextBatch'
+                    });
+                  });
               } else {
                 // send response with data that we have until now
-                sendResponse();
+                updateImportLogEntry();
               }
 
               return;
@@ -1650,11 +1715,10 @@ module.exports = function (Outbreak) {
             logger.debug('All cases processed');
             // stop child process if not already stopped
             if (!stoppedWorker) {
-              stoppedWorker = true;
               stopWorker();
             }
 
-            sendResponse();
+            updateImportLogEntry();
           });
 
           break;
@@ -1662,7 +1726,6 @@ module.exports = function (Outbreak) {
         case 'finished': {
           // worker will send this message once it has processed all data
           if (!stoppedWorker) {
-            stoppedWorker = true;
             stopWorker();
           }
           break;
@@ -1679,13 +1742,14 @@ module.exports = function (Outbreak) {
           if (batchInProgress) {
             // processing will stop once current batch is finished
           } else {
-            if (!total) {
+            if (total === undefined) {
               // error was encountered before worker started processing
+              // no log entry was created; return error
               return callback(err);
             }
 
             // send response with the data that we have until now
-            sendResponse();
+            updateImportLogEntry();
           }
 
           break;
@@ -1702,7 +1766,7 @@ module.exports = function (Outbreak) {
       const workerCommunication = WorkerRunner.cases
         .importImportableCasesFileUsingMap(
           Object.assign({
-            batchSize: 2,
+            batchSize: caseImportBatchSize,
             outbreakId: self.id,
             modelBooleanProperties: app.models.case._booleanProperties
           }, body),
@@ -1711,7 +1775,10 @@ module.exports = function (Outbreak) {
 
       // cache child process communication functions
       sendMessageToWorker = workerCommunication.sendMessageToWorker;
-      stopWorker = workerCommunication.stopWorker;
+      stopWorker = () => {
+        stoppedWorker = true;
+        workerCommunication.stopWorker();
+      }
     } catch (err) {
       callback(err);
     }

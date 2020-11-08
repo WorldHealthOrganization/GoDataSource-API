@@ -64,6 +64,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "importLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "databaseActionLog": {
     "dataSource": "mongoDb",
     "public": false

@@ -1,0 +1,81 @@
+{
+  "name": "importLog",
+  "base": "databaseActionLog",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "import"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "import",
+      "readOnly": true
+    },
+    "resourceType": {
+      "type": "string",
+      "description": "Resource which is being imported"
+    },
+    "totalNo": {
+      "type": "number",
+      "description": "Total number of resources to be imported"
+    },
+    "processedNo": {
+      "type": "number",
+      "description": "Number of resources processed"
+    },
+    "result": {
+      "type": "any",
+      "description": "Import result"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_list",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    }
+  ],
+  "methods": {
+  }
+}
