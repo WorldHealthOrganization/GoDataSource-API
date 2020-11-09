@@ -17,6 +17,8 @@ const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const async = require('async');
+const MongoDBHelper = require('../../components/mongoDBHelper');
+const Uuid = require('uuid');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -1488,11 +1490,6 @@ module.exports = function (Outbreak) {
     // inject platform identifier
     options.platform = Platform.IMPORT;
 
-    // define a container for results
-    const createResults = [];
-    // define a container for error results
-    const createErrors = [];
-
     // define data counters
     let processed = 0;
     let total;
@@ -1506,6 +1503,10 @@ module.exports = function (Outbreak) {
     // initialize cache for import log entry
     let importLogEntry;
 
+    // initialize counters to know that there were some errors or some successful imports
+    let importErrors = 0;
+    let importSuccess = 0;
+
     /**
      * Create and send response; Either success or error response
      * Handles premature failure of import; Can happen when the worked stops before sending all data
@@ -1515,14 +1516,19 @@ module.exports = function (Outbreak) {
       // check for premature failure
       if (processed !== total) {
         // add errors for all rows not processed
+        const createErrors = [];
         const notProcessedError = app.utils.apiError.getError('IMPORT_DATA_NOT_PROCESSED');
         for (let i = processed + 1; i <= total; i++) {
+          importErrors++;
           createErrors.push({
-            message: `Failed to import case ${i}`,
+            _id: Uuid.v4(),
+            importLogId: importLogEntry.id,
             error: notProcessedError,
             recordNo: i
           });
         }
+
+        saveErrorsFromBatch(createErrors);
       }
 
       // initialize update payload
@@ -1532,25 +1538,16 @@ module.exports = function (Outbreak) {
       };
 
       // if import errors were found
-      if (createErrors.length) {
-        // define a toString function to be used by error handler
-        createResults.toString = function () {
-          return JSON.stringify(this);
-        };
-        // define a toString function to be used by error handler
-        createErrors.toString = function () {
-          return JSON.stringify(this);
-        };
+      if (importErrors) {
         // error with partial success
-        updatePayload.status = createResults.length ? 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS' : 'LNG_SYNC_STATUS_FAILED';
+        updatePayload.status = importSuccess ? 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS' : 'LNG_SYNC_STATUS_FAILED';
         updatePayload.result = app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
           model: app.models.case.modelName,
-          failed: createErrors,
-          success: createResults
+          success: importSuccess,
+          failed: importErrors
         });
       } else {
         updatePayload.status = 'LNG_SYNC_STATUS_SUCCESS';
-        updatePayload.result = createResults;
       }
 
       // save log entry
@@ -1561,6 +1558,29 @@ module.exports = function (Outbreak) {
         })
         .catch(err => {
           logger.debug(`Import finished but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
+        });
+    };
+
+    /**
+     * Save errors from a batch in DB
+     * @param {Array} batchErrors - Array of error objects
+     * @returns {Promise<T> | Promise<unknown>}
+     */
+    const saveErrorsFromBatch = function (batchErrors) {
+      // create Mongo DB connection
+      return MongoDBHelper
+        .getMongoDBConnection()
+        .then(dbConn => {
+          const importResultCollection = dbConn.collection('importResult');
+
+          return importResultCollection
+            .insertMany(batchErrors);
+        })
+        .catch(err => {
+          logger.debug('Failed saving batch errors' + JSON.stringify({
+            err: err,
+            errors: batchErrors
+          }));
         });
     };
 
@@ -1638,6 +1658,9 @@ module.exports = function (Outbreak) {
           // starting batch processing
           batchInProgress = true;
 
+          // define a container for error results
+          const createErrors = [];
+
           // get data
           const casesList = message.data;
           const batchSize = casesList.length;
@@ -1652,13 +1675,18 @@ module.exports = function (Outbreak) {
             createCases.push(function (asyncCallback) {
               // sync the case
               return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
-                .then(function (result) {
-                  asyncCallback(null, result.record.toJSON());
+                .then(function () {
+                  importSuccess++;
+
+                  asyncCallback();
                 })
                 .catch(function (error) {
                   // on error, store the error, but don't stop, continue with other items
+                  importErrors++;
+
                   createErrors.push({
-                    message: `Failed to import case ${processed + index + 1}`,
+                    _id: Uuid.v4(),
+                    importLogId: importLogEntry.id,
                     error: error,
                     recordNo: processed + index + 1,
                     data: {
@@ -1666,21 +1694,24 @@ module.exports = function (Outbreak) {
                       save: caseData.save
                     }
                   });
-                  asyncCallback(null, null);
+                  asyncCallback();
                 });
             });
           });
 
           // start importing cases
-          async.series(createCases, function (error, results) {
-            createResults.push(...results.filter(result => result !== null));
-
+          async.series(createCases, function () {
             // increase processed counter
             processed += batchSize;
             logger.debug(`Cases processed: ${processed}/${total}`);
 
             // finished batch
             batchInProgress = false;
+
+            // save any errors
+            if (createErrors.length) {
+              saveErrorsFromBatch(createErrors);
+            }
 
             // check if we still have data to process
             if (processed < total) {
