@@ -1710,60 +1710,60 @@ const isValidDate = function (date) {
 };
 
 /**
+ * Check Model definition for boolean properties and get their references
+ * Also checks for nested definitions
+ * @param model Model definition
+ * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
+ * @returns {[]}
+ */
+const getModelBooleanProperties = function (model, prefix = '') {
+  // used in getReferencedValue function
+  const arrayIdentifier = '[].';
+
+  let result = [];
+
+  if (
+    !model ||
+    typeof model !== 'function' ||
+    !model.forEachProperty) {
+    // not a loopback model
+    return result;
+  }
+
+  // go through all model properties, from model definition
+  model.forEachProperty(function (propertyName) {
+    // check if the property is supposed to be boolean
+    if (model.definition.properties[propertyName].type) {
+      // check for simple boolean prop
+      if (model.definition.properties[propertyName].type.name === 'Boolean') {
+        // store property name
+        result.push(prefix + propertyName);
+      }
+        // check for model definition
+      // eg: address: "address"
+      else if (typeof model.definition.properties[propertyName].type === 'function') {
+        result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type, propertyName + '.'));
+      }
+        // check for array of model definitions
+      // eg: persons: ["relationshipParticipant"]
+      else if (
+        Array.isArray(model.definition.properties[propertyName].type) &&
+        typeof model.definition.properties[propertyName].type[0] === 'function'
+      ) {
+        result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type[0], propertyName + arrayIdentifier));
+      }
+    }
+  });
+
+  return result;
+};
+
+/**
  * Convert boolean model properties to correct boolean values from strings
  * @param Model
  * @param dataSet [object|array]
  */
 const convertBooleanProperties = function (Model, dataSet) {
-  // used in getReferencedValue function
-  const arrayIdentifier = '[].';
-
-  /**
-   * Check Model definition for boolean properties and get their references
-   * Also checks for nested definitions
-   * @param model Model definition
-   * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
-   * @returns {[]}
-   */
-  const getModelBooleanProperties = function (model, prefix = '') {
-    let result = [];
-
-    if (
-      !model ||
-      typeof model !== 'function' ||
-      !model.forEachProperty) {
-      // not a loopback model
-      return result;
-    }
-
-    // go through all model properties, from model definition
-    model.forEachProperty(function (propertyName) {
-      // check if the property is supposed to be boolean
-      if (model.definition.properties[propertyName].type) {
-        // check for simple boolean prop
-        if (model.definition.properties[propertyName].type.name === 'Boolean') {
-          // store property name
-          result.push(prefix + propertyName);
-        }
-          // check for model definition
-        // eg: address: "address"
-        else if (typeof model.definition.properties[propertyName].type === 'function') {
-          result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type, propertyName + '.'));
-        }
-          // check for array of model definitions
-        // eg: persons: ["relationshipParticipant"]
-        else if (
-          Array.isArray(model.definition.properties[propertyName].type) &&
-          typeof model.definition.properties[propertyName].type[0] === 'function'
-        ) {
-          result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type[0], propertyName + arrayIdentifier));
-        }
-      }
-    });
-
-    return result;
-  };
-
   /**
    * Set property boolean value on a record given its reference
    * Also accepts array references
@@ -1798,6 +1798,61 @@ const convertBooleanProperties = function (Model, dataSet) {
   function convertBooleanModelProperties(record) {
     // check each property that is supposed to be boolean
     Model._booleanProperties.forEach(function (booleanProperty) {
+      setValueOnRecordProperty(record, booleanProperty);
+    });
+  }
+
+  // array of records
+  if (Array.isArray(dataSet)) {
+    // go through the dataSet records
+    dataSet.forEach(function (record) {
+      // convert each record
+      convertBooleanModelProperties(record);
+    });
+    // single record
+  } else {
+    // convert record
+    convertBooleanModelProperties(dataSet);
+  }
+  // records are modified by reference, but also return the dataSet
+  return dataSet;
+};
+
+/**
+ * TODO: copied from convertBooleanProperties and updated to not used Loopback models; Should be used everywhere instead of the old function
+ * Convert boolean model properties to correct boolean values from strings
+ * @param {Array} modelBooleanProperties
+ * @param {Object|Array} dataSet
+ */
+const convertBooleanPropertiesNoModel = function (modelBooleanProperties, dataSet) {
+  /**
+   * Set property boolean value on a record given its reference
+   * Also accepts array references
+   * @param record Record to be updated
+   * @param propRef Property reference
+   */
+  const setValueOnRecordProperty = function (record, propRef) {
+    let propRefValues = getReferencedValue(record, propRef);
+    // if it's single value, convert it to array (simplify the code)
+    if (!Array.isArray(propRefValues)) {
+      propRefValues = [propRefValues];
+    }
+    // go through all the found values
+    propRefValues.forEach(refValue => {
+      // if it has a value but the value is not boolean
+      if (refValue.value != null && typeof refValue.value !== 'boolean') {
+        _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
+      }
+    });
+  };
+
+  /**
+   * Convert boolean model properties for a single record instance
+   * @param record
+   */
+  function convertBooleanModelProperties(record) {
+    // check each property that is supposed to be boolean
+    modelBooleanProperties.forEach(function (booleanProperty) {
       setValueOnRecordProperty(record, booleanProperty);
     });
   }
@@ -3998,6 +4053,91 @@ function getParentLocationsWithDetails(locationsIds, allLocations, loopbackFilte
     .catch(callback);
 }
 
+/**
+ * TODO: Duplicated from templateParser; Copied here to be used in workers without including app
+ * Extract a list of variables and their answers (if any) from a template
+ * @param template
+ * @return {Array}
+ */
+function extractVariablesAndAnswerOptions(template) {
+  // store a list of variables
+  let variables = [];
+  // template should be an array of questions
+  if (Array.isArray(template)) {
+    // go through all the questions
+    template.forEach(function (question) {
+      // start building the variable
+      const variable = {
+        name: question.variable,
+        text: question.text,
+        answerType: question.answerType
+      };
+      // store variable in the list of variables
+      variables.push(variable);
+      // if the question has predefined answers
+      if (
+        ['LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER',
+          'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+        ].includes(question.answerType) &&
+        Array.isArray(question.answers)
+      ) {
+        // store a list of variables
+        variable.answers = [];
+        // go through the list of answers
+        question.answers.forEach(function (answer) {
+          // store them
+          variable.answers.push({
+            label: answer.label,
+            value: answer.value
+          });
+          // if there are additional questions inside an answer
+          if (Array.isArray(answer.additionalQuestions)) {
+            // parse them recursively
+            variables = variables.concat(extractVariablesAndAnswerOptions(answer.additionalQuestions));
+          }
+        });
+      }
+    });
+  }
+  return variables;
+}
+
+/**
+ * Remove empty addresses and return a filtered array of addresses if an array is provided,
+ * otherwise return the provided addresses value ( null | undefined | ... )
+ * @param person
+ * @returns {Array | any}
+ */
+const sanitizePersonAddresses = function (person) {
+  if (person.toJSON) {
+    person = person.toJSON();
+  }
+
+  // filter out empty addresses
+  if (person.addresses) {
+    return _.filter(person.addresses, (address) => {
+      return !!_.find(address, (propertyValue) => {
+        return typeof propertyValue === 'string' ?
+          !!propertyValue.trim() :
+          !!propertyValue;
+      });
+    });
+  }
+
+  // no addresses under this person
+  return person.addresses;
+};
+
+/**
+ * Replace system visual ID system values
+ * @param visualId
+ */
+const sanitizePersonVisualId = (visualId) => {
+  return !visualId ? visualId : visualId
+    .replace(/YYYY/g, moment().format('YYYY'))
+    .replace(/\*/g, '');
+};
+
 Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -4023,7 +4163,9 @@ Object.assign(module.exports, {
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
+  getModelBooleanProperties: getModelBooleanProperties,
   convertBooleanProperties: convertBooleanProperties,
+  convertBooleanPropertiesNoModel: convertBooleanPropertiesNoModel,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
@@ -4053,5 +4195,10 @@ Object.assign(module.exports, {
   getMaximumLengthForArrays: getMaximumLengthForArrays,
   getCaptchaConfig: getCaptchaConfig,
   handleActionsInBatches: handleActionsInBatches,
-  exportFilteredModelsList: exportFilteredModelsList
+  exportFilteredModelsList: exportFilteredModelsList,
+  extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
+  sanitizePersonAddresses: sanitizePersonAddresses,
+  sanitizePersonVisualId: sanitizePersonVisualId,
+  processMapLists: processMapLists,
+  remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap
 });

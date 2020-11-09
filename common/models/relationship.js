@@ -130,6 +130,7 @@ module.exports = function (Relationship) {
   Relationship.foreignKeyFields = {
     clusterId: {
       modelName: 'cluster',
+      collectionName: 'cluster',
       labelProperty: 'name',
       // mongoDB filter by outbreak properties
       filter: {

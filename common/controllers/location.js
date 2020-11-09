@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const fs = require('fs');
 const _ = require('lodash');
 const async = require('async');
+const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (Location) {
 
@@ -157,89 +158,79 @@ module.exports = function (Location) {
    */
   Location.importImportableFileUsingMap = function (body, options, callback) {
     // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawLocationsList = JSON.parse(file);
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // parse file content
+        const rawLocationsList = file.data;
 
-          // remap properties
-          const locationsList = app.utils.helpers.convertBooleanProperties(
-            Location,
-            app.utils.helpers.remapProperties(rawLocationsList, body.map, body.valuesMap));
+        // remap properties
+        const locationsList = app.utils.helpers.convertBooleanProperties(
+          Location,
+          app.utils.helpers.remapProperties(rawLocationsList, body.map, body.valuesMap));
 
-          // build a list of sync operations
-          const syncLocation = [];
+        // build a list of sync operations
+        const syncLocation = [];
 
-          // define a container for error results
-          const syncErrors = [];
+        // define a container for error results
+        const syncErrors = [];
 
-          // define a toString function to be used by error handler
-          syncErrors.toString = function () {
-            return JSON.stringify(this);
-          };
+        // define a toString function to be used by error handler
+        syncErrors.toString = function () {
+          return JSON.stringify(this);
+        };
 
-          // go through all entries
-          locationsList.forEach(function (locationItem, index) {
-            syncLocation.push(function (callback) {
-              // sync location
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, locationItem, options)
-                .then(function (syncResult) {
-                  callback(null, syncResult.record);
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  syncErrors.push({
-                    message: `Failed to import location data ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawLocationsList[index],
-                      save: locationItem
-                    }
-                  });
-                  callback(null, null);
+        // go through all entries
+        locationsList.forEach(function (locationItem, index) {
+          syncLocation.push(function (callback) {
+            // sync location
+            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, locationItem, options)
+              .then(function (syncResult) {
+                callback(null, syncResult.record);
+              })
+              .catch(function (error) {
+                // on error, store the error, but don't stop, continue with other items
+                syncErrors.push({
+                  message: `Failed to import location data ${index + 1}`,
+                  error: error,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawLocationsList[index],
+                    save: locationItem
+                  }
                 });
-            });
+                callback(null, null);
+              });
           });
+        });
 
-          // start importing locations
-          async.parallelLimit(syncLocation, 10, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
+        // start importing locations
+        async.parallelLimit(syncLocation, 10, function (error, results) {
+          // handle errors (should not be any)
+          if (error) {
+            return callback(error);
+          }
 
-            // if import errors were found
-            if (syncErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.location.modelName,
-                failed: syncErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
+          // if import errors were found
+          if (syncErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.location.modelName,
+              failed: syncErrors,
+              success: results
+            }));
+          }
+          // send the result
+          callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**

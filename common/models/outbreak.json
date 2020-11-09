@@ -4398,11 +4398,8 @@
       ],
       "returns": [
         {
-          "arg": "cases",
-          "type": [
-            "case"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],

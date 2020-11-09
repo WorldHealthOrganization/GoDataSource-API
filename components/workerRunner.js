@@ -50,6 +50,60 @@ function invokeWorkerMethod(workerName, method, args, callback) {
   });
 }
 
+/**
+ * Invoke worker method
+ * @param {string} workerName - name of the file to be executed
+ * @param {Object} options - Options
+ * @param {function} actionOnMessage - Function to be executed anytime a message is received from child process
+ * @returns {{sendMessageToWorker: sendMessageToWorker, stopWorker: stopWorker}}
+ */
+function startWorkerWithCommunication(workerName, options, actionOnMessage) {
+  // fork the worker
+  const worker = fork(`${workersPath}/${workerName}`, [], {
+    execArgv: [],
+    windowsHide: true
+  });
+
+  let workerStopped = false;
+
+  // wait for its response and process it
+  worker.on('message', function (args) {
+    if (args[0]) {
+      actionOnMessage(args[0]);
+      // stop worker on error
+      worker.kill();
+      workerStopped = true;
+      return;
+    }
+    actionOnMessage(null, args[1]);
+  });
+
+  // in case of failure, stop with error
+  ['close', 'disconnect', 'error', 'exit'].forEach(function (event) {
+    worker.on(event, function () {
+      workerStopped = true;
+      actionOnMessage(new Error(`Processing failed. Worker stopped. Event: ${event}, details: ${JSON.stringify(arguments)}`));
+    });
+  });
+
+  // start worker functionality
+  worker.send({
+    subject: 'start',
+    options: options
+  });
+
+  return {
+    sendMessageToWorker: (message) => {
+      worker.send(message);
+    },
+    stopWorker: () => {
+      if (!workerStopped) {
+        workerStopped = true;
+        worker.kill();
+      }
+    }
+  };
+}
 
 module.exports = {
   transmissionChain: {
@@ -169,6 +223,23 @@ module.exports = {
         callback
       );
     },
+    /**
+     * Import cases from importable file given using given map
+     * @param cases
+     * @param periodInterval
+     * @param periodType
+     * @param weekType
+     * @param periodMap
+     * @param caseClassifications
+     * @param callback
+     */
+    importImportableCasesFileUsingMap: function (options, actionOnMessage) {
+      return startWorkerWithCommunication(
+        'casesImport',
+        options,
+        actionOnMessage
+      );
+    }
   },
   sync: {
     /**
@@ -337,6 +408,32 @@ module.exports = {
             result.data.type === 'Buffer') {
             result.data = Buffer.from(result.data.data);
           }
+          resolve(result);
+        });
+      });
+    }
+  },
+  importableFile: {
+    upload: function () {
+      let originalArguments = arguments;
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('importableFile', 'upload', [...originalArguments], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+
+          resolve(result);
+        });
+      });
+    },
+    getDistinctValuesForHeaders: function () {
+      let originalArguments = arguments;
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('importableFile', 'getDistinctValuesForHeaders', [...originalArguments], function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+
           resolve(result);
         });
       });

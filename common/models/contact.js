@@ -253,6 +253,7 @@ module.exports = function (Contact) {
   Contact.foreignKeyFields = {
     'followUpTeamId': {
       modelName: 'team',
+      collectionName: 'team',
       labelProperty: 'name'
     }
   };

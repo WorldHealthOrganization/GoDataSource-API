@@ -11,6 +11,7 @@ const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const fork = require('child_process').fork;
 const Platform = require('../../components/platform');
+const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (Outbreak) {
 
@@ -2309,226 +2310,105 @@ module.exports = function (Outbreak) {
     options.platform = Platform.IMPORT;
 
     // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawlabResultsList = JSON.parse(file);
-          // remap properties & values
-          const labResultsList = app.utils.helpers.convertBooleanProperties(
-            app.models.labResult,
-            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
-          // build a list of create lab results operations
-          const createLabResults = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          labResultsList.forEach(function (labResult, index) {
-            createLabResults.push(function (callback) {
-              // sanitize questionnaire answers
-              // convert to new format if necessary
-              if (labResult.questionnaireAnswers) {
-                labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
-              }
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // get file content
+        const rawlabResultsList = file.data;
+        // remap properties & values
+        const labResultsList = app.utils.helpers.convertBooleanProperties(
+          app.models.labResult,
+          app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
+        // build a list of create lab results operations
+        const createLabResults = [];
+        // define a container for error results
+        const createErrors = [];
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // go through all entries
+        labResultsList.forEach(function (labResult, index) {
+          createLabResults.push(function (callback) {
+            // sanitize questionnaire answers
+            // convert to new format if necessary
+            if (labResult.questionnaireAnswers) {
+              labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
+            }
 
-              // first check if the case id (person id) is valid
-              app.models.case
-                .findOne({
-                  where: {
-                    or: [
-                      {id: labResult.personId},
-                      {visualId: labResult.personId}
-                    ],
-                    outbreakId: self.id
-                  }
-                })
-                .then(function (caseInstance) {
-                  // if the person was not found, don't sync the lab result, stop with error
-                  if (!caseInstance) {
-                    throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
-                      model: app.models.case.modelName,
-                      id: labResult.personId
-                    });
-                  }
-
-                  // make sure we map it to the parent case in case we retrieved the case using visual id
-                  labResult.personId = caseInstance.id;
-
-                  // set outbreakId
-                  labResult.outbreakId = self.id;
-
-                  // sync the record
-                  return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
-                    .then(function (result) {
-                      callback(null, result.record);
-                    });
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import lab result ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawlabResultsList[index],
-                      save: labResult
-                    }
+            // first check if the case id (person id) is valid
+            app.models.case
+              .findOne({
+                where: {
+                  or: [
+                    {id: labResult.personId},
+                    {visualId: labResult.personId}
+                  ],
+                  outbreakId: self.id
+                }
+              })
+              .then(function (caseInstance) {
+                // if the person was not found, don't sync the lab result, stop with error
+                if (!caseInstance) {
+                  throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
+                    model: app.models.case.modelName,
+                    id: labResult.personId
                   });
-                  callback(null, null);
-                });
-            });
-          });
-          // start importing lab results
-          async.parallelLimit(createLabResults, 10, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.labResult.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
-  };
+                }
 
-  /**
-   * Import an importable cases file using file ID and a map to remap parameters & reference data values
-   * @param body
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
-    const self = this;
-    // treat the sync as a regular operation, not really a sync
-    options._sync = false;
-    // inject platform identifier
-    options.platform = Platform.IMPORT;
-    // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawCasesList = JSON.parse(file);
-          // remap properties & values
-          const casesList = app.utils.helpers.convertBooleanProperties(
-            app.models.case,
-            app.utils.helpers.remapProperties(rawCasesList, body.map, body.valuesMap));
-          // build a list of create operations
-          const createCases = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          casesList.forEach(function (caseData, index) {
-            createCases.push(function (callback) {
-              // set outbreak id
-              caseData.outbreakId = self.id;
+                // make sure we map it to the parent case in case we retrieved the case using visual id
+                labResult.personId = caseInstance.id;
 
-              // filter out empty addresses
-              const addresses = app.models.person.sanitizeAddresses(caseData);
-              if (addresses) {
-                caseData.addresses = addresses;
-              }
+                // set outbreakId
+                labResult.outbreakId = self.id;
 
-              // sanitize questionnaire answers
-              if (caseData.questionnaireAnswers) {
-                // convert properties that should be date to actual date objects
-                caseData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(caseData.questionnaireAnswers);
-              }
-
-              // sanitize visual ID
-              if (caseData.visualId) {
-                caseData.visualId = app.models.person.sanitizeVisualId(caseData.visualId);
-              }
-
-              // sync the case
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.case, caseData, options)
-                .then(function (result) {
-                  callback(null, result.record);
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import case ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawCasesList[index],
-                      save: caseData
-                    }
+                // sync the record
+                return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
+                  .then(function (result) {
+                    callback(null, result.record);
                   });
-                  callback(null, null);
+              })
+              .catch(function (error) {
+                // on error, store the error, but don't stop, continue with other items
+                createErrors.push({
+                  message: `Failed to import lab result ${index + 1}`,
+                  error: error,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawlabResultsList[index],
+                    save: labResult
+                  }
                 });
-            });
+                callback(null, null);
+              });
           });
-          // start importing cases
-          async.series(createCases, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.case.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
+        });
+        // start importing lab results
+        async.parallelLimit(createLabResults, 10, function (error, results) {
+          // handle errors (should not be any)
+          if (error) {
+            return callback(error);
+          }
+          // if import errors were found
+          if (createErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.labResult.modelName,
+              failed: createErrors,
+              success: results
+            }));
+          }
+          // send the result
+          callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**
@@ -2544,146 +2424,134 @@ module.exports = function (Outbreak) {
     // inject platform identifier
     options.platform = Platform.IMPORT;
     // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawContactList = JSON.parse(file);
-          // remap properties & values
-          const contactsList = app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap);
-          // build a list of create operations
-          const createContacts = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          contactsList.forEach(function (recordData, index) {
-            createContacts.push(function (callback) {
-              // extract relationship data
-              const relationshipData = app.utils.helpers.convertBooleanProperties(
-                app.models.relationship,
-                app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // get file content
+        const rawContactList = file.data;
+        // remap properties & values
+        const contactsList = app.utils.helpers.remapProperties(rawContactList, body.map, body.valuesMap);
+        // build a list of create operations
+        const createContacts = [];
+        // define a container for error results
+        const createErrors = [];
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // go through all entries
+        contactsList.forEach(function (recordData, index) {
+          createContacts.push(function (callback) {
+            // extract relationship data
+            const relationshipData = app.utils.helpers.convertBooleanProperties(
+              app.models.relationship,
+              app.utils.helpers.extractImportableFields(app.models.relationship, recordData.relationship));
 
-              // extract contact data
-              const contactData = app.utils.helpers.convertBooleanProperties(
-                app.models.contact,
-                app.utils.helpers.extractImportableFields(app.models.contact, recordData));
+            // extract contact data
+            const contactData = app.utils.helpers.convertBooleanProperties(
+              app.models.contact,
+              app.utils.helpers.extractImportableFields(app.models.contact, recordData));
 
-              // set outbreak ids
-              contactData.outbreakId = self.id;
-              relationshipData.outbreakId = self.id;
+            // set outbreak ids
+            contactData.outbreakId = self.id;
+            relationshipData.outbreakId = self.id;
 
-              // filter out empty addresses
-              const addresses = app.models.person.sanitizeAddresses(contactData);
-              if (addresses) {
-                contactData.addresses = addresses;
-              }
+            // filter out empty addresses
+            const addresses = app.models.person.sanitizeAddresses(contactData);
+            if (addresses) {
+              contactData.addresses = addresses;
+            }
 
-              // sanitize questionnaire answers
-              if (contactData.questionnaireAnswers) {
-                // convert properties that should be date to actual date objects
-                contactData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(contactData.questionnaireAnswers);
-              }
+            // sanitize questionnaire answers
+            if (contactData.questionnaireAnswers) {
+              // convert properties that should be date to actual date objects
+              contactData.questionnaireAnswers = genericHelpers.convertQuestionnairePropsToDate(contactData.questionnaireAnswers);
+            }
 
-              // sanitize visual ID
-              if (contactData.visualId) {
-                contactData.visualId = app.models.person.sanitizeVisualId(contactData.visualId);
-              }
+            // sanitize visual ID
+            if (contactData.visualId) {
+              contactData.visualId = app.models.person.sanitizeVisualId(contactData.visualId);
+            }
 
-              // sync the contact
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
-                .then(function (syncResult) {
-                  const contactRecord = syncResult.record;
-                  // promisify next step
-                  return new Promise(function (resolve, reject) {
-                    // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
-                      if (error) {
-                        // delete contact since contact was created without an error while relationship failed
-                        return app.models.contact.destroyById(
-                          contactRecord.id,
-                          () => {
-                            // return error
-                            return reject(error);
-                          }
-                        );
-                      }
-
-                      // sync relationship
-                      return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
-                        .then(function (syncedRelationship) {
-                          // relationship successfully created, move to tne next one
-                          callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
-                        })
-                        .catch(function (error) {
-                          // failed to create relationship, remove the contact if it was created during sync
-                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                            contactRecord.destroy(options);
-                          }
-                          reject(error);
-                        });
-                    });
-                  });
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import contact ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawContactList[index],
-                      save: {
-                        contact: contactData,
-                        relationship: relationshipData
-                      }
+            // sync the contact
+            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contact, contactData, options)
+              .then(function (syncResult) {
+                const contactRecord = syncResult.record;
+                // promisify next step
+                return new Promise(function (resolve, reject) {
+                  // normalize people
+                  Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', relationshipData, true, function (error) {
+                    if (error) {
+                      // delete contact since contact was created without an error while relationship failed
+                      return app.models.contact.destroyById(
+                        contactRecord.id,
+                        () => {
+                          // return error
+                          return reject(error);
+                        }
+                      );
                     }
+
+                    // sync relationship
+                    return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
+                      .then(function (syncedRelationship) {
+                        // relationship successfully created, move to tne next one
+                        callback(null, Object.assign({}, contactRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
+                      })
+                      .catch(function (error) {
+                        // failed to create relationship, remove the contact if it was created during sync
+                        if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                          contactRecord.destroy(options);
+                        }
+                        reject(error);
+                      });
                   });
-                  callback(null, null);
                 });
-            });
+              })
+              .catch(function (error) {
+                // on error, store the error, but don't stop, continue with other items
+                createErrors.push({
+                  message: `Failed to import contact ${index + 1}`,
+                  error: error,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawContactList[index],
+                    save: {
+                      contact: contactData,
+                      relationship: relationshipData
+                    }
+                  }
+                });
+                callback(null, null);
+              });
           });
-          // start importing contacts
-          async.series(createContacts, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.contact.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // log error
-          options.remotingContext.req.logger.error(error);
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
+        });
+        // start importing contacts
+        async.series(createContacts, function (error, results) {
+          // handle errors (should not be any)
+          if (error) {
+            return callback(error);
+          }
+          // if import errors were found
+          if (createErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.contact.modelName,
+              failed: createErrors,
+              success: results
+            }));
+          }
+          // send the result
+          callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**
@@ -4174,115 +4042,105 @@ module.exports = function (Outbreak) {
     // inject platform identifier
     options.platform = Platform.IMPORT;
     // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawlabResultsList = JSON.parse(file);
-          // remap properties & values
-          const labResultsList = app.utils.helpers.convertBooleanProperties(
-            app.models.labResult,
-            app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
-          // build a list of create lab results operations
-          const createLabResults = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          labResultsList.forEach(function (labResult, index) {
-            createLabResults.push(function (callback) {
-              // sanitize questionnaire answers
-              // convert to new format if necessary
-              if (labResult.questionnaireAnswers) {
-                labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
-              }
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // get file content
+        const rawlabResultsList = file.data;
+        // remap properties & values
+        const labResultsList = app.utils.helpers.convertBooleanProperties(
+          app.models.labResult,
+          app.utils.helpers.remapProperties(rawlabResultsList, body.map, body.valuesMap));
+        // build a list of create lab results operations
+        const createLabResults = [];
+        // define a container for error results
+        const createErrors = [];
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // go through all entries
+        labResultsList.forEach(function (labResult, index) {
+          createLabResults.push(function (callback) {
+            // sanitize questionnaire answers
+            // convert to new format if necessary
+            if (labResult.questionnaireAnswers) {
+              labResult.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToNewFormat(labResult.questionnaireAnswers);
+            }
 
-              // first check if the case id (person id) is valid
-              app.models.contact
-                .findOne({
-                  where: {
-                    or: [
-                      {id: labResult.personId},
-                      {visualId: labResult.personId}
-                    ],
-                    outbreakId: self.id
-                  }
-                })
-                .then(function (contactInstance) {
-                  // if the person was not found, don't sync the lab result, stop with error
-                  if (!contactInstance) {
-                    throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
-                      model: app.models.case.modelName,
-                      id: labResult.personId
-                    });
-                  }
-
-                  // make sure we map it to the parent case in case we retrieved the contact using visual id
-                  labResult.personId = contactInstance.id;
-
-                  // set outbreakId
-                  labResult.outbreakId = self.id;
-
-                  // sync the record
-                  return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
-                    .then(function (result) {
-                      callback(null, result.record);
-                    });
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import lab result ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawlabResultsList[index],
-                      save: labResult
-                    }
+            // first check if the case id (person id) is valid
+            app.models.contact
+              .findOne({
+                where: {
+                  or: [
+                    {id: labResult.personId},
+                    {visualId: labResult.personId}
+                  ],
+                  outbreakId: self.id
+                }
+              })
+              .then(function (contactInstance) {
+                // if the person was not found, don't sync the lab result, stop with error
+                if (!contactInstance) {
+                  throw app.utils.apiError.getError('PERSON_NOT_FOUND', {
+                    model: app.models.case.modelName,
+                    id: labResult.personId
                   });
-                  callback(null, null);
+                }
+
+                // make sure we map it to the parent case in case we retrieved the contact using visual id
+                labResult.personId = contactInstance.id;
+
+                // set outbreakId
+                labResult.outbreakId = self.id;
+
+                // sync the record
+                return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.labResult, labResult, options)
+                  .then(function (result) {
+                    callback(null, result.record);
+                  });
+              })
+              .catch(function (error) {
+                // on error, store the error, but don't stop, continue with other items
+                createErrors.push({
+                  message: `Failed to import lab result ${index + 1}`,
+                  error: error,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawlabResultsList[index],
+                    save: labResult
+                  }
                 });
-            });
+                callback(null, null);
+              });
           });
-          // start importing lab results
-          async.parallelLimit(createLabResults, 10, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.labResult.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
+        });
+        // start importing lab results
+        async.parallelLimit(createLabResults, 10, function (error, results) {
+          // handle errors (should not be any)
+          if (error) {
+            return callback(error);
+          }
+          // if import errors were found
+          if (createErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.labResult.modelName,
+              failed: createErrors,
+              success: results
+            }));
+          }
+          // send the result
+          callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**
@@ -4474,146 +4332,134 @@ module.exports = function (Outbreak) {
     // inject platform identifier
     options.platform = Platform.IMPORT;
     // get importable file
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, function (error, file) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-        try {
-          // parse file content
-          const rawRecordsList = JSON.parse(file);
-          // remap properties & values
-          const recordsList = app.utils.helpers.remapProperties(rawRecordsList, body.map, body.valuesMap);
-          // build a list of create operations
-          const createOps = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          recordsList.forEach(function (recordItem, index) {
-            createOps.push(function (callback) {
-              // extract relationship data
-              const relationshipData = app.utils.helpers.convertBooleanProperties(
-                app.models.relationship,
-                app.utils.helpers.extractImportableFields(app.models.relationship, recordItem.relationship));
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // get file content
+        const rawRecordsList = file.data;
+        // remap properties & values
+        const recordsList = app.utils.helpers.remapProperties(rawRecordsList, body.map, body.valuesMap);
+        // build a list of create operations
+        const createOps = [];
+        // define a container for error results
+        const createErrors = [];
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // go through all entries
+        recordsList.forEach(function (recordItem, index) {
+          createOps.push(function (callback) {
+            // extract relationship data
+            const relationshipData = app.utils.helpers.convertBooleanProperties(
+              app.models.relationship,
+              app.utils.helpers.extractImportableFields(app.models.relationship, recordItem.relationship));
 
-              // extract record's data
-              const recordData = app.utils.helpers.convertBooleanProperties(
-                app.models.contactOfContact,
-                app.utils.helpers.extractImportableFields(app.models.contactOfContact, recordItem));
+            // extract record's data
+            const recordData = app.utils.helpers.convertBooleanProperties(
+              app.models.contactOfContact,
+              app.utils.helpers.extractImportableFields(app.models.contactOfContact, recordItem));
 
-              // set outbreak ids
-              recordData.outbreakId = self.id;
-              relationshipData.outbreakId = self.id;
+            // set outbreak ids
+            recordData.outbreakId = self.id;
+            relationshipData.outbreakId = self.id;
 
-              // filter out empty addresses
-              const addresses = app.models.person.sanitizeAddresses(recordData);
-              if (addresses) {
-                recordData.addresses = addresses;
-              }
+            // filter out empty addresses
+            const addresses = app.models.person.sanitizeAddresses(recordData);
+            if (addresses) {
+              recordData.addresses = addresses;
+            }
 
-              // sanitize visual ID
-              if (recordData.visualId) {
-                recordData.visualId = app.models.person.sanitizeVisualId(recordData.visualId);
-              }
+            // sanitize visual ID
+            if (recordData.visualId) {
+              recordData.visualId = app.models.person.sanitizeVisualId(recordData.visualId);
+            }
 
-              // sync the record
-              return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contactOfContact, recordData, options)
-                .then(function (syncResult) {
-                  const syncedRecord = syncResult.record;
-                  // promisify next step
-                  return new Promise(function (resolve, reject) {
-                    // normalize people
-                    Outbreak.helpers.validateAndNormalizePeople(
-                      self.id,
-                      syncedRecord.id,
-                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
-                      relationshipData,
-                      true,
-                      function (error) {
-                        if (error) {
-                          // delete record since it was created without an error while relationship failed
-                          return app.models.contactOfContact.destroyById(
-                            syncedRecord.id,
-                            () => {
-                              // return error
-                              return reject(error);
-                            }
-                          );
-                        }
-
-                        // sync relationship
-                        return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
-                          .then(function (syncedRelationship) {
-                            // relationship successfully created, move to tne next one
-                            callback(null, Object.assign({}, syncedRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
-                          })
-                          .catch(function (error) {
-                            // failed to create relationship, remove the record if it was created during sync
-                            if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                              syncedRecord.destroy(options);
-                            }
-                            reject(error);
-                          });
-                      });
-                  });
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import contact of contact ${index + 1}`,
-                    error: error,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawRecordsList[index],
-                      save: {
-                        record: recordData,
-                        relationship: relationshipData
+            // sync the record
+            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contactOfContact, recordData, options)
+              .then(function (syncResult) {
+                const syncedRecord = syncResult.record;
+                // promisify next step
+                return new Promise(function (resolve, reject) {
+                  // normalize people
+                  Outbreak.helpers.validateAndNormalizePeople(
+                    self.id,
+                    syncedRecord.id,
+                    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+                    relationshipData,
+                    true,
+                    function (error) {
+                      if (error) {
+                        // delete record since it was created without an error while relationship failed
+                        return app.models.contactOfContact.destroyById(
+                          syncedRecord.id,
+                          () => {
+                            // return error
+                            return reject(error);
+                          }
+                        );
                       }
-                    }
-                  });
-                  callback(null, null);
+
+                      // sync relationship
+                      return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
+                        .then(function (syncedRelationship) {
+                          // relationship successfully created, move to tne next one
+                          callback(null, Object.assign({}, syncedRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
+                        })
+                        .catch(function (error) {
+                          // failed to create relationship, remove the record if it was created during sync
+                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                            syncedRecord.destroy(options);
+                          }
+                          reject(error);
+                        });
+                    });
                 });
-            });
+              })
+              .catch(function (error) {
+                // on error, store the error, but don't stop, continue with other items
+                createErrors.push({
+                  message: `Failed to import contact of contact ${index + 1}`,
+                  error: error,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawRecordsList[index],
+                    save: {
+                      record: recordData,
+                      relationship: relationshipData
+                    }
+                  }
+                });
+                callback(null, null);
+              });
           });
-          // start importing
-          async.series(createOps, function (error, results) {
-            // handle errors (should not be any)
-            if (error) {
-              return callback(error);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.contactOfContact.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            callback(null, results);
-          });
-        } catch (error) {
-          // log error
-          options.remotingContext.req.logger.error(error);
-          // handle parse error
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: error.message
-          }));
-        }
-      });
+        });
+        // start importing
+        async.series(createOps, function (error, results) {
+          // handle errors (should not be any)
+          if (error) {
+            return callback(error);
+          }
+          // if import errors were found
+          if (createErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.contactOfContact.modelName,
+              failed: createErrors,
+              success: results
+            }));
+          }
+          // send the result
+          callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**
@@ -4670,83 +4516,75 @@ module.exports = function (Outbreak) {
     options._sync = false;
     // inject platform identifier
     options.platform = Platform.IMPORT;
-    app.models.importableFile
-      .getTemporaryFileById(body.fileId, (err, file) => {
-        if (err) {
-          return callback(err);
-        }
-        try {
-          // parse file content
-          const rawRelationsList = JSON.parse(file);
-          // remap properties & values
-          const relations = app.utils.helpers.convertBooleanProperties(
-            app.models.relationship,
-            app.utils.helpers.remapProperties(rawRelationsList, body.map, body.valuesMap));
-          // build a list of create operations
-          const createOps = [];
-          // define a container for error results
-          const createErrors = [];
-          // define a toString function to be used by error handler
-          createErrors.toString = function () {
-            return JSON.stringify(this);
-          };
-          // go through all entries
-          relations.forEach((relation, index) => {
-            createOps.push(callback => {
-              relation.outbreakId = self.id;
+    importableFileHelpers
+      .getTemporaryFileById(body.fileId)
+      .then(file => {
+        // get file content
+        const rawRelationsList = file.data;
+        // remap properties & values
+        const relations = app.utils.helpers.convertBooleanProperties(
+          app.models.relationship,
+          app.utils.helpers.remapProperties(rawRelationsList, body.map, body.valuesMap));
+        // build a list of create operations
+        const createOps = [];
+        // define a container for error results
+        const createErrors = [];
+        // define a toString function to be used by error handler
+        createErrors.toString = function () {
+          return JSON.stringify(this);
+        };
+        // go through all entries
+        relations.forEach((relation, index) => {
+          createOps.push(callback => {
+            relation.outbreakId = self.id;
 
-              return app.utils.dbSync.syncRecord(
-                options.remotingContext.req.logger,
-                app.models.relationship,
-                relation,
-                options
-              )
-                .then(result => callback(null, result.record))
-                .catch(err => {
-                  // on error, store the error, but don't stop, continue with other items
-                  createErrors.push({
-                    message: `Failed to import relationship ${index + 1}`,
-                    error: err,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawRelationsList[index],
-                      save: relation
-                    }
-                  });
-                  return callback(null, null);
+            return app.utils.dbSync.syncRecord(
+              options.remotingContext.req.logger,
+              app.models.relationship,
+              relation,
+              options
+            )
+              .then(result => callback(null, result.record))
+              .catch(err => {
+                // on error, store the error, but don't stop, continue with other items
+                createErrors.push({
+                  message: `Failed to import relationship ${index + 1}`,
+                  error: err,
+                  recordNo: index + 1,
+                  data: {
+                    file: rawRelationsList[index],
+                    save: relation
+                  }
                 });
-            });
+                return callback(null, null);
+              });
           });
+        });
 
-          async.series(createOps, (err, results) => {
-            if (err) {
-              return callback(err);
-            }
-            // if import errors were found
-            if (createErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // define a toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.relationship.modelName,
-                failed: createErrors,
-                success: results
-              }));
-            }
-            // send the result
-            return callback(null, results);
-          });
-        } catch (parseErr) {
-          callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
-            contentType: 'JSON',
-            details: parseErr.message
-          }));
-        }
-      });
+        async.series(createOps, (err, results) => {
+          if (err) {
+            return callback(err);
+          }
+          // if import errors were found
+          if (createErrors.length) {
+            // remove results that failed to be added
+            results = results.filter(result => result !== null);
+            // define a toString function to be used by error handler
+            results.toString = function () {
+              return JSON.stringify(this);
+            };
+            // return error with partial success
+            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+              model: app.models.relationship.modelName,
+              failed: createErrors,
+              success: results
+            }));
+          }
+          // send the result
+          return callback(null, results);
+        });
+      })
+      .catch(callback);
   };
 
   /**

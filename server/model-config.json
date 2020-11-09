@@ -64,6 +64,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "importLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "databaseActionLog": {
     "dataSource": "mongoDb",
     "public": false
@@ -213,6 +217,14 @@
     "public": true
   },
   "importableFileWithMap": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileHeaders": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileDistinctValues": {
     "dataSource": null,
     "public": false
   },

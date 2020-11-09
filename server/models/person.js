@@ -5,7 +5,6 @@ const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
-const moment = require('moment');
 const escapeStringRegexp = require('escape-string-regexp');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
@@ -177,25 +176,7 @@ module.exports = function (Person) {
    * @param person
    * @returns {Array | any}
    */
-  Person.sanitizeAddresses = function (person) {
-    if (person.toJSON) {
-      person = person.toJSON();
-    }
-
-    // filter out empty addresses
-    if (person.addresses) {
-      return _.filter(person.addresses, (address) => {
-        return !!_.find(address, (propertyValue) => {
-          return typeof propertyValue === 'string' ?
-            !!propertyValue.trim() :
-            !!propertyValue;
-        });
-      });
-    }
-
-    // no addresses under this person
-    return person.addresses;
-  };
+  Person.sanitizeAddresses = app.utils.helpers.sanitizePersonAddresses;
 
   /**
    * Basic person address validation
@@ -2045,11 +2026,7 @@ module.exports = function (Person) {
    * Replace system visual ID system values
    * @param visualId
    */
-  Person.sanitizeVisualId = (visualId) => {
-    return !visualId ? visualId : visualId
-      .replace(/YYYY/g, moment().format('YYYY'))
-      .replace(/\*/g, '');
-  };
+  Person.sanitizeVisualId = app.utils.helpers.sanitizePersonVisualId;
 
   /**
    * Count contacts/exposures for a list of records

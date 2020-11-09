@@ -386,7 +386,6 @@ const syncRecordFlags = {
  * Functionality description:
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
- *
  * @param logger
  * @param model
  * @param record
