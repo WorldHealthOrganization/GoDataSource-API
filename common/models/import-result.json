@@ -8,11 +8,6 @@
   "hidden": [
     "type"
   ],
-  "scope": {
-    "where": {
-      "type": "import"
-    }
-  },
   "properties": {
     "importLogId": {
       "type": "string",
