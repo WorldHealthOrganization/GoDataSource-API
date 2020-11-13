@@ -1439,7 +1439,7 @@ const processImportableFileData = function (app, options, formatterOptions, batc
 
   try {
     // start child process
-    const workerCommunication = WorkerRunner.cases
+    const workerCommunication = WorkerRunner.importableFile
       .importImportableFileUsingMap(formatterOptions, actionOnMessageFromChild);
 
     // cache child process communication functions

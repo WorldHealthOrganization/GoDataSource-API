@@ -224,19 +224,6 @@ module.exports = {
         ],
         callback
       );
-    },
-    /**
-     * Import data from importable file given using given map
-     * @param {Object} options - Options
-     * @param {Function} actionOnMessage - Action to be executed on message from worker
-     */
-    importImportableFileUsingMap: function (options, actionOnMessage) {
-      return startWorkerWithCommunication(
-        'importableFile',
-        'readAndFormatDataFromImportableFile',
-        options,
-        actionOnMessage
-      );
     }
   },
   sync: {
@@ -435,6 +422,19 @@ module.exports = {
           resolve(result);
         });
       });
+    },
+    /**
+     * Import data from importable file given using given map
+     * @param {Object} options - Options
+     * @param {Function} actionOnMessage - Action to be executed on message from worker
+     */
+    importImportableFileUsingMap: function (options, actionOnMessage) {
+      return startWorkerWithCommunication(
+        'importableFile',
+        'readAndFormatDataFromImportableFile',
+        options,
+        actionOnMessage
+      );
     }
   },
   getContactFollowUpReport: function (
