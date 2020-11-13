@@ -490,6 +490,38 @@ const extractImportableFields = function (Model, data) {
 };
 
 /**
+ * TODO: Duplicated functionality from above without using Loopback models
+ * Extract only the importable fields for a model from a record data
+ * @param {Array} modelImportableTopLevelProperties
+ * @param {Object} data
+ */
+const extractImportableFieldsNoModel = function (modelImportableTopLevelProperties, data) {
+  // store importable properties as part of a new object
+  const importableFields = {};
+  // nothing to do if there is no data
+  if (data) {
+    // go through all importable top level properties
+    modelImportableTopLevelProperties.forEach(function (importableProperty) {
+      // add the importable data (if it exists)
+      if (data[importableProperty] !== undefined) {
+        importableFields[importableProperty] = data[importableProperty];
+      } else if (importableProperty.indexOf('.') > -1) {
+        // property is object path ?
+        const importValue = _.get(data, importableProperty);
+        if (importValue !== undefined) {
+          _.set(
+            importableFields,
+            importableProperty,
+            importValue
+          );
+        }
+      }
+    });
+  }
+  return importableFields;
+};
+
+/**
  * Get a JSON that has XML friendly property names
  * @param jsonObj
  * @return {*}
@@ -4148,6 +4180,7 @@ Object.assign(module.exports, {
   convertPropsToDate: convertPropsToDate,
   isValidDate: isValidDate,
   extractImportableFields: extractImportableFields,
+  extractImportableFieldsNoModel: extractImportableFieldsNoModel,
   exportListFile: exportListFile,
   exportListFileSync: exportListFileSync,
   getReferencedValue: getReferencedValue,

@@ -22,7 +22,7 @@ const importableFile = require('./../../components/importableFile');
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
 
 // used in case import
-const caseImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 10000);
+const caseImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
   /**
@@ -1530,7 +1530,7 @@ module.exports = function (Outbreak) {
 
     const formatterOptions = Object.assign({
       dataType: 'case',
-      batchSize: 2,//caseImportBatchSize,
+      batchSize: caseImportBatchSize,
       outbreakId: self.id,
       modelBooleanProperties: app.models.case._booleanProperties
     }, body);
