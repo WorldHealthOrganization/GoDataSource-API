@@ -1,6 +1,8 @@
 'use strict';
 
+const async = require('async');
 const personConstants = require('./person');
+const helpers = require('./../helpers');
 
 // constants
 const constants = {
@@ -177,7 +179,71 @@ const constants = {
   }
 };
 
+/**
+ * Format cases imported data
+ * @param {Array} rawData - List of items to process
+ * @param {Array} formattedDataContainer - Container for formatted data
+ * @param {Object} options - Options for processing
+ * returns {Promise<unknown>}
+ */
+const formatDataFromImportableFile = function (rawData, formattedDataContainer, options) {
+  const processedMap = helpers.processMapLists(options.map);
+
+  return new Promise((resolve, reject) => {
+    async.eachOfSeries(
+      rawData,
+      (rawItem, index, callback) => {
+        // run the code async in order to allow sending processed items to parent while still processing other items
+        setTimeout(() => {
+          // remap properties
+          const remappedProperties = helpers.remapPropertiesUsingProcessedMap([rawItem], processedMap, options.valuesMap);
+
+          // process boolean values
+          const formattedData = helpers.convertBooleanPropertiesNoModel(
+            options.modelBooleanProperties || [],
+            remappedProperties)[0];
+
+          // set outbreak id
+          formattedData.outbreakId = options.outbreakId;
+
+          // filter out empty addresses
+          const addresses = helpers.sanitizePersonAddresses(formattedData);
+          if (addresses) {
+            formattedData.addresses = addresses;
+          }
+
+          // sanitize questionnaire answers
+          if (formattedData.questionnaireAnswers) {
+            // convert properties that should be date to actual date objects
+            formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+          }
+
+          // sanitize visual ID
+          if (formattedData.visualId) {
+            formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+          }
+
+          // add case entry in the processed list
+          formattedDataContainer.push({
+            raw: rawItem,
+            save: formattedData
+          });
+
+          callback();
+        }, 0);
+      }, err => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve();
+      });
+  });
+};
+
 module.exports = {
   constants: constants,
-  helpers: {}
+  helpers: {
+    formatDataFromImportableFile: formatDataFromImportableFile
+  }
 };

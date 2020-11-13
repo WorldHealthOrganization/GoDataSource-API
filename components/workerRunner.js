@@ -53,11 +53,12 @@ function invokeWorkerMethod(workerName, method, args, callback) {
 /**
  * Invoke worker method
  * @param {string} workerName - name of the file to be executed
+ * @param {string} method - name of the method to be executed from file
  * @param {Object} options - Options
  * @param {function} actionOnMessage - Function to be executed anytime a message is received from child process
  * @returns {{sendMessageToWorker: sendMessageToWorker, stopWorker: stopWorker}}
  */
-function startWorkerWithCommunication(workerName, options, actionOnMessage) {
+function startWorkerWithCommunication(workerName, method, options, actionOnMessage) {
   // fork the worker
   const worker = fork(`${workersPath}/${workerName}`, [], {
     execArgv: [],
@@ -88,7 +89,8 @@ function startWorkerWithCommunication(workerName, options, actionOnMessage) {
 
   // start worker functionality
   worker.send({
-    subject: 'start',
+    fn: method,
+    communication: true,
     options: options
   });
 
@@ -224,18 +226,14 @@ module.exports = {
       );
     },
     /**
-     * Import cases from importable file given using given map
-     * @param cases
-     * @param periodInterval
-     * @param periodType
-     * @param weekType
-     * @param periodMap
-     * @param caseClassifications
-     * @param callback
+     * Import data from importable file given using given map
+     * @param {Object} options - Options
+     * @param {Function} actionOnMessage - Action to be executed on message from worker
      */
-    importImportableCasesFileUsingMap: function (options, actionOnMessage) {
+    importImportableFileUsingMap: function (options, actionOnMessage) {
       return startWorkerWithCommunication(
-        'casesImport',
+        'importableFile',
+        'readAndFormatDataFromImportableFile',
         options,
         actionOnMessage
       );

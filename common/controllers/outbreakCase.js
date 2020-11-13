@@ -16,9 +16,7 @@ const AdmZip = require('adm-zip');
 const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
-const async = require('async');
-const MongoDBHelper = require('../../components/mongoDBHelper');
-const Uuid = require('uuid');
+const importableFile = require('./../../components/importableFile');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -1479,339 +1477,69 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableCasesFileUsingMap = function (body, options, callback) {
-    // initialize functions containers for child process communication
-    let sendMessageToWorker, stopWorker;
-
     const self = this;
+
     // create a transaction logger as the one on the req will be destroyed once the response is sent
     const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
     // inject platform identifier
     options.platform = Platform.IMPORT;
 
-    // define data counters
-    let processed = 0;
-    let total;
-
-    // initialize flag to know if the worker is stopped (by us or error)
-    let stoppedWorker = false;
-
-    // initialize flag to know if we have a batch in progress
-    let batchInProgress = false;
-
-    // initialize cache for import log entry
-    let importLogEntry;
-
-    // initialize counters to know that there were some errors or some successful imports
-    let importErrors = 0;
-    let importSuccess = 0;
-
     /**
-     * Create and send response; Either success or error response
-     * Handles premature failure of import; Can happen when the worked stops before sending all data
-     * @returns {*}
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
      */
-    const updateImportLogEntry = function () {
-      // check for premature failure
-      if (processed !== total) {
-        // add errors for all rows not processed
-        const createErrors = [];
-        const notProcessedError = app.utils.apiError.getError('IMPORT_DATA_NOT_PROCESSED');
-        for (let i = processed + 1; i <= total; i++) {
-          importErrors++;
-          createErrors.push({
-            _id: Uuid.v4(),
-            importLogId: importLogEntry.id,
-            error: notProcessedError,
-            recordNo: i
-          });
-        }
+    const createBatchActions = function (batchData) {
+      // build a list of create operations for this batch
+      const createCases = [];
 
-        saveErrorsFromBatch(createErrors);
-      }
-
-      // initialize update payload
-      let updatePayload = {
-        actionCompletionDate: new Date(),
-        processedNo: total
-      };
-
-      // if import errors were found
-      if (importErrors) {
-        // error with partial success
-        updatePayload.status = importSuccess ? 'LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS' : 'LNG_SYNC_STATUS_FAILED';
-        updatePayload.result = app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-          model: app.models.case.modelName,
-          success: importSuccess,
-          failed: importErrors
-        });
-      } else {
-        updatePayload.status = 'LNG_SYNC_STATUS_SUCCESS';
-      }
-
-      // save log entry
-      importLogEntry
-        .updateAttributes(updatePayload)
-        .then(() => {
-          logger.debug(`Import finished and import log entry (${importLogEntry.id}) update succeeded`);
-        })
-        .catch(err => {
-          logger.debug(`Import finished but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
-        });
-    };
-
-    /**
-     * Save errors from a batch in DB
-     * @param {Array} batchErrors - Array of error objects
-     * @returns {Promise<T> | Promise<unknown>}
-     */
-    const saveErrorsFromBatch = function (batchErrors) {
-      // create Mongo DB connection
-      return MongoDBHelper
-        .getMongoDBConnection()
-        .then(dbConn => {
-          const importResultCollection = dbConn.collection('importResult');
-
-          return importResultCollection
-            .insertMany(batchErrors);
-        })
-        .catch(err => {
-          logger.debug('Failed saving batch errors' + JSON.stringify({
-            err: err,
-            errors: batchErrors
-          }));
-        });
-    };
-
-    /**
-     * Action to be executed when a message is sent from the child process
-     * @param message
-     */
-    const actionOnMessageFromChild = function (err, message) {
-      if (err) {
-        // errors with the child process; we received errors or closing messages when we stopped the child process
-        if (!stoppedWorker) {
-          // we didn't stop the process and it was an actual error
-          logger.debug(`Worker error. Err: ${JSON.stringify(err)}`);
-          stoppedWorker = true;
-
-          if (batchInProgress) {
-            // processing will stop once in progress batch is finished
-          } else {
-            if (!total) {
-              // error was encountered before worker started processing
-              return callback(err);
-            }
-
-            // send response with the data that we have until now
-            updateImportLogEntry();
-          }
-        } else {
-          // worker is already stopped; this is a close/disconnect error; nothing to do as we closed the worker
-        }
-
-        return;
-      }
-
-      // depending on message we need to make different actions
-      switch (message.subject) {
-        case 'start': {
-          // save total number of cases
-          total = message.totalCasesNo;
-          logger.debug(`Cases to be imported: ${total}`);
-
-          // create import log entry
-          app.models.importLog
-            .create({
-              actionStartDate: new Date(),
-              status: 'LNG_SYNC_STATUS_IN_PROGRESS',
-              resourceType: app.models.case.modelName,
-              totalNo: total,
-              processedNo: 0,
-              outbreakIDs: [self.id]
+      // go through all batch entries
+      batchData.forEach(function (caseData) {
+        createCases.push(function (asyncCallback) {
+          // sync the case
+          return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+            .then(function () {
+              asyncCallback();
             })
-            .then(result => {
-              // cache log entry
-              importLogEntry = result;
-
-              // send response; don't wait for import
-              callback(null, importLogEntry.id);
-
-              // get next batch
-              sendMessageToWorker({
-                subject: 'nextBatch'
+            .catch(function (error) {
+              asyncCallback(null, {
+                success: false,
+                error: {
+                  error: error,
+                  data: {
+                    file: caseData.raw,
+                    save: caseData.save
+                  }
+                }
               });
-            })
-            .catch(err => {
-              // failed creating import log entry
-              // stop worker
-              stopWorker();
-
-              // return error
-              callback(err);
             });
+        });
+      });
 
-          break;
-        }
-        case 'nextBatch': {
-          // starting batch processing
-          batchInProgress = true;
-
-          // define a container for error results
-          const createErrors = [];
-
-          // get data
-          const casesList = message.data;
-          const batchSize = casesList.length;
-
-          logger.debug(`Received ${batchSize} items from worker`);
-
-          // build a list of create operations for this batch
-          const createCases = [];
-
-          // go through all entries received from child process
-          casesList.forEach(function (caseData, index) {
-            createCases.push(function (asyncCallback) {
-              // sync the case
-              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
-                .then(function () {
-                  importSuccess++;
-
-                  asyncCallback();
-                })
-                .catch(function (error) {
-                  // on error, store the error, but don't stop, continue with other items
-                  importErrors++;
-
-                  createErrors.push({
-                    _id: Uuid.v4(),
-                    importLogId: importLogEntry.id,
-                    error: error,
-                    recordNo: processed + index + 1,
-                    data: {
-                      file: caseData.raw,
-                      save: caseData.save
-                    }
-                  });
-                  asyncCallback();
-                });
-            });
-          });
-
-          // start importing cases
-          async.series(createCases, function () {
-            // increase processed counter
-            processed += batchSize;
-            logger.debug(`Cases processed: ${processed}/${total}`);
-
-            // finished batch
-            batchInProgress = false;
-
-            // save any errors
-            if (createErrors.length) {
-              saveErrorsFromBatch(createErrors);
-            }
-
-            // check if we still have data to process
-            if (processed < total) {
-              // check if worker is still active
-              if (!stoppedWorker) {
-                logger.debug('Processing next batch');
-
-                // save log entry
-                const updatePayload = {
-                  processedNo: processed
-                };
-                importLogEntry
-                  .updateAttributes(updatePayload)
-                  .catch(err => {
-                    logger.debug(`Import in progress but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
-                  })
-                  .then(() => {
-                    // get next batch; doesn't matter if import log entry update succeeded or failed
-                    sendMessageToWorker({
-                      subject: 'nextBatch'
-                    });
-                  });
-              } else {
-                // send response with data that we have until now
-                updateImportLogEntry();
-              }
-
-              return;
-            }
-
-            // all data has been processed
-            logger.debug('All cases processed');
-            // stop child process if not already stopped
-            if (!stoppedWorker) {
-              stopWorker();
-            }
-
-            updateImportLogEntry();
-          });
-
-          break;
-        }
-        case 'finished': {
-          // worker will send this message once it has processed all data
-          if (!stoppedWorker) {
-            stopWorker();
-          }
-          break;
-        }
-        case 'log': {
-          logger.debug(message.log);
-          break;
-        }
-        default:
-          // unhandled message
-          logger.debug(`Worker sent invalid message subject '${message.subject}'`);
-          stopWorker();
-
-          if (batchInProgress) {
-            // processing will stop once current batch is finished
-          } else {
-            if (total === undefined) {
-              // error was encountered before worker started processing
-              // no log entry was created; return error
-              return callback(err);
-            }
-
-            // send response with the data that we have until now
-            updateImportLogEntry();
-          }
-
-          break;
-      }
+      return createCases;
     };
 
-    // construct options needed by the import worker
+    // construct options needed by the formatter worker
     if (!app.models.case._booleanProperties) {
       app.models.case._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.case);
     }
 
-    try {
-      // start child process
-      const workerCommunication = WorkerRunner.cases
-        .importImportableCasesFileUsingMap(
-          Object.assign({
-            batchSize: caseImportBatchSize,
-            outbreakId: self.id,
-            modelBooleanProperties: app.models.case._booleanProperties
-          }, body),
-          actionOnMessageFromChild
-        );
+    const formatterOptions = Object.assign({
+      dataType: 'case',
+      batchSize: 2,//caseImportBatchSize,
+      outbreakId: self.id,
+      modelBooleanProperties: app.models.case._booleanProperties
+    }, body);
 
-      // cache child process communication functions
-      sendMessageToWorker = workerCommunication.sendMessageToWorker;
-      stopWorker = () => {
-        stoppedWorker = true;
-        workerCommunication.stopWorker();
-      };
-    } catch (err) {
-      callback(err);
-    }
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.case.modelName,
+      outbreakId: self.id,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 };
