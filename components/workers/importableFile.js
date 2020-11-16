@@ -38,7 +38,8 @@ const worker = {
     // initialize map for data formatters container
     const dataTypeToFormatterMap = {
       case: './../baseModelOptions/case',
-      contact: './../baseModelOptions/contact'
+      contact: './../baseModelOptions/contact',
+      labResult: './../baseModelOptions/labResult'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {

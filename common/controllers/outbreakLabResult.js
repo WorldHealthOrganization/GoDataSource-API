@@ -5,8 +5,15 @@
  * It extends the Outbreak controller with lab-result related actions
  */
 
+const _ = require('lodash');
 const app = require('../../server/server');
 const genericHelpers = require('../../components/helpers');
+const Platform = require('../../components/platform');
+const importableFile = require('./../../components/importableFile');
+const Config = require('../../server/config.json');
+
+// used in lab result import
+const labResultImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
   /**
@@ -431,5 +438,103 @@ module.exports = function (Outbreak) {
           });
       })
       .catch(callback);
+  };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableCaseLabResultsFileUsingMap = function (body, options, callback) {
+    const self = this;
+
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of create operations for this batch
+      const createLabResults = [];
+
+      // go through all batch entries
+      batchData.forEach(function (labResultData) {
+        createLabResults.push(function (asyncCallback) {
+          // first check if the case id (person id) is valid
+          app.models.case
+            .findOne({
+              where: {
+                or: [
+                  {id: labResultData.save.personId},
+                  {visualId: labResultData.save.personId}
+                ],
+                outbreakId: self.id
+              }
+            })
+            .then(function (caseInstance) {
+              // if the person was not found, don't sync the lab result, stop with error
+              if (!caseInstance) {
+                return Promise.reject(app.utils.apiError.getError('PERSON_NOT_FOUND', {
+                  model: app.models.case.modelName,
+                  id: labResultData.personId
+                }));
+              }
+
+              // make sure we map it to the parent case in case we retrieved the case using visual id
+              labResultData.save.personId = caseInstance.id;
+
+              // sync the record
+              return app.utils.dbSync.syncRecord(logger, app.models.labResult, labResultData.save, options)
+                .then(function () {
+                  asyncCallback();
+                });
+            })
+            .catch(function (error) {
+              asyncCallback(null, {
+                success: false,
+                error: {
+                  error: error,
+                  data: {
+                    file: labResultData.raw,
+                    save: labResultData.save
+                  }
+                }
+              });
+            });
+        });
+      });
+
+      return createLabResults;
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.labResult._booleanProperties) {
+      app.models.labResult._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.labResult);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'labResult',
+      batchSize: labResultImportBatchSize,
+      outbreakId: self.id,
+      modelBooleanProperties: app.models.labResult._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.labResult.modelName,
+      outbreakId: self.id,
+      logger: logger,
+      parallelActionsLimit: 10
+    }, formatterOptions, createBatchActions, callback);
   };
 };
