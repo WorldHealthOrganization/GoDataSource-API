@@ -1734,7 +1734,9 @@ module.exports = function (Outbreak) {
                 }
               }
             }
-          ])
+          ], {
+            allowDiskUse: true
+          })
           .toArray()
           .then((relationshipData) => {
             // map relationship data
@@ -1798,7 +1800,9 @@ module.exports = function (Outbreak) {
                 }
               }
             }
-          ])
+          ], {
+            allowDiskUse: true
+          })
           .toArray()
           .then((followUpData) => {
             // go though each group of follow-ups and assighn it to the proper contact

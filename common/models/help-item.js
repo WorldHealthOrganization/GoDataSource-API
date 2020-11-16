@@ -272,7 +272,11 @@ module.exports = function (HelpItem) {
       // retrieve data
       app.dataSources.mongoDb.connector
         .collection('helpItem')
-        .aggregate(aggregatePipeline)
+        .aggregate(
+          aggregatePipeline, {
+            allowDiskUse: true
+          }
+        )
         .toArray()
         .then((records) => {
           // make sure we have an array

@@ -1723,7 +1723,11 @@ module.exports = function (Person) {
         // run request to db
         const cursor = app.dataSources.mongoDb.connector
           .collection('person')
-          .aggregate(aggregatePipeline);
+          .aggregate(
+            aggregatePipeline, {
+              allowDiskUse: true
+            }
+          );
 
         // get the records from the cursor
         return cursor.toArray();

@@ -489,7 +489,11 @@ module.exports = function (FollowUp) {
     // retrieve data
     return app.dataSources.mongoDb.connector
       .collection(FollowUp.modelName)
-      .aggregate(aggregatePipeline)
+      .aggregate(
+        aggregatePipeline, {
+          allowDiskUse: true
+        }
+      )
       .toArray()
       .then(data => {
         // log time need to execute query
@@ -904,10 +908,25 @@ module.exports = function (FollowUp) {
               $limit: filter.limit
             });
           }
+        } else {
+          // count only - we don't need the entire data
+          aggregatePipeline.push(
+            {
+              $project: {
+                _id: 1
+              }
+            }
+          );
         }
 
         // run the aggregation against database
-        const cursor = app.dataSources.mongoDb.connector.collection('followUp').aggregate(aggregatePipeline);
+        const cursor = app.dataSources.mongoDb.connector
+          .collection('followUp')
+          .aggregate(
+            aggregatePipeline, {
+              allowDiskUse: true
+            }
+          );
 
         // get the records from the cursor
         cursor
