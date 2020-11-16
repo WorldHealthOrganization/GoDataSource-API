@@ -37,7 +37,8 @@ const worker = {
   readAndFormatDataFromImportableFile: function (options) {
     // initialize map for data formatters container
     const dataTypeToFormatterMap = {
-      case: './../baseModelOptions/case'
+      case: './../baseModelOptions/case',
+      contact: './../baseModelOptions/contact'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {
