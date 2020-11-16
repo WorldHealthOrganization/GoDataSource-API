@@ -258,7 +258,11 @@ module.exports = function (Model) {
     // retrieve data
     return app.dataSources.mongoDb.connector
       .collection(collectionName)
-      .aggregate(aggregatePipeline)
+      .aggregate(
+        aggregatePipeline, {
+          allowDiskUse: true
+        }
+      )
       .toArray()
       .then((records) => {
         // log time need to execute query
