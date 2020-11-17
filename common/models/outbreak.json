@@ -7384,11 +7384,8 @@
       ],
       "returns": [
         {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],

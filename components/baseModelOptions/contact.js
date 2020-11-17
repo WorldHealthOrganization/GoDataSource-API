@@ -14,9 +14,9 @@ const formatDataFromImportableFile = function (rawData, formattedDataContainer, 
   const processedMap = helpers.processMapLists(options.map);
 
   return new Promise((resolve, reject) => {
-    async.eachOfSeries(
+    async.eachSeries(
       rawData,
-      (rawItem, index, callback) => {
+      (rawItem, callback) => {
         // run the code async in order to allow sending processed items to parent while still processing other items
         setTimeout(() => {
           // remap properties
