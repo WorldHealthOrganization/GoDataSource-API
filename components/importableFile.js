@@ -1324,7 +1324,8 @@ const processImportableFileData = function (app, options, formatterOptions, batc
         const operations = batchHandler(batchData);
 
         // run batch operations; will never error
-        async.series(operations, function (err, results) {
+        // some actions support parallel processing some don't
+        async.parallelLimit(operations, options.parallelActionsLimit || 1, function (err, results) {
           // check results and increase counters
           const createErrors = [];
           results.forEach((itemResult, index) => {

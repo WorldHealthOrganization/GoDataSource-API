@@ -432,4 +432,24 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableCaseLabResultsFileUsingMap = function (body, options, callback) {
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.case, options, callback);
+  };
+
+  /**
+   * Import an importable lab results file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableContactLabResultsFileUsingMap = function (body, options, callback) {
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.contact, options, callback);
+  };
 };

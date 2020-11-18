@@ -1291,7 +1291,7 @@
       "principalType": "ROLE",
       "principalId": "case_import_lab_result",
       "permission": "ALLOW",
-      "property": "importImportableLabResultsFileUsingMap"
+      "property": "importImportableCaseLabResultsFileUsingMap"
     },
     {
       "principalType": "ROLE",
@@ -4203,7 +4203,7 @@
         "path": "/importable-files/:id/json"
       }
     },
-    "prototype.importImportableLabResultsFileUsingMap": {
+    "prototype.importImportableCaseLabResultsFileUsingMap": {
       "accepts": [
         {
           "arg": "body",
@@ -4222,11 +4222,8 @@
       ],
       "returns": [
         {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],
@@ -7387,11 +7384,8 @@
       ],
       "returns": [
         {
-          "arg": "labResults",
-          "type": [
-            "labResult"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],
