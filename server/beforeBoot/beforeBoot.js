@@ -3,7 +3,6 @@
 const path = require('path');
 const disableRemoteMethods = require('../../components/disableRemoteMethods');
 const disableStandardRelationRemoteMethods = require('../../components/disableStandardRelationRemoteMethods');
-const disableCommonExtraRoutes = require('../../components/disableCommonExtraRoutes');
 const searchByRelationProperty = require('../../components/searchByRelationProperty');
 const mergeFilters = require('../../components/mergeFilters');
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
@@ -27,7 +26,6 @@ function init(app, callback) {
       disableRemoteMethods: disableRemoteMethods,
       searchByRelationProperty: searchByRelationProperty,
       disableStandardRelationRemoteMethods: disableStandardRelationRemoteMethods,
-      disableCommonExtraRoutes: disableCommonExtraRoutes,
       mergeFilters: mergeFilters,
       convertLoopbackFilterToMongo: convertLoopbackFilterToMongo,
       convertNestedGeoPointsFilterToMongo: convertNestedGeoPointsFilterToMongo,
