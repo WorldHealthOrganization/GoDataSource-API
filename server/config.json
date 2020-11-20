@@ -4,6 +4,17 @@
   "port": 3000,
   "remoting": {
     "context": false,
+    "sharedMethods": {
+      "upsert": false,
+      "findOne": false,
+      "exists": false,
+      "updateAll": false,
+      "replaceById": false,
+      "upsertWithWhere": false,
+      "replaceOrCreate": false,
+      "patchOrCreate": false,
+      "createChangeStream": false
+    },
     "rest": {
       "handleErrors": false,
       "normalizeHttpPath": true,
