@@ -1,0 +1,41 @@
+{
+  "name": "transmissionChain",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "description": "Outbreak for which the transmission chain was calculated"
+    },
+    "status": {
+      "type": "string",
+      "description": "Status of transmission chain calculation",
+      "enum": [
+        "LNG_COT_STATUS_IN_PROGRESS",
+        "LNG_COT_STATUS_SUCCESS",
+        "LNG_COT_STATUS_FAILED"
+      ],
+      "required": true
+    },
+    "startDate": {
+      "type": "date",
+      "description": "Timestamp when the calculation has started",
+      "required": true
+    },
+    "endDate": {
+      "type": "date",
+      "description": "Timestamp when the calculation has started"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {
+  }
+}

@@ -80,6 +80,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "transmissionChain": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
   "template": {
     "dataSource": "mongoDb",
     "public": true

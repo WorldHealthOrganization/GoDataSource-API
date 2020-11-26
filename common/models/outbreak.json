@@ -241,6 +241,11 @@
       "type": "hasMany",
       "model": "contactOfContact",
       "foreignKey": "outbreakId"
+    },
+    "transmissionChains": {
+      "type": "hasMany",
+      "model": "transmissionChain",
+      "foreignKey": "outbreakId"
     }
   },
   "acls": [
@@ -716,6 +721,12 @@
       "principalId": "cot_list",
       "permission": "ALLOW",
       "property": "getIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "calculateIndependentTransmissionChains"
     },
     {
       "principalType": "ROLE",
@@ -1766,6 +1777,30 @@
       "principalId": "follow_up_delete",
       "permission": "ALLOW",
       "property": "deleteContactFollowUp"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "__get__transmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "__findById__transmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "__destroyById__transmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
+      "property": "__count__transmissionChains"
     }
   ],
   "methods": {
@@ -3372,6 +3407,32 @@
       "http": {
         "verb": "get",
         "path": "/relationships/independent-transmission-chains"
+      }
+    },
+    "prototype.calculateIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'where.active' boolean, 'where.size' number, 'where.person', 'where.chainIncludesPerson', 'where.endDate' (used to provide a snapshot of chains until the specified end date), where.includeContacts (default false) queries."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "transmissionChainId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Calculate independent transmission chains",
+      "http": {
+        "verb": "post",
+        "path": "/relationships/calculate-independent-transmission-chains"
       }
     },
     "prototype.countContactsSeen": {
