@@ -7,20 +7,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
-const path = require('path');
-const fs = require('fs-extra');
-const config = require('../../server/config.json');
-
-// calculate cot storage path
-const cotStoragePath = config.cot && config.cot.containerPath ?
-  (
-    // use configured path; if relative make it relative to config.json
-    path.isAbsolute(config.cot.containerPath) ?
-      path.resolve(config.cot.containerPath) :
-      path.resolve(__dirname, '../../server', config.cot.containerPath)
-  ) :
-  // default
-  path.resolve(__dirname, '../../server/storage/files');
+const baseTransmissionChainModel = require('../../components/baseModelOptions/transmissionChain');
 
 module.exports = function (Outbreak) {
   /**
@@ -69,8 +56,9 @@ module.exports = function (Outbreak) {
       })
       .then(cot => {
         // save to file
-        return fs
-          .writeJSON(path.resolve(cotStoragePath, `${cotDBEntry.id}.json`), cot);
+        return baseTransmissionChainModel
+          .helpers
+          .saveFile(cotDBEntry, cot);
       })
       .then(() => {
         // file was saved; update db entry
@@ -97,6 +85,44 @@ module.exports = function (Outbreak) {
             options.remotingContext.req.logger.debug(`Transmission chain (${cotDBEntry.id}) calculation failed with error ${err}`);
           });
       });
+  };
+
+  /**
+   * Get calculated independent transmission chains
+   * @param {string} id - Transmission chain ID
+   * @param {Object} res - Res instance
+   * @param {Object} options
+   * @param {Function} callback
+   */
+  Outbreak.prototype.getCalculatedIndependentTransmissionChains = function (id, res, options, callback) {
+    // get cot DB entry
+    app.models.transmissionChain
+      .findById(id)
+      .then((cotDBEntry) => {
+        if (!cotDBEntry) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.transmissionChain.modelName,
+            id: id
+          }));
+        }
+
+        const readStream = baseTransmissionChainModel.helpers.getFileContents(cotDBEntry);
+        // This will wait until we know the readable stream is actually valid before piping
+        readStream.on('open', function () {
+          // This just pipes the read stream to the response object (which goes to the client)
+          readStream.pipe(res);
+        });
+
+        // This catches any errors that happen while creating the readable stream (usually invalid names)
+        readStream.on('error', function (err) {
+          callback(err);
+        });
+
+        readStream.on('end', function () {
+          res.end();
+        });
+      })
+      .catch(callback);
   };
 
   /**

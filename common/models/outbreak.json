@@ -732,6 +732,12 @@
       "principalType": "ROLE",
       "principalId": "cot_list",
       "permission": "ALLOW",
+      "property": "getCalculatedIndependentTransmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "cot_list",
+      "permission": "ALLOW",
       "property": "countIndependentTransmissionChains"
     },
     {
@@ -3433,6 +3439,88 @@
       "http": {
         "verb": "post",
         "path": "/relationships/calculate-independent-transmission-chains"
+      }
+    },
+    "prototype.getCalculatedIndependentTransmissionChains": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "ID of the transmission chain"
+        },
+        {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "chains",
+          "type": {
+            "nodes": {
+              "type": {
+                "<personId>": {
+                  "type": "person"
+                }
+              }
+            },
+            "edges": {
+              "type": {
+                "<relationshipId>": {
+                  "type": "relationship"
+                }
+              }
+            },
+            "transmissionChains": {
+              "type": {
+                "chains": [
+                  {
+                    "type": {
+                      "chain": [
+                        "string"
+                      ],
+                      "period": {
+                        "type": {
+                          "startDate": "date",
+                          "endDate": "date",
+                          "duration": {
+                            "type": "number",
+                            "description": "Transmission chain duration in days"
+                          }
+                        }
+                      },
+                      "active": "boolean"
+                    }
+                  }
+                ],
+                "length": {
+                  "type": "number",
+                  "description": "Number of chain links"
+                },
+                "size": {
+                  "type": "number",
+                  "description": "Number of chain nodes"
+                }
+              }
+            }
+          },
+          "description": "Independent transmission chains",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Get already calculated independent transmission chains",
+      "http": {
+        "verb": "get",
+        "path": "/transmission-chains/:fk/result"
       }
     },
     "prototype.countContactsSeen": {

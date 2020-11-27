@@ -44,7 +44,8 @@ module.exports = function (Backup) {
       'user',
       'role',
       'cluster',
-      'fileAttachment'
+      'fileAttachment',
+      'transmissionChain'
     ]
   };
 
