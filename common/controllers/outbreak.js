@@ -74,7 +74,10 @@ module.exports = function (Outbreak) {
     'prototype.__get__contactsOfContacts',
     'prototype.__count__contactsOfContacts',
     'prototype.__updateById__contacts__followUps',
-    'prototype.__destroyById__contacts__followUps'
+    'prototype.__destroyById__contacts__followUps',
+    'prototype.__delete__transmissionChains',
+    'prototype.__create__transmissionChains',
+    'prototype.__updateById__transmissionChains'
   ]);
 
   // attach search by relation property behavior on get contacts

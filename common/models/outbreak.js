@@ -1196,11 +1196,6 @@ module.exports = function (Outbreak) {
               cotFilter.retrieveFields = filter.retrieveFields;
             }
 
-            // do we need to look though all relationships ?
-            if (filter.dontLimitRelationships !== undefined) {
-              cotFilter.dontLimitRelationships = filter.dontLimitRelationships;
-            }
-
             // build/count transmission chains starting from the found relationIds
             app.models.relationship.buildOrCountTransmissionChains(
               outbreak.id,
@@ -2510,5 +2505,241 @@ module.exports = function (Outbreak) {
         }));
       }
     });
+  };
+
+  /**
+   * Get independent transmission chains
+   * @param {Object} outbreak - Outbreak instance
+   * @param {Object} filter - also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param {Object} options - options from request
+   */
+  Outbreak.helpers.getIndependentTransmissionChains = function (outbreak, filter, options) {
+    // if contacts of contacts is disabled on the outbreak, do not include them in CoT
+    const isContactsOfContactsActive = outbreak.isContactsOfContactsActive;
+
+    // determine if we need to send to client just some specific fields
+    if (
+      filter.fields &&
+      filter.fields.length > 0
+    ) {
+      // determine visible and format visible fields
+      const edgeFields = {};
+      const nodeFields = {};
+      const edgesName = 'edges.';
+      const nodesName = 'nodes.';
+      filter.fields.forEach((field) => {
+        // check if we have fields for our objects
+        if (field.toLowerCase().startsWith(edgesName)) {
+          // push to fields array
+          edgeFields[field.substring(edgesName.length)] = 1;
+        } else if (field.toLowerCase().startsWith(nodesName)) {
+          // push to fields array
+          nodeFields[field.substring(nodesName.length)] = 1;
+        }
+      });
+
+      // Edges - push required fields
+      Object.assign(
+        edgeFields, {
+          id: 1,
+          contactDate: 1,
+          persons: 1
+        }
+      );
+
+      // Nodes - push required fields
+      Object.assign(
+        nodeFields, {
+          id: 1,
+          type: 1
+        }
+      );
+
+      // set fields
+      filter.fields = undefined;
+      filter.retrieveFields = {
+        edges: edgeFields,
+        nodes: nodeFields
+      };
+    }
+
+    // process filters
+    return outbreak.preProcessTransmissionChainsFilter(filter, options)
+      .then(function (processedFilter) {
+        // use processed filters
+        filter = Object.assign(
+          processedFilter.filter, {
+            retrieveFields: filter.retrieveFields
+          }
+        );
+        const personIds = processedFilter.personIds;
+        const endDate = processedFilter.endDate;
+        const activeFilter = processedFilter.active;
+        const includedPeopleFilter = processedFilter.includedPeopleFilter;
+        const sizeFilter = processedFilter.size;
+        const includeContacts = processedFilter.includeContacts;
+        const noContactChains = processedFilter.noContactChains;
+        const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
+        const geographicalRestrictionsQuery = processedFilter.geographicalRestrictionsQuery;
+
+        // flag that indicates that contacts should be counted per chain
+        const countContacts = processedFilter.countContacts;
+
+        // end date is supported only one first level of where in transmission chains
+        _.set(filter, 'where.endDate', endDate);
+
+        return new Promise((resolve, reject) => {
+          // get transmission chains
+          app.models.relationship
+            .getTransmissionChains(outbreak.id, outbreak.periodOfFollowup, filter, countContacts, noContactChains, geographicalRestrictionsQuery, function (error, transmissionChains) {
+              if (error) {
+                return reject(error);
+              }
+
+              // apply post filtering/processing
+              transmissionChains = outbreak.postProcessTransmissionChains(
+                {
+                  active: activeFilter,
+                  size: sizeFilter,
+                  includedPeopleFilter: includedPeopleFilter
+                },
+                transmissionChains,
+                {
+                  includeContacts: includeContacts,
+                  includeContactsOfContacts: isContactsOfContactsActive && includeContactsOfContacts && includeContacts
+                }
+              );
+
+              // determine if isolated nodes should be included
+              const shouldIncludeIsolatedNodes = (
+                // there is no size filter
+                (sizeFilter == null) &&
+                // no included people filter
+                !includedPeopleFilter
+              );
+
+              // initialize isolated nodes filter
+              let isolatedNodesFilter;
+
+              // build isolated nodes filter only if needed
+              if (shouldIncludeIsolatedNodes) {
+                // initialize isolated nodes filter
+                isolatedNodesFilter = {
+                  where: {
+                    outbreakId: outbreak.id,
+                    or: [
+                      {
+                        type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                        classification: {
+                          nin: app.models.case.discardedCaseClassifications
+                        }
+                      },
+                      {
+                        type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                      }
+                    ],
+                    dateOfReporting: {
+                      lte: endDate
+                    }
+                  }
+                };
+
+                // if there was a people filter
+                // from preprocess function the personIds are already geographically restricted so no need to apply geographic restriction here
+                if (personIds) {
+                  // use it for isolated nodes as well
+                  isolatedNodesFilter = app.utils.remote
+                    .mergeFilters({
+                      where: {
+                        id: {
+                          inq: personIds
+                        }
+                      }
+                    }, isolatedNodesFilter);
+                }
+              }
+
+              // depending on activeFilter we need to filter the transmissionChains
+              if (typeof activeFilter !== 'undefined') {
+
+                // update isolated nodes filter only if needed
+                if (shouldIncludeIsolatedNodes) {
+
+                  // update isolated nodes filter depending on active filter value
+                  let followUpPeriod = outbreak.periodOfFollowup;
+                  // get day of the start of the follow-up period starting from specified end date (by default, today)
+                  let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
+
+                  if (activeFilter) {
+                    // get cases/events reported in the last followUpPeriod days
+                    isolatedNodesFilter = app.utils.remote
+                      .mergeFilters({
+                        where: {
+                          dateOfReporting: {
+                            gte: new Date(followUpStartDate)
+                          }
+                        }
+                      }, isolatedNodesFilter);
+                  } else {
+                    // get cases/events reported earlier than in the last followUpPeriod days
+                    isolatedNodesFilter = app.utils.remote
+                      .mergeFilters({
+                        where: {
+                          dateOfReporting: {
+                            lt: new Date(followUpStartDate)
+                          }
+                        }
+                      }, isolatedNodesFilter);
+                  }
+                }
+              } else {
+                // if isolated nodes don't need to be included, stop here
+                if (!shouldIncludeIsolatedNodes) {
+                  return resolve(transmissionChains);
+                }
+              }
+
+              // look for isolated nodes, if needed
+              if (shouldIncludeIsolatedNodes) {
+                // update isolated nodes filter
+                isolatedNodesFilter = app.utils.remote
+                  .mergeFilters({
+                    where: {
+                      id: {
+                        nin: Object.keys(transmissionChains.nodes)
+                      }
+                    }
+                  }, isolatedNodesFilter);
+
+                // get isolated nodes as well (nodes that were never part of a relationship)
+                app.models.person
+                  .rawFind(
+                    app.utils.remote.convertLoopbackFilterToMongo(isolatedNodesFilter.where),
+                    filter.retrieveFields && filter.retrieveFields.nodes ? {
+                      projection: filter.retrieveFields.nodes
+                    } : {}
+                  )
+                  .then(function (isolatedNodes) {
+                    // add all the isolated nodes to the complete list of nodes
+                    isolatedNodes.forEach(function (isolatedNode) {
+                      transmissionChains.nodes[isolatedNode.id] = isolatedNode;
+                    });
+
+                    // send answer to client
+                    resolve(transmissionChains);
+                  })
+                  .catch(reject);
+              }
+            });
+        });
+      })
+      .then(result => {
+        Object.keys(result.nodes).forEach((key) => {
+          // transform Mongo geolocation to Loopback geolocation
+          genericHelpers.covertAddressesGeoPointToLoopbackFormat(result.nodes[key]);
+        });
+
+        return result;
+      });
   };
 };

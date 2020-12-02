@@ -234,16 +234,9 @@ module.exports = function (Relationship) {
     app.models.relationship
       .rawFind(
         app.utils.remote.convertLoopbackFilterToMongo(filter.where),
-        Object.assign(
-          originalFilter.retrieveFields && originalFilter.retrieveFields.edges ? {
-            projection: originalFilter.retrieveFields.edges
-          } : {},
-          originalFilter.dontLimitRelationships ? {} : {
-            limit: config.cot && config.cot.maxRelationships ?
-              config.cot.maxRelationships :
-              1000
-          }
-        )
+        originalFilter.retrieveFields && originalFilter.retrieveFields.edges ? {
+          projection: originalFilter.retrieveFields.edges
+        } : {}
       )
       .then(function (relationships) {
         // build a list of people ids (to query related data later)

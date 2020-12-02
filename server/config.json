@@ -164,6 +164,6 @@
     }
   },
   "cot": {
-    "maxRelationships": 9999999
+    "containerPath": "./storage/files"
   }
 }

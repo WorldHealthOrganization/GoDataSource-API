@@ -10357,6 +10357,17 @@
         "translation": "النجاح مع التحذيرات"
       }
     },
+    "cotCalculationStatus": {
+      "LNG_COT_STATUS_FAILED": {
+        "translation": "Failed"
+      },
+      "LNG_COT_STATUS_IN_PROGRESS": {
+        "translation": "In progress"
+      },
+      "LNG_COT_STATUS_SUCCESS": {
+        "translation": "Success"
+      }
+    },
     "locationGeographicalLevel": {
       "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0": {
         "translation": "مستوى المسؤول 0",

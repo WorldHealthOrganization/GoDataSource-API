@@ -8,6 +8,7 @@ const path = require('path');
 const async = require('async');
 const fsExtra = require('fs-extra');
 const workerRunner = require('./workerRunner');
+const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
 
 // map of collection names and property name that matches a file on the disk
 // also directory path (relative to the project) that holds the files should be left unchanged
@@ -21,6 +22,11 @@ const collectionsWithFiles = {
     prop: 'path',
     srcDir: 'server/storage/files',
     targetDir: 'files'
+  },
+  transmissionChain: {
+    prop: '_id',
+    srcDir: baseTransmissionChainModel.storagePath,
+    targetDir: 'cotFiles'
   }
 };
 
@@ -50,7 +56,8 @@ const collectionsMap = {
   deviceHistory: 'deviceHistory',
   importMapping: 'importMapping',
   filterMapping: 'filterMapping',
-  migrationLog: 'migrationLog'
+  migrationLog: 'migrationLog',
+  transmissionChain: 'transmissionChain'
 };
 
 // list of user related collections
@@ -625,9 +632,6 @@ const syncRecord = function (logger, model, record, options, done) {
  * @param done
  */
 const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, logger, password, done) {
-  let storageModel = {};
-  require('./../server/models/storage')(storageModel);
-
   // if there are no records, do not run anything
   if (!records.length) {
     return done();
@@ -636,6 +640,12 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
   // if collection has no related files configuration set up, stop
   if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
     return done();
+  }
+
+  let storageModel = {};
+  // cot file are not saved using storage model
+  if (collectionName !== 'transmissionChain') {
+    require('./../server/models/storage')(storageModel);
   }
 
   // get the configuration options
@@ -650,7 +660,13 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
     return async.parallelLimit(
       records.map((record) => {
         return function (doneRecord) {
-          let filePath = storageModel.resolvePath(record[collectionOpts.prop]);
+          let filePath;
+          // cot files path might not be relative so we cannot calculate it using storage model
+          if (collectionName === 'transmissionChain') {
+            filePath = baseTransmissionChainModel.helpers.getFilePath(record[collectionOpts.prop]);
+          } else {
+            filePath = storageModel.resolvePath(record[collectionOpts.prop]);
+          }
 
           // make sure the source file is okay
           return fs.lstat(filePath, function (err) {
@@ -660,7 +676,14 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
             }
 
             // copy file in temporary directory
-            let tmpFilePath = path.join(tmpDir, collectionOpts.targetDir, path.basename(record[collectionOpts.prop]));
+            let tmpFilePath = path.join(
+              tmpDir,
+              collectionOpts.targetDir,
+              collectionName === 'transmissionChain' ?
+                baseTransmissionChainModel.helpers.getFileName(record[collectionOpts.prop]) :
+                path.basename(record[collectionOpts.prop])
+            );
+
             return fs.copyFile(
               filePath,
               tmpFilePath,
@@ -711,7 +734,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, logger, p
   const collectionOpts = collectionsWithFiles[collectionName];
 
   let collectionFilesTmpDir = path.join(tmpDir, collectionOpts.targetDir);
-  let collectionFilesDir = path.join(__dirname, '..', collectionOpts.srcDir);
+  let collectionFilesDir = path.isAbsolute(collectionOpts.srcDir) ? collectionOpts.srcDir : path.join(__dirname, '..', collectionOpts.srcDir);
 
   logger.debug(`Importing related files for collection '${collectionName}'`);
 

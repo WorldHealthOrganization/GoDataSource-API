@@ -7,281 +7,123 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
-const genericHelpers = require('../../components/helpers');
-const config = require('../../server/config.json');
+const baseTransmissionChainModel = require('../../components/baseModelOptions/transmissionChain');
 
 module.exports = function (Outbreak) {
   /**
    * Get independent transmission chains
-   * @param filter Note: also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
-   * @param options
-   * @param callback
+   * @param {Object} filter - also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param {Object} options
+   * @param {Function} callback
    */
   Outbreak.prototype.getIndependentTransmissionChains = function (filter, options, callback) {
-    const self = this;
-
-    // if contacts of contacts is disabled on the outbreak, do not include them in CoT
-    const isContactsOfContactsActive = this.isContactsOfContactsActive;
-
-    // determine if we need to send to client just some specific fields
-    if (
-      filter.fields &&
-      filter.fields.length > 0
-    ) {
-      // determine visible and format visible fields
-      const edgeFields = {};
-      const nodeFields = {};
-      const edgesName = 'edges.';
-      const nodesName = 'nodes.';
-      filter.fields.forEach((field) => {
-        // check if we have fields for our objects
-        if (field.toLowerCase().startsWith(edgesName)) {
-          // push to fields array
-          edgeFields[field.substring(edgesName.length)] = 1;
-        } else if (field.toLowerCase().startsWith(nodesName)) {
-          // push to fields array
-          nodeFields[field.substring(nodesName.length)] = 1;
-        }
-      });
-
-      // Edges - push required fields
-      Object.assign(
-        edgeFields, {
-          id: 1,
-          contactDate: 1,
-          persons: 1
-        }
-      );
-
-      // Nodes - push required fields
-      Object.assign(
-        nodeFields, {
-          id: 1,
-          type: 1
-        }
-      );
-
-      // set fields
-      filter.fields = undefined;
-      filter.retrieveFields = {
-        edges: edgeFields,
-        nodes: nodeFields
-      };
-    }
-
-    // don't limit by relationships ?
-    if (
-      filter.where &&
-      filter.where.dontLimitRelationships !== undefined
-    ) {
-      filter.dontLimitRelationships = filter.where.dontLimitRelationships;
-      delete filter.where.dontLimitRelationships;
-    }
-
-    // process filters
-    this.preProcessTransmissionChainsFilter(filter, options).then(function (processedFilter) {
-      // use processed filters
-      const dontLimitRelationships = filter.dontLimitRelationships;
-      filter = Object.assign(
-        processedFilter.filter, {
-          retrieveFields: filter.retrieveFields
-        }
-      );
-      const personIds = processedFilter.personIds;
-      const endDate = processedFilter.endDate;
-      const activeFilter = processedFilter.active;
-      const includedPeopleFilter = processedFilter.includedPeopleFilter;
-      const sizeFilter = processedFilter.size;
-      const includeContacts = processedFilter.includeContacts;
-      const noContactChains = processedFilter.noContactChains;
-      const includeContactsOfContacts = processedFilter.includeContactsOfContacts;
-      const geographicalRestrictionsQuery = processedFilter.geographicalRestrictionsQuery;
-
-      // don't limit by relationships ?
-      if (dontLimitRelationships !== undefined) {
-        processedFilter.filter.dontLimitRelationships = dontLimitRelationships;
-      }
-
-      // if we need to display specific chains then we need to remove the maxRelationship constraint
-      if (
-        sizeFilter !== undefined || (
-          includedPeopleFilter !== undefined &&
-          includedPeopleFilter.length > 0
-        )
-      ) {
-        processedFilter.filter.dontLimitRelationships = true;
-      }
-
-      // flag that indicates that contacts should be counted per chain
-      const countContacts = processedFilter.countContacts;
-
-      // end date is supported only one first level of where in transmission chains
-      _.set(filter, 'where.endDate', endDate);
-
-      // get transmission chains
-      app.models.relationship
-        .getTransmissionChains(self.id, self.periodOfFollowup, filter, countContacts, noContactChains, geographicalRestrictionsQuery, function (error, transmissionChains) {
-          if (error) {
-            return callback(error);
-          }
-
-          // apply post filtering/processing
-          transmissionChains = self.postProcessTransmissionChains(
-            {
-              active: activeFilter,
-              size: sizeFilter,
-              includedPeopleFilter: includedPeopleFilter
-            },
-            transmissionChains,
-            {
-              includeContacts: includeContacts,
-              includeContactsOfContacts: isContactsOfContactsActive && includeContactsOfContacts && includeContacts
-            }
-          );
-
-          // determine if isolated nodes should be included
-          const cotMaxRelationships = config.cot && config.cot.maxRelationships ?
-            config.cot.maxRelationships :
-            1000;
-          const shouldIncludeIsolatedNodes = (
-            // there is no size filter
-            (sizeFilter == null) &&
-            // no included people filter
-            !includedPeopleFilter &&
-            Object.keys(transmissionChains.edges).length < cotMaxRelationships
-          );
-
-          // initialize isolated nodes filter
-          let isolatedNodesFilter;
-
-          // build isolated nodes filter only if needed
-          if (shouldIncludeIsolatedNodes) {
-            // initialize isolated nodes filter
-            isolatedNodesFilter = {
-              where: {
-                outbreakId: self.id,
-                or: [
-                  {
-                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                    classification: {
-                      nin: app.models.case.discardedCaseClassifications
-                    }
-                  },
-                  {
-                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                  }
-                ],
-                dateOfReporting: {
-                  lte: endDate
-                }
-              }
-            };
-
-            // if there was a people filter
-            // from preprocess function the personIds are already geographically restricted so no need to apply geographic restriction here
-            if (personIds) {
-              // use it for isolated nodes as well
-              isolatedNodesFilter = app.utils.remote
-                .mergeFilters({
-                  where: {
-                    id: {
-                      inq: personIds
-                    }
-                  }
-                }, isolatedNodesFilter);
-            }
-          }
-
-          // depending on activeFilter we need to filter the transmissionChains
-          if (typeof activeFilter !== 'undefined') {
-
-            // update isolated nodes filter only if needed
-            if (shouldIncludeIsolatedNodes) {
-
-              // update isolated nodes filter depending on active filter value
-              let followUpPeriod = self.periodOfFollowup;
-              // get day of the start of the follow-up period starting from specified end date (by default, today)
-              let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
-
-              if (activeFilter) {
-                // get cases/events reported in the last followUpPeriod days
-                isolatedNodesFilter = app.utils.remote
-                  .mergeFilters({
-                    where: {
-                      dateOfReporting: {
-                        gte: new Date(followUpStartDate)
-                      }
-                    }
-                  }, isolatedNodesFilter);
-              } else {
-                // get cases/events reported earlier than in the last followUpPeriod days
-                isolatedNodesFilter = app.utils.remote
-                  .mergeFilters({
-                    where: {
-                      dateOfReporting: {
-                        lt: new Date(followUpStartDate)
-                      }
-                    }
-                  }, isolatedNodesFilter);
-              }
-            }
-          } else {
-            // if isolated nodes don't need to be included, stop here
-            if (!shouldIncludeIsolatedNodes) {
-              return callback(null, transmissionChains);
-            }
-          }
-
-          // look for isolated nodes, if needed
-          if (shouldIncludeIsolatedNodes) {
-            // update isolated nodes filter
-            isolatedNodesFilter = app.utils.remote
-              .mergeFilters({
-                where: {
-                  id: {
-                    nin: Object.keys(transmissionChains.nodes)
-                  }
-                }
-              }, isolatedNodesFilter);
-
-            // get isolated nodes as well (nodes that were never part of a relationship)
-            app.models.person
-              .rawFind(
-                app.utils.remote.convertLoopbackFilterToMongo(isolatedNodesFilter.where),
-                filter.retrieveFields && filter.retrieveFields.nodes ? {
-                  projection: filter.retrieveFields.nodes
-                } : {}
-              )
-              .then(function (isolatedNodes) {
-                // add all the isolated nodes to the complete list of nodes
-                isolatedNodes.forEach(function (isolatedNode) {
-                  transmissionChains.nodes[isolatedNode.id] = isolatedNode;
-                });
-
-                // send answer to client
-                callback(null, transmissionChains);
-              })
-              .catch(callback);
-          }
-        });
-    });
+    Outbreak
+      .helpers
+      .getIndependentTransmissionChains(this, filter, options)
+      .then(result => {
+        callback(null, result);
+      })
+      .catch(callback);
   };
 
   /**
-   * Since this endpoint returns person data without checking if the user has the required read permissions,
-   * check the user's permissions and return only the fields he has access to
+   * Calculate independent transmission chains in async mode
+   * @param {Object} filter - also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param {Object} options
+   * @param {Function} callback
    */
-  Outbreak.afterRemote('prototype.getIndependentTransmissionChains', function (context, modelInstance, next) {
-    let personTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+  Outbreak.prototype.calculateIndependentTransmissionChains = function (filter, options, callback) {
+    const self = this;
 
-    Object.keys(modelInstance.nodes).forEach((key) => {
-      Outbreak.helpers.limitPersonInformation(modelInstance.nodes[key], personTypesWithReadAccess);
+    let cotDBEntry;
+    // create cot DB entry
+    app.models.transmissionChain
+      .create({
+        outbreakId: self.id,
+        startDate: new Date(),
+        status: 'LNG_COT_STATUS_IN_PROGRESS'
+      }, options)
+      .then(result => {
+        // send response
+        callback(null, result.id);
 
-      // transform Mongo geolocation to Loopback geolocation
-      genericHelpers.covertAddressesGeoPointToLoopbackFormat(modelInstance.nodes[key]);
-    });
-    next();
-  });
+        // cache cot db entry
+        cotDBEntry = result;
+
+        return Outbreak
+          .helpers
+          .getIndependentTransmissionChains(self, filter, options);
+      })
+      .then(cot => {
+        // save to file
+        return baseTransmissionChainModel
+          .helpers
+          .saveFile(cotDBEntry, cot);
+      })
+      .then(() => {
+        // file was saved; update db entry
+        return cotDBEntry
+          .updateAttributes({
+            status: 'LNG_COT_STATUS_SUCCESS',
+            endDate: new Date()
+          });
+      })
+      .catch(err => {
+        if (!cotDBEntry) {
+          // error was encountered when creating db entry
+          return callback(err);
+        }
+
+        // error was encountered when calculating cot or saving file
+        cotDBEntry
+          .updateAttributes({
+            status: 'LNG_COT_STATUS_FAILED',
+            error: err.toString() ? err.toString() : JSON.stringify(err),
+            endDate: new Date()
+          })
+          .catch(err => {
+            options.remotingContext.req.logger.debug(`Transmission chain (${cotDBEntry.id}) calculation failed with error ${err}`);
+          });
+      });
+  };
+
+  /**
+   * Get calculated independent transmission chains
+   * @param {string} id - Transmission chain ID
+   * @param {Object} res - Res instance
+   * @param {Object} options
+   * @param {Function} callback
+   */
+  Outbreak.prototype.getCalculatedIndependentTransmissionChains = function (id, res, options, callback) {
+    // get cot DB entry
+    app.models.transmissionChain
+      .findById(id)
+      .then((cotDBEntry) => {
+        if (!cotDBEntry) {
+          return callback(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.transmissionChain.modelName,
+            id: id
+          }));
+        }
+
+        const readStream = baseTransmissionChainModel.helpers.getFileContents(cotDBEntry);
+        // This will wait until we know the readable stream is actually valid before piping
+        readStream.on('open', function () {
+          // This just pipes the read stream to the response object (which goes to the client)
+          readStream.pipe(res);
+        });
+
+        // This catches any errors that happen while creating the readable stream (usually invalid names)
+        readStream.on('error', function (err) {
+          callback(err);
+        });
+
+        readStream.on('end', function () {
+          res.end();
+        });
+      })
+      .catch(callback);
+  };
 
   /**
    * Count independent transmission chains
@@ -310,11 +152,9 @@ module.exports = function (Outbreak) {
     this.preProcessTransmissionChainsFilter(filter, options)
       .then(function (processedFilter) {
         // we don't need to retrieve all fields from database to determine the number of chains
-        // & don't limit relationships
         Object.assign(
           processedFilter.filter, {
-            retrieveFields: filter.retrieveFields,
-            dontLimitRelationships: true
+            retrieveFields: filter.retrieveFields
           }
         );
 
@@ -558,7 +398,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.buildNewChainsFromRegisteredContactsWhoBecameCases = function (filter, options, callback) {
     // determine if we need to send to client just some specific fields
-    filter.dontLimitRelationships = true;
     filter.retrieveFields = {
       edges: {
         id: 1,
@@ -614,7 +453,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.countNewChainsFromRegisteredContactsWhoBecameCases = function (filter, options, callback) {
     // we don't need to retrieve all fields from database to determine the number of chains
-    filter.dontLimitRelationships = true;
     filter.retrieveFields = {
       edges: {
         id: 1,
