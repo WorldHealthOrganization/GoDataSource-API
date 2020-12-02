@@ -4,7 +4,6 @@ const transmissionChain = require('../../components/workerRunner').transmissionC
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
-const config = require('../../server/config.json');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
