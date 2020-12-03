@@ -9,7 +9,6 @@ const configSettings = require('../../server/config.json');
 const syncActionsSettings = configSettings.sync;
 const SyncClient = require('../../components/syncClient');
 const tmp = require('tmp');
-const logger = require('./../../components/logger');
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -394,7 +393,7 @@ module.exports = function (app) {
             } catch (remErr) {
               // we don't have rights to delete directory or something has gone wrong...
               // log data and continue as God intended to be..without any worries...
-              logger.error(`Failed removing tmp uploaded directories: ${remErr}`);
+              app.logger.error(`Failed removing tmp uploaded directories: ${remErr}`);
             }
           };
 
@@ -428,7 +427,7 @@ module.exports = function (app) {
                 } catch (remFileErr) {
                   // we don't have rights to delete file or something has gone wrong...
                   // log data and continue as God intended to be..without any worries...
-                  logger.error(`Failed removing tmp file / directory: ${remFileErr}`);
+                  app.logger.error(`Failed removing tmp file / directory: ${remFileErr}`);
                 }
               }
             }
@@ -469,7 +468,7 @@ module.exports = function (app) {
       } catch (remErr) {
         // we don't have rights to delete files or something has gone wrong...
         // log data and continue as God intended to be..without any worries...
-        logger.error(`Failed removing tmp snapshot files: ${remErr}`);
+        app.logger.error(`Failed removing tmp snapshot files: ${remErr}`);
       }
 
       // finished
