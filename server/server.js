@@ -180,7 +180,7 @@ if (clusterConfig.enabled === true) {
 
       if (workerWithScheduler === worker.id) {
         // worker with scheduler has died; we need to start a new worker with scheduler
-        logger.debug(`Worker that died was responsible for scheduler. Starting a new worker with scheduler`);
+        logger.debug('Worker that died was responsible for scheduler. Starting a new worker with scheduler');
         const newWorker = cluster.fork({startScheduler: true});
         workerWithScheduler = newWorker.id;
       } else {
@@ -219,7 +219,7 @@ if (clusterConfig.enabled === true) {
           // no eol; chunk is part of a bigger message; will not log it now
           message[type] += chunkMessage;
         }
-      }
+      };
 
       worker.process.stdout.on('data', chunk => {
         logWorkerMessage(chunk, 'info');

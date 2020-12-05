@@ -30,7 +30,7 @@ function getMongoDBClient(mongoOptions = {}) {
     });
   }
   return MongoClient
-    .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
+    .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions);
 }
 
 /**
