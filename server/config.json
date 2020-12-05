@@ -165,5 +165,9 @@
   },
   "cot": {
     "containerPath": "./storage/files"
+  },
+  "cluster": {
+    "enabled": false,
+    "processesNo": "max"
   }
 }

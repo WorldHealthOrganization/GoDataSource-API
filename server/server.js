@@ -1,126 +1,245 @@
 'use strict';
 
-// load dependencies
-const ip = require('ip');
-const _ = require('lodash');
-const request = require('request');
-const config = require('./config');
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+const clusterConfig = require('./config.json').cluster || {};
+const accessTokensCleanup = require('./../components/accessTokensCleanup');
 
-let app;
+/**
+ * Start server
+ * @param {Object} [logger] - Logger instance
+ * @param {boolean} [startScheduler] - Flag specifying whether the process needs to start the scheduler
+ */
+const startServer = function (logger, startScheduler) {
+  // load dependencies
+  const ip = require('ip');
+  const _ = require('lodash');
+  const request = require('request');
+  const config = require('./config');
+  const path = require('path');
+  const fs = require('fs');
+  const url = require('url');
 
-// catch exceptions on startup
-process.on('uncaughtException', function (e) {
-  // check if app is initialized
-  if (typeof app !== 'undefined') {
-    app.logger.log('error', e);
-    // stop process and log error
-    app.logger.exitProcessAfterFlush(1);
-  } else {
-    /* eslint-disable no-console */
-    console.error(e);
-    /* eslint-enable no-console*/
-    process.exit(1);
-  }
-});
+  let app;
 
-// also catch unhandled rejections
-process.on('unhandledRejection', function (r) {
-  throw r;
-});
-
-const beforeBoot = require('./beforeBoot/beforeBoot');
-const logger = require('../components/logger');
-
-const loopback = require('loopback');
-const boot = require('loopback-boot');
-
-app = module.exports = loopback();
-app.logger = logger;
-
-app.start = function () {
-  // start the web server
-  const server = app.listen(function () {
-    app.emit('started');
-
-    if (config.enableConfigRewrite) {
-      // try and figure out IP address
-      let baseUrl = `http://${ip.address()}:${config.port}`;
-
-      app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
-
-      // test if that IP address is actually the correct one by making a status request
-      request({
-        uri: `${baseUrl}/status`,
-        json: true,
-        // do not wait a lot of time for the server to respond
-        timeout: 3000
-      }, function (error, response, body) {
-        // if an error occurred
-        if (error) {
-          // log it
-          app.logger.error(error);
-          // fallback to standard loopback address
-          baseUrl = app.get('url').replace(/\/$/, '');
-        }
-        // no error, but unexpected response
-        if (!body || !body.started) {
-          // log unexpected response
-          app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
-          // fallback to standard loopback address
-          baseUrl = app.get('url').replace(/\/$/, '');
-        }
-
-        app.logger.info('Web server listening at: %s', baseUrl);
-        if (app.get('loopback-component-explorer')) {
-          const explorerPath = app.get('loopback-component-explorer').mountPath;
-          app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
-        }
-
-        // make sure we update the public data
-        const urlData = url.parse(baseUrl);
-        _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
-        _.set(config, 'public.host', urlData.hostname);
-        _.set(config, 'public.port', urlData.port);
-
-        // update configuration
-        const configPath = path.resolve(__dirname + '/config.json');
-        fs.writeFileSync(
-          configPath,
-          JSON.stringify(config, null, 2)
-        );
-
-        // config saved
-        app.logger.info(
-          'Config file ( %s ) public data updated to: %s',
-          configPath,
-          JSON.stringify(config.public)
-        );
-      });
+  // catch exceptions on startup
+  process.on('uncaughtException', function (e) {
+    // check if app is initialized
+    if (typeof app !== 'undefined') {
+      app.logger.log('error', e);
+      // stop process and log error
+      app.logger.exitProcessAfterFlush(1);
+    } else {
+      /* eslint-disable no-console */
+      console.error(e);
+      /* eslint-enable no-console*/
+      process.exit(1);
     }
   });
 
-  // remove default socket timeout and set it 12 hours
-  // ref: https://nodejs.org/dist/latest-v12.x/docs/api/http.html#http_server_timeout
-  server.timeout = 43200000;
-
-  return server;
-};
-
-// run custom before boot initialisation
-beforeBoot(app, function (error) {
-  if (error) throw error;
-
-  // Bootstrap the application, configure models, datasources and middleware.
-  // Sub-apps like REST API are mounted via boot scripts.
-  boot(app, __dirname, function (err) {
-    if (err) throw err;
-
-    // start the server if `$ node server.js`
-    if (require.main === module)
-      app.start();
+  // also catch unhandled rejections
+  process.on('unhandledRejection', function (r) {
+    throw r;
   });
 
-});
+  const beforeBoot = require('./beforeBoot/beforeBoot');
+  logger = logger || require('../components/logger')();
+
+  const loopback = require('loopback');
+  const boot = require('loopback-boot');
+
+  app = module.exports = loopback();
+  app.logger = logger;
+
+  // set flag for scheduler start
+  app.startScheduler = startScheduler || false;
+
+  app.start = function () {
+    // start the web server
+    const server = app.listen(function () {
+      app.emit('started');
+
+      if (config.enableConfigRewrite) {
+        // try and figure out IP address
+        let baseUrl = `http://${ip.address()}:${config.port}`;
+
+        app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
+
+        // test if that IP address is actually the correct one by making a status request
+        request({
+          uri: `${baseUrl}/status`,
+          json: true,
+          // do not wait a lot of time for the server to respond
+          timeout: 3000
+        }, function (error, response, body) {
+          // if an error occurred
+          if (error) {
+            // log it
+            app.logger.error(error);
+            // fallback to standard loopback address
+            baseUrl = app.get('url').replace(/\/$/, '');
+          }
+          // no error, but unexpected response
+          if (!body || !body.started) {
+            // log unexpected response
+            app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
+            // fallback to standard loopback address
+            baseUrl = app.get('url').replace(/\/$/, '');
+          }
+
+          app.logger.info('Web server listening at: %s', baseUrl);
+          if (app.get('loopback-component-explorer')) {
+            const explorerPath = app.get('loopback-component-explorer').mountPath;
+            app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
+          }
+
+          // make sure we update the public data
+          const urlData = url.parse(baseUrl);
+          _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
+          _.set(config, 'public.host', urlData.hostname);
+          _.set(config, 'public.port', urlData.port);
+
+          // update configuration
+          const configPath = path.resolve(__dirname + '/config.json');
+          fs.writeFileSync(
+            configPath,
+            JSON.stringify(config, null, 2)
+          );
+
+          // config saved
+          app.logger.info(
+            'Config file ( %s ) public data updated to: %s',
+            configPath,
+            JSON.stringify(config.public)
+          );
+        });
+      }
+    });
+
+    // remove default socket timeout and set it 12 hours
+    // ref: https://nodejs.org/dist/latest-v12.x/docs/api/http.html#http_server_timeout
+    server.timeout = 43200000;
+
+    return server;
+  };
+
+  // run custom before boot initialisation
+  beforeBoot(app, function (error) {
+    if (error) throw error;
+
+    // Bootstrap the application, configure models, datasources and middleware.
+    // Sub-apps like REST API are mounted via boot scripts.
+    boot(app, __dirname, function (err) {
+      if (err) throw err;
+
+      // start the server if `$ node server.js`
+      if (require.main === module)
+        app.start();
+    });
+
+  });
+};
+
+// check if cluster is enabled
+if (clusterConfig.enabled === true) {
+  const cluster = require('cluster');
+  const cpusNo = require('os').cpus().length;
+  let processesNo = clusterConfig.processesNo === 'max' ?
+    cpusNo :
+    parseInt(clusterConfig.processesNo);
+  (isNaN(processesNo) || processesNo > cpusNo) && (processesNo = cpusNo);
+
+  if (cluster.isMaster) {
+    // set cluster options
+    cluster.schedulingPolicy = cluster.SCHED_RR;
+    cluster.setupMaster({
+      silent: true,
+      windowsHide: true
+    });
+
+    // get logger; will get stdout and stderr from child processes so no need for formatting
+    const logger = require('../components/logger')(true, {
+      json: false,
+      timestamp: false,
+      showLevel: false
+    });
+    logger.debug(`Master ${process.pid} is running. Forking ${processesNo} processes`);
+
+    // remove access tokens if needed
+    accessTokensCleanup(logger);
+
+    // Fork workers.
+    for (let i = 0; i < processesNo; i++) {
+      // send param to the first child process to start scheduler; the other child processes will not touch the scheduler
+      cluster.fork(i === 0 ? {startScheduler: true} : {});
+    }
+
+    // initialize cache for worker with scheduler
+    let workerWithScheduler = 1;
+
+    cluster.on('exit', (worker, code, signal) => {
+      logger.debug(`Worker ${worker.process.pid} died. Code ${code}. Signal ${signal}`);
+
+      if (workerWithScheduler === worker.id) {
+        // worker with scheduler has died; we need to start a new worker with scheduler
+        logger.debug(`Worker that died was responsible for scheduler. Starting a new worker with scheduler`);
+        const newWorker = cluster.fork({startScheduler: true});
+        workerWithScheduler = newWorker.id;
+      } else {
+        cluster.fork();
+      }
+    });
+
+    // capture stdout and stderr from child processes and log messages
+    cluster.on('online', (worker) => {
+      logger.debug(`Worker ${worker.process.pid} started`);
+
+      // initialize messages to be logged
+      const message = {
+        info: '',
+        error: ''
+      };
+
+      /**
+       * Log worker messages; They come in chunks
+       * Concatenate related chunks to not have split messages in log
+       * @param {Buffer} chunk - Chunk received from worker
+       * @param {String} type - Type of message to be handled
+       */
+      const logWorkerMessage = function (chunk, type) {
+        const chunkMessage = chunk.toString();
+        const endOfLineIndex = chunkMessage.indexOf('\n');
+        if (endOfLineIndex !== -1) {
+          // we found an eol finish current message and log it
+          message[type] += chunkMessage.substring(0, endOfLineIndex);
+          logger.info(message[type]);
+
+          // reinitialize message with remaining message in chunk
+          const remainingMessage = chunkMessage.substring(endOfLineIndex + '\n'.length);
+          message[type] = remainingMessage.length ? remainingMessage : '';
+        } else {
+          // no eol; chunk is part of a bigger message; will not log it now
+          message[type] += chunkMessage;
+        }
+      }
+
+      worker.process.stdout.on('data', chunk => {
+        logWorkerMessage(chunk, 'info');
+      });
+      worker.process.stderr.on('data', chunk => {
+        logWorkerMessage(chunk, 'error');
+      });
+    });
+  } else {
+    // start server
+    startServer(null, process.env.startScheduler === 'true');
+  }
+} else {
+  // single process
+  // get full logger
+  const logger = require('../components/logger')(true);
+
+  // remove access tokens if needed
+  accessTokensCleanup(logger);
+
+  // start server
+  startServer(logger, true);
+}

@@ -10,7 +10,7 @@ const path = require('path');
 const AdmZip = require('adm-zip');
 const _ = require('lodash');
 
-const logger = require('./../logger');
+const logger = require('./../logger')(true);
 const dbSync = require('./../dbSync');
 const workerRunner = require('./../workerRunner');
 const dbConfig = require('./../../server/datasources').mongoDb;
@@ -683,8 +683,8 @@ const worker = {
                       const cleanArchiveDataRecursive = (dirPath) => {
                         if (fs.existsSync(dirPath)) {
                           // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
-                          fs.readdirSync(dirPath).forEach(function(fileOrDirToRemovePath) {
-                            const currentPath =  `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
+                          fs.readdirSync(dirPath).forEach(function (fileOrDirToRemovePath) {
+                            const currentPath = `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
                             if (fs.lstatSync(currentPath).isDirectory()) {
                               // remove directory content
                               cleanArchiveDataRecursive(currentPath);

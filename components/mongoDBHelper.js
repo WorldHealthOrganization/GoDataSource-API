@@ -15,16 +15,11 @@ const uuid = require('uuid');
 let mongoDBConnection;
 
 /**
- * Create MongoDB connection and return it
- * @returns {Promise<Db | never>}
+ * Get MongoDB client
+ * @param {Object} mongoOptions - MongoDB connection options
+ * @returns {Promise<MongoClient>}
  */
-function getMongoDBConnection(mongoOptions = {}) {
-  // use existing connection if one was already initialized
-  // this is in order to prevent creating new connections for different actions
-  if (mongoDBConnection) {
-    return Promise.resolve(mongoDBConnection);
-  }
-
+function getMongoDBClient(mongoOptions = {}) {
   if (dbConfig.password) {
     mongoOptions = Object.assign(mongoOptions, {
       auth: {
@@ -36,6 +31,21 @@ function getMongoDBConnection(mongoOptions = {}) {
   }
   return MongoClient
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
+}
+
+/**
+ * Create MongoDB connection and return it
+ * @param {Object} mongoOptions - MongoDB connection options
+ * @returns {Promise<Db | never>}
+ */
+function getMongoDBConnection(mongoOptions = {}) {
+  // use existing connection if one was already initialized
+  // this is in order to prevent creating new connections for different actions
+  if (mongoDBConnection) {
+    return Promise.resolve(mongoDBConnection);
+  }
+
+  return getMongoDBClient(mongoOptions)
     .then(function (client) {
       // cache connection
       mongoDBConnection = client
@@ -140,6 +150,7 @@ function executeAction(collectionName, actionName, params, logger = console) {
 }
 
 module.exports = {
+  getMongoDBClient,
   getMongoDBConnection,
   getMongoDBProjectionFromLoopbackFields,
   getMongoDBOptionsFromLoopbackFilter,
