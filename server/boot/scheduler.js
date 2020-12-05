@@ -26,6 +26,12 @@ const shouldExecute = function (startTime, interval, timeUnit) {
 const automaticSyncID = 'Scheduled automatic sync';
 
 module.exports = function (app) {
+  // when using cluster only one child process will start the scheduler
+  if (!app.startScheduler) {
+    app.logger.debug(`Process ${process.pid} will not start scheduler`);
+    return;
+  }
+
   /**
    * Trigger automatic sync
    * @param server

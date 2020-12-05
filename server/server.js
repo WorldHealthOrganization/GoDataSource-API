@@ -1,13 +1,14 @@
 'use strict';
 
 const clusterConfig = require('./config.json').cluster || {};
-const accessTokenCleanup = require('./../components/accessTokensCleanup');
+const accessTokensCleanup = require('./../components/accessTokensCleanup');
 
 /**
- *
+ * Start server
+ * @param {Object} [logger] - Logger instance
+ * @param {boolean} [startScheduler] - Flag specifying whether the process needs to start the scheduler
  */
-const startServer = function () {
-
+const startServer = function (logger, startScheduler) {
   // load dependencies
   const ip = require('ip');
   const _ = require('lodash');
@@ -40,13 +41,16 @@ const startServer = function () {
   });
 
   const beforeBoot = require('./beforeBoot/beforeBoot');
-  const logger = require('../components/logger')();
+  logger = logger || require('../components/logger')();
 
   const loopback = require('loopback');
   const boot = require('loopback-boot');
 
   app = module.exports = loopback();
   app.logger = logger;
+
+  // set flag for scheduler start
+  app.startScheduler = startScheduler || false;
 
   app.start = function () {
     // start the web server
@@ -144,33 +148,98 @@ if (clusterConfig.enabled === true) {
   (isNaN(processesNo) || processesNo > cpusNo) && (processesNo = cpusNo);
 
   if (cluster.isMaster) {
-    // get full logger
-    const logger = require('../components/logger')(true);
+    // set cluster options
+    cluster.schedulingPolicy = cluster.SCHED_RR;
+    cluster.setupMaster({
+      silent: true,
+      windowsHide: true
+    });
+
+    // get logger; will get stdout and stderr from child processes so no need for formatting
+    const logger = require('../components/logger')(true, {
+      json: false,
+      timestamp: false,
+      showLevel: false
+    });
     logger.debug(`Master ${process.pid} is running. Forking ${processesNo} processes`);
+
+    // remove access tokens if needed
+    accessTokensCleanup(logger);
 
     // Fork workers.
     for (let i = 0; i < processesNo; i++) {
-      cluster.fork();
+      // send param to the first child process to start scheduler; the other child processes will not touch the scheduler
+      cluster.fork(i === 0 ? {startScheduler: true} : {});
     }
 
+    // initialize cache for worker with scheduler
+    let workerWithScheduler = 1;
+
     cluster.on('exit', (worker, code, signal) => {
-      logger.debug(`worker ${worker.process.pid} died`);
+      logger.debug(`Worker ${worker.process.pid} died. Code ${code}. Signal ${signal}`);
+
+      if (workerWithScheduler === worker.id) {
+        // worker with scheduler has died; we need to start a new worker with scheduler
+        logger.debug(`Worker that died was responsible for scheduler. Starting a new worker with scheduler`);
+        const newWorker = cluster.fork({startScheduler: true});
+        workerWithScheduler = newWorker.id;
+      } else {
+        cluster.fork();
+      }
+    });
+
+    // capture stdout and stderr from child processes and log messages
+    cluster.on('online', (worker) => {
+      logger.debug(`Worker ${worker.process.pid} started`);
+
+      // initialize messages to be logged
+      const message = {
+        info: '',
+        error: ''
+      };
+
+      /**
+       * Log worker messages; They come in chunks
+       * Concatenate related chunks to not have split messages in log
+       * @param {Buffer} chunk - Chunk received from worker
+       * @param {String} type - Type of message to be handled
+       */
+      const logWorkerMessage = function (chunk, type) {
+        const chunkMessage = chunk.toString();
+        const endOfLineIndex = chunkMessage.indexOf('\n');
+        if (endOfLineIndex !== -1) {
+          // we found an eol finish current message and log it
+          message[type] += chunkMessage.substring(0, endOfLineIndex);
+          logger.info(message[type]);
+
+          // reinitialize message with remaining message in chunk
+          const remainingMessage = chunkMessage.substring(endOfLineIndex + '\n'.length);
+          message[type] = remainingMessage.length ? remainingMessage : '';
+        } else {
+          // no eol; chunk is part of a bigger message; will not log it now
+          message[type] += chunkMessage;
+        }
+      }
+
+      worker.process.stdout.on('data', chunk => {
+        logWorkerMessage(chunk, 'info');
+      });
+      worker.process.stderr.on('data', chunk => {
+        logWorkerMessage(chunk, 'error');
+      });
     });
   } else {
-    console.debug(`Worker ${process.pid} started`);
-
     // start server
-    startServer();
+    startServer(null, process.env.startScheduler === 'true');
   }
-
 } else {
   // single process
   // get full logger
   const logger = require('../components/logger')(true);
 
   // remove access tokens if needed
-  accessTokenCleanup(logger);
+  accessTokensCleanup(logger);
 
   // start server
-  startServer();
+  startServer(logger, true);
 }

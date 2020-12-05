@@ -12,24 +12,25 @@ if (config.logging.level === 'warning') {
 /**
  * Get logger
  * @param {boolean} fileLogger - Flag specifying if logs should be written to file
+ * @param {object} fileLoggerOptions - Additional options for the file logger
  * @returns {winston.LoggerInstance}
  */
-module.exports = function (fileLogger = false) {
+module.exports = function (fileLogger = false, fileLoggerOptions = {}) {
   let logger;
   // check if we need to write logs in file
   if (fileLogger) {
     winston.loggers.add('fileLogger', {
-      file: {
+      file: Object.assign({
         filename: `${__dirname}/../logs/application.log`,
         level: config.logging.level,
         maxsize: config.logging.maxSize,
         maxFiles: config.logging.maxFiles,
         tailable: true
-      },
-      console: {
+      }, fileLoggerOptions),
+      console: Object.assign({
         stderrLevels: ['error'],
         level: config.logging.level
-      }
+      }, fileLoggerOptions)
     });
 
     logger = winston.loggers.get('fileLogger');
@@ -37,7 +38,10 @@ module.exports = function (fileLogger = false) {
     winston.loggers.add('consoleLogger', {
       console: {
         stderrLevels: ['error'],
-        level: config.logging.level
+        level: config.logging.level,
+        json: true,
+        timestamp: true,
+        stringify: true
       }
     });
 
