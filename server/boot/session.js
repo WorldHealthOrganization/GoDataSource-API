@@ -1,10 +1,5 @@
 'use strict';
 
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-const uuid = require('uuid').v4;
-const MongoDBHelper = require('./../../components/mongoDBHelper');
-
 const config = require('../config');
 const appSessionConfig = config.session || {};
 const captchaConfig = config.captcha || {};
@@ -22,6 +17,11 @@ module.exports = function (app) {
   ) {
     return;
   }
+
+  const session = require('express-session');
+  const MongoStore = require('connect-mongo')(session);
+  const uuid = require('uuid').v4;
+  const MongoDBHelper = require('./../../components/mongoDBHelper');
 
   // set default data if config not found
   appSessionConfig.appSId = appSessionConfig.appSId || 'GoData';
