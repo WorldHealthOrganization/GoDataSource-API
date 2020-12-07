@@ -29,10 +29,11 @@ module.exports = function (Outbreak) {
   /**
    * Calculate independent transmission chains in async mode
    * @param {Object} filter - also accepts 'active' boolean on the first level in 'where'. Supports endDate property on first level of where. It is used to provide a snapshot of chains until the specified end date
+   * @param {Object} data
    * @param {Object} options
    * @param {Function} callback
    */
-  Outbreak.prototype.calculateIndependentTransmissionChains = function (filter, options, callback) {
+  Outbreak.prototype.calculateIndependentTransmissionChains = function (filter, data, options, callback) {
     const self = this;
 
     let cotDBEntry;
@@ -40,6 +41,7 @@ module.exports = function (Outbreak) {
     app.models.transmissionChain
       .create({
         outbreakId: self.id,
+        name: data.name,
         startDate: new Date(),
         status: 'LNG_COT_STATUS_IN_PROGRESS'
       }, options)
