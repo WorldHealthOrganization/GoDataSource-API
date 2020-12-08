@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoDBHelper = require('./mongoDBHelper');
 const config = require('./../server/config.json');
 
 /**
@@ -9,6 +8,7 @@ const config = require('./../server/config.json');
  */
 module.exports = function (logger) {
   if (config.signoutUsersOnRestart) {
+    const MongoDBHelper = require('./mongoDBHelper');
     MongoDBHelper
       .executeAction('accessToken', 'remove', [{}])
       .catch(err => {

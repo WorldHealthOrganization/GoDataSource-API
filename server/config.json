@@ -167,7 +167,7 @@
     "containerPath": "./storage/files"
   },
   "cluster": {
-    "enabled": false,
+    "enabled": true,
     "processesNo": "max"
   }
 }
