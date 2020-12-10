@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const config = require('../../server/config.json');
+const zlib = require('zlib');
 
 // calculate cot storage path
 const storagePath = config.cot && config.cot.containerPath ?
@@ -25,7 +26,7 @@ module.exports = {
      * @returns {string}
      */
     getFileName: function (cotInstanceId) {
-      return `${cotInstanceId}.json`;
+      return `${cotInstanceId}.gzip`;
     },
     /**
      * Get COT file path given the instance ID
@@ -42,8 +43,45 @@ module.exports = {
      * @returns {*}
      */
     saveFile: function (cotInstance, cot) {
-      return fs
-        .writeJSON(this.getFilePath(cotInstance.id), cot);
+      // create promise
+      return new Promise((resolve, reject) => {
+        try {
+          // stringify
+          const cotString = JSON.stringify(cot);
+
+          // gzip data
+          zlib.gzip(
+            cotString,
+            (errGzip, buffer) => {
+              // error ?
+              if (errGzip) {
+                return reject(errGzip);
+              }
+
+              // write data
+              try {
+                fs.writeFile(
+                  this.getFilePath(cotInstance.id),
+                  buffer,
+                  (errWrite) => {
+                    // error ?
+                    if (errWrite) {
+                      return reject(errWrite);
+                    }
+
+                    // success
+                    resolve();
+                  }
+                );
+              } catch (e2) {
+                reject(e2);
+              }
+            }
+          );
+        } catch (e) {
+          reject(e);
+        }
+      });
     },
     /**
      * Get COT file contents
