@@ -108,7 +108,14 @@ module.exports = function (Outbreak) {
           }));
         }
 
+        // determine size used by FE for progress & compression
+        res.set({
+          'Content-Encoding': 'gzip'
+        });
+
+        // read file
         const readStream = baseTransmissionChainModel.helpers.getFileContents(cotDBEntry);
+
         // This will wait until we know the readable stream is actually valid before piping
         readStream.on('open', function () {
           // This just pipes the read stream to the response object (which goes to the client)
@@ -478,4 +485,18 @@ module.exports = function (Outbreak) {
       callback(null, result);
     });
   };
+
+  /**
+   * Get transmission chains
+   * - add file size
+   */
+  Outbreak.afterRemote('prototype.__get__transmissionChains', function (context, modelInstance, next) {
+    // determine file size
+    (modelInstance || []).forEach((tChain) => {
+      app.models.transmissionChain.attachCustomProperties(tChain);
+    });
+
+    // finished
+    next();
+  });
 };
