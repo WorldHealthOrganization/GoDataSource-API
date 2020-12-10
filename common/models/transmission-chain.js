@@ -28,4 +28,25 @@ module.exports = function (TransmissionChain) {
     // finished
     next();
   });
+
+  /**
+   * Attach custom properties
+   */
+  TransmissionChain.attachCustomProperties = function (record) {
+    // determine file size
+    let sizeBytes;
+    try {
+      const filePath = baseTransmissionChainModel.helpers.getFilePath(record.id);
+      if (fs.existsSync(filePath)) {
+        const stats = fs.statSync(filePath);
+        sizeBytes = stats.size;
+      }
+    } catch (e) {
+      app.logger.error(`Can't determine snapshot size ( ${record.id} )`);
+      sizeBytes = undefined;
+    }
+
+    // set backup size
+    record.sizeBytes = sizeBytes;
+  };
 };

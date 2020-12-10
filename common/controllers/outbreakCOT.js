@@ -485,4 +485,18 @@ module.exports = function (Outbreak) {
       callback(null, result);
     });
   };
+
+  /**
+   * Get transmission chains
+   * - add file size
+   */
+  Outbreak.afterRemote('prototype.__get__transmissionChains', function (context, modelInstance, next) {
+    // determine file size
+    (modelInstance || []).forEach((tChain) => {
+      app.models.transmissionChain.attachCustomProperties(tChain);
+    });
+
+    // finished
+    next();
+  });
 };
