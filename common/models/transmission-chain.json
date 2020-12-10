@@ -10,6 +10,11 @@
       "type": "string",
       "description": "Outbreak for which the transmission chain was calculated"
     },
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "Name of the transmission chain snapshot"
+    },
     "status": {
       "type": "string",
       "description": "Status of transmission chain calculation",

@@ -403,5 +403,9 @@
   "twoFactorAuthenticationStep2": {
     "dataSource": null,
     "public": false
+  },
+  "transmissionChainCalculate": {
+    "dataSource": null,
+    "public": false
   }
 }
