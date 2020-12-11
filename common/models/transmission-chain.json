@@ -36,6 +36,14 @@
     },
     "error": {
       "type": "string"
+    },
+    "showContacts": {
+      "type": "boolean",
+      "default": false
+    },
+    "showContactsOfContacts": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],
