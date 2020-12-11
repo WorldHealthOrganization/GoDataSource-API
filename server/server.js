@@ -138,8 +138,12 @@ const startServer = function (logger, startScheduler) {
   });
 };
 
-// check if cluster is enabled
-if (clusterConfig.enabled === true) {
+// check if cluster is enabled only if the server needs to start
+// for package.json actions we will not use cluster
+if (
+  require.main === module &&
+  clusterConfig.enabled === true
+) {
   const cluster = require('cluster');
   const cpusNo = require('os').cpus().length;
   let processesNo = clusterConfig.processesNo === 'max' ?
