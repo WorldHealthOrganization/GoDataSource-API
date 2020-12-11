@@ -36,6 +36,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.calculateIndependentTransmissionChains = function (filter, data, options, callback) {
     const self = this;
 
+    filter = filter || {};
     const where = filter.where || {};
     let cotDBEntry;
     // create cot DB entry
