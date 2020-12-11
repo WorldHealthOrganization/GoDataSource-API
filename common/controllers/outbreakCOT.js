@@ -36,6 +36,8 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.calculateIndependentTransmissionChains = function (filter, data, options, callback) {
     const self = this;
 
+    filter = filter || {};
+    const where = filter.where || {};
     let cotDBEntry;
     // create cot DB entry
     app.models.transmissionChain
@@ -43,7 +45,9 @@ module.exports = function (Outbreak) {
         outbreakId: self.id,
         name: data.name,
         startDate: new Date(),
-        status: 'LNG_COT_STATUS_IN_PROGRESS'
+        status: 'LNG_COT_STATUS_IN_PROGRESS',
+        showContacts: where.includeContacts,
+        showContactsOfContacts: where.includeContactsOfContacts
       }, options)
       .then(result => {
         // send response
