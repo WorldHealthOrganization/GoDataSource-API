@@ -172,7 +172,9 @@ const run = function (cb) {
           return {
             langTokens,
             sourceTemplate: data.sourceTemplate,
-            destinationTemplate: data.destinationTemplate
+            destinationTemplate: data.destinationTemplate,
+            sourceLanguageTokens: data.sourceLanguageTokens,
+            destinationLanguageTokens: data.destinationLanguageTokens
           };
         });
     })
@@ -311,6 +313,100 @@ const run = function (cb) {
           'text'
         );
       });
+
+      // should we force deep search ?
+      if (module.methodRelevantArgs.deepSearch) {
+        // log
+        console.log('Proceeding for deep search...');
+
+        // map compareLanguage source translations to other language translations
+        const compareLanguageMap = {};
+        _.each(data.sourceLanguageTokens, (templateTokens) => {
+          _.each(templateTokens, (NOTHING, langToken) => {
+            if (
+              langTokensMap[compareLanguage] &&
+              langTokensMap[compareLanguage][langToken] &&
+              langTokensMap[compareLanguage][langToken].translation &&
+              langTokensMap[compareLanguage][langToken].translation.trim()
+            ) {
+              // check the other languages if they are different
+              _.each(langTokensMap, (languageMap, languageId) => {
+                // ignore compare language
+                if (
+                  languageId === compareLanguage ||
+                  !langTokensMap[languageId][langToken] ||
+                  !langTokensMap[languageId][langToken].translation ||
+                  !langTokensMap[languageId][langToken].translation.trim()
+                ) {
+                  return;
+                }
+
+                // initialize ?
+                if (!compareLanguageMap[langTokensMap[compareLanguage][langToken].translation.trim().toLowerCase()]) {
+                  compareLanguageMap[langTokensMap[compareLanguage][langToken].translation.trim().toLowerCase()] = {};
+                }
+
+                // map translation
+                compareLanguageMap[langTokensMap[compareLanguage][langToken].translation.trim().toLowerCase()][languageId] = langTokensMap[languageId][langToken].translation.trim();
+              });
+            }
+          });
+        });
+
+        // go through each template
+        _.each(data.destinationLanguageTokens, (templateTokens) => {
+          _.each(templateTokens, (NOTHING, langToken) => {
+            // check if we have other translations for this item compare language translation
+            if (
+              langTokensMap[compareLanguage][langToken] &&
+              langTokensMap[compareLanguage][langToken].translation &&
+              langTokensMap[compareLanguage][langToken].translation.trim() &&
+              compareLanguageMap[langTokensMap[compareLanguage][langToken].translation.trim().toLowerCase()]
+            ) {
+              _.each(compareLanguageMap[langTokensMap[compareLanguage][langToken].translation.trim().toLowerCase()], (translation, languageId) => {
+                if (langTokensMap[languageId][langToken].translation.trim().toLowerCase() !== translation.trim().toLowerCase()) {
+                  // log message
+                  console.log(`Deep: Should update ${languageId}: '${langTokensMap[languageId][langToken].translation}' to '${translation}'`);
+
+                  // create update job
+                  (function (
+                    tokenId,
+                    tokenOldTranslation,
+                    tokenNewTranslation
+                  ) {
+                    tokenUpdateJobs.push((childCallback) => {
+                      // log
+                      console.log(`Deep: Updating token '${tokenId}' from '${tokenOldTranslation}' to '${tokenNewTranslation}'`);
+
+                      // update
+                      dbConnection.collection('languageToken')
+                        .updateOne({
+                          _id: tokenId
+                        }, {
+                          '$set': {
+                            translation: tokenNewTranslation
+                          }
+                        })
+                        .then(() => {
+                          // log
+                          console.log(`Deep: Finished updating token '${tokenId}' from '${tokenOldTranslation}' to '${tokenNewTranslation}'`);
+
+                          // finished
+                          childCallback();
+                        })
+                        .catch(childCallback);
+                    });
+                  })(
+                    langTokensMap[languageId][langToken]._id,
+                    langTokensMap[languageId][langToken].translation,
+                    translation
+                  );
+                }
+              });
+            }
+          });
+        });
+      }
 
       // execute token update operations
       if (tokenUpdateJobs.length > 0) {

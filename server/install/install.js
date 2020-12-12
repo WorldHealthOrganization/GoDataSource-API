@@ -364,6 +364,9 @@ const routines = {
       }, {
         name: 'compareLanguage',
         type: PARSE_TYPE.STRING
+      }, {
+        name: 'deepSearch',
+        type: PARSE_TYPE.BOOLEAN
       }
     ];
     methodRelevantArgs = parseArgumentValues(requiredArgs);
