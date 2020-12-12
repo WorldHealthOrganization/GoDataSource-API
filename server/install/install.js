@@ -21,7 +21,8 @@ const supportedArguments = [
   'set-relationships-information-on-person',
   'determine-and-dump-reference-data-items',
   'populate-missing-language-tokens',
-  'migrate-case-centre-name'
+  'migrate-case-centre-name',
+  'copy-language-from-template-questionnaires-to-template-questionnaires'
 ];
 // keep a list of functions that will be run
 const runFunctions = [];
@@ -349,6 +350,43 @@ const routines = {
       require('./scripts/migrations/older/migrateCaseCentreName').run
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
+    });
+  },
+  copyLanguageFromTemplateQuestionnairesToTemplateQuestionnaires: function() {
+    // where to check if reference data item from database are missing ?
+    const requiredArgs = [
+      {
+        name: 'sourceTemplate',
+        type: PARSE_TYPE.STRING
+      }, {
+        name: 'destinationTemplate',
+        type: PARSE_TYPE.STRING
+      }, {
+        name: 'compareLanguage',
+        type: PARSE_TYPE.STRING
+      }
+    ];
+    methodRelevantArgs = parseArgumentValues(requiredArgs);
+
+    // all above arg are required
+    let stop = false;
+    _.each(requiredArgs, (argKey) => {
+      if (methodRelevantArgs[argKey.name] === undefined) {
+        console.log(`The following arguments are required: ${requiredArgs.map(item => item.name).join(', ')}`);
+        stop = true;
+        return false;
+      }
+    });
+    if (stop) {
+      return;
+    }
+
+    // compare source with destination questionnaire, and copy languages
+    console.log('Copy questionnaire translations from one questionnaire to other');
+    [
+      require('./scripts/copyLanguageFromTemplateQuestionnairesToTemplateQuestionnaires')
+    ].forEach(function (installScript) {
+      runFunctions.push(installScript(methodRelevantArgs));
     });
   }
 };
