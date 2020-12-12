@@ -106,10 +106,10 @@
         "translation": "This permission allows modifying system settings"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG": {
-        "translation": "Audit Logs"
+        "translation": "Journaux d'audit"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG_DESCRIPTION": {
-        "translation": "Audit Logs permissions"
+        "translation": "Permissions des journaux d'audit"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG": {
         "translation": "Audit Log - list"
@@ -1111,7 +1111,7 @@
         "translation": "Contacts"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_DESCRIPTION": {
-        "translation": "Contact permissions"
+        "translation": "Permissions de contact"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT": {
         "translation": "Contact - list"
@@ -1414,19 +1414,19 @@
         "translation": "This permission allows exporting of lab results"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_FROM_CONTACT": {
-        "translation": "Contact - create contact of contacts"
+        "translation": "Contact - créer un contact de contacts"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION": {
         "translation": "This permission allows creating contacts of contacts from contact"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT": {
-        "translation": "Contact - bulk create contacts of contacts"
+        "translation": "Contact - créer en masse des contacts de contacts"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_BULK_CONTACT_OF_CONTACT_FROM_CONTACT_DESCRIPTION": {
         "translation": "This permission allows bulk creating contacts of contacts from contact"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP": {
-        "translation": "Contact Of Contact - share relationships"
+        "translation": "Contact de contact - partager les relations"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
         "translation": "This permission allows sharing of contact of contact relationships"
@@ -1786,157 +1786,157 @@
         "translation": "This permission allows exporting of lab results"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contacts"
+        "translation": "Contact de contacts"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_DESCRIPTION": {
-        "translation": "Contact Of Contact permissions"
+        "translation": "Permissions de contact de contact"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - list"
+        "translation": "Contact de contact - énumerer"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows listing contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - view"
+        "translation": "Contact de contact - voir "
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows viewing full contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - create"
+        "translation": "Contact de contact - créer"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows creating contact of contacts"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - modify"
+        "translation": "Contact de contact - modifier"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows modifying contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - delete"
+        "translation": "Contact de contact - supprimer"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows removing contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - restore"
+        "translation": "Contact de contact - restaurer"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows restoring deleted contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - export"
+        "translation": "Contact de contact - exporter"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows export of contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - import"
+        "translation": "Contact de contact - importer"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows import of contact of contact information"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID": {
-        "translation": "Contact Of Contact - generate id"
+        "translation": "Contact de contact - générer l'ID"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID_DESCRIPTION": {
         "translation": "This permission allows generation of contact of contact IDs ( visual id - outbreak contact of contact mask )"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - list relationship exposures"
+        "translation": "Contact de contact - énumérer les expositions des relations"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows listing contact of contact exposures"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - view relationship exposure"
+        "translation": "Contact de contact - voir les relations d'exposition"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows viewing contact of contact exposures"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - create relationship exposure"
+        "translation": "Contact de contact - créer la relation d'exposition"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows creating contact of contact exposures"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - modify relationship exposure"
+        "translation": "Contact de contact - modifier la relation d'exposition"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows modifying contact of contact exposures"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - delete relationship exposure"
+        "translation": "Contact de contact - supprimer les relations d'exposition"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows deleting contact of contact exposures"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER": {
-        "translation": "Contact Of Contact - export dossier"
+        "translation": "Contact de contact - exporter dossier"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER_DESCRIPTION": {
         "translation": "This permission allows export of contact of contact dossier document"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
-        "translation": "Contact Of Contact - view movement map"
+        "translation": "Contact de contact - voir carte des mouvements"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION": {
         "translation": "This permission allows viewing contact of contact movement map"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
-        "translation": "Contact Of Contact - export movement map"
+        "translation": "Contact de contact - exporter carte des mouvements"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP_DESCRIPTION": {
         "translation": "This permission allows exporting contact of contact movement map"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART": {
-        "translation": "Contact Of Contact - view chronology chart"
+        "translation": "Contact de contact - voir le tableau chronologique"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART_DESCRIPTION": {
         "translation": "This permission allows viewing contact of contact chronology chart"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK": {
-        "translation": "Contact Of Contact - group by risk"
+        "translation": "Contact de contact - groupe par risque"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK_DESCRIPTION": {
         "translation": "This permission allows grouping contacts of contacts by risk"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP": {
-        "translation": "Contact Of Contact - change source"
+        "translation": "Contact de contact - changer de source"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
         "translation": "This permission allows changing relationship source person"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP": {
-        "translation": "Contact Of Contact - change target"
+        "translation": "Contact de contact - changer d'objectif"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
         "translation": "This permission allows changing relationship target person"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - bulk create"
+        "translation": "Contact de contact - créer en masse"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows creating multiple contacts of contacts at the same time ( bulk )"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CONTACT_OF_CONTACT": {
-        "translation": "Contact Of Contact - bulk modify"
+        "translation": "Contact de contact - modifier en masse"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CONTACT_OF_CONTACT_DESCRIPTION": {
         "translation": "This permission allows modifying multiple contact of contacts at the same time ( bulk )"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP": {
-        "translation": "Contact of Contact - export relationships"
+        "translation": "Contact de contact - exporter relations"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DESCRIPTION": {
         "translation": "This permission allows exporting of contact of contact relationships"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-        "translation": "Contact Of Contact - bulk delete exposure relationships"
+        "translation": "Contact de contact - supprimer en masse les relations d'exposition"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
         "translation": "This permission allows deletion of contact of contact exposure relationships"
@@ -2760,13 +2760,13 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT": {
-        "translation": "Contact of Contact",
+        "translation": "Contact de contact",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT_DESCRIPTION": {
-        "translation": "",
+        "translation": "Contact de contact",
         "modules": [
           "referenceData"
         ]
@@ -2813,7 +2813,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION_FOR_OTHER_MEDICAL_CONDITIONS": {
-        "translation": "Hospitalization for other medical conditions",
+        "translation": "Hospitalisation pour d'autres conditions médicales",
         "modules": [
           "referenceData"
         ]
@@ -2831,13 +2831,13 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ICU_ADMISSION": {
-        "translation": "ICU Admission",
+        "translation": "Admission à l'ICU",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT": {
-        "translation": "Primary Health Care PHC (GP, etc)  Visit",
+        "translation": "Visite des soins de santé primaires (GP, etc.)",
         "modules": [
           "referenceData"
         ]
@@ -3219,7 +3219,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE_OTHER_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Other (specify in Notes field)",
+        "translation": "Autre (veuillez préciser dans le champ \"Notes\") ",
         "modules": [
           "referenceData"
         ]
@@ -3329,13 +3329,13 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_OTHER_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Other (specify in Notes field)",
+        "translation": "Autre (veuillez préciser dans le champ \"Notes\") ",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_PARTIAL_GENOME_SEQUENCING": {
-        "translation": "Partial genome sequencing",
+        "translation": "Séquençage partiel du génome",
         "modules": [
           "referenceData"
         ]
@@ -3347,7 +3347,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_WHOLE_GENOME_SEQUENCING": {
-        "translation": "Whole genome sequencing",
+        "translation": "Séquençage du génome entier",
         "modules": [
           "referenceData"
         ]
@@ -3421,7 +3421,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD": {
-        "translation": "Positive for other pathogens (specify in Notes field)",
+        "translation": "Positif pour d'autres agents pathogènes (à préciser dans le champ \"Notes\")",
         "modules": [
           "referenceData"
         ]
@@ -3657,25 +3657,25 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_ATE_DRANK_CONTAMINATED_MATERIAL": {
-        "translation": "Ate/drank contaminated material ",
+        "translation": "A mangé ou bu du matériel contaminé ",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_INTRAVENOUS_EXPOSURE": {
-        "translation": "Intravenous exposure ",
+        "translation": "L'exposition intraveineuse",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_OTHER_PLEASE_SPECIFY_IN_COMMENT_FIELD": {
-        "translation": "Other (please specify in comment field) ",
+        "translation": "Autre (veuillez préciser dans le champ \"Commentaire\") ",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE_SEXUAL_EXPOSURE": {
-        "translation": "Sexual exposure",
+        "translation": "L'exposition sexuelle",
         "modules": [
           "referenceData"
         ]
@@ -3999,7 +3999,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION_FRIENDS": {
-        "translation": "copains",
+        "translation": "Amis",
         "modules": [
           "referenceData"
         ]
@@ -4093,22 +4093,22 @@
     },
     "referenceDataCategoryFollowupGenerationTeamAssignmentAlgorithm": {
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
-        "translation": "Team assignment algorithm"
+        "translation": "Algorithme d'affectation des équipes"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
-        "translation": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location"
+        "translation": "Option précisant si la répartition des équipes dans le cadre du round-robin doit être effectuée en prenant en considération toutes les équipes s'activant dans le lieu du contact (via ce lieu ou les parents) ou seulement les équipes les plus proches. Par défaut : round-robin de toutes les équipes actives dans la localité du contact"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS": {
-        "translation": "Option 2 - Assign team responsible for the location where contact resides"
+        "translation": "Option 2 - Désigner l'équipe responsable du lieu où réside le contact"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS_DESCRIPTION": {
-        "translation": "Option 2 - Assign team responsible for the location where contact resides"
+        "translation": "Option 2 - Désigner l'équipe responsable du lieu où réside le contact"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT": {
-        "translation": "Option 1 - Assign team at the higher admin level"
+        "translation": "Option 1 - Désigner une équipe au niveau administratif supérieur"
       },
       "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT_DESCRIPTION": {
-        "translation": "Option 1 - Assign team at the higher admin level"
+        "translation": "Option 1 - Désigner une équipe au niveau administratif supérieur"
       }
     },
     "securityQuestions": {
@@ -4204,12 +4204,12 @@
         "translation": "Mis à jour par"
       },
       "LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON": {
-        "translation": "Created on"
+        "translation": "Créé le"
       }
     },
     "uiGenericLayout": {
       "LNG_LAYOUT_ACTION_CHANGE_LANGUAGE_SUCCESS_MESSAGE": {
-        "translation": "La langue a changé",
+        "translation": "La langue a été correctement modifiée",
         "modules": [
           "unauthenticated"
         ]
@@ -4230,19 +4230,19 @@
         "translation": "MENU"
       },
       "LNG_LAYOUT_MENU_ITEM_ADMIN_LABEL": {
-        "translation": "Admin"
+        "translation": "Administratif"
       },
       "LNG_LAYOUT_MENU_ITEM_AUDIT_LOG_LABEL": {
         "translation": "Journaux d'audit"
       },
       "LNG_LAYOUT_MENU_ITEM_BACKUPS_LABEL": {
-        "translation": "Des sauvegardes"
+        "translation": "Sauvegardes"
       },
       "LNG_LAYOUT_MENU_ITEM_CASES_LABEL": {
         "translation": "Cas"
       },
       "LNG_LAYOUT_MENU_ITEM_CHANGE_PASSWORD_LABEL": {
-        "translation": "Changer mot de passe"
+        "translation": "Changer le mot de passe"
       },
       "LNG_LAYOUT_MENU_ITEM_CLIENT_APPLICATIONS_LABEL": {
         "translation": "Applications client"
@@ -4251,7 +4251,7 @@
         "translation": "Clusters"
       },
       "LNG_LAYOUT_MENU_ITEM_CONTACTS_FOLLOW_UPS_LABEL": {
-        "translation": "Suivis à venir"
+        "translation": "Suivis journaliers"
       },
       "LNG_LAYOUT_MENU_ITEM_CONTACTS_LABEL": {
         "translation": "Contacts"
@@ -4290,13 +4290,13 @@
         "translation": "Aide et support"
       },
       "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
-        "translation": "Résultats de laboratoire"
+        "translation": "Résultats de labo."
       },
       "LNG_LAYOUT_MENU_ITEM_LANGUAGES": {
-        "translation": "Les langues"
+        "translation": "Langues"
       },
       "LNG_LAYOUT_MENU_ITEM_LOCATIONS_LABEL": {
-        "translation": "Endroits"
+        "translation": "Localisations Géographiques"
       },
       "LNG_LAYOUT_MENU_ITEM_LOGOUT_LABEL": {
         "translation": "Déconnecter"
@@ -4317,13 +4317,13 @@
         "translation": "Modèles"
       },
       "LNG_LAYOUT_MENU_ITEM_REFERENCE_DATA_LABEL": {
-        "translation": "Donnée de référence"
+        "translation": "Données de référence"
       },
       "LNG_LAYOUT_MENU_ITEM_ROLES_LABEL": {
         "translation": "Rôles"
       },
       "LNG_LAYOUT_MENU_ITEM_SYNC_LABEL": {
-        "translation": "Sync"
+        "translation": "Synchronisation"
       },
       "LNG_LAYOUT_MENU_ITEM_SYSTEM_CONFIG_LABEL": {
         "translation": "Configuration du système"
@@ -4347,31 +4347,31 @@
         "translation": "Filtres enregistrés"
       },
       "LNG_LAYOUT_MENU_ITEM_CLOUD_BACKUP_LABEL": {
-        "translation": "Sauvegarde sur le cloud"
+        "translation": "Sauvegarde dans le cloud"
       },
       "LNG_LAYOUT_MENU_ITEM_TERMS_OF_USE_LABEL": {
         "translation": "Conditions d'utilisation"
       },
       "LNG_LAYOUT_MENU_ITEM_SAVED_IMPORT_MAPPING_LABEL": {
-        "translation": "Cartographie d'importation importée"
+        "translation": "Cartographie d'importation sauvegardée"
       },
       "LNG_LAYOUT_MENU_ITEM_VERSION_LABEL": {
         "translation": "Version"
       },
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_LABEL": {
-        "translation": "Chaîne de transmission graphique"
+        "translation": "Chaînes de transmission (Graph.)"
       },
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAIN_BARS_LABEL": {
-        "translation": "Chaînes de barres de transmission"
+        "translation": "Chaînes de transmission (Barres)"
       },
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_LIST_LABEL": {
-        "translation": "Liste des chaînes de transmission"
+        "translation": "Listes des chaînes de transmission"
       },
       "LNG_LAYOUT_MENU_ITEM_TRANSMISSION_CHAINS_COUNT_MAP_LABEL": {
-        "translation": "Nombre de cas"
+        "translation": "Carte (Nombre de cas)"
       },
       "LNG_LAYOUT_MENU_ITEM_CONTACTS_OF_CONTACTS_LABEL": {
-        "translation": "Contacts of contacts"
+        "translation": "Contacts de contacts"
       }
     },
     "uiStepperButtons": {
@@ -4441,13 +4441,13 @@
         "translation": "Oui"
       },
       "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE": {
-        "translation": "Use question variable"
+        "translation": "Utiliser la variable de la question"
       },
       "LNG_COMMON_LABEL_EXPORT_USE_QUESTION_VARIABLE_DESCRIPTION": {
-        "translation": "When checked, questionnaire column headers will use question variables instead of question text"
+        "translation": "Lorsqu'il est sélectionné, les entêtes des colonnes du questionnaire afficheront les variables à la place du texte de la question"
       },
       "LNG_COMMON_LABEL_SEARCH": {
-        "translation": "Search",
+        "translation": "Rechercher",
         "modules": [
           "unauthenticated"
         ]
@@ -4553,7 +4553,7 @@
         "translation": "Mettre à jour"
       },
       "LNG_COMMON_BUTTON_BACK_TO_LOGIN": {
-        "translation": "Retour connexion",
+        "translation": "Retour connexion (retour à la page d'accueil?)",
         "modules": [
           "unauthenticated"
         ]
@@ -4562,7 +4562,7 @@
         "translation": "Contacts"
       },
       "LNG_COMMON_BUTTON_EXPOSURES_TO": {
-        "translation": "Exposures"
+        "translation": "Expositions"
       },
       "LNG_COMMON_BUTTON_SHOW_FILTERS": {
         "translation": "Afficher les filtres"
@@ -4597,49 +4597,49 @@
         "translation": "Donner un nom au clone de l'épidémie"
       },
       "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
-        "translation": "Êtes-vous sûr de vouloir convertir cette cas: \"{{name}}\" en contact?"
+        "translation": "Êtes-vous sûr de vouloir convertir le cas: \"{{name}}\" en contact?"
       },
       "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
-        "translation": "Êtes-vous sûr de convertir le contact: \"{{name}}\" en cas?"
+        "translation": "Êtes-vous sûr de vuoloir convertir le contact: \"{{name}}\" en cas?"
       },
       "LNG_DIALOG_CONFIRM_COPY_VALUE": {
-        "translation": "Êtes-vous sûr de vouoir copier la valeur de ce champ dans tous les autres champs vides?"
+        "translation": "Êtes-vous sûr de vouloir copier la valeur de ce champ dans tous les autres champs vides?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_ADDRESS": {
-        "translation": "Êtes-vous sûr de supprimer cette adresse?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette adresse?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP": {
         "translation": "Êtes-vous sûr de vouloir supprimer cette sauvegarde \"{{location}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP_RESTORE": {
-        "translation": "Confirmation de la restauration <br/><br/> Remarque: La restauration des données système à l’état sélectionné rétablit l’ensemble des données au point de la sauvegarde (suppression de toutes les nouvelles données ajoutées). Es-tu sur de vouloir continuer?"
+        "translation": "Confirmation de la restauration <br/><br/> Remarque: La restauration des données système à l’état sélectionné rétablit l’ensemble des données au point de la sauvegarde (suppression de toutes les nouvelles données ajoutées). Êtes-vous sur de vouloir continuer?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CASE": {
-        "translation": "Êtes-vous sûr de supprimer le cas: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer le cas: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CLIENT_APPLICATION": {
         "translation": "Êtes-vous sûr de vouloir supprimer cette application cliente: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CLUSTER": {
-        "translation": "Êtes-vous sûr de supprimer le cluster: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer le cluster: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CONTACT": {
-        "translation": "Êtes-vous sûr de supprimer le contact: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer le contact: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DATE_RANGE": {
-        "translation": "Êtes-vous sûr de supprimer cette plage de dates?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette plage de dates?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DEVICE": {
         "translation": "Êtes-vous sûr de vouloir supprimer ce périphérique: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DOCUMENT": {
-        "translation": "Êtes-vous sûr de supprimer ce document?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce document?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_EVENT": {
-        "translation": "Êtes-vous sûr de supprimer cet événement: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet événement: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_FOLLOW_UP": {
-        "translation": "Êtes-vous sûr de supprimer ce suivi: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce suivi: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_HELP_CATEGORY": {
         "translation": "Êtes-vous sûr de vouloir supprimer cette catégorie: \"{{name}}\"?"
@@ -4648,46 +4648,46 @@
         "translation": "Êtes-vous sûr de vouloir supprimer cet élément d'aide: \"{{title}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_HOSPITALIZATION_DATE": {
-        "translation": "Êtes-vous sûr de supprimer cette date d'hospitalisation?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette date d'hospitalisation?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_ICON": {
-        "translation": "Êtes-vous sûr de supprimer cette icône: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette icône: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_INPUT": {
-        "translation": "Êtes-vous sûr de supprimer cet élément?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet élément?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_ISOLATION_DATE": {
-        "translation": "Êtes-vous sûr de  supprimer cette date d'isolation?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette date d'isolation?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_ITEM": {
-        "translation": "Êtes-vous sûr de bien vouloir supprimer cet élément?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet élément?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_LAB_RESULT": {
-        "translation": "Êtes-vous sûr de supprimer ce résultat de laboratoire?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce résultat de laboratoire?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_LANGUAGE": {
         "translation": "Êtes-vous sûr de vouloir supprimer cette langue: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_LOCATION": {
-        "translation": "Êtes-vous sûr de  supprimer cet endroit: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet endroit: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_OUTBREAK": {
-        "translation": "Êtes-vous sûr de supprimer l'épidémie \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer l'épidémie \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_OUTBREAK_TEMPLATE": {
-        "translation": "Êtes-vous sûr de supprimer le modèle d'épidémie \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer le modèle d'épidémie \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_QUESTION": {
-        "translation": "Êtes-vous sûr de supprimer cette question?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette question?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_QUESTION_ANSWER": {
-        "translation": "Êtes-vous sûr de supprimer cette réponse?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette réponse?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_REFERENCE_DATA_ENTRY": {
-        "translation": "Êtes-vous sûr de supprimer cet enregistrement?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet enregistrement?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP": {
-        "translation": "Êtes-vous sûr de supprimer cette relation: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette relation: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_SYSTEM_SYNC_LOG": {
         "translation": "Êtes-vous sûr de vouloir supprimer ce log?"
@@ -4702,13 +4702,13 @@
         "translation": "Êtes-vous sûr de vouloir supprimer cette équipe: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_USER": {
-        "translation": "Êtes-vous sûr de  supprimer cet utilisateur: \"{{firstName}} {{lastName}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet utilisateur: \"{{firstName}} {{lastName}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_USER_ROLE": {
-        "translation": "Êtes-vous sûr de supprimer ce rôle: \"{{name}}\"?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce rôle: \"{{name}}\"?"
       },
       "LNG_DIALOG_CONFIRM_DUPLICATE_QUESTION": {
-        "translation": "Êtes-vous sûr de dupliquer cette question?"
+        "translation": "Êtes-vous sûr de vouloir dupliquer cette question?"
       },
       "LNG_DIALOG_CONFIRM_EXPORT_CHAINS_OF_TRANSMISSION": {
         "translation": "Chaînes de transmission à l'exportation"
@@ -4717,34 +4717,34 @@
         "translation": "Valeur"
       },
       "LNG_DIALOG_CONFIRM_IMPORT_FIELD_MAP": {
-        "translation": "Êtes-vous sûr de  supprimer cet élément?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cet élément?"
       },
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
-        "translation": "Êtes-vous sûr de lier cette réponse?"
+        "translation": "Êtes-vous sûr de vouloir lier cette réponse?"
       },
       "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
         "translation": "L'endroit \"{{name}}\" ne peut pas être supprimé car il contient des endroits enfants."
       },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
-        "translation": "L'endroit \"{{name}}\" ne peut pas être supprimé car elle est utilisé. Voulez-vous voir où? Cations"
+        "translation": "L'endroit \"{{name}}\" ne peut pas être supprimé car elle est utilisé. Voulez-vous voir où?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
         "translation": "Êtes-vous sûr de vouloir activer cette épidémie? <br/> L’autre épidémie active sera désactivée."
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP": {
-        "translation": "Êtes-vous sûr de marquer le contact \"{{name}}\" absent lors d'un suivi?"
+        "translation": "Êtes-vous sûr de vouloir marquer le contact \"{{name}}\" absent lors d'un suivi?"
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_PRESENT_ON_FOLLOW_UP": {
-        "translation": "Êtes-vous sûr de  marquer le contact \"{{name}}\" visité lors du suivi?"
+        "translation": "Êtes-vous sûr de vouloir marquer le contact \"{{name}}\" visité lors du suivi?"
       },
       "LNG_DIALOG_CONFIRM_REMOVE_ATTACHMENT": {
         "translation": "Êtes-vous sûr de vouloir supprimer cette pièce jointe?"
       },
       "LNG_DIALOG_CONFIRM_REMOVE_FOLLOW_UP": {
-        "translation": "Êtes-vous sûr de supprimer le suivi de la liste (détails et questionnaire)?"
+        "translation": "Êtes-vous sûr de vouloir supprimer le suivi de la liste (détails et questionnaire)?"
       },
       "LNG_DIALOG_CONFIRM_REMOVE_RELATIONSHIP": {
-        "translation": "Êtes-vous sûr de supprimer la relation de la liste?"
+        "translation": "Êtes-vous sûr de vouloir supprimer la relation de la liste?"
       },
       "LNG_DIALOG_CONFIRM_REPLACE_VALUE_WITH_NEW_ONE": {
         "translation": "Voulez-vous remplacer l'ancienne valeur par la nouvelle?"
@@ -4822,49 +4822,49 @@
         "translation": "Êtes-vous sûr de vouloir supprimer cette réponse?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP_CHAIN_OF_TRANSMISSION": {
-        "translation": "Êtes-vous sûr de vouloir supprimer cette relation?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette chaine de transmission?"
       },
       "LNG_DIALOG_EXPORT_CHAIN_OF_TRANSMISSION_SCALE_INFO": {
         "translation": "The higher the scale, the longer it can take to export Chains of Transmission"
       },
       "LNG_DIALOG_CONFIRM_WIPE_DEVICE": {
-        "translation": "Are you sure you want to wipe this device?"
+        "translation": "Êtes-vous sûr de vouloir supprimer les données de ce périférique?"
       },
       "LNG_DIALOG_CONFIRM_REVERSE_PERSONS": {
-        "translation": "Are you sure you want to reverse persons?"
+        "translation": "Êtes-vous sûr de vouloir inverser ces personnes?"
       },
       "LNG_DIALOG_CONFIRM_COPY_QUESTIONNAIRE_DATE": {
-        "translation": " Etes vous sûr que vous voulez appliquer cette date à tous les autres champs date similaire vide ?"
+        "translation": "Êtes-vous sûr de vouloir appliquer cette date à tous les autres champs date similaire vide ?"
       },
       "LNG_DIALOG_CONFIRM_COPY_PARENT_ENTITY_ADDRESS": {
-        "translation": "Etes vous sûr que vous voulez copier l'adresse de la localisation parent ?"
+        "translation": "Êtes-vous sûr de vouloir copier l'adresse de la localisation parent ?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIPS": {
-        "translation": "Are you sure you want to delete selected relationships?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ces relations?"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": {
-        "translation": "êtes vous sûr que vous voulez modifier '{{caseName}}' classification to '{{classification}}'?"
+        "translation": "Êtes-vous sûr de vouloir modifier la classification de  '{{caseName}}' vers '{{classification}}'?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": {
-        "translation": "Are you sure you want to delete this vaccine?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce vaccin?"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_SOURCE": {
-        "translation": "Are you sure you want to set this entity as source for selected contacts?"
+        "translation": "Êtes-vous sûr de vouloir assigner cette entité comme source pour tous les contacts sélectionnés?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_FOLLOW_UPS": {
-        "translation": " Etes vous sûr de vouloir supprimé les suivis selectionnés ?"
+        "translation": "Êtes-vous sûr de vouloir supprimer les suivis selectionnés ?"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_FOLLOW_UPS": {
-        "translation": "Are you sure you want to restore selected follow-ups?"
+        "translation": "Êtes-vous sûr de vouloir restaurer les suivis sélectionnés?"
       },
       "LNG_DIALOG_CONFIRM_CLONE_OUTBREAK_TEMPLATE": {
-        "translation": "Name the clone of the outbreak template"
+        "translation": "Donner un nom au clone du modèle de l'épidémie"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CONTACT_OF_CONTACT": {
-        "translation": "Are you sure you want to delete this contact of contact: '{{name}}'?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce contact de contact : {{{nom}} ?"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
-        "translation": "Are you sure tou want to restore this contact of contact: '{{name}}'?"
+        "translation": "Êtes-vous sûr de vouloir rétablir ce contact de contact : {{{nom}} ?"
       }
     },
     "uiLoginPage": {
@@ -4904,7 +4904,7 @@
         "translation": "Il n'y a pas d'épidémie"
       },
       "LNG_GENERIC_WARNING_SELECTED_OUTBREAK_NOT_ACTIVE": {
-        "translation": "L'épidémie active est {{activeOutbreakName}} alors que celle-ci est sélectionnée {{selectedOutbreakName}}"
+        "translation": "L'épidémie active est {{activeOutbreakName}} alors que celle qui est sélectionnée est {{selectedOutbreakName}}"
       }
     },
     "uiFormErrorsWarningsSuccessMessages": {
@@ -4923,7 +4923,7 @@
         ]
       },
       "LNG_API_ERROR_CODE_UNKNOWN_ERROR": {
-        "translation": "Quelque chose s'est mal passé. Veuillez contacter un administrateur",
+        "translation": "Quelque chose ne s'est pas passé comme prévu. Veuillez contacter un administrateur",
         "modules": [
           "unauthenticated"
         ]
@@ -4953,7 +4953,7 @@
         ]
       },
       "LNG_API_ERROR_CODE_UPSTREAM_SERVER_SYNC_IN_PROGRESS": {
-        "translation": "Une seule action de synchronisation peut être en cours à la fois.",
+        "translation": "Seule une action de synchronisation peut être en cours à la fois.",
         "modules": [
           "unauthenticated"
         ]
@@ -4971,7 +4971,7 @@
         ]
       },
       "LNG_API_ERROR_CODE_RECORD_NOT_FOUND": {
-        "translation": "Record not found",
+        "translation": "Donnée indisponible",
         "modules": [
           "unauthenticated"
         ]
@@ -5013,64 +5013,64 @@
         ]
       },
       "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": {
-        "translation": "Cannot delete a contact's last relationship with a case or event. The contact doesn't have an additional relationship with a case or event.",
+        "translation": "Impossible d'effacer la dernière relation d'un contact à un cas ou un évènement. Le contact n'a pas de relation additionnelle avec un cas ou un évènement.",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_INVALID_CASE_RELATIONSHIP": {
-        "translation": "Case needs to be exposed to another case or event in order to be able to convert it to a contact",
+        "translation": "Le cas doit être lié à un autre cas afin de pouvoir le convertir en contact",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_INVALID_PASSWORD": {
-        "translation": "Invalid current password",
+        "translation": "Le mot de passe actuel n'est pas valide",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_DELETE_ACTIVE_OUTBREAK": {
-        "translation": "The outbreak is active for at least another user. Cannot delete an active outbreak",
+        "translation": "L'épidémie est active pour au moins un autre utilisateur. Impossible d'effacer une épidémie active",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_INVALID_CAPTCHA": {
-        "translation": "Invalid captcha",
+        "translation": "Captcha invalide ",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_DISABLED_CAPTCHA": {
-        "translation": "Disabled captcha",
+        "translation": "Captcha désactivé",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_MISSING_REQUIRED_OLD_PASSWORD": {
-        "translation": "Old password is required when changing passwords",
+        "translation": "Le mot de passe précédent est nécessaire lors du changement de mot de passe",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_INVALID_OLD_PASSWORD": {
-        "translation": "Old password is invalid",
+        "translation": "Le mot de passe précédent n'est pas valide",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_REUSING_PASSWORDS_ERROR": {
-        "translation": "Reusing passwords is forbidden",
+        "translation": "La réutilisation de mots de passe est interdite",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_API_ERROR_CODE_ACTIVE_OUTBREAK_NOT_ALLOWED": {
-        "translation": "Epidemie active non autorisée"
+        "translation": "Epidémie active non autorisée"
       },
       "LNG_API_ERROR_CODE_ACTION_TEMPORARILY_BLOCKED": {
-        "translation": "This action has been blocked temporarily",
+        "translation": "Cette action est temporairement bloquée",
         "modules": [
           "unauthenticated"
         ]
@@ -5078,10 +5078,13 @@
     },
     "uiCommonFields": {
       "LNG_COMMON_FIELD_LABEL_CURRENT_PASSWORD": {
-        "translation": "Mot de passe actuel"
+        "translation": "Mot de passe actuel",
+        "modules": [
+          "unauthenticated"
+        ]
       },
       "LNG_COMMON_FIELD_LABEL_EMAIL_ADDRESS": {
-        "translation": "Email",
+        "translation": "Courriel",
         "modules": [
           "unauthenticated"
         ]
@@ -5128,16 +5131,16 @@
         "translation": ""
       },
       "LNG_ADDRESS_FIELD_LABEL_LOCATION": {
-        "translation": "Zone"
+        "translation": "Niveau Géographique"
       },
       "LNG_ADDRESS_FIELD_LABEL_LOCATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "Niveau Géographique"
       },
       "LNG_ADDRESS_FIELD_LABEL_NAME": {
         "translation": "Nom"
       },
       "LNG_ADDRESS_FIELD_LABEL_POSTAL_CODE": {
-        "translation": "Code postale"
+        "translation": "Code postal"
       },
       "LNG_ADDRESS_FIELD_LABEL_POSTAL_CODE_DESCRIPTION": {
         "translation": ""
@@ -5170,7 +5173,7 @@
         "translation": ""
       },
       "LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS": {
-        "translation": "Email address"
+        "translation": "Courriel"
       },
       "LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS_DESCRIPTION": {
         "translation": ""
@@ -5181,19 +5184,19 @@
         "translation": "Géolocalisation"
       },
       "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "Géolocalisation"
       },
       "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT": {
         "translation": "Latitude"
       },
       "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LAT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Latitude"
       },
       "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG": {
         "translation": "Longitude"
       },
       "LNG_FILL_LOCATION_FIELD_LABEL_GEO_LOCATION_LNG_DESCRIPTION": {
-        "translation": ""
+        "translation": "Longitude"
       }
     },
     "uiQuestionnaire": {
@@ -5278,10 +5281,10 @@
         "translation": "0 - Chiffre (0 à 9) / 9 - Chiffre (numéro de séquence généré automatiquement) / YYYY - Année (en utilisant l'année à partir de la date à laquelle un cas a été signalé) / @ - Lettre (A à Z) / & - N'importe quel caractère (y compris les espaces) / * - Tout (n'importe quelle chaîne de n'importe quelle longueur)"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK": {
-        "translation": "Contact Of Contact ID mask"
+        "translation": "Masque d'ID de contact de contact"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK_DESCRIPTION": {
-        "translation": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / YYYY – Year (Using year from the date when a case has been reported) / @ – Letter (A through Z) / & - Any character(including spaces) / * - Anything (any string of any length)"
+        "translation": "0 - Chiffre (0 à 9) / 9 - Chiffre (numéro de séquence généré automatiquement) / YYYY - Année (en utilisant l'année à partir de la date à laquelle un cas a été signalé) / @ - Lettre (A à Z) / & - N'importe quel caractère (y compris les espaces) / * - Tout (n'importe quelle chaîne de n'importe quelle longueur)"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE": {
         "translation": "Modèle de suivi des contacts"
@@ -5368,19 +5371,19 @@
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING": {
-        "translation": "Overwrite existing follow-ups"
+        "translation": "Écraser les suivis existants"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
         "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT": {
-        "translation": "Keep team assignment"
+        "translation": "Conserver l'affectation de l'équipe"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
         "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
-        "translation": "Team assignment algorithm"
+        "translation": "Algorithme d'affectation des équipes"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
         "translation": "[Option 1] - If Team1 has \"Argentina\" assigned and Team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done. [Option 2] - If Team1 has \"Argentina\" assigned and team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done."
@@ -5389,7 +5392,7 @@
         "translation": "Identifiant"
       },
       "LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE": {
-        "translation": "Modèle de résultats de laboratoire"
+        "translation": "Modèle de résultats de labo."
       },
       "LNG_OUTBREAK_FIELD_LABEL_LESS_THAN_X_CONTACTS": {
         "translation": "Moins de X contacts"
@@ -5434,25 +5437,25 @@
         "translation": "Pour info seulement"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_OUTBREAK_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
@@ -5464,22 +5467,22 @@
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
-        "translation": "Is case date of onset required?"
+        "translation": "La date d'apparition des symptômes est-elle requise ?"
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {
-        "translation": "Apply geographic restrictions in this outbreak"
+        "translation": "Appliquer des restrictions géographiques dans cette épidémie"
       },
       "LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_OF_CONTACT_ACTIVE": {
-        "translation": "Allow registration of contacts of contacts?"
+        "translation": "Autoriser l'enregistrement des contacts des contacts ?"
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_OF_CONTACT_ACTIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Est le contact du contact actif"
       }
     },
     "uiEntityFields": {
@@ -5496,7 +5499,7 @@
         "translation": "Age (Années)"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age / Mois"
+        "translation": "Age (Mois)"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Classification"
@@ -5508,7 +5511,7 @@
         "translation": "Numéro de document"
       },
       "LNG_ENTITY_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Prénom"
       },
       "LNG_ENTITY_FIELD_LABEL_FIRST_NAME": {
         "translation": "Prénom"
@@ -5532,7 +5535,7 @@
         "translation": "Endroit"
       },
       "LNG_ENTITY_FIELD_LABEL_RISK": {
-        "translation": "Risqué"
+        "translation": "Risque"
       },
       "LNG_ENTITY_FIELD_LABEL_TYPE": {
         "translation": "Type"
@@ -5541,22 +5544,22 @@
         "translation": "Cas / ID de contact"
       },
       "LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET": {
-        "translation": "Date of onset"
+        "translation": "Date de début des symptômes"
       },
       "LNG_ENTITY_FIELD_LABEL_DATE_OF_REPORTING": {
         "translation": "Date of reporting"
       },
       "LNG_ENTITY_FIELD_LABEL_VACCINE": {
-        "translation": "Vaccine"
+        "translation": "Vaccin"
       },
       "LNG_ENTITY_FIELD_LABEL_VACCINE_DATE": {
-        "translation": "Vaccine date"
+        "translation": "Date du vaccin"
       },
       "LNG_ENTITY_FIELD_LABEL_VACCINE_STATUS": {
-        "translation": "Vaccine status"
+        "translation": "Statut du vaccin"
       },
       "LNG_ENTITY_FIELD_LABEL_PHONE_NUMBER": {
-        "translation": "Phone number"
+        "translation": "Numéro de téléphone"
       }
     },
     "addressFields": {
@@ -5579,13 +5582,13 @@
         "translation": "Géolocalisation"
       },
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE": {
-        "translation": "Geolocation précis"
+        "translation": "Geolocalisation précise"
       },
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LAT": {
         "translation": "Lat"
       },
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_LNG": {
-        "translation": "Lng"
+        "translation": "Lon"
       },
       "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LOCATION_ID": {
         "translation": "Emplacement"
@@ -5614,13 +5617,13 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age / Mois"
+        "translation": "Age (Mois)"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
         "translation": "Age (Années)"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
-        "translation": "UID du Case"
+        "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID_DESCRIPTION": {
         "translation": ""
@@ -5632,7 +5635,7 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_CENTER_DATES_LOCATION": {
-        "translation": "Endroit"
+        "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_CENTER_DATES_LOCATION_DESCRIPTION": {
         "translation": ""
@@ -5665,10 +5668,10 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET": {
-        "translation": "Date d'apparition des signes"
+        "translation": "Date d'apparition des signes/symptômes"
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_APPROXIMATE": {
-        "translation": "Date d'apparition approximative"
+        "translation": "Date approximative d'apparition "
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_DESCRIPTION": {
         "translation": ""
@@ -5683,7 +5686,7 @@
         "translation": "Date du rapport"
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date du rapport approximative"
+        "translation": "Date approximative du rapport "
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE_DESCRIPTION": {
         "translation": ""
@@ -5710,7 +5713,7 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION": {
-        "translation": "Endroit"
+        "translation": "Niveau Géographique"
       },
       "LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION_DESCRIPTION": {
         "translation": ""
@@ -5743,10 +5746,10 @@
         "translation": "Type de document"
       },
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LAT": {
-        "translation": "Compléter la géolocalisation latitude"
+        "translation": "Compléter la latitude de la géolocalisation"
       },
       "LNG_CASE_FIELD_LABEL_FILL_GEO_LOCATION_LNG": {
-        "translation": "Compléter la géolocalisation longitude"
+        "translation": "Compléter la longitude de la géolocalisation"
       },
       "LNG_CASE_FIELD_LABEL_FIRST_NAME": {
         "translation": "Prénom"
@@ -5764,13 +5767,13 @@
         "translation": "Identifiant"
       },
       "LNG_CASE_FIELD_LABEL_IS_DATE_OF_ONSET_APPROXIMATE": {
-        "translation": "Date d'apparition approximative"
+        "translation": "Date approximative d'apparition "
       },
       "LNG_CASE_FIELD_LABEL_IS_DATE_OF_ONSET_APPROXIMATE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date du rapport approximative"
+        "translation": "Date approximative du rapport "
       },
       "LNG_CASE_FIELD_LABEL_LAST_NAME": {
         "translation": "Nom"
@@ -5779,7 +5782,7 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_LAST_VISUAL_ID": {
-        "translation": "ID visuel"
+        "translation": "Dernier identifiant Visuel"
       },
       "LNG_CASE_FIELD_LABEL_LAST_VISUAL_ID_DESCRIPTION": {
         "translation": "L'identifiant doit correspondre à: {{mask}}"
@@ -5809,7 +5812,7 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_OUTCOME_ID": {
-        "translation": "Résultat"
+        "translation": "Identifieant de Résultat"
       },
       "LNG_CASE_FIELD_LABEL_PHONE_NUMBER": {
         "translation": "Numéro de téléphone"
@@ -5851,10 +5854,10 @@
         "translation": "Type"
       },
       "LNG_CASE_FIELD_LABEL_VISUAL_ID": {
-        "translation": "Cas ID"
+        "translation": "ID de cas"
       },
       "LNG_CASE_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
-        "translation": "L'identifiant doit correspondre à: {{mask}}"
+        "translation": "L'identifiant visuel doit correspondre à: {{mask}}"
       },
       "LNG_CASE_FIELD_LABEL_WAS_CONTACT": {
         "translation": "Etait un contact"
@@ -5884,52 +5887,52 @@
         "translation": "Dates"
       },
       "LNG_CASE_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_CASE_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_CASE_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_CASE_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_CASE_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID": {
-        "translation": "Burial Location"
+        "translation": "Lieu de l'enterrement"
       },
       "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": {
-        "translation": "Burial Place Name"
+        "translation": "Nom du lieu d'enterrement"
       },
       "LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED": {
-        "translation": "Vaccines Received"
+        "translation": "Les vaccins reçus"
       },
       "LNG_CASE_FIELD_LABEL_VACCINE": {
-        "translation": "Vaccine"
+        "translation": "Vaccin"
       },
       "LNG_CASE_FIELD_LABEL_VACCINE_DATE": {
-        "translation": "Vaccine Date"
+        "translation": "Les dates de vaccination"
       },
       "LNG_CASE_FIELD_LABEL_VACCINE_STATUS": {
-        "translation": "Vaccine Status"
+        "translation": "Statut de vaccination"
       },
       "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
-        "translation": "Pregnancy Status"
+        "translation": "Statut de grossesse"
       },
       "LNG_CASE_FIELD_LABEL_PLACE_OF_BURIAL": {
-        "translation": "Place of burial"
+        "translation": "Lieu de l'enterrement"
       },
       "LNG_CASE_FIELD_LABEL_PLACE_OF_BURIAL_DESCRIPTION": {
         "translation": ""
@@ -5938,22 +5941,22 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_ADDRESS_LOCATION": {
-        "translation": "Area"
+        "translation": "Localisation Géo."
       },
       "LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": {
-        "translation": "Vaccines received"
+        "translation": "Les vaccins reçus"
       },
       "LNG_CASE_FIELD_LABEL_DATE_OF_EXPOSURE": {
-        "translation": "Exposure Date ( {{exposureName}} )"
+        "translation": "Date d'exposition ( {{exposureName}} )"
       },
       "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_NUMBER_OF_CONTACTS": {
-        "translation": "Number of contacts"
+        "translation": "Nombre de contacts"
       },
       "LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
-        "translation": "Number of exposures"
+        "translation": "Nombre d'expositions"
       }
     },
     "uiCasesListPage": {
@@ -6057,7 +6060,7 @@
         "translation": "Exporter les relations de cas"
       },
       "LNG_PAGE_LIST_CASES_NOT_A_CASE_INFO_LABEL": {
-        "translation": "* Note that: If you wish to filter to see discarded cases then you should add the 'Not a Case' column from the menu of extra field on the left hand side and ensure that this is set to 'Yes'. You can't simply filter on the Classification column for 'Not a case (discarded)' since Not a Case is set, by default, to 'No' to only show you active records."
+        "translation": "* Notez cela : Si vous souhaitez filtrer pour voir les cas rejetés, vous devez ajouter la colonne \"Pas un cas\" dans le menu du champ supplémentaire à gauche et vous assurer qu'elle est réglée sur \"Oui\". Vous ne pouvez pas simplement filtrer sur la colonne Classification pour \"Pas un cas (rejeté)\" puisque Pas un cas est réglé, par défaut, sur \"Non\" pour ne montrer que les enregistrements actifs."
       },
       "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_SECTION_TITLE": {
         "translation": "Entities"
@@ -6066,10 +6069,10 @@
         "translation": "Relationships"
       },
       "LNG_PAGE_LIST_CASES_ACTION_SHOW_GROUP_BY_CLASSIFICATION_PILLS": {
-        "translation": "Show cases grouped by classification count"
+        "translation": "Cas groupés par statut de classification"
       },
       "LNG_PAGE_LIST_CASES_ACTION_IMPORT_CASES_RELATIONSHIPS": {
-        "translation": "Import case relationships"
+        "translation": "Importer les relations de cas"
       }
     },
     "uiCreateCasePage": {
@@ -6142,7 +6145,7 @@
         "translation": "Ouvrir {{name}}"
       },
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_CASE_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "Not duplicates"
@@ -6209,10 +6212,10 @@
         "translation": "Reverse persons"
       },
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": {
-        "translation": "You can reverse a relationship only if is not involving a contact"
+        "translation": "Vous ne pouvez inverser une relation que si elle n'implique pas un contact"
       },
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       }
     },
     "uiAvailableEntitiesForRelationshipPage": {
@@ -6232,7 +6235,7 @@
         "translation": "Entités disponibles"
       },
       "LNG_PAGE_LIST_AVAILABLE_ENTITIES_HAS_POSSIBLE_RELATIONSHIP_DUPLICATE": {
-        "translation": "Possible Duplicate ?"
+        "translation": "Doublon probable ?"
       }
     },
     "uiCreateEntityRelationshipPage": {
@@ -6284,7 +6287,7 @@
         "translation": "Age (Années)"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
-        "translation": "Date de devenir contact"
+        "translation": "Date d'identification de contact"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
         "translation": "Date de naissance"
@@ -6311,7 +6314,7 @@
         "translation": "Date du rapport"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date du rapport approximative"
+        "translation": "Date approximative du rapport "
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE_DESCRIPTION": {
         "translation": ""
@@ -6344,10 +6347,10 @@
         "translation": "Type de document"
       },
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": {
-        "translation": "Compléter la géolocalisation latitude"
+        "translation": "Compléter la latitude de la géolocalisation "
       },
       "LNG_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": {
-        "translation": "Compléter la géolocalisation longitude"
+        "translation": "Compléter la longitude de la géolocalisation "
       },
       "LNG_CONTACT_FIELD_LABEL_FIRST_NAME": {
         "translation": "Prénom"
@@ -6356,7 +6359,7 @@
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP": {
-        "translation": "Follow-up"
+        "translation": "Suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_DESCRIPTION": {
         "translation": ""
@@ -6368,7 +6371,7 @@
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID": {
-        "translation": "Follow-up assigned team"
+        "translation": "Équipe chargée du suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
         "translation": "Follow-up Team should be set only if you want all generated follow-ups to be assigned to a specific team (instead of using the nearest location auto-assign system)"
@@ -6383,7 +6386,7 @@
         "translation": "Identifiant"
       },
       "LNG_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date du rapport approximative"
+        "translation": "Date approximative du rapport "
       },
       "LNG_CONTACT_FIELD_LABEL_LAST_NAME": {
         "translation": "Nom"
@@ -6398,7 +6401,7 @@
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_NAME": {
-        "translation": "Name"
+        "translation": "Prénom"
       },
       "LNG_CONTACT_FIELD_LABEL_OCCUPATION": {
         "translation": "Emploi"
@@ -6461,82 +6464,82 @@
         "translation": "Date de début de suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_CONTACT_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_CONTACT_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_CONTACT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_CONTACT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_END_DATE": {
-        "translation": "End of the followup"
+        "translation": "Fin de suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_END_DATE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE": {
-        "translation": "Start of the followup"
+        "translation": "Date de début de suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE": {
-        "translation": "Original Start of the followup"
+        "translation": "Date initiale de début de suivi"
       },
       "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": {
-        "translation": "Area"
+        "translation": "Niveau Géographique"
       },
       "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
-        "translation": "Vaccines Received"
+        "translation": "Vaccins reçus"
       },
       "LNG_CONTACT_FIELD_LABEL_VACCINE": {
-        "translation": "Vaccine"
+        "translation": "Vaccin"
       },
       "LNG_CONTACT_FIELD_LABEL_VACCINE_DATE": {
-        "translation": "Vaccine Date"
+        "translation": "Date du Vaccin"
       },
       "LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
-        "translation": "Vaccine Status"
+        "translation": "Statut de vaccination"
       },
       "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
-        "translation": "Pregnancy Status"
+        "translation": "Statut de grossesse"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
         "translation": "Exposure Date ( {{exposureName}} )"
       },
       "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": {
-        "translation": "Vaccines received"
+        "translation": "Vaccins reçus"
       },
       "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS": {
-        "translation": "Number of contacts"
+        "translation": "Nombre de contacts"
       },
       "LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
-        "translation": "Number of exposures"
+        "translation": "Nombre d'expositions"
       },
       "LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
-        "translation": "Questionnaire answers"
+        "translation": "Réponses du questionnaire"
       }
     },
     "uiContactsListPage": {
@@ -6592,7 +6595,7 @@
         "translation": "Dossier de contacts"
       },
       "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS": {
-        "translation": "Exportateur les contacts sélectionnés"
+        "translation": "Exportater les contacts sélectionnés"
       },
       "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_DOSSIER": {
         "translation": "Dossier d'exportation pour les contacts sélectionnés"
@@ -6634,7 +6637,7 @@
         "translation": "Modifier les contacts sélectionnés"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS": {
-        "translation": "Change Contact Final Follow-Up Status"
+        "translation": "Changement de contact Statut final de suivi"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": {
         "translation": "Etes vous sûr que vous voulez changer le 'status final de suivi' pour {{count}} contact(s)? "
@@ -6658,13 +6661,13 @@
         "translation": "Show contacts grouped by risk count"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_ADD_CONTACT_OF_CONTACT": {
-        "translation": "Add contact of contact"
+        "translation": "Ajouter un contact de contact"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_BULK_ADD_CONTACTS": {
         "translation": "Bulk add contacts of contacts"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_IMPORT_CONTACTS_RELATIONSHIPS": {
-        "translation": "Import contact relationships"
+        "translation": "Importer les relations de contact "
       }
     },
     "uiCreateContactPage": {
@@ -6708,7 +6711,7 @@
         "translation": "Flag this contact with a risk level for additional attention"
       },
       "LNG_PAGE_CREATE_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
-        "translation": "You need Team - list permission to change contact follow-up team"
+        "translation": "Vous avez besoin de la permission de Team - list pour changer d'équipe de suivi des contacts"
       }
     },
     "uiModifyContactPage": {
@@ -6749,7 +6752,7 @@
         "translation": "Voir l'exposition"
       },
       "LNG_PAGE_MODIFY_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_SEE_LAB_RESULTS": {
         "translation": "Lab results"
@@ -6761,7 +6764,7 @@
         "translation": "Questionnaire"
       },
       "LNG_PAGE_MODIFY_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
-        "translation": "You need Team - list permission to change contact follow-up team"
+        "translation": "Vous avez besoin de la permission de Team - list pour changer d'équipe de suivi des contacts"
       }
     },
     "uiRelationshipFields": {
@@ -6865,25 +6868,25 @@
         "translation": "Cas / ID de contact"
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé sur"
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
@@ -6900,7 +6903,7 @@
         "translation": "Adresse"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_AREA": {
-        "translation": "Zone"
+        "translation": "Niveau géographique"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_COMMENT": {
         "translation": "Commentaire"
@@ -6930,13 +6933,13 @@
         "translation": "Est l'alimentation"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": {
-        "translation": "Perdu de suivi"
+        "translation": "Sans suivi"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED": {
         "translation": "Effectué"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_PERSON_ID": {
-        "translation": "ID de contact"
+        "translation": "Identifiant personnel"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_STATUSID": {
         "translation": "Statut"
@@ -6948,16 +6951,16 @@
         "translation": "Équipe"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_DATE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_ID": {
         "translation": "Identifiant"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP_DESCRIPTION": {
-        "translation": ""
+        "translation": "Sans suivi"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_PERFORMED_DESCRIPTION": {
-        "translation": ""
+        "translation": "Effectué"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
         "translation": "Réponses au questionnaire"
@@ -6966,13 +6969,13 @@
         "translation": "Statut"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_STATUS_ID_DESCRIPTION": {
-        "translation": ""
+        "translation": "Statut"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_TARGETED_DESCRIPTION": {
-        "translation": ""
+        "translation": "Ciblé"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_TEAM_DESCRIPTION": {
-        "translation": ""
+        "translation": "Équipe"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_TIME_FILTER": {
         "translation": "Dernière fois vu"
@@ -6984,46 +6987,46 @@
         "translation": "ID de contact"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED": {
-        "translation": "Not targeted"
+        "translation": "Non ciblé"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_NOT_TARGETED_DESCRIPTION": {
-        "translation": ""
+        "translation": "Non ciblé"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé par"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé à ( utc )"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour par"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION": {
-        "translation": "Fill location"
+        "translation": "Remplir l'endroit"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_FILL_LOCATION_NO_LOCATION": {
-        "translation": "Not available"
+        "translation": "Aucun endroit disponible"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
-        "translation": "Phone Number"
+        "translation": "Numéro de téléphone"
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_RISK_LEVEL": {
-        "translation": "Risk level"
+        "translation": "Niveau de risque"
       }
     },
     "uiTermsOfUsePage": {
@@ -7048,7 +7051,7 @@
         "translation": "Ciblé"
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_OVERWRITE_EXISTING_LABEL": {
-        "translation": "Overwrite existing follow-ups"
+        "translation": "Éffacer les suivis existants"
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_DIALOG_OVERWRITE_EXISTING_LABEL_DESCRIPTION": {
         "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
@@ -7238,7 +7241,7 @@
         "translation": "Ouvrir {{dateFormatted}}"
       },
       "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       }
     },
     "uiEventFields": {
@@ -7249,19 +7252,19 @@
         "translation": "Date"
       },
       "LNG_EVENT_FIELD_LABEL_DATE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date"
       },
       "LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING": {
         "translation": "Date du rapport"
       },
       "LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date du rapport approximatif"
+        "translation": "Date approximative du rapport "
       },
       "LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date approximative du rapport "
       },
       "LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date du rapport"
       },
       "LNG_EVENT_FIELD_LABEL_DELETED": {
         "translation": "Supprimé"
@@ -7270,46 +7273,46 @@
         "translation": "La description"
       },
       "LNG_EVENT_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
-        "translation": ""
+        "translation": "La description"
       },
       "LNG_EVENT_FIELD_LABEL_NAME": {
         "translation": "Nom"
       },
       "LNG_EVENT_FIELD_LABEL_NAME_DESCRIPTION": {
-        "translation": ""
+        "translation": "Nom de l'évènement"
       },
       "LNG_EVENT_FIELD_LABEL_PHONE_NUMBER": {
         "translation": "Numéro de téléphone"
       },
       "LNG_EVENT_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_EVENT_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé par"
       },
       "LNG_EVENT_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_EVENT_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé à ( utc )"
       },
       "LNG_EVENT_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_EVENT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour par"
       },
       "LNG_EVENT_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_EVENT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS": {
-        "translation": "Number of contacts"
+        "translation": "Nombre de contacts"
       },
       "LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
-        "translation": "Number of exposures"
+        "translation": "Nombre d'expositions"
       }
     },
     "uiCreateEventPage": {
@@ -7401,25 +7404,25 @@
         "translation": ""
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
@@ -7484,10 +7487,10 @@
         "translation": "Données de référence modifiées"
       },
       "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_REFERENCE_DATA_ENTRY_LABEL_NO_ICON": {
-        "translation": "No icon"
+        "translation": "Pas d'icône"
       }
     },
     "uiOutbreakTemplates": {
@@ -7750,7 +7753,7 @@
         "translation": "Terminé"
       },
       "LNG_PAGE_CREATE_OUTBREAK_TAB_LAB_RESULTS": {
-        "translation": "Résultats de laboratoire"
+        "translation": "Résultats de labo."
       },
       "LNG_PAGE_CREATE_OUTBREAK_TAB_MAP_SERVERS": {
         "translation": "Serveurs de carte"
@@ -7797,10 +7800,10 @@
         "translation": "Ouvrir {{name}}"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
-        "translation": "Contact form"
+        "translation": "Formulaire de contact"
       }
     },
     "uiFormRangeFields": {
@@ -7808,7 +7811,7 @@
         "translation": "De"
       },
       "LNG_FORM_RANGE_FIELD_LABEL_TO": {
-        "translation": "UNE"
+        "translation": "A"
       }
     },
     "uiTransmissionChainsListPage": {
@@ -7824,10 +7827,10 @@
     },
     "pdfExport": {
       "LNG_FILE_NAME_DAILY_CONTACTS_LIST": {
-        "translation": "Daily_Contacts"
+        "translation": "Contacts_Quotidiens"
       },
       "LNG_FILE_NAME_RANGE_CONTACTS_LIST": {
-        "translation": "Range_Contacts"
+        "translation": "Contacts_Plage"
       },
       "LNG_FOLLOW_UP_STATUS_LEGEND": {
         "translation": "Suivi de la légende"
@@ -7896,7 +7899,7 @@
         "translation": "La personne"
       },
       "LNG_DOB_LABEL_DAY": {
-        "translation": "journée"
+        "translation": "Journée"
       },
       "LNG_DOB_LABEL_MONTH": {
         "translation": "Mois"
@@ -7917,7 +7920,7 @@
         "translation": "Adresses"
       },
       "LNG_PAGE_TITLE_CONTACT_OF_CONTACT_DETAILS": {
-        "translation": "Contact of Contact details"
+        "translation": "Details de contact de contact"
       }
     },
     "countries": {
@@ -10545,7 +10548,7 @@
     },
     "uiFormInputValidationErrors": {
       "LNG_FORM_VALIDATION_EMAIL_UNIQUE": {
-        "translation": "L'email existe déjà",
+        "translation": "Le courriel existe déjà",
         "modules": [
           "unauthenticated"
         ]
@@ -10629,7 +10632,7 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_EMAIL": {
-        "translation": "Email invalide",
+        "translation": "Courriel invalide",
         "modules": [
           "unauthenticated"
         ]
@@ -10725,25 +10728,25 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_REF_DATA_ITEM_CODE_NOT_UNIQUE": {
-        "translation": "This code is already in use",
+        "translation": "Ce code est déjà utilisé",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_NOT_NUMBER": {
-        "translation": "Can't be number",
+        "translation": "Ne peut pas être un chiffre",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_MISSING_REQUIRED_OPTIONS": {
-        "translation": "Missing options: {{options}}",
+        "translation": "Options manquantes: {{options}}",
         "modules": [
           "unauthenticated"
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_OUTBREAK_TEMPLATE_NAME_NOT_UNIQUE": {
-        "translation": "This name is already in use",
+        "translation": "Ce nom est déjà utilisé",
         "modules": [
           "unauthenticated"
         ]
@@ -10754,13 +10757,13 @@
         "translation": "Numéro de document"
       },
       "LNG_DOCUMENT_FIELD_LABEL_DOCUMENT_NUMBER_DESCRIPTION": {
-        "translation": ""
+        "translation": "Numéro de document"
       },
       "LNG_DOCUMENT_FIELD_LABEL_DOCUMENT_TYPE": {
         "translation": "Type de document"
       },
       "LNG_DOCUMENT_FIELD_LABEL_DOCUMENT_TYPE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Type de document"
       },
       "LNG_DOCUMENT_LABEL_ADD_NEW_DOCUMENT": {
         "translation": "Ajouter un autre document"
@@ -10968,25 +10971,25 @@
         "translation": ""
       },
       "LNG_LOCATION_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_LOCATION_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_LOCATION_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_LOCATION_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_LOCATION_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_LOCATION_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
         "translation": ""
       },
       "LNG_LOCATION_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_LOCATION_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
         "translation": ""
@@ -11079,7 +11082,7 @@
         "translation": "Les coordonnées d'emplacement ont été propagées à toutes les adresses utilisant cet emplacement."
       },
       "LNG_PAGE_MODIFY_LOCATION_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       }
     },
     "uiLocationsUsageListPage": {
@@ -11102,7 +11105,7 @@
         "translation": "Suivi"
       },
       "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_NAME": {
-        "translation": "Prénom"
+        "translation": "Nom"
       },
       "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_OUTBREAK": {
         "translation": "Déclenchement"
@@ -11155,7 +11158,7 @@
         "translation": ""
       },
       "LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS": {
-        "translation": "Phone Number"
+        "translation": "Numéro de téléphone"
       },
       "LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS_DESCRIPTION": {
         "translation": ""
@@ -11226,7 +11229,7 @@
         "translation": ""
       },
       "LNG_USER_ROLE_FIELD_LABEL_NAME": {
-        "translation": "Prénom"
+        "translation": "Nom"
       },
       "LNG_USER_ROLE_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -11407,7 +11410,7 @@
         "translation": "Relationships"
       },
       "LNG_PAGE_LIST_EVENTS_ACTION_IMPORT_EVENTS_RELATIONSHIPS": {
-        "translation": "Import event relationships"
+        "translation": "Importer les relations d'événements"
       }
     },
     "uiModifyEventPage": {
@@ -11427,7 +11430,7 @@
         "translation": "Ouvrir {{name}}"
       },
       "LNG_PAGE_MODIFY_EVENT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       }
     },
     "uiIconFields": {
@@ -11656,7 +11659,7 @@
         "translation": ""
       },
       "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_NESTED_QUESTIONS": {
-        "translation": "Nested questions"
+        "translation": "Questions imbriquées"
       }
     },
     "uiOutbreakListPage": {
@@ -11712,7 +11715,7 @@
         "translation": "Formulaire de résultats de laboratoire"
       },
       "LNG_PAGE_LIST_OUTBREAKS_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
-        "translation": "Contact form"
+        "translation": "Formulaire de contact"
       }
     },
     "uiOutbreakTemplateFields": {
@@ -11771,19 +11774,19 @@
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING": {
-        "translation": "Overwrite existing follow-ups"
+        "translation": "Écraser les suivis existants"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
         "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT": {
-        "translation": "Keep team assignment"
+        "translation": "Conserver l'affectation de l'équipe"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
         "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin."
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
-        "translation": "Team assignment algorithm"
+        "translation": "Algorithme d'affectation des équipes"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
         "translation": "[Option 1] - If Team1 has \"Argentina\" assigned and Team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done. [Option 2] - If Team1 has \"Argentina\" assigned and team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done."
@@ -11801,28 +11804,28 @@
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE": {
-        "translation": "Allow lab sample collection for contacts?"
+        "translation": "Autoriser la collecte de donnée pour des prélèvements effectués sur les contacts"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
-        "translation": "Is case date of onset required?"
+        "translation": "La date d'apparition des symptômes est-elle requise ?"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {
-        "translation": "Apply geographic restrictions in this outbreak"
+        "translation": "Appliquer des restrictions géographiques dans cette épidémie"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_OF_CONTACT_ACTIVE": {
-        "translation": "Allow registration of contacts of contacts?"
+        "translation": "Autoriser l'enregistrement des contacts des contacts ?"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_OF_CONTACT_ACTIVE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Est le contact du contact actif"
       }
     },
     "uiOutbreakTemplateListPage": {
@@ -11851,16 +11854,16 @@
         "translation": "Formulaire de suivi"
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CASE_LAB_RESULTS_QUESTIONNAIRE": {
-        "translation": "Formulaire de résultats de laboratoire"
+        "translation": "Formulaire de résultats de labo"
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTIONS_CLONE_OUTBREAK_TEMPLATE": {
-        "translation": "Clone outbreak template"
+        "translation": "Cloner le modèle d'épidémie"
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_CLONE_NAME": {
         "translation": "{{name}} Clone"
       },
       "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
-        "translation": "Contact form"
+        "translation": "Formulaire de contact"
       }
     },
     "uiCreateOutbreakTemplatePage": {
@@ -11936,7 +11939,7 @@
         "translation": "Ouvrir {{name}}"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
-        "translation": "Contact form"
+        "translation": "Formulaire de contact"
       }
     },
     "uiModifyOutbreakQuestionnairePage": {
@@ -11962,7 +11965,7 @@
         "translation": "Réponse en double"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_QUESTIONNAIRE_CONTACT_TITLE": {
-        "translation": "Contact investigation"
+        "translation": "Investigation de contact"
       }
     },
     "uiModifyOutbreakTemplateQuestionnairePage": {
@@ -11979,7 +11982,7 @@
         "translation": "Résultats de laboratoire"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_QUESTIONNAIRE_CONTACT_TITLE": {
-        "translation": "Contact investigation"
+        "translation": "Investigation de contact"
       }
     },
     "uiDashboardPage": {
@@ -12026,7 +12029,7 @@
         "translation": "Nombre de cas"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORT_LABEL": {
-        "translation": "Epi Curve"
+        "translation": "Courbe épidémique"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_SHOW_DAYS_LABEL": {
         "translation": "Afficher les jours"
@@ -12155,7 +12158,7 @@
         "translation": "Rapports"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": {
-        "translation": "Epi Curve"
+        "translation": "Courbe épidémique"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_CLASSIFICATION_TITLE": {
         "translation": "Nombre de cas dans le temps stratifiés par classification"
@@ -12224,7 +12227,7 @@
         "translation": "% des cas enregistrés auparavant comme contact"
       },
       "LNG_PAGE_DASHBOARD_PIE_CHARTS_TITLE": {
-        "translation": "Summaries charts"
+        "translation": "Graphiques de synthèse"
       },
       "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
         "translation": "Please make sure that EPI chart is visible"
@@ -12233,10 +12236,10 @@
         "translation": "Global Week"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_EPI": {
-        "translation": "Epi Week"
+        "translation": "Semaine de l'épidémique"
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_SUNDAY": {
-        "translation": "Week starting on Sunday"
+        "translation": "Semaine commençant le dimanche"
       }
     },
     "uiChainsOfTransmission": {
@@ -12375,7 +12378,7 @@
         "translation": "Case summary"
       },
       "LNG_PAGE_LIST_FILTER_CASES_NOT_HOSPITALISED": {
-        "translation": "Cases not hospitalized"
+        "translation": "Cases non hospitalises"
       },
       "LNG_PAGE_DASHBOARD_CASE_BY_LOCATION": {
         "translation": "Cases by geographic location"
@@ -12542,7 +12545,7 @@
         "translation": "Has value"
       },
       "LNG_SIDE_FILTERS_COMPARATOR_LABEL_DOESNT_HAVE_VALUE": {
-        "translation": "Doesn't have value"
+        "translation": "N'a pas de valeur"
       },
       "LNG_SIDE_FILTERS_COMPARATOR_LABEL_SELECT_HAS_AT_LEAST_ONE": {
         "translation": "Has at least one of these values"
@@ -12715,16 +12718,16 @@
         "translation": "Value"
       },
       "LNG_PAGE_IMPORT_CASE_RELATIONSHIP_DATA_TITLE": {
-        "translation": "Import case relationships"
+        "translation": "Importer les relations de cas"
       },
       "LNG_PAGE_IMPORT_CONTACT_RELATIONSHIP_DATA_TITLE": {
-        "translation": "Import contact relationships"
+        "translation": "Importer les relations de contact "
       },
       "LNG_PAGE_IMPORT_EVENT_RELATIONSHIP_DATA_TITLE": {
-        "translation": "Import event relationships"
+        "translation": "Importer les relations d'événements"
       },
       "LNG_PAGE_IMPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DATA_TITLE": {
-        "translation": "Import contact of contact relationships"
+        "translation": "Importer les relations de contact de contact"
       }
     },
     "uiImportHierarchicalLocations": {
@@ -12779,7 +12782,7 @@
         "translation": "Nom de l'épidémie clonée"
       },
       "LNG_DIALOG_FIELD_PLACEHOLDER_CLONED_OUTBREAK_TEMPLATE_NAME": {
-        "translation": "Cloned outbreak template name"
+        "translation": "Nom du modèle de l'épidémie clonée"
       }
     },
     "uiOutbreakDateInconsistenciesListPage": {
@@ -12795,7 +12798,7 @@
         "translation": ""
       },
       "LNG_TEAM_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_TEAM_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -12893,7 +12896,7 @@
         "translation": " - row {{row}} is invalid: {{err}}"
       },
       "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
-        "translation": "Les enregistrements qui ont été créé avec succès ont éé enelevé de la feuille de travail afin de ne pas créer de doublon."
+        "translation": "Les enregistrements qui ont été créé avec succès ont été enelevés de la feuille de travail afin de ne pas créer de doublon."
       }
     },
     "uiExcelLikeSheetWidget": {
@@ -12929,7 +12932,7 @@
         "translation": "Erreur"
       },
       "LNG_BACKUP_FIELD_LABEL_LOCATION": {
-        "translation": "Endroit"
+        "translation": "Localisation Géo."
       },
       "LNG_BACKUP_FIELD_LABEL_LOCATION_DESCRIPTION": {
         "translation": ""
@@ -12941,13 +12944,13 @@
         "translation": ""
       },
       "LNG_BACKUP_FIELD_LABEL_STATUS": {
-        "translation": "Status"
+        "translation": "Statut"
       },
       "LNG_BACKUP_FIELD_LABEL_USER": {
         "translation": "Utilisateur"
       },
       "LNG_BACKUP_FIELD_LABEL_FILE_SIZE": {
-        "translation": "File size"
+        "translation": "Taille de fichier"
       },
       "LNG_BACKUP_FIELD_LABEL_DESCRIPTION": {
         "translation": "Description"
@@ -13084,7 +13087,7 @@
         "translation": ""
       },
       "LNG_UPSTREAM_SERVER_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_UPSTREAM_SERVER_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -13177,7 +13180,7 @@
     },
     "uiSyncLogsFields": {
       "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_COMPLETION_DATE": {
-        "translation": "Date d'achèvement de l'action"
+        "translation": "Date de fin de l'action"
       },
       "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_START_DATE": {
         "translation": "Date de début de l'action"
@@ -13245,10 +13248,10 @@
         "translation": "Journaux de synchronisation"
       },
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_IMPORT_SYNC_PACKAGE_BUTTON": {
-        "translation": "Import sync package"
+        "translation": "Importer sync package"
       },
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_EXPORT_SYNC_PACKAGE_BUTTON": {
-        "translation": "Export sync package"
+        "translation": "Exporter sync package"
       },
       "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_ERROR_DETAILS_TITLE": {
         "translation": "Error details"
@@ -13277,7 +13280,7 @@
         "translation": "Lettres de créance"
       },
       "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -13382,7 +13385,7 @@
         "translation": "Réseau de bulles"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
-        "translation": "Générer un graphique"
+        "translation": "Générer un graph."
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CHANGE_TIMELINE_VIEW_HORIZONTAL": {
         "translation": "Afficher la chronologie horizontale"
@@ -13442,7 +13445,7 @@
         "translation": "Détails de l'évènement"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EXPORT": {
-        "translation": "Chaînes d'exportation de transmission"
+        "translation": "Exportation de chaines de transmission"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EXPORT_SPLIT_FACTOR": {
         "translation": "Échelle"
@@ -13478,7 +13481,7 @@
         "translation": "Initiales"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_LOCATION": {
-        "translation": "Emplacement"
+        "translation": "Localisation Géo."
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_NAME": {
         "translation": "prénom"
@@ -13505,13 +13508,13 @@
         "translation": "Réinitialiser"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_LABEL": {
-        "translation": "Afficher les contacts"
+        "translation": "Afficher contacts"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_EVENTS_LABEL": {
-        "translation": "Afficher les événements"
+        "translation": "Afficher événements"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_LEGEND_LABEL": {
-        "translation": "Afficher la légende"
+        "translation": "Afficher légende"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TITLE": {
         "translation": "Chaînes de Transmission"
@@ -13520,13 +13523,13 @@
         "translation": "Mode édition"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TIMELINE_NETWORK_VIEW_DATE_OF_ONSET": {
-        "translation": "Timeline Network - Date d'apparition"
+        "translation": "Chronologie - Date d'apparition"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TIMELINE_NETWORK_VIEW_DATE_OF_LAST_CONTACT": {
-        "translation": "Timeline Network - Date du dernier contact"
+        "translation": "Chronologie - Date du dernier contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TIMELINE_NETWORK_VIEW_DATE_OF_REPORTING": {
-        "translation": "Réseau de la chronologie - Date du rapport"
+        "translation": "Chronologie - Date du rapport"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EVENTS_WITHOUT_DATE_OF_REPORTING_TITLE": {
         "translation": "événements sans date de rapport"
@@ -13598,7 +13601,7 @@
         "translation": "Reverse persons"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_REVERSE_RELATIONSHIP_TOOLTIP": {
-        "translation": "You can reverse a relationship only if is not involving a contact"
+        "translation": "Vous ne pouvez inverser une relation que si elle n'implique pas un contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_TITLE": {
         "translation": "{{type}}"
@@ -13616,34 +13619,34 @@
         "translation": "Relationships"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_TOGGLE_FULL_SCREEN_LABEL": {
-        "translation": "Full screen"
+        "translation": "Plein écran"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_VISUAL_ID_AND_LOCATION": {
         "translation": "ID + Location"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_OF_CONTACTS": {
-        "translation": "Show Contacts of Contacts"
+        "translation": "Afficher contacts de contacts"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_TITLE": {
         "translation": "Create Contact of Contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_LABEL_CONTACT_FIELDS": {
-        "translation": "Contact of contact info"
+        "translation": "Info de contact de contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_LABEL_RELATIONSHIP_FIELDS": {
-        "translation": "Relationship info"
+        "translation": "Information de relation"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_BUTTON": {
         "translation": "Create Contact of contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_FOR_PERSON": {
-        "translation": "Add contact"
+        "translation": "Ajouter un contact"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
-        "translation": "Contact of Contact created"
+        "translation": "Contact de contact créé"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_DATE_OF_ONSET_AND_EVENT_DATE": {
-        "translation": "Date of onset/Event"
+        "translation": "Date de début des signes/événement"
       }
     },
     "uiInconsistencyLabels": {
@@ -13715,7 +13718,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": {
-        "translation": "Vu avec signe/symptome",
+        "translation": "Vu avec signe (s)",
         "modules": [
           "referenceData"
         ]
@@ -13727,7 +13730,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": {
-        "translation": "Vu sans signe/symptome",
+        "translation": "Vu sans signe",
         "modules": [
           "referenceData"
         ]
@@ -13758,7 +13761,7 @@
     },
     "contactFinalFollowUpStatusType": {
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
-        "translation": "Contact Statut de suivi final"
+        "translation": "statut final du suivi du contact"
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DESCRIPTION": {
         "translation": ""
@@ -13776,7 +13779,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": {
-        "translation": "Perdu pour le suivi",
+        "translation": "Perdu de vu pour le suivi",
         "modules": [
           "referenceData"
         ]
@@ -13800,13 +13803,13 @@
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DIED": {
-        "translation": "Died",
+        "translation": "Décédé",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_NEVER_ILL_NOT_A_CASE": {
-        "translation": "Never ill/not a case",
+        "translation": "N'est jamais tombé malade / pas un cas",
         "modules": [
           "referenceData"
         ]
@@ -13834,7 +13837,7 @@
     },
     "deviceHistoryStatus": {
       "LNG_DEVICE_HISTORY_WIPE_STATUS_FAILED": {
-        "translation": "Suppression des données échoué"
+        "translation": "La suppression des données a échoué"
       },
       "LNG_DEVICE_HISTORY_WIPE_STATUS_PENDING": {
         "translation": "Suppression des données en attente"
@@ -13862,16 +13865,16 @@
         "translation": "Case classification modified!"
       },
       "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CASE_LAB_RESULTS_BUTTON": {
-        "translation": "Import Case Lab Data"
+        "translation": "Importer de données de laboratoire de cas"
       },
       "LNG_PAGE_LIST_LAB_RESULTS_IMPORT_CONTACT_LAB_RESULTS_BUTTON": {
-        "translation": "Import Contact Lab Data"
+        "translation": "Importer de données de laboratoire de contact"
       },
       "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_BUTTON": {
-        "translation": "Export lab result data"
+        "translation": "Exporter des données de résultats de laboratoire"
       },
       "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_TITLE": {
-        "translation": "Export lab result data"
+        "translation": "Exporter des données de résultats de laboratoire"
       }
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
@@ -14049,7 +14052,7 @@
     },
     "uiLanguageFields": {
       "LNG_LANGUAGE_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_LANGUAGE_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -14280,7 +14283,7 @@
         "translation": "Icône"
       },
       "LNG_MODULE_LABEL_LAB_RESULT": {
-        "translation": "Résultat de laboratoire"
+        "translation": "Résultat de labo."
       },
       "LNG_MODULE_LABEL_LANGUAGE": {
         "translation": "La langue"
@@ -14394,19 +14397,19 @@
         "translation": "La description"
       },
       "LNG_HELP_CATEGORY_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
-        "translation": ""
+        "translation": "La description"
       },
       "LNG_HELP_CATEGORY_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_HELP_CATEGORY_FIELD_LABEL_NAME_DESCRIPTION": {
-        "translation": ""
+        "translation": "Nom"
       },
       "LNG_HELP_CATEGORY_FIELD_LABEL_ORDER": {
         "translation": "Ordre"
       },
       "LNG_HELP_CATEGORY_FIELD_LABEL_ORDER_DESCRIPTION": {
-        "translation": ""
+        "translation": "Ordre"
       }
     },
     "uiHelpCategoriesListPage": {
@@ -14477,34 +14480,34 @@
         "translation": "Approuvé par"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_APPROVED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Approuvé par"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_APPROVED_DATE": {
-        "translation": "Une date approuvée"
+        "translation": "Approuvé le"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_APPROVED_DATE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Approuvé le"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_APPROVED_DESCRIPTION": {
-        "translation": ""
+        "translation": "Description"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_CATEGORY": {
         "translation": "Catégorie"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_CATEGORY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Catégorie"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_COMMENT": {
         "translation": "Commentaire"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_COMMENT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Commentaire"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_CONTENT": {
         "translation": "Contenu"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_CONTENT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Contenu"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_PAGE": {
         "translation": "Page"
@@ -14516,10 +14519,10 @@
         "translation": "Titre"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_TITLE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Titre"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_ORDER": {
-        "translation": "Order"
+        "translation": "Ordre"
       },
       "LNG_HELP_ITEM_FIELD_LABEL_ORDER_DESCRIPTION": {
         "translation": ""
@@ -14596,10 +14599,10 @@
         "translation": "Longitude"
       },
       "LNG_ADDRESS_FIELD_LABEL_ZIP": {
-        "translation": "Zip"
+        "translation": "Code Postal"
       },
       "LNG_ADD_ADDRESS_TAB_ADD_LOCATION_MESSAGE": {
-        "translation": "Choisir une endroit"
+        "translation": "Choisir un endroit"
       },
       "LNG_ADD_FOLLOW_UP_MODAL_FOLLOW_UPS_DATE": {
         "translation": "Date de suivi"
@@ -14686,7 +14689,7 @@
         "translation": "Supprimer le contact"
       },
       "LNG_CONTACT_SINGLE_SCREEN_EXPOSURE_TAB": {
-        "translation": "Exposures"
+        "translation": "Expositions"
       },
       "LNG_CONTACT_SINGLE_SCREEN_PERSONAL_TAB": {
         "translation": "Personnel"
@@ -14698,7 +14701,7 @@
         "translation": "Nom du centre"
       },
       "LNG_DATE_FIELD_LABEL_HOSPITAL_NAME": {
-        "translation": "Hospital Name"
+        "translation": "Nom de l'hôpital"
       },
       "LNG_DATE_FIELD_LABEL_COMMENTS": {
         "translation": "Commentaires"
@@ -14725,7 +14728,7 @@
         "translation": "Êtes-vous sûr de vouloir supprimer ce cas?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_EXPOSURE": {
-        "translation": "L'exposure sera supprimée de la base de données. Êtes-vous sûr de vouloir supprimer cette exposure?"
+        "translation": "L'exposition sera supprimée de la base de données. Êtes-vous sûr de vouloir supprimer cette exposition?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_FOLLOW_UP": {
         "translation": "Êtes-vous sûr de vouloir supprimer ce suivi?"
@@ -14734,10 +14737,10 @@
         "translation": "Êtes-vous sûr de vouloir annuler toutes les modifications?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_CANNOT_DELETE_CONTACT_LAST_EXPOSURE": {
-        "translation": "Impossible de supprimer la dernière exposure de contact"
+        "translation": "Impossible de supprimer la dernière exposition de contact"
       },
       "LNG_DIALOG_ALERT_MESSAGE_COMPLETE_ALL_MISSING_REQUIRED_FIELDS": {
-        "translation": "Certains des champs obligatoires sont manquants. S'il vous plaît assurez-vous que vous avez les completé"
+        "translation": "Certains des champs obligatoires sont manquants. S'il vous plaît assurez-vous de les completer"
       },
       "LNG_DIALOG_ALERT_MESSAGE_DATE_OF_ISOLATION_SHOULD_NOT_BE_BEFORE_DATE_OF_ONSET": {
         "translation": "La date d'isolement ne doit pas être antérieure à la date d'apparition"
@@ -14764,7 +14767,7 @@
         "translation": "Sélectionnez l'application de cartes que vous souhaitez utiliser"
       },
       "LNG_DIALOG_ALERT_MESSAGE_THERE_WAS_AN_ISSUE_GETTING_YOUR_LOCATION": {
-        "translation": "Il y avait un problème avec l'obtention de votre position"
+        "translation": "Il y a eu un problème lors de l'obtention de votre géolocalisation"
       },
       "LNG_DIALOG_ALERT_TITLE_LABEL": {
         "translation": "Alerte"
@@ -14848,7 +14851,7 @@
         "translation": "Ajouter"
       },
       "LNG_HELP_ITEMS_EDIT_MESSAGE": {
-        "translation": "modifier"
+        "translation": "Modifier"
       },
       "LNG_HELP_ITEMS_EMPTY_LIST_MESSAGE": {
         "translation": "Il n'y a pas d'aide à afficher"
@@ -14878,7 +14881,7 @@
         "translation": "Filtres d'aide"
       },
       "LNG_HELP_ITEMS_ITEMS_FOR_MESSAGE": {
-        "translation": "articles pour"
+        "translation": "Articles pour"
       },
       "LNG_HELP_ITEMS_LIST_TITLE": {
         "translation": "Aide"
@@ -14908,7 +14911,7 @@
         "translation": "Secret du client"
       },
       "LNG_HUB_CONFIGURATION_SCREEN_CURRENT_CONFIG_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_HUB_CONFIGURATION_SCREEN_CURRENT_CONFIG_URL": {
         "translation": "URL"
@@ -14917,7 +14920,7 @@
         "translation": "Votre configuration actuelle du hub est:"
       },
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_GET_CURRENT_HUB": {
-        "translation": "Erreur obtenir le hub actuel"
+        "translation": "Erreur lors de l'obtention du hub actuel"
       },
       "LNG_HUB_CONFIGURATION_SCREEN_ERROR_GET_HUBS": {
         "translation": "Erreur lors de l'obtention des hubs"
@@ -15079,43 +15082,43 @@
         "translation": "Ordre de tri"
       },
       "LNG_DROPDOWN_NONE_OPTION": {
-        "translation": "None"
+        "translation": "Aucun"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_DOCUMENT": {
-        "translation": "Are you sure you want to delete this document?"
+        "translation": "Êtes-vous sûr de vouloir supprimer ce document?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_ADDRESS": {
-        "translation": "Are you sure you want to delete this address?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette adresse?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_DATE_RANGE": {
-        "translation": "Are you sure you want to delete this date range?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette plage de dates?"
       },
       "LNG_COMMON_BUTTON_LABEL_RESET_FILTERS": {
-        "translation": "Reset"
+        "translation": "Réinitialiser"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_EXIT_THE_APP": {
-        "translation": "Are you sure you want to exit the application?"
+        "translation": "Êtes-vous sûr de vouloir quitter l'application?"
       },
       "LNG_ADDRESS_FIELD_LABEL_MOBILE_NAME": {
         "translation": "Type"
       },
       "LNG_DIALOG_ALERT_MESSAGE_DO_YOU_WANT_TO_REPLACE_CURRENT_COORDINATES_WITH_LOCATION_VALUES": {
-        "translation": "Do you want to replace current coordinates with location's values?"
+        "translation": "Souhaitez vous remplacer les coordonnées actuelles par celles du lieu choisi?"
       },
       "LNG_ADD_SINGLE_ANSWER_MODAL_SCREEN_ADD_NEW_ANSWER": {
         "translation": "Ajouter une nouvelle réponse"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ADD_PERSON": {
-        "translation": "Would you like to add a new person for this id?"
+        "translation": "Souhaitez-vous ajouter une nouvelle personne pour cette carte d'identité ?"
       },
       "LNG_DIALOG_ALERT_MESSAGE_COMPLETE_ALL_MISSING_RELATIONSHIPS": {
         "translation": "Vous n'avez pas ajouté de relation, veuillez en ajouter au moins une"
       },
       "LNG_DIALOG_ALERT_MESSAGE_COMPLETE_ALL_MISSING_FIELDS": {
-        "translation": "Missing fields"
+        "translation": "Champs manquants"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_DELETE_THIS_ANSWER": {
-        "translation": "Are you sure you want to delete this answer?"
+        "translation": "Êtes-vous sûr de vouloir supprimer cette réponse?"
       },
       "LNG_PREVIOUS_ANSWERS_SCREEN_PREVIOUS_ANSWERS_TITLE": {
         "translation": "Previous Answers"
@@ -15130,22 +15133,22 @@
         "translation": "Prev Answers"
       },
       "LNG_FOLLOW_UP_AGENDA_NO_FOLLOW_UPS_FOR_DATE": {
-        "translation": "No follow-ups to show for this day"
+        "translation": "Aucun suivi pour cette journée"
       },
       "LNG_FOLLOW_UPS_SINGLE_SCREEN_ACTION_EDIT_CONTACT": {
-        "translation": "Edit contact"
+        "translation": "Modifier le contact"
       },
       "LNG_DIALOG_SAVE_ANYWAY_LABEL": {
-        "translation": "Save anyway"
+        "translation": "Sauvegarder quand même"
       },
       "LNG_CASE_FIELD_LABEL_CASE_ID": {
-        "translation": "Case ID"
+        "translation": "ID du cas"
       },
       "LNG_CONTACT_FIELD_LABEL_CONTACT_ID": {
-        "translation": "Contact ID"
+        "translation": "Identifiant de contact"
       },
       "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_COPY_THE_ADDRESS_FROM_THE_PARENT_ENTITY": {
-        "translation": "Etes vous sûr que vous voulez copier l'adresse de la localisation parent ?"
+        "translation": "Êtes-vous sûr de vouloir copier l'adresse de la localisation parent ?"
       },
       "LNG_PERSON_LIST_ITEM_DAY_OF_FOLLOW_UP": {
         "translation": "Day of follow-up: "
@@ -15154,22 +15157,22 @@
         "translation": "Capture coordinates"
       },
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP": {
-        "translation": "Follow-up"
+        "translation": "Suivi"
       },
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_STATUS": {
-        "translation": "Status"
+        "translation": "Statut du suivi"
       },
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_QUESTIONNAIRE": {
-        "translation": "Questionnaire"
+        "translation": "Questionnaire de suivi"
       },
       "LNG_FOLLOW_UP_AGENDA_FOLLOW_UP_ADDRESS": {
-        "translation": "Adresse"
+        "translation": "Adresse de suivi"
       },
       "LNG_CONTACT_LIST_SCREEN_NO_CONTACTS": {
-        "translation": "There are no contacts to display"
+        "translation": "Aucun contact à afficher"
       },
       "LNG_CASE_LIST_SCREEN_NO_CASES": {
-        "translation": "There are no cases to display"
+        "translation": "Aucun cas à afficher"
       },
       "LNG_CASE_LIST_SCREEN_SEE_CONTACTS": {
         "translation": "Contacts"
@@ -15187,7 +15190,7 @@
         "translation": "More Filters"
       },
       "LNG_MOBILE_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
-        "translation": "Pregnancy status"
+        "translation": "Statut de grossesse"
       },
       "LNG_MOBILE_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": {
         "translation": "Follow-up final status"
@@ -15231,7 +15234,7 @@
         "translation": "Adresse"
       },
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_PHONE_NUMBER": {
-        "translation": "Phone number"
+        "translation": "Numéro de téléphone"
       },
       "LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE": {
         "translation": "Age"
@@ -15284,7 +15287,7 @@
     },
     "uiBulkActionsOnListPages": {
       "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_CHECK_ALL": {
-        "translation": "Vérifie tout"
+        "translation": "Sélectionner tout"
       },
       "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_TOOLTIP": {
         "translation": "Actions en vrac"
@@ -15295,7 +15298,7 @@
     },
     "uiColumnActionsOnListPages": {
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE": {
-        "translation": "Effondrer"
+        "translation": "Réduire"
       },
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE_ALL": {
         "translation": "Réduire tout"
@@ -15310,16 +15313,16 @@
         "translation": "{{value}} éléments"
       },
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE": {
-        "translation": "Hide"
+        "translation": "Cacher"
       },
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE_ALL": {
-        "translation": "Hide All"
+        "translation": "Cacher tout"
       },
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW": {
-        "translation": "Show"
+        "translation": "Montrer"
       },
       "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW_ALL": {
-        "translation": "Show All"
+        "translation": "Montrer tout"
       }
     },
     "uiFormErrorsWarningsAndSuccessMessages": {
@@ -15327,7 +15330,7 @@
         "translation": "Les champs suivants ne sont pas valides: {{fields}}"
       },
       "LNG_FORM_ERROR_FORM_INVALID_WITH_FIELDS_ROW": {
-        "translation": "item {{item}}"
+        "translation": "Le formulaire est invalide:  {{item}}"
       }
     },
     "uiGlobalFilterFields": {
@@ -15528,7 +15531,7 @@
         "translation": ""
       },
       "LNG_SYSTEM_DEVICE_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_SYSTEM_DEVICE_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -15595,7 +15598,7 @@
         "translation": "Identifiant d'entité"
       },
       "LNG_GLOBAL_ENTITY_SEARCH_ENTITY_ID_LABEL_VALUE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Identifiant d'entité"
       },
       "LNG_GLOBAL_ENTITY_SEARCH_NO_ENTITIES_MESSAGE": {
         "translation": "Aucune entité ne correspond!"
@@ -15617,13 +15620,13 @@
         "translation": "Min"
       },
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_DESCRIPTION": {
-        "translation": ""
+        "translation": "Description"
       },
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_MAX": {
         "translation": "Max"
       },
       "LNG_FORM_DATE_RANGE_SLIDER_FIELD_LABEL_MAX_DESCRIPTION": {
-        "translation": ""
+        "translation": "Max"
       }
     },
     "uiSavedFiltersListPage": {
@@ -15642,7 +15645,7 @@
     },
     "uiSavedFiltersFields": {
       "LNG_SAVED_FILTERS_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_SAVED_FILTERS_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -15686,10 +15689,10 @@
         "translation": "Available entities for switch"
       },
       "LNG_APP_PAGE_CONTACT_LAB_RESULTS": {
-        "translation": "Individual contact lab results"
+        "translation": "Résultats de laboratoire de contacts indivituels"
       },
       "LNG_APP_PAGE_CONTACTS_OF_CONTACTS": {
-        "translation": "Contacts of contacts"
+        "translation": "Contacts de contacts"
       }
     },
     "uiSavedImportMappingsListPage": {
@@ -15714,24 +15717,24 @@
         "translation": "Contacts"
       },
       "LNG_APP_PAGE_IMPORT_REFERENCE_DATA": {
-        "translation": "Reference data"
+        "translation": "Données de Référence"
       },
       "LNG_APP_PAGE_IMPORT_LOCATION_DATA": {
         "translation": "Locations"
       },
       "LNG_APP_PAGE_IMPORT_CASE_LAB_DATA": {
-        "translation": "Case Lab data"
+        "translation": "Données du laboratoire pour cas"
       },
       "LNG_APP_PAGE_IMPORT_CONTACT_LAB_DATA": {
-        "translation": "Contact Lab data"
+        "translation": "Données du laboratoire de contacts indivituels"
       },
       "LNG_APP_PAGE_IMPORT_CONTACTS_OF_CONTACTS": {
-        "translation": "Contacts of contacts"
+        "translation": "Contacts de contacts"
       }
     },
     "uiSavedImportMappingsFields": {
       "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME": {
-        "translation": "prénom"
+        "translation": "Nom"
       },
       "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
@@ -15779,7 +15782,7 @@
         "translation": "Hospitalisation / Isolement"
       },
       "LNG_HOSPITALISATION_ISOLATION_DATE_RANGE_WARNING_CASE_DATEOFONSET_AFTER_START_DATE": {
-        "translation": "Warning: Date of onset is after start date"
+        "translation": "Attention: Date de début des symptômes est après la date de début de l'isolement"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_FIELD_LABEL_DATE": {
         "translation": "Date"
@@ -15788,13 +15791,13 @@
         "translation": "Center name: {{name}}"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_CELL_WIDTH_LABEL": {
-        "translation": "Cell width"
+        "translation": "Largeur de la cellule"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LAB_PENDING_LABEL": {
         "translation": "{{result}} (p)"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
-        "translation": "{{rectCD}} Case details: hs - Hospitalized / is - Isolated  <br/>{{rectLAB}} Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result<br/>{{rectOUT}} Outcome: oa - Alive / od - Deceased / or - Recovered<br/>{{rectB}} Burial: bn - Buried no safe / bs - Buried safe"
+        "translation": "{{rectCD}} Détails du cas: hs - Hospitalisé / is - Isolé  <br/>{{rectLAB}} Détails des résultats de laboratoire: L? - unknown result / L- - Résultat inconnu / L+ - Résultat positif / (p) - En attente d'un résultat<br/>{{rectOUT}} Vivant: oa - Alive / od - Décédé / or - Récupéré<br/>{{rectB}} Enterrement: bn - Enterrément pas en sécurité / bs - Enterrément sécurité"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_ISOLATED_CASE_LABEL": {
         "translation": "is"
@@ -15833,10 +15836,10 @@
         "translation": "bs"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_FILTERS_CASE_CLASSIFICATION": {
-        "translation": "Case classification"
+        "translation": "Classification de cas"
       },
       "LNG_PAGE_TRANSMISSION_CHAIN_BARS_FILTERS_CASE_OUTCOME": {
-        "translation": "Case outcome"
+        "translation": "Résultat du cas"
       }
     },
     "uiBulkModifyContactsPage": {
@@ -15998,19 +16001,19 @@
     },
     "referenceDataCategoryVaccine": {
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE": {
-        "translation": "Vaccine"
+        "translation": "Vaccin"
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {
-        "translation": "Vaccine Status"
+        "translation": "Statut de vaccination"
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_DESCRIPTION": {
         "translation": ""
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
-        "translation": "Pregnancy Status"
+        "translation": "Statut de grossesse"
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_DESCRIPTION": {
         "translation": ""
@@ -16022,7 +16025,7 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NOT_PREGNANT": {
-        "translation": "Not Pregnant",
+        "translation": "Pas enceinte",
         "modules": [
           "referenceData"
         ]
@@ -16052,13 +16055,13 @@
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_NOT_VACCINATED": {
-        "translation": "Not vaccinated",
+        "translation": "Pas vacciné",
         "modules": [
           "referenceData"
         ]
       },
       "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS_VACCINATED": {
-        "translation": "Vaccinated",
+        "translation": "Vacciné",
         "modules": [
           "referenceData"
         ]
@@ -16162,7 +16165,7 @@
         "translation": "Loading locations"
       },
       "LNG_FORM_HOT_TABLE_WRAPPER_CHANGE_LOCATION_DIALOG_TITLE": {
-        "translation": "Change location"
+        "translation": "Changer de lieu"
       }
     },
     "uiGeneralLabels": {
@@ -16170,13 +16173,13 @@
         "translation": "Contacts"
       },
       "LNG_DIALOG_GENERAL_DIALOG_TITLE_GROUP_EXPOSURES_DIALOG_TITLE": {
-        "translation": "Exposures"
+        "translation": "Expositions"
       },
       "LNG_DIALOG_GENERAL_DIALOG_LINK_FULL_LIST_CONTACTS": {
-        "translation": "Full list of contacts"
+        "translation": "Liste complète des contacts"
       },
       "LNG_DIALOG_GENERAL_DIALOG_LINK_FULL_LIST_EXPOSURES": {
-        "translation": "Full list of exposures"
+        "translation": "Liste complète des expositions"
       }
     },
     "uiEntityLabResultsListPage": {
@@ -16184,16 +16187,16 @@
         "translation": "Ajouter"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_DELETE_SUCCESS_MESSAGE": {
-        "translation": "Lab result deleted"
+        "translation": "le résultat de labo a été effacé"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_VIEW_LAB_RESULT": {
-        "translation": "View lab result"
+        "translation": "afficher le résultat de labo"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_MODIFY_LAB_RESULT": {
-        "translation": "Modify lab result"
+        "translation": "modifier le résultat de labo"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_DELETE_LAB_RESULT": {
-        "translation": "Delete lab result"
+        "translation": "effacer le résultat de labo"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_ACTION_RESTORE_LAB_RESULT": {
         "translation": "Restore lab result"
@@ -16202,138 +16205,138 @@
         "translation": "Lab results"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_BUTTON": {
-        "translation": "Export lab result data"
+        "translation": "Exporter des données de résultats de laboratoire"
       },
       "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_EXPORT_TITLE": {
-        "translation": "Export lab result data"
+        "translation": "Exporter des données de résultats de laboratoire"
       }
     },
     "uiLabResultsFields": {
       "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_FIRST_NAME": {
-        "translation": "Person first name"
+        "translation": "Prénom"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_LAST_NAME": {
-        "translation": "Person last name"
+        "translation": "Nom de famille"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_ENTITY_TYPE": {
-        "translation": "Person type"
+        "translation": "Type de personne"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT": {
-        "translation": "Date of the result"
+        "translation": "Date du résultat"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_OF_RESULT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date de résultat"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED": {
-        "translation": "Sample delivered to lab"
+        "translation": "Échantillon livré au laboratoire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_DELIVERED_DESCRIPTION": {
-        "translation": "Specify the date on which the sample was delivered to the laboratory"
+        "translation": "Précisez la date à laquelle l'échantillon a été livré au laboratoire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN": {
-        "translation": "Sample taken"
+        "translation": "Échantillon prélevé"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_SAMPLE_TAKEN_DESCRIPTION": {
-        "translation": "Specify the date on which the sample was taken from the individual"
+        "translation": "Précisez la date à laquelle l'échantillon a été prélevé du patient"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_TESTING": {
-        "translation": "Sample tested"
+        "translation": "Échantillon testé"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DATE_TESTING_DESCRIPTION": {
-        "translation": "Specify the date on which the sample was tested by the laboratory"
+        "translation": "Précisez la date à laquelle l'échantillon a été testé par le laboratoire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_DELETED": {
-        "translation": "Deleted"
+        "translation": "Supprimé"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_LAB_NAME": {
-        "translation": "Lab name"
+        "translation": "Nom du laboratoire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_LAB_NAME_DESCRIPTION": {
-        "translation": ""
+        "translation": "Nom du laboratoire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_NOTES": {
-        "translation": "Notes"
+        "translation": "Remarques"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_NOTES_DESCRIPTION": {
-        "translation": ""
+        "translation": "Remarques"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_PERSON_ID": {
-        "translation": "Person ID"
+        "translation": "ID de la personne"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT": {
-        "translation": "Quantitative result"
+        "translation": "Résultat quantitatif"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_QUANTITATIVE_RESULT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Résultat quantitatif"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
-        "translation": "Questionnaire answers"
+        "translation": "Réponses au questionnaire"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_RESULT": {
-        "translation": "Result"
+        "translation": "Résultat"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_RESULT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Résultat "
       },
       "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID": {
-        "translation": "Sample lab ID"
+        "translation": "Identifiant de l'échantillon"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_LAB_ID_DESCRIPTION": {
-        "translation": "If the lab has their own identifying code/number then please enter it here"
+        "translation": "Si le laboratoire a son propre identifiant, renseignez-le ici"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE": {
-        "translation": "Sample type"
+        "translation": "Type d'échantillon"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_SAMPLE_TYPE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Type d'échantillon"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_STATUS": {
-        "translation": "Status"
+        "translation": "Statut"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_STATUS_DESCRIPTION": {
-        "translation": ""
+        "translation": "Statut"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE": {
-        "translation": "Test type"
+        "translation": "Type de test"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE_DESCRIPTION": {
-        "translation": ""
+        "translation": "Type de test"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_TESTED_FOR": {
-        "translation": "Tested for"
+        "translation": "Testé pour"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_TESTED_FOR_DESCRIPTION": {
-        "translation": ""
+        "translation": "Testé pour"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé par"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé à ( utc )"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour par"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION": {
         "translation": "Classification"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "Classification"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": {
         "translation": "Current classification of the case:"
@@ -16388,7 +16391,7 @@
         "translation": "Alerte ! : Date de début des symptômes est postérieure à la date du prélèvement de l'échantillon"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_LAB_RESULT_FIELD_LABEL_CONTACT_WITH_INFO": {
         "translation": "* Cette personne est maintenant un contact and les tests de laboratoire ont été effectué lorsque que '{{caseName}}' était un cas"
@@ -16396,12 +16399,12 @@
     },
     "uiImportContactLabData": {
       "LNG_PAGE_IMPORT_CONTACT_LAB_DATA_TITLE": {
-        "translation": "Import contact lab data"
+        "translation": "Importer de données de laboratoire de contact"
       }
     },
     "uiAuthentication": {
       "LNG_AUTHENTICATION_TOKEN_EXPIRE_DIALOG_TITLE": {
-        "translation": "No activity detected in the last few minutes, you will be signed out if you don't perform any action"
+        "translation": "Aucune activité détectée ces dernières minutes, vous serez déconnectés si vous ne prenez aucune action"
       },
       "LNG_AUTHENTICATION_TOKEN_EXPIRE_DIALOG_CONTINUE_BUTTON": {
         "translation": "I'm still here..."
@@ -16409,10 +16412,10 @@
     },
     "uiContactOfContactFields": {
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS": {
-        "translation": "Address"
+        "translation": "Adresse"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESSES": {
-        "translation": "Address"
+        "translation": "Adresse"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE": {
         "translation": "Age"
@@ -16421,211 +16424,211 @@
         "translation": "Age"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_DESCRIPTION": {
-        "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
+        "translation": "L'âge de la personne, vous pouvez le préciser en années ou en mois.  Vous devez utiliser les mois pour les enfants de moins d'un an uniquement"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Months)"
+        "translation": "Age (Mois)"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Years)"
+        "translation": "Age (Années)"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
-        "translation": "Date of birth"
+        "translation": "Date de naissance"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH_BUTTON": {
-        "translation": "Date of birth"
+        "translation": "Date de naissance"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BURIAL": {
-        "translation": "Date of burial"
+        "translation": "Date de l'enterrement"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BURIAL_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date de l'enterrement"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_END_OF_FOLLOWUP": {
-        "translation": "Follow-up end date"
+        "translation": "Date de fin de suivi"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_LAST_CONTACT": {
-        "translation": "Date of last contact"
+        "translation": "Date du dernier contact"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": {
-        "translation": "Date of outcome"
+        "translation": "Date de résultat"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING": {
-        "translation": "Date of reporting"
+        "translation": "Date du rapport"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date of reporting approximate"
+        "translation": "Date approximative du rapport "
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE_DESCRIPTION": {
-        "translation": "Specify that the date of reporting of this case is not known exactly"
+        "translation": "Précisez que la date de signalement de ce cas n'est pas connue avec exactitude"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date du rapport"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DAY_OF_FOLLOWUP": {
-        "translation": "Day of follow-up"
+        "translation": "Jour de suivi"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DELETED": {
-        "translation": "Deleted"
+        "translation": "Effacé"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DELETED_AT": {
-        "translation": "Deleted at"
+        "translation": "Effacé à"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOB": {
-        "translation": "Date of birth"
+        "translation": "Date de naissance"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOB_DESCRIPTION": {
-        "translation": ""
+        "translation": "Date de naissance"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENTS": {
         "translation": "Documents"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER": {
-        "translation": "Document number"
+        "translation": "Numéro de document"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_TYPE": {
-        "translation": "Document type"
+        "translation": "Type de document"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LAT": {
-        "translation": "Fill geolocation latitude"
+        "translation": "Compléter la latitude de la géolocalisation "
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_FILL_GEO_LOCATION_LNG": {
-        "translation": "Fill geolocation longitude"
+        "translation": "Compléter la longitude de la géolocalisation "
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_FIRST_NAME": {
-        "translation": "First name"
+        "translation": "Prénom"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_FIRST_NAME_DESCRIPTION": {
-        "translation": ""
+        "translation": "Prénom"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_GENDER": {
-        "translation": "Gender"
+        "translation": "Genre"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_GENDER_DESCRIPTION": {
-        "translation": ""
+        "translation": "Genre"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ID": {
         "translation": "ID"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE": {
-        "translation": "Date of reporting is approximate"
+        "translation": "La date du rapport est approximative"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_LAST_NAME": {
-        "translation": "Last Name"
+        "translation": "Nom"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_LAST_NAME_DESCRIPTION": {
-        "translation": "The surname(s) of the contact"
+        "translation": "Le(s) nom(s) de famille du contact"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_MIDDLE_NAME": {
-        "translation": "Middle name"
+        "translation": "Deuxième prénom"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_MIDDLE_NAME_DESCRIPTION": {
-        "translation": "Add in any additional (middle) names for this individual."
+        "translation": "Ajoutez tout autre (second) nom pour cette personne."
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_NAME": {
-        "translation": "Name"
+        "translation": "Nom"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_OCCUPATION": {
-        "translation": "Occupation"
+        "translation": "Emploi"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_OCCUPATION_DESCRIPTION": {
-        "translation": ""
+        "translation": "Emploi"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_OUTBREAK_ID": {
-        "translation": "Outbreak ID"
+        "translation": "ID de l'épidémie"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_OUTCOME_ID": {
-        "translation": "Outcome"
+        "translation": "Résultat"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_OUTCOME_ID_DESCRIPTION": {
-        "translation": ""
+        "translation": "Identifiant du résultat"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PHONE_NUMBER": {
-        "translation": "Phone number"
+        "translation": "Numéro de téléphone"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RELATIONSHIP": {
-        "translation": "Relationship"
+        "translation": "Relation"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RELATIONSHIP_PERSONS": {
-        "translation": "Persons"
+        "translation": "Personnes"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_LEVEL": {
-        "translation": "Risk level"
+        "translation": "Niveau de risque"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_LEVEL_DESCRIPTION": {
-        "translation": ""
+        "translation": "Niveau de risque"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_REASON": {
-        "translation": "Reason"
+        "translation": "Raison"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_REASON_DESCRIPTION": {
-        "translation": ""
+        "translation": "Raison de risque"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_SAFE_BURIAL": {
-        "translation": "Performed safe burial"
+        "translation": "Enterrement sécuritaire"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_TYPE": {
         "translation": "Type"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID": {
-        "translation": "Contact Of Contact ID"
+        "translation": "ID de contact de contact"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
-        "translation": "The ID should match the pattern defined for this outbreak: {{mask}}"
+        "translation": "L'identification doit correspondre au modèle défini pour cette épidémie : {{{mask}}"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_BY": {
-        "translation": "Created by"
+        "translation": "Créé par"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé par"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_AT": {
-        "translation": "Created at ( utc )"
+        "translation": "Créé à ( utc )"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Créé à ( utc )"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_UPDATED_BY": {
-        "translation": "Updated by"
+        "translation": "Mis à jour par"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_UPDATED_BY_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour par"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_UPDATED_AT": {
-        "translation": "Updated at ( utc )"
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_UPDATED_AT_DESCRIPTION": {
-        "translation": ""
+        "translation": "Mis à jour à ( utc )"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": {
-        "translation": "Area"
+        "translation": "Lieu"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
-        "translation": "Vaccines Received"
+        "translation": "Vaccins reçus"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE": {
-        "translation": "Vaccine"
+        "translation": "Vaccin"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_DATE": {
-        "translation": "Vaccine Date"
+        "translation": "Date du Vaccin"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
-        "translation": "Vaccine Status"
+        "translation": "Statut de la vaccination"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
-        "translation": "Pregnancy Status"
+        "translation": "Statut de grossesse"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
-        "translation": "Exposure Date ( {{exposureName}} )"
+        "translation": "Date d'exposition ( {{exposureName}} )"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINES_RECEIVED_DETAILS": {
-        "translation": "Vaccines received"
+        "translation": "Vaccins reçus"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS_DESCRIPTION": {
-        "translation": ""
+        "translation": "Statut de grossesse"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
-        "translation": "Number of exposures"
+        "translation": "Nombre d'expositions"
       }
     },
     "uiMarkedAsNotDuplicatesListPage": {
@@ -16650,16 +16653,16 @@
         "translation": "Action"
       },
       "LNG_DUPLICATES_DIALOG_ACTION_DESCRIPTION": {
-        "translation": "Mark as NOT a duplicate - won't be displayed as a potential duplicate in the future for this record\nMerge duplicate - This is a duplicate of the current record, and we need to merge it"
+        "translation": "Identifier comme n'étant pas un doublon-  Ne sera pas affiché comme un potentiel dulicata dans le futur. Ceci est un duplicata et il faudrait le combiner."
       },
       "LNG_DUPLICATES_DIALOG_ACTION_NONE": {
-        "translation": "No action"
+        "translation": "Aucune action"
       },
       "LNG_DUPLICATES_DIALOG_ACTION_MARK_AS_NOT_A_DUPLICATE": {
-        "translation": "Mark as NOT a duplicate"
+        "translation": "Identifier comme n'étant pas un doublon"
       },
       "LNG_DUPLICATES_DIALOG_ACTION_MERGE_DUPLICATE": {
-        "translation": "Merge duplicate"
+        "translation": "Fusionner les doublons"
       }
     },
     "uiContactsOfContactsListPage": {
@@ -16670,22 +16673,22 @@
         "translation": "Export contacts of contacts data"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_IMPORT_BUTTON": {
-        "translation": "Import contacts of contacts data"
+        "translation": "Importer de données de contact de contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_EXPORT_CONTACTS_OF_CONTACTS_RELATIONSHIPS": {
         "translation": "Export contacts of contacts relationships"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_IMPORT_CONTACTS_OF_CONTACTS_RELATIONSHIPS": {
-        "translation": "Import contacts of contacts relationships"
+        "translation": "Importer les relations de contact de contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_SHOW_GROUP_BY_RISK_PILLS": {
-        "translation": "Show contacts of contacts grouped by risk count"
+        "translation": "Afficher les contacts des contacts regroupés par nombre de risques"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SUCCESS_MESSAGE": {
-        "translation": "Contact of contact deleted"
+        "translation": "Contact de contact supprimé"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SUCCESS_MESSAGE": {
-        "translation": "Contact of contact restored"
+        "translation": "Contact de contact restauré"
       }
     },
     "uiContactOfContactListPage": {
@@ -16693,10 +16696,10 @@
         "translation": "Contacts of contacts"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_CONTACT_OF_CONTACT": {
-        "translation": "View contact of contact"
+        "translation": "Voir le contact du contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_MODIFY_CONTACT_OF_CONTACT": {
-        "translation": "Modify contact of contact"
+        "translation": "Modifier contact de contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_CONTACT_OF_CONTACT": {
         "translation": "Delete contact of contact"
@@ -16708,7 +16711,7 @@
         "translation": "View chronology"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_CONTACT_OF_CONTACTS": {
-        "translation": "Restore contact of contact"
+        "translation": "Restaurer contact de contact"
       },
       "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_EXPORT_SELECTED_CONTACTS_OF_CONTACTS": {
         "translation": "Export selected contacts of contacts"
@@ -16737,25 +16740,25 @@
     },
     "uiCreateContactOfContactPage": {
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TAB_PERSONAL_TITLE": {
-        "translation": "Personal"
+        "translation": "Personnel"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_ACTION_CREATE_CONTACT_BUTTON": {
         "translation": "Create contact of contact"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_ACTION_CREATE_CONTACT_SUCCESS_MESSAGE": {
-        "translation": "Contact of contact created"
+        "translation": "Contact de contact créé"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "This contact might already be in the system (see possible matches below). Do you still want to create a new contact?"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TAB_ADDRESS_TITLE": {
-        "translation": "Address"
+        "translation": "Adresse"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TAB_RELATIONSHIP_RELATE_TITLE": {
-        "translation": "Case"
+        "translation": "Cas"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TAB_RELATIONSHIP_TITLE": {
-        "translation": "Relationship"
+        "translation": "Relation"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TITLE": {
         "translation": "Create contact of contact"
@@ -16770,33 +16773,33 @@
         "translation": "Flag this contact with a risk level for additional attention"
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_WARNING_CASE_OR_EVENT_REQUIRED": {
-        "translation": "You can only add a contact of contact through a contact"
+        "translation": "Vous ne pouvez ajouter un contact de contact que par l'intermédiaire d'un contact"
       }
     },
     "uiModifyContactOfContactPage": {
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_MODIFY_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
-        "translation": "Contact of contact saved"
+        "translation": "Contact de contact sauvegardé"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CHRONOLOGY": {
-        "translation": "View chronology"
+        "translation": "Voir la chronologie"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_FOLLOW_UPS": {
-        "translation": "View follow-ups"
+        "translation": "Voir les suivis"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_MOVEMENT": {
-        "translation": "View movement"
+        "translation": "Voir le mouvement"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_DUPLICATES_DIALOG_ACTION_MERGE_AT_LEAST_ONE_ERROR_MESSAGE": {
-        "translation": "Please select at least one record with which to merge"
+        "translation": "Veuillez sélectionner au moins un enregistrement avec lequel vous souhaitez fusionner"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_DUPLICATES_DIALOG_CONFIRM_MSG": {
         "translation": "This contact might already be in the system (see possible matches below). Do you still want to update this contact or merge possible matches?"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_DUPLICATES_DIALOG_LABEL_MERGE_WITH": {
-        "translation": "Merge with?"
+        "translation": "Fusionner avec?"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_ADDRESS_TITLE": {
-        "translation": "Address"
+        "translation": "Adresse"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_PERSONAL_DOCUMENTS_TITLE": {
         "translation": "Documents"
@@ -16805,32 +16808,32 @@
         "translation": "Flag this contact of contact with a risk level for additional attention"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_PERSONAL_TITLE": {
-        "translation": "Personal"
+        "translation": "Personnel"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TITLE": {
-        "translation": "Modify {{name}}"
+        "translation": "Modifier {{nom}}"
       },
       "LNG_PAGE_VIEW_CONTACT_OF_CONTACT_TITLE": {
-        "translation": "View {{name}}"
+        "translation": "View {{nom}}"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_EXPOSURE": {
-        "translation": "View exposure"
+        "translation": "Voir l'exposition"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
-        "translation": "Record Details"
+        "translation": "Détails du dossier"
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
-        "translation": "Not duplicates"
+        "translation": "Pas de doublons"
       }
     },
     "uiImportContactOfContactData": {
       "LNG_PAGE_IMPORT_CONTACT_OF_CONTACT_DATA_TITLE": {
-        "translation": "Import contact of contact data"
+        "translation": "Importer de données de contact de contact"
       }
     },
     "uiMovementContactOfContactPage": {
       "LNG_PAGE_VIEW_MOVEMENT_CONTACT_OF_CONTACT_TITLE": {
-        "translation": "Contact of contact movement"
+        "translation": "Mouvement de contact de contact"
       },
       "LNG_PAGE_VIEW_MOVEMENT_CONTACT_OF_CONTACT_EXPORT": {
         "translation": "Export contact of contact movement Map"
@@ -16841,16 +16844,16 @@
         "translation": "Contacts of contacts merged"
       },
       "LNG_PAGE_CONTACT_OF_CONTACT_MERGE_DUPLICATE_RECORDS_MERGE_CONTACT_BUTTON": {
-        "translation": "Merge contacts of contacts"
+        "translation": "Fusionner les contacts des contacts"
       },
       "LNG_PAGE_CONTACT_OF_CONTACT_MERGE_DUPLICATE_RECORDS_TAB_ADDRESS_TITLE": {
-        "translation": "Address"
+        "translation": "Adresse"
       },
       "LNG_PAGE_CONTACT_OF_CONTACT_MERGE_DUPLICATE_RECORDS_TAB_PERSONAL_TITLE": {
-        "translation": "Personal"
+        "translation": "Personnel"
       },
       "LNG_PAGE_CONTACT_OF_CONTACT_MERGE_DUPLICATE_RECORDS_TITLE": {
-        "translation": "Contact of contact - merge duplicate records"
+        "translation": "Contact de contact - fusionner les enregistrements en double"
       }
     },
     "uiBulkAddContactsOfContactsPage": {
@@ -16882,7 +16885,7 @@
         "translation": "Contacts of contacts created"
       },
       "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_WARNING_CONTACT_REQUIRED": {
-        "translation": "You can only add a Contact of Contact though a Contact"
+        "translation": "Vous ne pouvez ajouter un contact de contact que par le biais d'un contact"
       }
     },
     "uiBulkModifyContactsOfContactsPage": {
@@ -16904,7 +16907,7 @@
     },
     "uiChronologyContactOfContactPage": {
       "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_OF_CONTACT_TITLE": {
-        "translation": "Contact of contact chronology"
+        "translation": "Contact de contact chronologie"
       }
     },
     "uiMultipleSnackbar": {
