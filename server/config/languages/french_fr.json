@@ -4865,6 +4865,9 @@
       },
       "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
         "translation": "Êtes-vous sûr de vouloir rétablir ce contact de contact : {{{nom}} ?"
+      },
+      "LNG_DIALOG_CONFIRM_DELETE_COT_SNAPSHOT": {
+        "translation": "Are you sure you want to delete this cot snapshot?"
       }
     },
     "uiLoginPage": {
@@ -4891,6 +4894,12 @@
       },
       "LNG_PAGE_LOGIN_WELCOME_MESSAGE": {
         "translation": "Bienvenue",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_PAGE_LOGIN_ACTION_LOGIN_2FA_CODE_REQUIRED": {
+        "translation": "The code was sent to the following email '{{email}}'",
         "modules": [
           "unauthenticated"
         ]
@@ -5074,6 +5083,12 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_API_ERROR_CODE_AUTHORIZATION_REQUIRED": {
+        "translation": "Login failed",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiCommonFields": {
@@ -5097,6 +5112,12 @@
       },
       "LNG_COMMON_FIELD_LABEL_CAPTCHA": {
         "translation": "Captcha",
+        "modules": [
+          "unauthenticated"
+        ]
+      },
+      "LNG_COMMON_FIELD_LABEL_CODE": {
+        "translation": "Code",
         "modules": [
           "unauthenticated"
         ]
@@ -5560,6 +5581,9 @@
       },
       "LNG_ENTITY_FIELD_LABEL_PHONE_NUMBER": {
         "translation": "Numéro de téléphone"
+      },
+      "LNG_ENTITY_FIELD_LABEL_NO_VACCINE": {
+        "translation": "No vaccines"
       }
     },
     "addressFields": {
@@ -5957,6 +5981,9 @@
       },
       "LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
         "translation": "Nombre d'expositions"
+      },
+      "LNG_CASE_FIELD_LABEL_EMAIL": {
+        "translation": "Email"
       }
     },
     "uiCasesListPage": {
@@ -6540,6 +6567,9 @@
       },
       "LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
         "translation": "Réponses du questionnaire"
+      },
+      "LNG_CONTACT_FIELD_LABEL_EMAIL": {
+        "translation": "Email"
       }
     },
     "uiContactsListPage": {
@@ -7027,6 +7057,12 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_RISK_LEVEL": {
         "translation": "Niveau de risque"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_CASE": {
+        "translation": "Case:"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_EMAIL": {
+        "translation": "Email"
       }
     },
     "uiTermsOfUsePage": {
@@ -7242,6 +7278,9 @@
       },
       "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Détails du dossier"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
+        "translation": "* This person is now a case and follow-up was performed at the time when '{{ personName }}' was registered as a contact"
       }
     },
     "uiEventFields": {
@@ -7313,6 +7352,9 @@
       },
       "LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
         "translation": "Nombre d'expositions"
+      },
+      "LNG_EVENT_FIELD_LABEL_EMAIL": {
+        "translation": "Email"
       }
     },
     "uiCreateEventPage": {
@@ -10875,6 +10917,15 @@
       },
       "LNG_CLUSTER_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_CLUSTER_FIELD_LABEL_COLOR": {
+        "translation": "Colour"
+      },
+      "LNG_CLUSTER_FIELD_LABEL_COLOR_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_CLUSTER_FIELD_LABEL_ICON": {
+        "translation": "Icon"
       }
     },
     "uiClustersListPage": {
@@ -10895,6 +10946,12 @@
       },
       "LNG_PAGE_LIST_CLUSTERS_TITLE": {
         "translation": "Clusters"
+      },
+      "LNG_PAGE_LIST_CLUSTERS_LABEL_NO_ICON": {
+        "translation": "No icon"
+      },
+      "LNG_PAGE_LIST_CLUSTERS_LABEL_NO_COLOR": {
+        "translation": "No colour"
       }
     },
     "uiCreateClusterPage": {
@@ -10917,9 +10974,6 @@
       },
       "LNG_PAGE_MODIFY_CLUSTER_ACTION_VIEW_PEOPLE": {
         "translation": "Voir les gens"
-      },
-      "LNG_PAGE_MODIFY_CLUSTER_TAB_DETAILS_TITLE": {
-        "translation": "Détails"
       },
       "LNG_PAGE_MODIFY_CLUSTER_TITLE": {
         "translation": "Modificateur {{name}}"
@@ -11174,6 +11228,9 @@
       },
       "LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_USER_FIELD_LABEL_TEAMS": {
+        "translation": "Teams"
       }
     },
     "uiListUsersPage": {
@@ -12240,6 +12297,9 @@
       },
       "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_SUNDAY": {
         "translation": "Semaine commençant le dimanche"
+      },
+      "LNG_PAGE_DASHBOARD_KPIS_ELEMENTS_NOT_VISIBLE_ERROR_MSG": {
+        "translation": "Please make sure that at least one KPI dashlet is visible"
       }
     },
     "uiChainsOfTransmission": {
@@ -12696,9 +12756,6 @@
       "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_IMPORT_MAPPING_SUCCESS_MESSAGE": {
         "translation": "Le mappage d'importation enregistré est chargé"
       },
-      "LNG_PAGE_IMPORT_DATA_BUTTON_RESET_IMPORT_MAPPING": {
-        "translation": "Réinitialiser le mappage d'importation"
-      },
       "LNG_PAGE_IMPORT_DATA_BUTTON_SHOW_ERR_RECORD_DETAILS": {
         "translation": "Show details"
       },
@@ -12728,6 +12785,141 @@
       },
       "LNG_PAGE_IMPORT_CONTACT_OF_CONTACT_RELATIONSHIP_DATA_TITLE": {
         "translation": "Importer les relations de contact de contact"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_MODIFY": {
+        "translation": "Modify"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_CLONE": {
+        "translation": "Clone"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_REMOVE": {
+        "translation": "Remove"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_CLOSE_MODIFY": {
+        "translation": "Hide modify"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_EXPAND_OPTIONS": {
+        "translation": "Show sub-options"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_COLLAPSE_OPTIONS": {
+        "translation": "Hide sub-options"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_MAP_SUB_OPTIONS": {
+        "translation": "Map sub-options"
+      },
+      "LNG_PAGE_IMPORT_DATA_REQUIRED": {
+        "translation": "Field required"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_ARRAY_INDEX": {
+        "translation": "Level"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_ARRAY_INDEX_DESCRIPTION": {
+        "translation": "When Go.Data stores multiple records for the same type of data – for example a case that has three addresses, then you can choose the ‘level’ here.  For example, if you have two addresses in your source file for the same case then you can import one as Level 1 and the second as Level 2 to create the two addresses within the system."
+      },
+      "LNG_PAGE_IMPORT_DATA_INVALID_ARRAY_INDEX": {
+        "translation": "Invalid indexes"
+      },
+      "LNG_PAGE_IMPORT_DATA_RETRIEVING_UNIQUE_VALUES": {
+        "translation": "Retrieving unique values"
+      },
+      "LNG_PAGE_IMPORT_DATA_RETRIEVING_LOCATIONS": {
+        "translation": "Retrieving locations"
+      },
+      "LNG_PAGE_IMPORT_DATA_POPULATING_DISTINCT_CACHE": {
+        "translation": "{{index}} / {{total}}: Cache '{{key}}'"
+      },
+      "LNG_PAGE_IMPORT_DATA_MAPPING_RETRIEVING_LOCATIONS": {
+        "translation": "{{index}} / {{total}}: Retrieving locations"
+      },
+      "LNG_PAGE_IMPORT_DATA_MAPPING_RETRIEVING_RELABEL_LOCATIONS": {
+        "translation": "Preparing locations cache"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS": {
+        "translation": "Mapping"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_DESCRIPTION": {
+        "translation": "<div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Pending:</span><span>this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Complete no / total:</span><span>the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Complete:</span><span>all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Incomplete no / total:</span><span>the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Handled above:</span><span>a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Completed above:</span><span>a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_WAITING": {
+        "translation": "Pending"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_WAITING_DESCRIPTION": {
+        "translation": "You need to map sub-options"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_INVALID": {
+        "translation": "Incomplete"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_INVALID_WITH_NO": {
+        "translation": "Incomplete {{no}} / {{total}}"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_INVALID_HANDLED_ABOVE": {
+        "translation": "Handled above"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_VALID": {
+        "translation": "Complete"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_VALID_ABOVE": {
+        "translation": "Completed above"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_VALID_WITH_NO": {
+        "translation": "Complete {{no}} / {{total}}"
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_RETRIEVE_MAP_DATA": {
+        "translation": "Retrieving map data"
+      },
+      "LNG_PAGE_IMPORT_DATA_MAPPING_DATA": {
+        "translation": "{{index}} / {{total}}: Mapping '{{key}}'"
+      },
+      "LNG_PAGE_IMPORT_DATA_MAPPING_FINISHED": {
+        "translation": "Mapping of sub-options finished. Please check that all of them were mapped properly."
+      },
+      "LNG_PAGE_IMPORT_DATA_LABEL_ROW_NO": {
+        "translation": "No"
+      },
+      "LNG_PAGE_IMPORT_DATA_ERROR_INVALID_ROWS": {
+        "translation": "Invalid records: {{rows}}"
+      },
+      "LNG_PAGE_IMPORT_DATA_ERROR_MUST_FIX_DUPLICATE_BEFORE_ADD": {
+        "translation": "Please fix 'duplicate' issue before adding new sub-options"
+      },
+      "LNG_PAGE_IMPORT_DATA_LOAD_SAVED_MAPPING_CONFIRMATION": {
+        "translation": "Are you sure you want to load '{{name}}'? It might take a while..."
+      },
+      "LNG_PAGE_IMPORT_DATA_MIGHT_TAKE_SOME_TIME_MSG": {
+        "translation": "The file was successfully uploaded. Please be patient, it might take a couple of minutes to process data"
+      },
+      "LNG_PAGE_IMPORT_DATA_VISIBLE_ITEMS_MSG": {
+        "translation": "Rows {{no}}/{{total}}"
+      },
+      "LNG_PAGE_IMPORT_DATA_IMPORTING_VALIDATING": {
+        "translation": "Validate data"
+      },
+      "LNG_PAGE_IMPORT_DATA_IMPORTING_PREPARE": {
+        "translation": "Preparing data"
+      },
+      "LNG_PAGE_IMPORT_DATA_IMPORTING_START_IMPORT": {
+        "translation": "Starting import"
+      },
+      "LNG_PAGE_IMPORT_DATA_IMPORTING_IMPORT_STATUS": {
+        "translation": "Processed {{processed}} / {{total}} (failed: {{failed}})"
+      },
+      "LNG_PAGE_IMPORT_DATA_ERROR_MISSING_ERROR_DETAILS": {
+        "translation": "Something went wrong with the import, missing error details. Please check API logs"
+      },
+      "LNG_PAGE_IMPORT_DATA_ERROR_PROCESSED_DETAILS": {
+        "translation": "Processed records: {{processed.no}} / {{processed.total}}, imported: {{imported.success}}, failed: {{imported.failed}}"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_SEE_ERROR_DETAILS": {
+        "translation": "See details"
+      },
+      "LNG_PAGE_IMPORT_DATA_ERROR_DETAILS_DIALOG_TITLE": {
+        "translation": "Error details"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_SEE_RECORD_DATA": {
+        "translation": "See data"
+      },
+      "LNG_PAGE_IMPORT_DATA_RECORD_DATA_DIALOG_TITLE": {
+        "translation": "Record data"
       }
     },
     "uiImportHierarchicalLocations": {
@@ -13385,7 +13577,7 @@
         "translation": "Réseau de bulles"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
-        "translation": "Générer un graph."
+        "translation": "Create Snapshot"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CHANGE_TIMELINE_VIEW_HORIZONTAL": {
         "translation": "Afficher la chronologie horizontale"
@@ -13394,10 +13586,7 @@
         "translation": "Afficher la chronologie verticale"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
-        "translation": "Configurer les paramètres"
-      },
-      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_RESET_SETTINGS": {
-        "translation": "Réinitialiser les options"
+        "translation": "Create Snapshot"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CASES_WITHOUT_DATE_OF_ONSET_TITLE": {
         "translation": "cas sans date d'apparition"
@@ -13503,9 +13692,6 @@
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ONSET_LABEL": {
         "translation": "Début:"
-      },
-      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_RESET_CHAINS": {
-        "translation": "Réinitialiser"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_LABEL": {
         "translation": "Afficher contacts"
@@ -13647,6 +13833,48 @@
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LABEL_OPTION_DATE_OF_ONSET_AND_EVENT_DATE": {
         "translation": "Date de début des signes/événement"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_GRAPH": {
+        "translation": "Configure chain of transmission snapshot"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD_SNAPSHOT": {
+        "translation": "See snapshot"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SNAPSHOT_STATUS_IN_PROGRESS": {
+        "translation": "{{name}} is still in progress"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GENERATE_SNAPSHOT_IN_PROGRESS": {
+        "translation": "Generating snapshot"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_PAGE": {
+        "translation": "Page"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOTS": {
+        "translation": "Snapshots"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_CHART": {
+        "translation": "Chart"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_PAGE_SIZE": {
+        "translation": "Number of relationships per page"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_NAME": {
+        "translation": "Snapshot name"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_DOWNLOAD_PROGRESS": {
+        "translation": "{{name}} processed: {{progress}}"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_DOWNLOAD_FINISHED": {
+        "translation": "Rendering"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EXPORT_NOTHING_TO_EXPORT": {
+        "translation": "Please make sure that graph is visible"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_RENDER_METHOD_FAST": {
+        "translation": "Fast rendering"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_RENDER_METHOD_PRECISE": {
+        "translation": "Precise rendering"
       }
     },
     "uiInconsistencyLabels": {
@@ -16922,6 +17150,51 @@
         "modules": [
           "unauthenticated"
         ]
+      }
+    },
+    "uiImportResultFields": {
+      "LNG_IMPORT_RESULT_FIELD_LABEL_RECORD_NO": {
+        "translation": "Record no."
+      },
+      "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_MESSAGE": {
+        "translation": "Error message"
+      },
+      "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_DETAILS": {
+        "translation": "Error details"
+      },
+      "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_DATA": {
+        "translation": "Record data"
+      }
+    },
+    "uiAsyncCotListPage": {
+      "LNG_PAGE_LIST_ASYNC_COT_TITLE": {
+        "translation": "Chains of transmission snapshots"
+      },
+      "LNG_PAGE_LIST_ASYNC_COT_ACTION_DELETE_SNAPSHOT": {
+        "translation": "Delete snapshot"
+      },
+      "LNG_PAGE_LIST_ASYNC_COT_ACTION_DELETE_SUCCESS_MESSAGE": {
+        "translation": "Snapshot deleted"
+      }
+    },
+    "uiAsyncCotFields": {
+      "LNG_ASYNC_COT_FIELD_LABEL_STATUS": {
+        "translation": "Status"
+      },
+      "LNG_ASYNC_COT_FIELD_LABEL_NAME": {
+        "translation": "Name"
+      },
+      "LNG_ASYNC_COT_FIELD_LABEL_START_DATE": {
+        "translation": "Start date"
+      },
+      "LNG_ASYNC_COT_FIELD_LABEL_END_DATE": {
+        "translation": "End date"
+      },
+      "LNG_ASYNC_COT_FIELD_LABEL_ERROR": {
+        "translation": "Error"
+      },
+      "LNG_ASYNC_COT_FIELD_LABEL_FILE_SIZE": {
+        "translation": "File size"
       }
     }
   }
