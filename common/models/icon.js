@@ -74,16 +74,6 @@ module.exports = function (Icon) {
           return Promise.reject(app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.name, id: iconId}));
         }
 
-        return app.models.cluster
-          .count({
-            iconId: iconId
-          });
-      })
-      .then(function (count) {
-        if (count) {
-          return Promise.reject(app.utils.apiError.getError('MODEL_IN_USE', {model: Icon.name, id: iconId}));
-        }
-
         // store the instance that's about to be deleted to remove the resource from the disk later
         return Icon.findById(iconId)
           .then(function (icon) {
