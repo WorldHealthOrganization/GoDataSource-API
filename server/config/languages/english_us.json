@@ -13841,6 +13841,9 @@
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SNAPSHOT_STATUS_IN_PROGRESS": {
         "translation": "{{name}} is still in progress"
       },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SNAPSHOT_STATUS_FAILED": {
+        "translation": "{{name}} failed"
+      },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GENERATE_SNAPSHOT_IN_PROGRESS": {
         "translation": "Generating snapshot"
       },
@@ -13848,7 +13851,7 @@
         "translation": "Page"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOTS": {
-        "translation": "Snapshots"
+        "translation": "Snapshot"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_CHART": {
         "translation": "Chart"
