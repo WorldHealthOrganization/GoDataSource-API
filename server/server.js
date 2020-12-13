@@ -17,6 +17,7 @@ const startServer = function (logger, startScheduler) {
   const path = require('path');
   const fs = require('fs');
   const url = require('url');
+  const v8 = require('v8');
 
   let app;
 
@@ -42,6 +43,15 @@ const startServer = function (logger, startScheduler) {
 
   const beforeBoot = require('./beforeBoot/beforeBoot');
   logger = logger || require('../components/logger')();
+
+  try {
+    logger.debug('Process options', {
+      nodeOptions: _.get(process, 'env.NODE_OPTIONS'),
+      heapTotalAvailableSize: v8.getHeapStatistics().total_available_size / 1024 / 1024
+    });
+  } catch (err) {
+    logger.debug('Failed to calculate heap statistics', err);
+  }
 
   const loopback = require('loopback');
   const boot = require('loopback-boot');
