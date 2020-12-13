@@ -130,17 +130,26 @@ module.exports = function (Outbreak) {
                 );
             };
             const batchItemsAction = function (contacts) {
-              // get follow ups list for all contacts
-              // we don't need to retrieve only follow-ups from a specific location since we might want to overwrite them with the new address ?
-              return FollowupGeneration
-                .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contacts.map(c => c.id))
-                .then((followUpGroups) => {
-                  // create promise queues for handling database operations
-                  const dbOpsQueue = FollowupGeneration.dbOperationsQueue(options);
+              // create promise queues for handling database operations
+              const dbOpsQueue = FollowupGeneration.dbOperationsQueue(options);
 
-                  let pool = new PromisePool(
-                    contacts.map((contact) => {
-                      contact.followUpsList = followUpGroups[contact.id] || [];
+              // initialize current contact index; used in promise pool generator
+              let currentIndex = 0;
+
+              let pool = new PromisePool(
+                () => {
+                  if (currentIndex >= contacts.length) {
+                    return null;
+                  }
+
+                  const contact = contacts[currentIndex];
+                  currentIndex++;
+                  // get follow ups list for all contacts
+                  // we don't need to retrieve only follow-ups from a specific location since we might want to overwrite them with the new address ?
+                  return FollowupGeneration
+                    .getContactFollowups(followupStartDate.toDate(), followupEndDate.toDate(), contact.id)
+                    .then((followUps) => {
+                      contact.followUpsList = followUps;
 
                       // get eligible teams for contact
                       return FollowupGeneration
@@ -166,19 +175,19 @@ module.exports = function (Outbreak) {
                           dbOpsQueue.enqueueForInsert(generateResult.add);
                           dbOpsQueue.enqueueForRecreate(generateResult.update);
                         });
-                    }),
-                    100 // concurrency limit
-                  );
+                    });
+                },
+                100 // concurrency limit
+              );
 
-                  let poolPromise = pool.start();
+              let poolPromise = pool.start();
 
-                  return poolPromise
-                    // make sure the queue has emptied
-                    .then(() => dbOpsQueue.internalQueue.onIdle())
-                    // settle any remaining items that didn't reach the batch size
-                    .then(() => dbOpsQueue.settleRemaining())
-                    .then(() => dbOpsQueue.insertedCount());
-                })
+              return poolPromise
+                // make sure the queue has emptied
+                .then(() => dbOpsQueue.internalQueue.onIdle())
+                // settle any remaining items that didn't reach the batch size
+                .then(() => dbOpsQueue.settleRemaining())
+                .then(() => dbOpsQueue.insertedCount())
                 .then(count => {
                   // count newly created followups
                   followUpsCount += count;

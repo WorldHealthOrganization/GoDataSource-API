@@ -134,7 +134,7 @@
   "skipOldPasswordForUserModify": true,
   "jobSettings": {
     "generateFollowups": {
-      "batchSize": 10000
+      "batchSize": 500
     },
     "bulkModifyFollowUps": {
       "batchSize": 1000
