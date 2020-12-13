@@ -4,7 +4,6 @@
 const App = require('../server/server');
 const Helpers = require('./helpers');
 const Moment = require('moment');
-const _ = require('lodash');
 const PromiseQueue = require('p-queue');
 
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
