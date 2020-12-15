@@ -5,12 +5,15 @@ const _ = require('lodash');
 const moment = require('moment');
 
 // default obfuscate fields
-const obfuscateDefault = ['password'];
-const obfuscateAccessToken = [
-  ...obfuscateDefault, ...[
-    'id'
-  ]
-];
+const obfuscateDefault = {
+  password: true
+};
+const obfuscateAccessToken = Object.assign(
+  {}, {
+    id: true
+  },
+  obfuscateDefault
+);
 
 /**
  * Extract request form options (if available)
@@ -93,10 +96,10 @@ function mustObfuscateField(
   switch (modelName) {
     case app.models.accessToken.modelName:
       // access token specific fields
-      return obfuscateAccessToken.indexOf(field) > -1;
+      return obfuscateAccessToken[field];
 
     default:
-      return obfuscateDefault.indexOf(field) > -1;
+      return obfuscateDefault[field];
   }
 }
 
