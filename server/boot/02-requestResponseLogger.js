@@ -59,6 +59,15 @@ module.exports = function (app) {
         }
       }
 
+      // remove password
+      try {
+        requestBody = requestBody.replace(/,?('|")password('|")\s*:\s*('|")[^'"]*('|")/ig, '');
+        requestBody = requestBody.replace(/,?('|")oldPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '');
+        requestBody = requestBody.replace(/,?('|")newPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '');
+      } catch (e) {
+        // NOTHING
+      }
+
       // log incoming request
       req.logger.debug(`Received Request: ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(req.headers)} Body: ${requestBody}`);
 
