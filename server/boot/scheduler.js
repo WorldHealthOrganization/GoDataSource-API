@@ -82,7 +82,13 @@ module.exports = function (app) {
       // run pre routine functionality for backup create
       backup.preRoutine((err, backupSettings) => {
         if (err) {
-          app.logger.warn('Failed to setup backup create job');
+          let errMsg = '1. Failed to setup backup create job => ';
+          try {
+            errMsg = errMsg + (err ? JSON.stringify(err) : err);
+          } catch (e) {
+            // NOTHING
+          }
+          app.logger.error(errMsg);
           return done();
         }
 
@@ -155,7 +161,13 @@ module.exports = function (app) {
       // run pre routine functionality for backup cleanup
       backup.preRoutine((err, backupSettings) => {
         if (err) {
-          app.logger.warn('Failed to setup backup create job');
+          let errMsg = '2. Failed to setup backup create job => ';
+          try {
+            errMsg = errMsg + (err ? JSON.stringify(err) : err);
+          } catch (e) {
+            // NOTHING
+          }
+          app.logger.error(errMsg);
           return done();
         }
 
