@@ -61,9 +61,9 @@ module.exports = function (app) {
 
       // remove password
       try {
-        requestBody = requestBody.replace(/,?('|")password('|")\s*:\s*('|")[^'"]*('|")/ig, '');
-        requestBody = requestBody.replace(/,?('|")oldPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '');
-        requestBody = requestBody.replace(/,?('|")newPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '');
+        requestBody = requestBody.replace(/('|")password('|")\s*:\s*('|")[^'"]*('|")/ig, '"password":"***"');
+        requestBody = requestBody.replace(/('|")oldPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '"oldPassword":"***"');
+        requestBody = requestBody.replace(/('|")newPassword('|")\s*:\s*('|")[^'"]*('|")/ig, '"newPassword":"***"');
       } catch (e) {
         // NOTHING
       }
