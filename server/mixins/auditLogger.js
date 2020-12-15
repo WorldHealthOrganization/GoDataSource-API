@@ -4,6 +4,14 @@ const app = require('../server');
 const _ = require('lodash');
 const moment = require('moment');
 
+// default obfuscate fields
+const obfuscateDefault = ['password'];
+const obfuscateAccessToken = [
+  ...obfuscateDefault, ...[
+    'id'
+  ]
+];
+
 /**
  * Extract request form options (if available)
  * @param options
@@ -74,10 +82,22 @@ function isMonitoredModel(model) {
 /**
  * Check if we need to obfuscate a field
  * @param field
+ * @param model
  * @returns {boolean}
  */
-function mustObfuscateField(field) {
-  return ['password'].indexOf(field) > -1;
+function mustObfuscateField(
+  field,
+  model
+) {
+  const modelName = model ? model.modelName : null;
+  switch (modelName) {
+    case app.models.accessToken.modelName:
+      // access token specific fields
+      return obfuscateAccessToken.indexOf(field) > -1;
+
+    default:
+      return obfuscateDefault.indexOf(field) > -1;
+  }
 }
 
 
@@ -136,8 +156,8 @@ module.exports = function (Model) {
 
                 changedFields.push({
                   field: field,
-                  oldValue: mustObfuscateField(field) ? '***' : context.currentInstance[field],
-                  newValue: mustObfuscateField(field) ? '*****' : newValue
+                  oldValue: mustObfuscateField(field, Model) ? '***' : context.currentInstance[field],
+                  newValue: mustObfuscateField(field, Model) ? '*****' : newValue
                 });
               }
             });
@@ -169,13 +189,13 @@ module.exports = function (Model) {
           };
           let instanceData = context.instance.toJSON();
           // add record id
-          logData.recordId = context.instance.id;
+          logData.recordId = mustObfuscateField('id', Model) ? '***' : context.instance.id;
           // add changes
           Object.keys(instanceData).forEach(function (field) {
             if (isMonitoredField(field) && instanceData[field] !== undefined) {
               logData.changedData.push({
                 field: field,
-                newValue: mustObfuscateField(field) ? '***' : instanceData[field]
+                newValue: mustObfuscateField(field, Model) ? '***' : instanceData[field]
               });
             }
           });
@@ -191,7 +211,7 @@ module.exports = function (Model) {
             let logData = {
               action: app.models.auditLog.actions.modified,
               modelName: Model.modelName,
-              recordId: context.instance.id,
+              recordId: mustObfuscateField('id', Model) ? '***' : context.instance.id,
               userId: user.id,
               userRole: user.role,
               userIPAddress: user.iPAddress,
@@ -239,7 +259,7 @@ module.exports = function (Model) {
         let logData = {
           action: app.models.auditLog.actions.removed,
           modelName: Model.modelName,
-          recordId: context.options.deletedInstance.id,
+          recordId: mustObfuscateField('id', Model) ? '***' : context.options.deletedInstance.id,
           userId: user.id,
           userRole: user.role,
           userIPAddress: user.iPAddress,
@@ -249,7 +269,7 @@ module.exports = function (Model) {
           if (context.options.deletedInstance[field] !== undefined) {
             logData.changedData.push({
               field: field,
-              oldValue: context.options.deletedInstance[field]
+              oldValue: mustObfuscateField(field, Model) ? '***' : context.options.deletedInstance[field],
             });
           }
         });
@@ -286,13 +306,13 @@ module.exports = function (Model) {
           instance = instance.toJSON();
         }
         // add record id
-        logData.recordId = instance.id;
+        logData.recordId = mustObfuscateField('id', Model) ? '***' : instance.id;
         // add changes
         Object.keys(instance).forEach(function (field) {
           if (isMonitoredField(field) && instance[field] !== undefined) {
             logData.changedData.push({
               field: field,
-              newValue: instance[field]
+              newValue: mustObfuscateField(field, Model) ? '***' : instance[field]
             });
           }
         });
