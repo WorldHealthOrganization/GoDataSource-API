@@ -1,5 +1,8 @@
-# godatasourcecode
+#GoDataSource-API
+
 This repository contains the souce code for the Go.Data outbreak investigation and contract tracing system, both the PC-installable user interface and database parts and the mobile application.  Go.Data is available for Windows, Linux and Apple and the mobile application is built for Android and IOS.
+
+This repository is for the API code.
 
 Vendor Clarisoft Ltd are the technical partner for this work.
 
