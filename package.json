@@ -55,7 +55,7 @@
     "moment-range": "^4.0.2",
     "mongodb": "^3.1.10",
     "p-queue": "^3.0.0",
-    "parse": "2.1.0",
+    "parse": "2.10.0",
     "pdfkit": "0.8.3",
     "qr-image": "3.2.0",
     "randomatic": "^3.1.1",
