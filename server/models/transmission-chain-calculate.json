@@ -1,0 +1,21 @@
+{
+  "name": "transmissionChainCalculate",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

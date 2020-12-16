@@ -1,0 +1,52 @@
+{
+  "name": "databaseActionLog",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mongodb": {
+    "collection": "databaseActionLog"
+  },
+  "properties": {
+    "actionStartDate": {
+      "type": "date",
+      "required": true
+    },
+    "actionCompletionDate": {
+      "type": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "LNG_SYNC_STATUS_IN_PROGRESS",
+        "LNG_SYNC_STATUS_SUCCESS",
+        "LNG_SYNC_STATUS_SUCCESS_WITH_WARNINGS",
+        "LNG_SYNC_STATUS_FAILED"
+      ],
+      "required": true
+    },
+    "outbreakIDs": {
+      "type": [
+        "string"
+      ],
+      "description": "IDs of the synced outbreaks"
+    },
+    "informationStartDate": {
+      "type": "date",
+      "description": "Start date from which the created/modified/deleted entries are synced. Information is synced until the 'actionStartDate'"
+    },
+    "syncServerUrl": {
+      "type": "string",
+      "description": "URL of the server with which the client is synced. Present in the entries for Client instances. Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model;"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "indexes": {},
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

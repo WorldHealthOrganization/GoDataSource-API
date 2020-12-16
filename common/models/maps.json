@@ -1,0 +1,45 @@
+{
+  "name": "maps",
+  "base": "extendedPersistedModel",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findGeoLocationForAddress"
+    }
+  ],
+  "methods": {
+    "findGeoLocationForAddress": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "address",
+          "required": true,
+          "http": {"source": "body"}
+        }
+      ],
+      "returns": [
+        {
+          "arg": "geoLocation",
+          "type": "GeoPoint",
+          "root": true,
+          "required": true,
+          "description": "Geo-Location for specified address"
+        }
+      ],
+      "description": "Find Geo-Location for an address",
+      "http": {
+        "verb": "post",
+        "path": "/geo-location/find"
+      }
+    }
+  }
+}

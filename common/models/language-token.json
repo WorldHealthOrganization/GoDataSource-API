@@ -1,0 +1,60 @@
+{
+  "name": "languageToken",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "token": {
+      "type": "string",
+      "required": true
+    },
+    "tokenSortKey": {
+      "type": "string"
+    },
+    "languageId": {
+      "type": "string",
+      "required": true
+    },
+    "translation": {
+      "type": "string",
+      "default": ""
+    },
+    "outbreakId": {
+      "type": "string"
+    },
+    "modules": {
+      "type": [
+        "string"
+      ]
+    }
+  },
+  "removeIndexes": [
+    "token_asc_index"
+  ],
+  "indexes": {
+    "token_index": {
+      "token": "hashed"
+    },
+    "tokenSortKey_index": {
+      "tokenSortKey": 1
+    },
+    "languageId_index": {
+      "languageId": 1
+    },
+    "translation_index": {
+      "translation": "text"
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
+    },
+    "modules_index": {
+      "modules": 1
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

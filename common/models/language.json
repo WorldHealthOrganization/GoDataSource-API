@@ -1,0 +1,198 @@
+{
+  "name": "language",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        "languageTokens"
+      ]
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "readOnly": {
+      "type": "boolean",
+      "readOnly": true,
+      "default": false
+    }
+  },
+  "validations": [],
+  "relations": {
+    "languageTokens": {
+      "type": "hasMany",
+      "model": "languageToken",
+      "foreignKey": "languageId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getLanguageTokens"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__count__languageTokens"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "language_create",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "language_modify",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "language_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "language_export_tokens",
+      "permission": "ALLOW",
+      "property": "exportLanguageTokensFile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "language_import_tokens",
+      "permission": "ALLOW",
+      "property": "importLanguageTokensFile"
+    }
+  ],
+  "methods": {
+    "prototype.getLanguageTokens": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields. - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'updatedSince' property on the first level of where which is optional. This allows retrieving tokens updated after this date"
+        }
+      ],
+      "returns": {
+        "arg": "data",
+        "type": {
+          "languageId": {
+            "type": "string"
+          },
+          "lastUpdateDate": {
+            "type": "date"
+          },
+          "tokens": {
+            "type": [
+              "languageToken"
+            ]
+          }
+        },
+        "root": true,
+        "required": true
+      },
+      "description": "Queries language tokens of language.",
+      "http": {
+        "verb": "get",
+        "path": "/language-tokens"
+      }
+    },
+    "prototype.importLanguageTokensFile": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "languageFile",
+          "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "languageTokens",
+          "type": ["languageToken"],
+          "root": true
+        }
+      ],
+      "description": "Import a translation file for a language",
+      "http": {
+        "verb": "post",
+        "path": "/language-tokens/import"
+      }
+    },
+    "prototype.exportLanguageTokensFile": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download a translation file for a language.",
+      "http": {
+        "verb": "get",
+        "path": "/language-tokens/export"
+      }
+    }
+  }
+}

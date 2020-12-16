@@ -1,0 +1,154 @@
+{
+  "name": "template",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "disease": {
+      "type": "string"
+    },
+    "periodOfFollowup": {
+      "type": "number",
+      "description": "Duration for the follow-up period in days"
+    },
+    "frequencyOfFollowUp": {
+      "type": "number"
+    },
+    "frequencyOfFollowUpPerDay": {
+      "type": "number"
+    },
+    "generateFollowUpsOverwriteExisting": {
+      "description": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not",
+      "type": "boolean",
+      "default": false
+    },
+    "generateFollowUpsKeepTeamAssignment": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a contact or the team assignment will be made through round-robin (can be true only if 'overwriteExistingFollowUps' is false)",
+      "type": "boolean",
+      "default": true
+    },
+    "generateFollowUpsTeamAssignmentAlgorithm": {
+      "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location",
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
+      ],
+      "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
+    "noDaysAmongContacts": {
+      "type": "number",
+      "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
+    },
+    "noDaysInChains": {
+      "type": "number",
+      "description": "Number of days used to calculate the proportion of new cases in known transmission chains"
+    },
+    "noDaysNotSeen": {
+      "type": "number",
+      "description": "Number of days used to filter a list of contacts not seen for a specific number of days"
+    },
+    "noLessContacts": {
+      "type": "number",
+      "description": "Number of contacts used to determine the proportion of cases with less than X contacts"
+    },
+    "longPeriodsBetweenCaseOnset": {
+      "type": "number"
+    },
+    "noDaysNewContacts": {
+      "type": "number",
+      "description": "Number of days used to determine if a contact is new"
+    },
+    "caseInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
+    "contactInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
+    "contactFollowUpTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
+    "labResultsTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
+    "isContactLabResultsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "isContactsOfContactsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "isDateOfOnsetRequired": {
+      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
+      "type": "boolean",
+      "default": true
+    },
+    "applyGeographicRestrictions": {
+      "description": "Flag specifying whether the team assignment concept (geographical restriction o data) will be applied on the web app.",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_create",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_modify",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_template_list",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
+  "methods": {}
+}

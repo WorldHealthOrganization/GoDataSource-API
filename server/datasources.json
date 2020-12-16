@@ -1,0 +1,38 @@
+{
+  "mongoDb": {
+    "host": "127.0.0.1",
+    "port": 27000,
+    "url": "",
+    "database": "go-data",
+    "password": "",
+    "name": "mongoDb",
+    "user": "root",
+    "connector": "mongodb",
+    "allowExtendedOperators": true,
+    "enableGeoIndexing": true,
+    "ignoreUndefined": true,
+    "maxDepthOfQuery": 24,
+    "lazyConnect": true,
+    "authSource": "admin"
+  },
+  "email": {
+    "name": "email",
+    "connector": "mail",
+    "transports": [
+      {
+        "type": "SMTP",
+        "host": "smtp.example.com",
+        "secure": true,
+        "port": 465,
+        "auth": {
+          "user": "user",
+          "pass": "password"
+        }
+      }
+    ]
+  },
+  "memory": {
+    "name": "memory",
+    "connector": "memory"
+  }
+}

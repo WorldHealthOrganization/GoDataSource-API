@@ -1,0 +1,54 @@
+{
+  "name": "captcha",
+  "base": "Model",
+  "plural": "captcha",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "generateSVG"
+    }
+  ],
+  "methods": {
+    "generateSVG": {
+      "accepts": [
+        {
+          "arg": "forComponent",
+          "type": "string",
+          "description": "For which request should we generate captcha ( e.g. login, forgot-password, reset-password-questions )?",
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "description": "Captcha information",
+          "type": "string",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generate a SVG captcha",
+      "http": {
+        "verb": "get",
+        "path": "/generate-svg"
+      }
+    }
+  }
+}

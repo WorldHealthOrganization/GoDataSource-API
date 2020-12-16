@@ -1,0 +1,25 @@
+{
+  "name": "securityQuestionsTemplate",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
+  },
+  "properties": {
+    "questions": {
+      "type": ["securityQuestionTemplate"],
+      "required": true
+    },
+    "email": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

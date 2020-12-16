@@ -1,0 +1,519 @@
+'use strict';
+
+// requires
+const moment = require('moment');
+const async = require('async');
+const fs = require('fs');
+const path = require('path');
+const configSettings = require('../../server/config.json');
+const syncActionsSettings = configSettings.sync;
+const SyncClient = require('../../components/syncClient');
+const tmp = require('tmp');
+
+// function used to check if a routine should be executed or not
+// if executed return an execution time, needed for further execution
+const shouldExecute = function (startTime, interval, timeUnit) {
+  // map of time unit and moment functions to measure the duration
+  let unitsMap = {
+    h: 'hours',
+    m: 'minutes',
+    d: 'days'
+  };
+  return moment().isAfter(moment(startTime).add(interval, unitsMap[timeUnit]));
+};
+
+// initialize ID to be set as createdBy for automatic sync
+const automaticSyncID = 'Scheduled automatic sync';
+
+module.exports = function (app) {
+  // when using cluster only one child process will start the scheduler
+  if (!app.startScheduler) {
+    app.logger.debug(`Process ${process.pid} will not start scheduler`);
+    return;
+  }
+
+  /**
+   * Trigger automatic sync
+   * @param server
+   */
+  function triggerAutomaticSync(server) {
+    // initialize sync params
+    let data = {
+      upstreamServerURL: server.url
+    };
+    // create options; Keeping only the details required for audit log
+    let options = {
+      remotingContext: {
+        req: {
+          authData: {
+            user: {
+              id: automaticSyncID
+            }
+          },
+          headers: {},
+          connection: {}
+        }
+      }
+    };
+
+    app.logger.debug(`Scheduled automatic sync: Started sync with server '${server.name}'`);
+    // start the sync process
+    app.models.sync.sync(data, options, function (err, syncLogId) {
+      if (err) {
+        app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' failed with error: ${err}`);
+      } else {
+        app.logger.debug(`Scheduled automatic sync: Sync with server '${server.name}' is progressing having sync log ID ${syncLogId}`);
+      }
+    });
+  }
+
+  // routines configuration file path
+  let routinesConfigFilePath = path.resolve(__dirname, 'scheduler.json');
+
+  // routines config
+  let routinesConfig;
+
+  // load the backup module
+  let backup = require('../../components/backup');
+
+  // routines to be executed
+  let routines = [
+    (done) => {
+      // run pre routine functionality for backup create
+      backup.preRoutine((err, backupSettings) => {
+        if (err) {
+          let errMsg = '1. Failed to setup backup create job => ';
+          try {
+            errMsg = errMsg + (err ? JSON.stringify(err) : err);
+          } catch (e) {
+            // NOTHING
+          }
+          app.logger.error(errMsg);
+          return done();
+        }
+
+        // backup interval is in hours
+        const interval = backupSettings.backupInterval;
+
+        // if intervals are 0, then don't schedule
+        if (interval < 1) {
+          // remove the old backup routine configuration
+          if (routinesConfig.backup) {
+            delete routinesConfig.backup;
+          }
+          app.logger.warn('Backup interval is less than configured threshold.');
+          return done();
+        }
+
+        // if routines configuration doesn't exist, create it
+        if (!routinesConfig.backup) {
+          routinesConfig.backup = {
+            startTime: moment(),
+            lastExecutedTime: null,
+            timeUnit: 'h',
+            interval: interval
+          };
+        } else {
+          // make sure the interval didn't change in the meantime
+          routinesConfig.backup.interval = interval;
+        }
+
+        // cache routines backup config
+        let backupRoutineConfig = routinesConfig.backup;
+
+        // if routine was executed at least once, used that date as base date for checks
+        let baseTime = backupRoutineConfig.lastExecutedTime ? backupRoutineConfig.lastExecutedTime : backupRoutineConfig.startTime;
+
+        if (shouldExecute(baseTime, backupRoutineConfig.interval, backupRoutineConfig.timeUnit)) {
+          // save the last execution time to now
+          backupRoutineConfig.lastExecutedTime = moment();
+
+          // cache backup model, used in many places below
+          const backupModel = app.models.backup;
+
+          // create new backup record with pending status
+          backupModel
+            .create({
+              date: Date.now(),
+              modules: backupSettings.modules,
+              location: null,
+              userId: null,
+              status: backupModel.status.PENDING,
+              automatic: true,
+              description: backupSettings.description
+            })
+            .then((record) => {
+              // start the backup process
+              // when done update backup status and file location
+              backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
+                let newStatus = backupModel.status.SUCCESS;
+                if (err) {
+                  newStatus = backupModel.status.FAILED;
+                }
+                record.updateAttributes({status: newStatus, location: backupFilePath});
+              });
+            });
+        }
+        return done();
+      });
+    },
+    (done) => {
+      // run pre routine functionality for backup cleanup
+      backup.preRoutine((err, backupSettings) => {
+        if (err) {
+          let errMsg = '2. Failed to setup backup create job => ';
+          try {
+            errMsg = errMsg + (err ? JSON.stringify(err) : err);
+          } catch (e) {
+            // NOTHING
+          }
+          app.logger.error(errMsg);
+          return done();
+        }
+
+        // backup retention interval is in days
+        const interval = backupSettings.dataRetentionInterval;
+
+        // if intervals are 0, then don't schedule
+        if (interval < 1) {
+          // remove the old backup routine configuration
+          if (routinesConfig.backupCleanup) {
+            delete routinesConfig.backupCleanup;
+          }
+          app.logger.warn('Backup retention interval is less than configured threshold.');
+          return done();
+        }
+
+        // if routines configuration doesn't exist, create it
+        if (!routinesConfig.backupCleanup) {
+          routinesConfig.backupCleanup = {
+            startTime: moment(),
+            lastExecutedTime: null,
+            timeUnit: 'd',
+            interval: interval
+          };
+        } else {
+          // make sure the interval didn't change in the meantime
+          routinesConfig.backupCleanup.interval = interval;
+        }
+
+        // cache routines backup config
+        let backupRoutineConfig = routinesConfig.backupCleanup;
+
+        // if routine was executed at least once, used that date as base date for checks
+        let baseTime = backupRoutineConfig.lastExecutedTime ? backupRoutineConfig.lastExecutedTime : backupRoutineConfig.startTime;
+
+        if (shouldExecute(baseTime, backupRoutineConfig.interval, backupRoutineConfig.timeUnit)) {
+          // save the last execution time to now
+          backupRoutineConfig.lastExecutedTime = moment();
+
+          // remove backups which are older than the configured retention interval
+          backup.removeBackups({
+            where: {
+              date: {
+                lt: new Date(baseTime)
+              },
+              automatic: true
+            }
+          });
+        }
+        return done();
+      });
+    },
+    // fail sync actions started more than a configured period ago
+    (done) => {
+      // get configuration param; action cleanup interval is in hours
+      let actionCleanupInterval = syncActionsSettings.actionCleanupInterval || 24;
+
+      // fail any in progress sync/export actions;
+      // the sync/export action might have been successful and the sync/export log update action failed
+      app.models.databaseActionLog
+        .updateAll({
+          status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+          actionStartDate: {
+            lt: new Date(moment().subtract(actionCleanupInterval, 'hours'))
+          }
+        }, {
+          status: 'LNG_SYNC_STATUS_FAILED',
+          error: `Sync/export action was 'in progress' for more than ${actionCleanupInterval} hours`
+        })
+        .then(function (info) {
+          app.logger.debug(`Scheduler: ${info.count} sync/export actions that were 'in progress' for more than ${actionCleanupInterval} hours. Changed status to failed`);
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
+        });
+
+      return done();
+    },
+    // run automatic sync after the configured period of time
+    (done) => {
+      // get system settings
+      app.models.systemSettings
+        .getCache()
+        .then(function (systemSettings) {
+          // initialize routinesConfig entry for sync if not already initialize
+          routinesConfig.sync = routinesConfig.sync || {};
+          systemSettings.upstreamServers = systemSettings.upstreamServers || [];
+
+          // get upstream servers that have sync enabled and syncInterval configured (!==0)
+          let serversToSync = systemSettings.upstreamServers.filter(function (server) {
+            return server.syncEnabled && server.syncInterval > 0;
+          });
+
+          // loop through the servers to sync an start the sync if the required time has passed
+          // if no entry for the server is found in the routinesConfig then add an entry for the server
+          serversToSync.forEach(function (server) {
+            // check if there is an entry for the server in the routinesConfig
+            if (routinesConfig.sync[server.url]) {
+              // check schedule and start sync if needed
+              // update interval as the systemSettings might have changed
+              let routinesEntry = routinesConfig.sync[server.url];
+              routinesEntry.interval = server.syncInterval;
+
+              if (shouldExecute(routinesEntry.lastExecutedTime || routinesEntry.startTime, routinesEntry.interval, routinesEntry.timeUnit)) {
+                // save the last execution time to now
+                routinesEntry.lastExecutedTime = moment();
+
+                triggerAutomaticSync(server);
+              }
+            } else {
+              // create entry for the server in the routinesConfig with
+              routinesConfig.sync[server.url] = {
+                startTime: moment(),
+                lastExecutedTime: null,
+                timeUnit: 'h',
+                interval: server.syncInterval
+              };
+            }
+          });
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Failed to schedule automatic sync. Error: ${err}`);
+        });
+
+      return done();
+    },
+    // start sync with upstream server if the latest automatic sync failed because of connection error
+    (done) => {
+      // get system settings
+      app.models.systemSettings
+        .getCache()
+        .then(function (systemSettings) {
+          systemSettings.upstreamServers = systemSettings.upstreamServers || [];
+          // get upstream servers that have sync enabled and syncInterval configured (!==0)
+          let serversToSync = systemSettings.upstreamServers.filter(function (server) {
+            return server.syncEnabled && server.syncInterval > 0;
+          });
+
+          // initialize promises array
+          let promises = [];
+
+          // loop through the servers to sync and check if the latest automatic sync was failed
+          serversToSync.forEach(function (server) {
+            // get latest sync log entry
+            promises.push(app.models.syncLog
+              .findOne({
+                where: {
+                  syncServerUrl: server.url
+                },
+                order: 'actionStartDate DESC'
+              })
+              .then(function (syncLogEntry) {
+                // check if the sync was an automatic sync and it failed with connection error
+                if (syncLogEntry &&
+                  syncLogEntry.status === 'LNG_SYNC_STATUS_FAILED' &&
+                  syncLogEntry.createdBy === automaticSyncID &&
+                  syncLogEntry.error.indexOf('EXTERNAL_API_CONNECTION_ERROR') !== -1
+                ) {
+                  app.logger.debug(`Scheduler: Latest automatic sync with server '${server.name}' failed with connection error. Checking if connection was re-established.`);
+
+                  let client = new SyncClient(server, {
+                    id: automaticSyncID
+                  });
+                  client
+                    .getServerVersion()
+                    .then(function () {
+                      app.logger.debug(`Scheduler: Connection with server '${server.name}' was re-established. Triggering automatic sync`);
+                      // trigger a new sync
+                      triggerAutomaticSync(server);
+                    })
+                    .catch(function (err) {
+                      app.logger.debug(`Scheduler: Connection with server '${server.name}' couldn't be re-established. Error: ${err}`);
+                    });
+                } else {
+                  // nothing to do
+                }
+              })
+            );
+          });
+
+          return Promise.all(promises);
+        })
+        .catch(function (err) {
+          app.logger.debug(`Scheduler: Failed to check for failed automatic sync. Error: ${err}`);
+        });
+
+      return done();
+    },
+
+    // remove old snapshot files
+    (done) => {
+      // job for deleting old files that aren't needed anymore
+      try {
+        // determine after how much time we should remove snapshot files
+        if (fs.existsSync(tmp.tmpdir)) {
+          // used to determine when can we delete snapshot files
+          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}\_\d{2}-\d{2}-\d{2}.zip$/i;
+          const removeSyncSnapshotsAfterHours = configSettings.removeSyncSnapshotsAfter || 24;
+          const deleteSnapshotBeforeDateTime = moment().subtract(removeSyncSnapshotsAfterHours, 'hours');
+
+          // used to determine when can we delete snapshot files
+          // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
+          const snapshotTmpDirMatchRegex = /^tmp-[a-zA-Z0-9\_]{10,20}$/i;
+
+          // used to determine when can we delete uploaded files with formidable.IncomingForm
+          const uploadedMatchRegex = /^upload_[a-zA-Z0-9\_]+$/i;
+          const removeTmpUploadedFilesAfter = configSettings.removeTmpUploadedFilesAfter || 24;
+          const deleteTmpUploadBeforeDateTime = moment().subtract(removeTmpUploadedFilesAfter, 'hours');
+
+          // used to determine when can we delete uploaded files used to import data
+          const uploadedImportMatchRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+          const removeTmpUploadedImportFilesAfter = configSettings.removeTmpUploadedImportFilesAfter || 24;
+          const deleteTmpUploadImportBeforeDateTime = moment().subtract(removeTmpUploadedImportFilesAfter, 'hours');
+
+          // used to remove directory
+          const removeDirectory = (dirToRemovePath) => {
+            // remove directory and its content
+            const removeDirectoryRecursive = (dirPath) => {
+              if (fs.existsSync(dirPath)) {
+                // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
+                fs.readdirSync(dirPath).forEach(function (fileOrDirToRemovePath) {
+                  const currentPath = `${dirPath}${path.sep}${fileOrDirToRemovePath}`;
+                  if (fs.lstatSync(currentPath).isDirectory()) {
+                    // remove directory content
+                    removeDirectoryRecursive(currentPath);
+                  } else {
+                    // delete file
+                    fs.unlinkSync(currentPath);
+                  }
+                });
+
+                // remove main directory
+                fs.rmdirSync(dirPath);
+              }
+            };
+
+            // delete directory
+            // no matter if it was a success or not
+            try {
+              removeDirectoryRecursive(dirToRemovePath);
+            } catch (remErr) {
+              // we don't have rights to delete directory or something has gone wrong...
+              // log data and continue as God intended to be..without any worries...
+              app.logger.error(`Failed removing tmp uploaded directories: ${remErr}`);
+            }
+          };
+
+          // used to check and delete files
+          const deleteFileOrDirIfMatches = (
+            fileOrDir,
+            regexMatch,
+            beforeDate
+          ) => {
+            // does this file match out search criteria ( snapshot or something else ? )
+            const currentPath = `${tmp.tmpdir}${path.sep}${fileOrDir}`;
+            if (
+              regexMatch.test(fileOrDir) &&
+              fs.existsSync(currentPath)
+            ) {
+              // check and delete old files
+              const fileStats = fs.statSync(currentPath);
+              if (
+                fileStats.birthtime &&
+                moment(fileStats.birthtime).isBefore(beforeDate)
+              ) {
+                try {
+                  // delete file / directory
+                  if (fs.lstatSync(currentPath).isDirectory()) {
+                    // delete directory
+                    removeDirectory(currentPath);
+                  } else {
+                    // delete file
+                    fs.unlinkSync(currentPath);
+                  }
+                } catch (remFileErr) {
+                  // we don't have rights to delete file or something has gone wrong...
+                  // log data and continue as God intended to be..without any worries...
+                  app.logger.error(`Failed removing tmp file / directory: ${remFileErr}`);
+                }
+              }
+            }
+          };
+
+          // fs.rmdirSync with "recursive: true" flag doesn't do the job properly...
+          fs.readdirSync(tmp.tmpdir).forEach(function (fileOrDir) {
+            // snapshot zip files
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              snapshotMatchRegex,
+              deleteSnapshotBeforeDateTime
+            );
+
+            // snapshot zip tmp dir
+            // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              snapshotTmpDirMatchRegex,
+              deleteSnapshotBeforeDateTime
+            );
+
+            // uploaded files & directories
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              uploadedMatchRegex,
+              deleteTmpUploadBeforeDateTime
+            );
+
+            // uploaded import files
+            deleteFileOrDirIfMatches(
+              fileOrDir,
+              uploadedImportMatchRegex,
+              deleteTmpUploadImportBeforeDateTime
+            );
+          });
+        }
+      } catch (remErr) {
+        // we don't have rights to delete files or something has gone wrong...
+        // log data and continue as God intended to be..without any worries...
+        app.logger.error(`Failed removing tmp snapshot files: ${remErr}`);
+      }
+
+      // finished
+      done();
+    }
+  ];
+
+  // endless loop, running every 2 minutes
+  setInterval(() => {
+    try {
+      routinesConfig = JSON.parse(fs.readFileSync(routinesConfigFilePath));
+
+      // run the configured routines
+      async.parallel(
+        routines,
+        () => {
+          // write the routines config back to file
+          // to make sure any changes are persistent from tick to tick
+          try {
+            fs.writeFileSync(routinesConfigFilePath, JSON.stringify(routinesConfig));
+          } catch (writeErr) {
+            app.logger.warn(`Failed to write routines configuration. ${writeErr}`);
+          }
+        }
+      );
+    } catch (readErr) {
+      app.logger.error(`Failed to read routines configuration. ${readErr}`);
+    }
+  }, 120000);
+};

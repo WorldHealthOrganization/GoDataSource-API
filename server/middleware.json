@@ -1,0 +1,62 @@
+{
+  "initial:before": {},
+  "initial": {
+    "compression": {},
+    "helmet#xssFilter": {},
+    "helmet#frameguard": {
+      "params": [
+        "deny"
+      ]
+    },
+    "helmet#hsts": {
+      "params": {
+        "maxAge": 0,
+        "includeSubdomains": true
+      }
+    },
+    "helmet#hidePoweredBy": {},
+    "helmet#ieNoOpen": {},
+    "helmet#noSniff": {},
+    "helmet#noCache": {
+      "enabled": false
+    }
+  },
+  "session": {},
+  "auth": {},
+  "parse": {
+    "body-parser#json": {
+      "params": {
+        "limit": "10mb"
+      }
+    },
+    "body-parser#urlencoded": {
+      "params": {
+        "limit": "10mb",
+        "extended": true
+      }
+    }
+  },
+  "routes": {
+    "loopback#rest": {
+      "paths": [
+        "${restApiRoot}"
+      ]
+    }
+  },
+  "files": {},
+  "final": {
+    "loopback#urlNotFound": {}
+  },
+  "final:after": {
+    "./middleware/passwordResetError": {},
+    "./middleware/authenticationError": {},
+    "./middleware/mongoDBError": {},
+    "./middleware/internalError": {},
+    "strong-error-handler": {
+      "params": {
+        "log": true,
+        "safeFields": ["code", "message", "details"]
+      }
+    }
+  }
+}

@@ -1,0 +1,362 @@
+{
+  "MODEL_IN_USE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is in use."
+  },
+  "MODIFY_OWN_RECORD": {
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is used by current logged in user. Cannot modify own record."
+  },
+  "DELETE_OWN_RECORD": {
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is used by current logged in user. Cannot delete own record."
+  },
+  "DELETE_LAST_USER": {
+    "messagePattern": "Cannot delete the last user of the system. The system must have at least one user."
+  },
+  "DELETE_ACTIVE_OUTBREAK": {
+    "messagePattern": "The outbreak (id: `<%= id %>`) is active for at least another user. Cannot delete an active outbreak."
+  },
+  "ONE_ACTIVE_OUTBREAK": {
+    "messagePattern": "There is already an active outbreak (id: `<%= id %>`) in the system."
+  },
+  "FUNCTIONALITY_NOT_IMPLEMENTED": {
+    "messagePattern": "The requested functionality is not implemented."
+  },
+  "MODEL_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Unknown `<%= model %>` id `<%= id %>`"
+  },
+  "MODEL_NOT_FOUND_IN_CONTEXT": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Unknown `<%= model %>` id `<%= id %>` in context of `<%= contextModel %>` id `<%= contextId %>`"
+  },
+  "PERSON_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Unknown `<%= model %>` id / visualId `<%= id %>`"
+  },
+  "MODEL_VISUAL_ID_MATCHES_MORE_THAN_2_RECORDS": {
+    "defaultStatusCode": 409,
+    "messagePattern": "Model `<%= model %>` with visualId `<%= visualId %>` => ( there are multiple records with this visual id )"
+  },
+  "MODEL_CONFLICT": {
+    "defaultStatusCode": 409,
+    "messagePattern": "Model with id `<%= id %>` already exists"
+  },
+  "INTERNAL_ERROR": {
+    "defaultStatusCode": 500,
+    "messagePattern": "Internal error: `<%= error %>`"
+  },
+  "NO_ACTIVE_OUTBREAK": {
+    "defaultStatusCode": 422,
+    "messagePattern": "User `<%= username %>` doesn't have an active outbreak"
+  },
+  "NO_ACCESS_TO_ACTIVE_OUTBREAK": {
+    "defaultStatusCode": 422,
+    "messagePattern": "User `<%= username %>` doesn't have access to active outbreak through client outbreaks"
+  },
+  "VALIDATION_ERROR": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The `<%= model %>` instance is not valid. Details: <%= details %>"
+  },
+  "MISSING_REQUIRED_PERMISSION": {
+    "messagePattern": "Logged in user must have (at least) one of the following permissions to access this endpoint: <%= permissions %>."
+  },
+  "INVALID_PASSWORD": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The password must be at least <%= length %> characters in length."
+  },
+  "PASSWORD_RECOVERY_FAILED": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Information provided is incorrect."
+  },
+  "INVALID_SECURITY_QUESTIONS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Security questions must be different and answers can not be empty."
+  },
+  "REQUEST_VALIDATION_ERROR": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_CLIENT_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_INVALID_BACKUP_LOCATION": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "REQUEST_VALIDATION_ERROR_DUPLICATE_SERVER_IDS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid request parameters. Details: <%= errorMessages %>"
+  },
+  "ACCESS_DENIED": {
+    "messagePattern": "Logged in user doesn't have access this endpoint: <%= accessErrors %>."
+  },
+  "AUTHORIZATION_REQUIRED": {
+    "defaultStatusCode": 401,
+    "messagePattern": "Authorization Required"
+  },
+  "INVALID_CASE_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The case `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
+  },
+  "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Related person `<%= id %>` is a contact. Cannot create relationships between two contacts."
+  },
+  "MODEL_NOT_EDITABLE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Model `<%= model %>` id `<%= id %>` is not editable (read-only)."
+  },
+  "MISSING_REQUIRED_PROPERTY": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Model `<%= model %>` is missing required properties: <%= properties %>."
+  },
+  "DUPLICATE_TEMPLATE_QUESTION_VARIABLE_OR_ANSWER_VALUE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A template cannot contain duplicate question variables and a template question cannot contain duplicate answer value"
+  },
+  "MODEL_IDENTIFIERS_ARE_NOT_UNIQUE_IN_CONTEXT": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The `<%= model %>` is invalid. Details: <%= details %>"
+  },
+  "DELETE_PARENT_MODEL": {
+    "defaultStatusCode": 400,
+    "messagePattern": "This `<%= model %>` still has sub models linked to it. Please make sure to delete all child models before deleting a parent model."
+  },
+  "DEACTIVATE_PARENT_MODEL": {
+    "defaultStatusCode": 400,
+    "messagePattern": "This `<%= model %>` still has sub models that are active. Please make sure to deactivate all child models before deactivating a parent model."
+  },
+  "DUPLICATE_VISUAL_ID": {
+    "defaultStatusCode": 409,
+    "messagePattern": "The visual identifier `<%= id %>` is not unique."
+  },
+  "INVALID_TRANSLATIONS_FILE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided language file `<%= fileName %>` is invalid: <%= details %>"
+  },
+  "UNSUPPORTED_FILE_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
+  },
+  "INVALID_CONTENT_OF_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid <%= contentType %> content: <%= details%>"
+  },
+  "INVALID_GENERATE_FOLLOWUP_PARAMS": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid follow up generation parameters. Details: `<%= details %>`"
+  },
+  "IMPORT_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Import Partial Success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
+  },
+  "INVALID_SNAPSHOT_FILE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "The provided database snapshot is invalid."
+  },
+  "DELETE_CONTACT_LAST_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
+  },
+  "EXTERNAL_API_CONNECTION_ERROR": {
+    "defaultStatusCode": 503,
+    "messagePattern": "Communication with external service (<%= serviceName %>) failed"
+  },
+  "UNEXPECTED_EXTERNAL_API_RESPONSE": {
+    "defaultStatusCode": 500,
+    "messagePattern": "External service (<%= serviceName %>) returned an invalid response"
+  },
+  "ACCESS_DENIED_TO_ROUTE_FOR_APP": {
+    "defaultStatusCode": 403,
+    "messagePattern": "The requested route (`<%= route %>`) is not accessible on <%= app %> deployment."
+  },
+  "INVALID_FOLLOW_UP_DATE": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid follow up date, it exceeds the configured period."
+  },
+  "UPSTREAM_SERVER_NOT_CONFIGURED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Upstream server with url `<%= upstreamServerURL %>` is not configured in system settings"
+  },
+  "UPSTREAM_SERVER_SYNC_DISABLED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` is disabled"
+  },
+  "UPSTREAM_SERVER_SYNC_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Sync with upstream server `<%= upstreamServerName %>` failed"
+  },
+  "UPSTREAM_SERVER_SYNC_IN_PROGRESS": {
+    "defaultStatusCode": 424,
+    "messagePattern": "There is already a sync with upstream server `<%= upstreamServerName %>` in progress. Only a sync action can be in progress at a time."
+  },
+  "UPSTREAM_SERVER_EXPORT_FAILED": {
+    "defaultStatusCode": 424,
+    "messagePattern": "Database export of the upstream server `<%= upstreamServerName %>` failed"
+  },
+  "INSTANCE_SYNC_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance sync failed: `<%= syncError %>`"
+  },
+  "INSTANCE_SYNC_PARTIAL_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance sync failed partially (incomplete sync): `<%= syncError %>`"
+  },
+  "INSTANCE_EXPORT_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance export failed: `<%= error %>`"
+  },
+  "INSTANCE_EXPORT_STILL_IN_PROGRESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Instance export is still in progress`"
+  },
+  "MAPS_API_KEY_INVALID": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Maps API key is invalid."
+  },
+  "INVALID_RELATIONSHIP_WITH_DISCARDED_CASE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot create/modify relationships with discarded cases (case id: `<%= id %>` )"
+  },
+  "RECORD_NOT_FOUND": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Record not found"
+  },
+  "INVALID_VISUAL_ID_MASK": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Provided Visual ID template `<%= visualIdTemplate %>` does not match Visual ID mask set on outbreak level `<%= outbreakVisualIdMask %>`"
+  },
+  "CONTACT_AND_RELATIONSHIP_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Both contact and relationship are required when creating a contact"
+  },
+  "MULTIPLE_CONTACTS_CREATION_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contact creation partial Success. Some contact instances failed to be created."
+  },
+  "INVALID_RELATIONSHIP_SOURCE_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid person type `<%= type %>` provided as relationship source."
+  },
+  "CONTACT_CANT_BE_SOURCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A contact can't be the source in a relationship ( it can only be a target )"
+  },
+  "CONTACT_OF_CONTACT_CANT_BE_SOURCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "A contact of contact can't be the source in a relationship ( it can only be a target )"
+  },
+  "CIRCULAR_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "You can't have a relationship between the same records"
+  },
+  "BULK_CREATE_RELATIONSHIP_ERRORS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "At least one relationship failed to be created. Successfully created: <%= created.count %>. Failed to create: <%= failed.count %>"
+  },
+  "MAPS_API_DISABLED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Maps API is disabled."
+  },
+  "MAPS_GEO_LOCATION_ERROR": {
+    "defaultStatusCode": 422,
+    "messagePattern": "An error occurred while trying to retrieve geo-location for specified address from the Maps API"
+  },
+  "ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "One of the addresses must be set as Usual Place of Residence"
+  },
+  "ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple addresses set as Usual Place of Residence. Only one address should be set as Usual Place of Residence"
+  },
+  "ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Addresses set as Previous Usual Place of Residence must have a date set"
+  },
+  "READ_DEVICE_INFORMATION_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Unable to read device information."
+  },
+  "SAVE_DEVICE_INFORMATION_FAILURE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Unable to save device information."
+  },
+  "INVALID_DATES": {
+    "defaultStatusCode": 400,
+    "messagePattern": "Invalid date properties"
+  },
+  "LOCATION_NO_GEOLOCATION_INFORMATION": {
+    "defaultStatusCode": 425,
+    "messagePattern": "The location you have used (id: `<%= id %>`) does not have Geo-Location information"
+  },
+  "BULK_UPDATE_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Bulk Update Partial Success. Some `<%= model %>` instances failed to be updated. Successfully updated: <%= success %> \nFailed to be updated: <%= failed %>"
+  },
+  "BULK_UPDATE_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Bulk Update Failed. `<%= model %>` instances failed to be updated: <%= failed %>"
+  },
+  "SYNC_NO_DATA_TO_EXPORT": {
+    "defaultStatusCode": 422,
+    "messagePattern": "No data to export"
+  },
+  "CONTACT_ID_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Contact ID is required"
+  },
+  "MULTIPLE_CONTACTS_UPDATE_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contacts update partial success. Some contact instances failed to be updated."
+  },
+  "SYNC_PACKAGE_FOR_USER_WITHOUT_TEAMS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Sync package cannot be generated for user `<%= userEmail %>` as it is not assigned to any team"
+  },
+  "INVALID_CAPTCHA": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid captcha."
+  },
+  "DISABLED_CAPTCHA": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Disabled captcha."
+  },
+  "MISSING_REQUIRED_OLD_PASSWORD": {
+    "defaultStatusCode": 400,
+    "translation": "Old password is required when changing passwords"
+  },
+  "INVALID_OLD_PASSWORD": {
+    "defaultStatusCode": 422,
+    "translation": "Old password is invalid"
+  },
+  "REUSING_PASSWORDS_ERROR": {
+    "defaultStatusCode": 422,
+    "translation": "Reusing passwords is forbidden"
+  },
+  "ACTIVE_OUTBREAK_NOT_ALLOWED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Active outbreak not allowed"
+  },
+  "ACTION_TEMPORARILY_BLOCKED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "This action has been blocked temporarily"
+  },
+  "LOGIN_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Login failed"
+  },
+  "CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Both contact of contact and relationship are required when creating a contact of contact"
+  },
+  "MULTIPLE_CONTACTS_OF_CONTACT_CREATION_PARTIAL_SUCCESS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Multiple contact of contact creation partial Success. Some contact instances failed to be created."
+  },
+  "IMPORT_DATA_NOT_PROCESSED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Import worker stopped with error before processing data"
+  }
+}

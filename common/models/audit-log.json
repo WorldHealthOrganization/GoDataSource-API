@@ -1,0 +1,84 @@
+{
+  "name": "auditLog",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "action": {
+      "type": "string",
+      "required": true
+    },
+    "modelName": {
+      "type": "string",
+      "required": true
+    },
+    "recordId": {
+      "type": "string",
+      "required": true
+    },
+    "changedData": {
+      "type": [
+        "auditLogData"
+      ]
+    },
+    "userId": {
+      "type": "string",
+      "required": true
+    },
+    "userRole": {
+      "type": "string",
+      "required": true
+    },
+    "userIPAddress": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "indexes": {
+    "action_index": {
+      "action": 1
+    },
+    "modelName_index": {
+      "modelName": 1
+    },
+    "userId_index": {
+      "userId": 1
+    },
+    "userRole_index": {
+      "userRole": 1
+    },
+    "userIPAddress_index": {
+      "userIPAddress": 1
+    }
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "audit_log_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "audit_log_list",
+      "permission": "ALLOW",
+      "property": "count"
+    }
+  ],
+  "methods": {}
+}

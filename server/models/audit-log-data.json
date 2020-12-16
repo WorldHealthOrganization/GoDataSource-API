@@ -1,0 +1,29 @@
+{
+  "name": "auditLogData",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "field": {
+      "type": "string",
+      "required": true
+    },
+    "oldValue": {
+      "type": "any",
+      "required": true
+    },
+    "newValue": {
+      "type": "any",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

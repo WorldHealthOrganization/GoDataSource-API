@@ -1,0 +1,147 @@
+{
+  "name": "backup",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "userId": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "modules": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
+    "date": {
+      "type": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "LNG_BACKUP_STATUS_SUCCESS",
+        "LNG_BACKUP_STATUS_FAILED",
+        "LNG_BACKUP_STATUS_PENDING"
+      ],
+      "description": "Backup status"
+    },
+    "error": {
+      "type": "string"
+    },
+    "automatic": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag specifying if the backup was created automatically through scheduled task"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_list",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_create",
+      "permission": "ALLOW",
+      "property": "createManualBackup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_restore",
+      "permission": "ALLOW",
+      "property": "restoreBackup"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_delete",
+      "permission": "ALLOW",
+      "property": "removeBackup"
+    }
+  ],
+  "methods": {
+    "createManualBackup": {
+      "accepts": [
+        {
+          "arg": "params",
+          "description": "Backup specific params, if not given fallback on system settings",
+          "type": "backupParams",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "backupId",
+          "type": "string"
+        }
+      ],
+      "description": "Create backups",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "prototype.restoreBackup": {
+      "returns": [],
+      "description": "Restore backup",
+      "http": {
+        "verb": "post",
+        "path": "/restore"
+      }
+    },
+    "prototype.removeBackup": {
+      "returns": [
+        {
+          "arg": "error"
+        }
+      ],
+      "description": "Remove backup",
+      "http": {
+        "verb": "del",
+        "path": "/"
+      }
+    }
+  },
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  }
+}

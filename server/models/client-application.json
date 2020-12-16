@@ -1,0 +1,36 @@
+{
+  "name": "clientApplication",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "credentials": {
+      "type": "clientCredentials",
+      "required": true
+    },
+    "active": {
+      "type": "boolean",
+      "required": true
+    },
+    "outbreakIDs": {
+      "type": ["string"],
+      "description": "Available outbreaks for this client. Not present/empty array means that all outbreaks are available"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,191 @@
+{
+  "name": "importableFile",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {
+    "file": {
+      "type": "file",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "upload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getJsonById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getJsonDistinctValuesById"
+    }
+  ],
+  "methods": {
+    "upload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file"
+        },
+        {
+          "arg": "model",
+          "type": "string"
+        },
+        {
+          "arg": "decryptPassword",
+          "type": "string",
+          "description": "If provided, the imported file will be decrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "id": "string",
+            "fileHeaders": [
+              "string"
+            ],
+            "suggestedFieldMapping": {
+              "type": {
+                "<fileHeader>": {
+                  "type": "string",
+                  "description": "Model property"
+                }
+              }
+            },
+            "modelProperties": {
+              "type": {
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Model property label"
+                  }
+                ]
+              }
+            },
+            "modelPropertyValues": {
+              "type": {
+                "<modelProperty>": [
+                  {
+                    "type": "string",
+                    "description": "Available values for a model property"
+                  }
+                ]
+              }
+            },
+            "distinctFileColumnValues": {
+              "type": {
+                "<fileHeader>": [
+                  {
+                    "type": "string",
+                    "description": "Distinct values for column"
+                  }
+                ]
+              }
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Upload a file and get file headers",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "getJsonById": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": [
+            "any"
+          ],
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve JSON version of an uploaded file",
+      "http": {
+        "verb": "get",
+        "path": "/:id/json"
+      }
+    },
+    "getJsonDistinctValuesById": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "importableFileHeaders",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "json",
+          "type": "object",
+          "model": "importableFileDistinctValues",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Retrieve distinct values from an uploaded file",
+      "http": {
+        "verb": "post",
+        "path": "/:id/distinct-values-json"
+      }
+    }
+  }
+}

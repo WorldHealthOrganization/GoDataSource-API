@@ -1,0 +1,261 @@
+{
+  "name": "person",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mongodb": {
+    "collection": "person"
+  },
+  "scope": {
+    "order": [
+      "name ASC",
+      "lastName ASC",
+      "firstName ASC"
+    ]
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "unique": true,
+      "safeForImport": true
+    },
+    "type": {
+      "type": "string"
+    },
+    "outbreakId": {
+      "type": "string",
+      "required": true,
+      "readOnly": true
+    },
+    "visualId": {
+      "type": "string"
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Event name; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "age"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "documents": [
+      "document"
+    ],
+    "addresses": [
+      "address"
+    ],
+    "dateOfReporting": {
+      "type": "date",
+      "required": true
+    },
+    "isDateOfReportingApproximate": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateOfLastContact": {
+      "type": "date"
+    },
+    "dateOfInfection": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateOfOnset": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateBecomeCase": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "dateRanges": {
+      "type": [
+        "dateRangeWithDetails"
+      ],
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "classificationHistory": {
+      "type": [
+        "classificationHistoryItem"
+      ],
+      "readOnly": true,
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
+    "followUpHistory": {
+      "type": [
+        "followUpHistoryHistoryItem"
+      ],
+      "readOnly": true,
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
+    },
+    "dateOfOutcome": {
+      "type": "date",
+      "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
+    },
+    "dateOfBurial": {
+      "type": "date",
+      "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
+    },
+    "dateBecomeContact": {
+      "type": "date",
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
+    },
+    "followUp": {
+      "description": "Contact property; Defining it here as on sync we use the person model and not the contact model. Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",
+      "type": {
+        "originalStartDate": {
+          "description": "Date of the contact's earliest relationship (first contactDate)",
+          "type": "date"
+        },
+        "startDate": {
+          "description": "Latest contactDate of the contact's relationships",
+          "type": "date"
+        },
+        "endDate": {
+          "description": "Follow-up end date for the contact. Calculated from the startDate + outbreak.periodOfFollowup days",
+          "type": "date"
+        },
+        "status": {
+          "description": "Follow-up status",
+          "type": "string"
+        }
+      }
+    },
+    "followUpTeamId": {
+      "description": "Contact property; Allocated team for contact follow-ups; Defining it here as on sync we use the person model and not the contact model",
+      "type": "string"
+    },
+    "date": {
+      "type": "date",
+      "description": "Event property; Defining it here as on sync we use the person model and not the event model"
+    },
+    "deletedByParent": {
+      "type": "string"
+    },
+    "vaccinesReceived": {
+      "type": [
+        "vaccine"
+      ]
+    },
+    "pregnancyStatus": {
+      "type": "string"
+    },
+    "hasRelationships": {
+      "description": "Flag that specifies if a case/contact/event has at least a relationship.",
+      "type": "boolean",
+      "default": false
+    },
+    "relationshipsRepresentation": {
+      "description": "Array containing entries for the relationships where the person is a participant",
+      "type": [
+        "personRelationshipRepresentation"
+      ]
+    },
+    "notDuplicatesIds": {
+      "description": "Array containing IDs for persons that system detected as possible duplicates but they aren't duplicates",
+      "type": [
+        "string"
+      ]
+    },
+    "usualPlaceOfResidenceLocationId": {
+      "description": "Location ID for the usual place of residence address.",
+      "type": "string"
+    }
+  },
+  "indexes": {
+    "type_index": {
+      "type": 1
+    },
+    "visualId_index": {
+      "visualId": 1
+    },
+    "firstName_index": {
+      "firstName": 1
+    },
+    "middleName_index": {
+      "middleName": 1
+    },
+    "lastName_index": {
+      "lastName": 1
+    },
+    "documents_index": {
+      "documents": 1
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
+    },
+    "addresses_geoLocation_index": {
+      "addresses.geoLocation": "2dsphere"
+    },
+    "addresses_locationId_index": {
+      "addresses.locationId": 1
+    },
+    "dateOfReporting_index": {
+      "dateOfReporting": 1
+    },
+    "dateOfLastContact_index": {
+      "dateOfLastContact": 1
+    },
+    "name_index": {
+      "name": 1
+    },
+    "lastName_firstName_index": {
+      "lastName": 1,
+      "firstName": 1
+    },
+    "name_lastName_firstName_index": {
+      "name": 1,
+      "lastName": 1,
+      "firstName": 1
+    },
+    "followUp_endDate_index": {
+      "followUp.endDate": 1
+    },
+    "dateOfOnset_index": {
+      "dateOfOnset": 1
+    },
+    "classification_index": {
+      "classification": 1
+    },
+    "riskLevel_index": {
+      "riskLevel": 1
+    },
+    "hasRelationships_index": {
+      "hasRelationships": 1
+    },
+    "notDuplicatesIds_index": {
+      "notDuplicatesIds": 1
+    },
+    "usualPlaceOfResidenceLocationId_index": {
+      "usualPlaceOfResidenceLocationId": 1
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

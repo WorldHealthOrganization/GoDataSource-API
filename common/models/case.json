@@ -1,0 +1,150 @@
+{
+  "name": "case",
+  "base": "person",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        {
+          "relation": "relationships",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "deletedByParent": {
+                  "eq": null
+                }
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "labResults",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "deletedByParent": {
+                  "eq": null
+                }
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE"
+    },
+    "order": [
+      "lastName ASC",
+      "firstName ASC"
+    ]
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE",
+      "readOnly": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "gender": {
+      "type": "string"
+    },
+    "isDateOfOnsetApproximate": {
+      "type": "boolean"
+    },
+    "wasContact": {
+      "type": "boolean",
+      "default": false
+    },
+    "outcomeId": {
+      "type": "string"
+    },
+    "safeBurial": {
+      "type": "boolean",
+      "default": false
+    },
+    "burialPlaceName": {
+      "type": "string"
+    },
+    "burialLocationId": {
+      "type": "string"
+    },
+    "classification": {
+      "type": "string",
+      "required": true
+    },
+    "riskLevel": {
+      "type": "string"
+    },
+    "riskReason": {
+      "type": "string"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
+    },
+    "questionnaireAnswers": {
+      "type": "object"
+    },
+    "vaccinesReceived": {
+      "type": [
+        "vaccine"
+      ]
+    },
+    "pregnancyStatus": {
+      "type": "string"
+    }
+  },
+  "excludeBaseProperties": [
+    "name",
+    "description",
+    "dateBecomeContact",
+    "followUp",
+    "followUpHistory",
+    "date"
+  ],
+  "validations": [],
+  "relations": {
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

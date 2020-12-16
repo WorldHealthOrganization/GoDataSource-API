@@ -1,0 +1,69 @@
+{
+  "name": "exposureOrContact",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "required": true,
+      "readOnly": true
+    },
+    "visualId": {
+      "type": "string"
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "middleName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Event name; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "description": {
+      "type": "string",
+      "description": "Event description; Defining it here as Loopback fails on querying with regexp on properties that are not defined in the model; Needed for querying person directly"
+    },
+    "dob": {
+      "type": "date"
+    },
+    "age": {
+      "type": "age"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "documents": [
+      "document"
+    ],
+    "addresses": [
+      "address"
+    ],
+    "dateOfReporting": {
+      "type": "date",
+      "required": true
+    },
+    "isDateOfReportingApproximate": {
+      "type": "boolean",
+      "default": false
+    },
+    "dateOfLastContact": {
+      "type": "date"
+    },
+    "relationship": "relationship"
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,416 @@
+{
+  "name": "sync",
+  "base": "Model",
+  "plural": "sync",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "AttachController": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_export_package",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_import_package",
+      "permissions": "ALLOW",
+      "property": "importDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_synchronize",
+      "permissions": "ALLOW",
+      "property": "sync"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotForMobile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "importDatabaseSnapshot"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getAvailableOutbreaksForClient"
+    },    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getDatabaseSnapshotAsynchronous"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "getExportedDatabaseSnapshot"
+    }
+  ],
+  "methods": {
+    "getDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'], 'exportType': mobile/system/outbreak/full (Note: when exportType is present 'collections' is ignored), 'includeUsers': boolean on the first level in 'where'"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Retrieve a compressed snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot"
+      }
+    },
+    "getDatabaseSnapshotAsynchronous": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'] on the first level in 'where'"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "databaseExportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export a compressed snapshot of the database in the tmp folder. The action is done asynchronous and the response contains a databaseExportLogId",
+      "http": {
+        "verb": "get",
+        "path": "/database-snapshot-asynchronous"
+      }
+    },
+    "getExportedDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "databaseExportLogId",
+          "type": "string"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an already exported snapshot of the database.",
+      "http": {
+        "verb": "get",
+        "path": "/exported-database-snapshot/:databaseExportLogId"
+      }
+    },
+    "importDatabaseSnapshot": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "snapshot",
+          "type": "file"
+        },
+        {
+          "arg": "asynchronous",
+          "type": "string",
+          "description": "Flag to specify whether the import is sync or async. Default: sync (false)"
+        },
+        {
+          "arg": "triggerBackupBeforeSync",
+          "type": "boolean",
+          "description": "Flag to specify whether before the import a backup should be triggered. If the flag is not sent the System settings triggerBackupBeforeSync flag will be used"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "generatePersonVisualId",
+          "type": "boolean",
+          "description": "Generate visualId on cases/contacts; Default: 'false'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "syncLogId",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Synchronize the database based on a given snapshot archive",
+      "http": {
+        "verb": "post",
+        "path": "/import-database-snapshot"
+      }
+    },
+    "getAvailableOutbreaksForClient": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreakIDs",
+          "type": [
+            "string"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of IDs for the client available outbreaks",
+      "http": {
+        "verb": "get",
+        "path": "/available-outbreaks"
+      }
+    },
+    "sync": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "syncParameters",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "syncLogId",
+          "description": "Sync log entry ID for the sync that was triggered",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Synchronize the instance with upstream servers",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "getDatabaseSnapshotForMobile": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "http": {
+            "source": "query"
+          },
+          "description": "This request accepts 'fromDate': date, 'outbreakId': 'outbreak ID' / {inq: ['outbreak ID1', 'outbreak ID2']}, 'collections': ['modelName'], 'exportType': mobile/system/outbreak/full (Note: when exportType is present 'collections' is ignored), 'includeUsers': boolean on the first level in 'where'"
+        },
+        {
+          "arg": "password",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "Snapshot Encryption Password"
+        },
+        {
+          "arg": "autoEncrypt",
+          "type": "boolean",
+          "http": {
+            "source": "query"
+          },
+          "description": "Auto Encrypt; Default 'true'"
+        },
+        {
+          "arg": "chunkSize",
+          "type": "number",
+          "http": {
+            "source": "query"
+          },
+          "description": "Number of elements to be included in an archive. Default: 10000"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "mobileDatabaseDownloadParameters",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true,
+          "description": "Can contain languageTokens array; if present only those language tokens and the reference data related ones will be exported; Can contain languages array; if present only tokens from these languages will be retrieved (can be used together with languageTokens)"
+        },
+        {
+          "arg": "userEmail",
+          "type": "string",
+          "http": {
+            "source": "query"
+          },
+          "description": "User email; Used to filter data based on user's teams locations"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Retrieve a compressed snapshot of the database. Language tokens might be filtered",
+      "http": {
+        "verb": "post",
+        "path": "/get-mobile-database-snapshot"
+      }
+    }
+  }
+}

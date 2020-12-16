@@ -1,0 +1,71 @@
+{
+  "name": "templateQuestion",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "multiAnswer": {
+      "type": "boolean",
+      "default": false
+    },
+    "inactive": {
+      "type": "boolean",
+      "default": false
+    },
+    "text": {
+      "type": "string",
+      "required": true
+    },
+    "variable": {
+      "type": "string",
+      "required": true,
+      "description": "Question identifier"
+    },
+    "category": {
+      "type": "string",
+      "required": true
+    },
+    "required": {
+      "type": "boolean",
+      "default": false
+    },
+    "order": {
+      "type": "number",
+      "required": true
+    },
+    "answerType": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_NUMERIC",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWER",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD",
+        "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP"
+      ]
+    },
+    "answersDisplay": {
+      "type": "string",
+      "enum": [
+        "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+        "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_HORIZONTAL"
+      ]
+    },
+    "answers": {
+      "type": [
+        "templateQuestionAnswer"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,83 @@
+{
+  "name": "labResult",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "personId": {
+      "type": "string",
+      "readOnly": true,
+      "safeForImport": true
+    },
+    "personType": {
+      "type": "string"
+    },
+    "dateSampleTaken": {
+      "type": "date",
+      "required": true
+    },
+    "dateSampleDelivered": {
+      "type": "date"
+    },
+    "dateTesting": {
+      "type": "date"
+    },
+    "dateOfResult": {
+      "type": "date"
+    },
+    "labName": {
+      "type": "string"
+    },
+    "sampleIdentifier": {
+      "type": "string"
+    },
+    "sampleType": {
+      "type": "string"
+    },
+    "testType": {
+      "type": "string"
+    },
+    "result": {
+      "type": "string"
+    },
+    "quantitativeResult": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "questionnaireAnswers": {
+      "type": "object"
+    },
+    "outbreakId": {
+      "type": "string",
+      "required": true
+    },
+    "testedFor": {
+      "type": "string"
+    },
+    "deletedByParent": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "case": {
+      "type": "belongsTo",
+      "model": "case",
+      "foreignKey": "personId"
+    },
+    "contact": {
+      "type": "belongsTo",
+      "model": "contact",
+      "foreignKey": "personId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

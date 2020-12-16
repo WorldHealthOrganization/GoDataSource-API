@@ -1,0 +1,54 @@
+{
+  "name": "extendedPersistedModel",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "EnumProperty": true,
+    "UniqueValidator": true,
+    "PatternValidator": true,
+    "AuthorTimeStamp": true,
+    "PlatformStamp": true,
+    "AuditLogger": true,
+    "SoftDelete": true,
+    "ReadOnlyProperty": true,
+    "AttachController": true,
+    "IncludeCustomRelations": true,
+    "ConvertNestedGeoPoints": true,
+    "DateProperty": true,
+    "RawFind": true,
+    "RawFindAggregate": true,
+    "RawUpdateOne": true,
+    "RawBulkInsert": true,
+    "RawBulkDelete": true,
+    "RawBulkUpdate": true
+  },
+  "replaceOnPUT": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "readOnly": true,
+      "unique": true,
+      "safeForImport": true
+    }
+  },
+  "indexes": {
+    "deleted_index": {
+      "deleted": 1
+    },
+    "createdAt_index": {
+      "createdAt": 1
+    },
+    "updatedAt_index": {
+      "updatedAt": 1
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

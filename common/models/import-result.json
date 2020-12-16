@@ -1,0 +1,63 @@
+{
+  "name": "importResult",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "importLogId": {
+      "type": "string",
+      "required": true,
+      "description": "Import log ID"
+    },
+    "error": {
+      "type": "any",
+      "description": "Error that occurred when importing resource"
+    },
+    "recordNo": {
+      "type": "number",
+      "description": "Record number in the imported file"
+    },
+    "data": {
+      "type": {
+        "file": {
+          "type": "any"
+        },
+        "save": {
+          "type": "any"
+        }
+      },
+      "description": "Record data (raw data from file and data that was sent to save function)"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    }
+  ],
+  "methods": {
+  }
+}

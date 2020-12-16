@@ -1,0 +1,54 @@
+{
+  "name": "securityQuestion",
+  "base": "extendedPersistedModel",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "answer"
+  ],
+  "properties": {
+    "question": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "LNG_SECURITY_QUESTION_1",
+        "LNG_SECURITY_QUESTION_2",
+        "LNG_SECURITY_QUESTION_3",
+        "LNG_SECURITY_QUESTION_4",
+        "LNG_SECURITY_QUESTION_5",
+        "LNG_SECURITY_QUESTION_6",
+        "LNG_SECURITY_QUESTION_7",
+        "LNG_SECURITY_QUESTION_8",
+        "LNG_SECURITY_QUESTION_9",
+        "LNG_SECURITY_QUESTION_10"
+      ]
+    },
+    "answer": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {
+    "getQuestions": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "securityQuestion",
+          "type": "securityQuestion",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return Security Questions",
+      "http": {
+        "verb": "get",
+        "path": "/"
+      }
+    }
+  }
+}

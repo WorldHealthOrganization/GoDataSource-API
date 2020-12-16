@@ -1,0 +1,30 @@
+{
+  "name": "backupParams",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
+  },
+  "properties": {
+    "location": {
+      "type": "string",
+      "required": true
+    },
+    "modules": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,38 @@
+{
+  "name": "dataBackup",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "modules": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
+    "backupInterval": {
+      "type": "number",
+      "required": true
+    },
+    "dataRetentionInterval": {
+      "type": "number",
+      "required": true
+    },
+    "location": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

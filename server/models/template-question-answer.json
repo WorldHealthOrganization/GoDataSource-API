@@ -1,0 +1,34 @@
+{
+  "name": "templateQuestionAnswer",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "alert": {
+      "type": "boolean",
+      "default": false
+    },
+    "additionalQuestions": {
+      "type": [
+        "templateQuestion"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

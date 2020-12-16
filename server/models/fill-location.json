@@ -1,0 +1,21 @@
+{
+  "name": "fillLocation",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "geoLocation": {
+      "required": false,
+      "type": "customGeoPoint"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

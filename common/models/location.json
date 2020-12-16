@@ -1,0 +1,403 @@
+{
+  "name": "location",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "scope": {
+    "order": [
+      "name ASC"
+    ]
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "synonyms": {
+      "type": [
+        "string"
+      ]
+    },
+    "identifiers": {
+      "type": [
+        {
+          "type": {
+            "code": "string",
+            "description": "string"
+          }
+        }
+      ]
+    },
+    "active": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "populationDensity": {
+      "type": "number"
+    },
+    "parentLocationId": {
+      "type": "string",
+      "default": null
+    },
+    "geoLocation": {
+      "type": "geopoint"
+    },
+    "geographicalLevelId": {
+      "type": "string"
+    }
+  },
+  "indexes": {
+    "geoLocation_index": {
+      "geoLocation": "2dsphere"
+    },
+    "name_index": {
+      "name": 1
+    },
+    "synonyms_index": {
+      "synonyms": 1
+    },
+    "identifiers_index": {
+      "identifiers": 1
+    },
+    "identifiers_code_index": {
+      "identifiers.code": 1
+    },
+    "parentLocationId_index": {
+      "parentLocationId": 1
+    }
+  },
+  "validations": [],
+  "relations": {
+    "parentLocation": {
+      "type": "belongsTo",
+      "model": "location",
+      "foreignKey": "parentLocationId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permissions": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_view",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_create",
+      "permissions": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_modify",
+      "permissions": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_export",
+      "permission": "ALLOW",
+      "property": "exportHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_import",
+      "permission": "ALLOW",
+      "property": "importHierarchicalList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_import",
+      "permission": "ALLOW",
+      "property": "importImportableFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_usage",
+      "permission": "ALLOW",
+      "property": "getUsage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_usage",
+      "permission": "ALLOW",
+      "property": "countUsage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "location_propagate_geo_to_persons",
+      "permission": "ALLOW",
+      "property": "propagateGeoLocationToLinkedPeople"
+    }
+  ],
+  "methods": {
+    "exportHierarchicalList": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export hierarchical list of locations.",
+      "http": {
+        "verb": "get",
+        "path": "/hierarchical/export"
+      }
+    },
+    "getHierarchicalList": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'includeChildren' boolean on the first level in 'where'"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            {
+              "type": {
+                "location": "location",
+                "children": [
+                  {
+                    "type": {
+                      "location": "location",
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get hierarchical list of locations.",
+      "http": {
+        "verb": "get",
+        "path": "/hierarchical"
+      }
+    },
+    "importHierarchicalList": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "file",
+          "type": "file",
+          "description": "JSON file containing hierarchical locations list"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a hierarchical locations list (JSON)",
+      "http": {
+        "verb": "post",
+        "path": "/import"
+      }
+    },
+    "importImportableFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a hierarchical locations list coming from a flat XLS file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
+      }
+    },
+    "prototype.getUsage": {
+      "description": "Find usage for a record.",
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": {
+        "description": "Record usage locations",
+        "arg": "data",
+        "type": {
+          "followUp": [],
+          "case": [],
+          "contact": [],
+          "event": []
+        },
+        "root": true,
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage"
+        }
+      ]
+    },
+    "prototype.countUsage": {
+      "description": "Count usage for a record.",
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "get",
+          "path": "/usage/count"
+        }
+      ]
+    },
+    "prototype.propagateGeoLocationToLinkedPeople": {
+      "description": "Propagate Geo-Location to linked people.",
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "description": "Updated Records",
+        "arg": "count",
+        "type": "number",
+        "required": true
+      },
+      "http": [
+        {
+          "verb": "post",
+          "path": "/propagate-geo-location"
+        }
+      ]
+    },
+    "find": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "locations",
+          "type": [
+            "location"
+          ],
+          "description": "List of locations that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries locations.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/"
+        }, {
+          "verb": "post",
+          "path": "/filter"
+        }
+      ]
+    }
+  }
+}

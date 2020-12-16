@@ -1,0 +1,370 @@
+{
+  "name": "user",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true,
+    "ttl": 600
+  },
+  "scope": {
+    "order": [
+      "lastName ASC",
+      "firstName ASC"
+    ]
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "readOnly": true,
+      "unique": true
+    },
+    "firstName": {
+      "type": "string",
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "required": true
+    },
+    "roleIds": {
+      "type": [
+        "string"
+      ],
+      "required": true
+    },
+    "outbreakIds": {
+      "type": [
+        "string"
+      ]
+    },
+    "activeOutbreakId": {
+      "type": "string"
+    },
+    "languageId": {
+      "type": "string",
+      "required": true,
+      "default": "english_us"
+    },
+    "passwordChange": {
+      "type": "boolean",
+      "default": true
+    },
+    "institutionName": {
+      "type": "string"
+    },
+    "telephoneNumbers": {
+      "type": "telephoneNumbers"
+    },
+    "settings": {
+      "type": {
+        "caseFields": [
+          "string"
+        ],
+        "dashboard": {
+          "type": "any"
+        }
+      }
+    },
+    "securityQuestions": [
+      "securityQuestion"
+    ],
+    "loginRetriesCount": {
+      "type": "number"
+    },
+    "lastLoginDate": {
+      "type": "date"
+    },
+    "disregardGeographicRestrictions": {
+      "description": "Flag specifying whether the outbreak setting for geographical restriction of data will be disregarded for the user",
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "indexes": {
+    "firstName_index": {
+      "firstName": 1
+    },
+    "lastName_index": {
+      "lastName": 1
+    },
+    "email_index": {
+      "email": 1
+    }
+  },
+  "mixins": {
+    "ReadOnlyProperty": true,
+    "UniqueValidator": true,
+    "AuthorTimeStamp": true,
+    "AuditLogger": true,
+    "SoftDelete": true,
+    "AttachController": true,
+    "IncludeCustomRelations": true,
+    "DateProperty": true,
+    "RawFind": true,
+    "PlatformStamp": true
+  },
+  "validations": [],
+  "relations": {
+    "accessTokens": {
+      "type": "hasMany",
+      "model": "accessToken",
+      "foreignKey": "userId",
+      "options": {
+        "disableInclude": true
+      }
+    },
+    "activeOutbreak": {
+      "type": "belongsTo",
+      "model": "outbreak",
+      "foreignKey": "activeOutbreakId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$owner",
+      "permission": "DENY",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_create",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list_for_filters",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_list_for_filters",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_modify",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "resetPassWithSecurityQuestion"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "twoFactorAuthenticationStep2"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_export",
+      "permission": "ALLOW",
+      "property": "export"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_import",
+      "permission": "ALLOW",
+      "property": "import"
+    }
+  ],
+  "methods": {
+    "resetPassWithSecurityQuestion": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "securityQuestionsTemplate",
+          "http": {
+            "source": "body"
+          },
+          "description": "An object of model property name/value pairs"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": {
+            "token": {
+              "type": "string"
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return Security Questions",
+      "http": {
+        "verb": "post",
+        "path": "/reset-password-with-security-question"
+      }
+    },
+    "export": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of users",
+      "http": {
+        "verb": "get",
+        "path": "/export"
+      }
+    },
+    "import": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "users",
+          "type": [
+            "user"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Import a list of users from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import"
+      }
+    },
+    "twoFactorAuthenticationStep2": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "twoFactorAuthenticationStep2",
+          "http": {
+            "source": "body"
+          }
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": "accessToken",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Step 2 of the Two-Factor Authentication process",
+      "http": {
+        "verb": "post",
+        "path": "/two-factor-authentication-step-2"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "dateRangeWithDetails",
+  "base": "dateRange",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "typeId": {
+      "type": "string",
+      "required": true
+    },
+    "centerName": {
+      "type": "string"
+    },
+    "locationId": {
+      "type": "string"
+    },
+    "comments": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

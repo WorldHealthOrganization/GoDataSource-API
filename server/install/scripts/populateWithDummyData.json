@@ -1,0 +1,63 @@
+{
+  "outbreakName": "outbreakNameExample",
+  "outbreakSettings": {
+    "caseInvestigationTemplate": {
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
+    },
+    "contactInvestigationTemplate": {
+      "questionsNoPerLevel": [
+        2,
+        100,
+        2
+      ],
+      "answersNoPerLevel": [
+        2,
+        5,
+        2
+      ]
+    },
+    "contactFollowUpTemplate": {
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
+    },
+    "labResultsTemplate": {
+      "questionsNoPerLevel": [
+        100,
+        2,
+        2
+      ],
+      "answersNoPerLevel": [
+        5,
+        2,
+        2
+      ]
+    }
+  },
+  "casesNo": 1000,
+  "contactsNo": 10000,
+  "eventsNo": 1000,
+  "locationsNo": 100,
+  "subLocationsPerLocationNo": 3,
+  "subLocationsLevelsNo": 2,
+  "minNoRelationshipsForEachRecord": 3,
+  "maxNoRelationshipsForEachRecord": 5,
+  "relationshipsForAlreadyAssociatedPerson": true,
+  "batchSize": 10
+}

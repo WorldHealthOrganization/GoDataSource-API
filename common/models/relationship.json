@@ -1,0 +1,97 @@
+{
+  "name": "relationship",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "readOnly": true,
+      "required": true
+    },
+    "persons": {
+      "type": ["relationshipParticipant"],
+      "required": true
+    },
+    "contactDate": {
+      "type": "date",
+      "required": true
+    },
+    "contactDateEstimated": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "certaintyLevelId": {
+      "type": "string",
+      "required": true
+    },
+    "exposureTypeId": {
+      "type": "string"
+    },
+    "exposureFrequencyId": {
+      "type": "string"
+    },
+    "exposureDurationId": {
+      "type": "string"
+    },
+    "socialRelationshipTypeId": {
+      "type": "string"
+    },
+    "socialRelationshipDetail": {
+      "type": "string"
+    },
+    "clusterId": {
+      "type": "string"
+    },
+    "comment": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "description": "Whether the relationship is active or not. A relationship becomes inactive if the case (if any) becomes discarded",
+      "default": true
+    },
+    "deletedByParent": {
+      "type": "string"
+    },
+    "dateOfFirstContact": {
+      "type": "date"
+    }
+  },
+  "indexes": {
+    "persons_type_index": {
+      "persons.type": 1
+    },
+    "persons_source_index": {
+      "persons.source": 1
+    },
+    "persons_target_index": {
+      "persons.target": 1
+    },
+    "persons_id_index": {
+      "persons.id": 1
+    },
+    "outbreakId_index": {
+      "outbreakId": 1
+    },
+    "clusterId_index": {
+      "clusterId": 1
+    },
+    "contactDate_index": {
+      "contactDate": 1
+    }
+  },
+  "validations": [],
+  "relations": {
+    "cluster": {
+      "type": "belongsTo",
+      "model": "cluster",
+      "foreignKey": "clusterId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

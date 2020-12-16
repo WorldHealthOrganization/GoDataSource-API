@@ -1,0 +1,1162 @@
+{
+  "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION": {
+    "Confirmed": {
+      "readOnly": true,
+      "colorCode": "#f41818",
+      "order": 1
+    },
+    "Probable": {
+      "readOnly": true,
+      "colorCode": "#5b50ec",
+      "order": 2
+    },
+    "Suspect": {
+      "readOnly": true,
+      "colorCode": "#f0b341",
+      "order": 3
+    },
+    "Not a case (discarded)": {
+      "readOnly": true,
+      "colorCode": "#a59c9c",
+      "order": 4
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_GENDER": {
+    "Male": {
+      "readOnly": false
+    },
+    "Female": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION": {
+    "Health Care Worker": {
+      "readOnly": false
+    },
+    "Civil Servant": {
+      "readOnly": false
+    },
+    "Farmer": {
+      "readOnly": false
+    },
+    "Teacher": {
+      "readOnly": false
+    },
+    "Child": {
+      "readOnly": false
+    },
+    "Student": {
+      "readOnly": false
+    },
+    "Traditional Healer": {
+      "readOnly": false
+    },
+    "Religious Leader": {
+      "readOnly": false
+    },
+    "Hunter": {
+      "readOnly": false
+    },
+    "Butcher": {
+      "readOnly": false
+    },
+    "Taxi Driver": {
+      "readOnly": false
+    },
+    "Other": {
+      "readOnly": false
+    },
+    "Unknown": {
+      "readOnly": false
+    },
+    "HEALTH_LABORATORY_WORKER": {
+      "readOnly": false
+    },
+    "WORKING_WITH_ANIMALS": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE": {
+    "Blood": {
+      "readOnly": false
+    },
+    "Skin Biopsy": {
+      "readOnly": false
+    },
+    "Throat swab": {
+      "readOnly": false
+    },
+    "Sputum": {
+      "readOnly": false
+    },
+    "CSF": {
+      "readOnly": false
+    },
+    "ENDOTRACHEAL_ASPIRATE": {
+      "readOnly": false
+    },
+    "FAECES": {
+      "readOnly": false
+    },
+    "NASAL_SWAB": {
+      "readOnly": false
+    },
+    "NASOPHARYNGEAL_SWAB": {
+      "readOnly": false
+    },
+    "OTHER_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false
+    },
+    "PLEURAL_FLUID": {
+      "readOnly": false
+    },
+    "SERUM": {
+      "readOnly": false
+    },
+    "URINE": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST": {
+    "RT-PCR": {
+      "readOnly": false,
+      "order": 2
+    },
+    "IgC or IgM": {
+      "readOnly": false,
+      "order": 3
+    },
+    "OTHER_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false,
+      "order": 6
+    },
+    "PARTIAL_GENOME_SEQUENCING": {
+      "readOnly": false,
+      "order": 4
+    },
+    "PCR": {
+      "readOnly": false,
+      "order": 1
+    },
+    "WHOLE_GENOME_SEQUENCING": {
+      "readOnly": false,
+      "order": 5
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT": {
+    "Positive": {
+      "readOnly": false,
+      "order": 1
+    },
+    "Negative": {
+      "readOnly": false,
+      "order": 2
+    },
+    "Inconclusive": {
+      "readOnly": false,
+      "order": 3
+    },
+    "POSITIVE_FOR_OTHER_PATHOGENS_SPECIFY_IN_NOTES_FIELD": {
+      "readOnly": false,
+      "order": 4
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS": {
+    "In Progress": {
+      "readOnly": true
+    },
+    "Completed": {
+      "readOnly": true
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE": {
+    "National ID Card": {
+      "readOnly": false
+    },
+    "Passport": {
+      "readOnly": false
+    },
+    "Vaccination Card": {
+      "readOnly": false
+    },
+    "External ID": {
+      "readOnly": false
+    },
+    "Archived ID": {
+      "readOnly": false
+    },
+    "Other": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_DISEASE": {
+    "Ebola Virus disease": {
+      "readOnly": false
+    },
+    "Marburg virus disease": {
+      "readOnly": false
+    },
+    "Plague, pneumonic": {
+      "readOnly": false
+    },
+    "Middle Easi Respiratory Syndrome Coronavirus (MERS-CoV)": {
+      "readOnly": false
+    },
+    "ACUTE_RESPIRATORY_DISEASE": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE": {
+    "Touched Body Fluids": {
+      "readOnly": false,
+      "order": 3,
+      "colorCode": "#f2c87c"
+    },
+    "Direct Physical contact": {
+      "readOnly": false,
+      "order": 2,
+      "colorCode": "#ffa500"
+    },
+    "Slept, Ate Or Spend Time In Same Household": {
+      "readOnly": false,
+      "order": 1,
+      "colorCode": "#9370db"
+    },
+    "ATE_DRANK_CONTAMINATED_MATERIAL": {
+      "readOnly": false,
+      "colorCode": "#dcb6f4",
+      "order": 4
+    },
+    "INTRAVENOUS_EXPOSURE": {
+      "readOnly": false,
+      "colorCode": "#e2aa7e",
+      "order": 6
+    },
+    "OTHER_PLEASE_SPECIFY_IN_COMMENT_FIELD": {
+      "readOnly": false,
+      "colorCode": "#966161",
+      "order": 7
+    },
+    "SEXUAL_EXPOSURE": {
+      "readOnly": false,
+      "colorCode": "#f89d9d",
+      "order": 5
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": {
+    "1 - Low": {
+      "readOnly": false
+    },
+    "2 - Medium": {
+      "readOnly": false
+    },
+    "3 - High": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY": {
+    "1-5 Times": {
+      "readOnly": false
+    },
+    "6-10 Times": {
+      "readOnly": false
+    },
+    "11-20 Times": {
+      "readOnly": false
+    },
+    "Over 21 Times": {
+      "readOnly": false
+    },
+    "Unknown": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION": {
+    "Very Short (seconds)": {
+      "readOnly": false
+    },
+    "Short (minutes)": {
+      "readOnly": false
+    },
+    "Medium (hours)": {
+      "readOnly": false
+    },
+    "Long (days)": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL": {
+    "1 - Low": {
+      "readOnly": false
+    },
+    "2 - Medium": {
+      "readOnly": false
+    },
+    "3 - High": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL": {
+    "1 - Low": {
+      "readOnly": false
+    },
+    "2 - Medium": {
+      "readOnly": false
+    },
+    "3 - High": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION": {
+    "Family": {
+      "readOnly": false,
+      "order": 1
+    },
+    "Nosocomial Transmission": {
+      "readOnly": false,
+      "order": 2
+    },
+    "Co-workers": {
+      "readOnly": false,
+      "order": 3
+    },
+    "Friends": {
+      "readOnly": false,
+      "order": 4
+    },
+    "Travel To Outbreak Area": {
+      "readOnly": false,
+      "order": 5
+    },
+    "Unknown": {
+      "readOnly": false,
+      "order": 6
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_OUTCOME": {
+    "Alive": {
+      "readOnly": true
+    },
+    "Recovered": {
+      "readOnly": true
+    },
+    "Deceased": {
+      "readOnly": true
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE": {
+    "Free Text": {
+      "readOnly": true,
+      "order": null
+    },
+    "Numeric": {
+      "readOnly": true
+    },
+    "Date/Time": {
+      "readOnly": true
+    },
+    "Single Answer": {
+      "readOnly": true,
+      "order": null
+    },
+    "Multiple Answers": {
+      "readOnly": true,
+      "order": null
+    },
+    "File Upload": {
+      "readOnly": true
+    },
+    "Markup": {
+      "readOnly": true
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY": {
+    "Clinical": {
+      "readOnly": false,
+      "order": 1
+    },
+    "A_0_DATA_COLLECTOR_INFORMATION": {
+      "readOnly": false,
+      "order": 2
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE": {
+    "Hospitalization": {
+      "readOnly": true
+    },
+    "Isolation": {
+      "readOnly": true
+    },
+    "Hospitalization for other medical conditions": {
+      "readOnly": true
+    },
+    "Other": {
+      "readOnly": true
+    },
+    "A_E_VISIT": {
+      "readOnly": false
+    },
+    "ICU_ADMISSION": {
+      "readOnly": false
+    },
+    "PRIMARY_HEALTH_CARE_PHC_GP_ETC_VISIT": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE": {
+    "Case": {
+      "readOnly": true,
+      "colorCode": "#e04242"
+    },
+    "Contact": {
+      "readOnly": true,
+      "colorCode": "#6263bf"
+    },
+    "Event": {
+      "readOnly": true,
+      "colorCode": "#a638ab"
+    },
+    "Contact Of Contact": {
+      "readOnly": true,
+      "colorCode": "#424380"
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE": {
+    "Usual Place of Residence": {
+      "readOnly": true
+    },
+    "Previous Usual Place of Residence": {
+      "readOnly": true
+    },
+    "Other": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_COUNTRY": {
+    "Afghanistan": {
+      "readOnly": false
+    },
+    "Albania": {
+      "readOnly": false
+    },
+    "Algeria": {
+      "readOnly": false
+    },
+    "Andorra": {
+      "readOnly": false
+    },
+    "Angola": {
+      "readOnly": false
+    },
+    "Anguilla": {
+      "readOnly": false
+    },
+    "Antigua and Barbuda": {
+      "readOnly": false
+    },
+    "Argentina": {
+      "readOnly": false
+    },
+    "Armenia": {
+      "readOnly": false
+    },
+    "Aruba": {
+      "readOnly": false
+    },
+    "Australia": {
+      "readOnly": false
+    },
+    "Austria": {
+      "readOnly": false
+    },
+    "Azerbaijan": {
+      "readOnly": false
+    },
+    "Bahamas (the)": {
+      "readOnly": false
+    },
+    "Bahrain": {
+      "readOnly": false
+    },
+    "Bangladesh": {
+      "readOnly": false
+    },
+    "Barbados": {
+      "readOnly": false
+    },
+    "Belarus": {
+      "readOnly": false
+    },
+    "Belgium": {
+      "readOnly": false
+    },
+    "Belize": {
+      "readOnly": false
+    },
+    "Benin": {
+      "readOnly": false
+    },
+    "Bermuda": {
+      "readOnly": false
+    },
+    "Bhutan": {
+      "readOnly": false
+    },
+    "Bolivia (Plurinational State of)": {
+      "readOnly": false
+    },
+    "Bosnia and Herzegovina": {
+      "readOnly": false
+    },
+    "Botswana": {
+      "readOnly": false
+    },
+    "Brazil": {
+      "readOnly": false
+    },
+    "Brunei Darussalam": {
+      "readOnly": false
+    },
+    "Bulgaria": {
+      "readOnly": false
+    },
+    "Burkina Faso": {
+      "readOnly": false
+    },
+    "Burundi": {
+      "readOnly": false
+    },
+    "Cabo Verde": {
+      "readOnly": false
+    },
+    "Cambodia": {
+      "readOnly": false
+    },
+    "Cameroon": {
+      "readOnly": false
+    },
+    "Canada": {
+      "readOnly": false
+    },
+    "Central African Republic": {
+      "readOnly": false
+    },
+    "Chad": {
+      "readOnly": false
+    },
+    "Chile": {
+      "readOnly": false
+    },
+    "China": {
+      "readOnly": false
+    },
+    "Colombia": {
+      "readOnly": false
+    },
+    "Comoros (the)": {
+      "readOnly": false
+    },
+    "Congo": {
+      "readOnly": false
+    },
+    "Cook Islands": {
+      "readOnly": false
+    },
+    "Costa Rica": {
+      "readOnly": false
+    },
+    "Côte d'Ivoire": {
+      "readOnly": false
+    },
+    "Croatia": {
+      "readOnly": false
+    },
+    "Cuba": {
+      "readOnly": false
+    },
+    "Cyprus": {
+      "readOnly": false
+    },
+    "Czech Republic": {
+      "readOnly": false
+    },
+    "Democratic People's Republic of Korea": {
+      "readOnly": false
+    },
+    "Democratic Republic of the Congo": {
+      "readOnly": false
+    },
+    "Denmark": {
+      "readOnly": false
+    },
+    "Djibouti": {
+      "readOnly": false
+    },
+    "Dominica": {
+      "readOnly": false
+    },
+    "Dominican Republic (the)": {
+      "readOnly": false
+    },
+    "Ecuador": {
+      "readOnly": false
+    },
+    "Egypt": {
+      "readOnly": false
+    },
+    "El Salvador": {
+      "readOnly": false
+    },
+    "Equatorial Guinea": {
+      "readOnly": false
+    },
+    "Eritrea": {
+      "readOnly": false
+    },
+    "Estonia": {
+      "readOnly": false
+    },
+    "Eswatini": {
+      "readOnly": false
+    },
+    "Ethiopia": {
+      "readOnly": false
+    },
+    "Fiji": {
+      "readOnly": false
+    },
+    "Finland": {
+      "readOnly": false
+    },
+    "France": {
+      "readOnly": false
+    },
+    "Gabon": {
+      "readOnly": false
+    },
+    "Georgia": {
+      "readOnly": false
+    },
+    "Germany": {
+      "readOnly": false
+    },
+    "Ghana": {
+      "readOnly": false
+    },
+    "Greece": {
+      "readOnly": false
+    },
+    "Grenada": {
+      "readOnly": false
+    },
+    "Guatemala": {
+      "readOnly": false
+    },
+    "Guinea": {
+      "readOnly": false
+    },
+    "Guinea-Bissau": {
+      "readOnly": false
+    },
+    "Guyana": {
+      "readOnly": false
+    },
+    "Haiti": {
+      "readOnly": false
+    },
+    "Honduras": {
+      "readOnly": false
+    },
+    "Hungary": {
+      "readOnly": false
+    },
+    "Iceland": {
+      "readOnly": false
+    },
+    "India": {
+      "readOnly": false
+    },
+    "Indonesia": {
+      "readOnly": false
+    },
+    "Iran (Islamic Republic of)": {
+      "readOnly": false
+    },
+    "Iraq": {
+      "readOnly": false
+    },
+    "Ireland": {
+      "readOnly": false
+    },
+    "Israel": {
+      "readOnly": false
+    },
+    "Italy": {
+      "readOnly": false
+    },
+    "Jamaica": {
+      "readOnly": false
+    },
+    "Japan": {
+      "readOnly": false
+    },
+    "Jordan": {
+      "readOnly": false
+    },
+    "Kazakhstan": {
+      "readOnly": false
+    },
+    "Kenya": {
+      "readOnly": false
+    },
+    "Kiribati": {
+      "readOnly": false
+    },
+    "Kuwait": {
+      "readOnly": false
+    },
+    "Kyrgyzstan": {
+      "readOnly": false
+    },
+    "Lao People's Democratic Republic": {
+      "readOnly": false
+    },
+    "Latvia": {
+      "readOnly": false
+    },
+    "Lebanon": {
+      "readOnly": false
+    },
+    "Lesotho": {
+      "readOnly": false
+    },
+    "Liberia": {
+      "readOnly": false
+    },
+    "Libya": {
+      "readOnly": false
+    },
+    "Liechtenstein": {
+      "readOnly": false
+    },
+    "Lithuania": {
+      "readOnly": false
+    },
+    "Luxembourg": {
+      "readOnly": false
+    },
+    "Madagascar": {
+      "readOnly": false
+    },
+    "Malawi": {
+      "readOnly": false
+    },
+    "Malaysia": {
+      "readOnly": false
+    },
+    "Maldives": {
+      "readOnly": false
+    },
+    "Mali": {
+      "readOnly": false
+    },
+    "Malta": {
+      "readOnly": false
+    },
+    "Marshall Islands": {
+      "readOnly": false
+    },
+    "Mauritania": {
+      "readOnly": false
+    },
+    "Mauritius": {
+      "readOnly": false
+    },
+    "Mexico": {
+      "readOnly": false
+    },
+    "Micronesia (Federated States of)": {
+      "readOnly": false
+    },
+    "Monaco": {
+      "readOnly": false
+    },
+    "Mongolia": {
+      "readOnly": false
+    },
+    "Montenegro": {
+      "readOnly": false
+    },
+    "Morocco": {
+      "readOnly": false
+    },
+    "Mozambique": {
+      "readOnly": false
+    },
+    "Myanmar": {
+      "readOnly": false
+    },
+    "Namibia": {
+      "readOnly": false
+    },
+    "Nauru": {
+      "readOnly": false
+    },
+    "Nepal": {
+      "readOnly": false
+    },
+    "Netherlands": {
+      "readOnly": false
+    },
+    "New Zealand": {
+      "readOnly": false
+    },
+    "Nicaragua": {
+      "readOnly": false
+    },
+    "Niger": {
+      "readOnly": false
+    },
+    "Nigeria": {
+      "readOnly": false
+    },
+    "Niue": {
+      "readOnly": false
+    },
+    "Norway": {
+      "readOnly": false
+    },
+    "Oman": {
+      "readOnly": false
+    },
+    "Pakistan": {
+      "readOnly": false
+    },
+    "Palau": {
+      "readOnly": false
+    },
+    "Panama": {
+      "readOnly": false
+    },
+    "Papua New Guinea": {
+      "readOnly": false
+    },
+    "Paraguay": {
+      "readOnly": false
+    },
+    "Peru": {
+      "readOnly": false
+    },
+    "Philippines": {
+      "readOnly": false
+    },
+    "Poland": {
+      "readOnly": false
+    },
+    "Portugal": {
+      "readOnly": false
+    },
+    "Qatar": {
+      "readOnly": false
+    },
+    "Republic of Korea": {
+      "readOnly": false
+    },
+    "Republic of Moldova": {
+      "readOnly": false
+    },
+    "Romania": {
+      "readOnly": false
+    },
+    "Russian Federation": {
+      "readOnly": false
+    },
+    "Rwanda": {
+      "readOnly": false
+    },
+    "Saint Kitts and Nevis": {
+      "readOnly": false
+    },
+    "Saint Lucia": {
+      "readOnly": false
+    },
+    "Saint Vincent and the Grenadines": {
+      "readOnly": false
+    },
+    "Samoa": {
+      "readOnly": false
+    },
+    "San Marino": {
+      "readOnly": false
+    },
+    "Sao Tome and Principe": {
+      "readOnly": false
+    },
+    "Saudi Arabia": {
+      "readOnly": false
+    },
+    "Senegal": {
+      "readOnly": false
+    },
+    "Serbia": {
+      "readOnly": false
+    },
+    "Seychelles": {
+      "readOnly": false
+    },
+    "Sierra Leone": {
+      "readOnly": false
+    },
+    "Singapore": {
+      "readOnly": false
+    },
+    "Slovakia": {
+      "readOnly": false
+    },
+    "Slovenia": {
+      "readOnly": false
+    },
+    "Solomon Islands": {
+      "readOnly": false
+    },
+    "Somalia": {
+      "readOnly": false
+    },
+    "South Africa": {
+      "readOnly": false
+    },
+    "South Sudan": {
+      "readOnly": false
+    },
+    "Spain": {
+      "readOnly": false
+    },
+    "Sri Lanka": {
+      "readOnly": false
+    },
+    "Sudan": {
+      "readOnly": false
+    },
+    "Suriname": {
+      "readOnly": false
+    },
+    "Sweden": {
+      "readOnly": false
+    },
+    "Switzerland": {
+      "readOnly": false
+    },
+    "Syrian Arab Republic": {
+      "readOnly": false
+    },
+    "Tajikistan": {
+      "readOnly": false
+    },
+    "Thailand": {
+      "readOnly": false
+    },
+    "The former Yugoslav Republic of Macedonia": {
+      "readOnly": false
+    },
+    "the Islamic Republic of the Gambia": {
+      "readOnly": false
+    },
+    "Timor-Leste": {
+      "readOnly": false
+    },
+    "Togo": {
+      "readOnly": false
+    },
+    "Tonga": {
+      "readOnly": false
+    },
+    "Trinidad and Tobago": {
+      "readOnly": false
+    },
+    "Tunisia": {
+      "readOnly": false
+    },
+    "Turkey": {
+      "readOnly": false
+    },
+    "Turkmenistan": {
+      "readOnly": false
+    },
+    "Tuvalu": {
+      "readOnly": false
+    },
+    "Uganda": {
+      "readOnly": false
+    },
+    "Ukraine": {
+      "readOnly": false
+    },
+    "United Arab Emirates": {
+      "readOnly": false
+    },
+    "United Kingdom of Great Britain and Northern Ireland (the)": {
+      "readOnly": false
+    },
+    "United Republic of Tanzania": {
+      "readOnly": false
+    },
+    "United States of America": {
+      "readOnly": false
+    },
+    "Uruguay": {
+      "readOnly": false
+    },
+    "Uzbekistan": {
+      "readOnly": false
+    },
+    "Vanuatu": {
+      "readOnly": false
+    },
+    "Venezuela (Bolivarian Republic of)": {
+      "readOnly": false
+    },
+    "Viet Nam": {
+      "readOnly": false
+    },
+    "Yemen": {
+      "readOnly": false
+    },
+    "Zambia": {
+      "readOnly": false
+    },
+    "Zimbabwe": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL": {
+    "Admin Level 0": {
+      "readOnly": false
+    },
+    "Admin Level 1": {
+      "readOnly": false
+    },
+    "Admin Level 2": {
+      "readOnly": false
+    },
+    "Admin Level 3": {
+      "readOnly": false
+    },
+    "Admin Level 4": {
+      "readOnly": false
+    },
+    "Admin Level 5": {
+      "readOnly": false
+    },
+    "Admin Level 6": {
+      "readOnly": false
+    },
+    "Admin Level 7": {
+      "readOnly": false
+    },
+    "Admin Level 8": {
+      "readOnly": false
+    },
+    "Admin Level 9": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
+    "Not Performed": {
+      "readOnly": true,
+      "colorCode": "#928585",
+      "order": 5
+    },
+    "Not Attempted": {
+      "readOnly": true,
+      "colorCode": "#bb359e",
+      "order": 4
+    },
+    "Seen Ok": {
+      "readOnly": true,
+      "colorCode": "#46c59c",
+      "order": 1
+    },
+    "Seen Not Ok": {
+      "readOnly": true,
+      "colorCode": "#d64545",
+      "order": 2
+    },
+    "Missed": {
+      "readOnly": true,
+      "colorCode": "#bda825",
+      "order": 3
+    }
+  },
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
+    "Under Follow-up": {
+      "readOnly": true,
+      "order": 1
+    },
+    "Follow-up Completed": {
+      "readOnly": true,
+      "order": 2
+    },
+    "Lost To Follow-up": {
+      "readOnly": true,
+      "order": 3
+    },
+    "DIED": {
+      "readOnly": false
+    },
+    "NEVER_ILL_NOT_A_CASE": {
+      "readOnly": false,
+      "order": 4
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE": {},
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {
+    "NOT_VACCINATED": {
+      "readOnly": false,
+      "order": 2
+    },
+    "VACCINATED": {
+      "readOnly": false,
+      "order": 1
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+    "NONE": {
+      "readOnly": false,
+      "order": 1
+    },
+    "NOT_PREGNANT": {
+      "readOnly": false,
+      "order": 1
+    },
+    "YES_FIRST_TRIMESTER": {
+      "readOnly": false,
+      "order": 2
+    },
+    "YES_SECOND_TRIMESTER": {
+      "readOnly": false,
+      "order": 3
+    },
+    "YES_THIRD_TRIMESTER": {
+      "readOnly": false,
+      "order": 4
+    },
+    "YES_TRIMESTER_UNKNOWN": {
+      "readOnly": false,
+      "order": 5
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {
+    "GENERIC": {
+      "readOnly": false
+    }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME": {},
+  "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM": {
+    "ROUND_ROBIN_ALL_TEAMS": {
+      "readOnly": true
+    },
+    "ROUND_ROBIN_NEAREST_FIT": {
+      "readOnly": true
+    }
+  }
+}

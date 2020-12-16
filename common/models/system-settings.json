@@ -1,0 +1,398 @@
+{
+  "name": "systemSettings",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "upstreamServers": {
+      "type": [
+        {
+          "type": "upstreamServer"
+        }
+      ]
+    },
+    "clientApplications": {
+      "type": [
+        {
+          "type": "clientApplication"
+        }
+      ]
+    },
+    "sync": {
+      "type": {
+        "triggerBackupBeforeSync": {
+          "type": "boolean",
+          "description": "Flag to specify if a DB backup is done before a sync action"
+        }
+      }
+    },
+    "dataBackup": {
+      "type": "dataBackup"
+    },
+    "nodeFields": {
+      "type": [
+        "string"
+      ]
+    },
+    "relationFields": {
+      "type": [
+        "string"
+      ]
+    },
+    "anonymizeFields": {
+      "type": {
+        "case": {
+          "type": [
+            "string"
+          ],
+          "default": [
+            "firstName",
+            "middleName",
+            "lastName",
+            "addresses[].addressLine1"
+          ]
+        },
+        "contact": {
+          "type": [
+            "string"
+          ],
+          "default": [
+            "firstName",
+            "middleName",
+            "lastName",
+            "addresses[].addressLine1"
+          ]
+        }
+      }
+    },
+    "dbVersion": {
+      "type": "string",
+      "default": "1.0.0"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getVersion"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "generateUniqueId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "createPdfFromImage"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "generateFile"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getServerUTCDate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "checkForUpdates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getBackupLocation"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "system_settings_view",
+      "permission": "ALLOW",
+      "property": "getSystemSettings"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "system_settings_modify",
+      "permission": "ALLOW",
+      "property": "updateSystemSettings"
+    }
+  ],
+  "methods": {
+    "getSystemSettings": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "systemSettings",
+          "type": "systemSettings",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Return System Settings",
+      "http": {
+        "verb": "get",
+        "path": "/"
+      }
+    },
+    "updateSystemSettings": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "systemSettings",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "systemSettings",
+          "type": "systemSettings",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update System Settings",
+      "http": {
+        "verb": "put",
+        "path": "/"
+      }
+    },
+    "generateUniqueId": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "uniqueId",
+          "type": {
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "description": "Unique ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates a globally unique ID (UUID).",
+      "http": {
+        "verb": "post",
+        "path": "/generate-unique-id"
+      }
+    },
+    "createPdfFromImage": {
+      "accepts": [
+        {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
+          "arg": "image",
+          "type": "string",
+          "required": true,
+          "description": "PNG Base64 image content"
+        },
+        {
+          "arg": "splitFactor",
+          "type": "number",
+          "description": "Split the image into :- a nxm matrix computed based on the provided image size; a square matrix with a side of <splitFactor> (1 no split, 2 => 2x2 grid, 3 => 3x3 grid) when splitType is grid; - a list of <splitFactor> images, divided horizontally when splitType is horizontal; - a list of <splitFactor> images, divided vertically when splitType is vertical"
+        },
+        {
+          "arg": "splitType",
+          "type": "string",
+          "enum": ["auto", "grid", "horizontal", "vertical"],
+          "description": "How should apply the split. Enum: ['auto', grid', 'horizontal', 'vertical']. Default 'auto'."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Create a PDF file containing PNG images coming from PNG files",
+      "http": {
+        "verb": "post",
+        "path": "/image-to-pdf"
+      }
+    },
+    "getServerUTCDate": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "date",
+          "type": {
+            "date": {
+              "type": "string"
+            }
+          },
+          "description": "Current server UTC date",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates server current UTC date.",
+      "http": {
+        "verb": "get",
+        "path": "/utc-date"
+      }
+    },
+    "checkForUpdates": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "application",
+          "type": {
+            "update": "boolean",
+            "name": "string",
+            "description": "string",
+            "version": "string",
+            "platform": "string",
+            "download": "string"
+          },
+          "description": "Application update",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Checks for application updates",
+      "http": {
+        "verb": "get",
+        "path": "/update"
+      }
+    },
+    "getVersion": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "version",
+          "type": {
+            "platform": "string",
+            "type": "string",
+            "build": "string",
+            "version": "string"
+          },
+          "description": "Version Information",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get application version information.",
+      "http": {
+        "verb": "get",
+        "path": "/version"
+      }
+    },
+    "getBackupLocation": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "location",
+          "type": {
+            "install": "string",
+            "backUp": "string"
+          },
+          "description": "Application install & backup locations",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get application install & backup locations.",
+      "http": {
+        "verb": "get",
+        "path": "/backup-location"
+      }
+    },
+    "generateFile": {
+      "accepts": [
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": ["json", "qr"],
+          "required": true,
+          "description": "Generate file type. Enum: ['json', 'qr']"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Generate and download a JSON/(QR-Code)PNG file.",
+      "http": {
+        "verb": "post",
+        "path": "/generate-file"
+      }
+    }
+  }
+}

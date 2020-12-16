@@ -1,0 +1,185 @@
+{
+  "name": "device",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        "history"
+      ]
+    }
+  },
+  "properties": {
+    "physicalDeviceId": {
+      "type": "string",
+      "required": true,
+      "readOnly": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "operatingSystem": {
+      "type": "string"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "required": true,
+      "default": "LNG_DEVICE_WIPE_STATUS_READY",
+      "readOnly": true
+    },
+    "lastSeen": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now",
+      "readOnly": true
+    }
+  },
+  "indexes": {
+    "physicalDeviceId_index": {
+      "physicalDeviceId": 1
+    }
+  },
+  "validations": [],
+  "relations": {
+    "history": {
+      "type": "hasMany",
+      "model": "deviceHistory",
+      "foreignKey": "deviceId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list",
+      "permissions": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list",
+      "permissions": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_modify",
+      "permissions": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_view",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_delete",
+      "permissions": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list_history",
+      "permissions": "ALLOW",
+      "property": "__get__history"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_list_history",
+      "permissions": "ALLOW",
+      "property": "__count__history"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "device_wipe",
+      "permissions": "ALLOW",
+      "property": "wipe"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findByPhysicalDeviceId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "wipeComplete"
+    }
+  ],
+  "methods": {
+    "prototype.wipe": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [],
+      "description": "Wipe Device",
+      "http": {
+        "verb": "post",
+        "path": "/wipe"
+      }
+    },
+    "wipeComplete": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [],
+      "description": "Wipe completed successfully",
+      "http": {
+        "verb": "post",
+        "path": "/wipe-complete"
+      }
+    },
+    "findByPhysicalDeviceId": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Device physical id"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "device",
+          "type": "device",
+          "description": "Device data",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries devices",
+      "http": {
+        "verb": "get",
+        "path": "/findByPhysicalDeviceId/:nk"
+      }
+    }
+  }
+}

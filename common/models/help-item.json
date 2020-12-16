@@ -1,0 +1,131 @@
+{
+  "name": "helpItem",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "string",
+      "required": true
+    },
+    "approved": {
+      "type": "boolean",
+      "default": false
+    },
+    "approvedBy": {
+      "type": "string"
+    },
+    "approvedDate": {
+      "type": "date"
+    },
+    "categoryId": {
+      "type": "string",
+      "required": true
+    },
+    "comment": {
+      "type": "string"
+    },
+    "page": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "approvedBy"
+    },
+    "category": {
+      "type": "belongsTo",
+      "model": "helpCategory",
+      "foreignKey": "categoryId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getHelpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "countHelpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "getHelpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "countHelpItems"
+    }
+  ],
+  "methods": {
+    "getHelpItems": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). CAN'T USE include ( categories are included by default )."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "helpItems",
+          "type": [
+            "helpItem"
+          ],
+          "description": "List of help items and their category",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries help items",
+      "http": {
+        "verb": "get",
+        "path": "/"
+      }
+    },
+    "countHelpItems": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": {
+        "arg": "count",
+        "type": "integer",
+        "required": true
+      },
+      "description": "Count help items",
+      "http": {
+        "verb": "get",
+        "path": "/count"
+      }
+    }
+  }
+}

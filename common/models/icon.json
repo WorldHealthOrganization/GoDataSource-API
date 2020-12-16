@@ -1,0 +1,131 @@
+{
+  "name": "icon",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "path": {
+      "type": "string"
+    }
+  },
+  "hidden": ["path"],
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "download"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "icon_create",
+      "permission": "ALLOW",
+      "property": "upload"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "icon_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    }
+  ],
+  "methods": {
+    "upload": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        },
+        {
+          "arg": "name",
+          "type": "string"
+        },
+        {
+          "arg": "icon",
+          "type": "file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "icon",
+          "type": "icon",
+          "root": true
+        }
+      ],
+      "description": "Create a new instance of the model and persist it into the data source.",
+      "http": {
+        "verb": "post",
+        "path": "/"
+      }
+    },
+    "prototype.download": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Download an icon.",
+      "http": {
+        "verb": "get",
+        "path": "/download"
+      }
+    }
+  }
+}

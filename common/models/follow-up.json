@@ -1,0 +1,97 @@
+{
+  "name": "followUp",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "isGenerated"
+  ],
+  "scope": {
+    "order": ["date ASC"]
+  },
+  "properties": {
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "statusId": {
+      "type": "string"
+    },
+    "address": {
+      "type": "address"
+    },
+    "usualPlaceOfResidenceLocationId": {
+      "description": "Location ID for the usual place of residence address.",
+      "type": "string"
+    },
+    "questionnaireAnswers": {
+      "type": "object"
+    },
+    "index": {
+      "type": "number"
+    },
+    "teamId": {
+      "type": "string"
+    },
+    "outbreakId": {
+      "type": "string",
+      "required": true
+    },
+    "targeted": {
+      "type": "boolean",
+      "required": true
+    },
+    "comment": {
+      "type": "string"
+    },
+    "deletedByParent": {
+      "type": "string"
+    },
+    "fillLocation": {
+      "type": "fillLocation"
+    }
+  },
+  "indexes": {
+    "personId_index": {
+      "personId": 1
+    },
+    "statusId_index": {
+      "statusId": 1
+    },
+    "teamId_index": {
+      "teamId": 1
+    },
+    "targeted_index": {
+      "targeted": 1
+    },
+    "address_geoLocation_index": {
+      "address.geoLocation": "2dsphere"
+    },
+    "fillLocation_geoLocation_index": {
+      "fillLocation.geoLocation": "2dsphere"
+    },
+    "date_index": {
+      "date": 1
+    },
+    "usualPlaceOfResidenceLocationId_index": {
+      "usualPlaceOfResidenceLocationId": 1
+    }
+  },
+  "validations": [],
+  "relations": {
+    "contact": {
+      "type": "belongsTo",
+      "model": "contact",
+      "foreignKey": "personId"
+    },
+    "team": {
+      "type": "belongsTo",
+      "model": "team",
+      "foreignKey": "teamId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

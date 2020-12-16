@@ -1,0 +1,10 @@
+{
+  "loopback-component-explorer": {
+    "mountPath": "/explorer",
+    "generateOperationScopedModels": true,
+    "apiInfo": {
+      "title": "Go.Data API",
+      "description": "Go.Data API Explorer."
+    }
+  }
+}

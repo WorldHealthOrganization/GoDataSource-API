@@ -1,0 +1,411 @@
+{
+  "_meta": {
+    "sources": [
+      "loopback/common/models",
+      "loopback/server/models",
+      "../common/models",
+      "./models"
+    ],
+    "mixins": [
+      "loopback/common/mixins",
+      "loopback/server/mixins",
+      "../common/mixins",
+      "./mixins"
+    ]
+  },
+  "User": {
+    "dataSource": null,
+    "public": false
+  },
+  "AccessToken": {
+    "dataSource": null,
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "RoleMapping": {
+    "dataSource": null,
+    "public": false,
+    "options": {
+      "strictObjectIDCoercion": true
+    }
+  },
+  "Role": {
+    "dataSource": null,
+    "public": false
+  },
+  "user": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "role": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "location": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "team": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "auditLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "systemSettings": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "syncLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "importLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "importResult": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "databaseActionLog": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "databaseExportLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "transmissionChain": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "template": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "outbreak": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "case": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "contact": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "referenceData": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "followUp": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "cluster": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "helpCategory": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "labResult": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "extendedPersistedModel": {
+    "dataSource": null,
+    "public": false
+  },
+  "templateQuestion": {
+    "dataSource": null,
+    "public": false
+  },
+  "templateQuestionAnswer": {
+    "dataSource": null,
+    "public": false
+  },
+  "helpItem": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "upstreamServer": {
+    "dataSource": null,
+    "public": false
+  },
+  "clientCredentials": {
+    "dataSource": null,
+    "public": false
+  },
+  "clientApplication": {
+    "dataSource": null,
+    "public": false
+  },
+  "dataBackup": {
+    "dataSource": null,
+    "public": false
+  },
+  "auditLogData": {
+    "dataSource": null,
+    "public": false
+  },
+  "address": {
+    "dataSource": "memory",
+    "public": false
+  },
+  "relationship": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "Email": {
+    "dataSource": "email",
+    "public": false
+  },
+  "accessToken": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "person": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "document": {
+    "dataSource": null,
+    "public": false
+  },
+  "relationshipParticipant": {
+    "dataSource": null,
+    "public": false
+  },
+  "personRelationshipRepresentation": {
+    "dataSource": null,
+    "public": false
+  },
+  "language": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "languageToken": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "log": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "logData": {
+    "dataSource": null,
+    "public": false
+  },
+  "securityQuestion": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "event": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "icon": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "storage": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFile": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "importableFileWithMap": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileHeaders": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileDistinctValues": {
+    "dataSource": null,
+    "public": false
+  },
+  "securityQuestionsTemplate": {
+    "dataSource": null,
+    "public": false
+  },
+  "securityQuestionTemplate": {
+    "dataSource": null,
+    "public": false
+  },
+  "dateRange": {
+    "dataSource": null,
+    "public": false
+  },
+  "dateRangeWithDetails": {
+    "dataSource": null,
+    "public": false
+  },
+  "importableFileWithFieldAndReferenceDataMap": {
+    "dataSource": null,
+    "public": false
+  },
+  "sync": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "backup": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "backupParams": {
+    "dataSource": null,
+    "public": false
+  },
+  "syncParameters": {
+    "dataSource": null,
+    "public": false
+  },
+  "arcGisServer": {
+    "dataSource": null,
+    "public": false
+  },
+  "country": {
+    "dataSource": null,
+    "public": false
+  },
+  "maps": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "contactAndRelationship": {
+    "dataSource": null,
+    "public": false
+  },
+  "exposureOrContact": {
+    "dataSource": null,
+    "public": false
+  },
+  "age": {
+    "dataSource": null,
+    "public": false
+  },
+  "classificationHistoryItem": {
+    "dataSource": null,
+    "public": false
+  },
+  "followUpHistoryHistoryItem": {
+    "dataSource": null,
+    "public": false
+  },
+  "fileAttachment": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "generateFollowup": {
+    "dataSource": null,
+    "public": false
+  },
+  "device": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "deviceHistory": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "exportContacts": {
+    "dataSource": null,
+    "public": false
+  },
+  "exportRangeContacts": {
+    "dataSource": null,
+    "public": false
+  },
+  "mergePeopleProps": {
+    "dataSource": null,
+    "public": false
+  },
+  "mobileDatabaseDownloadParameters": {
+    "dataSource": null,
+    "public": false
+  },
+  "customGeoPoint": {
+    "dataSource": null,
+    "public": false
+  },
+  "importMapping": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "importMappingValue": {
+    "dataSource": null,
+    "public": false
+  },
+  "importMappingOptionValue": {
+    "dataSource": null,
+    "public": false
+  },
+  "filterMapping": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "relationshipSourceTarget": {
+    "dataSource": null,
+    "public": false
+  },
+  "fillLocation": {
+    "dataSource": null,
+    "public": false
+  },
+  "vaccine": {
+    "dataSource": null,
+    "public": false
+  },
+  "telephoneNumbers": {
+    "dataSource": null,
+    "public": false
+  },
+  "contactOfContact": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "captcha": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "oauth": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "oauthTokenRequest": {
+    "dataSource": "memory",
+    "public": true
+  },
+  "contactOfContactAndRelationship": {
+    "dataSource": null,
+    "public": false
+  },
+  "migrationLog": {
+    "dataSource": "mongoDb",
+    "public": false
+  },
+  "personDuplicateParams": {
+    "dataSource": null,
+    "public": false
+  },
+  "twoFactorAuthenticationStep2": {
+    "dataSource": null,
+    "public": false
+  },
+  "transmissionChainCalculate": {
+    "dataSource": null,
+    "public": false
+  }
+}

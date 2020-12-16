@@ -1,0 +1,27 @@
+{
+  "name": "personDuplicateParams",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "hidden": [
+      "id"
+    ]
+  },
+  "properties": {
+    "addRecords": {
+      "type": [
+        "string"
+      ]
+    },
+    "removeRecords": {
+      "type": [
+        "string"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

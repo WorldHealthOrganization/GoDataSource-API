@@ -1,0 +1,20 @@
+{
+  "name": "telephoneNumbers",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

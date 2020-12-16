@@ -1,0 +1,38 @@
+{
+  "name": "fileAttachment",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "id": {
+      "type": "string",
+      "id": true,
+      "defaultFn": "uuidv4",
+      "unique": true
+    },
+    "outbreakId": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "originalName": {
+      "type": "string"
+    },
+    "mimeType": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    }
+  },
+  "hidden": ["path"],
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

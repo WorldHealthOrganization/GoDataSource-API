@@ -1,0 +1,38 @@
+{
+  "name": "importableFileWithFieldAndReferenceDataMap",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "fileId": "string",
+    "map": {
+      "type": {
+        "<fileHeader>": {
+          "type": "string",
+          "description": "Model property"
+        }
+      }
+    },
+    "valuesMap":{
+      "type":{
+        "<fileHeader>": {
+          "type": {
+            "<fileValue>": {
+              "type": "string",
+              "description": "Model property value"
+            }
+          }
+        }
+      }
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

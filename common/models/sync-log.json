@@ -1,0 +1,102 @@
+{
+  "name": "syncLog",
+  "base": "databaseActionLog",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "sync"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "sync",
+      "readOnly": true
+    },
+    "syncClientId": {
+      "type": "string",
+      "description": "Client ID which is synced with the server. Present in the entries for Server instances"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_list",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_list",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_view",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permissions": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_delete",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "sync_log_bulk_delete",
+      "permission": "ALLOW",
+      "property": "bulkDelete"
+    }
+  ],
+  "methods": {
+    "bulkDelete": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "required": true,
+          "description": "Number of deleted sync log entries"
+        }
+      ],
+      "description": "Delete sync log entries that match the criteria.",
+      "http": {
+        "verb": "del",
+        "path": "/"
+      }
+    }
+  }
+}

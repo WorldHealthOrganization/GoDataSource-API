@@ -1,0 +1,39 @@
+{
+  "name": "accessToken",
+  "base": "AccessToken",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "twoFADisabled": {
+      "description": "Flag specifying whether access-token is disabled following two-factor authentication logic",
+      "type": "boolean"
+    },
+    "twoFACode": {
+      "description": "Generated code for two-factor authentication logic",
+      "type": "string"
+    },
+    "twoFACodeExpirationDate": {
+      "description": "Two-factor authentication code expiration date",
+      "type": "date"
+    }
+  },
+  "mixins": {
+    "UniqueValidator": true,
+    "AuthorTimeStamp": true,
+    "AuditLogger": true,
+    "SoftDelete": true,
+    "DateProperty": true
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,818 @@
+'use strict';
+
+const _ = require('lodash');
+const helpers = require('./helpers');
+const mkdirp = require('mkdirp');
+const fs = require('fs');
+const path = require('path');
+const async = require('async');
+const fsExtra = require('fs-extra');
+const workerRunner = require('./workerRunner');
+const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
+
+// map of collection names and property name that matches a file on the disk
+// also directory path (relative to the project) that holds the files should be left unchanged
+const collectionsWithFiles = {
+  icon: {
+    prop: 'path',
+    srcDir: 'server/storage/icons',
+    targetDir: 'icons'
+  },
+  fileAttachment: {
+    prop: 'path',
+    srcDir: 'server/storage/files',
+    targetDir: 'files'
+  },
+  transmissionChain: {
+    prop: '_id',
+    srcDir: baseTransmissionChainModel.storagePath,
+    targetDir: 'cotFiles'
+  }
+};
+
+// map of collections and their given corresponding collection name in database
+const collectionsMap = {
+  systemSettings: 'systemSettings',
+  template: 'template',
+  icon: 'icon',
+  helpCategory: 'helpCategory',
+  helpItem: 'helpItem',
+  language: 'language',
+  languageToken: 'languageToken',
+  outbreak: 'outbreak',
+  person: 'person',
+  labResult: 'labResult',
+  followUp: 'followUp',
+  referenceData: 'referenceData',
+  relationship: 'relationship',
+  location: 'location',
+  team: 'team',
+  user: 'user',
+  role: 'role',
+  cluster: 'cluster',
+  auditLog: 'auditLog',
+  fileAttachment: 'fileAttachment',
+  device: 'device',
+  deviceHistory: 'deviceHistory',
+  importMapping: 'importMapping',
+  filterMapping: 'filterMapping',
+  migrationLog: 'migrationLog',
+  transmissionChain: 'transmissionChain'
+};
+
+// list of user related collections
+const userCollections = ['team', 'user', 'role'];
+
+// map of export type to collections
+const collectionsForExportTypeMap = {
+  system: ['template', 'icon', 'helpCategory', 'helpItem', 'language', 'languageToken', 'referenceData', 'location']
+};
+collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
+collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster', 'fileAttachment']);
+collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
+// mobile export doesn't need to include template, icon, helpCategory, helpItem, fileAttachment
+['template', 'icon', 'fileAttachment'].forEach(function (model) {
+  collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf(model), 1);
+});
+
+// on sync we need get all collections except the following
+let syncExcludeList = [
+  'systemSettings',
+  'team',
+  'user',
+  'role',
+  'auditLog',
+  'helpCategory',
+  'helpItem',
+  'device',
+  'deviceHistory'
+];
+let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExcludeList.indexOf(collection) === -1);
+
+// create list of models that need to be synced starting from the syncCollections list
+// add the case, contact and event models besides the existing ones
+let syncModels = syncCollections.concat(['case', 'contact', 'event']);
+
+// on import sync package we need to sync in series some collections that generate values based on resources in DB
+// eg: person model - visualId
+const collectionsToSyncInSeries = ['person'];
+
+// for which records we should always retrieve only NOT deleted records?
+const collectionsExcludeDeletedRecords = {
+  languageToken: true
+};
+
+/**
+ * Add outbreakId filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the outbreakId filter
+ * @param filter Filter from request in which to check for outbreakId filter
+ * @returns {*}
+ */
+function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
+  // check for outbreakId filter
+  let outbreakIdFilter = _.get(filter, 'where.outbreakId');
+
+  // initialize resulting filter
+  // start from base filter; Note that it can be null
+  let result = Object.assign({}, baseFilter || {});
+  if (outbreakIdFilter) {
+    // outbreak ID property is different in some models
+    let outbreakIDDBProp = 'outbreakId';
+    // update property name for outbreak model
+    if (collectionName === 'outbreak') {
+      outbreakIDDBProp = '_id';
+    }
+
+    // parse the outbreakIdFilter to mongoDB format
+    if (typeof outbreakIdFilter === 'object') {
+      // accepting only inq option for the filter
+      if (outbreakIdFilter.inq) {
+        result[outbreakIDDBProp] = {
+          $in: outbreakIdFilter.inq
+        };
+      } else {
+        // filter is not accepted; not using the outbreakId filter
+      }
+    } else {
+      // filtering outbreakId by value
+      result[outbreakIDDBProp] = outbreakIdFilter;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and person ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the person ID filter
+ * @param filter Filter from request in which to check for personsIds filter
+ * @returns {*}
+ */
+function addPersonMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for personsIds to filter
+  let personsIds = _.get(filter, 'where.personsIds');
+  if (personsIds) {
+    result._id = {
+      '$in': personsIds
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and case ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the case ID filter
+ * @param filter Filter from request in which to check for casesIds filter
+ * @returns {*}
+ */
+function addLabResultMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for casesIds to filter
+  let casesIds = _.get(filter, 'where.casesIds');
+  if (casesIds) {
+    result.personId = {
+      '$in': casesIds
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and contact ID + team ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the contacts ID and team ID filter
+ * @param filter Filter from request in which to check for contactsIds and teamsIDs filters; Both must be present
+ * @returns {*}
+ */
+function addFollowupMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for contactsIds and teamsIDs to filter
+  let contactsIds = _.get(filter, 'where.contactsIds');
+  let teamsIDs = _.get(filter, 'where.teamsIds');
+  if (contactsIds && teamsIDs) {
+    result.personId = {
+      '$in': contactsIds
+    };
+    // get only the followups assigned to the teams or not assigned
+    result['$or'] = [{
+      teamId: {
+        '$in': teamsIDs
+      }
+    }, {
+      teamId: null
+    }];
+  }
+
+  return result;
+}
+
+/**
+ * Add outbreak ID and relationship ID filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param baseFilter MongoDB Base filter on which to add the relationship ID filter
+ * @param filter Filter from request in which to check for relationshipsIds filter
+ * @returns {*}
+ */
+function addRelationshipMongoFilter(collectionName, baseFilter, filter) {
+  // need to also add the filter for outbreakId
+  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+
+  // check for relationshipsIds to filter
+  let relationshipsIds = _.get(filter, 'where.relationshipsIds');
+  if (relationshipsIds) {
+    result._id = {
+      '$in': relationshipsIds
+    };
+  }
+
+  return result;
+}
+
+/**
+ * Add language token filter if found to a mongoDB filter;
+ * Note: the base mongoDB filter is not affected
+ * @param collectionName Collection name; Currently not used however the function is automatically called with this param
+ * @param baseFilter MongoDB Base filter on which to add the language token filter
+ * @param filter Filter from request in which to check for language token filter
+ * @returns {*}
+ */
+function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
+  // initialize resulting filter
+  // start from base filter; Note that it can be null
+  let result = Object.assign({}, baseFilter || {});
+
+  // check for language token filter
+  let languageTokenFilter = _.get(filter, 'where.languageTokens');
+
+  // check for languages filter
+  let languagesFilter = _.get(filter, 'where.languages');
+
+  // update filter only if languagesFilter is an array
+  if (Array.isArray(languagesFilter)) {
+    // construct languages filter
+    const languagesMongoFilter = {
+      languageId: {
+        $in: languagesFilter
+      }
+    };
+
+    // update result filter
+    if (_.isEmpty(result)) {
+      result = languagesMongoFilter;
+    } else {
+      result = {
+        '$and': [
+          result,
+          languagesMongoFilter
+        ]
+      };
+    }
+  }
+
+  // update filter only if languageTokenFilter is an array
+  if (Array.isArray(languageTokenFilter)) {
+    // Note: should be in sync with the subTemplates names from templateParser.js
+    const subTemplates = ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
+
+    // create language token mongo filter; creating it as an '$or' filter
+    let languageTokenMongoFilter = {
+      '$or': [
+        {
+          // get required tokens
+          'token': {
+            '$in': languageTokenFilter
+          }
+        },
+        {
+          // get all reference data and templates/questionnaires tokens
+          'token': {
+            '$regex': `${subTemplates.reduce(
+              function (result, subTemplateName) {
+                result += '|' + subTemplateName.toUpperCase();
+                return result;
+              },
+              // start the regex with reference data identifier
+              'LNG_REFERENCE_DATA')}`
+          }
+        }
+      ]
+    };
+
+    // update result filter
+    if (_.isEmpty(result)) {
+      result = languageTokenMongoFilter;
+    } else {
+      result = {
+        '$and': [
+          result,
+          languageTokenMongoFilter
+        ]
+      };
+    }
+  }
+
+  // finished
+  return result;
+}
+
+/**
+ * Filter record by outbreakId
+ * @param collectionName Collection name; Depending on collection name the filter might be different
+ * @param record Record; JSON model instance
+ * @param outbreakIDs List of outbreak IDs for the outbreaks that can be imported
+ * @returns {*}
+ */
+function isImportableRecord(collectionName, record, outbreakIDs) {
+  // initialize importable flag
+  let importable = true;
+
+  // check for outbreakIDs
+  if (outbreakIDs.length) {
+    // get record outbreakId
+    let recordOutbreakId = collectionName === 'outbreak' ? record._id : record.outbreakId;
+
+    // check if the found outbreakId is accepted
+    importable = outbreakIDs.indexOf(recordOutbreakId) !== -1;
+  }
+
+  return importable;
+}
+
+// on export some additional filters might be applied on different collections
+// map collections to filter update functions
+const collectionsFilterMap = {
+  outbreak: addOutbreakIdMongoFilter,
+  person: addPersonMongoFilter,
+  labResult: addLabResultMongoFilter,
+  followUp: addFollowupMongoFilter,
+  relationship: addRelationshipMongoFilter,
+  cluster: addOutbreakIdMongoFilter,
+  fileAttachment: addOutbreakIdMongoFilter,
+  languageToken: addLanguageTokenMongoFilter
+};
+
+// on import some additional filters might be applied on different collections
+// map collections to functions that calculate if the record needs to be imported
+const collectionsImportFilterMap = {
+  outbreak: isImportableRecord,
+  person: isImportableRecord,
+  labResult: isImportableRecord,
+  followUp: isImportableRecord,
+  relationship: isImportableRecord,
+  cluster: isImportableRecord,
+  fileAttachment: isImportableRecord
+};
+
+const syncRecordFlags = {
+  UNTOUCHED: 'UNTOUCHED',
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED',
+  REMOVED: 'REMOVED'
+};
+
+/**
+ * Sync a record of given model type with the main MongoDb database
+ * Note: Deleted records are taken into consideration
+ * Functionality description:
+ * If no record is found or record is found and was created externally (no updateAt flag), create new record
+ * If record has updateAt timestamp higher than the main database, update
+ * @param logger
+ * @param model
+ * @param record
+ * @param [options]
+ * @param [done]
+ */
+const syncRecord = function (logger, model, record, options, done) {
+
+  // log formatted message
+  function log(level, message) {
+    logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
+  }
+
+  // convert first level GeoPoints to valid Loopback GeoPoint on sync action
+  // on sync the GeoPoint is received as it is saved in the DB (contains coordinates)
+  // Loopback expects lat/lng instead of coordinates and breaks
+  // we need to covert coordinates to lat/lng before trying to create/update
+  function convertGeoPointToLoopbackFormat(record, model) {
+    // get list of properties and check if there are any that would require parsing (geopoint properties)
+    let modelProperties = model.definition.rawProperties;
+    let geoPointProperties = Object.keys(modelProperties).filter(property => modelProperties[property].type === 'geopoint');
+
+    // if model definition contains first level GeoPoints parse them
+    if (geoPointProperties.length) {
+      // convert each GeoPoint
+      geoPointProperties.forEach(function (property) {
+        // get current value and path
+        let geoPoint = helpers.getReferencedValue(record, property);
+
+        // always works with same data type (simplify logic)
+        if (!Array.isArray(geoPoint)) {
+          geoPoint = [geoPoint];
+        }
+        // go through each GeoPoint
+        geoPoint.forEach(function (point) {
+          // if the GeoPoint is not in the desired format
+          if (
+            point.value &&
+            point.value.coordinates &&
+            point.value.lng === undefined &&
+            point.value.lat === undefined
+          ) {
+            // convert it
+            _.set(record, point.exactPath, {
+              lat: point.value.coordinates[1],
+              lng: point.value.coordinates[0]
+            });
+          }
+        });
+      });
+    }
+  }
+
+  // options is optional parameter
+  if (typeof options === 'function') {
+    done = options;
+    options = {};
+  }
+
+  // mark this operation as a sync (if not specified otherwise)
+  options._sync = options._sync !== undefined ? options._sync : true;
+
+  // go through date type fields and convert them to a proper date
+  if (!_.isEmpty(model._parsedDateProperties)) {
+    (function setDateProps(obj, map) {
+      // go through each date properties and parse date properties
+      for (let prop in map) {
+        // skip createdAt, updatedAt properties from formatting
+        // but make sure they are valid dates before trying to import them into database
+        // because we might have cases where those values were altered outside of the system
+        if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+          let propValue = _.get(obj, prop);
+          // XML file don't have 'null' values, they use empty strings instead
+          if (propValue === '') {
+            propValue = null;
+            _.set(obj, prop, propValue);
+          }
+          if (propValue) {
+            const convertedDate = helpers.getDate(propValue);
+            if (!convertedDate.isValid()) {
+              _.set(obj, prop, null);
+            }
+          }
+          continue;
+        }
+
+        if (map.hasOwnProperty(prop)) {
+          // this is an array prop
+          if (typeof map[prop] === 'object') {
+            if (Array.isArray(obj[prop])) {
+              obj[prop].forEach((item) => setDateProps(item, map[prop]));
+            }
+          } else {
+            let recordPropValue = _.get(obj, prop);
+            // XML file don't have 'null' values, they use empty strings instead
+            if (recordPropValue === '') {
+              recordPropValue = null;
+              _.set(obj, prop, recordPropValue);
+            }
+            if (recordPropValue) {
+              // try to convert the string value to date, if valid, replace the old value
+              let convertedDate = helpers.getDate(recordPropValue);
+              if (convertedDate.isValid()) {
+                _.set(obj, prop, convertedDate.toDate());
+              }
+            }
+          }
+        }
+      }
+    })(record, model._parsedDateProperties);
+  }
+
+  let findRecord;
+  // check if a record with the given id exists if record.id exists
+  if (record.id !== undefined) {
+    log('debug', `Trying to find record with id ${record.id}.`);
+    findRecord = model
+      .findOne({
+        where: {
+          id: record.id
+        },
+        deleted: true
+      });
+  } else {
+    log('debug', 'Record id not present');
+    // record id not present, don't search for a record
+    findRecord = Promise.resolve();
+  }
+
+  const syncPromise = findRecord
+    .then(function (dbRecord) {
+      // record not found, create it
+      if (!dbRecord) {
+        // update geopoint properties
+        convertGeoPointToLoopbackFormat(record, model);
+
+        log('debug', `Record not found (id: ${record.id}), creating record.`);
+        return model
+          .create(record, options)
+          .then(function (dbRecord) {
+            return {
+              record: dbRecord,
+              flag: syncRecordFlags.CREATED
+            };
+          });
+      }
+
+      // if record was found in DB but we cannot figure out if the changes are newer or older skip record (updatedAt is missing)
+      if (!record.updatedAt) {
+        log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property. Skipped record`);
+        return Promise.reject({message: `Record found (id: ${record.id}) but data received is missing updatedAt property. Skipped record`});
+      }
+
+      // if updated timestamp is greater than the one in the main database, update
+      // also make sure that if the record is soft deleted, it stays that way
+      if (new Date(dbRecord.updatedAt).getTime() < new Date(record.updatedAt).getTime()) {
+        // update geopoint properties
+        convertGeoPointToLoopbackFormat(record, model);
+
+        log('debug', `Record found (id: ${record.id}), updating record`);
+
+        // record was just deleted
+        if (
+          !dbRecord.deleted &&
+          record.deleted !== undefined &&
+          (
+            record.deleted === true ||
+            (typeof record.deleted === 'string' && record.deleted.toLowerCase() === 'true') ||
+            record.deleted === 1
+          )
+        ) {
+          // remove deleted flag; keeping deletedAt property as we need to not change it when the model is destroyed
+          delete record.deleted;
+          // make sure the record is up to date
+          return dbRecord
+            .updateAttributes(record, options)
+            .then(function (dbRecord) {
+              // then destroy the record
+              return dbRecord
+                .destroy(options)
+                .then(function () {
+                  // get the record from the db to send it back
+                  return model
+                    .findOne({
+                      where: {
+                        id: record.id
+                      },
+                      deleted: true
+                    })
+                    .then(function (dbRecord) {
+                      return {
+                        record: dbRecord,
+                        flag: syncRecordFlags.REMOVED
+                      };
+                    });
+                });
+            });
+        }
+        // record just needs to be updated
+        return dbRecord
+          .updateAttributes(record, options)
+          .then(function (dbRecord) {
+            return {
+              record: dbRecord,
+              flag: syncRecordFlags.UPDATED
+            };
+          });
+      }
+
+      log('debug', `Record found (id: ${record.id}) but data received is older than server data, record ignored.`);
+      // if nothing happened, report that
+      return {
+        record: dbRecord,
+        flag: syncRecordFlags.UNTOUCHED
+      };
+    });
+
+  // allow working with callbacks
+  if (typeof done === 'function') {
+    syncPromise
+      .then(function (result) {
+        done(null, result);
+      })
+      .catch(done);
+  } else {
+    return syncPromise;
+  }
+};
+
+/**
+ * Include files that are related to records in the target collection into the temporary directory
+ * @param collectionName
+ * @param records
+ * @param tmpDir
+ * @param logger
+ * @param password Encrypt password
+ * @param done
+ */
+const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, logger, password, done) {
+  // if there are no records, do not run anything
+  if (!records.length) {
+    return done();
+  }
+
+  // if collection has no related files configuration set up, stop
+  if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
+    return done();
+  }
+
+  let storageModel = {};
+  // cot file are not saved using storage model
+  if (collectionName !== 'transmissionChain') {
+    require('./../server/models/storage')(storageModel);
+  }
+
+  // get the configuration options
+  const collectionOpts = collectionsWithFiles[collectionName];
+
+  // create the temporary directory matching the configured path
+  return mkdirp(path.join(tmpDir, collectionOpts.targetDir), (err) => {
+    if (err) {
+      return done(err);
+    }
+
+    return async.parallelLimit(
+      records.map((record) => {
+        return function (doneRecord) {
+          let filePath;
+          // cot files path might not be relative so we cannot calculate it using storage model
+          if (collectionName === 'transmissionChain') {
+            filePath = baseTransmissionChainModel.helpers.getFilePath(record[collectionOpts.prop]);
+          } else {
+            filePath = storageModel.resolvePath(record[collectionOpts.prop]);
+          }
+
+          // make sure the source file is okay
+          return fs.lstat(filePath, function (err) {
+            if (err) {
+              logger.warn(`Failed to export file: ${filePath}. Related record: ${record.id}.`, err);
+              return doneRecord();
+            }
+
+            // copy file in temporary directory
+            let tmpFilePath = path.join(
+              tmpDir,
+              collectionOpts.targetDir,
+              collectionName === 'transmissionChain' ?
+                baseTransmissionChainModel.helpers.getFileName(record[collectionOpts.prop]) :
+                path.basename(record[collectionOpts.prop])
+            );
+
+            return fs.copyFile(
+              filePath,
+              tmpFilePath,
+              function () {
+                if (!password) {
+                  return doneRecord();
+                }
+
+                // password is sent; encrypt file
+                return workerRunner
+                  .helpers
+                  .encryptFile(password, {}, tmpFilePath)
+                  .then(function () {
+                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record.id}.`);
+                    doneRecord();
+                  })
+                  .catch(function (err) {
+                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record.id}.`, err);
+                    doneRecord();
+                  });
+              }
+            );
+          });
+        };
+      }),
+      // restrict maximum parallel runs, to be consistent with other usages
+      10,
+      done
+    );
+  });
+};
+
+/**
+ * Import related files from temporary directory to local storage
+ * @param collectionName
+ * @param tmpDir
+ * @param logger
+ * @param password
+ * @param done
+ */
+const importCollectionRelatedFiles = function (collectionName, tmpDir, logger, password, done) {
+  // if collection has no related files, stop
+  if (!collectionsWithFiles.hasOwnProperty(collectionName)) {
+    return done();
+  }
+
+  // get the property, directory names from the mapping
+  const collectionOpts = collectionsWithFiles[collectionName];
+
+  let collectionFilesTmpDir = path.join(tmpDir, collectionOpts.targetDir);
+  let collectionFilesDir = path.isAbsolute(collectionOpts.srcDir) ? collectionOpts.srcDir : path.join(__dirname, '..', collectionOpts.srcDir);
+
+  logger.debug(`Importing related files for collection '${collectionName}'`);
+
+  /**
+   * Copy files from tmp dir to target dir
+   */
+  function copyFiles() {
+    fsExtra.copy(
+      collectionFilesTmpDir,
+      collectionFilesDir,
+      function (err) {
+        if (err) {
+          logger.warn(`Failed to copy files from tmp dir '${collectionFilesTmpDir}' to '${collectionFilesDir}'`);
+          return done(err);
+        }
+
+        return done();
+      }
+    );
+  }
+
+  // check if the files need to be decrypted
+  if (!password) {
+    return copyFiles();
+  }
+
+  // decrypt files
+  // read all files in the temp dir
+  return fs.readdir(collectionFilesTmpDir, (err, filenames) => {
+    if (err) {
+      logger.warn(`Failed to read files from tmp dir '${collectionFilesTmpDir}'.`);
+      return done(err);
+    }
+
+    logger.debug(`Decrypting files at '${collectionFilesTmpDir}'`);
+
+    return async.parallelLimit(
+      filenames.map((fileName) => (doneFile) => {
+        let filePath = `${collectionFilesTmpDir}/${fileName}`;
+
+        // decrypt file
+        workerRunner
+          .helpers
+          .decryptFile(password, {}, filePath)
+          .then(function () {
+            doneFile();
+          })
+          .catch(function (err) {
+            logger.warn(`Failed to decrypt file '${filePath}'. Error: ${err}. Removing file.`);
+
+            // remove file; waiting for remove action to finish to not copy encrypted files to target dir
+            fs.unlink(filePath, function (err) {
+              logger.warn(`Failed to remove file '${filePath}'. Error: ${err}.`);
+              doneFile();
+            });
+          });
+      }),
+      5,
+      function () {
+        // decrypt finished; copy files to target dir
+        return copyFiles();
+      });
+  });
+};
+
+module.exports = {
+  collectionsMap: collectionsMap,
+  collectionsFilterMap: collectionsFilterMap,
+  collectionsImportFilterMap: collectionsImportFilterMap,
+  collectionsToSyncInSeries: collectionsToSyncInSeries,
+  collectionsExcludeDeletedRecords: collectionsExcludeDeletedRecords,
+  syncRecord: syncRecord,
+  syncRecordFlags: syncRecordFlags,
+  syncCollections: syncCollections,
+  collectionsForExportTypeMap: collectionsForExportTypeMap,
+  userCollections: userCollections,
+  syncModels: syncModels,
+  collectionsWithFiles: collectionsWithFiles,
+  exportCollectionRelatedFiles: exportCollectionRelatedFiles,
+  importCollectionRelatedFiles: importCollectionRelatedFiles
+};

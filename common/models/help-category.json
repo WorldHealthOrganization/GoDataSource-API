@@ -1,0 +1,300 @@
+{
+  "name": "helpCategory",
+  "base": "extendedPersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "CascadeDelete": {
+      "relations": [
+        "helpItems"
+      ]
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "order": {
+      "type": "number",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "helpItems": {
+      "type": "hasMany",
+      "model": "helpItem",
+      "foreignKey": "categoryId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__get__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__count__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "__findById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "searchHelpCategory"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "searchHelpItem"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__get__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__count__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "__findById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "searchHelpCategory"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$client_application",
+      "permission": "ALLOW",
+      "property": "searchHelpItem"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_create_category",
+      "permission": "ALLOW",
+      "property": "create"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_modify_category",
+      "permission": "ALLOW",
+      "property": "patchAttributes"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_delete_category",
+      "permission": "ALLOW",
+      "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_create_category_item",
+      "permission": "ALLOW",
+      "property": "__create__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_delete_category_item",
+      "permission": "ALLOW",
+      "property": "__destroyById__helpItems"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_approve_category_item",
+      "permission": "ALLOW",
+      "property": "approveHelpItem"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "help_modify_category_item",
+      "permission": "ALLOW",
+      "property": "updateHelpItem"
+    }
+  ],
+  "methods": {
+    "prototype.updateHelpItem": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for help items"
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "helpItem",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "arg": "helpItem",
+        "type": "helpItem",
+        "description": "Help Item resulted from approval",
+        "required": true,
+        "root": true
+      },
+      "description": "Update a help item",
+      "http": {
+        "verb": "put",
+        "path": "/help-items/:fk"
+      }
+    },
+    "prototype.approveHelpItem": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for help items"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": {
+        "arg": "helpItem",
+        "type": "helpItem",
+        "description": "Help Item resulted from approval",
+        "required": true,
+        "root": true
+      },
+      "description": "Approves a help item",
+      "http": {
+        "verb": "post",
+        "path": "/help-items/:fk/approve"
+      }
+    },
+    "searchHelpCategory": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where.token' (supported only on top level) with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help categories referenced by the language tokens that pass the where condition",
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "categories",
+          "type": "array",
+          "description": "An array of the help categories that contain the required text"
+        }
+      ],
+      "description": "Returns the help categories that contain the text sent",
+      "http": {
+        "verb": "get",
+        "path": "/search-help-category"
+      }
+    },
+    "searchHelpItem": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). The filter should contain a 'where.token' (supported only on top level) with a text search that will pe applied on the language tokens only, the rest of the filter will be applied on the help items referenced by the language tokens that pass the where condition",
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "items",
+          "type": "array",
+          "description": "An array of the help items that contain the required text"
+        }
+      ],
+      "description": "Returns the help items that contain the text sent",
+      "http": {
+        "verb": "get",
+        "path": "/search-help-items"
+      }
+    }
+  }
+}
