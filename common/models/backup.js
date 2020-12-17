@@ -60,6 +60,8 @@ module.exports = function (Backup) {
    * @param done Optional callback; if sent will be called immediately after the backup creation is triggered
    */
   Backup.createBackup = function (location, modules, userId, description, done) {
+    let cb = done;
+
     // create new backup record with pending status
     let createBackup = Backup
       .create({
@@ -72,7 +74,12 @@ module.exports = function (Backup) {
       })
       .then((record) => {
         // send the response back to the user, do not wait for the backup to finish
-        done && done(null, record.id);
+        if (cb) {
+          cb(null, record.id);
+          // make cb a noop function as it might also be called on catch
+          cb = () => {
+          };
+        }
         app.logger.debug(`Backup ${record.id}: Started the backup process`);
 
         // start the backup process
@@ -84,7 +91,7 @@ module.exports = function (Backup) {
             if (err) {
               newStatus = Backup.status.FAILED;
               failReason = err;
-              app.logger.debug(`Backup ${record.id}: Backup process failed with error`, {error: err});
+              app.logger.error(`Backup ${record.id}: Backup process failed with error`, {error: err});
             } else {
               app.logger.debug(`Backup ${record.id}: Successfully created backup file at ${backupFilePath}`);
             }
@@ -101,17 +108,17 @@ module.exports = function (Backup) {
                 }
               })
               .catch(function (err) {
-                app.logger.debug(`Backup ${record.id}: Failed updating backup entry status. Error: ${err}`);
+                app.logger.error(`Backup ${record.id}: Failed updating backup entry status. Error: ${err}`);
                 reject(err);
               });
           });
         });
       });
 
-    // check for done function; if sent call it on error
-    if (done) {
+    // check for done function; if sent will be called on error only if it was not already called
+    if (cb) {
       return createBackup
-        .catch((createError) => done(createError));
+        .catch((createError) => cb(createError));
     } else {
       return createBackup;
     }

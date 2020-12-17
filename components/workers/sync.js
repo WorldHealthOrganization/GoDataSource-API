@@ -238,7 +238,7 @@ const worker = {
             archivesDirName = `${tmpDirName}/archives`;
             fs.mkdirSync(archivesDirName);
           } catch (err) {
-            logger.debug(`Failed creating tmp directories; ${err}`);
+            logger.error(`Failed creating tmp directories; ${err}`);
             return reject(err);
           }
 
