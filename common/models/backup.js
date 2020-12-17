@@ -84,7 +84,7 @@ module.exports = function (Backup) {
             if (err) {
               newStatus = Backup.status.FAILED;
               failReason = err;
-              app.logger.debug(`Backup ${record.id}: Backup process failed with error: ${err}`);
+              app.logger.debug(`Backup ${record.id}: Backup process failed with error`, {error: err});
             } else {
               app.logger.debug(`Backup ${record.id}: Successfully created backup file at ${backupFilePath}`);
             }

@@ -60,7 +60,7 @@ const createBackup = function (modules, location, done) {
       },
       (exportError, archivePath) => {
         if (exportError) {
-          app.logger.error(`Backup process failed. ${exportError}`);
+          app.logger.error('Backup process failed.', {error: exportError});
           return done(exportError);
         }
 

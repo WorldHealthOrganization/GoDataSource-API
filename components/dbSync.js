@@ -671,7 +671,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
           // make sure the source file is okay
           return fs.lstat(filePath, function (err) {
             if (err) {
-              logger.warn(`Failed to export file: ${filePath}. Related record: ${record.id}.`, err);
+              logger.warn(`Failed to export file: ${filePath}. Related record: ${record._id}.`, err);
               return doneRecord();
             }
 
@@ -697,11 +697,11 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
                   .helpers
                   .encryptFile(password, {}, tmpFilePath)
                   .then(function () {
-                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record.id}.`);
+                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record._id}.`);
                     doneRecord();
                   })
                   .catch(function (err) {
-                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record.id}.`, err);
+                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record._id}.`, err);
                     doneRecord();
                   });
               }
