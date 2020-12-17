@@ -862,7 +862,10 @@ process.on('message', function (message) {
       process.send([null, result]);
     })
     .catch(function (error) {
-      process.send([error]);
+      process.send([error instanceof Error ? {
+        message: error.message,
+        stack: error.stack
+      } : error]);
     });
 });
 
