@@ -31,6 +31,7 @@ module.exports = function (app) {
     app.logger.debug(`Process ${process.pid} will not start scheduler`);
     return;
   }
+  app.logger.debug(`Process ${process.pid} starting scheduler`);
 
   /**
    * Trigger automatic sync
@@ -82,13 +83,7 @@ module.exports = function (app) {
       // run pre routine functionality for backup create
       backup.preRoutine((err, backupSettings) => {
         if (err) {
-          let errMsg = '1. Failed to setup backup create job => ';
-          try {
-            errMsg = errMsg + (err ? JSON.stringify(err) : err);
-          } catch (e) {
-            // NOTHING
-          }
-          app.logger.error(errMsg);
+          app.logger.error('Failed to setup backup create job', {error: err});
           return done();
         }
 
@@ -161,13 +156,7 @@ module.exports = function (app) {
       // run pre routine functionality for backup cleanup
       backup.preRoutine((err, backupSettings) => {
         if (err) {
-          let errMsg = '2. Failed to setup backup create job => ';
-          try {
-            errMsg = errMsg + (err ? JSON.stringify(err) : err);
-          } catch (e) {
-            // NOTHING
-          }
-          app.logger.error(errMsg);
+          app.logger.error('Failed to setup backup cleanup job', {error: err});
           return done();
         }
 

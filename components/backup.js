@@ -56,11 +56,12 @@ const createBackup = function (modules, location, done) {
       {
         password: getBackupPassword(),
         chunkSize: 10000,
-        exportEmptyCollections: true
+        exportEmptyCollections: true,
+        noDataFiltering: true
       },
       (exportError, archivePath) => {
         if (exportError) {
-          app.logger.error(`Backup process failed. ${exportError}`);
+          app.logger.error('Backup process failed.', {error: exportError});
           return done(exportError);
         }
 
