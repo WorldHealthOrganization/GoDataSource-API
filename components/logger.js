@@ -66,11 +66,15 @@ module.exports = function (fileLogger = false, fileLoggerOptions = {}) {
   logger.exitProcessAfterFlush = function (code) {
     // attach flush handler only once
     if (!flushHandlerAdded) {
-      logger.transports.file.once('flush', function () {
-        process.exit(code);
-      });
+      if (logger.transports.file) {
+        logger.transports.file.once('flush', function () {
+          process.exit(code);
+        });
 
-      flushHandlerAdded = true;
+        flushHandlerAdded = true;
+      } else {
+        process.exit(code);
+      }
     }
   };
 
