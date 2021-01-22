@@ -87,6 +87,12 @@ module.exports = function (app) {
           return done();
         }
 
+        // if automatic backup is off, then don't schedule
+        if (backupSettings.disabled) {
+          app.logger.warn('Automatic Backup is off.');
+          return done();
+        }
+
         // backup interval is in hours
         const interval = backupSettings.backupInterval;
 

@@ -15,6 +15,10 @@
       ],
       "required": true
     },
+    "disabled": {
+      "type": "boolean",
+      "required": true
+    },
     "backupInterval": {
       "type": "number",
       "required": true
