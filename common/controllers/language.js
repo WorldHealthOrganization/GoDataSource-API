@@ -136,7 +136,7 @@ module.exports = function (Language) {
     };
 
     // translate file headers
-    return app.models.languageToken
+    app.models.languageToken
       .rawFind(Object.assign({
         token: {
           $in: [
