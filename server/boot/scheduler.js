@@ -89,7 +89,6 @@ module.exports = function (app) {
 
         // if automatic backup is off, then don't schedule
         if (backupSettings.disabled) {
-          app.logger.warn('Automatic Backup is off.');
           return done();
         }
 
