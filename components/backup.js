@@ -387,6 +387,12 @@ const preRoutine = function (done) {
   app.models.systemSettings
     .getCache()
     .then((systemSettings) => {
+
+      // do not perform any additional checks if the automatic backup is off
+      if (systemSettings.dataBackup && systemSettings.dataBackup.disabled){
+        return done(null, systemSettings.dataBackup);
+      }
+
       // data backup configuration is not available, do nothing
       if (!systemSettings.dataBackup) {
         app.logger.warn('Backup settings not available.');
