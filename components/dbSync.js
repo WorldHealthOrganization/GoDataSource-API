@@ -446,6 +446,70 @@ const syncRecord = function (logger, model, record, options, done) {
     }
   }
 
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  const mergeMissingDataFromMergebleFields = (record, model, dbRecord) => {
+    // no merge fields ?
+    if (
+      !record ||
+      !model ||
+      !model.mergeFieldsOnUpdate ||
+      !dbRecord
+    ) {
+      return;
+    }
+
+    // merge data
+    model.mergeFieldsOnUpdate.forEach((mergeField) => {
+      // not a merge field ?
+      // OR not need to merge data since we don't try to update it ?
+      if (
+        !record[mergeField] ||
+        !dbRecord[mergeField]
+      ) {
+        return;
+      }
+
+      // merge properties recursively
+      const mergeRecursive = (
+        destination,
+        source,
+        property
+      ) => {
+        if (!destination.hasOwnProperty(property)) {
+          destination[property] = source[property];
+        } else {
+          // if array or object we need to look further
+          if (
+            _.isArray(source[property]) ||
+            _.isObject(source[property])
+          ) {
+            // go through array / object and merge each value
+            _.each(source[property], (value, key) => {
+              mergeRecursive(
+                destination[property],
+                source[property],
+                key
+              );
+            });
+          } else {
+            // we need to keep the destination value, so no need to do any changes here
+            // NOTHING TO DO
+          }
+        }
+      };
+
+      // if we try to update a specific property then we need to make sure all missing values are merged
+      Object.keys(dbRecord[mergeField]).forEach((mergeFieldProp) => {
+        mergeRecursive(
+          record[mergeField],
+          dbRecord[mergeField],
+          mergeFieldProp
+        );
+      });
+    });
+  };
+
   // options is optional parameter
   if (typeof options === 'function') {
     done = options;
@@ -552,6 +616,10 @@ const syncRecord = function (logger, model, record, options, done) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
 
+        // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+        // this is relevant only when we update a record since on create we don't have old data that we need to merge
+        mergeMissingDataFromMergebleFields(record, model, dbRecord);
+
         log('debug', `Record found (id: ${record.id}), updating record`);
 
         // record was just deleted
@@ -591,6 +659,7 @@ const syncRecord = function (logger, model, record, options, done) {
                 });
             });
         }
+
         // record just needs to be updated
         return dbRecord
           .updateAttributes(record, options)

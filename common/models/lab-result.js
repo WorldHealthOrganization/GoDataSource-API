@@ -37,6 +37,12 @@ module.exports = function (LabResult) {
     questionnaireAnswers: 'LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  LabResult.mergeFieldsOnUpdate = [
+    'questionnaireAnswers'
+  ];
+
   LabResult.referenceDataFieldsToCategoryMap = {
     labName: 'LNG_REFERENCE_DATA_CATEGORY_LAB_NAME',
     sampleType: 'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE',
