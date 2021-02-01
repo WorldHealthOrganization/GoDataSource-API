@@ -385,7 +385,7 @@ const removeBackups = function (filter = {}) {
 const preRoutine = function (done) {
   // retrieve system settings and get backup timings
   app.models.systemSettings
-    .getCache()
+    .findOne()
     .then((systemSettings) => {
 
       // do not perform any additional checks if the automatic backup is off

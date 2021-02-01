@@ -89,6 +89,10 @@ module.exports = function (app) {
 
         // if automatic backup is off, then don't schedule
         if (backupSettings.disabled) {
+          // remove the old backup routine configuration
+          if (routinesConfig.backup) {
+            delete routinesConfig.backup;
+          }
           return done();
         }
 
@@ -244,7 +248,7 @@ module.exports = function (app) {
     (done) => {
       // get system settings
       app.models.systemSettings
-        .getCache()
+        .findOne()
         .then(function (systemSettings) {
           // initialize routinesConfig entry for sync if not already initialize
           routinesConfig.sync = routinesConfig.sync || {};
@@ -292,7 +296,7 @@ module.exports = function (app) {
     (done) => {
       // get system settings
       app.models.systemSettings
-        .getCache()
+        .findOne()
         .then(function (systemSettings) {
           systemSettings.upstreamServers = systemSettings.upstreamServers || [];
           // get upstream servers that have sync enabled and syncInterval configured (!==0)

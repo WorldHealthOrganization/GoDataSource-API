@@ -245,7 +245,7 @@ module.exports = function (SystemSettings) {
    */
   SystemSettings.getBackupLocation = function (callback) {
     SystemSettings
-      .getCache()
+      .findOne()
       .then(function (systemSettings) {
         callback(null, {
           install: app.ROOT_PATH,

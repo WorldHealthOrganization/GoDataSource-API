@@ -41,7 +41,7 @@ module.exports = function (Backup) {
     let getBackupSettings = Promise.resolve();
     if (!params.location || !params.modules) {
       getBackupSettings = app.models.systemSettings
-        .getCache()
+        .findOne()
         .then(function (record) {
           // initialize error
           if (!record) {

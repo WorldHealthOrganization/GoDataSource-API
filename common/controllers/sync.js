@@ -751,7 +751,7 @@ module.exports = function (Sync) {
 
     // check if the received upstream server URL matches one from the configured upstream servers
     app.models.systemSettings
-      .getCache()
+      .findOne()
       .then(function (record) {
         // initialize error
         if (!record) {
