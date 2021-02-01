@@ -4914,6 +4914,9 @@
       },
       "LNG_GENERIC_WARNING_SELECTED_OUTBREAK_NOT_ACTIVE": {
         "translation": "O surto atual é {{activeOutbreakName}} enquanto o selecionado é {{selectedOutbreakName}}"
+      },
+      "LNG_GENERIC_WARNING_EDIT_COT": {
+        "translation": "Edit Mode will be saved to the database but will not show in the chain of transmission graph until you generate and load a new snapshot."
       }
     },
     "uiFormErrorsWarningsSuccessMessages": {
@@ -13146,6 +13149,12 @@
       },
       "LNG_BACKUP_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_BACKUP_FIELD_LABEL_DISABLED": {
+        "translation": "Disabled"
+      },
+      "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+        "translation": "Turn On/Off Automatic Backups"
       }
     },
     "uiAutomaticBackupFields": {
@@ -13180,7 +13189,13 @@
         "translation": ""
       },
       "LNG_PAGE_SYSTEM_BACKUPS_AUTOMATIC_BACKUP_SETTINGS_DIALOG_EXISTING_CONFIGURATION_INFO": {
-        "translation": "<b>Existing configuration: </b><br>{{descriptionLabel}}: {{description}} <br>{{locationLabel}}: {{location}} <br>{{backupIntervalLabel}}: {{backupInterval}} <br>{{dataRetentionIntervalLabel}}: {{dataRetentionInterval}} <br>{{modulesLabel}}: {{modules}}"
+        "translation": "<b>Existing configuration: </b><br>{{disabledLabel}}: {{disabled}} <br>{{descriptionLabel}}: {{description}} <br>{{locationLabel}}: {{location}} <br>{{backupIntervalLabel}}: {{backupInterval}} <br>{{dataRetentionIntervalLabel}}: {{dataRetentionInterval}} <br>{{modulesLabel}}: {{modules}}"
+      },
+      "LNG_PAGE_SYSTEM_BACKUPS_AUTOMATIC_BACKUP_SETTINGS_DIALOG_EXISTING_CONFIGURATION_INFO_DISABLE": {
+        "translation": "<b>Existing configuration: </b><br>{{disabledLabel}}: {{disabled}}"
+      },
+      "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_DISABLED": {
+        "translation": "Disabled"
       }
     },
     "uiSystemConfigMainPage": {
