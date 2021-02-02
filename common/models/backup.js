@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const backupHelper = require('../../components/backup');
 const fs = require('fs');
+const moment = require('moment');
 
 module.exports = function (Backup) {
   Backup.hasController = true;
@@ -85,6 +86,10 @@ module.exports = function (Backup) {
         // start the backup process
         // when done update backup status and file location
         return new Promise(function (resolve, reject) {
+          // keep backup start time
+          const startedAt = moment();
+
+          // start creating backup
           backupHelper.create(modules, location, (err, backupFilePath) => {
             let newStatus = Backup.status.SUCCESS;
             let failReason = '';
@@ -96,7 +101,14 @@ module.exports = function (Backup) {
               app.logger.debug(`Backup ${record.id}: Successfully created backup file at ${backupFilePath}`);
             }
 
-            record.updateAttributes({status: newStatus, location: backupFilePath, error: failReason && failReason.message ? failReason.message : JSON.stringify(failReason)})
+
+            record.updateAttributes({
+              status: newStatus,
+              location: backupFilePath,
+              error: failReason && failReason.message ? failReason.message : JSON.stringify(failReason),
+              startedAt: startedAt,
+              endedAt: moment()
+            })
               .then(function (record) {
                 app.logger.debug(`Backup ${record.id}: Successfully updated backup entry status`);
                 // resolve/reject promise
