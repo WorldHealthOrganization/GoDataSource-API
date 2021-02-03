@@ -144,7 +144,6 @@ module.exports = function (app) {
             })
             .then((record) => {
               // start the backup process
-
               // keep backup start date
               const startedAt = moment();
 
