@@ -144,13 +144,21 @@ module.exports = function (app) {
             })
             .then((record) => {
               // start the backup process
+              // keep backup start date
+              const startedAt = moment();
+
               // when done update backup status and file location
               backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
                 let newStatus = backupModel.status.SUCCESS;
                 if (err) {
                   newStatus = backupModel.status.FAILED;
                 }
-                record.updateAttributes({status: newStatus, location: backupFilePath});
+                record.updateAttributes({
+                  status: newStatus,
+                  location: backupFilePath,
+                  startedAt: startedAt,
+                  endedAt: moment()
+                });
               });
             });
         }
@@ -162,6 +170,11 @@ module.exports = function (app) {
       backup.preRoutine((err, backupSettings) => {
         if (err) {
           app.logger.error('Failed to setup backup cleanup job', {error: err});
+          return done();
+        }
+
+        // if automatic backup is off, then don't schedule
+        if (backupSettings.disabled) {
           return done();
         }
 
@@ -244,7 +257,7 @@ module.exports = function (app) {
     (done) => {
       // get system settings
       app.models.systemSettings
-        .getCache()
+        .findOne()
         .then(function (systemSettings) {
           // initialize routinesConfig entry for sync if not already initialize
           routinesConfig.sync = routinesConfig.sync || {};
@@ -292,7 +305,7 @@ module.exports = function (app) {
     (done) => {
       // get system settings
       app.models.systemSettings
-        .getCache()
+        .findOne()
         .then(function (systemSettings) {
           systemSettings.upstreamServers = systemSettings.upstreamServers || [];
           // get upstream servers that have sync enabled and syncInterval configured (!==0)

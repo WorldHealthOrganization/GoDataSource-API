@@ -40,6 +40,14 @@
     },
     "description": {
       "type": "string"
+    },
+    "startedAt": {
+      "type": "date",
+      "description": "Backup start time"
+    },
+    "endedAt": {
+      "type": "date",
+      "description": "Backup end time"
     }
   },
   "validations": [],

@@ -142,7 +142,7 @@ module.exports = function (Sync) {
 
     // check if backup should be triggered
     app.models.systemSettings
-      .getCache()
+      .findOne()
       .then(function (systemSettings) {
         // backup if needed
         if (triggerBackupBeforeSync || (typeof triggerBackupBeforeSync === 'undefined' && _.get(systemSettings, 'sync.triggerBackupBeforeSync'))) {
