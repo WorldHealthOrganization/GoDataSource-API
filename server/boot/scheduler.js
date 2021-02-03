@@ -87,22 +87,23 @@ module.exports = function (app) {
           return done();
         }
 
-        // if automatic backup is off or if interval is 0, then don't schedule
-        if (backupSettings.disabled || backupSettings.backupInterval < 1) {
-          // remove the old backup routine configuration
-          if (routinesConfig.backup) {
-            delete routinesConfig.backup;
-          }
-
-          // if interval is invalid add a warning
-          if (!backupSettings.disabled) {
-            app.logger.warn('Backup interval is less than configured threshold.');
-          }
+        // if automatic backup is off, then don't schedule
+        if (backupSettings.disabled) {
           return done();
         }
 
         // backup interval is in hours
         const interval = backupSettings.backupInterval;
+
+        // if intervals are 0, then don't schedule
+        if (interval < 1) {
+          // remove the old backup routine configuration
+          if (routinesConfig.backup) {
+            delete routinesConfig.backup;
+          }
+          app.logger.warn('Backup interval is less than configured threshold.');
+          return done();
+        }
 
         // if routines configuration doesn't exist, create it
         if (!routinesConfig.backup) {
@@ -142,21 +143,14 @@ module.exports = function (app) {
               description: backupSettings.description
             })
             .then((record) => {
-              // keep backup start date
-              const startedAt = moment();
-
+              // start the backup process
               // when done update backup status and file location
               backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
                 let newStatus = backupModel.status.SUCCESS;
                 if (err) {
                   newStatus = backupModel.status.FAILED;
                 }
-                record.updateAttributes({
-                  status: newStatus,
-                  location: backupFilePath,
-                  startedAt: startedAt,
-                  endedAt: moment()
-                });
+                record.updateAttributes({status: newStatus, location: backupFilePath});
               });
             });
         }
@@ -168,6 +162,11 @@ module.exports = function (app) {
       backup.preRoutine((err, backupSettings) => {
         if (err) {
           app.logger.error('Failed to setup backup cleanup job', {error: err});
+          return done();
+        }
+
+        // if automatic backup is off, then don't schedule
+        if (backupSettings.disabled) {
           return done();
         }
 
