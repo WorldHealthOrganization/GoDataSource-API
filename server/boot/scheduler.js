@@ -144,13 +144,22 @@ module.exports = function (app) {
             })
             .then((record) => {
               // start the backup process
+
+              // keep backup start date
+              const startedAt = moment();
+
               // when done update backup status and file location
               backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
                 let newStatus = backupModel.status.SUCCESS;
                 if (err) {
                   newStatus = backupModel.status.FAILED;
                 }
-                record.updateAttributes({status: newStatus, location: backupFilePath});
+                record.updateAttributes({
+                  status: newStatus,
+                  location: backupFilePath,
+                  startedAt: startedAt,
+                  endedAt: moment()
+                });
               });
             });
         }
