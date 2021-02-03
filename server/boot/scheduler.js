@@ -179,23 +179,18 @@ module.exports = function (app) {
           return done();
         }
 
-        // if automatic backup is off or if interval is 0, then don't schedule
-        if (backupSettings.disabled || backupSettings.dataRetentionInterval < 1) {
+        // backup retention interval is in days
+        const interval = backupSettings.dataRetentionInterval;
+
+        // if intervals are 0, then don't schedule
+        if (interval < 1) {
           // remove the old backup routine configuration
           if (routinesConfig.backupCleanup) {
             delete routinesConfig.backupCleanup;
           }
-
-          // if interval is invalid add a warning
-          if (!backupSettings.disabled) {
-            app.logger.warn('Backup retention interval is less than configured threshold.');
-          }
-
+          app.logger.warn('Backup retention interval is less than configured threshold.');
           return done();
         }
-
-        // backup retention interval is in days
-        const interval = backupSettings.dataRetentionInterval;
 
         // if routines configuration doesn't exist, create it
         if (!routinesConfig.backupCleanup) {
