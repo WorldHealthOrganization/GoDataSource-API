@@ -1158,5 +1158,16 @@
     "ROUND_ROBIN_NEAREST_FIT": {
       "readOnly": true
     }
+  },
+  "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE": {
+    "Tile-TileArcGISRest": {
+      "readOnly": true
+    },
+    "Tile-XYZ": {
+      "readOnly": true
+    },
+    "VectorTile-VectorTileLayer": {
+      "readOnly": true
+    }
   }
 }

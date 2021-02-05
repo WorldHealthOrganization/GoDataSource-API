@@ -10,6 +10,9 @@
     },
     "url": {
       "type": "string"
+    },
+    "type": {
+      "type": "string"
     }
   },
   "required": ["url"],

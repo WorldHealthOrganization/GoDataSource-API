@@ -105,7 +105,11 @@ module.exports = function (Backup) {
             record.updateAttributes({
               status: newStatus,
               location: backupFilePath,
-              error: failReason && failReason.message ? failReason.message : JSON.stringify(failReason),
+              error: failReason ?
+                failReason.message ?
+                  failReason.message :
+                  JSON.stringify(failReason) :
+                '',
               startedAt: startedAt,
               endedAt: moment()
             })

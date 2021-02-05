@@ -127,7 +127,8 @@ module.exports = function (SystemSettings) {
         if (arcGisServer.url) {
           arcGisServers.push({
             name: arcGisServer.name,
-            url: arcGisServer.url
+            url: arcGisServer.url,
+            type: arcGisServer.type
           });
         }
       });
