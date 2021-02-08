@@ -88,12 +88,9 @@
   },
   "defaultArcGisServers": [
     {
-      "name": "WHO Background",
-      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_West_Africa_background_7/MapServer"
-    },
-    {
-      "name": "WHO Reference",
-      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
+      "name": "WHO Basemap",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Basemap_Beta3/MapServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER"
     }
   ],
   "signoutUsersOnRestart": false,
