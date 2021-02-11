@@ -106,6 +106,15 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.36.4',
+  scripts: [{
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'updateMapServers',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**
