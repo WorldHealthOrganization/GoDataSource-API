@@ -233,7 +233,11 @@ module.exports = function (SystemSettings) {
             config.authToken.ttl :
             app.models.user.settings.ttl,
           skipOldPasswordForUserModify: config.skipOldPasswordForUserModify,
-          captcha: app.utils.helpers.getCaptchaConfig()
+          captcha: app.utils.helpers.getCaptchaConfig(),
+          demoInstance: config.demoInstance ?
+            config.demoInstance : {
+              enabled: false
+            }
         }
       )
     );

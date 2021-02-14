@@ -315,9 +315,33 @@
         {
           "arg": "version",
           "type": {
-            "platform": "string",
-            "type": "string",
+            "arch": "string",
             "build": "string",
+            "captcha": {
+              "type": {
+                "forgotPassword": "boolean",
+                "login": "boolean",
+                "resetPasswordQuestions": "boolean"
+              }
+            },
+            "demoInstance": {
+              "type": {
+                "enabled": "boolean",
+                "label": "string",
+                "style": {
+                  "type": {
+                    "opacity": "number",
+                    "backgroundColor": "string",
+                    "color": "string",
+                    "fontWeight": "string",
+                    "fontSize": "string"
+                  }
+                }
+              }
+            },
+            "platform": "string",
+            "skipOldPasswordForUserModify": "boolean",
+            "tokenTTL": "number",
             "version": "string"
           },
           "description": "Version Information",
