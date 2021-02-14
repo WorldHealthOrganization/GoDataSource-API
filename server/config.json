@@ -176,5 +176,16 @@
   "cluster": {
     "enabled": true,
     "processesNo": "max"
+  },
+  "demoInstance": {
+    "enabled": false,
+    "label": "DEMO",
+    "style": {
+      "opacity": 0.5,
+      "backgroundColor": "gray",
+      "color": "black",
+      "fontWeight": "bold",
+      "fontSize": "40px"
+    }
   }
 }

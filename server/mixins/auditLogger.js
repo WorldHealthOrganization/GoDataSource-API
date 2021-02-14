@@ -86,20 +86,66 @@ function isMonitoredModel(model) {
  * Check if we need to obfuscate a field
  * @param field
  * @param model
- * @returns {boolean}
+ * @param value Original value
+ * @param obfuscateString Obfuscate string (default '***')
+ * @param compareValue Used to determine if something changed for arrays / objects
+ * @param compareValueSameObfuscateString Same value obfuscate string
+ * @returns {string} The value (obfuscated or not depending of the rules)
  */
-function mustObfuscateField(
+function obfuscateFieldValue(
   field,
-  model
+  model,
+  value,
+  obfuscateString = '***',
+  compareValue = undefined,
+  compareValueSameObfuscateString = '***'
 ) {
   const modelName = model ? model.modelName : null;
   switch (modelName) {
+    // access token
     case app.models.accessToken.modelName:
       // access token specific fields
-      return obfuscateAccessToken[field];
+      return obfuscateAccessToken[field] ? obfuscateString : value;
 
+    // system settings
+    case app.models.systemSettings.modelName:
+      // system settings specific fields
+      if (
+        field === 'clientApplications' &&
+        value &&
+        value.length > 0
+      ) {
+        // clone so we don't alter the original one and replace critical keys
+        value = JSON.parse(JSON.stringify(value));
+        value.forEach((item, index) => {
+          // no credentials ?
+          if (!item.credentials) {
+            return;
+          }
+
+          // client secret
+          if (item.credentials.clientSecret) {
+            if (
+              compareValue &&
+              compareValue[index] &&
+              compareValue[index].credentials &&
+              compareValue[index].credentials.clientSecret &&
+              compareValue[index].credentials.clientSecret === item.credentials.clientSecret
+            ) {
+              item.credentials.clientSecret = compareValueSameObfuscateString;
+            } else {
+              item.credentials.clientSecret = obfuscateString;
+            }
+          }
+        });
+      }
+
+      // finished
+      return value;
+
+    // remaining models
     default:
-      return obfuscateDefault[field];
+      return obfuscateDefault[field] ? obfuscateString : value;
   }
 }
 
@@ -159,8 +205,18 @@ module.exports = function (Model) {
 
                 changedFields.push({
                   field: field,
-                  oldValue: mustObfuscateField(field, Model) ? '***' : context.currentInstance[field],
-                  newValue: mustObfuscateField(field, Model) ? '*****' : newValue
+                  oldValue: obfuscateFieldValue(
+                    field,
+                    Model,
+                    context.currentInstance[field]
+                  ),
+                  newValue: obfuscateFieldValue(
+                    field,
+                    Model,
+                    newValue,
+                    '*****',
+                    context.currentInstance[field]
+                  )
                 });
               }
             });
@@ -192,13 +248,22 @@ module.exports = function (Model) {
           };
           let instanceData = context.instance.toJSON();
           // add record id
-          logData.recordId = mustObfuscateField('id', Model) ? '***' : context.instance.id;
+          logData.recordId = obfuscateFieldValue(
+            'id',
+            Model,
+            context.instance.id
+          );
+
           // add changes
           Object.keys(instanceData).forEach(function (field) {
             if (isMonitoredField(field) && instanceData[field] !== undefined) {
               logData.changedData.push({
                 field: field,
-                newValue: mustObfuscateField(field, Model) ? '***' : instanceData[field]
+                newValue: obfuscateFieldValue(
+                  field,
+                  Model,
+                  instanceData[field]
+                )
               });
             }
           });
@@ -214,7 +279,11 @@ module.exports = function (Model) {
             let logData = {
               action: app.models.auditLog.actions.modified,
               modelName: Model.modelName,
-              recordId: mustObfuscateField('id', Model) ? '***' : context.instance.id,
+              recordId: obfuscateFieldValue(
+                'id',
+                Model,
+                context.instance.id
+              ),
               userId: user.id,
               userRole: user.role,
               userIPAddress: user.iPAddress,
@@ -262,7 +331,11 @@ module.exports = function (Model) {
         let logData = {
           action: app.models.auditLog.actions.removed,
           modelName: Model.modelName,
-          recordId: mustObfuscateField('id', Model) ? '***' : context.options.deletedInstance.id,
+          recordId: obfuscateFieldValue(
+            'id',
+            Model,
+            context.options.deletedInstance.id
+          ),
           userId: user.id,
           userRole: user.role,
           userIPAddress: user.iPAddress,
@@ -272,7 +345,11 @@ module.exports = function (Model) {
           if (context.options.deletedInstance[field] !== undefined) {
             logData.changedData.push({
               field: field,
-              oldValue: mustObfuscateField(field, Model) ? '***' : context.options.deletedInstance[field],
+              oldValue: obfuscateFieldValue(
+                field,
+                Model,
+                context.options.deletedInstance[field]
+              )
             });
           }
         });
@@ -309,13 +386,22 @@ module.exports = function (Model) {
           instance = instance.toJSON();
         }
         // add record id
-        logData.recordId = mustObfuscateField('id', Model) ? '***' : instance.id;
+        logData.recordId = obfuscateFieldValue(
+          'id',
+          Model,
+          instance.id
+        );
+
         // add changes
         Object.keys(instance).forEach(function (field) {
           if (isMonitoredField(field) && instance[field] !== undefined) {
             logData.changedData.push({
               field: field,
-              newValue: mustObfuscateField(field, Model) ? '***' : instance[field]
+              newValue: obfuscateFieldValue(
+                field,
+                Model,
+                instance[field]
+              )
             });
           }
         });
