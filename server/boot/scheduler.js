@@ -89,9 +89,10 @@ module.exports = function (app) {
 
         // if automatic backup is off in the database or in the configuration file, then don't schedule
         if (
-          backupSettings.disabled ||
-          !configSettings.backUp ||
-          configSettings.backUp.enabled === false
+          backupSettings.disabled || (
+            configSettings.backUp &&
+            configSettings.backUp.disabled
+          )
         ) {
           return done();
         }
@@ -179,9 +180,10 @@ module.exports = function (app) {
 
         // if automatic backup is off in the database or in the configuration file, then don't schedule
         if (
-          backupSettings.disabled ||
-          !configSettings.backUp ||
-          configSettings.backUp.enabled === false
+          backupSettings.disabled || (
+            configSettings.backUp &&
+            configSettings.backUp.disabled
+          )
         ) {
           return done();
         }
