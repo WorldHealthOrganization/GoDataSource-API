@@ -505,7 +505,7 @@ module.exports = function (Case) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
-      'dateOfOnset',
+      'dateOfReporting',
       'classification',
       casesWorker.countStratifiedByClassificationOverTime,
       filter,
