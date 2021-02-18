@@ -83,7 +83,9 @@ const updateMapServers = (callback) => {
             {
               name: map.name,
               url: map.url,
-              type: map.type
+              type: map.type,
+              styleUrl: map.styleUrl,
+              styleUrlSource: map.styleUrlSource
             }
           );
         });
