@@ -84,7 +84,8 @@
     "masterKey": "KlYddh2OdVycHuVBhXv2"
   },
   "backUp": {
-    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd"
+    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd",
+    "disabled": false
   },
   "defaultArcGisServers": [
     {
