@@ -14,6 +14,20 @@
     },
     "url": {
       "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_TILE_ARC_GIS_REST",
+        "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_XYZ",
+        "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER"
+      ]
+    },
+    "styleUrl": {
+      "type": "string"
+    },
+    "styleUrlSource": {
+      "type": "string"
     }
   },
   "validations": [],
