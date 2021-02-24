@@ -84,13 +84,30 @@
     "masterKey": "KlYddh2OdVycHuVBhXv2"
   },
   "backUp": {
-    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd"
+    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd",
+    "disabled": false
   },
   "defaultArcGisServers": [
     {
-      "name": "WHO Basemap",
-      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Basemap_Beta3/MapServer",
-      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_XYZ"
+      "name": "WHO Polygon Basemap",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_no_labels/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_no_labels/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
+    },
+    {
+      "name": "Disputed Areas and Borders for Polygon Basemap",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_Disputed_Areas_and_Borders_VTP/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_Disputed_Areas_and_Borders_VTP/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
+    },
+    {
+      "name": "Labels",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_labels/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_labels/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
     }
   ],
   "signoutUsersOnRestart": false,
