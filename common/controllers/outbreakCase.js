@@ -626,6 +626,9 @@ module.exports = function (Outbreak) {
       periodType = periodTypes.day;
     }
 
+    // create date condition
+    let filterDate = {};
+
     // initialize periodInterval; keeping it as moment instances we need to use them further in the code
     let periodInterval;
     // check if the periodInterval filter was sent; accepting it only on the first level
@@ -634,11 +637,47 @@ module.exports = function (Outbreak) {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
       // normalize periodInterval dates
-      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
-      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
+      // let empty if start date is not provided
+      if (periodInterval[0]) {
+        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toDate();
+      }
+
+      // and current date if end date is not provided
+      periodInterval[1] = periodInterval[1] ?
+        genericHelpers.getDateEndOfDay(periodInterval[1]).toDate() :
+        genericHelpers.getDateEndOfDay().toDate();
+
+      // set the date condition
+      if (
+        periodInterval[0] &&
+        periodInterval[1]) {
+        filterDate = {
+          'gte': periodInterval[0],
+          'lte': periodInterval[1]
+        };
+      } else if (periodInterval[0]) {
+        filterDate = {
+          'gte': periodInterval[0],
+        };
+      } else if (periodInterval[1]) {
+        filterDate = {
+          'lte': periodInterval[1]
+        };
+      } else {
+        // set default periodInterval depending on periodType
+        periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+        filterDate = {
+          'gte': periodInterval[0],
+          'lte': periodInterval[1]
+        };
+      }
     } else {
       // set default periodInterval depending on periodType
       periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+      filterDate = {
+        'gte': periodInterval[0],
+        'lte': periodInterval[1]
+      };
     }
 
     // get outbreakId
@@ -670,20 +709,16 @@ module.exports = function (Outbreak) {
         },
 
         // get only the cases reported in the periodInterval
-        or: [{
-          dateOfReporting: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          },
-          dateBecomeCase: {
-            eq: null
+        or: [
+          {
+            dateOfReporting: filterDate,
+            dateBecomeCase: {
+              eq: null
+            }
+          }, {
+            dateBecomeCase: filterDate
           }
-        }, {
-          dateBecomeCase: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          }
-        }]
+        ]
       },
       order: 'dateOfReporting ASC'
     };
@@ -721,6 +756,13 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function (cases) {
+        // set start date to first date of reporting if it's not set
+        if (!periodInterval[0]) {
+          periodInterval[0] = cases.length > 0 ?
+            genericHelpers.getDate(cases[0].dateOfReporting).toDate():
+            genericHelpers.getDateEndOfDay().toDate();
+        }
+
         // get periodMap for interval
         let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap

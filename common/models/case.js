@@ -392,56 +392,17 @@ module.exports = function (Case) {
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
-      endDate = app.utils.helpers.getDateEndOfDay(endDate);
+      endDate = app.utils.helpers.getDateEndOfDay(endDate).toDate();
     } else {
       // nothing sent, use current day's end of day
-      endDate = app.utils.helpers.getDateEndOfDay();
+      endDate = app.utils.helpers.getDateEndOfDay().toDate();
     }
-
-    // make sure end date is after start date
-    const startDate = app.utils.helpers.getDate(outbreak.startDate);
-    if (endDate.isBefore(startDate)) {
-      endDate = app.utils.helpers.getDateEndOfDay(startDate);
-    }
-
-    // define period interval
-    const periodInterval = [
-      startDate,
-      endDate
-    ];
-
-    // build period map
-    const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
 
     // get available case categories
     const categoryList = {};
-    return app.models.referenceData
-      .find({
-        where: {
-          categoryId: referenceDataCategoryId
-        },
-        fields: {
-          id: true
-        }
-      })
-      .then(function (categoryItems) {
-        // add default entries for all categoryItems
-        categoryItems.forEach(function (categoryItem) {
-          categoryList[categoryItem.id] = 0;
-        });
-        // add case categoryItems to periodMap
-        Object.keys(periodMap)
-          .forEach(function (periodMapIndex) {
-            Object.assign(periodMap[periodMapIndex], {
-              [exportedPropertyName]: Object.assign({}, categoryList),
-              total: 0
-            });
-          });
-      })
-      .then(function () {
-        // add geographical restrictions if needed
-        return Case.addGeographicalRestrictions(options.remotingContext, filter.where);
-      })
+
+    // add geographical restrictions if needed
+    return Case.addGeographicalRestrictions(options.remotingContext, filter.where)
       .then(updatedFilter => {
         // update filter.where if needed
         updatedFilter && (filter.where = updatedFilter);
@@ -454,8 +415,11 @@ module.exports = function (Case) {
                 where: {
                   outbreakId: outbreak.id,
                   [timePropertyName]: {
-                    gte: new Date(periodInterval[0]),
-                    lte: new Date(periodInterval[1])
+                    lte: endDate,
+                    ne: null
+                  },
+                  dateOfReporting: {
+                    lte: endDate
                   }
                 }
               }, filter || {}).where
@@ -466,29 +430,72 @@ module.exports = function (Case) {
                 dateOfOutcome: 1,
                 outcomeId: 1,
                 dateOfReporting: 1
+              },
+              sort: {
+                dateOfReporting: 1
               }
             }
           )
           .then(function (cases) {
-            return new Promise(function (resolve, reject) {
-              // count categories over time
-              counterFn(
-                cases,
-                periodInterval,
-                periodType,
-                weekType,
-                periodMap,
-                categoryList,
-                function (error, periodMap) {
-                  // handle errors
-                  if (error) {
-                    return reject(error);
-                  }
-                  // send back the result
-                  return resolve(periodMap);
+            // if there are not cases, use end date
+            const startDate = cases.length > 0 ?
+              app.utils.helpers.getDateEndOfDay(cases[0]['dateOfReporting']).toDate() :
+              endDate;
+
+            // define period interval
+            const periodInterval = [
+              startDate,
+              endDate
+            ];
+
+            // build period map
+            const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
+
+            // get available case categories
+            return app.models.referenceData
+              .find({
+                where: {
+                  categoryId: referenceDataCategoryId
+                },
+                fields: {
+                  id: true
                 }
-              );
-            });
+              })
+              .then(function (categoryItems) {
+                // add default entries for all categoryItems
+                categoryItems.forEach(function (categoryItem) {
+                  categoryList[categoryItem.id] = 0;
+                });
+                // add case categoryItems to periodMap
+                Object.keys(periodMap)
+                  .forEach(function (periodMapIndex) {
+                    Object.assign(periodMap[periodMapIndex], {
+                      [exportedPropertyName]: Object.assign({}, categoryList),
+                      total: 0
+                    });
+                  });
+              })
+              .then(function () {
+                return new Promise(function (resolve, reject) {
+                  // count categories over time
+                  counterFn(
+                    cases,
+                    periodInterval,
+                    periodType,
+                    weekType,
+                    periodMap,
+                    categoryList,
+                    function (error, periodMap) {
+                      // handle errors
+                      if (error) {
+                        return reject(error);
+                      }
+                      // send back the result
+                      return resolve(periodMap);
+                    }
+                  );
+                });
+              });
           });
       });
   };
@@ -505,7 +512,7 @@ module.exports = function (Case) {
     return Case.countStratifiedByCategoryOverTime(
       outbreak,
       'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION',
-      'dateOfReporting',
+      'dateOfOnset',
       'classification',
       casesWorker.countStratifiedByClassificationOverTime,
       filter,
