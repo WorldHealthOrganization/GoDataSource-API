@@ -437,6 +437,7 @@ module.exports = function (Outbreak) {
             .mergeFilters({
               where: {
                 outbreakId: outbreakId,
+                wasContact: true,
                 or: [{
                   dateOfReporting: {
                     gte: xDaysAgo
