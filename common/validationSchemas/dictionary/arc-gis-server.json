@@ -13,6 +13,12 @@
     },
     "type": {
       "type": "string"
+    },
+    "styleUrl": {
+      "type": "string"
+    },
+    "styleUrlSource": {
+      "type": "string"
     }
   },
   "required": ["url"],
