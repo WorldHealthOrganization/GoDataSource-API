@@ -82,10 +82,6 @@ const worker = {
         '$gte': startDate,
         '$lte': endDate
       };
-    } else if (startDate) {
-      filterDate = {
-        '$gte': startDate
-      };
     } else {
       filterDate = {
         '$lte': endDate
@@ -231,23 +227,26 @@ const worker = {
           (function getNextBatch(skip = 0) {
             const cursor = dbConnection
               .collection(collectionName)
-              .find(filter, {
-                skip: skip,
-                limit: batchSize,
-                projection: {
-                  date: 1,
-                  personId: 1,
-                  statusId: 1
-                },
-                sort: {
-                  date: 1
-                }
-              });
+              .find(
+                filter,
+                Object.assign(
+                  {
+                    skip: skip,
+                    limit: batchSize,
+                    projection: {
+                      date: 1,
+                      personId: 1,
+                      statusId: 1
+                    }
+                  },
+                  !startDate ? {sort: {date: 1}} : {}
+                )
+              );
 
             cursor
               .toArray()
               .then((records) => {
-                if (!records.length) {
+                if (records.length < 1) {
                   // get the total count of contacts into the result
                   result.totalContacts = contactFollowUpsMap.size;
 
@@ -271,7 +270,7 @@ const worker = {
                 }
 
                 // get range of days
-                if (!days.length) {
+                if (days.length < 1) {
                   const range = Moment.range(startDate, endDate);
                   days = Array.from(range.by('days')).map((m => m.toString()));
 

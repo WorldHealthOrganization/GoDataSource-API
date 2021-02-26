@@ -392,14 +392,11 @@ module.exports = function (Case) {
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
-      endDate = app.utils.helpers.getDateEndOfDay(endDate).toDate();
+      endDate = app.utils.helpers.getDateEndOfDay(endDate).toISOString();
     } else {
       // nothing sent, use current day's end of day
-      endDate = app.utils.helpers.getDateEndOfDay().toDate();
+      endDate = app.utils.helpers.getDateEndOfDay().toISOString();
     }
-
-    // get available case categories
-    const categoryList = {};
 
     // add geographical restrictions if needed
     return Case.addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -439,7 +436,7 @@ module.exports = function (Case) {
           .then(function (cases) {
             // if there are not cases, use end date
             const startDate = cases.length > 0 ?
-              app.utils.helpers.getDateEndOfDay(cases[0]['dateOfReporting']).toDate() :
+              app.utils.helpers.getDateEndOfDay(cases[0]['dateOfReporting']).toISOString() :
               endDate;
 
             // define period interval
@@ -462,6 +459,9 @@ module.exports = function (Case) {
                 }
               })
               .then(function (categoryItems) {
+                // get available case categories
+                const categoryList = {};
+
                 // add default entries for all categoryItems
                 categoryItems.forEach(function (categoryItem) {
                   categoryList[categoryItem.id] = 0;
@@ -474,8 +474,10 @@ module.exports = function (Case) {
                       total: 0
                     });
                   });
+
+                return categoryList;
               })
-              .then(function () {
+              .then(function (categoryList) {
                 return new Promise(function (resolve, reject) {
                   // count categories over time
                   counterFn(

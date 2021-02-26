@@ -627,9 +627,6 @@ module.exports = function (Outbreak) {
       periodType = periodTypes.day;
     }
 
-    // create date condition
-    let filterDate = {};
-
     // initialize periodInterval; keeping it as moment instances we need to use them further in the code
     let periodInterval;
     // check if the periodInterval filter was sent; accepting it only on the first level
@@ -637,46 +634,36 @@ module.exports = function (Outbreak) {
     if (typeof periodInterval !== 'undefined') {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
+
       // normalize periodInterval dates
       // let empty if start date is not provided
       if (periodInterval[0]) {
-        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toDate();
+        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toISOString();
       }
 
       // and current date if end date is not provided
       periodInterval[1] = periodInterval[1] ?
-        genericHelpers.getDateEndOfDay(periodInterval[1]).toDate() :
-        genericHelpers.getDateEndOfDay().toDate();
-
-      // set the date condition
-      if (
-        periodInterval[0] &&
-        periodInterval[1]) {
-        filterDate = {
-          'gte': periodInterval[0],
-          'lte': periodInterval[1]
-        };
-      } else if (periodInterval[0]) {
-        filterDate = {
-          'gte': periodInterval[0],
-        };
-      } else if (periodInterval[1]) {
-        filterDate = {
-          'lte': periodInterval[1]
-        };
-      } else {
-        // set default periodInterval depending on periodType
-        periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
-        filterDate = {
-          'gte': periodInterval[0],
-          'lte': periodInterval[1]
-        };
-      }
+        genericHelpers.getDateEndOfDay(periodInterval[1]).toISOString() :
+        genericHelpers.getDateEndOfDay().toISOString();
     } else {
       // set default periodInterval depending on periodType
       periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+    }
+
+    // create date condition
+    let filterDate = {};
+
+    // set the date condition
+    if (
+      periodInterval[0] &&
+      periodInterval[1]
+    ) {
       filterDate = {
         'gte': periodInterval[0],
+        'lte': periodInterval[1]
+      };
+    } else {
+      filterDate = {
         'lte': periodInterval[1]
       };
     }
@@ -759,9 +746,10 @@ module.exports = function (Outbreak) {
       .then(function (cases) {
         // set start date to first date of reporting if it's not set
         if (!periodInterval[0]) {
-          periodInterval[0] = cases.length > 0 ?
-            genericHelpers.getDate(cases[0].dateOfReporting).toDate():
-            genericHelpers.getDateEndOfDay().toDate();
+          periodInterval[0] = cases.length > 0 &&
+          cases[0].dateOfReporting ?
+            genericHelpers.getDate(cases[0].dateOfReporting).toISOString() :
+            genericHelpers.getDateEndOfDay().toISOString();
         }
 
         // get periodMap for interval
