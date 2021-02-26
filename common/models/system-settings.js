@@ -128,7 +128,9 @@ module.exports = function (SystemSettings) {
           arcGisServers.push({
             name: arcGisServer.name,
             url: arcGisServer.url,
-            type: arcGisServer.type
+            type: arcGisServer.type,
+            styleUrl: arcGisServer.styleUrl,
+            styleUrlSource: arcGisServer.styleUrlSource
           });
         }
       });
