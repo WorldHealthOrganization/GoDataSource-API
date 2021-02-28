@@ -14,6 +14,12 @@ const obfuscateAccessToken = Object.assign(
   },
   obfuscateDefault
 );
+const obfuscateUser = Object.assign(
+  {}, {
+    securityQuestions: true
+  },
+  obfuscateDefault
+);
 
 /**
  * Extract request form options (if available)
@@ -142,6 +148,12 @@ function obfuscateFieldValue(
 
       // finished
       return value;
+
+    // user
+    case app.models.user.modelName:
+      // security questions
+      // password
+      return obfuscateUser[field] ? obfuscateString : value;
 
     // remaining models
     default:
