@@ -15473,6 +15473,9 @@
       },
       "LNG_QUESTIONNAIRE_LABEL_ADDITIONAL_QUESTIONS": {
         "translation": "Additional Questions"
+      },
+      "LNG_HUB_CONFIGURATION_SCREEN_DELETE_HUB_SYNC_DATA": {
+        "translation": "There is data that has not been sent to the server and will be lost. Please synchronize your data first, then try to delete the hub again."
       }
     },
     "reportDailyFollowUpList": {
