@@ -61,8 +61,13 @@ const worker = {
     whereFilter
   ) {
     // parse dates for mongodb conditions
-    startDate = Helpers.getDate(startDate).toDate();
-    endDate = Helpers.getDateEndOfDay(endDate).toDate();
+    if (startDate) {
+      startDate = Helpers.getDate(startDate).toDate();
+    }
+
+    endDate = endDate ?
+      Helpers.getDateEndOfDay(endDate).toDate() :
+      Helpers.getDateEndOfDay().toDate();
 
     // filter by classification ?
     const classification = _.get(whereFilter, 'classification');
@@ -70,15 +75,25 @@ const worker = {
       delete whereFilter.classification;
     }
 
+    // create filter date
+    let filterDate = {};
+    if (startDate && endDate) {
+      filterDate = {
+        '$gte': startDate,
+        '$lte': endDate
+      };
+    } else {
+      filterDate = {
+        '$lte': endDate
+      };
+    }
+
     // mongodb date between filter
     const filter = {
       $and: [
         {
           outbreakId: outbreakId,
-          date: {
-            $gte: startDate,
-            $lte: endDate
-          }
+          date: filterDate
         }, {
           $or: [
             {
@@ -100,21 +115,13 @@ const worker = {
     }
 
     // get range of days
-    const range = Moment.range(startDate, endDate);
-    const days = Array.from(range.by('days')).map((m => m.toString()));
+    let days = [];
 
     // result props
     const result = {
       days: {},
       totalContacts: 0
     };
-    days.forEach((day) => {
-      result.days[day] = {
-        followedUp: 0,
-        notFollowedUp: 0,
-        percentage: 0
-      };
-    });
 
     // map of contacts and days in which it has follow ups
     // this is needed as follow ups come in batches and not always in right order
@@ -216,23 +223,50 @@ const worker = {
         })
         .then((dbConnection) => {
           // process records in batches
+          // order records to find the start date
           (function getNextBatch(skip = 0) {
             const cursor = dbConnection
               .collection(collectionName)
-              .find(filter, {
-                skip: skip,
-                limit: batchSize,
-                projection: {
-                  date: 1,
-                  personId: 1,
-                  statusId: 1
-                }
-              });
+              .find(
+                filter,
+                Object.assign(
+                  {
+                    skip: skip,
+                    limit: batchSize,
+                    projection: {
+                      date: 1,
+                      personId: 1,
+                      statusId: 1
+                    }
+                  },
+                  !startDate ? {sort: {date: 1}} : {}
+                )
+              );
 
             cursor
               .toArray()
               .then((records) => {
-                if (!records.length) {
+                // set start date to the older date if it's not set
+                if (!startDate) {
+                  startDate = records.length > 0 ? records[0].date : endDate;
+                }
+
+                // get range of days
+                if (days.length < 1) {
+                  const range = Moment.range(startDate, endDate);
+                  days = Array.from(range.by('days')).map((m => m.toString()));
+
+                  // result props
+                  days.forEach((day) => {
+                    result.days[day] = {
+                      followedUp: 0,
+                      notFollowedUp: 0,
+                      percentage: 0
+                    };
+                  });
+                }
+
+                if (records.length < 1) {
                   // get the total count of contacts into the result
                   result.totalContacts = contactFollowUpsMap.size;
 
