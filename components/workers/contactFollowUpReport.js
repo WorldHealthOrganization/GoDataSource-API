@@ -246,6 +246,26 @@ const worker = {
             cursor
               .toArray()
               .then((records) => {
+                // set start date to the older date if it's not set
+                if (!startDate) {
+                  startDate = records.length > 0 ? records[0].date : endDate;
+                }
+
+                // get range of days
+                if (days.length < 1) {
+                  const range = Moment.range(startDate, endDate);
+                  days = Array.from(range.by('days')).map((m => m.toString()));
+
+                  // result props
+                  days.forEach((day) => {
+                    result.days[day] = {
+                      followedUp: 0,
+                      notFollowedUp: 0,
+                      percentage: 0
+                    };
+                  });
+                }
+
                 if (records.length < 1) {
                   // get the total count of contacts into the result
                   result.totalContacts = contactFollowUpsMap.size;
@@ -262,26 +282,6 @@ const worker = {
                   }
 
                   return resolve(result);
-                }
-
-                // set start date to the older date if it's not set
-                if (!startDate) {
-                  startDate = records[0].date;
-                }
-
-                // get range of days
-                if (days.length < 1) {
-                  const range = Moment.range(startDate, endDate);
-                  days = Array.from(range.by('days')).map((m => m.toString()));
-
-                  // result props
-                  days.forEach((day) => {
-                    result.days[day] = {
-                      followedUp: 0,
-                      notFollowedUp: 0,
-                      percentage: 0
-                    };
-                  });
                 }
 
                 // group follow ups by day
