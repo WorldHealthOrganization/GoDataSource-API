@@ -4451,6 +4451,12 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_COMMON_LABEL_FILTERS_USED": {
+        "translation": "**Filters applied"
+      },
+      "LNG_COMMON_LABEL__INVALID_URL_FILTERS": {
+        "translation": "Ignored invalid URL filters"
       }
     },
     "uiGeneralActions": {
@@ -4578,6 +4584,9 @@
       },
       "LNG_COMMON_BUTTON_ADD_VACCINE": {
         "translation": "Добавить еще одну вакцинацию"
+      },
+      "LNG_COMMON_BUTTON_DRAG": {
+        "translation": "Drag me"
       }
     },
     "uiDialogs": {
@@ -5503,6 +5512,24 @@
         "translation": "Allow registration of contacts of contacts?"
       },
       "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_OF_CONTACT_ACTIVE_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_TYPE": {
+        "translation": "Map Type"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_TYPE_DESCRIPTION": {
+        "translation": "<div style='padding-bottom: 10px'>Specify the layer source of the REST service for this layer of map information. If you leave this blank when creating an outbreak, the system will default to using WHO's source layer.</div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Tile - TileArcGISRest]</span> - Layer source that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions.</div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Tile - XYZ]</span> - Layer source for tile data with URLs in a set XYZ format that are defined in a URL template. By default, this follows the widely-used Google grid where x 0 and y 0 are in the top left. Grids like TMS where x 0 and y 0 are in the bottom left can be used by using the {-y} placeholder in the URL template, so long as the source does not have a custom tile grid.</div><div><span style='color: #770000; font-weight: bold;'>[VectorTile - VectorTileLayer]</span> - Layer source for vector tile data that is rendered client-side.</div>"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE": {
+        "translation": "Style URL"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE_SOURCE": {
+        "translation": "Style source"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE_SOURCE_DESCRIPTION": {
         "translation": ""
       }
     },
@@ -7805,6 +7832,12 @@
       },
       "LNG_PAGE_CREATE_OUTBREAK_TITLE": {
         "translation": "Создать вспышку"
+      },
+      "LNG_PAGE_CREATE_OUTBREAK_MAP_SERVER_STYLE_INVALID_URL": {
+        "translation": "Invalid style url"
+      },
+      "LNG_PAGE_CREATE_OUTBREAK_MAP_SERVER_STYLE_INVALID_URL_RESPONSE": {
+        "translation": "Invalid style url response - expecting json source"
       }
     },
     "uiModifyOutbreakPage": {
@@ -7846,6 +7879,12 @@
       },
       "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
         "translation": "Contact form"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_MAP_SERVER_STYLE_INVALID_URL": {
+        "translation": "Invalid style url"
+      },
+      "LNG_PAGE_MODIFY_OUTBREAK_MAP_SERVER_STYLE_INVALID_URL_RESPONSE": {
+        "translation": "Invalid style url response - expecting json source"
       }
     },
     "uiFormRangeFields": {
@@ -11231,6 +11270,12 @@
       },
       "LNG_USER_FIELD_LABEL_TEAMS": {
         "translation": "Teams"
+      },
+      "LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS": {
+        "translation": "Don't use cached filters"
+      },
+      "LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS_DESCRIPTION": {
+        "translation": "When true, the system won't cache filter. So every time you come to a list page it will display the list without the previous filters that were applied last time when you accessed the page"
       }
     },
     "uiListUsersPage": {
@@ -12609,6 +12654,9 @@
       },
       "LNG_SIDE_FILTERS_COMPARATOR_LABEL_SELECT_HAS_AT_LEAST_ONE": {
         "translation": "Имеет как минимум одно из этих значений"
+      },
+      "LNG_SIDE_FILTERS_NOTICE_NOTHING_TO_SAVE": {
+        "translation": "Nothing to save"
       }
     },
     "uiSideColumn": {
@@ -13117,9 +13165,6 @@
       }
     },
     "uiBackupFields": {
-      "LNG_BACKUP_FIELD_LABEL_DATE": {
-        "translation": "Дата"
-      },
       "LNG_BACKUP_FIELD_LABEL_ERROR": {
         "translation": "Ошибка"
       },
@@ -13155,6 +13200,12 @@
       },
       "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
         "translation": "Turn On/Off Automatic Backups"
+      },
+      "LNG_BACKUP_FIELD_LABEL_DURATION": {
+        "translation": "Duration"
+      },
+      "LNG_BACKUP_FIELD_LABEL_DATE": {
+        "translation": "Start Time (UTC)"
       }
     },
     "uiAutomaticBackupFields": {
@@ -13890,6 +13941,9 @@
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_RENDER_METHOD_PRECISE": {
         "translation": "Precise rendering"
+      },
+      "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+        "translation": "Snapshot Filters"
       }
     },
     "uiInconsistencyLabels": {
@@ -14595,6 +14649,9 @@
       },
       "LNG_PAGE_WORLD_MAP_FULL_SCREEN_LABEL": {
         "translation": "Full screen"
+      },
+      "LNG_PAGE_WORLD_MAP_OUTBREAK_MAP_SERVER_STYLE_INVALID_URL": {
+        "translation": "Outbreak Map Servers aren't configure properly, please check the outbreak settings"
       }
     },
     "uiWorldMapMovement": {
@@ -17213,6 +17270,20 @@
       },
       "LNG_ASYNC_COT_FIELD_LABEL_FILE_SIZE": {
         "translation": "File size"
+      }
+    },
+    "referenceDataOutbreakMapServerType": {
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE": {
+        "translation": "Map Type"
+      },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_TILE_ARC_GIS_REST": {
+        "translation": "Tile - ArcGIS REST"
+      },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_XYZ": {
+        "translation": "Tile - XYZ"
+      },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER": {
+        "translation": "VectorTile - VectorTileLayer"
       }
     }
   }
