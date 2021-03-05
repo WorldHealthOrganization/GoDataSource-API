@@ -16036,6 +16036,9 @@
       },
       "LNG_APP_PAGE_IMPORT_CONTACTS_OF_CONTACTS": {
         "translation": "Contacts de contacts"
+      },
+      "LNG_APP_PAGE_IMPORT_RELATIONSHIP_DATA": {
+        "translation": "Relationship"
       }
     },
     "uiSavedImportMappingsFields": {
