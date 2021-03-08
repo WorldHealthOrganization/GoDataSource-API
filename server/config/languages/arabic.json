@@ -4453,7 +4453,7 @@
         ]
       },
       "LNG_COMMON_LABEL_FILTERS_USED": {
-        "translation": "**Filters applied"
+        "translation": "**Filters are applied on this list (may include hidden fields)"
       },
       "LNG_COMMON_LABEL__INVALID_URL_FILTERS": {
         "translation": "Ignored invalid URL filters"
@@ -16036,6 +16036,9 @@
       },
       "LNG_APP_PAGE_IMPORT_RELATIONSHIP_DATA": {
         "translation": "Relationship"
+      },
+      "LNG_APP_PAGE_EVENTS": {
+        "translation": "Events"
       }
     },
     "uiSavedImportMappingsFields": {
