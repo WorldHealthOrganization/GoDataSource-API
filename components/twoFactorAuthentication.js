@@ -166,6 +166,11 @@ const verifyStep2Data = (data, options) => {
   }
   if (!data.hasOwnProperty('code')) {
     validationErrors.push('Code is mandatory');
+  } else {
+    // make sure that code is a string to prevent a MongoDB injection
+    if (typeof data.code !== 'string') {
+      validationErrors.push('Code must be a string');
+    }
   }
 
   // if there are any validation errors, stop
