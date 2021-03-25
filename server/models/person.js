@@ -566,7 +566,20 @@ module.exports = function (Person) {
               }
 
               // get mask property
-              let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
+              let maskProperty = '';
+              switch (data.source.existingRaw.type) {
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                  maskProperty = 'caseIdMask';
+
+                  break;
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                  maskProperty = 'contactIdMask';
+
+                  break;
+                default:
+                  // contact of contact
+                  maskProperty = 'contactOfContactIdMask';
+              }
 
               // resolve visual ID; send the mask as the visualId to not break logic
               return app.models.outbreak.helpers
