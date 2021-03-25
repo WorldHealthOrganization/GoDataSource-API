@@ -165,7 +165,7 @@ function exportFilteredModelsList(
           return callback(error);
         }
 
-        helpers.attachParentLocations(
+        helpers.attachLocations(
           Model,
           app.models.location,
           results,
@@ -213,16 +213,34 @@ function exportFilteredModelsList(
                   }
                   for (let i = 1; i <= maxElements; i++) {
                     for (let prop in map) {
+                      // remove "." from the property name
+                      const propName = prop.replace(/\./g, ' ');
+
                       headers.push({
-                        id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
+                        id: `${propertyName} ${i} ${propName}`,
                         // use correct label translation for user language
                         header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
                       });
+
                       // include parent locations
                       if (
                         Model.locationFields &&
                         Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
                       ) {
+                        // add the location id as a new column because the original location id will be replaced with the location name
+                        headers.push({
+                          id: `${propertyName} ${i} ${propName}_uid`,
+                          // use correct label translation for user language
+                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')} [${i}]`
+                        });
+
+                        // add the location identifiers codes
+                        headers.push({
+                          id: `${propertyName} ${i} ${propName}_identifiers`,
+                          // use correct label translation for user language
+                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}]`
+                        });
+
                         for (let j = 1; j <= highestParentsChain; j++) {
                           headers.push({
                             id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
@@ -305,8 +323,13 @@ function exportFilteredModelsList(
                     }
                   }
 
+                  // add column to header
+                  const propertyId = !isJSONXMLExport ?
+                    propertyName.replace(/\./g, ' ') :
+                    propertyName;
+
                   headers.push({
-                    id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
+                    id: propertyId,
                     // use correct label translation for user language
                     header: headerTranslation
                   });
@@ -316,6 +339,18 @@ function exportFilteredModelsList(
                     Model.locationFields &&
                     Model.locationFields.indexOf(propertyName) !== -1
                   ) {
+                    // add the location id as a new column because the original location id will be replaced with the location name
+                    headers.push({
+                      id: propertyId + '_uid',
+                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
+                    });
+
+                    // add the location identifiers codes
+                    headers.push({
+                      id: propertyId + '_identifiers',
+                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
+                    });
+
                     if (isJSONXMLExport) {
                       headers.push({
                         id: `${propertyName}_parentLocations`,
@@ -324,7 +359,7 @@ function exportFilteredModelsList(
                     } else {
                       for (let i = 1; i <= highestParentsChain; i++) {
                         headers.push({
-                          id: `${propertyName.replace(/\./g, ' ')}_parentLocations ${i}`,
+                          id: `${propertyId}_parentLocations ${i}`,
                           header: `${headerTranslation} ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${i}]`
                         });
                       }
