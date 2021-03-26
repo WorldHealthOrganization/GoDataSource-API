@@ -171,10 +171,12 @@ function exportFilteredModelsList(
           results,
           (err, result) => {
             let highestParentsChain = 0;
+            let highestIdentifiersChain = 0;
             if (!err) {
               result = result || {};
               results = result.records || results;
               highestParentsChain = result.highestParentsChain || 0;
+              highestIdentifiersChain = result.highestIdentifiersChain || 0;
             }
 
             // define a list of table headers
@@ -222,7 +224,7 @@ function exportFilteredModelsList(
                         header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
                       });
 
-                      // include parent locations
+                      // check if we need to include additional location columns (id, identifiers and parent location)
                       if (
                         Model.locationFields &&
                         Model.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
@@ -235,11 +237,13 @@ function exportFilteredModelsList(
                         });
 
                         // add the location identifiers codes
-                        headers.push({
-                          id: `${propertyName} ${i} ${propName}_identifiers`,
-                          // use correct label translation for user language
-                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}]`
-                        });
+                        for (let j = 1; j <= highestParentsChain; j++) {
+                          headers.push({
+                            id: `${propertyName} ${i} ${propName}_identifiers ${j}`,
+                            // use correct label translation for user language
+                            header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}] ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${j}]`
+                          });
+                        }
 
                         for (let j = 1; j <= highestParentsChain; j++) {
                           headers.push({
@@ -334,7 +338,7 @@ function exportFilteredModelsList(
                     header: headerTranslation
                   });
 
-                  // check if we need to include parent locations column
+                  // check if we need to include additional location columns (id, identifiers and parent location)
                   if (
                     Model.locationFields &&
                     Model.locationFields.indexOf(propertyName) !== -1
@@ -345,18 +349,25 @@ function exportFilteredModelsList(
                       header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
                     });
 
-                    // add the location identifiers codes
-                    headers.push({
-                      id: propertyId + '_identifiers',
-                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
-                    });
-
                     if (isJSONXMLExport) {
+                      // add the location identifiers codes
+                      headers.push({
+                        id: propertyId + '_identifiers',
+                        header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
+                      });
+
                       headers.push({
                         id: `${propertyName}_parentLocations`,
                         header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION')}`
                       });
                     } else {
+                      for (let i = 1; i <= highestIdentifiersChain; i++) {
+                        headers.push({
+                          id: `${propertyId}_identifiers ${i}`,
+                          header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${i}]`
+                        });
+                      }
+
                       for (let i = 1; i <= highestParentsChain; i++) {
                         headers.push({
                           id: `${propertyId}_parentLocations ${i}`,

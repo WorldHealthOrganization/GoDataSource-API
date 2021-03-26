@@ -10605,6 +10605,9 @@
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIERS": {
         "translation": "Identifiants"
       },
+      "LNG_LOCATION_FIELD_LABEL_IDENTIFIER": {
+        "translation": "Identifier"
+      },
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_DESCRIPTION": {
         "translation": ""
       },
