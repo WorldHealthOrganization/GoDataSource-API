@@ -34,7 +34,9 @@ module.exports = function (User) {
         }
         return user.updateAttributes({
           loginRetriesCount: 0,
-          lastLoginDate: null
+          lastLoginDate: null,
+          resetPasswordRetriesCount: 0,
+          lastResetPasswordDate: null
         }).then(() => next());
       });
   });
@@ -489,61 +491,135 @@ module.exports = function (User) {
         }
 
         // verify if user has any security questions set, if not stop at once
-        if (user.securityQuestions && user.securityQuestions.length) {
-          // flag that indicates that each question name is a match on the user data and the answers are correct
-          let isValid = false;
-
-          // check user questions against the ones from request body
-          for (let i = 0; i < user.securityQuestions.length; i++) {
-            let userQuestion = user.securityQuestions[i];
-
-            // position of the user question in the request body
-            let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
-
-            // if any of the question are not matching, stop
-            if (questionPos === -1) {
-              isValid = false;
-              break;
-            }
-
-            // check the answers
-            // backwards compatible (case sensitive check)
-            isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
-              bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
-            if (!isValid) {
-              break;
-            }
-          }
-
-          // generate a password reset token
-          if (isValid) {
-            return user.createAccessToken(
-              {
-                email: user.email,
-                password: user.password
-              },
-              {
-                ttl: config.passwordReset.ttl,
-                scopes: ['reset-password']
-              })
-              .then((token) => {
-                return {
-                  token: token.id,
-                  ttl: token.ttl
-                };
-              })
-              .catch((err) => {
-                app.logger.warn('Failed to generate reset password token', err);
-                return buildError('PASSWORD_RECOVERY_FAILED');
-              });
-          }
-
-          app.logger.warn('Invalid security questions');
+        if (
+          !user.securityQuestions ||
+          !user.securityQuestions.length
+        ) {
+          app.logger.warn('Security questions recovery is disabled');
           throw buildError('PASSWORD_RECOVERY_FAILED');
         }
 
-        app.logger.warn('Security questions recovery is disabled');
-        throw buildError('PASSWORD_RECOVERY_FAILED');
+        // flag that indicates that each question name is a match on the user data and the answers are correct
+        let isValid = false;
+
+        // verify the number of user failed attempts at reset password
+        const resetPasswordSettings = config.bruteForce &&
+        config.bruteForce.resetPassword ?
+          config.bruteForce.resetPassword :
+          undefined;
+
+        // define a promise
+        let promise = Promise.resolve();
+
+        if (
+          resetPasswordSettings &&
+          resetPasswordSettings.enabled === true &&
+          user.resetPasswordRetriesCount &&
+          user.resetPasswordRetriesCount >= 0 &&
+          user.lastResetPasswordDate
+        ) {
+          const lastResetPasswordDate = Moment(user.lastResetPasswordDate);
+          const now = Moment();
+          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(now);
+          const isBanned = user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries;
+
+          // reset the number of failed attempts
+          if (isValidForReset) {
+            promise = promise
+              .then(() => {
+                return user.updateAttributes({
+                  resetPasswordRetriesCount: 0,
+                  lastResetPasswordDate: null
+                });
+              });
+          }
+
+          if (
+            isBanned &&
+            !isValidForReset
+          ) {
+            app.logger.warn('The number of failed attempts at security questions checking has been reached');
+            throw buildError('ACTION_TEMPORARILY_BLOCKED');
+          }
+        }
+
+        // return the promise
+        return promise
+          .then(() => {
+            // check user questions against the ones from request body
+            for (let i = 0; i < user.securityQuestions.length; i++) {
+              let userQuestion = user.securityQuestions[i];
+
+              // position of the user question in the request body
+              let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
+
+              // if any of the question are not matching, stop
+              if (questionPos === -1) {
+                isValid = false;
+                break;
+              }
+
+              // check the answers
+              // backwards compatible (case sensitive check)
+              isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
+                bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
+              if (!isValid) {
+                break;
+              }
+            }
+          })
+          .then(() => {
+            // update the number of failed attempts
+            if (!isValid) {
+              if (
+                resetPasswordSettings &&
+                resetPasswordSettings.enabled === true
+              ) {
+                // increase the number of failed attempts
+                const userAttributesToUpdate = {};
+                const now = Moment().toDate();
+                if (
+                  user.resetPasswordRetriesCount >= 0 &&
+                  user.lastResetPasswordDate &&
+                  user.resetPasswordRetriesCount < resetPasswordSettings.maxRetries
+                ) {
+                  userAttributesToUpdate.resetPasswordRetriesCount = ++user.resetPasswordRetriesCount;
+                  userAttributesToUpdate.lastResetPasswordDate = now;
+                } else {
+                  userAttributesToUpdate.resetPasswordRetriesCount = 1;
+                  userAttributesToUpdate.lastResetPasswordDate = now;
+                }
+                return user.updateAttributes(userAttributesToUpdate);
+              }
+            }
+          })
+          .then(() => {
+            // generate a password reset token
+            if (isValid) {
+              return user.createAccessToken(
+                {
+                  email: user.email,
+                  password: user.password
+                },
+                {
+                  ttl: config.passwordReset.ttl,
+                  scopes: ['reset-password']
+                })
+                .then((token) => {
+                  return {
+                    token: token.id,
+                    ttl: token.ttl
+                  };
+                })
+                .catch((err) => {
+                  app.logger.warn('Failed to generate reset password token', err);
+                  return buildError('PASSWORD_RECOVERY_FAILED');
+                });
+            }
+
+            app.logger.warn('Invalid security questions');
+            throw buildError('PASSWORD_RECOVERY_FAILED');
+          });
       });
   };
 
