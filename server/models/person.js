@@ -577,7 +577,7 @@ module.exports = function (Person) {
 
                   break;
                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
-                 //  maskProperty = 'contactOfContactIdMask';
+                  maskProperty = 'contactOfContactIdMask';
 
                   break;
               }
