@@ -566,7 +566,7 @@ module.exports = function (Person) {
               }
 
               // get mask property
-              let maskProperty = '';
+              let maskProperty;
               switch (data.source.existingRaw.type) {
                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
                   maskProperty = 'caseIdMask';
@@ -576,9 +576,18 @@ module.exports = function (Person) {
                   maskProperty = 'contactIdMask';
 
                   break;
-                default:
-                  // contact of contact
-                  maskProperty = 'contactOfContactIdMask';
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+                 //  maskProperty = 'contactOfContactIdMask';
+
+                  break;
+              }
+
+              if (!maskProperty) {
+                throw app.utils.apiError.getError('MASK_NOT_FOUND', {
+                  model: app.models.outbreak.modelName,
+                  id: data.source.existing.outbreakId,
+                  type: data.source.existingRaw.type
+                });
               }
 
               // resolve visual ID; send the mask as the visualId to not break logic

@@ -33,6 +33,10 @@
     "defaultStatusCode": 404,
     "messagePattern": "Unknown `<%= model %>` id / visualId `<%= id %>`"
   },
+  "MASK_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Mask not found for `<%= type %>` Model `<%= model %>` id / visualId `<%= id %>`"
+  },
   "MODEL_VISUAL_ID_MATCHES_MORE_THAN_2_RECORDS": {
     "defaultStatusCode": 409,
     "messagePattern": "Model `<%= model %>` with visualId `<%= visualId %>` => ( there are multiple records with this visual id )"
