@@ -503,25 +503,28 @@ module.exports = function (User) {
         let isValid = false;
 
         // verify the number of user failed attempts at reset password
-        const resetPasswordSettings = config.bruteForce &&
-        config.bruteForce.resetPassword ?
+        const resetPasswordSettings = config.bruteForce && config.bruteForce.resetPassword ?
           config.bruteForce.resetPassword :
           undefined;
 
         // define a promise
         let promise = Promise.resolve();
-
         if (
           resetPasswordSettings &&
-          resetPasswordSettings.enabled === true &&
-          user.resetPasswordRetriesCount &&
+          resetPasswordSettings.enabled &&
           user.resetPasswordRetriesCount >= 0 &&
           user.lastResetPasswordDate
         ) {
+          // check if then number of failed attempts has been reached
           const lastResetPasswordDate = Moment(user.lastResetPasswordDate);
-          const now = Moment();
-          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(now);
-          const isBanned = user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries;
+          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(Moment());
+          if (
+            user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries &&
+            !isValidForReset
+          ) {
+            app.logger.warn('The number of failed attempts at security questions checking has been reached');
+            throw buildError('ACTION_TEMPORARILY_BLOCKED');
+          }
 
           // reset the number of failed attempts
           if (isValidForReset) {
@@ -532,14 +535,6 @@ module.exports = function (User) {
                   lastResetPasswordDate: null
                 });
               });
-          }
-
-          if (
-            isBanned &&
-            !isValidForReset
-          ) {
-            app.logger.warn('The number of failed attempts at security questions checking has been reached');
-            throw buildError('ACTION_TEMPORARILY_BLOCKED');
           }
         }
 
@@ -554,43 +549,30 @@ module.exports = function (User) {
               let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
 
               // if any of the question are not matching, stop
-              if (questionPos === -1) {
-                isValid = false;
-                break;
-              }
+              // check the answers, backwards compatible (case sensitive check)
+              isValid = questionPos !== -1 &&
+                (
+                  bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
+                  bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer)
+                );
 
-              // check the answers
-              // backwards compatible (case sensitive check)
-              isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
-                bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
+              // do not continue if at least one answer is invalid
               if (!isValid) {
                 break;
               }
             }
           })
           .then(() => {
-            // update the number of failed attempts
-            if (!isValid) {
-              if (
-                resetPasswordSettings &&
-                resetPasswordSettings.enabled === true
-              ) {
-                // increase the number of failed attempts
-                const userAttributesToUpdate = {};
-                const now = Moment().toDate();
-                if (
-                  user.resetPasswordRetriesCount >= 0 &&
-                  user.lastResetPasswordDate &&
-                  user.resetPasswordRetriesCount < resetPasswordSettings.maxRetries
-                ) {
-                  userAttributesToUpdate.resetPasswordRetriesCount = ++user.resetPasswordRetriesCount;
-                  userAttributesToUpdate.lastResetPasswordDate = now;
-                } else {
-                  userAttributesToUpdate.resetPasswordRetriesCount = 1;
-                  userAttributesToUpdate.lastResetPasswordDate = now;
-                }
-                return user.updateAttributes(userAttributesToUpdate);
-              }
+            // increase the number of failed attempts
+            if (
+              !isValid &&
+              resetPasswordSettings &&
+              resetPasswordSettings.enabled
+            ) {
+              return user.updateAttributes({
+                resetPasswordRetriesCount: user.resetPasswordRetriesCount ? ++user.resetPasswordRetriesCount : 1,
+                lastResetPasswordDate: Moment().toDate()
+              });
             }
           })
           .then(() => {
