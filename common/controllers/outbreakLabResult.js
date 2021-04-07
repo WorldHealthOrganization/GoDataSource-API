@@ -145,6 +145,13 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Attach before remote (GET outbreaks/{id}/lab-results/export) hooks
+   */
+  Outbreak.beforeRemote('prototype.exportFilteredLabResults', function (context, modelInstance, next) {
+    Outbreak.helpers.findAndFilteredCountLabResultsBackCompat(context, modelInstance, next);
+  });
+
+  /**
    * Export filtered lab results to file
    * @param filter
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
