@@ -17286,11 +17286,20 @@
       "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_TILE_ARC_GIS_REST": {
         "translation": "Tile - ArcGIS REST"
       },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_TILE_ARC_GIS_REST_DESCRIPTION": {
+        "translation": "Layer source for tile data from ArcGIS Rest services."
+      },
       "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_XYZ": {
         "translation": "Tile - XYZ"
       },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_TILE_XYZ_DESCRIPTION": {
+        "translation": "Layer source for tile data with URLs in a set XYZ format that are defined in a URL template."
+      },
       "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER": {
         "translation": "VectorTile - VectorTileLayer"
+      },
+      "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER_DESCRIPTION": {
+        "translation": "Layer for vector tile data that is rendered client-side."
       }
     }
   }
