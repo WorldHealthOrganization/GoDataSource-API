@@ -392,7 +392,7 @@ module.exports = function (Outbreak) {
           // list of records ready to be printed
           let sanitizedRecords = [];
 
-          genericHelpers.attachParentLocations(
+          genericHelpers.attachLocations(
             app.models.contactOfContact,
             app.models.location,
             results,

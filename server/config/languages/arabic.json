@@ -10581,6 +10581,9 @@
       }
     },
     "locationFields": {
+      "LNG_LOCATION_FIELD_LABEL_ID": {
+        "translation": "ID"
+      },
       "LNG_LOCATION_FIELD_LABEL_ACTIVE": {
         "translation": "نشط"
       },
@@ -10598,6 +10601,9 @@
       },
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIERS": {
         "translation": "محددات الهوية"
+      },
+      "LNG_LOCATION_FIELD_LABEL_IDENTIFIER": {
+        "translation": "Identifier"
       },
       "LNG_LOCATION_FIELD_LABEL_IDENTIFIERS_DESCRIPTION": {
         "translation": ""

@@ -908,7 +908,7 @@ module.exports = function (Outbreak) {
 
           const sanitizedCases = [];
 
-          genericHelpers.attachParentLocations(
+          genericHelpers.attachLocations(
             app.models.case,
             app.models.location,
             results,

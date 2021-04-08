@@ -1194,7 +1194,7 @@ module.exports = function (Outbreak) {
         const languageId = options.remotingContext.req.authData.user.languageId;
         let sanitizedContacts = [];
 
-        genericHelpers.attachParentLocations(
+        genericHelpers.attachLocations(
           app.models.case,
           app.models.location,
           results,

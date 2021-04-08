@@ -2750,13 +2750,16 @@ const getFilterCustomOption = function (filter, option) {
 };
 
 /**
- * Attach parent locations for each of the target model locations
+ * Attach locations data (id, identifiers and parent locations) for each of the target model locations
  * @param targetModel
  * @param locationModel
  * @param records
  * @param callback
  */
-const attachParentLocations = function (targetModel, locationModel, records, callback) {
+const attachLocations = function (targetModel, locationModel, records, callback) {
+  // location fields suffixes
+  const locationUIDSuffix = '_uid';
+  const locationIdentifiersSuffix = '_identifiers';
   const parentLocationsSuffix = '_parentLocations';
 
   // get all the location ids from all the passed records
@@ -2797,8 +2800,13 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
           name: location.name,
           parentLocationId: location.parentLocationId,
           geographicalLevelId: location.geographicalLevelId,
+          identifiers: location.identifiers
         };
       }
+
+      // highest number of identifiers
+      // used for flat files to know the highest number of columns needed
+      let highestIdentifiersChain = 0;
 
       // highest chain of parents
       // used for flat files to know the highest number of columns needed
@@ -2827,27 +2835,50 @@ const attachParentLocations = function (targetModel, locationModel, records, cal
           }
           _.set(record, `${obj.exactPath}${parentLocationsSuffix}`, parentLocations);
 
+          // add the location uid
+          _.set(record, `${obj.exactPath}${locationUIDSuffix}`, obj.value);
+
           if (parentLocations.length > highestParentsChain) {
             highestParentsChain = parentLocations.length;
           }
+
+          // add the location identifiers codes
+          let identifiers = [];
+          if (
+            locationsMap[obj.value].identifiers &&
+            locationsMap[obj.value].identifiers.length
+          ) {
+            identifiers = locationsMap[obj.value].identifiers.map((item) => {
+              return item.code;
+            });
+          }
+          _.set(record, `${obj.exactPath}${locationIdentifiersSuffix}`, identifiers);
+
+          // update highest number of identifiers
+          if (identifiers.length > highestIdentifiersChain) {
+            highestIdentifiersChain = identifiers.length;
+          }
         }
       }
-      return callback(null, {records, highestParentsChain});
+      return callback(null, {records, highestIdentifiersChain, highestParentsChain});
     }
   );
 };
 
 /**
- * Attach parent locations for each of the target model locations
+ * Attach locations data (id, identifiers and parent locations) for each of the target model locations
  * @param locationFields Array of references to records location fields
  * @param records
  */
-const attachParentLocationsNoModels = function (locationFields, records) {
+const attachLocationsNoModels = function (locationFields, records) {
   if (!locationFields || !locationFields.length) {
     // no location fields for which to get parents
     return Promise.resolve({records});
   }
 
+  // location fields suffixes
+  const locationUIDSuffix = '_uid';
+  const locationIdentifiersSuffix = '_identifiers';
   const parentLocationsSuffix = '_parentLocations';
 
   // get all the location ids from all the passed records
@@ -2878,7 +2909,7 @@ const attachParentLocationsNoModels = function (locationFields, records) {
       allLocations,
       [],
       {
-        fields: ['name', 'parentLocationId', 'geographicalLevelId']
+        fields: ['name', 'parentLocationId', 'geographicalLevelId', 'identifiers']
       },
       (err, locations) => {
         if (err) {
@@ -2891,8 +2922,13 @@ const attachParentLocationsNoModels = function (locationFields, records) {
             name: location.name,
             parentLocationId: location.parentLocationId,
             geographicalLevelId: location.geographicalLevelId,
+            identifiers: location.identifiers
           };
         }
+
+        // highest number of identifiers
+        // used for flat files to know the highest number of columns needed
+        let highestIdentifiersChain = 0;
 
         // highest chain of parents
         // used for flat files to know the highest number of columns needed
@@ -2924,9 +2960,29 @@ const attachParentLocationsNoModels = function (locationFields, records) {
             if (parentLocations.length > highestParentsChain) {
               highestParentsChain = parentLocations.length;
             }
+
+            // add the location uid
+            _.set(record, `${obj.exactPath}${locationUIDSuffix}`, obj.value);
+
+            // add the location identifiers codes
+            let identifiers = [];
+            if (
+              locationsMap[obj.value].identifiers &&
+              locationsMap[obj.value].identifiers.length
+            ) {
+              identifiers = locationsMap[obj.value].identifiers.map((item) => {
+                return item.code;
+              });
+            }
+            _.set(record, `${obj.exactPath}${locationIdentifiersSuffix}`, identifiers);
+
+            // update highest number of identifiers
+            if (identifiers.length > highestIdentifiersChain) {
+              highestIdentifiersChain = identifiers.length;
+            }
           }
         }
-        return resolve({records, highestParentsChain});
+        return resolve({records, highestIdentifiersChain, highestParentsChain});
       }
     );
   });
@@ -3208,8 +3264,13 @@ function exportFilteredModelsList(
         });
       }
 
-      // parent location tokens
-      neededTokens.push('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL', 'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION');
+      // location data tokens
+      neededTokens.push(
+        'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL',
+        'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION',
+        'LNG_LOCATION_FIELD_LABEL_ID',
+        'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
+        'LNG_LOCATION_FIELD_LABEL_IDENTIFIER');
 
       // referenceDataFields categories and allowed values
       if (modelOptions.referenceDataFieldsToCategoryMap) {
@@ -3330,7 +3391,7 @@ function exportFilteredModelsList(
         arrayPropsLengths = getMaximumLengthForArrays(results, Object.keys(modelOptions.arrayProps));
       }
 
-      return attachParentLocationsNoModels(
+      return attachLocationsNoModels(
         modelOptions.locationFields,
         results)
         .then(result => {
@@ -3338,6 +3399,9 @@ function exportFilteredModelsList(
           result = result || {};
           results = result.records || results;
           highestParentsChain = result.highestParentsChain || 0;
+
+          // get the maximum number of location identifiers
+          const highestIdentifiersChain = result.highestIdentifiersChain || 0;
 
           // define a list of table headers
           const headers = [];
@@ -3362,16 +3426,37 @@ function exportFilteredModelsList(
                 }
                 for (let i = 1; i <= maxElements; i++) {
                   for (let prop in map) {
+                    // remove "." from the property name
+                    const propName = prop.replace(/\./g, ' ');
+
                     headers.push({
-                      id: `${propertyName} ${i} ${prop.replace(/\./g, ' ')}`,
+                      id: `${propertyName} ${i} ${propName}`,
                       // use correct label translation for user language
                       header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
                     });
-                    // include parent locations
+
+                    // check if we need to include additional location columns (id, identifiers and parent location)
                     if (
                       modelOptions.locationFields &&
                       modelOptions.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
                     ) {
+                      // include the location id as a new column because the original location id will be replaced with the location name
+                      headers.push({
+                        id: `${propertyName} ${i} ${propName}_uid`,
+                        // use correct label translation for user language
+                        header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')} [${i}]`
+                      });
+
+                      // include the location identifiers codes
+                      for (let j = 1; j <= highestIdentifiersChain; j++) {
+                        headers.push({
+                          id: `${propertyName} ${i} ${propName}_identifiers ${j}`,
+                          // use correct label translation for user language
+                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}] ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${j}]`
+                        });
+                      }
+
+                      // include the parent locations columns
                       for (let j = 1; j <= highestParentsChain; j++) {
                         headers.push({
                           id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
@@ -3460,17 +3545,37 @@ function exportFilteredModelsList(
                   header: headerTranslation
                 });
 
-                // check if we need to include parent locations column
+                // check if we need to include additional location columns (UID, identifiers and parent location)
                 if (
                   modelOptions.locationFields &&
                   modelOptions.locationFields.indexOf(propertyName) !== -1
                 ) {
+                  // include the location id as a new column because the original location id will be replaced with the location name
+                  headers.push({
+                    id: `${propertyName}_uid`,
+                    header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
+                  });
+
+                  // include the location identifiers and parent locations columns
                   if (isJSONXMLExport) {
+                    // include the location identifiers codes
+                    headers.push({
+                      id: `${propertyName}_identifiers`,
+                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
+                    });
+
                     headers.push({
                       id: `${propertyName}_parentLocations`,
                       header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION')}`
                     });
                   } else {
+                    for (let i = 1; i <= highestIdentifiersChain; i++) {
+                      headers.push({
+                        id: `${propertyName.replace(/\./g, ' ')}_identifiers ${i}`,
+                        header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${i}]`
+                      });
+                    }
+
                     for (let i = 1; i <= highestParentsChain; i++) {
                       headers.push({
                         id: `${propertyName.replace(/\./g, ' ')}_parentLocations ${i}`,
@@ -4222,7 +4327,7 @@ Object.assign(module.exports, {
   getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
-  attachParentLocations: attachParentLocations,
+  attachLocations: attachLocations,
   removeFilterOptions: removeFilterOptions,
   attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
   getMaximumLengthForArrays: getMaximumLengthForArrays,
