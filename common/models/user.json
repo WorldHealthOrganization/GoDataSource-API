@@ -76,6 +76,12 @@
     "lastLoginDate": {
       "type": "date"
     },
+    "resetPasswordRetriesCount": {
+      "type": "number"
+    },
+    "lastResetPasswordDate": {
+      "type": "date"
+    },
     "disregardGeographicRestrictions": {
       "description": "Flag specifying whether the outbreak setting for geographical restriction of data will be disregarded for the user",
       "type": "boolean",
