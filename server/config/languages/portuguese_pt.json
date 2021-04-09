@@ -4887,7 +4887,7 @@
         ]
       },
       "LNG_PAGE_LOGIN_ACTION_LOGIN_SUCCESS_MESSAGE": {
-        "translation": "Bem-vindo, {{name} }",
+        "translation": "Bem-vindo, {{name}}",
         "modules": [
           "unauthenticated"
         ]
@@ -10659,7 +10659,7 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_DATE_COMPARE": {
-        "translation": "Data precisa ser {{comparador} } {{field}}",
+        "translation": "Data precisa ser {{comparador}} {{field}}",
         "modules": [
           "unauthenticated"
         ]
@@ -13966,7 +13966,7 @@
         "translation": "\"{{date1}}\" não é igual a \"{{date2}}\""
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_SMALLER": {
-        "translation": "\"{{date1}}\" é menor que \"{{date2} } \""
+        "translation": "\"{{date1}}\" é menor que \"{{date2}} \""
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_SMALLER_OR_EQUAL": {
         "translation": "\" {{date1}} \"é menor ou igual a\" {{date2}} \""
