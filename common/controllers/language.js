@@ -5,6 +5,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const _ = require('lodash');
 const moment = require('moment');
+const apiError = require('../../components/apiError');
 
 module.exports = function (Language) {
 
@@ -44,7 +45,7 @@ module.exports = function (Language) {
       // read language file
       fs.readFile(files.languageFile.path, function (error, buffer) {
         if (error) {
-          return callback(error);
+          return callback(apiError.getError('FILE_NOT_FOUND'));
         }
         // read XLS file
         // we don't need to worry about other file formats, XLSX tries to read anything (does not do validations)

@@ -8,6 +8,7 @@ const aesCrypto = require('./aesCrypto');
 const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid');
+const apiError = require('./apiError');
 
 /**
  * Encrypt file (AES-256) using password
@@ -23,7 +24,7 @@ function encryptSync(password, options, filePath) {
     fs.readFile(filePath, function (error, buffer) {
       // handle read errors
       if (error) {
-        return reject(error);
+        return reject(apiError.getError('FILE_NOT_FOUND'));
       }
       // encrypt the file
       return aesCrypto
@@ -63,7 +64,7 @@ function decryptSync(password, options, filePath) {
     fs.readFile(filePath, function (error, buffer) {
       // handle read errors
       if (error) {
-        return reject(error);
+        return reject(apiError.getError('FILE_NOT_FOUND'));
       }
       // decrypt the file
       return aesCrypto

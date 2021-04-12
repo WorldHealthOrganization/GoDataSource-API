@@ -17,6 +17,7 @@ const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
+const apiError = require('../../components/apiError');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -1168,7 +1169,7 @@ module.exports = function (Outbreak) {
 
                     fs.readFile(archivePath, (err, data) => {
                       if (err) {
-                        callback(err);
+                        callback(apiError.getError('FILE_NOT_FOUND'));
                       } else {
                         tmpDir.removeCallback();
                         app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);

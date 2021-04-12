@@ -18,6 +18,7 @@ const fork = require('child_process').fork;
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
+const apiError = require('../../components/apiError');
 
 // used in contact import
 const contactImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -1432,7 +1433,7 @@ module.exports = function (Outbreak) {
 
                   fs.readFile(archivePath, (err, data) => {
                     if (err) {
-                      callback(err);
+                      callback(apiError.getError('FILE_NOT_FOUND'));
                     } else {
                       tmpDir.removeCallback();
                       app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
