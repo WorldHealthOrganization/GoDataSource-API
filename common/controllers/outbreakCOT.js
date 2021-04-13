@@ -128,7 +128,7 @@ module.exports = function (Outbreak) {
         });
 
         // This catches any errors that happen while creating the readable stream (usually invalid names)
-        readStream.on('error', function (err) {
+        readStream.on('error', function () {
           callback(apiError.getError('FILE_NOT_FOUND'));
         });
 
