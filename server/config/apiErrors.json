@@ -227,6 +227,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Record not found"
   },
+  "FILE_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "File not found"
+  },
   "INVALID_VISUAL_ID_MASK": {
     "defaultStatusCode": 422,
     "messagePattern": "Provided Visual ID template `<%= visualIdTemplate %>` does not match Visual ID mask set on outbreak level `<%= outbreakVisualIdMask %>`"

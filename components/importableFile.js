@@ -53,9 +53,24 @@ const isExtensionSupported = function (extension) {
  */
 const getTemporaryFileById = function (fileId) {
   return new Promise((resolve, reject) => {
+    // prevent path traversal vulnerability
+    if (
+      !fileId ||
+      fileId.indexOf('\\') !== -1 ||
+      fileId.indexOf('/') !== -1
+    ) {
+      return reject(apiError.getError('FILE_NOT_FOUND', {
+        contentType: 'JSON',
+        details: 'File not found'
+      }));
+    }
+
     fs.readFile(path.join(os.tmpdir(), fileId), (err, data) => {
       if (err) {
-        return reject(err);
+        return reject(apiError.getError('FILE_NOT_FOUND', {
+          contentType: 'JSON',
+          details: 'File not found'
+        }));
       }
 
       try {
@@ -65,7 +80,7 @@ const getTemporaryFileById = function (fileId) {
         // handle JSON.parse errors
         reject(apiError.getError('INVALID_CONTENT_OF_TYPE', {
           contentType: 'JSON',
-          details: error.message
+          details: 'Invalid JSON content: Invalid file'
         }));
       }
     });
@@ -376,7 +391,7 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
     fs.readFile(file.path, function (error, buffer) {
       // handle error
       if (error) {
-        return reject(error);
+        return reject(apiError.getError('FILE_NOT_FOUND'));
       }
 
       // decrypt file if needed

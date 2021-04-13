@@ -8,6 +8,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const baseTransmissionChainModel = require('../../components/baseModelOptions/transmissionChain');
+const apiError = require('../../components/apiError');
 
 module.exports = function (Outbreak) {
   /**
@@ -128,7 +129,7 @@ module.exports = function (Outbreak) {
 
         // This catches any errors that happen while creating the readable stream (usually invalid names)
         readStream.on('error', function (err) {
-          callback(err);
+          callback(apiError.getError('FILE_NOT_FOUND'));
         });
 
         readStream.on('end', function () {

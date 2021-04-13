@@ -5,6 +5,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const async = require('async');
 const importableFileHelpers = require('./../../components/importableFile');
+const apiError = require('./../../components/apiError');
 
 module.exports = function (Location) {
 
@@ -142,7 +143,7 @@ module.exports = function (Location) {
       // read the file
       fs.readFile(files.file.path, function (error, buffer) {
         if (error) {
-          return callback(error);
+          return callback(apiError.getError('FILE_NOT_FOUND'));
         }
         // import locations
         Location.importHierarchicalListFromJsonFile(buffer.toString(), options, callback);

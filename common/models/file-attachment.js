@@ -5,6 +5,7 @@ const app = require('../../server/server');
 const helpers = require('../../components/helpers');
 const fs = require('fs');
 const path = require('path');
+const apiError = require('../../components/apiError');
 
 module.exports = function (fileAttachment) {
 
@@ -18,7 +19,7 @@ module.exports = function (fileAttachment) {
       function (resolve, reject) {
         fs.readFile(file.path, function (error, buffer) {
           if (error) {
-            return reject(error);
+            return reject(apiError.getError('FILE_NOT_FOUND'));
           }
           return resolve(buffer);
         });

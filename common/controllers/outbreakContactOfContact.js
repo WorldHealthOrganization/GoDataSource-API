@@ -12,6 +12,7 @@ const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
 const moment = require('moment');
+const apiError = require('../../components/apiError');
 
 module.exports = function (Outbreak) {
   /**
@@ -587,7 +588,7 @@ module.exports = function (Outbreak) {
 
                     fs.readFile(archivePath, (err, data) => {
                       if (err) {
-                        callback(err);
+                        callback(apiError.getError('FILE_NOT_FOUND'));
                       } else {
                         tmpDir.removeCallback();
                         app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);

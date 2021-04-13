@@ -11,6 +11,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const config = require('../server/config');
 const syncWorker = require('./workerRunner').sync;
+const apiError = require('./apiError');
 
 /**
  * Get backup password
@@ -183,7 +184,7 @@ const restoreBackupFromFile = function (filePath, done) {
                 (err, data) => {
                   if (err) {
                     app.logger.error(`Failed to read collection file ${filePath}`);
-                    return doneCollection(err);
+                    return doneCollection(apiError.getError('FILE_NOT_FOUND'));
                   }
 
                   // split filename into 'collection name' and 'extension'
@@ -351,7 +352,7 @@ const removeBackup = function (backup, callback) {
         return fs.unlink(backup.location, (err) => {
           if (err) {
             app.logger.warn(`Failed to remove ${backup.location} for ${backup.id}. ${err}`);
-            return done(err);
+            return done(apiError.getError('FILE_NOT_FOUND'));
           }
           return done();
         });
