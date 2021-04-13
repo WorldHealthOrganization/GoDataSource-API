@@ -55,6 +55,7 @@ const getTemporaryFileById = function (fileId) {
   return new Promise((resolve, reject) => {
     // prevent path traversal vulnerability
     if (
+      !fileId ||
       fileId.indexOf('\\') !== -1 ||
       fileId.indexOf('/') !== -1
     ) {
