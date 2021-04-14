@@ -2480,8 +2480,8 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
     if (address.geoLocation &&
       typeof address.geoLocation === 'object' &&
       address.geoLocation.coordinates &&
-      address.geoLocation.lng === undefined &&
-      address.geoLocation.lat === undefined) {
+      !address.geoLocation.lng &&
+      !address.geoLocation.lat) {
       // convert it
       _.set(address, 'geoLocation', {
         lat: address.geoLocation.coordinates[1],
