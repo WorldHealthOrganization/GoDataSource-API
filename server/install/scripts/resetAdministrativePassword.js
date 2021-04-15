@@ -152,12 +152,18 @@ function run(callback) {
       return User
         .find({
           where: {
-            email: {
-              inq: [
-                ADMIN_EMAIL,
-                'admin@who.int'
-              ]
-            }
+            or: [
+              {
+                email: {
+                  inq: [
+                    ADMIN_EMAIL,
+                    'admin@who.int'
+                  ]
+                }
+              }, {
+                id: ADMIN_ID
+              }
+            ]
           }
         })
         .then(function (systemAdmins) {
