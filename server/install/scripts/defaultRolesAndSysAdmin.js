@@ -131,10 +131,10 @@ function run(callback) {
               });
           } else if (rewrite) {
             // different id ?
-            if (user._id !== ADMIN_ID) {
+            if (user.id !== ADMIN_ID) {
               return User
                 .rawBulkHardDelete({
-                  _id: user._id
+                  _id: user.id
                 })
                 .then(() => {
                   return User

@@ -153,7 +153,7 @@ function run(callback) {
         .find({
           where: {
             email: {
-              $in: [
+              inq: [
                 ADMIN_EMAIL,
                 'admin@who.int'
               ]
