@@ -78,10 +78,7 @@ const migrateUsers = function (next) {
 
         // check if we need to update anything
         const result = results[0];
-        if (
-          result._id === ADMIN_ID &&
-          result.email === ADMIN_EMAIL
-        ) {
+        if (result._id === ADMIN_ID) {
           return next();
         }
 
@@ -112,13 +109,7 @@ const migrateUsers = function (next) {
                 {},
                 result, {
                   _id: ADMIN_ID,
-                  oldId: result._id !== ADMIN_ID ?
-                    result._id :
-                    result.oldId,
-                  email: ADMIN_EMAIL,
-                  oldEmail: result.email !== ADMIN_EMAIL ?
-                    result.email :
-                    result.oldEmail
+                  oldId: result._id
                 }),
               err => callback(err)
             )

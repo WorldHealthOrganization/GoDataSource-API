@@ -46,7 +46,7 @@ const migrationVersions = [{
     fileName: 'user.js',
     actions: [{
       name: 'migrateUsers',
-      buildNo: 3
+      buildNo: 1
     }]
   }, {
     fileName: 'migrateRolesAndUsers.js',
