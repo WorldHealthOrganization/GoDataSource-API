@@ -291,6 +291,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Unable to save device information."
   },
+  "ADMIN_ACCOUNT_CONFLICT": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Admin account conflict"
+  },
   "INVALID_DATES": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid date properties"

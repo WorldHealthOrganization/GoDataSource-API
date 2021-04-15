@@ -202,5 +202,6 @@
       "fontWeight": "bold",
       "fontSize": "40px"
     }
-  }
+  },
+  "adminEmail": "admin@who.int"
 }
