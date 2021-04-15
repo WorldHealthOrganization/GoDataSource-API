@@ -50,12 +50,18 @@ const migrateUsers = function (next) {
     const userCollection = db.collection('user');
     return userCollection
       .find({
-        email: {
-          $in: [
-            ADMIN_EMAIL,
-            'admin@who.int'
-          ]
-        }
+        $or: [
+          {
+            email: {
+              $in: [
+                ADMIN_EMAIL,
+                'admin@who.int'
+              ]
+            }
+          }, {
+            _id: ADMIN_ID
+          }
+        ]
       })
       .toArray()
       .then((results) => {
@@ -106,8 +112,13 @@ const migrateUsers = function (next) {
                 {},
                 result, {
                   _id: ADMIN_ID,
-                  oldId: result._id,
-                  email: ADMIN_EMAIL
+                  oldId: result._id !== ADMIN_ID ?
+                    result._id :
+                    result.oldId,
+                  email: ADMIN_EMAIL,
+                  oldEmail: result.email !== ADMIN_EMAIL ?
+                    result.email :
+                    result.oldEmail
                 }),
               err => callback(err)
             )
