@@ -1,15 +1,18 @@
 'use strict';
 
 const app = require('../../server');
+const adminEmailConfig = require('../../config.json').adminEmail;
 const common = require('./_common');
 const Role = app.models.role;
 const User = app.models.user;
 const rewrite = false;
+const ADMIN_ID = 'sys_admin';
+const ADMIN_EMAIL = adminEmailConfig || 'admin@who.int';
 const defaultAdmin = {
-  id: 'sys_admin',
+  id: ADMIN_ID,
   firstName: 'System',
   lastName: 'Administrator',
-  email: 'admin@who.int',
+  email: ADMIN_EMAIL,
   password: 'admin',
   languageId: 'english_us',
   passwordChange: true,
@@ -31,7 +34,6 @@ let options = {
  * Create default roles
  */
 function initRolesCreation() {
-
   Object.keys(rolesMap).forEach(function (roleName) {
     createRoles.push(
       Role
@@ -87,21 +89,40 @@ function initRolesCreation() {
  * @param callback
  */
 function run(callback) {
-
+  // init
   initRolesCreation();
 
-  /**
-   * Create default System Admin accounts
-   */
+  // Create default System Admin accounts
   Promise.all(createRoles)
     .then(function () {
       return User
-        .findOne({
+        .find({
           where: {
-            email: defaultAdmin.email
+            $or: [
+              {
+                email: {
+                  $in: [
+                    ADMIN_EMAIL,
+                    'admin@who.int'
+                  ]
+                }
+              }, {
+                _id: ADMIN_ID
+              }
+            ]
           }
         })
-        .then(function (user) {
+        .then(function (users) {
+          // error - found multiple matching users with same admin credentials ?
+          if (users.length > 1) {
+            app.logger.error(`Multiple admin accounts found (id: "${ADMIN_ID}", email1: "${ADMIN_EMAIL}", email2: "admin@who.int"). Probably config.json isn't configured properly`);
+            throw new app.utils.apiError.getError('ADMIN_ACCOUNT_CONFLICT');
+          }
+
+          // create / update user
+          const user = users.length > 0 ?
+            users[0] :
+            null;
           if (!user) {
             return User
               .create(Object.assign(defaultAdmin, common.install.timestamps), options)
@@ -109,6 +130,22 @@ function run(callback) {
                 return 'created.';
               });
           } else if (rewrite) {
+            // different id ?
+            if (user._id !== ADMIN_ID) {
+              return User
+                .rawBulkHardDelete({
+                  _id: user._id
+                })
+                .then(() => {
+                  return User
+                    .create(Object.assign(defaultAdmin, common.install.timestamps), options)
+                    .then(function () {
+                      return 'deleted and created.';
+                    });
+                });
+            }
+
+            // update user
             return user
               .updateAttributes(defaultAdmin, options)
               .then(function () {

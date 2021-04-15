@@ -3,14 +3,17 @@
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const _ = require('lodash');
 const moment = require('moment');
+const adminEmailConfig = require('../../../../config.json').adminEmail;
 
 // roles map from model
 const rolesMap = require('../../defaultRoles');
+const ADMIN_ID = 'sys_admin';
+const ADMIN_EMAIL = adminEmailConfig || 'admin@who.int';
 const defaultAdmin = {
-  _id: 'sys_admin',
+  _id: ADMIN_ID,
   firstName: 'System',
   lastName: 'Administrator',
-  email: 'admin@who.int',
+  email: ADMIN_EMAIL,
   password: 'admin',
   languageId: 'english_us',
   passwordChange: true,
@@ -360,10 +363,9 @@ function run(callback) {
 
       // reset sys-admin user roles
       // make sure he has both use roles - reset sys admin
-      const sysAdminId = 'sys_admin';
       return User
         .findOne({
-          _id: sysAdminId
+          _id: ADMIN_ID
         })
         .then((userData) => {
           // if not found..then we need to create it
@@ -395,7 +397,7 @@ function run(callback) {
           // reset sys admin data
           return User
             .updateOne({
-              _id: sysAdminId
+              _id: ADMIN_ID
             }, {
               '$set': {
                 roleIds: newRolesIds

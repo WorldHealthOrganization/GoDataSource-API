@@ -2,7 +2,7 @@
 
 const app = require('../../../../server');
 const Async = require('async');
-
+const adminEmailConfig = require('../../../../config.json').adminEmail;
 /**
  * Migrate users
  * @param next
@@ -12,7 +12,7 @@ const migrateUsers = function (next) {
   return db.connect(() => {
     // sys admin constants
     const ADMIN_ID = 'sys_admin';
-    const ADMIN_EMAIL = 'admin@who.int';
+    const ADMIN_EMAIL = adminEmailConfig || 'admin@who.int';
 
     // db collections
     const collections = [
@@ -48,18 +48,38 @@ const migrateUsers = function (next) {
     // make sure we have a sys admin on the system that doesn't have the hardcoded _id
     // we find it by the hardcoded email address admin@who.int
     const userCollection = db.collection('user');
-    return userCollection.findOne({
-      email: ADMIN_EMAIL,
-      _id: {
-        $ne: ADMIN_ID
+    return userCollection.find({
+      where: {
+        email: {
+          $in: [
+            ADMIN_EMAIL,
+            'admin@who.int'
+          ]
+        }
       }
-    }, (err, result) => {
+    }, (err, results) => {
+      // error migrating users ?
       if (err) {
         return next(err);
       }
 
+      // error - found multiple matching users with same admin credentials ?
+      if (results.length > 1) {
+        app.logger.error(`Multiple admin accounts found (id: "${ADMIN_ID}", email1: "${ADMIN_EMAIL}", email2: "admin@who.int"). Probably config.json isn't configured properly`);
+        return next(app.utils.apiError.getError('ADMIN_ACCOUNT_CONFLICT'));
+      }
+
       // everything is alright, just stop the script
-      if (!result) {
+      if (results.length < 1) {
+        return next();
+      }
+
+      // check if we need to update anything
+      const result = results[0];
+      if (
+        result._id === ADMIN_ID &&
+        result.email === ADMIN_EMAIL
+      ) {
         return next();
       }
 
@@ -86,7 +106,13 @@ const migrateUsers = function (next) {
         callback => Async.series([
           callback => userCollection.deleteOne({_id: result._id}, err => callback(err)),
           callback => userCollection.insertOne(
-            Object.assign({}, result, {_id: ADMIN_ID, oldId: result._id}),
+            Object.assign(
+              {},
+              result, {
+                _id: ADMIN_ID,
+                oldId: result._id,
+                email: ADMIN_EMAIL
+              }),
             err => callback(err)
           )
         ], err => callback(err))

@@ -2,16 +2,19 @@
 
 const _ = require('lodash');
 const app = require('../../server');
+const adminEmailConfig = require('../../config.json').adminEmail;
 const Role = app.models.role;
 const User = app.models.user;
 const rolesMap = require('./defaultRoles');
 const async = require('async');
 
+const ADMIN_ID = 'sys_admin';
+const ADMIN_EMAIL = adminEmailConfig || 'admin@who.int';
 const defaultAdmin = {
-  id: 'sys_admin',
+  id: ADMIN_ID,
   firstName: 'System',
   lastName: 'Administrator',
-  email: 'admin@who.int',
+  email: ADMIN_EMAIL,
   password: 'admin',
   languageId: 'english_us',
   passwordChange: true
@@ -147,13 +150,27 @@ function run(callback) {
     .then(function () {
       // try to find system admin user
       return User
-        .findOne({
+        .find({
           where: {
-            email: defaultAdmin.email
+            email: {
+              $in: [
+                ADMIN_EMAIL,
+                'admin@who.int'
+              ]
+            }
           }
         })
-        .then(function (systemAdmin) {
+        .then(function (systemAdmins) {
+          // error - found multiple matching users with same admin credentials ?
+          if (systemAdmins.length > 1) {
+            app.logger.error(`Multiple admin accounts found (id: "${ADMIN_ID}", email1: "${ADMIN_EMAIL}", email2: "admin@who.int"). Probably config.json isn't configured properly`);
+            throw new app.utils.apiError.getError('ADMIN_ACCOUNT_CONFLICT');
+          }
+
           // system admin was not found
+          const systemAdmin = systemAdmins.length > 0 ?
+            systemAdmins[0] :
+            null;
           if (!systemAdmin) {
             // log role missing
             console.warn('Could not find default system admin user, it will be re-created');
