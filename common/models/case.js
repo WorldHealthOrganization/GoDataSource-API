@@ -192,6 +192,116 @@ module.exports = function (Case) {
   // map language token labels for model properties
   Case.fieldLabelsMap = caseConstants.fieldLabelsMap;
 
+  // map language token labels for export fields group
+  Case.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'firstName',
+        'middleName',
+        'lastName',
+        'gender',
+        'occupation',
+        'age',
+        'age.years',
+        'age.months',
+        'dob',
+        'visualId',
+        'documents',
+        'documents[].type',
+        'documents[].number',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'pregnancyStatus'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'type',
+        'wasContact',
+        'wasCase',
+        'classification',
+        'dateOfInfection',
+        'dateOfOnset',
+        'isDateOfOnsetApproximate',
+        'riskLevel',
+        'riskReason',
+        'dateBecomeContact',
+        'dateBecomeCase',
+        'outcomeId',
+        'dateOfOutcome',
+        'transferRefused',
+        'safeBurial',
+        'dateOfBurial',
+        'burialLocationId',
+        'burialPlaceName'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {
+      properties: [
+        'vaccinesReceived',
+        'vaccinesReceived[].vaccine',
+        'vaccinesReceived[].date',
+        'vaccinesReceived[].status'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA': {
+      properties: [
+        'dateRanges',
+        'dateRanges[].typeId',
+        'dateRanges[].startDate',
+        'dateRanges[].endDate',
+        'dateRanges[].centerName',
+        'dateRanges[].locationId',
+        'dateRanges[].comments'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'addresses',
+        'addresses[].typeId',
+        'addresses[].country',
+        'addresses[].city',
+        'addresses[].addressLine1',
+        'addresses[].postalCode',
+        'addresses[].locationId',
+        'addresses[].geoLocation',
+        'addresses[].geoLocation.lat',
+        'addresses[].geoLocation.lng',
+        'addresses[].geoLocationAccurate',
+        'addresses[].date',
+        'addresses[].phoneNumber',
+        'addresses[].emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // custom fields used to manage the ids and identifiers fields for a location
+        'uid',
+        'identifiers'
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    }
+  };
+
   Case.exportFieldsOrder = caseConstants.exportFieldsOrder;
 
   Case.arrayProps = caseConstants.arrayProps;

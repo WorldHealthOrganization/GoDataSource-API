@@ -361,11 +361,20 @@ module.exports = function (Outbreak) {
    * @param exportType
    * @param encryptPassword
    * @param anonymizeFields
+   * @param exportFieldsGroup
    * @param options
    * @param callback
    * @returns {*}
    */
-  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredFollowups = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    exportFieldsGroup,
+    options,
+    callback
+  ) {
     let self = this;
     // set a default filter
     filter = filter || {};
@@ -426,6 +435,11 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // make sure exportFieldsGroup is valid
+        if (!Array.isArray(exportFieldsGroup)) {
+          exportFieldsGroup = [];
+        }
+
         options.questionnaire = self.contactFollowUpTemplate;
         options.dictionary = dictionary;
         options.useQuestionVariable = useQuestionVariable;
@@ -439,6 +453,7 @@ module.exports = function (Outbreak) {
           'Follow-Up List',
           encryptPassword,
           anonymizeFields,
+          exportFieldsGroup,
           options,
           function (results) {
             return Promise.resolve(results);

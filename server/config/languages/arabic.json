@@ -4422,6 +4422,33 @@
       "LNG_COMMON_LABEL_EXPORT_TYPE": {
         "translation": "حسب النوع"
       },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA": {
+        "translation": "Record creation and update data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA": {
+        "translation": "Core demographic data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA": {
+        "translation": "Epidemiological data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA": {
+        "translation": "Vaccination data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA": {
+        "translation": "Hospitalization data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA": {
+        "translation": "Address and location data"
+      },
+       "LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA": {
+        "translation": "Location ID data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA": {
+        "translation": "Questionnaire data"
+      },
+      "LNG_COMMON_LABEL_EXPORT_GROUP_RELATIONSHIPS_DATA": {
+        "translation": "Relationships data"
+      },
       "LNG_COMMON_LABEL_NO": {
         "translation": "لا"
       },

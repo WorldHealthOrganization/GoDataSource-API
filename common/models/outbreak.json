@@ -1807,6 +1807,12 @@
       "principalId": "cot_list",
       "permission": "ALLOW",
       "property": "__count__transmissionChains"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "exportFieldsGroup"
     }
   ],
   "methods": {
@@ -2967,6 +2973,13 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -3186,6 +3199,13 @@
             "string"
           ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
         },
         {
           "arg": "options",
@@ -4628,6 +4648,13 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -4898,6 +4925,13 @@
             "string"
           ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
         },
         {
           "arg": "options",
@@ -7587,6 +7621,13 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -8082,6 +8123,13 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -8389,6 +8437,13 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -8459,6 +8514,13 @@
             "string"
           ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "exportFieldsGroup",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
         },
         {
           "arg": "options",
@@ -8829,6 +8891,32 @@
           "path": "/cases/count-map"
         }
       ]
+    },
+    "exportFieldsGroup": {
+      "accepts": [
+        {
+          "arg": "model",
+          "type": "string"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": {
+            "<groupId>": {
+              "properties": [],
+              "required": []
+            }
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieves the export fields groups",
+      "http": {
+        "verb": "post",
+        "path": "/export-fields-group"
+      }
     }
   }
 }

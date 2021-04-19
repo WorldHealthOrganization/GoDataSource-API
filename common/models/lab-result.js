@@ -37,6 +37,85 @@ module.exports = function (LabResult) {
     questionnaireAnswers: 'LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
+  // map language token labels for export fields group
+  LabResult.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'personId',
+        'person.visualId',
+        'person.type',
+        'person.lastName',
+        'person.firstName',
+        'person.middleName',
+        'person.dateOfReporting',
+        'person'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'dateSampleTaken',
+        'dateSampleDelivered',
+        'dateTesting',
+        'dateOfResult',
+        'labName',
+        'sampleIdentifier',
+        'sampleType',
+        'testType',
+        'testedFor',
+        'result',
+        'quantitativeResult',
+        'notes',
+        'status',
+        'person.dateOfOnset'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'person.address',
+        'person.address.typeId',
+        'person.address.country',
+        'person.address.city',
+        'person.address.addressLine1',
+        'person.address.postalCode',
+        'person.address.locationId',
+        'person.address.geoLocation',
+        'person.address.geoLocation.lat',
+        'person.address.geoLocation.lng',
+        'person.address.geoLocationAccurate',
+        'person.address.date',
+        'person.address.phoneNumber',
+        'person.address.emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // custom fields used to manage the ids and identifiers fields for a location
+        'uid',
+        'identifiers'
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    }
+  };
+
   // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
   // this is relevant only when we update a record since on create we don't have old data that we need to merge
   LabResult.mergeFieldsOnUpdate = [

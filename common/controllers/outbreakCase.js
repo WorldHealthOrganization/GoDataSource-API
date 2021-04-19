@@ -330,10 +330,11 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param exportFieldsGroup
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, exportFieldsGroup, options, callback) {
     const self = this;
     // set a default filter
     filter = filter || {};
@@ -358,6 +359,11 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // make sure exportFieldsGroup is valid
+        if (!Array.isArray(exportFieldsGroup)) {
+          exportFieldsGroup = [];
+        }
+
         let exportOptions = {
           questionnaire: self.caseInvestigationTemplate.toJSON(),
           useQuestionVariable: useQuestionVariable,
@@ -370,6 +376,7 @@ module.exports = function (Outbreak) {
           scopeQuery: CaseModel.definition.settings.scope,
           arrayProps: CaseModel.arrayProps,
           fieldLabelsMap: CaseModel.fieldLabelsMap,
+          exportFieldsGroup: CaseModel.exportFieldsGroup,
           exportFieldsOrder: CaseModel.exportFieldsOrder,
           locationFields: CaseModel.locationFields,
           foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
@@ -384,6 +391,7 @@ module.exports = function (Outbreak) {
           exportType,
           encryptPassword,
           anonymizeFields,
+          exportFieldsGroup,
           exportOptions
         );
       })

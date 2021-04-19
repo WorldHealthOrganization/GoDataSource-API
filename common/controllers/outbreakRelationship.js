@@ -365,10 +365,19 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param exportFieldsGroup
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredRelationships = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredRelationships = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    exportFieldsGroup,
+    options,
+    callback
+  ) {
     // const self = this;
     app.models.relationship
       .preFilterForOutbreak(this, filter, options)
@@ -383,6 +392,11 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
+        // make sure exportFieldsGroup is valid
+        if (!Array.isArray(exportFieldsGroup)) {
+          exportFieldsGroup = [];
+        }
+
         // export list of relationships
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
@@ -393,6 +407,7 @@ module.exports = function (Outbreak) {
           'Relationship List',
           encryptPassword,
           anonymizeFields,
+          exportFieldsGroup,
           options,
           function (results) {
             // construct unique list of persons that we need to retrieve

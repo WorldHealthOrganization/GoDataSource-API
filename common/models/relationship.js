@@ -97,6 +97,69 @@ module.exports = function (Relationship) {
     comment: 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
   });
 
+  // map language token labels for export fields group
+  Relationship.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'sourcePerson.id',
+        'sourcePerson.visualId',
+        'sourcePerson.type',
+        'sourcePerson.name',
+        'sourcePerson.lastName',
+        'sourcePerson.firstName',
+        'sourcePerson.middleName',
+        'sourcePerson.gender',
+        'sourcePerson.dob',
+        'sourcePerson.age',
+        'sourcePerson.age.years',
+        'sourcePerson.age.months',
+        'sourcePerson.source',
+        'sourcePerson',
+        'targetPerson.id',
+        'targetPerson.visualId',
+        'targetPerson.type',
+        'targetPerson.name',
+        'targetPerson.lastName',
+        'targetPerson.firstName',
+        'targetPerson.middleName',
+        'targetPerson.gender',
+        'targetPerson.dob',
+        'targetPerson.age',
+        'targetPerson.age.years',
+        'targetPerson.age.months',
+        'targetPerson.target',
+        'targetPerson'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'dateOfFirstContact',
+        'contactDate',
+        'contactDateEstimated',
+        'certaintyLevelId',
+        'exposureTypeId',
+        'exposureFrequencyId',
+        'exposureDurationId',
+        'socialRelationshipTypeId',
+        'socialRelationshipDetail',
+        'clusterId',
+        'comment'
+      ]
+    }
+  };
+
   Relationship.referenceDataFieldsToCategoryMap = {
     certaintyLevelId: 'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL',
     exposureTypeId: 'LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE',

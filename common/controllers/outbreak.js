@@ -2490,10 +2490,18 @@ module.exports = function (Outbreak) {
    * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
    * @param encryptPassword
    * @param anonymizeFields Array containing properties that need to be anonymized
+   * @param exportFieldsGroup
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredContactFollowUps = function (
+    filter,
+    encryptPassword,
+    anonymizeFields,
+    exportFieldsGroup,
+    options,
+    callback
+  ) {
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
@@ -2502,6 +2510,11 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
+    }
+
+    // make sure exportFieldsGroup is valid
+    if (!Array.isArray(exportFieldsGroup)) {
+      exportFieldsGroup = [];
     }
 
     // initialize includeContactAddress and includeContactPhoneNumber filters
@@ -4553,5 +4566,22 @@ module.exports = function (Outbreak) {
         callback(null, finalNotDuplicates);
       })
       .catch(callback);
+  };
+
+  /**
+   * Returns export fields groups for a model
+   * @param modelName
+   * @param callback
+   */
+  Outbreak.exportFieldsGroup = function (modelName, callback) {
+    // reference to application models
+    const appModels = app.models;
+
+    // reference to the model name
+    const targetModel = appModels[modelName];
+
+    // return the export fields groups of the model
+    const items = targetModel && targetModel.exportFieldsGroup ? targetModel.exportFieldsGroup : {};
+    return callback(null, items);
   };
 };
