@@ -2477,11 +2477,19 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
   // loop through the addresses and update then if needed
   addressesToUpdate.forEach(function (address) {
     // if the GeoPoint exists and is not in the desired format
-    if (address.geoLocation &&
+    if (
+      address.geoLocation &&
       typeof address.geoLocation === 'object' &&
       address.geoLocation.coordinates &&
-      address.geoLocation.lng === undefined &&
-      address.geoLocation.lat === undefined) {
+      (
+        address.geoLocation.lng === undefined ||
+        address.geoLocation.lng === null
+      ) &&
+      (
+        address.geoLocation.lat === undefined ||
+        address.geoLocation.lat === null
+      )
+    ) {
       // convert it
       _.set(address, 'geoLocation', {
         lat: address.geoLocation.coordinates[1],

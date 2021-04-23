@@ -11,6 +11,7 @@ const PromisePool = require('es6-promise-pool');
 const _ = require('lodash');
 const Config = require('./../../server/config.json');
 const genericHelpers = require('../../components/helpers');
+const Platform = require('../../components/platform');
 
 module.exports = function (Outbreak) {
   /**
@@ -20,6 +21,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    // inject platform identifier
+    options.platform = Platform.BULK;
+
     let errorMessage = '';
 
     // outbreak follow up generate params sanity checks
