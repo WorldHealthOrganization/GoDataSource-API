@@ -3201,7 +3201,7 @@ function filterFieldslLbelList(
     // exclude the fields that are not in the export fields group
     _.each(modelFieldLabelsMap, (token, property) => {
       if (
-        exportFieldsGroupMap[property] &&
+        !exportFieldsGroupMap[property] ||
         !fieldsGroupListMap[exportFieldsGroupMap[property]]
       ) {
         delete modelFieldLabelsMap[property];
