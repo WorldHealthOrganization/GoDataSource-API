@@ -34,6 +34,9 @@ module.exports = function (Model) {
     // get logged in user from request options in order to create author fields
     let userId = _.get(reqOpts, 'accessToken.userId', 'unavailable');
 
+    // get platform from request options in order to set the "created on" field
+    const platform = _.get(reqOpts, 'platform');
+
     // used for author timestamps
     let now = new Date();
 
@@ -50,6 +53,9 @@ module.exports = function (Model) {
       record.updatedAt = now;
       record.createdBy = userId;
       record.updatedBy = userId;
+
+      // platform
+      record.createdOn = platform;
 
       return record;
     });

@@ -2347,25 +2347,25 @@
         "translation": "لوحة المتابعة - عرض ملخص الحالة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUMMARY_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض ملخص الحالة. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض ملخص الحالة. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_PER_LOCATION_LEVEL_DASHLET": {
         "translation": "لوحة المتابعة - عرض الحالة حسب مستوى الموقع"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_PER_LOCATION_LEVEL_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض الحالة حسب مستوى الموقع. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض الحالة حسب مستوى الموقع. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_PIE_CHART_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة رسم بياني دائري للحالات الموجودة بالمستشفى"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_PIE_CHART_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة رسم بياني دائري للحالات الموجودة بالمستشفى. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة رسم بياني دائري للحالات الموجودة بالمستشفى. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_COT_SIZE_HISTOGRAM_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة الرسم البياني لحجم السرير"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_COT_SIZE_HISTOGRAM_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة حجم سلاسل الانتقال النشطة إذا كان لديك إذن \"سلاسل الانتقال - عرض شبكة  افتراضية\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة حجم سلاسل الانتقال النشطة إذا كان لديك إذن 'سلاسل الانتقال - عرض شبكة  افتراضية' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_EPI_CURVE_CLASSIFICATION_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة تصنيف المنحنى الوبائي"
@@ -2401,49 +2401,49 @@
         "translation": "لوحة المتابعة -  عرض  لوحة  حالات الوفيات"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_DECEASED_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة الحالات المتوفاة. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة الحالات المتوفاة. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة متابعة  الحالات الموجودة بالمستشفى"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_HOSPITALIZED_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة الحالات الموجودة بالمستشفى. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة الحالات الموجودة بالمستشفى. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_LESS_THAN_X_CONTACTS_DASHLET": {
         "translation": "لوحة المتابعة - عرض الحالات التي تحتوي على أقل من x لوحة لجهات الاتصال"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_LESS_THAN_X_CONTACTS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض  الحالات التي تحتوي على أقل من x من جهات الاتصال إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض  الحالات التي تحتوي على أقل من x من جهات الاتصال إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_PREV_DAYS_AMONG_KNOWN_CONTACTS_DASHLET": {
         "translation": "لوحة المتابعة - عرض حالات جديدة في الأيام x السابقة بين جهات الاتصال المعروفة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_PREV_DAYS_AMONG_KNOWN_CONTACTS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض حالات جديدة في الأيام x السابقة بين جهات الاتصال المعروفة إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض حالات جديدة في الأيام x السابقة بين جهات الاتصال المعروفة إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_REFUSING_TREATMENT_DASHLET": {
         "translation": "لوحة المتابعة - عرض الحالات التي ترفض منصة المعالجة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_REFUSING_TREATMENT_DASHLET_DESCRIPTION": {
-        "translation": "ويسمح هذا الإذن بعرض الحالات التي ترفض منصة العلاج. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "ويسمح هذا الإذن بعرض الحالات التي ترفض منصة العلاج. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_COT_DASHLET": {
         "translation": "لوحة المتابعة - عرض الحالات الجديدة في لوحة  معلومات السرير المعروفة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NEW_IN_COT_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض حالات جديدة في لوحة سلاسل انتقال معروفة إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض حالات جديدة في لوحة سلاسل انتقال معروفة إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_PENDING_LAB_RESULTS_DASHLET": {
         "translation": "لوحة المتابعة - عرض الحالات التي تتضمن نتائج مخبرية معلقة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_WITH_PENDING_LAB_RESULTS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض الحالات التي تتضمن نتائج مخبرية معلقة. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض الحالات التي تتضمن نتائج مخبرية معلقة. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_IDENTIFIED_THROUGH_CONTACTS_DASHLET": {
         "translation": "لوحة المتابعة - عرض حالات لم يتم تحديدها من خلال جهات الاتصال في اللوحة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_IDENTIFIED_THROUGH_CONTACTS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض حالات لم يتم تحديدها من خلال جهات الاتصال في اللوحة. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض حالات لم يتم تحديدها من خلال جهات الاتصال في اللوحة. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEAN_DASHLET": {
         "translation": "لوحة المتابعة - عرض جهات الاتصال لكل حالة"
@@ -2461,55 +2461,55 @@
         "translation": "لوحة المتابعة - عرض جهات الاتصال انطلاقا من لوحة معلومات المتابعة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_FROM_FOLLOW_UP_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال انطلاقا من لوحة معلومات المتابعة إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال انطلاقا من لوحة معلومات المتابعة إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET": {
         "translation": "لوحة المتابعة - عرض جهات الاتصال المفقودة للوحة المتابعة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال المفقودة للوحة المتابعة إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال المفقودة للوحة المتابعة إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_NOT_SEEN_IN_X_DAYS_DASHLET": {
         "translation": "لوحة المتابعة - عرض جهات الاتصال التي لم يتم رؤيتها في نشرات x أيام"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_NOT_SEEN_IN_X_DAYS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي لم يتم رؤيتها في نشرات x أيام إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي لم يتم رؤيتها في نشرات x أيام إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_BECOME_CASE_DASHLET": {
         "translation": "لوحة المتابعة - عرض جهة الاتصال يصبح لوحة معلومات الحالة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_BECOME_CASE_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي تصبح لوحة معلومات الحالة إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي تصبح لوحة معلومات الحالة إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SEEN_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة جهات الاتصال المرئية"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SEEN_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال المرئية في لوحة المعلومات إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال المرئية في لوحة المعلومات إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET": {
         "translation": "لوحة المتابعة - عرض جهات الاتصال مع نشرة المتابعة الناجحة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي لديها نشرات متابعة ناجحة. إذا كان لديك إذن \"حالات - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض جهات الاتصال التي لديها نشرات متابعة ناجحة. إذا كان لديك إذن 'حالات - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_INDEPENDENT_COT_DASHLET": {
         "translation": "لوحة المتابعة - عرض لوحة الأسرة المنقولة المستقلة"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_INDEPENDENT_COT_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل الانتقال المستقلة إذا كان لديك إذن \"سلاسل الانتقال - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل الانتقال المستقلة إذا كان لديك إذن 'سلاسل الانتقال - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_ACTIVE_COT_DASHLET": {
         "translation": "لوحة المتابعة -  عرض لوحة معلومات السرير النشطة        "
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_ACTIVE_COT_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل الانتقال النشطة إذا كان لديك إذن \"سلاسل الانتقال - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل الانتقال النشطة إذا كان لديك إذن 'سلاسل الانتقال - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_NEW_CHAINS_FROM_CONTACTS_WHO_BECAME_CASES_DASHLET": {
         "translation": " لوحة المتابعة - عرض سلاسل جديدة من جهات الاتصال التي أصبحت حالات"
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_NEW_CHAINS_FROM_CONTACTS_WHO_BECAME_CASES_DASHLET_DESCRIPTION": {
-        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل جديدة من  جهات الاتصال  التي أصبحت حالات. إذا كان لديك إذن \"سلاسل الانتقال - قائمة\" عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
+        "translation": "يسمح هذا الإذن بعرض لوحة سلاسل جديدة من  جهات الاتصال  التي أصبحت حالات. إذا كان لديك إذن 'سلاسل الانتقال - قائمة' عندها سيكون بإمكانك النقر على أي خيار لرؤية السجلات."
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_CLASSIFICATION_PER_LOCATION_REPORT": {
         "translation": "لوحة المتابعة - تصدير تصنيف الحالة حسب  تقرير كل  موقع"
@@ -4385,10 +4385,10 @@
         "translation": "تم"
       },
       "LNG_STEPPER_FINAL_STEP_TEXT": {
-        "translation": "لقد اكتملت الآن عملية إدخال البيانات. اضغط \"خلق\" لإنهاء العملية."
+        "translation": "لقد اكتملت الآن عملية إدخال البيانات. اضغط 'خلق' لإنهاء العملية."
       },
       "LNG_STEPPER_FINAL_STEP_TEXT_UPDATE": {
-        "translation": "Data entry is now complete. Hit \"Update\" to finish the process."
+        "translation": "Data entry is now complete. Hit 'Update' to finish the process."
       },
       "LNG_STEPPER_LABEL_BACK": {
         "translation": "رجوع"
@@ -4621,7 +4621,7 @@
         "translation": "تم تعيين هذا المستخدم بالفعل للفرق التالية: {{teamNames}}. هل أنت متأكد من رغبتك في إضافته إلى هذا الفريق أيضًا؟"
       },
       "LNG_DIALOG_CONFIRM_APPROVE_HELP_ITEM": {
-        "translation": "هل أنت متأكد من أنك تريد الموافقة على عنصر المساعدة هذا: \"{{title}}\"؟"
+        "translation": "هل أنت متأكد من أنك تريد الموافقة على عنصر المساعدة هذا: '{{title}}'؟"
       },
       "LNG_DIALOG_CONFIRM_BUTTON_CANCEL": {
         "translation": "إلغاء"
@@ -4633,10 +4633,10 @@
         "translation": "اذكر اسم مستنسخ الوباء"
       },
       "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
-        "translation": "هل أنت متأكد من أنك تريد تحويل هذه الحالة: \"{{name}}\" إلى جهة اتصال؟"
+        "translation": "هل أنت متأكد من أنك تريد تحويل هذه الحالة: '{{name}}' إلى جهة اتصال؟"
       },
       "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
-        "translation": "هل أنت متأكد من أنك تريد تحويل هذا الاتصال: \"{{name}}\" إلى حالة؟"
+        "translation": "هل أنت متأكد من أنك تريد تحويل هذا الاتصال: '{{name}}' إلى حالة؟"
       },
       "LNG_DIALOG_CONFIRM_COPY_VALUE": {
         "translation": "هل أنت متأكد من أنك تريد نسخ القيمة من هذا الحقل إلى جميع تلك التي هي فارغة؟"
@@ -4645,49 +4645,49 @@
         "translation": "هل أنت متأكد من رغبتك في حذف هذا العنوان؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه النسخة الاحتياطية  \"{{location}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه النسخة الاحتياطية  '{{location}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_BACKUP_RESTORE": {
         "translation": "إعادة التأكيد<br><br>ملاحظة: إعادة بيانات النظام إلى حالة مختارة سوف يعيد جميع البيانات إلى نقطة النسخ الاحتياطي (إزالة أي بيانات جديدة مضافة). هل أنت متأكد من رغبتك في المواصلة؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CASE": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه الحالة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه الحالة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CLIENT_APPLICATION": {
-        "translation": "هل أنت متأكد من رغبتك في حذف تطبيق هذا العميل: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف تطبيق هذا العميل: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CLUSTER": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه المجموعة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه المجموعة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CONTACT": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الاتصال \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الاتصال '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DATE_RANGE": {
         "translation": "هل أنت متأكد من رغبتك في حذف نطاق هذا التاريخ؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DEVICE": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الجهاز: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الجهاز: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_DOCUMENT": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذه الوثيقة؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_EVENT": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الحدث: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الحدث: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_FOLLOW_UP": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه المتابعة:\"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه المتابعة:'{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_HELP_CATEGORY": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه الفئة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه الفئة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_HELP_ITEM": {
-        "translation": "هل أنت متأكد من أنك تريد حذف عنصر المساعدة هذا: \"{{title}}\"؟"
+        "translation": "هل أنت متأكد من أنك تريد حذف عنصر المساعدة هذا: '{{title}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_HOSPITALIZATION_DATE": {
         "translation": "هل أنت متأكد من أنك تريد حذف تاريخ الإدخال إلى المستشفى؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_ICON": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه الأيقونة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه الأيقونة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_INPUT": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا العنصر؟"
@@ -4702,16 +4702,16 @@
         "translation": "هل أنت متأكد من رغبتك في حذف نتيجة المختبر هذه ؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_LANGUAGE": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه اللغة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه اللغة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_LOCATION": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا المكان \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا المكان '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_OUTBREAK": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه الفاشية \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه الفاشية '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_OUTBREAK_TEMPLATE": {
-        "translation": "هل أنت متأكد من رغبتك في حذف نموذج الفاشية\"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف نموذج الفاشية'{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_QUESTION": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا السؤال؟"
@@ -4723,25 +4723,25 @@
         "translation": "هل أنت متأكد من رغبتك في حذف هذا البند؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_RELATIONSHIP": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذه العلاقة:\"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذه العلاقة:'{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_SYSTEM_SYNC_LOG": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا السجل؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_SYSTEM_UPSTREAM_SERVER": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الخادم في المنبع : \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الخادم في المنبع : '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_SYSTEM_UPSTREAM_SYNC_CONFIRMATION": {
-        "translation": "هل أنت متأكد من رغبتك في المزامنة مع الخادم في المنبع : \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في المزامنة مع الخادم في المنبع : '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_TEAM": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الفريق: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الفريق: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_USER": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا المستخدم: \"{{firstName}} {{lastName}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا المستخدم: '{{firstName}} {{lastName}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_USER_ROLE": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الدور: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الدور: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DUPLICATE_QUESTION": {
         "translation": "هل أنت متأكد من رغبتك في تكرار هذا السؤال؟"
@@ -4759,19 +4759,19 @@
         "translation": "هل أنت متأكد من رغبتك في ربط هذا الجواب؟"
       },
       "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "لا يمكن إزالة المكان \"{{name}}\" لأنه  يحتوي على مواقع للأطفال"
+        "translation": "لا يمكن إزالة المكان '{{name}}' لأنه  يحتوي على مواقع للأطفال"
       },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
-        "translation": "لا يمكن إزالة المكان \"{{name}}\" لأنه مستخدم، هل تريد أن ترى أين؟"
+        "translation": "لا يمكن إزالة المكان '{{name}}' لأنه مستخدم، هل تريد أن ترى أين؟"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
         "translation": "هل أنت متأكد من أنك تريد أن تكون هذه الفاشية نشطة؟ <br> سيتم تعطيل الفاشية النشطة الحالية."
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_MISSING_FROM_FOLLOW_UP": {
-        "translation": "هل أنت متأكد من أنك تريد وضع علامة \"{{name}}\" على الاتصال باعتباره مفقود من المتابعة؟"
+        "translation": "هل أنت متأكد من أنك تريد وضع علامة '{{name}}' على الاتصال باعتباره مفقود من المتابعة؟"
       },
       "LNG_DIALOG_CONFIRM_MARK_CONTACT_AS_PRESENT_ON_FOLLOW_UP": {
-        "translation": "هل أنت متأكد من أنك تريد وضع علامة \"{{name}}\" على الاتصال باعتباره موجود في المتابعة؟"
+        "translation": "هل أنت متأكد من أنك تريد وضع علامة '{{name}}' على الاتصال باعتباره موجود في المتابعة؟"
       },
       "LNG_DIALOG_CONFIRM_REMOVE_ATTACHMENT": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا المرفق؟"
@@ -4786,22 +4786,22 @@
         "translation": "هل تريد استبدال القيمة القديمة بأخرى جديدة؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
-        "translation": "هل أنت متأكد من رغبتك في استعادة هذه الحالة: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في استعادة هذه الحالة: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
-        "translation": "هل أنت متأكد من رغبتك في استعادة هذا الاتصال \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في استعادة هذا الاتصال '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
-        "translation": "هل أنت متأكد من رغبتك في استعادة هذا الحدث: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في استعادة هذا الحدث: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_FOLLOW_UP": {
-        "translation": "هل أنت متأكد من رغبتك في استعادة هذه المتابعة:\"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في استعادة هذه المتابعة:'{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_LAB_RESULT": {
         "translation": "هل أنت متأكد من رغبتك في استعادة نتيجة المختبر هذه؟"
       },
       "LNG_DIALOG_CONFIRM_RESTORE_OUTBREAK": {
-        "translation": "هل أنت متأكد من رغبتك في استعادة هذه الفاشية: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في استعادة هذه الفاشية: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_SAVE_SAME_LOCATIONS_TEAM": {
         "translation": "هذه المواقع لديها بالفعل الفرق التالية المخصصة: {{teamNames}}. هل ترغب في المواصلة؟"
@@ -4822,7 +4822,7 @@
         "translation": "هناك تغييرات غير محفوظة ستضيع إذا واصلت"
       },
       "LNG_DIALOG_CONFIRM_DELETE_PERSON": {
-        "translation": "هل أنت متأكد من رغبتك في حذف هذا الشخص: \"{{name}}\"؟"
+        "translation": "هل أنت متأكد من رغبتك في حذف هذا الشخص: '{{name}}'؟"
       },
       "LNG_DIALOG_CONFIRM_REPLACE_GEOLOCATION": {
         "translation": "هل تريد استبدال خطوط العرض والطول الحالية مع قيم المكان؟"
@@ -4831,10 +4831,10 @@
         "translation": "يتم استخدام هذا المكان. هل تريد نشر قيم خطوط العرض والطول الجديدة للعناوين التي تستخدم هذا الموقع؟"
       },
       "LNG_DIALOG_SAVE_FILTERS_UPDATE_OR_CREATE_TITLE": {
-        "translation": "هل تريد تحديث \"{{filter}}\" أو إنشاء واحد جديد؟"
+        "translation": "هل تريد تحديث '{{filter}}' أو إنشاء واحد جديد؟"
       },
       "LNG_DIALOG_SAVE_MAPPINGS_UPDATE_OR_CREATE_TITLE": {
-        "translation": "هل تريد تحديث \"{{mapping}}\" أو إنشاء واحد جديد؟"
+        "translation": "هل تريد تحديث '{{mapping}}' أو إنشاء واحد جديد؟"
       },
       "LNG_DIALOG_SAVE_FILTERS_TITLE": {
         "translation": "أدخل اسمًا للفلتر الجديد"
@@ -4852,7 +4852,7 @@
         "translation": "حفظ التعيين المستورد"
       },
       "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": {
-        "translation": "الحالة: \"{{name}}'' لها  {{numberOfContacts}} تعرض بجهات اتصال  سيتم حذفها. هل أنت متأكد من رغبتك في حذف هذه الحالة؟"
+        "translation": "الحالة: '{{name}}'' لها  {{numberOfContacts}} تعرض بجهات اتصال  سيتم حذفها. هل أنت متأكد من رغبتك في حذف هذه الحالة؟"
       },
       "LNG_DIALOG_CONFIRM_REMOVE_MULTI_ANSWER": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا الجواب؟"
@@ -4879,7 +4879,7 @@
         "translation": "هل أنت متأكد من رغبتك في حذف العلاقات المختارة؟"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": {
-        "translation": "هل أنت متأكد من أنك تريد تغيير التصنيف \"{{caseName}}\" إلى \"{{classification}}\"؟"
+        "translation": "هل أنت متأكد من أنك تريد تغيير التصنيف '{{caseName}}' إلى '{{classification}}'؟"
       },
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": {
         "translation": "هل أنت متأكد من رغبتك في حذف هذا اللقاح؟"
@@ -5443,7 +5443,7 @@
         "translation": "Team assignment algorithm"
       },
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
-        "translation": "[Option 1] - If Team1 has \"Argentina\" assigned and Team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done. [Option 2] - If Team1 has \"Argentina\" assigned and team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done."
+        "translation": "<div style='color: #FFF; padding-bottom: 10px'><span style='font-weight: bold;'>[Option 1]</span> - If Team1 has 'Argentina' assigned and Team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Option 2]</span> - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done.</div>"
       },
       "LNG_OUTBREAK_FIELD_LABEL_ID": {
         "translation": " المعرف "
@@ -5545,7 +5545,7 @@
         "translation": "Map Type"
       },
       "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_TYPE_DESCRIPTION": {
-        "translation": "<div style='padding-bottom: 10px'>Specify the layer source of the REST service for this layer of map information. If you leave this blank when creating an outbreak, the system will default to using WHO's source layer.</div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Tile - TileArcGISRest]</span> - Layer source that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions.</div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Tile - XYZ]</span> - Layer source for tile data with URLs in a set XYZ format that are defined in a URL template. By default, this follows the widely-used Google grid where x 0 and y 0 are in the top left. Grids like TMS where x 0 and y 0 are in the bottom left can be used by using the {-y} placeholder in the URL template, so long as the source does not have a custom tile grid.</div><div><span style='color: #770000; font-weight: bold;'>[VectorTile - VectorTileLayer]</span> - Layer source for vector tile data that is rendered client-side.</div>"
+        "translation": "<div style='color: #FFF; padding-bottom: 10px'>Specify the layer source of the REST service for this layer of map information. If you leave this blank when creating an outbreak, the system will default to using WHO's source layer.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Tile - TileArcGISRest]</span> - Layer source that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Tile - XYZ]</span> - Layer source for tile data with URLs in a set XYZ format that are defined in a URL template. By default, this follows the widely-used Google grid where x 0 and y 0 are in the top left. Grids like TMS where x 0 and y 0 are in the bottom left can be used by using the {-y} placeholder in the URL template, so long as the source does not have a custom tile grid.</div><div><span style='font-weight: bold;'>[VectorTile - VectorTileLayer]</span> - Layer source for vector tile data that is rendered client-side.</div>"
       },
       "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE": {
         "translation": "Style URL"
@@ -6141,7 +6141,7 @@
         "translation": "تصدير علاقات الحالات"
       },
       "LNG_PAGE_LIST_CASES_NOT_A_CASE_INFO_LABEL": {
-        "translation": "* ملاحظة أن: إذا كنت ترغب في الفلترة لرؤية الحالات التي تم تجاهلها، فينبغي إضافة العمود \"ليست حالة\" من قائمة الحقل الإضافي على الجانب الأيسر والتأكد من تعيين هذا إلى \"نعم\". لا يمكنك ببساطة الفلترة حسب عمود التصنيف لـ \"ليست حالة (تم تجاهلها)\" نظرًا لأنه لم يتم تعيين حالة، بشكل افتراضي، إلى \"لا\" لإظهار السجلات النشطة فقط."
+        "translation": "* ملاحظة أن: إذا كنت ترغب في الفلترة لرؤية الحالات التي تم تجاهلها، فينبغي إضافة العمود 'ليست حالة' من قائمة الحقل الإضافي على الجانب الأيسر والتأكد من تعيين هذا إلى 'نعم'. لا يمكنك ببساطة الفلترة حسب عمود التصنيف لـ 'ليست حالة (تم تجاهلها)' نظرًا لأنه لم يتم تعيين حالة، بشكل افتراضي، إلى 'لا' لإظهار السجلات النشطة فقط."
       },
       "LNG_PAGE_LIST_CASES_DIALOG_ENTITY_SECTION_TITLE": {
         "translation": "كيانات"
@@ -6223,7 +6223,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_CASE_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_CASE_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "تفاصيل السجل "
@@ -6287,7 +6287,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_RELATIONSHIP_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_ACTION_REVERSE_RELATIONSHIP": {
         "translation": "عكس أشخاص"
@@ -6724,7 +6724,7 @@
         "translation": "تغيير حالة المتابعة النهائية لجهة الاتصال"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": {
-        "translation": "هل تريد بالتأكيد تغيير \"حالة المتابعة النهائية\" {{count}}  لجهات الاتصال؟"
+        "translation": "هل تريد بالتأكيد تغيير 'حالة المتابعة النهائية' {{count}}  لجهات الاتصال؟"
       },
       "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": {
         "translation": "تم تحديث الحالة النهائية {{count}} لجهة الاتصال"
@@ -6830,7 +6830,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_CONTACT_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_EXPOSURE": {
         "translation": "عرض التعرض"
@@ -7899,7 +7899,7 @@
         "translation": "خوادم الخرائط"
       },
       "LNG_PAGE_VIEW_OUTBREAK_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "تفاصيل السجل "
@@ -10830,7 +10830,7 @@
         ]
       },
       "LNG_FORM_VALIDATION_ERROR_FIELD_URL": {
-        "translation": "عنوان URL غير صالح، إما أنه يحتوي على \"المضيف المحلي\" أو أن الطريق ليس جيدًا",
+        "translation": "عنوان URL غير صالح، إما أنه يحتوي على 'المضيف المحلي' أو أن الطريق ليس جيدًا",
         "modules": [
           "unauthenticated"
         ]
@@ -10896,13 +10896,13 @@
     },
     "uiDateOnsetReportListPage": {
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_MODIFY": {
-        "translation": "تعديل \"{{name}}\""
+        "translation": "تعديل '{{name}}'"
       },
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_MODIFY_RELATIONSHIP": {
         "translation": "تعديل العلاقة"
       },
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_VIEW": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_VIEW_RELATIONSHIP": {
         "translation": "عرض العلاقة"
@@ -10919,13 +10919,13 @@
     },
     "uiLongPeriodBetweenOnsetDatesReportListPage": {
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_MODIFY": {
-        "translation": "تعديل \"{{name}}\""
+        "translation": "تعديل '{{name}}'"
       },
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_MODIFY_RELATIONSHIP": {
         "translation": "تعديل العلاقة"
       },
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_VIEW": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_VIEW_RELATIONSHIP": {
         "translation": "عرض العلاقة"
@@ -10947,10 +10947,10 @@
     },
     "uiChronologyCasePage": {
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_LABEL_CLASSIFICATION_HISTORY_END_DATE": {
-        "translation": "التصنيف \"{{classification}}\" تاريخ النهاية"
+        "translation": "التصنيف '{{classification}}' تاريخ النهاية"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_LABEL_CLASSIFICATION_HISTORY_START_DATE": {
-        "translation": "التصنيف \"{{classification}}\" تاريخ البداية"
+        "translation": "التصنيف '{{classification}}' تاريخ البداية"
       },
       "LNG_PAGE_VIEW_CHRONOLOGY_CASE_LABEL_HOSPITALISATION_END_DATE": {
         "translation": "تاريخ نهاية العلاج في المستشفى "
@@ -11051,7 +11051,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_CLUSTER_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       }
     },
     "uiViewClusterPeoplePage": {
@@ -11202,7 +11202,7 @@
         "translation": "{{name}}"
       },
       "LNG_PAGE_VIEW_LOCATION_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_LOCATION_ACTION_PROPAGATE_LOCATION_GEO_LOCATION_SUCCESS_MESSAGE": {
         "translation": "تم نشر إحداثيات الموقع على جميع العناوين التي تستخدم هذا الموقع"
@@ -11216,7 +11216,7 @@
         "translation": "لا يتم عرض سوى أول سجلات {{total}} من {{displayed}}"
       },
       "LNG_PAGE_LIST_USAGE_LOCATIONS_TITLE": {
-        "translation": "استخدام الموقع \"{{name}}\""
+        "translation": "استخدام الموقع '{{name}}'"
       },
       "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CASE": {
         "translation": "الحالة"
@@ -11353,7 +11353,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_USER_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       }
     },
     "uiUserRoleFields": {
@@ -11562,7 +11562,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_EVENT_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_EVENT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "تفاصيل السجل "
@@ -11924,7 +11924,7 @@
         "translation": "Team assignment algorithm"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
-        "translation": "[Option 1] - If Team1 has \"Argentina\" assigned and Team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done. [Option 2] - If Team1 has \"Argentina\" assigned and team2 has \"Buenos Aires\" assigned (sublocation of Argentina). Contact has \"Buenos Aires\" as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done."
+        "translation": "[Option 1] - If Team1 has 'Argentina' assigned and Team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done. [Option 2] - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done."
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_LESS_THAN_X_CONTACTS": {
         "translation": "أقل من X جهة اتصال"
@@ -12071,7 +12071,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_OUTBREAK_TEMPLATE_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       },
       "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CONTACT_INVESTIGATION_QUESTIONNAIRE": {
         "translation": "Contact form"
@@ -12378,6 +12378,84 @@
       },
       "LNG_PAGE_DASHBOARD_KPIS_ELEMENTS_NOT_VISIBLE_ERROR_MSG": {
         "translation": "Please make sure that at least one KPI dashlet is visible"
+      },
+      "LNG_PAGE_DASHBOARD_CASE_SUMMARY_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases for the selected outbreak by case classification and ignoring the 'not a case'."
+      },
+      "LNG_PAGE_DASHBOARD_CASE_BY_GEOGRAPHIC_LOCATION_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases for the selected outbreak by location."
+      },
+      "LNG_PAGE_DASHBOARD_CASE_HOSPITALIZATION_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases currently hospitalised, currently isolated etc."
+      },
+      "LNG_PAGE_DASHBOARD_HISTOGRAM_CHAINS_OF_TRANSMISSION_SIZE_TITLE_DESCRIPTION": {
+        "translation": "Determines the size of chains of transmission."
+      },
+      "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE_DESCRIPTION": {
+        "translation": "<div style='color: #FFF; padding-bottom: 10px'>Epi Curve reports</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Cases counts over time stratified by classification]</span> - Determines the number of cases over time stratified by classification.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Cases counts over time stratified by outcome]</span> - Determines the number of cases over time stratified by outcome.</div><div><span style='font-weight: bold;'>[Cases counts over reporting time stratified by classification]</span> - Determines the number of cases over reporting time stratified by classification.</div>"
+      },
+      "LNG_PAGE_DASHBOARD_CONTACT_FOLLOW_UP_REPORT_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of contacts based on their follow-up status."
+      },
+      "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases based on their contact status."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_DECEASED_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases who have died."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_HOSPITALISED_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of cases currently hospitalised."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_LESS_CONTACTS_TITLE_BEFORE_VALUE_DESCRIPTION": {
+        "translation": "Determines the number of cases with less than X contacts."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_NEW_PREVIOUS_DAYS_CONTACTS_BEFORE_VALUE_DESCRIPTION": {
+        "translation": "Determines the proportion of new cases in the previous X days detected among known contacts."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_REFUSING_TREATMENT_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of suspect cases refusing to be transferred to a treatment unit."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_NEW_CASES_PREVIOUS_DAYS_TRANSMISSION_CHAINS_BEFORE_VALUE_DESCRIPTION": {
+        "translation": "Determines the proportion of new cases in the previous X days in known transmission chains."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_PENDING_LAB_RESULT_DESCRIPTION": {
+        "translation": "Determines the number of suspect cases where the lab result is pending."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CASES_NOT_IDENTIFIED_THROUGH_CONTACTS_DESCRIPTION": {
+        "translation": "Determines the number of cases who are not identified though known contact list."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEAN_TITLE_DESCRIPTION": {
+        "translation": "Determines the mean number of contacts per case."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEDIAN_TITLE_DESCRIPTION": {
+        "translation": "Determines the median number of contacts per case."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_FOLLOWUP_LIST_TITLE_DESCRIPTION": {
+        "translation": "Determines the number of contacts on follow-up list."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_LOST_TO_FOLLOW_UP_DESCRIPTION": {
+        "translation": "Determines the number of contacts who are lost to follow-up."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_NOT_SEEN_TITLE_BEFORE_VALUE_DESCRIPTION": {
+        "translation": "Determines the number of contacts not seen in X days."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_BECOMING_CASES_OVER_TIME_AND_PLACE_DESCRIPTION": {
+        "translation": "Determines the number of contacts becoming cases over time and place."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_SEEN_EACH_DAY_DESCRIPTION": {
+        "translation": "Determines the number of contacts seen each day."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_CONTACTS_WITH_SUCCESSFUL_FOLLOW_UP_DESCRIPTION": {
+        "translation": "Determines the proportion of contacts successfully followed-up each day."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_INDEPENDENT_TRANSMISSION_CHAINS_DESCRIPTION": {
+        "translation": "Determines the number of independent chains of transmission."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_ACTIVE_CHAINS_DESCRIPTION": {
+        "translation": "Determines the number of active chains of transmission."
+      },
+      "LNG_PAGE_DASHBOARD_KPI_NEW_CHAINS_OF_TRANSMISSION_FROM_REGISTERED_CONTACTS_WHO_BECAME_CASES_DESCRIPTION": {
+        "translation": "Determines the number of new chains of transmission from registered contacts who have become cases."
       }
     },
     "uiChainsOfTransmission": {
@@ -12919,7 +12997,7 @@
         "translation": "Mapping"
       },
       "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_DESCRIPTION": {
-        "translation": "<div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Pending:</span><span>this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Complete no / total:</span><span>the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Complete:</span><span>all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Incomplete no / total:</span><span>the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>Handled above:</span><span>a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>Completed above:</span><span>a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
+        "translation": "<div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Pending]:</span><span> this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete no / total]:</span><span> the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete:]</span><span> all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Incomplete no / total]:</span><span> the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #770000; font-weight: bold;'>[Handled above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Completed above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
       },
       "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_WAITING": {
         "translation": "Pending"
@@ -13981,22 +14059,22 @@
     },
     "uiInconsistencyLabels": {
       "LNG_PAGE_INCONSISTENCY_LABEL_BIGGER": {
-        "translation": "\"{{date1}}\" متأخر عن \"{{date2}}\""
+        "translation": "'{{date1}}' متأخر عن '{{date2}}'"
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_BIGGER_OR_EQUAL": {
-        "translation": "\"{{date1}}\" متأخر أو مثل \"{{date2}}\""
+        "translation": "'{{date1}}' متأخر أو مثل '{{date2}}'"
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_EQUAL": {
-        "translation": "\"{{date1}}\" يساوي \"{{date2}}\""
+        "translation": "'{{date1}}' يساوي '{{date2}}'"
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_NOT_EQUAL": {
-        "translation": "\"{{date1}}\" لا يساوي \"{{date2}}\""
+        "translation": "'{{date1}}' لا يساوي '{{date2}}'"
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_SMALLER": {
-        "translation": "\"{{date1}}\" أقدم من \"{{date2}}\""
+        "translation": "'{{date1}}' أقدم من '{{date2}}'"
       },
       "LNG_PAGE_INCONSISTENCY_LABEL_SMALLER_OR_EQUAL": {
-        "translation": "\"{{date1}}\" أقدم من أو مثل \"{{date2}}\""
+        "translation": "'{{date1}}' أقدم من أو مثل '{{date2}}'"
       }
     },
     "uiImportLocationData": {
@@ -14374,7 +14452,7 @@
         "translation": "* إذا غاب تاريخ من الأعمدة الرئيسية، يعني ذلك عدم وجود بيانات عن ذلك التاريخ"
       },
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_QUESTIONNAIRE_ALERT_LABEL": {
-        "translation": "* تعني أيقونة الجرس أنه تم الإشارة إلى إجابة واحدة على الأقل لهذه المتابعة على أنها \"تنبيه\" في تعريف الاستبيان"
+        "translation": "* تعني أيقونة الجرس أنه تم الإشارة إلى إجابة واحدة على الأقل لهذه المتابعة على أنها 'تنبيه' في تعريف الاستبيان"
       },
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_TITLE": {
         "translation": "نطاق المتابعات "
@@ -14439,7 +14517,7 @@
         "translation": "تعديل {{name}}"
       },
       "LNG_PAGE_VIEW_LANGUAGE_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       }
     },
     "uiCaseCountMap": {
@@ -14485,7 +14563,7 @@
         "translation": "نوع التصدير"
       },
       "LNG_SYNC_PACKAGE_FIELD_LABEL_EXPORT_TYPE_DESCRIPTION": {
-        "translation": "ملاحظة: عند وجود نوع التصدير، يتم تجاهل \"المجموعات\""
+        "translation": "ملاحظة: عند وجود نوع التصدير، يتم تجاهل 'المجموعات'"
       },
       "LNG_SYNC_PACKAGE_FIELD_LABEL_FROM_DATE": {
         "translation": "من تاريخ"
@@ -15923,7 +16001,7 @@
         "translation": "عرض الجهاز"
       },
       "LNG_PAGE_VIEW_SYSTEM_DEVICE_TITLE": {
-        "translation": "عرض \"{{name}}\""
+        "translation": "عرض '{{name}}'"
       }
     },
     "uiGlobalSearch": {
@@ -16943,7 +17021,7 @@
         "translation": ""
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": {
-        "translation": "Area"
+        "translation": "Location"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
         "translation": "Vaccines Received"
@@ -17332,6 +17410,272 @@
       },
       "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER_DESCRIPTION": {
         "translation": "Layer for vector tile data that is rendered client-side."
+      }
+    },
+    "uiDatePickerCalendar": {
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_SUNDAY": {
+        "translation": "Su"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_MONDAY": {
+        "translation": "Mo"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_TUESDAY": {
+        "translation": "Tu"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_WEDNESDAY": {
+        "translation": "We"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_THURSDAY": {
+        "translation": "Th"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_FRIDAY": {
+        "translation": "Fr"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_NARROW_SATURDAY": {
+        "translation": "Sa"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_SUNDAY": {
+        "translation": "Sunday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_MONDAY": {
+        "translation": "Monday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_TUESDAY": {
+        "translation": "Tuesday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_WEDNESDAY": {
+        "translation": "Wednesday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_THURSDAY": {
+        "translation": "Thursday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_FRIDAY": {
+        "translation": "Friday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_LONG_SATURDAY": {
+        "translation": "Saturday"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_SUNDAY": {
+        "translation": "Sun"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_MONDAY": {
+        "translation": "Mon"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_TUESDAY": {
+        "translation": "Tue"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_WEDNESDAY": {
+        "translation": "Wed"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_THURSDAY": {
+        "translation": "Thu"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_FRIDAY": {
+        "translation": "Fri"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_WEEK_DAYS_SHORT_SATURDAY": {
+        "translation": "Sat"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_JANUARY": {
+        "translation": "Jan"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_FEBRUARY": {
+        "translation": "Feb"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_MARCH": {
+        "translation": "Mar"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_APRIL": {
+        "translation": "Apr"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_MAY": {
+        "translation": "May"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_JUNE": {
+        "translation": "Jun"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_JULY": {
+        "translation": "Jul"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_AUGUST": {
+        "translation": "Aug"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_SEPTEMBER": {
+        "translation": "Sep"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_OCTOBER": {
+        "translation": "Oct"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_NOVEMBER": {
+        "translation": "Nov"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_NARROW_DECEMBER": {
+        "translation": "Dec"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JANUARY": {
+        "translation": "January"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_FEBRUARY": {
+        "translation": "February"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_MARCH": {
+        "translation": "March"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_APRIL": {
+        "translation": "April"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_MAY": {
+        "translation": "May"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JUNE": {
+        "translation": "June"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JULY": {
+        "translation": "July"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_AUGUST": {
+        "translation": "August"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_SEPTEMBER": {
+        "translation": "September"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_OCTOBER": {
+        "translation": "October"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_NOVEMBER": {
+        "translation": "November"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_DECEMBER": {
+        "translation": "December"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_JANUARY": {
+        "translation": "Jan"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_FEBRUARY": {
+        "translation": "Feb"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_MARCH": {
+        "translation": "Mar"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_APRIL": {
+        "translation": "Apr"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_MAY": {
+        "translation": "May"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_JUNE": {
+        "translation": "Jun"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_JULY": {
+        "translation": "Jul"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_AUGUST": {
+        "translation": "Aug"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_SEPTEMBER": {
+        "translation": "Sep"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_OCTOBER": {
+        "translation": "Oct"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_NOVEMBER": {
+        "translation": "Nov"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_SHORT_DECEMBER": {
+        "translation": "Dec"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_1": {
+        "translation": "1"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_2": {
+        "translation": "2"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_3": {
+        "translation": "3"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_4": {
+        "translation": "4"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_5": {
+        "translation": "5"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_6": {
+        "translation": "6"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_7": {
+        "translation": "7"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_8": {
+        "translation": "8"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_9": {
+        "translation": "9"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_10": {
+        "translation": "10"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_11": {
+        "translation": "11"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_12": {
+        "translation": "12"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_13": {
+        "translation": "13"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_14": {
+        "translation": "14"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_15": {
+        "translation": "15"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_16": {
+        "translation": "16"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_17": {
+        "translation": "17"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_18": {
+        "translation": "18"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_19": {
+        "translation": "19"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_20": {
+        "translation": "20"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_21": {
+        "translation": "21"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_22": {
+        "translation": "22"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_23": {
+        "translation": "23"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_24": {
+        "translation": "24"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_25": {
+        "translation": "25"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_26": {
+        "translation": "26"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_27": {
+        "translation": "27"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_28": {
+        "translation": "28"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_29": {
+        "translation": "29"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_30": {
+        "translation": "30"
+      },
+      "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_31": {
+        "translation": "31"
       }
     }
   }
