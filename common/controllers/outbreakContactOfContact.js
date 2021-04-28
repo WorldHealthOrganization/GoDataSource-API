@@ -169,7 +169,7 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
-   * @param exportFieldsGroup
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
@@ -178,7 +178,7 @@ module.exports = function (Outbreak) {
     exportType,
     encryptPassword,
     anonymizeFields,
-    exportFieldsGroup,
+    fieldsGroupList,
     options,
     callback
   ) {
@@ -195,11 +195,6 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        // make sure exportFieldsGroup is valid
-        if (!Array.isArray(exportFieldsGroup)) {
-          exportFieldsGroup = [];
-        }
-
         app.utils.remote.helpers.exportFilteredModelsList(
           app,
           app.models.contactOfContact,
@@ -209,7 +204,7 @@ module.exports = function (Outbreak) {
           'Contacts Of Contacts List',
           encryptPassword,
           anonymizeFields,
-          exportFieldsGroup,
+          fieldsGroupList,
           options,
           (results, dictionary) => {
             return new Promise(function (resolve, reject) {

@@ -281,7 +281,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],

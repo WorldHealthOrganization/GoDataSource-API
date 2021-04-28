@@ -2973,7 +2973,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -3201,7 +3201,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -4648,7 +4648,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -4927,7 +4927,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -7621,7 +7621,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -8123,7 +8123,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -8437,7 +8437,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -8516,7 +8516,7 @@
           "description": "If provided, mentioned fields will be anonymized in the exported file"
         },
         {
-          "arg": "exportFieldsGroup",
+          "arg": "fieldsGroupList",
           "type": [
             "string"
           ],
@@ -8914,7 +8914,7 @@
       ],
       "description": "Retrieves the export fields groups",
       "http": {
-        "verb": "post",
+        "verb": "get",
         "path": "/export-fields-group"
       }
     }

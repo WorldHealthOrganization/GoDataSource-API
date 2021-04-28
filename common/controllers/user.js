@@ -633,7 +633,7 @@ module.exports = function (User) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
-   * @param exportFieldsGroup
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
@@ -642,7 +642,7 @@ module.exports = function (User) {
     exportType,
     encryptPassword,
     anonymizeFields,
-    exportFieldsGroup,
+    fieldsGroupList,
     options,
     callback
   ) {
@@ -666,11 +666,6 @@ module.exports = function (User) {
         anonymizeFields.push('password');
       }
 
-      // make sure exportFieldsGroup is valid
-      if (!Array.isArray(exportFieldsGroup)) {
-        exportFieldsGroup = [];
-      }
-
       options.dictionary = dictionary;
       return app.utils.remote.helpers.exportFilteredModelsList(
         app,
@@ -681,7 +676,7 @@ module.exports = function (User) {
         'Users List',
         (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
         anonymizeFields,
-        exportFieldsGroup,
+        fieldsGroupList,
         options,
         results => Promise.resolve(results),
         callback

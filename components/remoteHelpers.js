@@ -73,7 +73,7 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, option
  * @param fileName
  * @param encryptPassword {string|null}
  * @param anonymizeFields
- * @param exportFieldsGroup
+ * @param fieldsGroupList
  * @param options
  * @param [beforeExport] Optional result modifier before export
  * @param callback
@@ -87,7 +87,7 @@ function exportFilteredModelsList(
   fileName,
   encryptPassword,
   anonymizeFields,
-  exportFieldsGroup,
+  fieldsGroupList,
   options,
   beforeExport,
   callback
@@ -186,31 +186,28 @@ function exportFilteredModelsList(
             // headers come from model
             const fieldLabelsMap = Model.helpers && Model.helpers.sanitizeFieldLabelsMapForExport ? Model.helpers.sanitizeFieldLabelsMapForExport() : Model.fieldLabelsMap;
 
-            // get the fields order
-            let exportFieldsOrder = Model.exportFieldsOrder ? [...Model.exportFieldsOrder] : [];
-
             // check if location id and location identifiers custom fields should be removed
             let addLocationUID = true;
             let addLocationIdentifiers = true;
 
+            // make sure exportFieldsGroup is valid
+            if (!Array.isArray(fieldsGroupList)) {
+              fieldsGroupList = [];
+            }
+
+            // check if there are fields groups to export
+            const fieldsGroupListMap = {};
             if (
-              exportFieldsGroup.length &&
+              fieldsGroupList.length &&
               Model.exportFieldsGroup
             ) {
-              // mapping
-              const exportFieldsGroupMap = {};
-
-              // map the export fields map
-              _.each(Model.exportFieldsGroup, (fieldsGroup, token) => {
-                if (fieldsGroup.properties) {
-                  _.each(fieldsGroup.properties, (property) => {
-                    exportFieldsGroupMap[property] = token;
-                  });
-                }
+              // map fields groups
+              fieldsGroupList.forEach((field) => {
+                fieldsGroupListMap[field] = true;
               });
 
               // check if location id and identifiers must be added in the file
-              if (exportFieldsGroup.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA') &&
+              if (fieldsGroupListMap['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA'] &&
                 Model.exportFieldsGroup['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA'] &&
                 Model.exportFieldsGroup['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA']['properties']
               ) {
@@ -220,35 +217,10 @@ function exportFilteredModelsList(
                 addLocationUID = false;
                 addLocationIdentifiers = false;
               }
-
-              // exclude the fields that are not in the export fields group
-              _.each(fieldLabelsMap, (token, property) => {
-                if (
-                  exportFieldsGroupMap[property] &&
-                  !exportFieldsGroup.includes(exportFieldsGroupMap[property])
-                ) {
-                  delete fieldLabelsMap[property];
-
-                  // exclude from Model.exportFieldsOrder also
-                  if (exportFieldsOrder.length) {
-                    exportFieldsOrder = exportFieldsOrder.filter(item => item !== property);
-                  }
-                }
-              });
             }
 
-            // some models may have a specific order for headers
-            let originalFieldsList = Object.keys(fieldLabelsMap);
-            let fieldsList = [];
-            if (exportFieldsOrder) {
-              fieldsList = [...exportFieldsOrder];
-              // sometimes the order list contains only a subset of the actual fields list
-              if (exportFieldsOrder.length !== originalFieldsList.length) {
-                fieldsList.push(...originalFieldsList.filter(f => exportFieldsOrder.indexOf(f) === -1));
-              }
-            } else {
-              fieldsList = [...originalFieldsList];
-            }
+            // filter fields list
+            const fieldsList = helpers.filterFieldslLbelList(fieldLabelsMap, Model.exportFieldsGroup, Model.exportFieldsOrder, fieldsGroupListMap);
 
             fieldsList.forEach(function (propertyName) {
               // new functionality, not supported by all models

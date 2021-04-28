@@ -3155,6 +3155,76 @@ const handleActionsInBatches = function (
 };
 
 /**
+ * Filters model fields label list
+ * @param modelOptions Options for the model that will be exported
+ * @param modelPropertiesExpandOnFlatFiles Headers for custom fields like questionnaireAnswers
+ * @param modelFieldLabelsMap Model fields jabel map
+ * @param modelExportFieldsGroup Model export fields group
+ * @param modelExportFieldsOrder Model export fields order
+ * @param fieldsGroupListMap Export fields group map
+ */
+function filterFieldslLbelList(
+  modelFieldLabelsMap,
+  modelExportFieldsGroup,
+  modelExportFieldsOrder,
+  fieldsGroupListMap
+) {
+  // map the fields order
+  const exportFieldsOrderMap = {};
+  if (modelExportFieldsOrder) {
+    modelExportFieldsOrder.forEach((field) => {
+      exportFieldsOrderMap[field] = true;
+    });
+  }
+
+  if (Object.keys(fieldsGroupListMap).length) {
+    // mapping
+    const exportFieldsGroupMap = {};
+
+    // map the export fields groups
+    _.each(modelExportFieldsGroup, (fieldsGroup, token) => {
+      if (fieldsGroup.properties) {
+        _.each(fieldsGroup.properties, (property) => {
+          exportFieldsGroupMap[property] = token;
+        });
+      }
+    });
+
+    // exclude the fields that are not in the export fields group
+    _.each(modelFieldLabelsMap, (token, property) => {
+      if (
+        exportFieldsGroupMap[property] &&
+        !fieldsGroupListMap[exportFieldsGroupMap[property]]
+      ) {
+        delete modelFieldLabelsMap[property];
+
+        // exclude from model exportFieldsOrder also
+        if (exportFieldsOrderMap[property]) {
+          delete exportFieldsOrderMap[property];
+        }
+      }
+    });
+  }
+
+  // some models may have a specific order for headers
+  const exportFieldsOrderArray = Object.keys(exportFieldsOrderMap);
+  let originalFieldsList = Object.keys(modelFieldLabelsMap);
+  let fieldsList = [];
+  if (exportFieldsOrderArray) {
+    fieldsList = [...exportFieldsOrderArray];
+    // sometimes the order list contains only a subset of the actual fields list
+    if (exportFieldsOrderArray.length !== originalFieldsList.length) {
+      fieldsList.push(...originalFieldsList.filter(f => exportFieldsOrderArray.indexOf(f) === -1));
+    }
+  } else {
+    fieldsList = [...originalFieldsList];
+  }
+
+  // return the fields
+  return fieldsList;
+}
+
+/**
  * Export filtered model list
  * @param modelOptions Options for the model that will be exported
  * @param modelPropertiesExpandOnFlatFiles Headers for custom fields like questionnaireAnswers
@@ -3162,7 +3232,7 @@ const handleActionsInBatches = function (
  * @param exportType
  * @param encryptPassword {string|null}
  * @param anonymizeFields
- * @param exportFieldsGroup
+ * @param fieldsGroupList
  * @param options
  */
 function exportFilteredModelsList(
@@ -3172,7 +3242,7 @@ function exportFilteredModelsList(
   exportType,
   encryptPassword,
   anonymizeFields,
-  exportFieldsGroup,
+  fieldsGroupList,
   options
 ) {
   query = query || {};
@@ -3182,31 +3252,28 @@ function exportFilteredModelsList(
   // get fields that need to be exported from model options
   const fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
 
-  // get the fields order
-  let exportFieldsOrder = modelOptions.exportFieldsOrder ? [...modelOptions.exportFieldsOrder] : [];
-
   // check if location id and location identifiers custom fields should be removed
   let addLocationUID = true;
   let addLocationIdentifiers = true;
 
+  // make sure exportFieldsGroup is valid
+  if (!Array.isArray(fieldsGroupList)) {
+    fieldsGroupList = [];
+  }
+
+  // check if there are fields groups to export
+  const fieldsGroupListMap = {};
   if (
-    exportFieldsGroup.length &&
+    fieldsGroupList.length &&
     modelOptions.exportFieldsGroup
   ) {
-    // mapping
-    const exportFieldsGroupMap = {};
-
-    // map the export fields map
-    _.each(modelOptions.exportFieldsGroup, (fieldsGroup, token) => {
-      if (fieldsGroup.properties) {
-        _.each(fieldsGroup.properties, (property) => {
-          exportFieldsGroupMap[property] = token;
-        });
-      }
+    // map fields groups
+    fieldsGroupList.forEach((field) => {
+      fieldsGroupListMap[field] = true;
     });
 
     // check if location id and identifiers must be added in the file
-    if (exportFieldsGroup.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA') &&
+    if (fieldsGroupListMap['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA'] &&
       modelOptions.exportFieldsGroup['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA'] &&
       modelOptions.exportFieldsGroup['LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA']['properties']
     ) {
@@ -3216,35 +3283,10 @@ function exportFilteredModelsList(
       addLocationUID = false;
       addLocationIdentifiers = false;
     }
-
-    // exclude the fields that are not in the export fields group
-    _.each(fieldLabelsMap, (token, property) => {
-      if (
-        exportFieldsGroupMap[property] &&
-        !exportFieldsGroup.includes(exportFieldsGroupMap[property])
-      ) {
-        delete fieldLabelsMap[property];
-
-        // exclude from Model.exportFieldsOrder also
-        if (exportFieldsOrder.length) {
-          exportFieldsOrder = exportFieldsOrder.filter(item => item !== property);
-        }
-      }
-    });
   }
 
-  // some models may have a specific order for headers
-  let originalFieldsList = Object.keys(fieldLabelsMap);
-  let fieldsList = [];
-  if (exportFieldsOrder) {
-    fieldsList = [...exportFieldsOrder];
-    // sometimes the order list contains only a subset of the actual fields list
-    if (exportFieldsOrder.length !== originalFieldsList.length) {
-      fieldsList.push(...originalFieldsList.filter(f => exportFieldsOrder.indexOf(f) === -1));
-    }
-  } else {
-    fieldsList = [...originalFieldsList];
-  }
+  // filter fields list
+  const fieldsList = filterFieldslLbelList(fieldLabelsMap, modelOptions.exportFieldsGroup, modelOptions.exportFieldsOrder, fieldsGroupListMap);
 
   // create results projection from fieldsList
   let resultsProjection = {};
@@ -4396,6 +4438,7 @@ Object.assign(module.exports, {
   getMaximumLengthForArrays: getMaximumLengthForArrays,
   getCaptchaConfig: getCaptchaConfig,
   handleActionsInBatches: handleActionsInBatches,
+  filterFieldslLbelList: filterFieldslLbelList,
   exportFilteredModelsList: exportFilteredModelsList,
   extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
   sanitizePersonAddresses: sanitizePersonAddresses,
