@@ -105,6 +105,125 @@ module.exports = function (ContactOfContact) {
     'pregnancyStatus': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
   });
 
+  // map language token labels for export fields group
+  ContactOfContact.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'firstName',
+        'middleName',
+        'lastName',
+        'gender',
+        'occupation',
+        'age',
+        'age.years',
+        'age.months',
+        'dob',
+        'visualId',
+        'documents',
+        'documents[].type',
+        'documents[].number',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'pregnancyStatus'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'type',
+        'wasCase',
+        'wasContact',
+        'classification',
+        'dateOfInfection',
+        'dateOfOnset',
+        'riskLevel',
+        'riskReason',
+        'dateOfLastContact',
+        'outcomeId',
+        'dateOfOutcome',
+        'safeBurial',
+        'dateOfBurial',
+        'dateBecomeContact',
+        'transferRefused',
+        'dateBecomeCase'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {
+      properties: [
+        'vaccinesReceived',
+        'vaccinesReceived[].vaccine',
+        'vaccinesReceived[].date',
+        'vaccinesReceived[].status'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA': {
+      properties: [
+        'dateRanges'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'addresses',
+        'addresses[].typeId',
+        'addresses[].country',
+        'addresses[].city',
+        'addresses[].addressLine1',
+        'addresses[].postalCode',
+        'addresses[].locationId',
+        'addresses[].geoLocation',
+        'addresses[].geoLocation.lat',
+        'addresses[].geoLocation.lng',
+        'addresses[].geoLocationAccurate',
+        'addresses[].date',
+        'addresses[].phoneNumber',
+        'addresses[].emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RELATIONSHIPS_DATA': {
+      properties: [
+        'relationship.relatedId',
+        'relationship.contactDate',
+        'relationship.contactDateEstimated',
+        'relationship.certaintyLevelId',
+        'relationship.exposureTypeId',
+        'relationship.exposureFrequencyId',
+        'relationship.exposureDurationId',
+        'relationship.socialRelationshipTypeId',
+        'relationship.socialRelationshipDetail',
+        'relationship.clusterId',
+        'relationship.comment',
+        'relationship.id',
+        'relationship.createdAt',
+        'relationship.createdBy',
+        'relationship.updatedAt',
+        'relationship.updatedBy',
+        'relationship.deleted',
+        'relationship.deletedAt',
+        'relationship.createdOn',
+        'relationship'
+      ]
+    }
+  };
+
   ContactOfContact.exportFieldsOrder = [
     'id',
     'visualId',

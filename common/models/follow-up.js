@@ -93,6 +93,77 @@ module.exports = function (FollowUp) {
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
 
+  // map language token labels for export fields group
+  FollowUp.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'contact',
+        'contact.id',
+        'contact.visualId',
+        'contact.firstName',
+        'contact.lastName'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'date',
+        'index',
+        'teamId',
+        'statusId',
+        'isGenerated',
+        'targeted',
+        'comment'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'address',
+        'address.typeId',
+        'address.country',
+        'address.city',
+        'address.addressLine1',
+        'address.postalCode',
+        'address.locationId',
+        'address.geoLocation',
+        'address.geoLocation.lat',
+        'address.geoLocation.lng',
+        'address.geoLocationAccurate',
+        'address.date',
+        'address.phoneNumber',
+        'address.emailAddress',
+        'fillLocation',
+        'fillLocation.geoLocation',
+        'fillLocation.geoLocation.lat',
+        'fillLocation.geoLocation.lng'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    }
+  };
+
   // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
   // this is relevant only when we update a record since on create we don't have old data that we need to merge
   FollowUp.mergeFieldsOnUpdate = [

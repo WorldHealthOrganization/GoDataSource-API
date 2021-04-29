@@ -2853,6 +2853,7 @@ const attachLocations = function (targetModel, locationModel, records, callback)
           // add the location identifiers codes
           let identifiers = [];
           if (
+            locationsMap[obj.value] &&
             locationsMap[obj.value].identifiers &&
             locationsMap[obj.value].identifiers.length
           ) {
@@ -2975,6 +2976,7 @@ const attachLocationsNoModels = function (locationFields, records) {
             // add the location identifiers codes
             let identifiers = [];
             if (
+              locationsMap[obj.value] &&
               locationsMap[obj.value].identifiers &&
               locationsMap[obj.value].identifiers.length
             ) {
@@ -3170,6 +3172,7 @@ const handleActionsInBatches = function (
  * @param exportType
  * @param encryptPassword {string|null}
  * @param anonymizeFields
+ * @param fieldsGroupList
  * @param options
  */
 function exportFilteredModelsList(
@@ -3179,23 +3182,71 @@ function exportFilteredModelsList(
   exportType,
   encryptPassword,
   anonymizeFields,
+  fieldsGroupList,
   options
 ) {
   query = query || {};
 
   let modelPropertiesExpandOnFlatFilesKeys = [];
 
+  // make sure fieldsGroupList is valid
+  if (!Array.isArray(fieldsGroupList)) {
+    fieldsGroupList = [];
+  }
+
+  // get the model export fields order
+  let modelExportFieldsOrder = [...modelOptions.exportFieldsOrder];
+
   // get fields that need to be exported from model options
-  const fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
+  let fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
+
+  // filter field labels list if fields groups were provided
+  let exportLocationIdData = true;
+  if (
+    fieldsGroupList.length &&
+    modelOptions.exportFieldsGroup
+  ) {
+    // get all properties from each fields group
+    let exportFieldLabelsMap = {};
+    Object.keys(modelOptions.exportFieldsGroup).forEach((groupName) => {
+      if (fieldsGroupList.includes(groupName)) {
+        if (
+          modelOptions.exportFieldsGroup[groupName].properties &&
+          modelOptions.exportFieldsGroup[groupName].properties.length
+        ) {
+          modelOptions.exportFieldsGroup[groupName].properties.forEach((propertyName) => {
+            // add property and token
+            if (fieldLabelsMap[propertyName]) {
+              exportFieldLabelsMap[propertyName] = fieldLabelsMap[propertyName];
+            }
+          });
+        }
+      }
+    });
+
+    // use the headers come from export
+    if (Object.keys(exportFieldLabelsMap).length) {
+      fieldLabelsMap = exportFieldLabelsMap;
+
+      // ignore export fields order
+      modelExportFieldsOrder = [];
+
+      // check if location id data should be exported
+      exportLocationIdData = fieldsGroupList.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA');
+    }
+  }
 
   // some models may have a specific order for headers
   let originalFieldsList = Object.keys(fieldLabelsMap);
   let fieldsList = [];
-  if (modelOptions.exportFieldsOrder) {
-    fieldsList = [...modelOptions.exportFieldsOrder];
+  if (
+    modelExportFieldsOrder &&
+    modelExportFieldsOrder.length
+  ) {
+    fieldsList = [...modelExportFieldsOrder];
     // sometimes the order list contains only a subset of the actual fields list
-    if (modelOptions.exportFieldsOrder.length !== originalFieldsList.length) {
-      fieldsList.push(...originalFieldsList.filter(f => modelOptions.exportFieldsOrder.indexOf(f) === -1));
+    if (modelExportFieldsOrder.length !== originalFieldsList.length) {
+      fieldsList.push(...originalFieldsList.filter(f => modelExportFieldsOrder.indexOf(f) === -1));
     }
   } else {
     fieldsList = [...originalFieldsList];
@@ -3449,19 +3500,21 @@ function exportFilteredModelsList(
                       modelOptions.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
                     ) {
                       // include the location id as a new column because the original location id will be replaced with the location name
-                      headers.push({
-                        id: `${propertyName} ${i} ${propName}_uid`,
-                        // use correct label translation for user language
-                        header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')} [${i}]`
-                      });
-
-                      // include the location identifiers codes
-                      for (let j = 1; j <= highestIdentifiersChain; j++) {
+                      if (exportLocationIdData) {
                         headers.push({
-                          id: `${propertyName} ${i} ${propName}_identifiers ${j}`,
+                          id: `${propertyName} ${i} ${propName}_uid`,
                           // use correct label translation for user language
-                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}] ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${j}]`
+                          header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')} [${i}]`
                         });
+
+                        // include the location identifiers codes
+                        for (let j = 1; j <= highestIdentifiersChain; j++) {
+                          headers.push({
+                            id: `${propertyName} ${i} ${propName}_identifiers ${j}`,
+                            // use correct label translation for user language
+                            header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}] ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${j}]`
+                          });
+                        }
                       }
 
                       // include the parent locations columns
@@ -3559,29 +3612,35 @@ function exportFilteredModelsList(
                   modelOptions.locationFields.indexOf(propertyName) !== -1
                 ) {
                   // include the location id as a new column because the original location id will be replaced with the location name
-                  headers.push({
-                    id: `${propertyName}_uid`,
-                    header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
-                  });
+                  if (exportLocationIdData) {
+                    headers.push({
+                      id: `${propertyName}_uid`,
+                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
+                    });
+                  }
 
                   // include the location identifiers and parent locations columns
                   if (isJSONXMLExport) {
                     // include the location identifiers codes
-                    headers.push({
-                      id: `${propertyName}_identifiers`,
-                      header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
-                    });
+                    if (exportLocationIdData) {
+                      headers.push({
+                        id: `${propertyName}_identifiers`,
+                        header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
+                      });
+                    }
 
                     headers.push({
                       id: `${propertyName}_parentLocations`,
                       header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION')}`
                     });
                   } else {
-                    for (let i = 1; i <= highestIdentifiersChain; i++) {
-                      headers.push({
-                        id: `${propertyName.replace(/\./g, ' ')}_identifiers ${i}`,
-                        header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${i}]`
-                      });
+                    if (exportLocationIdData) {
+                      for (let i = 1; i <= highestIdentifiersChain; i++) {
+                        headers.push({
+                          id: `${propertyName.replace(/\./g, ' ')}_identifiers ${i}`,
+                          header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${i}]`
+                        });
+                      }
                     }
 
                     for (let i = 1; i <= highestParentsChain; i++) {

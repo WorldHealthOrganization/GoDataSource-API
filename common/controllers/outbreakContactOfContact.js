@@ -169,10 +169,19 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContactsOfContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredContactsOfContacts = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     app.models.contactOfContact
       .preFilterForOutbreak(this, filter, options)
       .then(filter => {
@@ -195,6 +204,7 @@ module.exports = function (Outbreak) {
           'Contacts Of Contacts List',
           encryptPassword,
           anonymizeFields,
+          fieldsGroupList,
           options,
           (results, dictionary) => {
             return new Promise(function (resolve, reject) {

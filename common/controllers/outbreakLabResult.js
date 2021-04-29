@@ -157,10 +157,19 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredLabResults = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredLabResults = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     const self = this;
 
     // defensive checks
@@ -231,6 +240,7 @@ module.exports = function (Outbreak) {
               'LabResult-List',
               encryptPassword,
               anonymizeFields,
+              fieldsGroupList,
               options,
               null,
               callback
@@ -247,10 +257,20 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCaseLabResults = function (caseId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredCaseLabResults = function (
+    caseId,
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     const self = this;
 
     // defensive checks
@@ -331,6 +351,7 @@ module.exports = function (Outbreak) {
               'LabResult-List',
               encryptPassword,
               anonymizeFields,
+              fieldsGroupList,
               options,
               null,
               callback
@@ -347,10 +368,20 @@ module.exports = function (Outbreak) {
    * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContactLabResults = function (contactId, filter, exportType, encryptPassword, anonymizeFields, options, callback) {
+  Outbreak.prototype.exportFilteredContactLabResults = function (
+    contactId,
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     const self = this;
 
     // defensive checks
@@ -431,6 +462,7 @@ module.exports = function (Outbreak) {
               'LabResult-List',
               encryptPassword,
               anonymizeFields,
+              fieldsGroupList,
               options,
               null,
               callback
