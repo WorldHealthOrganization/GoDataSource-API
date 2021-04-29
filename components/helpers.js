@@ -3195,7 +3195,9 @@ function exportFilteredModelsList(
   }
 
   // get the model export fields order
-  let modelExportFieldsOrder = [...modelOptions.exportFieldsOrder];
+  let modelExportFieldsOrder = modelOptions.exportFieldsOrder ?
+    [...modelOptions.exportFieldsOrder] :
+    [];
 
   // get fields that need to be exported from model options
   let fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;

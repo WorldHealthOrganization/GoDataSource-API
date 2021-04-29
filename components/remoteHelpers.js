@@ -187,7 +187,9 @@ function exportFilteredModelsList(
             }
 
             // get the model export fields order
-            let modelExportFieldsOrder = [...Model.exportFieldsOrder];
+            let modelExportFieldsOrder = Model.exportFieldsOrder ?
+              [...Model.exportFieldsOrder] :
+              [];
 
             // define a list of table headers
             const headers = [];
