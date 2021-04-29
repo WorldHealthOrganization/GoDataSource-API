@@ -101,9 +101,7 @@ module.exports = function (LabResult) {
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
       properties: [
-        // custom fields used to manage the ids and identifiers fields for a location
-        'uid',
-        'identifiers'
+        // the ids and identifiers fields for a location are added custom
       ],
       required: [
         'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
