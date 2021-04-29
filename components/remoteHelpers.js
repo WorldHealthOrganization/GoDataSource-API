@@ -187,7 +187,9 @@ function exportFilteredModelsList(
             }
 
             // get the model export fields order
-            let modelExportFieldsOrder = [...Model.exportFieldsOrder];
+            let modelExportFieldsOrder = Model.exportFieldsOrder ?
+              [...Model.exportFieldsOrder] :
+              Model.exportFieldsOrder;
 
             // define a list of table headers
             const headers = [];
@@ -224,7 +226,7 @@ function exportFilteredModelsList(
                 fieldLabelsMap = exportFieldLabelsMap;
 
                 // ignore export fields order
-                modelExportFieldsOrder = [];
+                modelExportFieldsOrder = undefined;
 
                 // check if location id data should be exported
                 exportLocationIdData = fieldsGroupList.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA');
