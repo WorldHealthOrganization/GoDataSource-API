@@ -12462,6 +12462,9 @@
       },
       "LNG_PAGE_DASHBOARD_KPI_NEW_CHAINS_OF_TRANSMISSION_FROM_REGISTERED_CONTACTS_WHO_BECAME_CASES_DESCRIPTION": {
         "translation": "Shows the number of new chains of transmission from registered contacts who have become cases."
+      },
+      "LNG_PAGE_DASHBOARD_PIE_CHART_TOTAL_LABEL": {
+        "translation": "TOTAL - {{total}}"
       }
     },
     "uiChainsOfTransmission": {
