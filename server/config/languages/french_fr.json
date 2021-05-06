@@ -5364,6 +5364,12 @@
       "LNG_OUTBREAK_FIELD_LABEL_COUNTRY_ID": {
         "translation": "Pays"
       },
+      "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS": {
+        "translation": "Follow-ups interval"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION": {
+        "translation": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5'). Leave empty if you want to use the old behaviour"
+      },
       "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": {
         "translation": "Jours parmi les contacts"
       },
@@ -10873,6 +10879,12 @@
         "modules": [
           "unauthenticated"
         ]
+      },
+      "LNG_FORM_VALIDATION_ERROR_INVALID_REGEX": {
+        "translation": "Invalid regex",
+        "modules": [
+          "unauthenticated"
+        ]
       }
     },
     "uiDocumentFields": {
@@ -11863,6 +11875,12 @@
       }
     },
     "uiOutbreakTemplateFields": {
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS": {
+        "translation": "Follow-ups interval"
+      },
+      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION": {
+        "translation": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5'). Leave empty if you want to use the old behaviour"
+      },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS": {
         "translation": "Jours parmi les contacts"
       },

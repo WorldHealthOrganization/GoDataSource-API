@@ -86,6 +86,11 @@ module.exports = function (Outbreak) {
       data.keepTeamAssignment :
       this.generateFollowUpsKeepTeamAssignment;
 
+    // get other generate follow-ups options
+    let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
+      data.intervalOfFollowUp :
+      this.intervalOfFollowUp;
+
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     let outbreakId = this.id;
@@ -173,7 +178,8 @@ module.exports = function (Outbreak) {
                             outbreakFollowUpPerDay,
                             targeted,
                             overwriteExistingFollowUps,
-                            teamAssignmentPerDay
+                            teamAssignmentPerDay,
+                            intervalOfFollowUp
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);

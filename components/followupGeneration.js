@@ -518,9 +518,36 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLa
  * @param targeted
  * @param overwriteExistingFollowUps flag specifying whether exiting follow-ups should be overwritten
  * @param teamAssignmentPerDay map of team assignment per day; used to not rely only on round-robin as we may reach odd scenarios
+ * @param intervalOfFollowUp Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')
  * @returns {{add: [], update: {}}}
  */
-module.exports.generateFollowupsForContact = function (contact, teams, period, freq, freqPerDay, targeted, overwriteExistingFollowUps, teamAssignmentPerDay) {
+module.exports.generateFollowupsForContact = function (
+  contact,
+  teams,
+  period,
+  freq,
+  freqPerDay,
+  targeted,
+  overwriteExistingFollowUps,
+  teamAssignmentPerDay,
+  intervalOfFollowUp
+) {
+
+  // process follow-up interval restrictions
+  let intervalOfFollowUpRestrictions;
+  if (intervalOfFollowUp) {
+    const intervalOfFollowUpValues = intervalOfFollowUp.split(',').map((v) => v.trim()).filter((v) => !!v);
+    if (
+      intervalOfFollowUpValues &&
+      intervalOfFollowUpValues.length > 0
+    ) {
+      intervalOfFollowUpRestrictions = {};
+      intervalOfFollowUpValues.forEach((followUpIndexDay) => {
+        intervalOfFollowUpRestrictions[followUpIndexDay] = true;
+      });
+    }
+  }
+
   /**
    * Get ID of the team with the smallest number of assignments for the day
    */
@@ -624,7 +651,8 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
 
     // recreate deleted follow ups, by retaining the UID
     followUpIdsToUpdateForDate.forEach(id => {
-      followUpsToUpdate[id] = _createFollowUpEntry({
+      // create follow-up
+      const followUp = _createFollowUpEntry({
         // used to easily trace all follow ups for a given outbreak
         outbreakId: contact.outbreakId,
         id: id,
@@ -635,11 +663,21 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
         teamId: getTeamIdToAssign(followUpDate),
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
       }, contact);
+
+      // do we need to update this follow-ups ?
+      if (
+        !intervalOfFollowUpRestrictions ||
+        intervalOfFollowUpRestrictions[followUp.index + '']
+      ) {
+        // update follow-up
+        followUpsToUpdate[id] = followUp;
+      }
     });
 
     // add brand new follow ups, until the daily quota is reached
     for (let i = 0; i < numberOfFollowUpsPerDay; i++) {
-      let followUp = _createFollowUpEntry({
+      // generate follow-up
+      const followUp = _createFollowUpEntry({
         // used to easily trace all follow ups for a given outbreak
         outbreakId: contact.outbreakId,
         personId: contact.id,
@@ -650,7 +688,14 @@ module.exports.generateFollowupsForContact = function (contact, teams, period, f
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
       }, contact);
 
-      followUpsToAdd.push(followUp);
+      // do we need to create this follow-ups ?
+      if (
+        !intervalOfFollowUpRestrictions ||
+        intervalOfFollowUpRestrictions[followUp.index + '']
+      ) {
+        // add it to the list
+        followUpsToAdd.push(followUp);
+      }
     }
   }
 
