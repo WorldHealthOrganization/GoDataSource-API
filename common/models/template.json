@@ -43,6 +43,10 @@
       ],
       "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
     },
+    "intervalOfFollowUp": {
+      "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
+      "type": "string"
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
