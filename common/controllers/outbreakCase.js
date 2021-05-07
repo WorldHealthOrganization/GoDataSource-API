@@ -441,13 +441,13 @@ module.exports = function (Outbreak) {
             .mergeFilters({
               where: {
                 outbreakId: outbreakId,
-                wasContact: true,
                 or: [{
-                  dateOfReporting: {
+                  wasContact: true,
+                  dateBecomeCase: {
                     gte: xDaysAgo
                   }
                 }, {
-                  dateBecomeCase: {
+                  dateOfReporting: {
                     gte: xDaysAgo
                   }
                 }]
@@ -464,7 +464,7 @@ module.exports = function (Outbreak) {
         };
 
         // get the newCasesAmongKnownContactsIDs
-        result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
 
         // send response
