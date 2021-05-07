@@ -1951,6 +1951,35 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 };
 
 /**
+ * Go through questionnaire columns and rename if they have the same header name
+ */
+const renameDuplicateQuestionnaireHeaderColumns = (questionnaireData) => {
+  // determine items for which we need to change column headers due to duplicate conflicts
+  const addKeysToHeaderWithIndexes = {};
+  questionnaireData.forEach((questionnaireColumnData1, questionnaireColumnDataIndex1) => {
+    questionnaireData.forEach((questionnaireColumnData2, questionnaireColumnDataIndex2) => {
+      // if same then we need to jump over
+      if (questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey) {
+        return;
+      }
+
+      // same translation ?
+      if (questionnaireColumnData1.expandHeader.toLowerCase() === questionnaireColumnData2.expandHeader.toLowerCase()) {
+        addKeysToHeaderWithIndexes[questionnaireColumnDataIndex1] = true;
+        addKeysToHeaderWithIndexes[questionnaireColumnDataIndex2] = true;
+      }
+    });
+  });
+
+  // change headers
+  Object.keys(addKeysToHeaderWithIndexes).forEach((questionnaireColumnDataIndex) => {
+    const questionnaireColumnData = questionnaireData[questionnaireColumnDataIndex];
+    questionnaireColumnData.expandHeader = `${questionnaireColumnData.expandHeader} (${questionnaireColumnData.expandKey})`;
+    questionnaireColumnData.header = `${questionnaireColumnData.header} (${questionnaireColumnData.expandKey})`;
+  });
+};
+
+/**
  * Retrieve list of questionnaire questions and their variables
  * @param questionnaire
  * @param idHeaderPrefix
@@ -2108,6 +2137,14 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
       }
     }
   });
+
+  // loop through headers and add variables to duplicate translations
+  if (
+    result &&
+    result.length > 1
+  ) {
+    renameDuplicateQuestionnaireHeaderColumns(result);
+  }
 
   return result;
 };
@@ -3421,6 +3458,16 @@ function exportFilteredModelsList(
                 }
               }
             }
+
+            // loop through headers and add variables to duplicate translations
+            if (
+              modelPropertiesExpandOnFlatFiles &&
+              modelPropertiesExpandOnFlatFiles.questionnaireAnswers &&
+              modelPropertiesExpandOnFlatFiles.questionnaireAnswers.length > 1
+            ) {
+              renameDuplicateQuestionnaireHeaderColumns(modelPropertiesExpandOnFlatFiles.questionnaireAnswers);
+            }
+
           }
         });
     })
