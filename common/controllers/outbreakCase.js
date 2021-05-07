@@ -442,12 +442,10 @@ module.exports = function (Outbreak) {
               where: {
                 outbreakId: outbreakId,
                 or: [{
-                  and: [{
-                    wasContact: true,
-                    dateBecomeCase: {
-                      gte: xDaysAgo
-                    }
-                  }]
+                  wasContact: true,
+                  dateBecomeCase: {
+                    gte: xDaysAgo
+                  }
                 }, {
                   dateOfReporting: {
                     gte: xDaysAgo
