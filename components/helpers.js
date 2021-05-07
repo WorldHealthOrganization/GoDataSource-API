@@ -2109,6 +2109,36 @@ const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionar
     }
   });
 
+  // loop through headers and add variables to duplicate translations
+  if (
+    result &&
+    result.length > 1
+  ) {
+    // determine items for which we need to change column headers due to duplicate conflicts
+    const addKeysToHeaderWithIndexes = {};
+    result.forEach((questionnaireColumnData1, questionnaireColumnDataIndex1) => {
+      result.forEach((questionnaireColumnData2, questionnaireColumnDataIndex2) => {
+        // if same then we need to jump over
+        if (questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey) {
+          return;
+        }
+
+        // same translation ?
+        if (questionnaireColumnData1.expandHeader.toLowerCase() === questionnaireColumnData2.expandHeader.toLowerCase()) {
+          addKeysToHeaderWithIndexes[questionnaireColumnDataIndex1] = true;
+          addKeysToHeaderWithIndexes[questionnaireColumnDataIndex2] = true;
+        }
+      });
+    });
+
+    // change headers
+    Object.keys(addKeysToHeaderWithIndexes).forEach((questionnaireColumnDataIndex) => {
+      const questionnaireColumnData = result[questionnaireColumnDataIndex];
+      questionnaireColumnData.expandHeader = `${questionnaireColumnData.expandHeader} (${questionnaireColumnData.expandKey})`;
+      questionnaireColumnData.header = `${questionnaireColumnData.header} (${questionnaireColumnData.expandKey})`;
+    });
+  }
+
   return result;
 };
 
@@ -3421,6 +3451,38 @@ function exportFilteredModelsList(
                 }
               }
             }
+
+            // loop through headers and add variables to duplicate translations
+            if (
+              modelPropertiesExpandOnFlatFiles &&
+              modelPropertiesExpandOnFlatFiles.questionnaireAnswers &&
+              modelPropertiesExpandOnFlatFiles.questionnaireAnswers.length > 1
+            ) {
+              // determine items for which we need to change column headers due to duplicate conflicts
+              const addKeysToHeaderWithIndexes = {};
+              modelPropertiesExpandOnFlatFiles.questionnaireAnswers.forEach((questionnaireColumnData1, questionnaireColumnDataIndex1) => {
+                modelPropertiesExpandOnFlatFiles.questionnaireAnswers.forEach((questionnaireColumnData2, questionnaireColumnDataIndex2) => {
+                  // if same then we need to jump over
+                  if (questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey) {
+                    return;
+                  }
+
+                  // same translation ?
+                  if (questionnaireColumnData1.expandHeader.toLowerCase() === questionnaireColumnData2.expandHeader.toLowerCase()) {
+                    addKeysToHeaderWithIndexes[questionnaireColumnDataIndex1] = true;
+                    addKeysToHeaderWithIndexes[questionnaireColumnDataIndex2] = true;
+                  }
+                });
+              });
+
+              // change headers
+              Object.keys(addKeysToHeaderWithIndexes).forEach((questionnaireColumnDataIndex) => {
+                const questionnaireColumnData = modelPropertiesExpandOnFlatFiles.questionnaireAnswers[questionnaireColumnDataIndex];
+                questionnaireColumnData.expandHeader = `${questionnaireColumnData.expandHeader} (${questionnaireColumnData.expandKey})`;
+                questionnaireColumnData.header = `${questionnaireColumnData.header} (${questionnaireColumnData.expandKey})`;
+              });
+            }
+
           }
         });
     })
