@@ -469,7 +469,7 @@ module.exports = function (Outbreak) {
         result.newCasesCount = cases.filter(item => new Date(item.dateOfReporting) >= xDaysAgo).map(item => item.id).length;
 
         // get the cases converted from contacts in the last X Days.
-        result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo && item.wasContact).map(item => item.id);
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
 
         // send response
