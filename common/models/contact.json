@@ -135,6 +135,9 @@
     },
     "questionnaireAnswers": {
       "type": "object"
+    },
+    "questionnaireAnswersCase": {
+      "type": "object"
     }
   },
   "excludeBaseProperties": [

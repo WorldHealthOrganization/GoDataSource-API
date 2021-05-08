@@ -120,6 +120,9 @@
     "questionnaireAnswers": {
       "type": "object"
     },
+    "questionnaireAnswersContact": {
+      "type": "object"
+    },
     "vaccinesReceived": {
       "type": [
         "vaccine"

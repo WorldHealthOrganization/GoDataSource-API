@@ -552,6 +552,19 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(contact.questionnaireAnswers)) {
+          params.questionnaireAnswersContact = Object.assign({}, contact.questionnaireAnswers);
+          params.questionnaireAnswers = {};
+        }
+
+        // restore data from custom forms before conversion
+        if (!_.isEmpty(contact.questionnaireAnswersCase)) {
+          params.questionnaireAnswers = Object.assign({}, contact.questionnaireAnswersCase);
+          params.questionnaireAnswersCase = {};
+        }
+
         return contact.updateAttributes(params, options);
       })
       .then(function (_case) {
