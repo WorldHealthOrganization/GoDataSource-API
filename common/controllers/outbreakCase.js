@@ -1462,12 +1462,30 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }
 
-        // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttributes({
+        // define the attributes for update
+        const attributes = {
           dateBecomeContact: app.utils.helpers.getDate().toDate(),
           wasCase: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-        }, options);
+        };
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(caseInstance.questionnaireAnswers)) {
+          attributes.questionnaireAnswersCase = Object.assign({}, caseInstance.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
+        }
+
+        // restore data from custom forms before conversion
+        if (!_.isEmpty(caseInstance.questionnaireAnswersContact)) {
+          attributes.questionnaireAnswers = Object.assign({}, caseInstance.questionnaireAnswersContact);
+          attributes.questionnaireAnswersContact = {};
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return caseInstance.updateAttributes(
+          attributes,
+          options
+        );
       })
       .then(function (contact) {
         convertedContact = contact;
