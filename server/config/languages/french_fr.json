@@ -5313,6 +5313,9 @@
       },
       "LNG_QUESTIONNAIRE_LABEL_MULTI_ANSWER_COPY_DATE_DESCRIPTION": {
         "translation": "Copy this date to all empty date fields"
+      },
+      "LNG_QUESTIONNAIRE_REGISTERED_AS_CONTACT_MESSAGE": {
+        "translation": "You cannot edit the questionnaires because this person is now a case and questionnaires were filled at the time when \"{{ personName }}\" was registered as a contact"
       }
     },
     "uiOutbreakFields": {
@@ -6245,6 +6248,15 @@
       },
       "LNG_PAGE_MODIFY_CASE_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "Not duplicates"
+      },
+      "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_CASE_WAS_CONTACT_TITLE": {
+        "translation": "This case was a contact"
+      },
+      "LNG_PAGE_MODIFY_CASE_TAB_CONTACT_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
+      },
+      "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_CONTACT_FOLLOW_UPS": {
+        "translation": "View follow-ups"
       }
     },
     "uiEntityRelationshipsListPage": {
@@ -6864,6 +6876,12 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
         "translation": "Vous avez besoin de la permission de Team - list pour changer d'équipe de suivi des contacts"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_WAS_CASE_TITLE": {
+        "translation": "This contact was a case"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_TAB_CASE_QUESTIONNAIRE_TITLE": {
+        "translation": "Questionnaire"
       }
     },
     "uiRelationshipFields": {
@@ -7298,6 +7316,18 @@
       },
       "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_SHOW_GROUP_BY_TEAM_PILLS": {
         "translation": "Show follow-ups grouped by team count"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_SHOW_MISSED_FOLLOW_UPS": {
+        "translation": "Display missed follow-ups"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_SHOW_MISSED_FOLLOW_UPS_NO_DAYS": {
+        "translation": "In the last n days"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_REGISTERED_AS_CONTACT_TITLE": {
+        "translation": "Follow-ups registered as a contact"
+      },
+      "LNG_PAGE_LIST_FOLLOW_UPS_REGISTERED_AS_CONTACT_MESSAGE": {
+        "translation": "You cannot edit the follow-ups because this person is now a case and follow-ups were performed at the time when \"{{ personName }}\" was registered as a contact"
       }
     },
     "uiCreateFollowUpPage": {
@@ -7350,6 +7380,12 @@
       },
       "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
         "translation": "* This person is now a case and follow-up was performed at the time when '{{ personName }}' was registered as a contact"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_UP_ACTION_VIEW_CASE": {
+        "translation": "View case"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_UP_REGISTERED_AS_CONTACT_MESSAGE": {
+        "translation": "* You cannot edit the follow-up because this person is now a case and follow-up was performed at the time when \"{{ personName }}\" was registered as a contact"
       }
     },
     "uiEventFields": {
@@ -14486,6 +14522,12 @@
       },
       "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_TITLE": {
         "translation": "Suivi de la gamme"
+      },
+      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_LABEL_SHOW_MISSED_FOLLOW_UPS": {
+        "translation": "Display missed follow-ups"
+      },
+      "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_LABEL_SHOW_MISSED_FOLLOW_UPS_NO_DAYS": {
+        "translation": "In the last n days"
       }
     },
     "uiLanguageFields": {
