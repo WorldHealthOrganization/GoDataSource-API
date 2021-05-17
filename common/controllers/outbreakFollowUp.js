@@ -91,6 +91,9 @@ module.exports = function (Outbreak) {
       data.intervalOfFollowUp :
       this.intervalOfFollowUp;
 
+    // check if contact tracing should start on the date of the last contact
+    const generateFollowUpsDateOfLastContact = this.generateFollowUpsDateOfLastContact;
+
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
     let outbreakId = this.id;
@@ -179,7 +182,8 @@ module.exports = function (Outbreak) {
                             targeted,
                             overwriteExistingFollowUps,
                             teamAssignmentPerDay,
-                            intervalOfFollowUp
+                            intervalOfFollowUp,
+                            generateFollowUpsDateOfLastContact
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);

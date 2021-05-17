@@ -62,6 +62,11 @@
       "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the contact's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the contact's location",
       "type": "string"
     },
+    "generateFollowUpsDateOfLastContact": {
+      "description": "Flag specifying if contact tracing should start on the date of the last contact",
+      "type": "boolean",
+      "default": false
+    },
     "noDaysAmongContacts": {
       "type": "number",
       "description": "Number of days used to calculate the proportion of new cases detected among known contacts"
