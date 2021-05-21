@@ -7281,6 +7281,9 @@
       "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_BUTTON": {
         "translation": "جهة الاتصال"
       },
+      "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CASE_BUTTON": {
+        "translation": "Case"
+      },
       "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": {
         "translation": "متابعات لجهات اتصال ذات صلة"
       },

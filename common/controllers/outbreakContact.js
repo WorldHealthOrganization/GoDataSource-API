@@ -86,7 +86,7 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Export contact follow-up list for one day
+   * Export contact follow-up list for one day or case follow-up list registered as a contact
    * @param res
    * @param date
    * @param contactId
@@ -257,7 +257,7 @@ module.exports = function (Outbreak) {
         })
         .then(function (followUps) {
           // find contacts for the found follow-ups
-          return app.models.contact
+          return app.models.person
             .rawFind({
               _id: contactId ? contactId : {
                 inq: [...new Set(followUps.map(followUp => followUp.personId))]
