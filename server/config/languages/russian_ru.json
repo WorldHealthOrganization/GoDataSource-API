@@ -5460,6 +5460,12 @@
       "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
         "translation": "<div style='color: #FFF; padding-bottom: 10px'><span style='font-weight: bold;'>[Option 1]</span> - If Team1 has 'Argentina' assigned and Team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Option 2]</span> - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done.</div>"
       },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT": {
+        "translation": "Start contact follow-up on the date of last contact"
+      },
+      "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT_DESCRIPTION": {
+        "translation": "Flag specifying if contact tracing should start on the date of the last contact"
+      },
       "LNG_OUTBREAK_FIELD_LABEL_ID": {
         "translation": "Идентификатор"
       },
