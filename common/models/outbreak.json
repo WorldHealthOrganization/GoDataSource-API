@@ -6651,7 +6651,7 @@
           }
         }
       ],
-      "description": "Export a pdf file with the daily contact follow-up form, for every relevant contact, from a specific day",
+      "description": "Export a pdf file with the daily contact follow-up form, for every relevant contact (or case follow-ups registered as a contact), from a specific day",
       "http": {
         "verb": "get",
         "path": "/contacts/daily-followup-form/export"
