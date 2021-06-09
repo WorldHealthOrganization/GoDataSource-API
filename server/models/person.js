@@ -1258,25 +1258,25 @@ module.exports = function (Person) {
     // first - last name condition
     const firstLastName = helpers.getDuplicateKey(targetBody, ['firstName', 'lastName']);
     if (firstLastName) {
-      query.$or.push(
-        {'duplicateKeys.name': firstLastName}
-      );
+      query.$or.push({
+        'duplicateKeys.name': firstLastName
+      });
     }
 
     // first - middle name condition
     const firstMiddleName = helpers.getDuplicateKey(targetBody, ['firstName', 'middleName']);
     if (firstMiddleName) {
-      query.$or.push(
-        {'duplicateKeys.name': firstMiddleName}
-      );
+      query.$or.push({
+        'duplicateKeys.name': firstMiddleName
+      });
     }
 
     // last - middle name condition
     const lastMiddleName = helpers.getDuplicateKey(targetBody,['lastName', 'middleName']);
     if (lastMiddleName) {
-      query.$or.push(
-        {'duplicateKeys.name': lastMiddleName}
-      );
+      query.$or.push({
+        'duplicateKeys.name': lastMiddleName
+      });
     }
 
     // documents conditions
@@ -1286,9 +1286,9 @@ module.exports = function (Person) {
         ['type', 'number']
       );
       if (docKey) {
-        query.$or.push(
-          {'duplicateKeys.document': docKey}
-        );
+        query.$or.push({
+          'duplicateKeys.document': docKey
+        });
       }
     });
 

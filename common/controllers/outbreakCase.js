@@ -1406,10 +1406,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getCasePossibleDuplicates = function (model = {}, options, callback) {
-    app.models.person
-      .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model, options)
-      .then(duplicates => callback(null, duplicates))
-      .catch(callback);
+    if (
+      Config.duplicate &&
+      Config.duplicate.disableCaseDuplicateCheck
+    ) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 
   /**

@@ -3,10 +3,11 @@
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Helpers = require('../../../../../components/helpers');
 const _ = require('lodash');
+const Config = require('../../../../config.json');
 
 // constants
-const personFindBatchSize = 10000;
-const personUpdateBatchSize = 200;
+const personFindBatchSize = _.get(Config, 'jobSettings.updateMissingDuplicateKeys.batchSize', 10000);
+const personUpdateBatchSize = _.get(Config, 'jobSettings.updateMissingDuplicateKeys.updateBatchSize', 50);
 
 /**
  * Update duplicate keys used to easily find duplicates

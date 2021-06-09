@@ -3027,10 +3027,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactPossibleDuplicates = function (model = {}, options, callback) {
-    app.models.person
-      .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
-      .then(duplicates => callback(null, duplicates))
-      .catch(callback);
+    if (
+      Config.duplicate &&
+      Config.duplicate.disableContactDuplicateCheck
+    ) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 
   /**

@@ -13,6 +13,7 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const moment = require('moment');
 const apiError = require('../../components/apiError');
+const Config = require('../../server/config.json');
 
 module.exports = function (Outbreak) {
   /**
@@ -339,10 +340,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.getContactOfContactPossibleDuplicates = function (model = {}, options, callback) {
-    app.models.person
-      .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', model, options)
-      .then(duplicates => callback(null, duplicates))
-      .catch(callback);
+    if (
+      Config.duplicate &&
+      Config.duplicate.disableContactOfContactDuplicateCheck
+    ) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT', model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 
   /**
