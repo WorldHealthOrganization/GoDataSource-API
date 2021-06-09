@@ -27,6 +27,13 @@ const updateMissingDuplicateKeys = (callback) => {
           .countDocuments({
             duplicateKeys: {
               $exists: false
+            },
+            type: {
+              $in: [
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              ]
             }
           });
       };
@@ -37,12 +44,18 @@ const updateMissingDuplicateKeys = (callback) => {
           .find({
             duplicateKeys: {
               $exists: false
+            },
+            type: {
+              $in: [
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              ]
             }
           }, {
             limit: batchSize,
             projection: {
               _id: 1,
-              type: 1,
               firstName: 1,
               lastName: 1,
               middleName: 1,
@@ -53,15 +66,6 @@ const updateMissingDuplicateKeys = (callback) => {
       };
 
       const itemAction = (data) => {
-        // exclude events
-        if (
-          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
-          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
-        ) {
-          return Promise.resolve();
-        }
-
         // first, last, middle names
         const target = {};
         Helpers.attachDuplicateKeys(
