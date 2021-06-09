@@ -3022,14 +3022,13 @@ module.exports = function (Outbreak) {
 
   /**
    * Get all duplicates based on hardcoded rules against a model props
-   * @param filter pagination props (skip, limit)
    * @param model
    * @param options
    * @param callback
    */
-  Outbreak.prototype.getContactPossibleDuplicates = function (filter = {}, model = {}, options, callback) {
+  Outbreak.prototype.getContactPossibleDuplicates = function (model = {}, options, callback) {
     app.models.person
-      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
+      .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
       .then(duplicates => callback(null, duplicates))
       .catch(callback);
   };

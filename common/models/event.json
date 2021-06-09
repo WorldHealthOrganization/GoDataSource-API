@@ -89,7 +89,8 @@
     "dateOfOutcome",
     "dateOfBurial",
     "dateBecomeContact",
-    "followUp"
+    "followUp",
+    "duplicateKeys"
   ],
   "validations": [],
   "relations": {},

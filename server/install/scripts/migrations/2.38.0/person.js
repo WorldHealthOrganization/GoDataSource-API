@@ -1,0 +1,124 @@
+'use strict';
+
+const MongoDBHelper = require('../../../../../components/mongoDBHelper');
+const Helpers = require('../../../../../components/helpers');
+const _ = require('lodash');
+
+// constants
+const personFindBatchSize = 10000;
+const personUpdateBatchSize = 200;
+
+/**
+ * Update duplicate keys used to easily find duplicates
+ */
+const updateMissingDuplicateKeys = (callback) => {
+  // create Mongo DB connection
+  let personCollection;
+  return MongoDBHelper
+    .getMongoDBConnection()
+    .then(dbConn => {
+      personCollection = dbConn.collection('person');
+
+      // initialize parameters for handleActionsInBatches call
+      const getActionsCount = () => {
+        // count persons
+        return personCollection
+          .countDocuments({
+            duplicateKeys: {
+              $exists: false
+            }
+          });
+      };
+
+      const getBatchData = (batchNo, batchSize) => {
+        // get persons for batch
+        return personCollection
+          .find({
+            duplicateKeys: {
+              $exists: false
+            }
+          }, {
+            limit: batchSize,
+            projection: {
+              _id: 1,
+              type: 1,
+              firstName: 1,
+              lastName: 1,
+              middleName: 1,
+              documents: 1
+            }
+          })
+          .toArray();
+      };
+
+      const itemAction = (data) => {
+        // exclude events
+        if (
+          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
+          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+          data.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+        ) {
+          return Promise.resolve();
+        }
+
+        // first, last, middle names
+        const target = {};
+        Helpers.attachDuplicateKeys(
+          target,
+          data,
+          'name',
+          [
+            ['firstName', 'lastName'],
+            ['firstName', 'middleName'],
+            ['lastName', 'middleName']
+          ]
+        );
+
+        // attach documents
+        Helpers.attachDuplicateKeys(
+          target,
+          data,
+          'document',
+          [
+            ['type', 'number']
+          ],
+          'documents'
+        );
+
+        // we need to put something even if no duplicate keys should exist
+        if (
+          !target.duplicateKeys ||
+          _.isEmpty(target.duplicateKeys)
+        ) {
+          target.duplicateKeys = {};
+        }
+
+        // update person
+        return personCollection
+          .updateOne({
+            _id: data._id
+          }, {
+            '$set': target
+          });
+      };
+
+      return Helpers.handleActionsInBatches(
+        getActionsCount,
+        getBatchData,
+        null,
+        itemAction,
+        personFindBatchSize,
+        personUpdateBatchSize,
+        console
+      );
+    })
+    .then(() => {
+      callback();
+    })
+    .catch(callback);
+};
+
+// export list of migration jobs; functions that receive a callback
+module.exports = {
+  updateMissingDuplicateKeys
+};

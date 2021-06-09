@@ -6828,15 +6828,6 @@
     "prototype.getContactPossibleDuplicates": {
       "accepts": [
         {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
-          "http": {
-            "source": "query"
-          },
-          "required": true
-        },
-        {
           "arg": "data",
           "type": "object",
           "model": "contact",
@@ -6972,15 +6963,6 @@
     },
     "prototype.getCasePossibleDuplicates": {
       "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
-          "http": {
-            "source": "query"
-          },
-          "required": true
-        },
         {
           "arg": "data",
           "type": "object",
@@ -8236,15 +8218,6 @@
     },
     "prototype.getContactOfContactPossibleDuplicates": {
       "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "description": "Filter offset and limit - must be a JSON-encoded string ({\"something\":\"value\"}).",
-          "http": {
-            "source": "query"
-          },
-          "required": true
-        },
         {
           "arg": "data",
           "type": "object",

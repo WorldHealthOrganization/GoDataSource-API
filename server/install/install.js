@@ -22,7 +22,8 @@ const supportedArguments = [
   'determine-and-dump-reference-data-items',
   'populate-missing-language-tokens',
   'migrate-case-centre-name',
-  'copy-language-from-template-questionnaires-to-template-questionnaires'
+  'copy-language-from-template-questionnaires-to-template-questionnaires',
+  'update-persons-missing-duplicate-keys'
 ];
 // keep a list of functions that will be run
 const runFunctions = [];
@@ -392,7 +393,14 @@ const routines = {
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
     });
-  }
+  },
+  updatePersonsMissingDuplicateKeys: function () {
+    // Update duplicate keys
+    console.log('Update persons duplicate keys');
+    runFunctions.push((cb) => {
+      require('./scripts/migrations/2.38.0/person').updateMissingDuplicateKeys(cb);
+    });
+  },
 };
 
 // check which routines should be run based on the passed arguments
