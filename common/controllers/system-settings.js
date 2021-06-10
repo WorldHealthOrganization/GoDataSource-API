@@ -242,7 +242,8 @@ module.exports = function (SystemSettings) {
             config.duplicate : {
               disableCaseDuplicateCheck: false,
               disableContactDuplicateCheck: false,
-              disableContactOfContactDuplicateCheck: false
+              disableContactOfContactDuplicateCheck: false,
+              executeCheckOnlyOnDuplicateDataChange: false
             }
         }
       )

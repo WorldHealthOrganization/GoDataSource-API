@@ -343,7 +343,8 @@
               "type": {
                 "disableCaseDuplicateCheck": "boolean",
                 "disableContactDuplicateCheck": "boolean",
-                "disableContactOfContactDuplicateCheck": "boolean"
+                "disableContactOfContactDuplicateCheck": "boolean",
+                "executeCheckOnlyOnDuplicateDataChange": "boolean"
               }
             },
             "platform": "string",
