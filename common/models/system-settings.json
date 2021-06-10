@@ -339,6 +339,13 @@
                 }
               }
             },
+            "duplicate": {
+              "type": {
+                "disableCaseDuplicateCheck": "boolean",
+                "disableContactDuplicateCheck": "boolean",
+                "disableContactOfContactDuplicateCheck": "boolean"
+              }
+            },
             "platform": "string",
             "skipOldPasswordForUserModify": "boolean",
             "tokenTTL": "number",

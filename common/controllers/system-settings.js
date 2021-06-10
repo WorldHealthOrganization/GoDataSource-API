@@ -237,6 +237,12 @@ module.exports = function (SystemSettings) {
           demoInstance: config.demoInstance ?
             config.demoInstance : {
               enabled: false
+            },
+          duplicate: config.duplicate ?
+            config.duplicate : {
+              disableCaseDuplicateCheck: false,
+              disableContactDuplicateCheck: false,
+              disableContactOfContactDuplicateCheck: false
             }
         }
       )
