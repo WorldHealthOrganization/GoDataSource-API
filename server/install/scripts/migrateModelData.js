@@ -115,6 +115,15 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.38.0',
+  scripts: [{
+    fileName: 'person.js',
+    actions: [{
+      name: 'updateMissingDuplicateKeys',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**

@@ -175,6 +175,10 @@
     },
     "importResources": {
       "batchSize": 100
+    },
+    "updateMissingDuplicateKeys": {
+      "batchSize": 10000,
+      "updateBatchSize": 50
     }
   },
   "caching": {
@@ -203,5 +207,11 @@
       "fontSize": "40px"
     }
   },
-  "adminEmail": "admin@who.int"
+  "adminEmail": "admin@who.int",
+  "duplicate": {
+    "disableCaseDuplicateCheck": false,
+    "disableContactDuplicateCheck": false,
+    "disableContactOfContactDuplicateCheck": false,
+    "executeCheckOnlyOnDuplicateDataChange": false
+  }
 }

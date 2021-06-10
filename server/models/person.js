@@ -5,7 +5,6 @@ const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
-const escapeStringRegexp = require('escape-string-regexp');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
 
@@ -384,6 +383,44 @@ module.exports = function (Person) {
       if (addressValidationError) {
         // stop with error
         return next(addressValidationError);
+      }
+    }
+
+    // set duplicate easy find index keys
+    if (
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+    ) {
+      // first, last, middle names
+      helpers.attachDuplicateKeys(
+        data.target,
+        data.source.all,
+        'name',
+        [
+          ['firstName', 'lastName'],
+          ['firstName', 'middleName'],
+          ['lastName', 'middleName']
+        ]
+      );
+
+      // attach documents
+      helpers.attachDuplicateKeys(
+        data.target,
+        data.source.all,
+        'document',
+        [
+          ['type', 'number']
+        ],
+        'documents'
+      );
+
+      // if duplicate values are the same - delete from update
+      if (_.isEqual(
+        data.target.duplicateKeys,
+        data.source.all.duplicateKeys
+      )) {
+        delete data.target.duplicateKeys;
       }
     }
 
@@ -1202,36 +1239,14 @@ module.exports = function (Person) {
 
   /**
    * Find duplicates entries in database based on hardcoded rules
-   * @param filter Pagination props (skip, limit)
    * @param outbreakId Outbreak id, used to narrow the searches
    * @param type Contact/Case
    * @param targetBody Target body properties (this is used for checking duplicates)
    * @param options Options from request
    */
-  Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody, options) {
-    filter = filter || {};
-    const buildRuleFilterPart = function (opts) {
-      // construct regex condition for case insensitive match
-      // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
-      // #TODO must replace logic with a key generated when you update a case contact so we don't have to check many conditions like we have now ( combinations between first / last / middle name )
-      // #TODO we should have something in person like: uniqueKey array.sort([firstName.toLoweCase(), lastName.toLoweCase(), middleName.toLoweCase()]).join('') ..this isn't enough, but it is a start
-      const props = Object.keys(opts);
-      const condition = {};
-      props.forEach((prop) => {
-        condition[prop] = {
-          $regex: `^${escapeStringRegexp(opts[prop])}$`,
-          $options: 'i'
-        };
-      });
-
-      // finished
-      return condition;
-    };
-
-    // remove end of line
-    const removeEOL = (value) => {
-      return value ? value.trim().replace(/(\n|\r)/gm, '') : value;
-    };
+  Person.findDuplicatesByType = function (outbreakId, type, targetBody, options) {
+    // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
+    // #TODO instead of having these "duplicateKeys"
 
     // init base query
     let query = {
@@ -1240,64 +1255,42 @@ module.exports = function (Person) {
       $or: []
     };
 
-    // make sure we trim values
-    targetBody.firstName = removeEOL(targetBody.firstName);
-    targetBody.lastName = removeEOL(targetBody.lastName);
-    targetBody.middleName = removeEOL(targetBody.middleName);
-
-    // duplicate rules
-    if (targetBody.firstName && targetBody.lastName) {
-      query.$or.push(
-        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.lastName}),
-        buildRuleFilterPart({firstName: targetBody.lastName, lastName: targetBody.firstName}),
-        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.lastName}),
-        buildRuleFilterPart({firstName: targetBody.lastName, middleName: targetBody.firstName}),
-        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.lastName}),
-        buildRuleFilterPart({lastName: targetBody.lastName, middleName: targetBody.firstName})
-      );
-    }
-
-    if (targetBody.firstName && targetBody.middleName) {
-      query.$or.push(
-        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.middleName}),
-        buildRuleFilterPart({firstName: targetBody.middleName, middleName: targetBody.firstName}),
-        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.middleName}),
-        buildRuleFilterPart({firstName: targetBody.middleName, lastName: targetBody.firstName}),
-        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.middleName}),
-        buildRuleFilterPart({lastName: targetBody.middleName, middleName: targetBody.firstName})
-      );
-    }
-
-    if (targetBody.middleName && targetBody.lastName) {
-      query.$or.push(
-        buildRuleFilterPart({middleName: targetBody.middleName, lastName: targetBody.lastName}),
-        buildRuleFilterPart({middleName: targetBody.lastName, lastName: targetBody.middleName}),
-        buildRuleFilterPart({middleName: targetBody.middleName, firstName: targetBody.lastName}),
-        buildRuleFilterPart({middleName: targetBody.lastName, firstName: targetBody.middleName}),
-        buildRuleFilterPart({lastName: targetBody.middleName, firstName: targetBody.lastName}),
-        buildRuleFilterPart({lastName: targetBody.lastName, firstName: targetBody.middleName})
-      );
-    }
-
-    // check against each document in the target body
-    if (targetBody.documents) {
-      targetBody.documents.forEach((doc) => {
-        // we only search the documents that have both target properties with values
-        if (doc.type && doc.number) {
-          query.$or.push({
-            documents: {
-              $elemMatch: {
-                type: doc.type,
-                number: {
-                  $regex: `^${escapeStringRegexp(doc.number)}$`,
-                  $options: 'i'
-                }
-              }
-            }
-          });
-        }
+    // first - last name condition
+    const firstLastName = helpers.getDuplicateKey(targetBody, ['firstName', 'lastName']);
+    if (firstLastName) {
+      query.$or.push({
+        'duplicateKeys.name': firstLastName
       });
     }
+
+    // first - middle name condition
+    const firstMiddleName = helpers.getDuplicateKey(targetBody, ['firstName', 'middleName']);
+    if (firstMiddleName) {
+      query.$or.push({
+        'duplicateKeys.name': firstMiddleName
+      });
+    }
+
+    // last - middle name condition
+    const lastMiddleName = helpers.getDuplicateKey(targetBody,['lastName', 'middleName']);
+    if (lastMiddleName) {
+      query.$or.push({
+        'duplicateKeys.name': lastMiddleName
+      });
+    }
+
+    // documents conditions
+    (targetBody.documents || []).forEach((doc) => {
+      const docKey = helpers.getDuplicateKey(
+        doc,
+        ['type', 'number']
+      );
+      if (docKey) {
+        query.$or.push({
+          'duplicateKeys.document': docKey
+        });
+      }
+    });
 
     // exclude target instance from the checks
     if (targetBody.id) {
@@ -1353,7 +1346,7 @@ module.exports = function (Person) {
       // finished
       return promise
         .then(() => {
-          return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+          return app.models.person.rawFind(query);
         });
     } else {
       // otherwise return empty list

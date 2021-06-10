@@ -184,6 +184,16 @@
     "usualPlaceOfResidenceLocationId": {
       "description": "Location ID for the usual place of residence address.",
       "type": "string"
+    },
+    "duplicateKeys": {
+      "type": {
+        "name": {
+          "type": ["string"]
+        },
+        "document": {
+          "type": ["string"]
+        }
+      }
     }
   },
   "indexes": {
@@ -252,6 +262,12 @@
     },
     "usualPlaceOfResidenceLocationId_index": {
       "usualPlaceOfResidenceLocationId": 1
+    },
+    "duplicateKey_name_index": {
+      "duplicateKeys.name": 1
+    },
+    "duplicateKey_document_index": {
+      "duplicateKeys.document": 1
     }
   },
   "validations": [],

@@ -4391,6 +4391,93 @@ const sanitizePersonVisualId = (visualId) => {
     .replace(/\*/g, '');
 };
 
+/**
+ * Retrieve duplicate key from values
+ */
+const getDuplicateKey = (
+  modelData,
+  props
+) => {
+  // first & last name
+  let propValues = [];
+
+  // format values and validate them, all should contain data
+  for (const prop of props) {
+    // not a valid prop ?
+    const propFinalValue = _.camelCase(modelData[prop]).toLowerCase();
+    if (!propFinalValue) {
+      return null;
+    }
+
+    // attach to list
+    propValues.push(propFinalValue);
+  }
+
+  // create key
+  return _.camelCase(propValues.sort().join()).toLowerCase();
+};
+
+/**
+ * Attach duplicate keys for easy find
+ */
+const attachDuplicateKeys = (
+  target,
+  modelData,
+  duplicateKey,
+  propCombinations,
+  modelDataArrayKey
+) => {
+  // duplicate keys parent
+  target.duplicateKeys = target.duplicateKeys || _.cloneDeep(modelData.duplicateKeys) || {};
+
+  // remove previous keys
+  target.duplicateKeys[duplicateKey] = [];
+
+  // first & last name
+  for (const propCombination of propCombinations) {
+    // handle as array property ?
+    if (modelDataArrayKey) {
+      for (const arrayItem of (modelData[modelDataArrayKey] || [])) {
+        // determine key
+        const duplicateKeyValue = getDuplicateKey(
+          arrayItem,
+          propCombination
+        );
+
+        // nothing to add ?
+        if (!duplicateKeyValue) {
+          continue;
+        }
+
+        // add key to index
+        target.duplicateKeys[duplicateKey].push(duplicateKeyValue);
+      }
+    } else {
+      // determine key
+      const duplicateKeyValue = getDuplicateKey(
+        modelData,
+        propCombination
+      );
+
+      // nothing to add ?
+      if (!duplicateKeyValue) {
+        continue;
+      }
+
+      // add key to index
+      target.duplicateKeys[duplicateKey].push(duplicateKeyValue);
+    }
+  }
+
+  // if empty - then remove key
+  if (
+    !target.duplicateKeys[duplicateKey] ||
+    target.duplicateKeys[duplicateKey].length < 1
+  ) {
+    delete target.duplicateKeys[duplicateKey];
+  }
+};
+
 Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -4454,5 +4541,7 @@ Object.assign(module.exports, {
   sanitizePersonAddresses: sanitizePersonAddresses,
   sanitizePersonVisualId: sanitizePersonVisualId,
   processMapLists: processMapLists,
-  remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap
+  remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap,
+  getDuplicateKey,
+  attachDuplicateKeys
 });
