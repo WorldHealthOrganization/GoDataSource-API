@@ -17,8 +17,8 @@ const updateMissingDuplicateKeys = (callback) => {
   let personCollection;
   return MongoDBHelper
     .getMongoDBConnection({
-      connectTimeoutMS: 9999999,
-      socketTimeoutMS: 9999999
+      connectTimeoutMS: 999999999,
+      socketTimeoutMS: 999999999
     })
     .then(dbConn => {
       personCollection = dbConn.collection('person');
@@ -39,7 +39,7 @@ const updateMissingDuplicateKeys = (callback) => {
               $exists: false
             }
           }, {
-            maxTimeMS: 999999
+            maxTimeMS: 99999999
           });
       };
 
