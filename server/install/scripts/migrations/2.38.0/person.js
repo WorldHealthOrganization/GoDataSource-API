@@ -25,16 +25,18 @@ const updateMissingDuplicateKeys = (callback) => {
         // count persons
         return personCollection
           .countDocuments({
-            duplicateKeys: {
-              $exists: false
-            },
             type: {
               $in: [
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
               ]
+            },
+            duplicateKeys: {
+              $exists: false
             }
+          }, {
+            maxTimeMS: 999999
           });
       };
 
@@ -42,15 +44,15 @@ const updateMissingDuplicateKeys = (callback) => {
         // get persons for batch
         return personCollection
           .find({
-            duplicateKeys: {
-              $exists: false
-            },
             type: {
               $in: [
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
                 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
               ]
+            },
+            duplicateKeys: {
+              $exists: false
             }
           }, {
             limit: batchSize,
