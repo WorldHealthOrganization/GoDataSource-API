@@ -10,6 +10,9 @@ const fsExtra = require('fs-extra');
 const workerRunner = require('./workerRunner');
 const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
 
+// limit for each chunk
+const noElementsInFilterArrayLimit = 20000;
+
 // map of collection names and property name that matches a file on the disk
 // also directory path (relative to the project) that holds the files should be left unchanged
 const collectionsWithFiles = {
@@ -145,6 +148,57 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
 }
 
 /**
+ * Split in condition into multiple filters since having too many ids in a $in condition fails to retrieve data
+ */
+function getChunkFilters(
+  collectionName,
+  baseFilter,
+  filter,
+  resultKey,
+  chunkKey
+) {
+  // initiate filters
+  const filters = [];
+
+  // check if we need to filter for specific records
+  const recordsIds = _.get(filter, `where.${chunkKey}`);
+  if (recordsIds) {
+    // split into chunks since we can't send as many ids as we want
+    _.chunk(
+      recordsIds,
+      noElementsInFilterArrayLimit
+    ).forEach((chunkIds) => {
+      // construct filter
+      const result = addOutbreakIdMongoFilter(
+        collectionName,
+        baseFilter,
+        filter
+      );
+
+      // add chunk condition
+      result[resultKey] = {
+        '$in': chunkIds
+      };
+
+      // push filter
+      filters.push(result);
+    });
+  } else {
+    // original filter that we don't need to alter
+    filters.push(
+      addOutbreakIdMongoFilter(
+        collectionName,
+        baseFilter,
+        filter
+      )
+    );
+  }
+
+  // array of filters since we might need to make multiple requests due to large amounts of ids
+  return filters;
+}
+
+/**
  * Add outbreak ID and person ID filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
  * @param collectionName Collection name; Depending on collection name the filter might be different
@@ -153,18 +207,13 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addPersonMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
-
-  // check for personsIds to filter
-  let personsIds = _.get(filter, 'where.personsIds');
-  if (personsIds) {
-    result._id = {
-      '$in': personsIds
-    };
-  }
-
-  return result;
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    '_id',
+    'personsIds'
+  );
 }
 
 /**
@@ -176,18 +225,13 @@ function addPersonMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addLabResultMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
-
-  // check for casesIds to filter
-  let casesIds = _.get(filter, 'where.casesIds');
-  if (casesIds) {
-    result.personId = {
-      '$in': casesIds
-    };
-  }
-
-  return result;
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    'personId',
+    'casesIds'
+  );
 }
 
 /**
@@ -199,27 +243,30 @@ function addLabResultMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addFollowupMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+  const filters = getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    'personId',
+    'contactsIds'
+  );
 
-  // check for contactsIds and teamsIDs to filter
-  let contactsIds = _.get(filter, 'where.contactsIds');
+  // attach teams to filters
   let teamsIDs = _.get(filter, 'where.teamsIds');
-  if (contactsIds && teamsIDs) {
-    result.personId = {
-      '$in': contactsIds
-    };
-    // get only the followups assigned to the teams or not assigned
-    result['$or'] = [{
-      teamId: {
-        '$in': teamsIDs
-      }
-    }, {
-      teamId: null
-    }];
+  if (teamsIDs) {
+    filters.forEach((filter) => {
+      filter.$or = [{
+        teamId: {
+          '$in': teamsIDs
+        }
+      }, {
+        teamId: null
+      }];
+    });
   }
 
-  return result;
+  // finished
+  return filters;
 }
 
 /**
@@ -231,18 +278,13 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addRelationshipMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
-
-  // check for relationshipsIds to filter
-  let relationshipsIds = _.get(filter, 'where.relationshipsIds');
-  if (relationshipsIds) {
-    result._id = {
-      '$in': relationshipsIds
-    };
-  }
-
-  return result;
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    '_id',
+    'relationshipsIds'
+  );
 }
 
 /**
