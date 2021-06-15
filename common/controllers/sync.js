@@ -292,17 +292,8 @@ module.exports = function (Sync) {
           }
         }
 
-        // mobile doesn't allow outbreak selection - always uses active outbreak
-        // otherwise set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty/invalid
-        if (
-          options &&
-          options.exportForMobile
-        ) {
-          filter.where.outbreakId = userModel.activeOutbreakId;
-        } else if (
-          !exportedOutbreakIDs.length &&
-          allowedOutbreakIDs.length
-        ) {
+        // set the client allowed outbreakIDs in the filter if the received outbreakId filter was empty/invalid
+        if (!exportedOutbreakIDs.length && allowedOutbreakIDs.length) {
           // outbreakId filter was not sent or is in an invalid format
           // use the allowedOutbreakIDs as filter
           filter.where.outbreakId = {
@@ -469,10 +460,6 @@ module.exports = function (Sync) {
       // add language filter; will be further processed before it reaches DB
       filter.where.languages = data.languages;
     }
-
-    // let the system know that we export data only for mobile
-    options = options || {};
-    options.exportForMobile = true;
 
     // download snapshot
     getDatabaseSnapshot(filter, false, password, autoEncrypt, chunkSize, userEmail, options, done);
