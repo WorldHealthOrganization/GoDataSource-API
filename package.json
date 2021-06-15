@@ -22,7 +22,8 @@
     "remove-language-tokens-of-deleted-outbreaks": "node ./server/install/install.js remove-language-tokens-of-deleted-outbreaks",
     "populate-with-dummy-data": "node ./server/install/install.js populate-with-dummy-data",
     "determine-and-dump-reference-data-items": "node ./server/install/install.js determine-and-dump-reference-data-items",
-    "copy-language-from-template-questionnaires-to-template-questionnaires": "node ./server/install/install.js copy-language-from-template-questionnaires-to-template-questionnaires"
+    "copy-language-from-template-questionnaires-to-template-questionnaires": "node ./server/install/install.js copy-language-from-template-questionnaires-to-template-questionnaires",
+    "update-persons-missing-duplicate-keys": "node ./server/install/install.js update-persons-missing-duplicate-keys"
   },
   "dependencies": {
     "adm-zip": "0.4.11",

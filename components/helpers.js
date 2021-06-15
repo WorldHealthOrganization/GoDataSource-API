@@ -24,6 +24,7 @@ const anonymizeDatasetFields = require('./anonymizeDatasetFields');
 const mergeFilters = require('./mergeFilters');
 const baseLanguageModel = require('./baseModelOptions/language');
 const aesCrypto = require('./aesCrypto');
+const { performance } = require('perf_hooks');
 
 const arrayFields = {
   'addresses': 'address',
@@ -3110,6 +3111,7 @@ const getCaptchaConfig = () => {
  * @param batchSize Size of a batch
  * @param parallelActionsNo Number of actions to be executed in parallel in a batch
  * @param logger
+ * @param startFromBatch If you want to jump over the first n batches you can specify this
  * @return {*|PromiseLike<T | never | never>|Promise<T | never | never>}
  */
 const handleActionsInBatches = function (
@@ -3119,37 +3121,69 @@ const handleActionsInBatches = function (
   itemAction,
   batchSize,
   parallelActionsNo,
-  logger
+  logger,
+  startFromBatch
 ) {
+  // convert to human readable format
+  const msToTime = (duration) => {
+    let milliseconds = parseInt((duration % 1000) / 100),
+      seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60),
+      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? '0' + hours : hours;
+    minutes = (minutes < 10) ? '0' + minutes : minutes;
+    seconds = (seconds < 10) ? '0' + seconds : seconds;
+
+    return hours + ':' + minutes + ':' + seconds + '.' + milliseconds;
+  };
+
+  // count items
+  const countStartTime = performance.now();
   return getActionsCount()
     .then(actionsCount => {
+      const countEndTime = performance.now();
       if (actionsCount === 0) {
         // nothing to do
-        logger.debug('No data found for which to execute actions');
+        logger.debug(`No data found for which to execute actions ( count duration: ${msToTime(countEndTime - countStartTime)})`);
         return Promise.resolve();
       }
 
       let totalBatchesNo = Math.ceil(actionsCount / batchSize);
-      logger.debug(`Actions to be done: ${actionsCount}. Batches: ${totalBatchesNo}`);
+      logger.debug(`Actions to be done: ${new Intl.NumberFormat().format(actionsCount)}. Batches: ${totalBatchesNo}. ( count duration: ${msToTime(countEndTime - countStartTime)})`);
 
       /**
        * Handle batchNo of actions
        * @param batchNo
        * @return {PromiseLike<T | never>}
        */
-      const handleBatch = (batchNo = 1) => {
+      const handleBatch = (batchNo) => {
+        // used to determine duration of each batch
+        const batchStartTime = performance.now();
+        let batchGetDataEndTime, batchItemsActionEndTime;
+
+        // log
         logger.debug(`Processing batch ${batchNo} of ${totalBatchesNo}`);
 
         return getBatchData(batchNo, batchSize)
           .then(dataArray => {
+            // used to determine how long it took to get batch data ?
+            batchGetDataEndTime = performance.now();
+
             // do we need to execute action for all batch data ?
             if (!batchItemsAction) {
+              // used to determine how long it took to get batch data ?
+              batchItemsActionEndTime = performance.now();
               return dataArray;
             }
 
             // execute batch group promise
             return batchItemsAction(dataArray)
               .then(() => {
+                // used to determine how long it took to get batch data ?
+                batchItemsActionEndTime = performance.now();
+
+                // finished
                 return dataArray;
               });
           })
@@ -3182,7 +3216,10 @@ const handleActionsInBatches = function (
             });
           })
           .then(() => {
-            logger.debug(`Finished processing batch ${batchNo} of ${totalBatchesNo}`);
+            // log
+            const batchEndTime = performance.now();
+            logger.debug(`Finished processing batch ${batchNo} of ${totalBatchesNo} ( total duration: ${msToTime(batchEndTime - batchStartTime)}, get data duration: ${msToTime(batchGetDataEndTime - batchStartTime)}, items action duration: ${msToTime(batchItemsActionEndTime - batchGetDataEndTime)}, item actions duration: ${msToTime(batchEndTime - batchItemsActionEndTime)} )`);
+
             // check if we need to handle another batch
             if (batchNo * batchSize > actionsCount) {
               logger.debug('All data has been processed');
@@ -3197,7 +3234,7 @@ const handleActionsInBatches = function (
 
       // start batches processing
       logger.debug('Processing actions in batches');
-      return handleBatch();
+      return handleBatch(startFromBatch ? startFromBatch : 1);
     });
 };
 
