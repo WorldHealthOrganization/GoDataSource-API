@@ -3150,7 +3150,7 @@ const handleActionsInBatches = function (
       }
 
       let totalBatchesNo = Math.ceil(actionsCount / batchSize);
-      logger.debug(`Actions to be done: ${actionsCount}. Batches: ${totalBatchesNo}. ( count duration: ${msToTime(countEndTime - countStartTime)})`);
+      logger.debug(`Actions to be done: ${new Intl.NumberFormat().format(actionsCount)}. Batches: ${totalBatchesNo}. ( count duration: ${msToTime(countEndTime - countStartTime)})`);
 
       /**
        * Handle batchNo of actions

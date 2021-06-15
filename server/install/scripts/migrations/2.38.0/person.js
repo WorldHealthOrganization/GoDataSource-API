@@ -35,6 +35,8 @@ const updateMissingDuplicateKeys = (callback) => {
             duplicateKeys: {
               $exists: false
             }
+          }, {
+            maxTimeMS: 999999
           });
       };
 
