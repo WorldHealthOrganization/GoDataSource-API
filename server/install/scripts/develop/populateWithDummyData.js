@@ -2,7 +2,7 @@
 
 /*eslint no-extra-boolean-cast: "off"*/
 
-const app = require('../../server');
+const app = require('../../../../server/server');
 const async = require('async');
 const moment = require('moment');
 const _ = require('lodash');

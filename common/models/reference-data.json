@@ -85,6 +85,12 @@
     },
     "order": {
       "type": "number"
+    },
+    "isDefaultReferenceData": {
+      "type": "boolean"
+    },
+    "isOutbreakTemplateReferenceData": {
+      "type": "boolean"
     }
   },
   "indexes": {

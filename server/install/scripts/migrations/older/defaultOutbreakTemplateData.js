@@ -1,26 +1,27 @@
 'use strict';
 
-const app = require('../../server');
+// imports
+const async = require('async');
+const _ = require('lodash');
+const app = require('../../../../server');
 const language = app.models.language;
 const languageToken = app.models.languageToken;
 const outbreakTemplate = app.models.template;
 const referenceData = app.models.referenceData;
-const defaultOutbreakTemplateData = require('./defaultOutbreakTemplateData.json');
-const common = require('./_common');
-const async = require('async');
-const _ = require('lodash');
-
-// initialize action options; set _init, _sync flags to prevent execution of some after save scripts
-let options = {
-  _init: true,
-  _sync: true
-};
+const common = require('./../../_common');
+const defaultOutbreakTemplateData = require(`${__dirname}/data/outbreak-template/defaultOutbreakTemplateData.json`);
 
 /**
  * Run initiation
  * @param callback
  */
 function run(callback) {
+  // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
+  const options = {
+    _init: true,
+    _sync: true
+  };
+
   // make sure we have what we need :)
   const defaultOutbreakTemplateDataJson = defaultOutbreakTemplateData || [];
 
@@ -187,7 +188,8 @@ function run(callback) {
                 refDataItem.value === fileData.value &&
                 refDataItem.description === fileData.description &&
                 refDataItem.colorCode === fileData.colorCode &&
-                refDataItem.order === fileData.order
+                refDataItem.order === fileData.order &&
+                refDataItem.isOutbreakTemplateReferenceData === true
               ) {
                 // finished
                 app.logger.debug(`No need to update reference data item ${refDataItem.id}`);
@@ -206,7 +208,8 @@ function run(callback) {
                         colorCode: data.colorCode,
                         order: data.order,
                         deleted: false,
-                        deletedAt: null
+                        deletedAt: null,
+                        isOutbreakTemplateReferenceData: true
                       }, options)
                       .then(() => {
                         // finished
@@ -240,7 +243,8 @@ function run(callback) {
                       value: newRefItem.value,
                       description: newRefItem.description,
                       colorCode: newRefItem.colorCode,
-                      order: newRefItem.order
+                      order: newRefItem.order,
+                      isOutbreakTemplateReferenceData: true
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished
@@ -420,4 +424,6 @@ function run(callback) {
     .catch(callback);
 }
 
-module.exports = run;
+module.exports = {
+  run
+};

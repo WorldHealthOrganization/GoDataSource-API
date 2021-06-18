@@ -19,6 +19,30 @@ const migrationLogStatusMap = {
 const migrationVersions = [{
   version: 'older',
   scripts: [{
+    fileName: 'defaultLanguages.js',
+    actions: [{
+      name: 'run',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'defaultReferenceData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'defaultHelpData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'defaultOutbreakTemplateData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 3
+    }]
+  }, {
     fileName: 'case.js',
     actions: [{
       name: 'migrateCases',

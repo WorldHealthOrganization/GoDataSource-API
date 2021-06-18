@@ -1,26 +1,27 @@
 'use strict';
 
-const app = require('../../server');
+// imports
+const async = require('async');
+const _ = require('lodash');
+const app = require('../../../../server');
 const language = app.models.language;
 const languageToken = app.models.languageToken;
 const helpCategory = app.models.helpCategory;
 const helpItem = app.models.helpItem;
-const defaultHelpData = require('./defaultHelpData.json');
-const common = require('./_common');
-const async = require('async');
-const _ = require('lodash');
-
-// initialize action options; set _init, _sync flags to prevent execution of some after save scripts
-let options = {
-  _init: true,
-  _sync: true
-};
+const common = require('./../../_common');
+const defaultHelpData = require(`${__dirname}/data/help/defaultHelpData.json`);
 
 /**
  * Run initiation
  * @param callback
  */
 function run(callback) {
+  // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
+  const options = {
+    _init: true,
+    _sync: true
+  };
+
   // make sure we have what we need :)
   const defaultHelpDataJson = defaultHelpData || [];
 
@@ -392,4 +393,6 @@ function run(callback) {
     .catch(callback);
 }
 
-module.exports = run;
+module.exports = {
+  run
+};
