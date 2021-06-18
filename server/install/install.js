@@ -11,7 +11,6 @@ const supportedArguments = [
   'init-database',
   'migrate-database',
   'reset-admin-password',
-  'install-script',
   'dump-help-data',
   'dump-language-data',
   'dump-outbreak-template-data',
@@ -110,19 +109,6 @@ const routines = {
     console.log('Resetting Administrative Password...');
     [
       require('./scripts/resetAdministrativePassword')
-    ].forEach(function (installScript) {
-      runFunctions.push(installScript);
-    });
-  },
-  installScript: function () {
-    let script = /script=(.+)(?:\s+|$)/.exec(args.toString());
-    if (!script) {
-      return console.error('No valid script name passed. Use -- script=<scriptName> to specify a script');
-    }
-    script = script.pop();
-    console.log(`Running install script ${script}`);
-    [
-      require(`./scripts/${script}`)
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
