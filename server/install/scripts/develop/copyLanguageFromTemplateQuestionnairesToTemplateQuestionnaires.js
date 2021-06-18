@@ -1,18 +1,10 @@
 'use strict';
 
 // deps
-const MongoDBHelper = require('../../../components/mongoDBHelper');
-const DataSources = require('../../datasources');
+const MongoDBHelper = require('../../../../components/mongoDBHelper');
+const DataSources = require('../../../datasources');
 const _ = require('lodash');
-const fs = require('fs');
 const async = require('async');
-
-// keep a list of languages that need to be installed
-// scan languages directory and read languages
-const languageList = [];
-fs.readdirSync(`${__dirname}/../../config/languages`).forEach(function (language) {
-  languageList.push(require(`${__dirname}/../../config/languages/${language}`));
-});
 
 // script's entry point
 const run = function (cb) {
@@ -158,16 +150,36 @@ const run = function (cb) {
       });
 
       // retrieve source tokens
-      return dbConnection.collection('languageToken')
+      return dbConnection.collection('language')
         .find({
-          token: {
-            $in: allTokens
-          },
-          languageId: {
-            $in: languageList.map((lang) => lang.id)
+          deleted: {
+            $ne: true
+          }
+        }, {
+          projection: {
+            _id: 1
           }
         })
         .toArray()
+        .then((languages) => {
+          return dbConnection.collection('languageToken')
+            .find({
+              token: {
+                $in: allTokens
+              },
+              languageId: {
+                $in: languages.map((lang) => lang._id)
+              }
+            }, {
+              projection: {
+                _id: 1,
+                languageId: 1,
+                token: 1,
+                translation: 1
+              }
+            })
+            .toArray();
+        })
         .then((langTokens) => {
           return {
             langTokens,
@@ -209,8 +221,8 @@ const run = function (cb) {
         destinationData,
         key
       ) => {
-        sourceData.forEach((sourceItem) => {
-          destinationData.forEach((destinationItem) => {
+        (sourceData || []).forEach((sourceItem) => {
+          (destinationData || []).forEach((destinationItem) => {
             // same question translation ?
             if (
               sourceItem[key] &&

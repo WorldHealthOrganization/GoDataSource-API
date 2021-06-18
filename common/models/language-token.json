@@ -28,6 +28,12 @@
       "type": [
         "string"
       ]
+    },
+    "isDefaultLanguageToken": {
+      "type": "boolean"
+    },
+    "section": {
+      "type": "string"
     }
   },
   "removeIndexes": [

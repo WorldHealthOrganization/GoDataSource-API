@@ -1,25 +1,25 @@
 'use strict';
 
-const app = require('../../server');
-const referenceData = app.models.referenceData;
-const defaultReferenceData = require('./defaultReferenceData.json');
-const common = require('./_common');
+// imports
 const async = require('async');
-
-// initialize action options; set _init, _sync flags to prevent execution of some after save scripts
-let options = {
-  _init: true,
-  _sync: true
-};
+const app = require('../../../../server');
+const referenceData = app.models.referenceData;
+const common = require('./../../_common');
+const defaultReferenceData = require(`${__dirname}/data/reference-data/defaultReferenceData.json`);
 
 /**
  * Run initiation
  * @param callback
  */
 function run(callback) {
-  let setUpReferenceData = [];
+  // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
+  const options = {
+    _init: true,
+    _sync: true
+  };
 
   // go through all reference data categories
+  const setUpReferenceData = [];
   Object.keys(defaultReferenceData).forEach(function (referenceDataCategory) {
     // go through all reference data items
     Object.keys(defaultReferenceData[referenceDataCategory]).forEach(function (referenceDataItem) {
@@ -46,7 +46,8 @@ function run(callback) {
                     readOnly: defaultReferenceData[referenceDataCategory][referenceDataItem].readOnly,
                     colorCode: defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode,
                     iconId: defaultReferenceData[referenceDataCategory][referenceDataItem].iconId,
-                    order: defaultReferenceData[referenceDataCategory][referenceDataItem].order
+                    order: defaultReferenceData[referenceDataCategory][referenceDataItem].order,
+                    isDefaultReferenceData: true
                   }, common.install.timestamps), options);
               }
 
@@ -58,10 +59,14 @@ function run(callback) {
                 ) || (
                   defaultReferenceData[referenceDataCategory][referenceDataItem].order !== undefined &&
                   defaultReferenceData[referenceDataCategory][referenceDataItem].order !== foundReferenceData.order
+                ) || (
+                  foundReferenceData.isDefaultReferenceData !== true
                 )
               ) {
                 // construct object to update
-                const updateProps = {};
+                const updateProps = {
+                  isDefaultReferenceData: true
+                };
 
                 // colorCode
                 if (defaultReferenceData[referenceDataCategory][referenceDataItem].colorCode !== undefined) {
@@ -100,4 +105,6 @@ function run(callback) {
   });
 }
 
-module.exports = run;
+module.exports = {
+  run
+};

@@ -11,7 +11,6 @@ const supportedArguments = [
   'init-database',
   'migrate-database',
   'reset-admin-password',
-  'install-script',
   'dump-help-data',
   'dump-language-data',
   'dump-outbreak-template-data',
@@ -90,12 +89,7 @@ const routines = {
       require('./scripts/initDatabaseCollections'),
       require('./scripts/migrateDatabaseCollections'),
       require('./scripts/defaultRolesAndSysAdmin'),
-      require('./scripts/defaultLanguages'),
       require('./scripts/defaultSystemSettings'),
-      require('./scripts/defaultReferenceData'),
-      require('./scripts/defaultLocations'),
-      require('./scripts/defaultHelpData'),
-      require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
@@ -105,10 +99,6 @@ const routines = {
     console.log('Setting Up Database Migration...');
     [
       require('./scripts/migrateDatabaseCollections'),
-      require('./scripts/defaultLanguages'),
-      require('./scripts/defaultReferenceData'),
-      require('./scripts/defaultHelpData'),
-      require('./scripts/defaultOutbreakTemplateData'),
       require('./scripts/migrateModelData'),
       require('./scripts/updateAdminEmail')
     ].forEach(function (installScript) {
@@ -119,19 +109,6 @@ const routines = {
     console.log('Resetting Administrative Password...');
     [
       require('./scripts/resetAdministrativePassword')
-    ].forEach(function (installScript) {
-      runFunctions.push(installScript);
-    });
-  },
-  installScript: function () {
-    let script = /script=(.+)(?:\s+|$)/.exec(args.toString());
-    if (!script) {
-      return console.error('No valid script name passed. Use -- script=<scriptName> to specify a script');
-    }
-    script = script.pop();
-    console.log(`Running install script ${script}`);
-    [
-      require(`./scripts/${script}`)
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
@@ -150,64 +127,83 @@ const routines = {
     // dump data
     console.log('Dumping Help Data...');
     [
-      require('./scripts/dumpHelpData')
+      require('./scripts/dump/dumpHelpData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(resolvedPath));
     });
   },
   dumpLanguageData: function () {
-    // need export file
-    let exportPath = /export=(.+)(?:\s+|$)/.exec(args.toString());
-    if (!exportPath) {
-      return console.error('No valid file path. Use -- export=<filePath> to specify a file where to export data');
-    }
-    exportPath = exportPath.pop();
+    // arguments supported by this function
+    const requiredArgs = [
+      {
+        name: 'languageId',
+        type: PARSE_TYPE.STRING
+      }, {
+        name: 'export',
+        type: PARSE_TYPE.STRING
+      }
+    ];
+    const methodRelevantArgs = parseArgumentValues(requiredArgs);
 
-    // check if we have access to write to this file
-    const resolvedPath = path.resolve(exportPath);
+    // all above arg are required
+    let stop = false;
+    _.each(requiredArgs, (argKey) => {
+      if (methodRelevantArgs[argKey.name] === undefined) {
+        console.log(`The following arguments are required: ${requiredArgs.map(item => item.name).join(', ')}`);
+        stop = true;
+        return false;
+      }
+    });
+    if (stop) {
+      return;
+    }
 
     // dump data
     console.log('Dumping Language Data...');
     [
-      require('./scripts/dumpLanguageData')
+      require('./scripts/dump/dumpLanguageData')
     ].forEach(function (installScript) {
-      runFunctions.push(installScript(resolvedPath));
+      runFunctions.push(installScript(
+        methodRelevantArgs.languageId,
+        path.resolve(methodRelevantArgs.export)
+      ));
     });
   },
   dumpOutbreakTemplateData: function () {
-    // need export file
-    let exportPath = /export=(.+)(?:\s+|$)/.exec(args.toString());
-    if (!exportPath) {
-      return console.error('No valid file path. Use -- export=<filePath> to specify a file where to export data');
-    }
-    exportPath = exportPath.pop();
+    // arguments supported by this function
+    const requiredArgs = [
+      {
+        name: 'fallbackLanguageId',
+        type: PARSE_TYPE.STRING
+      }, {
+        name: 'export',
+        type: PARSE_TYPE.STRING
+      }
+    ];
+    const methodRelevantArgs = parseArgumentValues(requiredArgs);
 
-    // check if we have access to write to this file
-    const resolvedPath = path.resolve(exportPath);
+    // all above arg are required
+    let stop = false;
+    _.each(requiredArgs, (argKey) => {
+      if (methodRelevantArgs[argKey.name] === undefined) {
+        console.log(`The following arguments are required: ${requiredArgs.map(item => item.name).join(', ')}`);
+        stop = true;
+        return false;
+      }
+    });
+    if (stop) {
+      return;
+    }
 
     // dump data
     console.log('Dumping Outbreak Template Data...');
     [
-      require('./scripts/dumpOutbreakTemplateData')
+      require('./scripts/dump/dumpOutbreakTemplateData')
     ].forEach(function (installScript) {
-      runFunctions.push(installScript(resolvedPath));
-    });
-  },
-  removeUnusedLanguageTokens: function () {
-    // need export file
-    let confirmRemoval = /confirm=(.+)(?:\s+|$)/.exec(args.toString());
-    if (!confirmRemoval) {
-      console.log('NO REMOVAL SELECTED');
-    } else {
-      console.log('REMOVAL SELECTED');
-    }
-
-    // dump data
-    console.log('Determining unused language tokens');
-    [
-      require('./scripts/removeUnusedLanguageTokens')
-    ].forEach(function (installScript) {
-      runFunctions.push(installScript(confirmRemoval));
+      runFunctions.push(installScript(
+        methodRelevantArgs.fallbackLanguageId,
+        path.resolve(methodRelevantArgs.export)
+      ));
     });
   },
   removeLanguageTokensOfDeletedOutbreaks: function () {
@@ -276,7 +272,7 @@ const routines = {
     // populate database
     console.log('Populating database');
     [
-      require('./scripts/populateWithDummyData')
+      require('./scripts/develop/populateWithDummyData')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
     });
@@ -287,7 +283,7 @@ const routines = {
       'outbreakName'
     ];
 
-    let methodRelevantArgs = parseArgumentValues(allowedArgs);
+    const methodRelevantArgs = parseArgumentValues(allowedArgs);
 
     // populate database
     console.log('Setting relationships information on person model');
@@ -299,21 +295,14 @@ const routines = {
     // where to check if reference data item from database are missing ?
     const requiredArgs = [
       {
-        name: 'checkDefaultReferenceData',
-        type: PARSE_TYPE.BOOLEAN
-      }, {
         name: 'checkDefaultOutbreakTemplateData',
         type: PARSE_TYPE.BOOLEAN
+      }, {
+        name: 'exportDir',
+        type: PARSE_TYPE.STRING
       }
     ];
-    methodRelevantArgs = parseArgumentValues([
-      ...requiredArgs, ...[
-        {
-          name: 'export',
-          type: PARSE_TYPE.STRING
-        }
-      ]
-    ]);
+    const methodRelevantArgs = parseArgumentValues(requiredArgs);
 
     // all above arg are required
     let stop = false;
@@ -331,7 +320,7 @@ const routines = {
     // determine missing reference data items
     console.log('Determine missing reference data items');
     [
-      require('./scripts/determineAndDumpReferenceDataItems')
+      require('./scripts/dump/determineAndDumpReferenceDataItems')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
     });
@@ -389,7 +378,7 @@ const routines = {
     // compare source with destination questionnaire, and copy languages
     console.log('Copy questionnaire translations from one questionnaire to other');
     [
-      require('./scripts/copyLanguageFromTemplateQuestionnairesToTemplateQuestionnaires')
+      require('./scripts/develop/copyLanguageFromTemplateQuestionnairesToTemplateQuestionnaires')
     ].forEach(function (installScript) {
       runFunctions.push(installScript(methodRelevantArgs));
     });

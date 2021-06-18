@@ -43,25 +43,57 @@ module.exports = function (Language) {
               const createUpdateToken = (outbreakId, modules) => {
                 // create / update token
                 if (foundToken) {
-                  // if found, update translation
-                  return foundToken.updateAttributes({
+                  // token update data
+                  const tokenUpdateData = {
                     translation: languageToken.translation,
                     outbreakId: outbreakId,
                     modules: modules
-                  }, options);
+                  };
+
+                  // add is default language token ?
+                  if (languageToken.isDefaultLanguageToken !== undefined) {
+                    tokenUpdateData.isDefaultLanguageToken = languageToken.isDefaultLanguageToken;
+                  }
+
+                  // add section
+                  if (languageToken.section !== undefined) {
+                    tokenUpdateData.section = languageToken.section;
+                  }
+
+                  // if found, update translation
+                  return foundToken.updateAttributes(
+                    tokenUpdateData,
+                    options
+                  );
+                }
+
+                // token create data
+                const tokenCreateData = {
+                  token: languageToken.token,
+                  languageId: self.id,
+                  translation: languageToken.translation,
+                  outbreakId: outbreakId,
+                  modules: modules,
+                  createdAt: languageToken.createdAt,
+                  updatedAt: languageToken.updatedAt
+                };
+
+                // add is default language token ?
+                if (languageToken.isDefaultLanguageToken !== undefined) {
+                  tokenCreateData.isDefaultLanguageToken = languageToken.isDefaultLanguageToken;
+                }
+
+                // add section
+                if (languageToken.section !== undefined) {
+                  tokenCreateData.section = languageToken.section;
                 }
 
                 // if not found, create it
                 return app.models.languageToken
-                  .create({
-                    token: languageToken.token,
-                    languageId: self.id,
-                    translation: languageToken.translation,
-                    outbreakId: outbreakId,
-                    modules: modules,
-                    createdAt: languageToken.createdAt,
-                    updatedAt: languageToken.updatedAt
-                  }, options);
+                  .create(
+                    tokenCreateData,
+                    options
+                  );
               };
 
               // determine outbreak
