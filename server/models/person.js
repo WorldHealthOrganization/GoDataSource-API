@@ -862,6 +862,9 @@ module.exports = function (Person) {
         order: 'contactDate DESC',
         where: {
           'persons.id': personRecord.id,
+          'persons.type': {
+            inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          },
           active: true
         }
       })
