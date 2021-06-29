@@ -1520,6 +1520,16 @@ module.exports = function (Outbreak) {
         return Promise.all(updateRelations);
       })
       .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate({
+              'personId': caseId
+            }, {
+              'personType': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            }
+          );
+      })
+      .then(function () {
         callback(null, convertedContact);
       })
       .catch(callback)
