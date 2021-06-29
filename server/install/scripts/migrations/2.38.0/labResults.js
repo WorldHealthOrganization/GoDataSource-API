@@ -5,7 +5,7 @@ const Helpers = require('../../../../../components/helpers');
 
 // Number of find requests at the same time
 // Don't set this value to high so we don't exceed Mongo 16MB limit
-const findBatchSize = 1000;
+const findBatchSize = 10000;
 
 // set how many item update actions to run in parallel
 const updateBatchSize = 10;
@@ -50,7 +50,7 @@ const updatePersonType = (callback) => {
         return personCollection
           .find(personFilter, {
             // always getting the first items as the already modified ones are filtered out
-            skip: 0,
+            skip: (batchNo - 1) * batchSize,
             limit: batchSize,
             projection: {
               _id: 1,
@@ -68,9 +68,7 @@ const updatePersonType = (callback) => {
             personId: data._id
           }, {
             '$set': {
-              personType: data.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ?
-                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' :
-                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+              personType: data.type
             }
           });
       };
