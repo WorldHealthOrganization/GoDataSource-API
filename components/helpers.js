@@ -1960,7 +1960,11 @@ const renameDuplicateQuestionnaireHeaderColumns = (questionnaireData) => {
   questionnaireData.forEach((questionnaireColumnData1, questionnaireColumnDataIndex1) => {
     questionnaireData.forEach((questionnaireColumnData2, questionnaireColumnDataIndex2) => {
       // if same then we need to jump over
-      if (questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey) {
+      if (
+        !questionnaireColumnData1.expandKey ||
+        !questionnaireColumnData2.expandKey ||
+        questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey
+      ) {
         return;
       }
 
