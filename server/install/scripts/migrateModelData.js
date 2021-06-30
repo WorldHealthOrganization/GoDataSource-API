@@ -147,6 +147,12 @@ const migrationVersions = [{
       name: 'updateMissingDuplicateKeys',
       buildNo: 1
     }]
+  }, {
+    fileName: 'labResults.js',
+    actions: [{
+      name: 'updatePersonType',
+      buildNo: 1
+    }]
   }]
 }];
 
