@@ -49,7 +49,6 @@ const updatePersonType = (callback) => {
       const getBatchData = (batchNo, batchSize) => {
         return personCollection
           .find(personFilter, {
-            // always getting the first items as the already modified ones are filtered out
             skip: (batchNo - 1) * batchSize,
             limit: batchSize,
             projection: {
