@@ -608,21 +608,20 @@ module.exports = function (Location) {
   };
 
   /**
-   * A location can be deleted only if all sub-locations have been deleted first and location is not in use. Assuming all the data is valid,
-   * this check is done only for the direct sub-locations and not recurrently for all sub-locations.
+   * A location can be deleted only if location is not in use and also all sub-locations are not in use. Assuming all the data is valid,
+   * this check is done recurrently for all sub-locations.
    */
   Location.checkIfCanDelete = function (locationId) {
-    return Location
-      .findOne({
-        where: {
-          parentLocationId: locationId
+    return new Promise((resolve, reject) => {
+      Location.getSubLocations([locationId], [], (err, locations) => {
+        if (err) {
+          return reject(err);
         }
-      })
-      .then((location) => {
-        if (location) {
-          throw(app.utils.apiError.getError('DELETE_PARENT_MODEL', {model: Location.modelName}));
-        }
-        return Location.isRecordInUse(locationId);
+        return resolve(locations);
+      });
+    })
+      .then((locationIds) => {
+        return Location.isRecordInUse(locationIds);
       })
       .then((recordInUse) => {
         if (recordInUse) {

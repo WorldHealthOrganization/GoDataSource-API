@@ -63,7 +63,7 @@ module.exports = function (ExtendedPersistedModel) {
 
   /**
    * Get usage for a record
-   * @param recordId
+   * @param recordId string | string[]
    * @param filter
    * @param justCount
    * @return {Promise<any[] | never>}
@@ -79,8 +79,11 @@ module.exports = function (ExtendedPersistedModel) {
     modelNames.forEach(function (modelName) {
       const orQuery = [];
       // build a search query using the fields that might contain the information
+      const operatorIn = justCount ? 'in' : '$in';
       EPM.possibleRecordUsage[currentModelName][modelName].forEach(function (field) {
-        orQuery.push({[field]: recordId});
+        orQuery.push({
+          [field]: Array.isArray(recordId) ? {[operatorIn]: recordId} : recordId
+        });
       });
 
       // build filter
@@ -116,7 +119,7 @@ module.exports = function (ExtendedPersistedModel) {
 
   /**
    * Check if a record is in use
-   * @param recordId
+   * @param recordId string | string[]
    * @return {Promise<boolean | never>}
    */
   ExtendedPersistedModel.isRecordInUse = function (recordId) {
