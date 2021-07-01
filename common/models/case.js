@@ -729,6 +729,12 @@ module.exports = function (Case) {
             ).where, {
               order: {
                 dateOfOnset: 1
+              },
+              projection: {
+                _id: 1,
+                dateOfOnset: 1,
+                firstName: 1,
+                lastName: 1
               }
             }
           );
@@ -836,6 +842,13 @@ module.exports = function (Case) {
             ).where, {
               order: {
                 dateOfOnset: 1
+              },
+              projection: {
+                _id: 1,
+                dateOfOnset: 1,
+                dateRanges: 1,
+                firstName: 1,
+                lastName: 1
               }
             }
           );
