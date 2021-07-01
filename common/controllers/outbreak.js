@@ -597,11 +597,10 @@ module.exports = function (Outbreak) {
         // update personType from lab results
         return app.models.labResult
           .rawBulkUpdate({
-              'personId': contactId
-            }, {
-              'personType': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-            }
-          );
+            personId: contactId
+          }, {
+            personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          });
       })
       .then(function () {
         callback(null, convertedCase);
