@@ -512,6 +512,43 @@ module.exports = function (Case) {
         // update filter.where if needed
         updatedFilter && (filter.where = updatedFilter);
 
+        // determine projection so we don't retrieve what isn't necessary
+        let caseProjection = {
+          _id: 1
+        };
+        const caseSort = {
+          [timePropertyName]: 1
+        };
+        switch (timePropertyName) {
+          case 'dateOfOnset':
+            // fields
+            caseProjection = {
+              dateOfOnset: 1,
+              classification: 1
+            };
+
+            // finished
+            break;
+          case 'dateOfOutcome':
+            // fields
+            caseProjection = {
+              dateOfOutcome: 1,
+              outcomeId: 1
+            };
+
+            // finished
+            break;
+          case 'dateOfReporting':
+            // fields
+            caseProjection = {
+              dateOfReporting: 1,
+              classification: 1
+            };
+
+            // finished
+            break;
+        }
+
         // find cases that have <timePropertyName> earlier then end of the period interval
         return app.models.case
           .rawFind(
@@ -529,22 +566,14 @@ module.exports = function (Case) {
                 }
               }, filter || {}).where
             ), {
-              projection: {
-                dateOfOnset: 1,
-                classification: 1,
-                dateOfOutcome: 1,
-                outcomeId: 1,
-                dateOfReporting: 1
-              },
-              sort: {
-                dateOfReporting: 1
-              }
+              projection: caseProjection,
+              sort: caseSort
             }
           )
           .then(function (cases) {
             // if there are not cases, use end date
             const startDate = cases.length > 0 ?
-              app.utils.helpers.getDateEndOfDay(cases[0]['dateOfReporting']).toISOString() :
+              app.utils.helpers.getDateEndOfDay(cases[0][timePropertyName]).toISOString() :
               endDate;
 
             // define period interval
