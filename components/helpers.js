@@ -2293,6 +2293,15 @@ const getPeriodIntervalForDate = function (
   date,
   weekType
 ) {
+  // make sure dates are in interval limits
+  if (
+    fullPeriodInterval &&
+    fullPeriodInterval.length > 1
+  ) {
+    date = getDate(date).isAfter(fullPeriodInterval[0]) ? date : getDate(fullPeriodInterval[0]);
+    date = getDate(date).isBefore(fullPeriodInterval[1]) ? date : getDateEndOfDay(fullPeriodInterval[1]);
+  }
+
   // get period in which the case needs to be included
   let startDay, endDay;
   switch (periodType) {
