@@ -600,7 +600,8 @@ module.exports = function (Outbreak) {
             personId: contactId
           }, {
             personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-          });
+          },
+            options);
       })
       .then(function () {
         callback(null, convertedCase);

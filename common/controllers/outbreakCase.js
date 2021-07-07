@@ -1526,7 +1526,8 @@ module.exports = function (Outbreak) {
             personId: caseId
           }, {
             personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-          });
+          },
+            options);
       })
       .then(function () {
         callback(null, convertedContact);
