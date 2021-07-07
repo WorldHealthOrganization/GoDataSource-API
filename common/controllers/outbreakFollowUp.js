@@ -509,9 +509,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -528,9 +526,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -647,9 +643,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -666,9 +660,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -867,9 +859,7 @@ module.exports = function (Outbreak) {
               and: [
                 caseQuery, {
                   outbreakId: outbreakId,
-                  deleted: {
-                    $ne: true
-                  }
+                  deleted: false
                 }
               ]
             }, {projection: {'_id': 1}});
@@ -887,9 +877,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,

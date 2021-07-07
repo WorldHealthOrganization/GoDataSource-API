@@ -200,7 +200,7 @@ const run = function (cb) {
       // get system's languages
       dbConn
         .collection('language')
-        .find({deleted: {$ne: true}}, {projection: {_id: 1}})
+        .find({deleted: false}, {projection: {_id: 1}})
         .toArray()
         .then(languages => {
           languageIds = languages.map(lang => lang._id);

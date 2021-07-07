@@ -153,9 +153,7 @@ const removeTokensOfDeletedOutbreak = (options, callback) => {
       // delete all outbreak related language tokens
       return languageTokenCollection
         .updateMany({
-          deleted: {
-            $ne: true
-          },
+          deleted: false,
           token: {
             $regex: new RegExp(`${outbreakIds.join('|')}`, 'i')
           }

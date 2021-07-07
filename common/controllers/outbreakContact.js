@@ -1694,9 +1694,11 @@ module.exports = function (Outbreak) {
         const matchFilter = app.utils.remote.convertLoopbackFilterToMongo({
           $and: [
             // make sure we're only retrieving relationships from the current outbreak
+            // retrieve only non-deleted records
             {
               outbreakId: outbreak.id,
-              active: true
+              active: true,
+              deleted: false
             },
             // and for the contacts desired
             {
@@ -1704,19 +1706,6 @@ module.exports = function (Outbreak) {
                 $in: Object.keys(contactsMap)
               },
               'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-            },
-            // retrieve only non-deleted records
-            {
-              $or: [
-                {
-                  deleted: false
-                },
-                {
-                  deleted: {
-                    $eq: null
-                  }
-                }
-              ]
             }
           ]
         });
@@ -1768,24 +1757,13 @@ module.exports = function (Outbreak) {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
               // and for the contacts desired
+              // retrieve only non-deleted records
               {
                 outbreakId: this.id,
                 personId: {
                   $in: Object.keys(contactsMap)
-                }
-              },
-              // retrieve only non-deleted records
-              {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                },
+                deleted: false
               }
             ]
           });
@@ -2323,9 +2301,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -2342,9 +2318,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,

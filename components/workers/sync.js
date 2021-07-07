@@ -142,9 +142,7 @@ function exportCollectionInBatches(
     ) {
       // query
       const notDeletedQuery = {
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       };
 
       // add to filter
@@ -324,15 +322,11 @@ const worker = {
                     _id: typeof outbreakIds === 'string' ?
                       outbreakIds :
                       convertLoopbackFilterToMongo(outbreakIds),
-                    deleted: {
-                      $ne: true
-                    }
+                    deleted: false
                   };
                 } else {
                   outbreakFilter = {
-                    deleted: {
-                      $ne: true
-                    }
+                    deleted: false
                   };
                 }
 

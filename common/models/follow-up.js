@@ -520,9 +520,7 @@ module.exports = function (FollowUp) {
         $and: [
           parsedFilter,
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           }
         ]
       };
@@ -863,21 +861,10 @@ module.exports = function (FollowUp) {
           {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
-              {
-                outbreakId: outbreakId
-              },
               // retrieve only non-deleted records
               {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                outbreakId: outbreakId,
+                deleted: false
               },
               // filter by contact
               ...(contactIds === undefined ? [] : [{

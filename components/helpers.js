@@ -1320,9 +1320,7 @@ const resolveModelForeignKeysNoModels = function (options, resultSet, languageDi
                 _id: {
                   $in: foreignKeyQueryMap[modelName]
                 },
-                deleted: {
-                  $ne: true
-                }
+                deleted: false
               },
               {
                 projection: foreignKeyProjectionMap[modelName]
@@ -3375,9 +3373,7 @@ function exportFilteredModelsList(
     if (!query.deleted) {
       query = mergeFilters(query, {
         where: {
-          deleted: {
-            ne: true
-          }
+          deleted: false
         }
       });
     }
@@ -4302,9 +4298,7 @@ function getParentLocationsWithDetails(locationsIds, allLocations, loopbackFilte
             $in: locationsToRetrieve
           },
           // add filter for not deleted entries
-          deleted: {
-            $ne: true
-          }
+          deleted: false
         },
         // query options
         {

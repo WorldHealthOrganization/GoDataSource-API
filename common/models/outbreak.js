@@ -909,9 +909,7 @@ module.exports = function (Outbreak) {
               and: [
                 caseQuery, {
                   outbreakId: data.outbreakId,
-                  deleted: {
-                    $ne: true
-                  }
+                  deleted: false
                 }
               ]
             }, {projection: {'_id': 1}});
@@ -929,9 +927,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: data.outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,

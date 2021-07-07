@@ -1603,9 +1603,7 @@ module.exports = function (Relationship) {
         // check for isolated cases
         return app.models.relationship
           .rawFind({
-            deleted: {
-              $ne: true
-            },
+            deleted: false,
             'persons.id': {
               $in: Object.keys(isolatedContactsData)
             }

@@ -73,9 +73,7 @@ module.exports = function (Model) {
     if (!filter.deleted) {
       // deleted condition
       const whereAdditionalConditions = {
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       };
 
       // construct the final query filter

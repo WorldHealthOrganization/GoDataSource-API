@@ -93,18 +93,8 @@ const worker = {
       $and: [
         {
           outbreakId: outbreakId,
-          date: filterDate
-        }, {
-          $or: [
-            {
-              deleted: false
-            },
-            {
-              deleted: {
-                $eq: null
-              }
-            }
-          ]
+          date: filterDate,
+          deleted: false
         }
       ]
     };
@@ -138,9 +128,7 @@ const worker = {
               .find({
                 outbreakId: outbreakId,
                 type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 classification: convertLoopbackFilterToMongo(classification)
               }, {
                 projection: {
@@ -168,9 +156,7 @@ const worker = {
                     .collection('relationship')
                     .find({
                       outbreakId: outbreakId,
-                      deleted: {
-                        $ne: true
-                      },
+                      deleted: false,
                       $or: [
                         {
                           'persons.0.source': true,

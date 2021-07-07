@@ -776,9 +776,7 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           },
           where || {}
         ]
@@ -1592,9 +1590,7 @@ module.exports = function (Person) {
               {
                 outbreakId: outbreakId,
                 // retrieve only non-deleted records
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 // retrieve cases & events
                 type: {
                   $in: [
