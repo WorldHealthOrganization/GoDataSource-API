@@ -461,6 +461,11 @@ module.exports = function (Contact) {
         order: 'contactDate DESC',
         where: {
           'persons.id': contactInstance.id,
+          'persons.type': {
+            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          },
           active: true
         }
       })
