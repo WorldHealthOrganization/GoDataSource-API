@@ -213,5 +213,8 @@
     "disableContactDuplicateCheck": false,
     "disableContactOfContactDuplicateCheck": false,
     "executeCheckOnlyOnDuplicateDataChange": false
+  },
+  "count": {
+    "limit": 30000
   }
 }

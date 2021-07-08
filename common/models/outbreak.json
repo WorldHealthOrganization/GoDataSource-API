@@ -2906,6 +2906,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of contacts that pass the filter",
+          "root": true,
           "required": true
         }
       ],
