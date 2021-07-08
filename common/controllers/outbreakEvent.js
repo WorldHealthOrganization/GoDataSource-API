@@ -41,6 +41,16 @@ module.exports = function (Outbreak) {
       ]
     };
 
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      countRelations &&
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
+
     // add geographical restriction to filter if needed
     app.models.event
       .addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -52,23 +62,11 @@ module.exports = function (Outbreak) {
       })
       .then((records) => {
         if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const eventsMap = {};
-          for (let record of records) {
-            eventsMap[record.id] = record;
-          }
-
           // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(eventsMap))
-            .then((relationsCountMap) => {
-              for (let recordId in relationsCountMap) {
-                const record = eventsMap[recordId];
-                record.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                record.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, records);
-            });
+          app.models.person.getPeopleContactsAndExposures(outbreakId, records);
+
+          // finished
+          return callback(null, records);
         } else {
           return callback(null, records);
         }

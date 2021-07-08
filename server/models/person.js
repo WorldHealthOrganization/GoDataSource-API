@@ -2051,41 +2051,25 @@ module.exports = function (Person) {
   /**
    * Count contacts/exposures for a list of records
    * @param outbreakId
-   * @param peopleIds
+   * @param records
    */
-  Person.getPeopleContactsAndExposures = function (outbreakId, peopleIds) {
-    const peopleMap = {};
-    for (let id of peopleIds) {
-      peopleMap[id] = {
-        numberOfContacts: 0,
-        numberOfExposures: 0
-      };
-    }
+  Person.getPeopleContactsAndExposures = function (outbreakId, records) {
+    // determine records
+    records = records || [];
+    for (let record of records) {
+      // initialize number of contacts / exposures
+      record.numberOfContacts = 0;
+      record.numberOfExposures = 0;
 
-    return app.models.relationship
-      .find({
-        where: {
-          outbreakId: outbreakId,
-          'persons.id': {
-            inq: peopleIds
-          }
+      // go through relationship data and determine contacts / exposures count
+      (record.relationshipsRepresentation || []).forEach((relData) => {
+        if (relData.source) {
+          record.numberOfContacts++;
+        } else {
+          record.numberOfExposures++;
         }
-      })
-      .then((relations) => {
-        for (let relation of relations) {
-          const relationParticipants = relation.persons;
-          for (let participant of relationParticipants) {
-            if (peopleMap[participant.id]) {
-              if (participant.source) {
-                peopleMap[participant.id].numberOfContacts++;
-              } else {
-                peopleMap[participant.id].numberOfExposures++;
-              }
-            }
-          }
-        }
-      })
-      .then(() => peopleMap);
+      });
+    }
   };
 
   /**
