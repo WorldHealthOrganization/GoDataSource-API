@@ -271,7 +271,9 @@ module.exports = function (Model) {
 
         // count records ?
         if (options.countOnly) {
-          return records.length;
+          return {
+            count: records.length
+          };
         }
 
         // format records

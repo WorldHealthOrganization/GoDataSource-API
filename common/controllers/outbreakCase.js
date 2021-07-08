@@ -89,7 +89,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.case.count(filter.where);
+        return app.models.case.rawCountDocuments(filter.where);
       })
       .then(function (cases) {
         callback(null, cases);

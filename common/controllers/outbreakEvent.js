@@ -118,7 +118,7 @@ module.exports = function (Outbreak) {
           // handle custom filter options
           filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
-          return app.models.event.count(filter.where);
+          return app.models.event.rawCountDocuments(filter.where);
         });
     }
   };

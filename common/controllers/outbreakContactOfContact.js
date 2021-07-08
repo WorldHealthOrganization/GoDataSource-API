@@ -152,7 +152,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.contactOfContact.count(filter.where);
+        return app.models.contactOfContact.rawCountDocuments(filter.where);
       })
       .then(function (records) {
         callback(null, records);
