@@ -88,7 +88,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.labResult.count(filter.where);
+        return app.models.labResult.rawCountDocuments(filter.where);
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -114,7 +114,7 @@ module.exports = function (Outbreak) {
       .then(filter => {
         // handle custom filter options
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-        return app.models.labResult.count(filter.where);
+        return app.models.labResult.rawCountDocuments(filter.where);
       })
       .then(result => callback(null, result))
       .catch(callback);
@@ -138,7 +138,7 @@ module.exports = function (Outbreak) {
       .then(filter => {
         // handle custom filter options
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-        return app.models.labResult.count(filter.where);
+        return app.models.labResult.rawCountDocuments(filter.where);
       })
       .then(result => callback(null, result))
       .catch(callback);

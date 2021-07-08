@@ -53,6 +53,12 @@ module.exports = function (Model) {
     // make sure filter is valid for mongodb
     query = app.utils.remote.convertLoopbackFilterToMongo(query);
 
+    // where include ?
+    if (query.includeDeletedRecords) {
+      delete query.includeDeletedRecords;
+      options.includeDeletedRecords = true;
+    }
+
     // query only non deleted data
     if (!options.includeDeletedRecords) {
       query = {
@@ -66,7 +72,7 @@ module.exports = function (Model) {
     }
 
     // log usage
-    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': find ${JSON.stringify(query)}`);
+    app.logger.debug(`[QueryId: ${queryId}] Performing MongoDB request on collection '${collectionName}': count documents ${JSON.stringify(query)}`);
 
     // determine if we need to apply count limit
     const countLimit = options.limit === false ?
@@ -88,6 +94,9 @@ module.exports = function (Model) {
         }
       )
       .then((counted) => {
+        app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed with error after ${timer.getElapsedMilliseconds()} msec`);
+
+        // finished
         return {
           count: counted,
           hasMore: countLimit > 0 && counted >= countLimit

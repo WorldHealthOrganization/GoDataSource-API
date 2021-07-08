@@ -5200,6 +5200,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5232,6 +5233,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5264,6 +5266,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
