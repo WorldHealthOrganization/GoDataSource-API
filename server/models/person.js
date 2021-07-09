@@ -1388,6 +1388,15 @@ module.exports = function (Person) {
       ]
     };
 
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
+
     // update filter for geographical restriction if needed
     return Person
       .addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -1400,11 +1409,14 @@ module.exports = function (Person) {
           .find(filter);
       })
       .then((records) => {
-        return Person.determineIfRelationshipsExist(
-          outbreakId,
+        // attach possible duplicates
+        Person.determineIfRelationshipsExist(
           personId,
           records
         );
+
+        // finished
+        return records;
       });
   };
 
@@ -1444,75 +1456,58 @@ module.exports = function (Person) {
         updatedFilter && (where = updatedFilter);
 
         // retrieve data
-        return Person.count(where);
+        return Person.rawCountDocuments(where);
       });
   };
 
   /**
    * Determine which relationships could be a duplicate ( add property to each record from the relatedPeopleDara array )
-   * @param outbreakId
    * @param personId
    * @param relatedPeopleData
    * @returns {Promise<any>}
    */
   Person.determineIfRelationshipsExist = function (
-    outbreakId,
     personId,
     relatedPeopleData
   ) {
-    return new Promise((resolve, reject) => {
-      // determine people ids which we need to check if they are duplicates
-      const peopleIds = (relatedPeopleData || []).map((r) => r.id);
+    // go through our records and determine possible duplicates
+    (relatedPeopleData || []).forEach((record) => {
+      // initialize matches ?
+      record.matchedDuplicateRelationships = [];
 
-      // retrieve all relationships of interest
-      app.models.relationship
-        .rawFind({
-          or: [{
-            'persons.0.id': personId,
-            'persons.1.id': {
-              inq: peopleIds
-            }
-          }, {
-            'persons.1.id': personId,
-            'persons.0.id': {
-              inq: peopleIds
-            }
-          }]
-        }, {
-          projection: {
-            _id: 1,
-            persons: 1
-          }
-        })
-        .then((relationshipsData) => {
-          // match relationship data to people
-          (relationshipsData || []).forEach((relData) => {
-            // first person is the main person ?
-            let indexOfRelatedPerson = 0;
-            if (relData.persons[0].id === personId) {
-              indexOfRelatedPerson = 1;
-            }
+      // go through relationship data and determine contacts / exposures count
+      (record.relationshipsRepresentation || []).forEach((relData) => {
+        // is our record already in relationships ?
+        if (relData.otherParticipantId !== personId) {
+          return;
+        }
 
-            // add person match
-            const relatedRecord = _.find(relatedPeopleData, (r) => r.id === relData.persons[indexOfRelatedPerson].id);
-            if (relatedRecord) {
-              // initialize matches ?
-              if (!relatedRecord.matchedDuplicateRelationships) {
-                relatedRecord.matchedDuplicateRelationships = [];
-              }
-
-              // add our match
-              relatedRecord.matchedDuplicateRelationships.push({
-                relationshipId: relData.id,
-                relatedPerson: relData.persons[indexOfRelatedPerson]
-              });
+        // add our match
+        record.matchedDuplicateRelationships.push({
+          relationshipId: relData.id,
+          relatedPerson: relData.source ? [
+            {
+              id: record.id,
+              type: record.type,
+              source: true
+            }, {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              target: true
             }
-          });
-
-          // finished
-          resolve(relatedPeopleData);
-        })
-        .catch(reject);
+          ] : [
+            {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              source: true
+            }, {
+              id: record.id,
+              type: record.type,
+              target: true
+            }
+          ]
+        });
+      });
     });
   };
 

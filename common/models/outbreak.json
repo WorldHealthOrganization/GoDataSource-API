@@ -1913,6 +1913,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a case",
+          "root": true,
           "required": true
         }
       ],
@@ -2185,6 +2186,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact",
+          "root": true,
           "required": true
         }
       ],
@@ -2457,6 +2459,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a event",
+          "root": true,
           "required": true
         }
       ],
@@ -8023,6 +8026,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact of contact",
+          "root": true,
           "required": true
         }
       ],
