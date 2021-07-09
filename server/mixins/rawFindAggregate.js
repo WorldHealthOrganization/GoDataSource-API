@@ -4,6 +4,7 @@ const _ = require('lodash');
 const app = require('../server');
 const Timer = require('../../components/Timer');
 const uuid = require('uuid');
+const config = require('../config');
 
 /**
  * Raw Find Aggregate (avoid loopback ODM)
@@ -180,13 +181,32 @@ module.exports = function (Model) {
       });
     }
 
+    // determine if we need to apply count limit
+    const countLimit = filter.limit === false ?
+      undefined : (
+        filter.limit > 0 ?
+          filter.limit : (
+            config.count && config.count.limit > 0 ?
+              config.count.limit :
+              undefined
+          )
+      );
+
     // no need to retrieve data, sort & skip records if we just need to count
     if (options.countOnly) {
-      aggregatePipeline.push({
-        $project: {
-          _id: 1
+      // count
+      aggregatePipeline.push(
+        {
+          $limit: countLimit
+        }, {
+          $group: {
+            _id: null,
+            count: {
+              $sum: 1
+            }
+          }
         }
-      });
+      );
     } else {
       // parse order props
       const knownOrderTypes = {
@@ -271,8 +291,12 @@ module.exports = function (Model) {
 
         // count records ?
         if (options.countOnly) {
+          const counted = records && records.length > 0 ?
+            records[0].count :
+            0;
           return {
-            count: records.length
+            count: counted,
+            hasMore: countLimit > 0 && counted >= countLimit
           };
         }
 
