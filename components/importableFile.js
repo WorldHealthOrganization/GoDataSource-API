@@ -613,17 +613,13 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
           $and: [
             query,
             {
-              deleted: {
-                $ne: true
-              }
+              deleted: false
             }
           ]
         };
       } else {
         query['$and'].push({
-          deleted: {
-            $ne: true
-          }
+          deleted: false
         });
       }
 

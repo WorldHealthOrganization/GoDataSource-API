@@ -89,7 +89,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.case.count(filter.where);
+        return app.models.case.rawCountDocuments(filter.where);
       })
       .then(function (cases) {
         callback(null, cases);
@@ -126,8 +126,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      countRelations &&
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
 
     // pre-filter using related data (case)
     app.models.case
@@ -154,22 +163,11 @@ module.exports = function (Outbreak) {
       })
       .then(function (cases) {
         if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const casesMap = {};
-          for (let record of cases) {
-            casesMap[record.id] = record;
-          }
-          // determine number of contacts/exposures for each case
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(casesMap))
-            .then(relationsCountMap => {
-              for (let recordId in relationsCountMap) {
-                const caseRecord = casesMap[recordId];
-                caseRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                caseRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, cases);
-            });
+          // determine number of contacts/exposures
+          app.models.person.getPeopleContactsAndExposures(cases);
+
+          // finished
+          return callback(null, cases);
         } else {
           return callback(null, cases);
         }

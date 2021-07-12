@@ -43,8 +43,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContacts = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      countRelations &&
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
 
     // pre-filter using related data (case, followUps)
     app.models.contact
@@ -55,22 +64,11 @@ module.exports = function (Outbreak) {
       })
       .then(function (contacts) {
         if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const contactsMap = {};
-          for (let contact of contacts) {
-            contactsMap[contact.id] = contact;
-          }
-          // determine number of contacts/exposures for each case
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(contactsMap))
-            .then(relationsCountMap => {
-              for (let recordId in relationsCountMap) {
-                const contactRecord = contactsMap[recordId];
-                contactRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                contactRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, contacts);
-            });
+          // determine number of contacts/exposures
+          app.models.person.getPeopleContactsAndExposures(contacts);
+
+          // finished
+          return callback(null, contacts);
         } else {
           return callback(null, contacts);
         }
@@ -1694,9 +1692,11 @@ module.exports = function (Outbreak) {
         const matchFilter = app.utils.remote.convertLoopbackFilterToMongo({
           $and: [
             // make sure we're only retrieving relationships from the current outbreak
+            // retrieve only non-deleted records
             {
               outbreakId: outbreak.id,
-              active: true
+              active: true,
+              deleted: false
             },
             // and for the contacts desired
             {
@@ -1704,19 +1704,6 @@ module.exports = function (Outbreak) {
                 $in: Object.keys(contactsMap)
               },
               'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-            },
-            // retrieve only non-deleted records
-            {
-              $or: [
-                {
-                  deleted: false
-                },
-                {
-                  deleted: {
-                    $eq: null
-                  }
-                }
-              ]
             }
           ]
         });
@@ -1768,24 +1755,13 @@ module.exports = function (Outbreak) {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
               // and for the contacts desired
+              // retrieve only non-deleted records
               {
                 outbreakId: this.id,
                 personId: {
                   $in: Object.keys(contactsMap)
-                }
-              },
-              // retrieve only non-deleted records
-              {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                },
+                deleted: false
               }
             ]
           });
@@ -2140,7 +2116,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.contact.count(filter.where);
+        return app.models.contact.rawCountDocuments(filter.where);
       })
       .then(function (contacts) {
         callback(null, contacts);
@@ -2323,9 +2299,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -2342,9 +2316,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,

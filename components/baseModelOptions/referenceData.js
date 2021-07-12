@@ -26,9 +26,7 @@ const getSystemAndOutbreakReferenceData = function (outbreakId, filter) {
           }
         ],
         // add not deleted filter
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       }
     },
     filter

@@ -26,7 +26,10 @@ function getMongoDBClient(mongoOptions = {}) {
         user: dbConfig.user,
         password: dbConfig.password
       },
-      authSource: dbConfig.authSource
+      authSource: dbConfig.authSource,
+      keepAlive: true,
+      socketTimeoutMS: 1800000, // 30 minutes
+      reconnectTries: 30
     });
   }
   return MongoClient

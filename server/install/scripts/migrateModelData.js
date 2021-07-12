@@ -153,6 +153,12 @@ const migrationVersions = [{
       name: 'updatePersonType',
       buildNo: 1
     }]
+  }, {
+    fileName: 'missing-property-deleted.js',
+    actions: [{
+      name: 'addMissingDeletedProperty',
+      buildNo: 1
+    }]
   }]
 }];
 

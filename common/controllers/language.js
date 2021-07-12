@@ -315,9 +315,7 @@ module.exports = function (Language) {
     // & retrieve only non-deleted records
     let where = {
       languageId: this.id,
-      deleted: {
-        $ne: true
-      }
+      deleted: false
     };
     if (!_.isEmpty(whereFilter)) {
       where.$and = [

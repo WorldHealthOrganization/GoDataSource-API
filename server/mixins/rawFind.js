@@ -61,9 +61,7 @@ module.exports = function (Model) {
         $and: [
           query,
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           }
         ]
       };

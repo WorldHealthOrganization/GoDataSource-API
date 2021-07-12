@@ -96,30 +96,28 @@ module.exports = function (Outbreak) {
    * @param options
    */
   Outbreak.prototype.findContactsOfContacts = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
+
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      countRelations &&
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
 
     app.models.contactOfContact
       .preFilterForOutbreak(this, filter, options)
       .then(app.models.contactOfContact.find)
       .then(records => {
         if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const recordsMap = {};
-          for (let record of records) {
-            recordsMap[record.id] = record;
-          }
-          // determine number of contacts/exposures for each record
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(recordsMap))
-            .then(relationsCountMap => {
-              for (let recordId in relationsCountMap) {
-                const mapRecord = recordsMap[recordId];
-                mapRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                mapRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, records);
-            });
+          // determine number of contacts/exposures
+          app.models.person.getPeopleContactsAndExposures(records);
+
+          // finished
+          return callback(null, records);
         } else {
           return callback(null, records);
         }
@@ -152,7 +150,7 @@ module.exports = function (Outbreak) {
         filter = genericHelpers.attachCustomDeleteFilterOption(filter);
 
         // count using query
-        return app.models.contactOfContact.count(filter.where);
+        return app.models.contactOfContact.rawCountDocuments(filter.where);
       })
       .then(function (records) {
         callback(null, records);

@@ -1913,6 +1913,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a case",
+          "root": true,
           "required": true
         }
       ],
@@ -2185,6 +2186,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact",
+          "root": true,
           "required": true
         }
       ],
@@ -2457,6 +2459,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a event",
+          "root": true,
           "required": true
         }
       ],
@@ -2906,6 +2909,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of contacts that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -2939,6 +2943,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of events that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -4812,6 +4817,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of follow-ups that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5197,6 +5203,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5229,6 +5236,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5261,6 +5269,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5318,6 +5327,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -6501,6 +6511,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of cases that match the search criteria",
+          "root": true,
           "required": true
         }
       ],
@@ -7735,6 +7746,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of contacts that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -8014,6 +8026,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact of contact",
+          "root": true,
           "required": true
         }
       ],

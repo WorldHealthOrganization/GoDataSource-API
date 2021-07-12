@@ -44,9 +44,7 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
 
       // initialize relationships filter
       let relationshipsFilter = {
-        deleted: {
-          $ne: true
-        },
+        deleted: false,
         persons: {
           $size: 2
         }
@@ -54,9 +52,7 @@ const setRelationshipsInformationOnPerson = (options, callback) => {
 
       // initialize personsFilter
       let personsFilter = {
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       };
 
       // initialize parameters for handleActionsInBatches call

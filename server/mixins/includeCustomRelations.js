@@ -155,7 +155,7 @@ module.exports = function (Model) {
         }
 
         // nothing to filter for ?
-        if (!query) {
+        if (_.isEmpty(query)) {
           return;
         }
 
@@ -186,7 +186,7 @@ module.exports = function (Model) {
       return Promise.resolve();
     }
 
-    // execute promisses
+    // execute promises
     return Promise.all(promises);
   }
 

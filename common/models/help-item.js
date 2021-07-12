@@ -173,16 +173,7 @@ module.exports = function (HelpItem) {
 
       // add other conditions
       const whereAdditionalConditions = {
-        $or: [
-          {
-            deleted: false
-          },
-          {
-            deleted: {
-              $eq: null
-            }
-          }
-        ]
+        deleted: false
       };
 
       // construct the final query filter

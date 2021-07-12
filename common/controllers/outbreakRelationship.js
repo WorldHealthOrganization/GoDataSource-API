@@ -29,9 +29,7 @@ module.exports = function (Outbreak) {
       .rawFind(app.utils.remote.convertLoopbackFilterToMongo({
         $and: [
           {
-            deleted: {
-              $ne: true
-            },
+            deleted: false,
             outbreakId: this.id
           },
           where

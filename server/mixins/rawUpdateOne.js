@@ -54,10 +54,7 @@ module.exports = function (Model) {
       {
         $and: [
           {
-            $or: [
-              {deleted: false},
-              {deleted: {$eq: null}}
-            ]
+            deleted: false
           },
           filter
         ]
