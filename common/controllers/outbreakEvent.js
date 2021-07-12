@@ -30,13 +30,12 @@ module.exports = function (Outbreak) {
     filter = filter || {};
     filter.where = filter.where || {};
 
-    const outbreakId = this.id;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
     filter.where = {
       and: [
         filter.where, {
-          outbreakId: outbreakId
+          outbreakId: this.id
         }
       ]
     };
@@ -63,7 +62,7 @@ module.exports = function (Outbreak) {
       .then((records) => {
         if (countRelations) {
           // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(outbreakId, records);
+          app.models.person.getPeopleContactsAndExposures(records);
 
           // finished
           return callback(null, records);

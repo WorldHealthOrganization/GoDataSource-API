@@ -43,7 +43,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContacts = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
     const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
 
     // make sure we retrieve data needed to determine contacts & exposures
@@ -66,7 +65,7 @@ module.exports = function (Outbreak) {
       .then(function (contacts) {
         if (countRelations) {
           // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(outbreakId, contacts);
+          app.models.person.getPeopleContactsAndExposures(contacts);
 
           // finished
           return callback(null, contacts);

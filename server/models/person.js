@@ -2045,10 +2045,9 @@ module.exports = function (Person) {
 
   /**
    * Count contacts/exposures for a list of records
-   * @param outbreakId
    * @param records
    */
-  Person.getPeopleContactsAndExposures = function (outbreakId, records) {
+  Person.getPeopleContactsAndExposures = function (records) {
     // determine records
     records = records || [];
     for (let record of records) {
