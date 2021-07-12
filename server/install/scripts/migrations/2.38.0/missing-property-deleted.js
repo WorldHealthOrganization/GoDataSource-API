@@ -29,6 +29,18 @@ const addMissingDeletedProperty = (callback) => {
         // get next collections
         const collectionName = collectionsToHandle.splice(0, 1)[0].name;
 
+        // ignore system indexes
+        if (collectionName.toLowerCase().indexOf('system.indexes') > -1) {
+          // log
+          console.log(`'${collectionName}' is a reserved collection`);
+
+          // next collection
+          nextCollection();
+
+          // finished
+          return;
+        }
+
         // log
         console.log(`Checking if '${collectionName}' has records without deleted property`);
 
