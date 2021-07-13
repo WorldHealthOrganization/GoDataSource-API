@@ -10,6 +10,45 @@ const moment = require('moment');
  */
 
 module.exports = function (Outbreak) {
+  // private method to generate the identifier custom filter
+  const _generateIdentifierFilter = function (disallowedPersonTypes, identifier) {
+    // create a custom filter
+    const filter = {
+      where: {}
+    };
+
+    // add disallowed person types condition
+    if (
+      disallowedPersonTypes &&
+      disallowedPersonTypes.length
+    ) {
+      filter.where.type = {
+        nin: disallowedPersonTypes
+      };
+    }
+
+    // add identifier condition
+    filter.where.or = [
+      {
+        id: {
+          like: identifier,
+          options: 'i'
+        }
+      },
+      {
+        visualId: {
+          like: identifier,
+          options: 'i'
+        }
+      },
+      {
+        'documents.number': identifier
+      }
+    ];
+
+    return filter;
+  };
+
   /**
    * Add support for 'identifier' search: Allow searching people based on id, visualId and documents.number
    * - & geo restrictions
@@ -23,23 +62,18 @@ module.exports = function (Outbreak) {
     if (identifier !== undefined) {
       // remove it from the query
       delete filter.where.identifier;
+
+      // get the user permission to filter the records
+      let userPersonTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+      // get the disallowed personTypes
+      const disallowedPersonTypes = Outbreak.helpers.getDisallowedPersonTypes(userPersonTypesWithReadAccess);
+
       // update filter with custom query around identifier
       filter = app.utils.remote.mergeFilters(
-        {
-          where: {
-            or: [
-              {
-                id: identifier
-              },
-              {
-                visualId: identifier
-              },
-              {
-                'documents.number': identifier
-              }
-            ]
-          }
-        }, filter || {});
+        _generateIdentifierFilter(disallowedPersonTypes, identifier),
+        filter || {}
+      );
 
       // replace old filter with new one
       context.args.filter = filter;
@@ -76,6 +110,31 @@ module.exports = function (Outbreak) {
    * Add support for geo restrictions
    */
   Outbreak.beforeRemote('prototype.__count__people', function (context, modelInstance, next) {
+    // get custom filter (if any)
+    let filter = context.args.where || {};
+    // get identifier query (if any)
+    const identifier = _.get(filter, 'identifier');
+    // if there is an identifier
+    if (identifier !== undefined) {
+      // remove it from the query
+      delete filter.identifier;
+
+      // get the user permission to filter the records
+      let userPersonTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+      // get the disallowed personTypes
+      const disallowedPersonTypes = Outbreak.helpers.getDisallowedPersonTypes(userPersonTypesWithReadAccess);
+
+      // update filter with custom query around identifier
+      filter = app.utils.remote.mergeFilters(
+        _generateIdentifierFilter(disallowedPersonTypes, identifier),
+        filter || {}
+      );
+
+      // replace old filter with new one
+      context.args.where = filter.where;
+    }
+
     // add geographical restrictions if needed
     app.models.person
       .addGeographicalRestrictions(context, context.args.where)

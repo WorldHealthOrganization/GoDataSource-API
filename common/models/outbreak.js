@@ -100,6 +100,14 @@ module.exports = function (Outbreak) {
     'type'
   ];
 
+  // map person read permissions
+  Outbreak.personReadPermissionMap = {
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
+  };
+
   /**
    * Checks whether the given follow up model is generated
    * Checks that update/create dates are on the same
@@ -1476,25 +1484,41 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Checks if a person type is a disallowed type
+   * @param permissions
+   * @param type
+   */
+  Outbreak.helpers.isDisallowedPersonType = function (permissions, type) {
+    return permissions.indexOf(Outbreak.personReadPermissionMap[type]) === -1 && (
+      !app.models.role.permissionGroupMap ||
+      !app.models.role.permissionGroupMap[Outbreak.personReadPermissionMap[type]] ||
+      permissions.indexOf(app.models.role.permissionGroupMap[Outbreak.personReadPermissionMap[type]].groupAllId) === -1
+    );
+  };
+
+  /**
+   * Returns the disallowed person types
+   * @param permissions
+   */
+  Outbreak.helpers.getDisallowedPersonTypes = function (permissions) {
+    let disallowedPersonTypes = [];
+    Object.keys(Outbreak.personReadPermissionMap).forEach((personType) => {
+      if (Outbreak.helpers.isDisallowedPersonType(permissions, personType)) {
+        disallowedPersonTypes.push(personType);
+      }
+    });
+
+    // return the disallowed types
+    return disallowedPersonTypes;
+  };
+
+  /**
    * Hide fields that the user does not have permission to see on a person model (case/contact/event/contactOfContact)
    * @param model
    * @param permissions
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
-    const personReadPermissionMap = {
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
-    };
-
-    if (
-      permissions.indexOf(personReadPermissionMap[model.type]) === -1 && (
-        !app.models.role.permissionGroupMap ||
-        !app.models.role.permissionGroupMap[personReadPermissionMap[model.type]] ||
-        permissions.indexOf(app.models.role.permissionGroupMap[personReadPermissionMap[model.type]].groupAllId) === -1
-      )
-    ) {
+    if (Outbreak.helpers.isDisallowedPersonType(permissions, model.type)) {
       for (let key in model) {
         if (Outbreak.noPersonReadPermissionFields.indexOf(key) === -1) {
           delete model[key];

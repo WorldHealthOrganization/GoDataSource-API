@@ -13219,6 +13219,11 @@
         "translation": "Inconsistencias en las principales fechas"
       }
     },
+    "uiOutbreakSearchResultListPage": {
+      "LNG_PAGE_LIST_SEARCH_RESULT_TITLE": {
+        "translation": "Search results"
+      }
+    },
     "uiTeamsFields": {
       "LNG_TEAM_FIELD_LABEL_LOCATIONS": {
         "translation": "Área geográfica"
