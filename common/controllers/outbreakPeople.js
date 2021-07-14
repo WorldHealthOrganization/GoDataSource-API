@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const moment = require('moment');
+const escapeRegExp = require('../../components/escapeRegExp');
 
 /**
  * Note: It is not exposed as an actual controller
@@ -31,18 +32,18 @@ module.exports = function (Outbreak) {
     filter.where.or = [
       {
         id: {
-          like: identifier,
-          options: 'i'
+          regex: new RegExp(escapeRegExp(identifier), 'i')
         }
       },
       {
         visualId: {
-          like: identifier,
-          options: 'i'
+          regex: new RegExp(escapeRegExp(identifier), 'i')
         }
       },
       {
-        'documents.number': identifier
+        'documents.number': {
+          regex: new RegExp(escapeRegExp(identifier), 'i')
+        }
       }
     ];
 
