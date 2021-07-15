@@ -29,8 +29,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Add support for 'identifier' search: Allow searching people based on id, visualId and documents.number
-   * - & geo restrictions
+   * Add support for disallowed person types and geo restrictions
    */
   Outbreak.beforeRemote('prototype.__get__people', function (context, modelInstance, next) {
     // merge the disallowed person types filter
@@ -64,7 +63,7 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Add support for geo restrictions
+   * Add support for disallowed person types and geo restrictions
    */
   Outbreak.beforeRemote('prototype.__count__people', function (context, modelInstance, next) {
     // merge the disallowed person types filter
