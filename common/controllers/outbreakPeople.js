@@ -17,18 +17,15 @@ module.exports = function (Outbreak) {
     // get the disallowed person types
     const disallowedPersonTypes = Outbreak.helpers.getDisallowedPersonTypes(userPersonTypesWithReadAccess);
 
-    const filter = {};
-
-    if (disallowedPersonTypes.length) {
-      filter.where = {
-        type: {
-          nin: disallowedPersonTypes
+    // return condition
+    return disallowedPersonTypes.length ?
+      {} : {
+        where: {
+          type: {
+            nin: disallowedPersonTypes
+          }
         }
       };
-    }
-
-    // return the filter
-    return filter;
   };
 
   /**
