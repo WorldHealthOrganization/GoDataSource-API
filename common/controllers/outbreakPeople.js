@@ -1,7 +1,6 @@
 'use strict';
 
 const app = require('../../server/server');
-const _ = require('lodash');
 const moment = require('moment');
 
 /**
@@ -10,47 +9,38 @@ const moment = require('moment');
  */
 
 module.exports = function (Outbreak) {
+  // private method to generate the disallowed person types filter
+  const _generatePersonTypesFilter = function (context) {
+    // get the user permissions
+    let userPersonTypesWithReadAccess = Outbreak.helpers.getUsersPersonReadPermissions(context);
+
+    // get the disallowed person types
+    const disallowedPersonTypes = Outbreak.helpers.getDisallowedPersonTypes(userPersonTypesWithReadAccess);
+
+    // return condition
+    return !disallowedPersonTypes.length ?
+      {} : {
+        where: {
+          type: {
+            nin: disallowedPersonTypes
+          }
+        }
+      };
+  };
+
   /**
-   * Add support for 'identifier' search: Allow searching people based on id, visualId and documents.number
-   * - & geo restrictions
+   * Add support for disallowed person types and geo restrictions
    */
   Outbreak.beforeRemote('prototype.__get__people', function (context, modelInstance, next) {
-    // get filter (if any)
-    let filter = context.args.filter || {};
-    // get identifier query (if any)
-    const identifier = _.get(filter, 'where.identifier');
-    // if there is an identifier
-    if (identifier !== undefined) {
-      // remove it from the query
-      delete filter.where.identifier;
-      // update filter with custom query around identifier
-      filter = app.utils.remote.mergeFilters(
-        {
-          where: {
-            or: [
-              {
-                id: identifier
-              },
-              {
-                visualId: identifier
-              },
-              {
-                'documents.number': identifier
-              }
-            ]
-          }
-        }, filter || {});
-
-      // replace old filter with new one
-      context.args.filter = filter;
-    }
+    // merge the disallowed person types filter
+    context.args.filter = app.utils.remote.mergeFilters(_generatePersonTypesFilter(context), context.args.filter || {});
 
     // add geographical restrictions if needed
     app.models.person
-      .addGeographicalRestrictions(context, filter.where)
+      .addGeographicalRestrictions(context, context.args.where)
       .then(updatedFilter => {
         // update where if needed
-        updatedFilter && (filter.where = updatedFilter);
+        updatedFilter && (context.args.where = updatedFilter);
 
         return next();
       })
@@ -73,9 +63,12 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Add support for geo restrictions
+   * Add support for disallowed person types and geo restrictions
    */
   Outbreak.beforeRemote('prototype.__count__people', function (context, modelInstance, next) {
+    // merge the disallowed person types filter
+    context.args.where = app.utils.remote.mergeFilters(_generatePersonTypesFilter(context), context.args || {}).where;
+
     // add geographical restrictions if needed
     app.models.person
       .addGeographicalRestrictions(context, context.args.where)
