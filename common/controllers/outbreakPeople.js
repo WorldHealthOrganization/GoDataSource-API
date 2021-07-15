@@ -18,7 +18,7 @@ module.exports = function (Outbreak) {
     const disallowedPersonTypes = Outbreak.helpers.getDisallowedPersonTypes(userPersonTypesWithReadAccess);
 
     // return condition
-    return disallowedPersonTypes.length ?
+    return !disallowedPersonTypes.length ?
       {} : {
         where: {
           type: {
