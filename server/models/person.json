@@ -196,11 +196,17 @@
       }
     }
   },
+  "removeIndexes": [
+    "outbreak_deleted_type_index"
+  ],
   "indexes": {
-    "outbreak_deleted_type_index": {
+    "outbreak_deleted_type_name_index": {
       "outbreakId": 1,
       "deleted": 1,
-      "type": 1
+      "type": 1,
+      "name": 1,
+      "lastName": 1,
+      "firstName": 1
     },
     "type_index": {
       "type": 1
