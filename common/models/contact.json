@@ -86,8 +86,7 @@
   "scope": {
     "where": {
       "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT"
-    },
-    "order": ["lastName ASC", "firstName ASC"]
+    }
   },
   "properties": {
     "type": {
