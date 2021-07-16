@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
+const genericHelpers = require('../../components/helpers');
 
 module.exports = function (Team) {
 
@@ -33,5 +34,29 @@ module.exports = function (Team) {
         next();
       })
       .catch(next);
+  });
+
+  /**
+   * Filter by parent location
+   */
+  Team.beforeRemote('**', function (context, modelInstance, next) {
+    if (context.args.filter) {
+      genericHelpers.includeSubLocationsInLocationFilter(
+        app,
+        context.args.filter,
+        'locationIds',
+        next
+      );
+    } else if (context.args.where) {
+      genericHelpers.includeSubLocationsInLocationFilter(
+        app, {
+          where: context.args.where
+        },
+        'locationIds',
+        next
+      );
+    } else {
+      return next();
+    }
   });
 };

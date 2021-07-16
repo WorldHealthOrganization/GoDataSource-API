@@ -1656,7 +1656,12 @@ const translateFieldLabels = function (app, model, modelName, dictionary, includ
  * @param filter
  * @param callback
  */
-const includeSubLocationsInLocationFilter = function (app, filter, callback) {
+const includeSubLocationsInLocationFilter = function (
+  app,
+  filter,
+  locationKey,
+  callback
+) {
   // build a list of search actions
   const searchForLocations = [];
   // go through all filter properties
@@ -1686,7 +1691,7 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
                 return callback(error);
               }
               // replace original filter with actual location filter and use found location ids
-              filter[propertyName.replace('parentLocationIdFilter', 'locationId')] = {
+              filter[propertyName.replace('parentLocationIdFilter', locationKey)] = {
                 [inqKey]: locationIds
               };
               // remove original filter
@@ -1702,7 +1707,7 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
         if (item && typeof item === 'object') {
           // process it recursively
           searchForLocations.push(function (callback) {
-            includeSubLocationsInLocationFilter(app, item, callback);
+            includeSubLocationsInLocationFilter(app, item, locationKey, callback);
           });
         }
       });
@@ -1710,7 +1715,7 @@ const includeSubLocationsInLocationFilter = function (app, filter, callback) {
       // if the element is an object
       searchForLocations.push(function (callback) {
         // process it recursively
-        includeSubLocationsInLocationFilter(app, filter[propertyName], callback);
+        includeSubLocationsInLocationFilter(app, filter[propertyName], locationKey, callback);
       });
     }
   });
