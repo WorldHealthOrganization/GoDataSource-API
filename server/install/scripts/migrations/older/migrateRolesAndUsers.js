@@ -63,7 +63,8 @@ function migrateRoles(mongoDBConnection) {
                 defaultRoleData.newName :
                 roleName,
               description: defaultRoleData.description,
-              permissionIds: defaultRoleData.permissionIds
+              permissionIds: defaultRoleData.permissionIds,
+              deleted: false
             })
             .then(() => {
               // new instance created

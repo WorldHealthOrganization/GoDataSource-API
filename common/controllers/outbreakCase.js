@@ -358,14 +358,18 @@ module.exports = function (Outbreak) {
         }
 
         let exportOptions = {
+          userId: _.get(options, 'accessToken.userId'),
+          outbreakId: self.id,
           questionnaire: self.caseInvestigationTemplate.toJSON(),
           useQuestionVariable: useQuestionVariable,
           contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
         };
 
+        // get logged in user from request options in order to create author fields
         const CaseModel = app.models.case;
         let modelOptions = {
           collectionName: 'person',
+          modelName: CaseModel.modelName,
           scopeQuery: CaseModel.definition.settings.scope,
           arrayProps: CaseModel.arrayProps,
           fieldLabelsMap: CaseModel.fieldLabelsMap,
@@ -379,7 +383,6 @@ module.exports = function (Outbreak) {
 
         return WorkerRunner.helpers.exportFilteredModelsList(
           modelOptions,
-          {},
           filter,
           exportType,
           encryptPassword,
@@ -388,8 +391,12 @@ module.exports = function (Outbreak) {
           exportOptions
         );
       })
-      .then((file) => {
-        return app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case List.${file.extension}`, callback);
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
       })
       .catch(callback);
   };

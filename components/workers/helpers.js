@@ -79,14 +79,38 @@ const worker = {
 };
 
 process.on('message', function (message) {
-  worker[message.fn](...message.args)
-    .then(function (result) {
-      process.send([null, result]);
-    })
-    .catch(function (error) {
-      process.send([error instanceof Error ? {
-        message: error.message,
-        stack: error.stack
-      } : error]);
-    });
+  // background worker ?
+  if (message.backgroundWorker) {
+    // trigger worker
+    worker[message.fn](
+      (error, result) => {
+        // an error occurred ?
+        if (error) {
+          // send error to parent
+          process.send([error instanceof Error ? {
+            message: error.message,
+            stack: error.stack
+          } : error]);
+
+          // finished
+          return;
+        }
+
+        // trigger worker job
+        process.send([null, result]);
+      },
+      ...message.args
+    );
+  } else {
+    worker[message.fn](...message.args)
+      .then(function (result) {
+        process.send([null, result]);
+      })
+      .catch(function (error) {
+        process.send([error instanceof Error ? {
+          message: error.message,
+          stack: error.stack
+        } : error]);
+      });
+  }
 });

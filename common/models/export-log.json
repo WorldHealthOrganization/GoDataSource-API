@@ -1,0 +1,123 @@
+{
+  "name": "exportLog",
+  "base": "databaseActionLog",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "export-data"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "export-data",
+      "readOnly": true
+    },
+    "resourceType": {
+      "type": "string",
+      "description": "Resource which is being exported"
+    },
+    "totalNo": {
+      "type": "number",
+      "description": "Total number of resources to be exported"
+    },
+    "processedNo": {
+      "type": "number",
+      "description": "Number of resources processed"
+    },
+    "mimeType": {
+      "type": "string"
+    },
+    "extension": {
+      "type": "string"
+    },
+    "statusStep": {
+      "type": "string",
+      "enum": [
+        "LNG_STATUS_STEP_RETRIEVING_LANGUAGE_TOKENS",
+        "LNG_STATUS_STEP_PREPARING_RECORDS",
+        "LNG_STATUS_STEP_CONFIGURE_HEADERS",
+        "LNG_STATUS_STEP_EXPORTING_RECORDS",
+        "LNG_STATUS_STEP_EXPORT_FINISHED"
+      ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "downloadExportedFile"
+    }
+  ],
+  "methods": {
+    "prototype.downloadExportedFile": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export filtered list of relationships",
+      "http": {
+        "verb": "get",
+        "path": "/download"
+      }
+    }
+  }
+}

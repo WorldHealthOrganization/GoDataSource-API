@@ -215,6 +215,9 @@
     "executeCheckOnlyOnDuplicateDataChange": false
   },
   "count": {
-    "limit": 30000
+    "limit": 10000
+  },
+  "export": {
+    "batchSize": 7000
   }
 }
