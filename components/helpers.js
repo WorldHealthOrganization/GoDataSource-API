@@ -3537,32 +3537,33 @@ function exportFilteredModelsList(
               // array property ?
               if (
                 arrayProps &&
-                arrayProps[propertyName] &&
-                sheetHandler.columns.arrayColumnMaxValues[propertyName]
+                arrayProps[propertyName]
               ) {
                 // go through each child property and create proper header columns
-                for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
-                  for (let childProperty in arrayProps[propertyName]) {
-                    // determine child property information
-                    const childPropertyTokenTranslation = sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+                if (sheetHandler.columns.arrayColumnMaxValues[propertyName]) {
+                  for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
+                    for (let childProperty in arrayProps[propertyName]) {
+                      // determine child property information
+                      const childPropertyTokenTranslation = sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
 
-                    // child property contains parent info ?
-                    const propertyOfAnObjectIndex = childProperty.indexOf('.');
-                    if (propertyOfAnObjectIndex > -1) {
-                      // determine parent property
-                      const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
+                      // child property contains parent info ?
+                      const propertyOfAnObjectIndex = childProperty.indexOf('.');
+                      if (propertyOfAnObjectIndex > -1) {
+                        // determine parent property
+                        const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
 
-                      // remove previous column if it was a parent column
-                      if (parentProperty) {
-                        removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                        // remove previous column if it was a parent column
+                        if (parentProperty) {
+                          removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                        }
                       }
-                    }
 
-                    // add columns
-                    addHeaderColumn(
-                      `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
-                      `${propertyName}[${arrayIndex}].${childProperty}`
-                    );
+                      // add columns
+                      addHeaderColumn(
+                        `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
+                        `${propertyName}[${arrayIndex}].${childProperty}`
+                      );
+                    }
                   }
                 }
 
