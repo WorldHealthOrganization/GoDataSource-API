@@ -3196,6 +3196,7 @@ function exportFilteredModelsList(
     // finished
     const columns = initializeColumnHeaders();
     return {
+      languageId: options.contextUserLanguageId || defaultLanguage,
       exportLogId,
       temporaryCollectionName: `zExport_${exportLogId}`,
       dictionaryMap: {},
@@ -3235,8 +3236,10 @@ function exportFilteredModelsList(
     };
   };
 
-  // data
+  // used collection
   let exportLog, temporaryCollection, languageToken;
+
+  // defaultLanguage must be initialized before initializeTemporaryWorkbook
   const defaultLanguage = 'english_us';
   const dataFilter = initializeQueryFilters();
   const sheetHandler = initializeTemporaryWorkbook();
@@ -3249,47 +3252,6 @@ function exportFilteredModelsList(
       const exportDataCollection = dbConn.collection(modelOptions.collectionName);
       exportLog = dbConn.collection('databaseActionLog');
       languageToken = dbConn.collection('languageToken');
-
-      // handle write data to file
-      const writeDataToFile = (records) => {
-        // write data to file
-        // for faster then forEach :) - monumental gain :)
-        for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
-          // get record data
-          const record = records[recordIndex];
-
-          // convert geo-points (if any)
-          covertAddressesGeoPointToLoopbackFormat(record);
-
-          // go through data and add create data array taking in account columns order
-          const data = [];
-          sheetHandler.columns.headerColumns.forEach((column) => {
-            // determine value from column path
-            const cellValue = _.get(
-              record,
-              column.path
-            );
-
-            // add value to row
-            data.push(cellValue);
-          });
-
-          // append row
-          sheetHandler.excel.worksheet.addRow(data).commit();
-        }
-
-        //#TODO
-        // update header columns with missing questionnaire questions / address arrays / documents / date ranges...
-        // the problem is that we might need to insert data for arrays which will break the cell values,
-        // and we will need to go through all rows and update order - read all and write stream with row updated
-
-        // update export log
-        sheetHandler.processedNo += records.length;
-        return sheetHandler.updateExportLog({
-          processedNo: sheetHandler.processedNo,
-          updatedAt: new Date()
-        });
-      };
 
       // initialize export log
       const initializeExportLog = () => {
@@ -3321,24 +3283,21 @@ function exportFilteredModelsList(
           });
       };
 
-      // initialize language tokens
-      const initializeLanguageTokens = () => {
-        // for which language do we need to retrieve tokens ?
-        const languageId = options.contextUserLanguageId || defaultLanguage;
-
-        // retrieve general language tokens
-        const languageTokensToRetrieve = Object.values(sheetHandler.columns.labels);
-
-        // retrieve language tokens
+      // retrieve missing tokens
+      const retrieveMissingTokens = (languageId, tokenIds) => {
+        // default token projection
         const languageTokenProjection = {
           token: 1,
           translation: 1
         };
+
+        // retrieve tokens
+        // - preferably in user language but if not found in default language (english_us)
         return languageToken
           .find({
             languageId: languageId,
             token: {
-              $in: languageTokensToRetrieve
+              $in: tokenIds
             }
           }, {
             projection: languageTokenProjection
@@ -3356,13 +3315,13 @@ function exportFilteredModelsList(
             // if records not found in current language try english
             if (
               languageId !== defaultLanguage &&
-              languageTokensToRetrieve.length !== tokens.length
+              tokenIds.length !== tokens.length
             ) {
               // find tokens that are missing
               const missingTokenIds = [];
-              for (let missingTokenIndex = 0; missingTokenIndex < languageTokensToRetrieve.length; missingTokenIndex++) {
+              for (let missingTokenIndex = 0; missingTokenIndex < tokenIds.length; missingTokenIndex++) {
                 // check if we have this token
-                const token = languageTokensToRetrieve[missingTokenIndex];
+                const token = tokenIds[missingTokenIndex];
                 if (sheetHandler.dictionaryMap[token] !== undefined) {
                   // retrieved already
                   continue;
@@ -3373,27 +3332,24 @@ function exportFilteredModelsList(
               }
 
               // retrieve missing tokens
-              return languageToken
-                .find({
-                  languageId: defaultLanguage,
-                  token: {
-                    $in: missingTokenIds
-                  }
-                }, {
-                  projection: languageTokenProjection
-                })
-                .toArray()
-                .then((missingTokens) => {
-                  // map tokens
-                  // for faster then forEach :) - monumental gain :)
-                  for (let tokenIndex = 0; tokenIndex < missingTokens.length; tokenIndex++) {
-                    // get record data
-                    const record = missingTokens[tokenIndex];
-                    sheetHandler.dictionaryMap[record.token] = record.translation;
-                  }
-                });
+              return retrieveMissingTokens(
+                defaultLanguage,
+                missingTokenIds
+              );
             }
           });
+      };
+
+      // initialize language tokens
+      const initializeLanguageTokens = () => {
+        // retrieve general language tokens
+        const languageTokensToRetrieve = Object.values(sheetHandler.columns.labels);
+
+        // retrieve language tokens
+        return retrieveMissingTokens(
+          sheetHandler.languageId,
+          languageTokensToRetrieve
+        );
       };
 
       // initialize collection view
@@ -3671,6 +3627,95 @@ function exportFilteredModelsList(
                   return recordsToExport;
                 });
             }));
+      };
+
+      // handle write data to file
+      const writeDataToFile = (records) => {
+        // retrieve missing tokens
+        // faster than a zombie
+        const missingTokens = {};
+        for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+          // get record data
+          const record = records[recordIndex];
+          sheetHandler.columns.headerColumns.forEach((column) => {
+            // determine value from column path
+            const cellValue = _.get(
+              record,
+              column.path
+            );
+
+            // do we need to translate it / determine missing tokens
+            if (
+              cellValue &&
+              typeof cellValue === 'string' &&
+              cellValue.startsWith('LNG_')
+            ) {
+              // missing token ?
+              if (!sheetHandler.dictionaryMap[cellValue]) {
+                missingTokens[cellValue] = true;
+              }
+            }
+          });
+        }
+
+        // retrieve missing language tokens & write data
+        return Promise.resolve()
+          .then(() => {
+            // no missing tokens ?
+            if (_.isEmpty(missingTokens)) {
+              return;
+            }
+
+            // retrieve missing tokens
+            return retrieveMissingTokens(
+              sheetHandler.languageId,
+              Object.keys(missingTokens)
+            );
+          })
+          .then(() => {
+            // write data to file
+            // for faster then forEach :) - monumental gain :)
+            for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+              // get record data
+              const record = records[recordIndex];
+
+              // convert geo-points (if any)
+              covertAddressesGeoPointToLoopbackFormat(record);
+
+              // go through data and add create data array taking in account columns order
+              const data = [];
+              sheetHandler.columns.headerColumns.forEach((column) => {
+                // determine value from column path
+                let cellValue = _.get(
+                  record,
+                  column.path
+                );
+
+                // do we need to translate it ?
+                if (
+                  cellValue &&
+                  typeof cellValue === 'string' &&
+                  cellValue.startsWith('LNG_') &&
+                  sheetHandler.dictionaryMap[cellValue] !== undefined
+                ) {
+                  cellValue = sheetHandler.dictionaryMap[cellValue];
+                }
+
+                // add value to row
+                data.push(cellValue);
+              });
+
+              // append row
+              sheetHandler.excel.worksheet.addRow(data).commit();
+            }
+
+            // update export log
+            sheetHandler.processedNo += records.length;
+            return sheetHandler.updateExportLog({
+              processedNo: sheetHandler.processedNo,
+              updatedAt: new Date()
+            });
+          });
       };
 
       // process data in batches
