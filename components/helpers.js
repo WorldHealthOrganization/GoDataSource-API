@@ -3173,6 +3173,7 @@ function exportFilteredModelsList(
     return {
       headerKeys: fieldsList,
       headerColumns: [],
+      arrayColumnMaxValues: {},
       labels: fieldLabelsMap
     };
   };
@@ -3219,7 +3220,18 @@ function exportFilteredModelsList(
           return acc;
         },
         {}
-      )
+      ),
+
+      // update export log
+      updateExportLog: (dataToUpdate) => {
+        // prepare data
+        return exportLog
+          .updateOne({
+            _id: sheetHandler.exportLogId
+          }, {
+            '$set': dataToUpdate
+          });
+      }
     };
   };
 
@@ -3228,139 +3240,6 @@ function exportFilteredModelsList(
   const defaultLanguage = 'english_us';
   const dataFilter = initializeQueryFilters();
   const sheetHandler = initializeTemporaryWorkbook();
-
-  // determine header columns
-  const determineHeaders = () => {
-    return new Promise((resolve, reject) => {
-      // handle adding columns to make sure they are all unitary
-      const addHeaderColumn = (
-        header,
-        path
-      ) => {
-        sheetHandler.columns.headerColumns.push({
-          header,
-          path
-        });
-      };
-
-      // remove previous column if path condition is met
-      const removeLastColumnIfSamePath = (path) => {
-        // nothing to do
-        if (sheetHandler.columns.headerColumns.length < 1) {
-          return;
-        }
-
-        // check if we need to remove it
-        if (sheetHandler.columns.headerColumns[sheetHandler.columns.headerColumns.length - 1].path !== path) {
-          return;
-        }
-
-        // meets the criteria, need to remove column
-        sheetHandler.columns.headerColumns.splice(
-          sheetHandler.columns.headerColumns.length - 1,
-          1
-        );
-      };
-
-      // get properties of type array definitions if current model has one
-      const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
-        undefined :
-        modelOptions.arrayProps;
-
-      // for faster then forEach :) - monumental gain :)
-      for (let propIndex = 0; propIndex < sheetHandler.columns.headerKeys.length; propIndex++) {
-        // get record data
-        const propertyName = sheetHandler.columns.headerKeys[propIndex];
-        const propertyLabelToken = sheetHandler.columns.labels[propertyName];
-        const propertyLabelTokenTranslation = propertyLabelToken && sheetHandler.dictionaryMap[propertyLabelToken] !== undefined ?
-          sheetHandler.dictionaryMap[propertyLabelToken] :
-          propertyLabelToken;
-
-        // array property ?
-        if (
-          arrayProps &&
-          arrayProps[propertyName]
-        ) {
-          // go through each child property and create proper header columns
-          for (let childProperty in arrayProps[propertyName]) {
-            // determine child property information
-            const childPropertyTokenTranslation = sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
-
-            // add column
-            // addHeaderColumn(
-            //   `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation}`,
-            //   '..path'
-            // );
-          }
-        }
-
-        // do not handle array properties from field labels map when we have arrayProps set on the model
-        const isPropertyOfAnArray = propertyName.indexOf('[]') > -1;
-        if (
-          isPropertyOfAnArray &&
-          arrayProps
-        ) {
-          continue;
-        }
-
-        // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-        if (isPropertyOfAnArray) {
-          // #TODO
-        } else {
-          // check if property belongs to an object
-          const propertyOfAnObjectIndex = propertyName.indexOf('.');
-          let parentProperty, parentPropertyTokenTranslation;
-          if (propertyOfAnObjectIndex > -1) {
-            parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
-            parentPropertyTokenTranslation = parentProperty && sheetHandler.dictionaryMap[parentProperty] ?
-              sheetHandler.dictionaryMap[parentProperty] :
-              undefined;
-          }
-
-          // if property belongs to an object then maybe we should remove the parent column since it isn't necessary anymore
-          if (parentProperty) {
-            // remove parent column
-            removeLastColumnIfSamePath(parentProperty);
-
-            // add column
-            if (parentPropertyTokenTranslation) {
-              addHeaderColumn(
-                `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
-                propertyName
-              );
-            } else {
-              // add column
-              addHeaderColumn(
-                propertyLabelTokenTranslation,
-                propertyName
-              );
-            }
-          } else {
-            // add column
-            addHeaderColumn(
-              propertyLabelTokenTranslation,
-              propertyName
-            );
-          }
-        }
-      }
-
-      // #TODO
-      // do we need reject / promise - maybe if we do requests to api etc
-
-      // finished
-      sheetHandler.excel.worksheet.columns = sheetHandler.columns.headerColumns;
-      resolve();
-
-      // resolve([
-      //   { header: 'Id', key: 'id', width: 10 },
-      //   { header: 'Name', key: 'name', width: 32 },
-      //   { header: 'D.O.B.', key: 'DOB', width: 10, outlineLevel: 1 }
-      // ]);
-      // console.log(222222, sheetHandler.columns.headerKeys);
-      // sheetHandler.excel.worksheet.addRow(['A', 'B']).commit();
-    });
-  };
 
   // retrieve mongo db connection - since this export will always run in a worker
   MongoDBHelper
@@ -3406,15 +3285,10 @@ function exportFilteredModelsList(
 
         // update export log
         sheetHandler.processedNo += records.length;
-        return exportLog
-          .updateOne({
-            _id: sheetHandler.exportLogId
-          }, {
-            '$set': {
-              processedNo: sheetHandler.processedNo,
-              updatedAt: new Date()
-            }
-          });
+        return sheetHandler.updateExportLog({
+          processedNo: sheetHandler.processedNo,
+          updatedAt: new Date()
+        });
       };
 
       // initialize export log
@@ -3522,19 +3396,37 @@ function exportFilteredModelsList(
           });
       };
 
-      // update export log
-      const updateExportLog = (dataToUpdate) => {
-        // prepare data
-        return exportLog
-          .updateOne({
-            _id: sheetHandler.exportLogId
-          }, {
-            '$set': dataToUpdate
-          });
-      };
-
       // initialize collection view
       const initializeCollectionView = () => {
+        // original project
+        const project = {
+          // force to keep object order by using the collection natural sort when retrieving data
+          _id: 0,
+          rowId: '$_id'
+        };
+
+        // determine how many values we have for array properties
+        const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
+          [] :
+          Object.keys(modelOptions.arrayProps);
+        arrayProps.forEach((property) => {
+          // array field value
+          const fieldValue = `$${property}`;
+
+          // attach projection
+          project[property] = {
+            $cond: {
+              if: {
+                $isArray: fieldValue
+              },
+              then: {
+                $size: fieldValue
+              },
+              else: 0
+            }
+          };
+        });
+
         // prepare records that will be exported
         return exportDataCollection
           .aggregate([
@@ -3543,11 +3435,7 @@ function exportFilteredModelsList(
             }, {
               $sort: dataFilter.sort
             }, {
-              $project: {
-                // force to keep object order by using the collection natural sort when retrieving data
-                _id: 0,
-                rowId: '$_id'
-              }
+              $project: project
             }, {
               $out: sheetHandler.temporaryCollectionName
             }
@@ -3557,6 +3445,184 @@ function exportFilteredModelsList(
           .toArray()
           .then(() => {
             temporaryCollection = dbConn.collection(sheetHandler.temporaryCollectionName);
+          });
+      };
+
+      // determine header columns
+      const initializeColumns = () => {
+        // initialize columns
+        return Promise.resolve()
+          .then(() => {
+            // determine the maximum number for each array field
+            const projectMax = {
+              _id: null
+            };
+            const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
+              [] :
+              Object.keys(modelOptions.arrayProps);
+
+            // nothing to retrieve ?
+            if (arrayProps.length < 1) {
+              return;
+            }
+
+            // go through array fields and construct query to determine maximum number of records
+            arrayProps.forEach((property) => {
+              // array field value
+              const fieldValue = `$${property}`;
+
+              // attach max projection
+              projectMax[property] = {
+                $max : fieldValue
+              };
+            });
+
+            // determine maximum number of items for each array field
+            return temporaryCollection
+              .aggregate([{
+                $group: projectMax
+              }])
+              .toArray();
+          })
+          .then((maxValues) => {
+            // keep a copy of max counts
+            sheetHandler.columns.arrayColumnMaxValues = maxValues && maxValues.length > 0 ?
+              maxValues[0] :
+              {};
+
+            // handle adding columns to make sure they are all unitary
+            const addHeaderColumn = (
+              header,
+              path
+            ) => {
+              sheetHandler.columns.headerColumns.push({
+                header,
+                path
+              });
+            };
+
+            // remove previous column if path condition is met
+            const removeLastColumnIfSamePath = (path) => {
+              // nothing to do
+              if (sheetHandler.columns.headerColumns.length < 1) {
+                return;
+              }
+
+              // check if we need to remove it
+              if (sheetHandler.columns.headerColumns[sheetHandler.columns.headerColumns.length - 1].path !== path) {
+                return;
+              }
+
+              // meets the criteria, need to remove column
+              sheetHandler.columns.headerColumns.splice(
+                sheetHandler.columns.headerColumns.length - 1,
+                1
+              );
+            };
+
+            // get properties of type array definitions if current model has one
+            const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
+              undefined :
+              modelOptions.arrayProps;
+
+            // for faster then forEach :) - monumental gain :)
+            for (let propIndex = 0; propIndex < sheetHandler.columns.headerKeys.length; propIndex++) {
+              // get record data
+              const propertyName = sheetHandler.columns.headerKeys[propIndex];
+              const propertyLabelToken = sheetHandler.columns.labels[propertyName];
+              const propertyLabelTokenTranslation = propertyLabelToken && sheetHandler.dictionaryMap[propertyLabelToken] !== undefined ?
+                sheetHandler.dictionaryMap[propertyLabelToken] :
+                propertyLabelToken;
+
+              // array property ?
+              if (
+                arrayProps &&
+                arrayProps[propertyName] &&
+                sheetHandler.columns.arrayColumnMaxValues[propertyName]
+              ) {
+                // go through each child property and create proper header columns
+                for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
+                  for (let childProperty in arrayProps[propertyName]) {
+                    // determine child property information
+                    const childPropertyTokenTranslation = sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+
+                    // child property contains parent info ?
+                    const propertyOfAnObjectIndex = childProperty.indexOf('.');
+                    if (propertyOfAnObjectIndex > -1) {
+                      // determine parent property
+                      const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
+
+                      // remove previous column if it was a parent column
+                      if (parentProperty) {
+                        removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                      }
+                    }
+
+                    // add columns
+                    addHeaderColumn(
+                      `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
+                      `${propertyName}[${arrayIndex}].${childProperty}`
+                    );
+                  }
+                }
+
+                // property addressed through its children, no need to continue, and yet we continue - dev joke :) - jump to next item in for loop
+                continue;
+              }
+
+              // do not handle array properties from field labels map when we have arrayProps set on the model
+              const isPropertyOfAnArray = propertyName.indexOf('[]') > -1;
+              if (
+                isPropertyOfAnArray &&
+                arrayProps
+              ) {
+                continue;
+              }
+
+              // if a flat file is exported, data needs to be flattened, include 3 elements for each array
+              if (isPropertyOfAnArray) {
+                // #TODO
+              } else {
+                // check if property belongs to an object
+                const propertyOfAnObjectIndex = propertyName.indexOf('.');
+                let parentProperty, parentPropertyTokenTranslation;
+                if (propertyOfAnObjectIndex > -1) {
+                  parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
+                  parentPropertyTokenTranslation = parentProperty && sheetHandler.dictionaryMap[parentProperty] ?
+                    sheetHandler.dictionaryMap[parentProperty] :
+                    undefined;
+                }
+
+                // if property belongs to an object then maybe we should remove the parent column since it isn't necessary anymore
+                if (parentProperty) {
+                  // remove parent column
+                  removeLastColumnIfSamePath(parentProperty);
+
+                  // add column
+                  if (parentPropertyTokenTranslation) {
+                    addHeaderColumn(
+                      `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
+                      propertyName
+                    );
+                  } else {
+                    // add column
+                    addHeaderColumn(
+                      propertyLabelTokenTranslation,
+                      propertyName
+                    );
+                  }
+                } else {
+                  // add column
+                  addHeaderColumn(
+                    propertyLabelTokenTranslation,
+                    propertyName
+                  );
+                }
+              }
+            }
+
+            // finished
+            sheetHandler.excel.worksheet.columns = sheetHandler.columns.headerColumns;
           });
       };
 
@@ -3616,7 +3682,7 @@ function exportFilteredModelsList(
 
             // change export status => Preparing records
             .then(() => {
-              return updateExportLog({
+              return sheetHandler.updateExportLog({
                 statusStep: 'LNG_STATUS_STEP_PREPARING_RECORDS',
                 updatedAt: new Date()
               });
@@ -3627,14 +3693,14 @@ function exportFilteredModelsList(
 
             // change export status => Preparing column headers
             .then(() => {
-              return updateExportLog({
+              return sheetHandler.updateExportLog({
                 statusStep: 'LNG_STATUS_STEP_CONFIGURE_HEADERS',
                 updatedAt: new Date()
               });
             })
 
             // generate column headers
-            .then(determineHeaders)
+            .then(initializeColumns)
 
             // count number of records that we need to export
             .then(() => {
@@ -3642,7 +3708,7 @@ function exportFilteredModelsList(
             })
             .then((counted) => {
               // change export status => Starting to export data
-              return updateExportLog(
+              return sheetHandler.updateExportLog(
                 {
                   totalNo: counted,
                   statusStep: 'LNG_STATUS_STEP_EXPORTING_RECORDS',
@@ -3681,28 +3747,6 @@ function exportFilteredModelsList(
       // finished with temporary workbook file
       return sheetHandler.excel.workbook.commit();
     })
-    // .then(() => {
-    //   // hack to add headers since commit rows can't be altered later, so we can't change first row
-    //   // not perfect since we need to bring everything in memory and it can fail on really big files, but with current libraries versions there isn't a better way which sucks with capital S
-    //   // but still it is better than keeping the file opened while getting data from db, writing etc
-    //   // #TODO - need to find a better way because this takes some time...
-    //   const finalWorkbook = new excel.Workbook();
-    //   return finalWorkbook.xlsx.readFile(sheetHandler.filePath)
-    //     .then(() => {
-    //       // remove old file since it will be replaced with the new one
-    //       fs.unlinkSync(sheetHandler.filePath);
-    //
-    //       // add header columns
-    //       // #TODO headers need to be mapped to translation - labels once we know number of arrays / objects etc
-    //       finalWorkbook
-    //         .getWorksheet(1)
-    //         .getRow(1)
-    //         .values = sheetHandler.columns.headerKeys;
-    //
-    //       // write the final file
-    //       return finalWorkbook.xlsx.writeFile(sheetHandler.filePath);
-    //     });
-    // })
     .then(() => {
       // drop temporary collection since we finished the export and we don't need it anymore
       return temporaryCollection
@@ -3713,16 +3757,12 @@ function exportFilteredModelsList(
       // #TODO
 
       // finished exporting data
-      return exportLog
-        .updateOne({
-          _id: sheetHandler.exportLogId
-        }, {
-          '$set': {
-            status: 'LNG_SYNC_STATUS_SUCCESS',
-            statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
-            updatedAt: new Date()
-          }
-        });
+      return sheetHandler.updateExportLog({
+        status: 'LNG_SYNC_STATUS_SUCCESS',
+        statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
+        updatedAt: new Date(),
+        actionCompletionDate: new Date()
+      });
     })
     .then(() => {
       // finished - stop worker
@@ -3735,16 +3775,12 @@ function exportFilteredModelsList(
       // #TODO
 
       // update export log to contain errors
-      exportLog
-        .updateOne({
-          _id: sheetHandler.exportLogId
-        }, {
-          '$set': {
-            status: 'LNG_SYNC_STATUS_FAILED',
-            // statusStep - keep as it is because it could help to know where it failed, on what step
-            error: err.message,
-            updatedAt: new Date()
-          }
+      sheetHandler.updateExportLog(
+        {
+          status: 'LNG_SYNC_STATUS_FAILED',
+          // statusStep - keep as it is because it could help to know where it failed, on what step
+          error: err.message,
+          updatedAt: new Date()
         })
         .then(() => {
           // throw parent error
