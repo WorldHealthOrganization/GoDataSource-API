@@ -3221,6 +3221,9 @@ function exportFilteredModelsList(
       batchSize: config.export && config.export.batchSize > 0 ?
         config.export.batchSize :
         5000,
+      locationFindBatchSize: config.export && config.export.locationFindBatchSize > 0 ?
+        config.export.locationFindBatchSize :
+        1000,
       filePath,
       columns,
       excel: {
@@ -3232,6 +3235,7 @@ function exportFilteredModelsList(
       dictionaryMap: {},
 
       // locations
+      locationsMaxNumberOfIdentifiers: 0,
       locationsMap: {},
 
       // retrieve only the fields that we need
@@ -3482,57 +3486,86 @@ function exportFilteredModelsList(
           parentLocationId: 1
         };
 
-        // retrieve locations
-        return location
-          .find({
-            _id: {
-              $in: locationIds
-            }
-          }, {
-            projection: locationTokenProjection
-          })
-          .toArray()
-          .then((locations) => {
-            // map locations
-            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
-              // get record data
-              const record = locations[locationIndex];
-              sheetHandler.locationsMap[record._id] = record;
+        // retrieve locations in batches - just in case
+        const locationIdsMap = {};
+        return new Promise((resolve, reject) => {
+          // batch handler
+          const nextBatch = () => {
+            // finished ?
+            if (
+              !locationIds ||
+              locationIds.length < 1
+            ) {
+              return Promise.resolve();
             }
 
-            // no need to retrieve parent locations ?
-            if (!sheetHandler.columns.includeParentLocationData) {
-              return;
-            }
+            // next batch to retrieve
+            const batchLocationIds = locationIds.splice(
+              0,
+              sheetHandler.locationFindBatchSize
+            );
 
-            // retrieve missing parent locations too
-            // - need to loop again because otherwise we might include in missing something that is already retrieved but not added to map
-            const missingParents = {};
-            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
-              // get record data
-              const record = locations[locationIndex];
+            // retrieve locations
+            return location
+              .find({
+                _id: {
+                  $in: batchLocationIds
+                }
+              }, {
+                projection: locationTokenProjection
+              })
+              .toArray()
+              .then((locations) => {
+                // map locations
+                for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+                  // get record data
+                  const record = locations[locationIndex];
+                  sheetHandler.locationsMap[record._id] = record;
 
-              // doesn't have parent, no point in continuing
-              if (!record.parentLocationId) {
-                continue;
-              }
+                  // update max number of identifier if necessary
+                  sheetHandler.locationsMaxNumberOfIdentifiers = record.identifiers && record.identifiers.length > 0 && record.identifiers.length > sheetHandler.locationsMaxNumberOfIdentifiers ?
+                    record.identifiers.length :
+                    sheetHandler.locationsMaxNumberOfIdentifiers;
+                }
 
-              // parent already retrieved ?
-              if (sheetHandler.locationsMap[record.parentLocationId]) {
-                continue;
-              }
+                // no need to retrieve parent locations ?
+                if (!sheetHandler.columns.includeParentLocationData) {
+                  return;
+                }
 
-              // missing parent
-              missingParents[record.parentLocationId] = true;
-            }
+                // retrieve missing parent locations too
+                // - need to loop again because otherwise we might include in missing something that is already retrieved but not added to map
+                for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+                  // get record data
+                  const record = locations[locationIndex];
 
-            // retrieve missing parents if we have any
-            if (!_.isEmpty(missingParents)) {
-              return retrieveMissingLocations(
-                Object.keys(missingParents)
-              );
-            }
-          });
+                  // doesn't have parent, no point in continuing
+                  if (!record.parentLocationId) {
+                    continue;
+                  }
+
+                  // parent already retrieved, or will be retrieved ?
+                  if (
+                    sheetHandler.locationsMap[record.parentLocationId] ||
+                    locationIdsMap[record.parentLocationId]
+                  ) {
+                    continue;
+                  }
+
+                  // missing parent
+                  locationIdsMap[record.parentLocationId] = true;
+                  locationIds.push(record.parentLocationId);
+                }
+              })
+              .then(nextBatch);
+          };
+
+          // retrieve locations
+          nextBatch()
+            .then(resolve)
+            .catch(reject);
+        });
+
       };
 
       // retrieve locations and determine how many columns we will have - depending of identifiers

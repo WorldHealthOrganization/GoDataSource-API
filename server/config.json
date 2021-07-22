@@ -218,6 +218,7 @@
     "limit": 10000
   },
   "export": {
-    "batchSize": 7000
+    "batchSize": 7000,
+    "locationFindBatchSize": 1000
   }
 }
