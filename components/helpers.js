@@ -4074,16 +4074,23 @@ function exportFilteredModelsList(
                   }
                 }
 
-                // translate applies for all
+                // process data applies for all
                 // - formulas & values
-                if (
-                  cellValue &&
-                  typeof cellValue === 'string' &&
-                  cellValue.startsWith('LNG_')
-                ) {
-                  cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
-                    sheetHandler.dictionaryMap[cellValue] :
-                    cellValue;
+                if (cellValue) {
+                  // translate
+                  if (
+                    typeof cellValue === 'string' &&
+                    cellValue.startsWith('LNG_')
+                  ) {
+                    cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
+                      sheetHandler.dictionaryMap[cellValue] :
+                      cellValue;
+                  }
+
+                  // format dates
+                  if (cellValue instanceof Date) {
+                    cellValue = moment(cellValue).toISOString();
+                  }
                 }
 
                 // add value to row
