@@ -3100,8 +3100,8 @@ function exportFilteredModelsList(
 
     // filter field labels list if fields groups were provided
     let modelExportFieldsOrder = modelOptions.exportFieldsOrder;
-    fieldsGroupList = fieldsGroupList || [];
     if (
+      fieldsGroupList &&
       fieldsGroupList.length > 0 &&
       modelOptions.exportFieldsGroup
     ) {
@@ -3177,6 +3177,9 @@ function exportFilteredModelsList(
       labels: fieldLabelsMap,
 
       // location fields
+      includeParentLocationData: fieldsGroupList && fieldsGroupList.length > 0 && modelOptions.exportFieldsGroup ?
+        fieldsGroupList.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA') :
+        true,
       locationsFieldsMap: !modelOptions.locationFields || modelOptions.locationFields.length < 1 ?
         {} :
         modelOptions.locationFields.reduce(
@@ -3724,6 +3727,11 @@ function exportFilteredModelsList(
               // get record data
               const record = locations[locationIndex];
               sheetHandler.locationsMap[record._id] = record;
+            }
+
+            // no need to retrieve parent locations ?
+            if (!sheetHandler.columns.includeParentLocationData) {
+              return;
             }
 
             // retrieve missing parent locations too
