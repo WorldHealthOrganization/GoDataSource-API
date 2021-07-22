@@ -3013,7 +3013,8 @@ function exportFilteredModelsList(
             updatedAt: new Date(),
             updatedBy: options.userId,
             mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            extension: exportType
+            extension: exportType,
+            filter: JSON.stringify(dataFilter)
           })
           .then(() => {
             // send id to parent and proceed with doing the export

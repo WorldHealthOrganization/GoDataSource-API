@@ -51,6 +51,9 @@
     },
     "errStack": {
       "type": "any"
+    },
+    "filter": {
+      "type": "any"
     }
   },
   "validations": [],
