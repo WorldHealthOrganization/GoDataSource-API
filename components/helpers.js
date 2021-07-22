@@ -3216,6 +3216,7 @@ function exportFilteredModelsList(
       languageId: options.contextUserLanguageId || defaultLanguage,
       exportLogId,
       temporaryCollectionName: `zExport_${exportLogId}`,
+      temporaryDistinctLocationsKey: 'allUsedLocationIds',
       processedNo: 0,
       batchSize: config.export && config.export.batchSize > 0 ?
         config.export.batchSize :
@@ -3406,6 +3407,50 @@ function exportFilteredModelsList(
           };
         });
 
+        // go through location fields so we can construct the retrieval of location ids
+        const locationProps = _.isEmpty(sheetHandler.columns.locationsFieldsMap) ?
+          [] :
+          Object.keys(sheetHandler.columns.locationsFieldsMap);
+        const locationContactQuery = {
+          $concatArrays: []
+        };
+        locationProps.forEach((propertyName) => {
+          // take action depending if field belong to an array of not
+          const propertyArrayIndex = propertyName.indexOf('[]');
+          if (propertyArrayIndex > -1) {
+            // get array item field name - most of the time should be locationId, but you never know when earth is flat :)
+            const arrayField = `$${propertyName.substr(0, propertyArrayIndex)}`;
+            const locationItemProp = propertyName.substr(propertyName.lastIndexOf('.') + 1);
+
+            // array merge
+            locationContactQuery.$concatArrays.push({
+              $cond: {
+                if: {
+                  $isArray: arrayField
+                },
+                then: {
+                  $map: {
+                    input: arrayField,
+                    as: 'item',
+                    in: `$$item.${locationItemProp}`
+                  }
+                },
+                else: []
+              }
+            });
+          } else {
+            // not array
+            locationContactQuery.$concatArrays.push([
+              `$${propertyName}`
+            ]);
+          }
+        });
+
+        // attach location pipe if we have one
+        if (locationContactQuery.$concatArrays) {
+          project[sheetHandler.temporaryDistinctLocationsKey] = locationContactQuery;
+        }
+
         // prepare records that will be exported
         return exportDataCollection
           .aggregate([
@@ -3424,6 +3469,90 @@ function exportFilteredModelsList(
           .toArray()
           .then(() => {
             temporaryCollection = dbConn.collection(sheetHandler.temporaryCollectionName);
+          });
+      };
+
+      // retrieve missing locations
+      const retrieveMissingLocations = (locationIds) => {
+        // default location projection
+        const locationTokenProjection = {
+          _id: 1,
+          name: 1,
+          identifiers: 1,
+          parentLocationId: 1
+        };
+
+        // retrieve locations
+        return location
+          .find({
+            _id: {
+              $in: locationIds
+            }
+          }, {
+            projection: locationTokenProjection
+          })
+          .toArray()
+          .then((locations) => {
+            // map locations
+            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+              // get record data
+              const record = locations[locationIndex];
+              sheetHandler.locationsMap[record._id] = record;
+            }
+
+            // no need to retrieve parent locations ?
+            if (!sheetHandler.columns.includeParentLocationData) {
+              return;
+            }
+
+            // retrieve missing parent locations too
+            // - need to loop again because otherwise we might include in missing something that is already retrieved but not added to map
+            const missingParents = {};
+            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+              // get record data
+              const record = locations[locationIndex];
+
+              // doesn't have parent, no point in continuing
+              if (!record.parentLocationId) {
+                continue;
+              }
+
+              // parent already retrieved ?
+              if (sheetHandler.locationsMap[record.parentLocationId]) {
+                continue;
+              }
+
+              // missing parent
+              missingParents[record.parentLocationId] = true;
+            }
+
+            // retrieve missing parents if we have any
+            if (!_.isEmpty(missingParents)) {
+              return retrieveMissingLocations(
+                Object.keys(missingParents)
+              );
+            }
+          });
+      };
+
+      // retrieve locations and determine how many columns we will have - depending of identifiers
+      const initializeLocations = () => {
+        // retrieve all locations which are used in this export
+        // - should we split into bulk? shouldn't be necessary..just for some ids
+        return temporaryCollection
+          .distinct(sheetHandler.temporaryDistinctLocationsKey)
+          .then((locationIds) => {
+            // no locations ?
+            if (
+              !locationIds ||
+              locationIds.length < 1 ||
+              (locationIds = locationIds.filter((locationId) => locationId)).length < 1
+            ) {
+              return;
+            }
+
+            // retrieve locations
+            return retrieveMissingLocations(locationIds);
           });
       };
 
@@ -3658,13 +3787,13 @@ function exportFilteredModelsList(
             }));
       };
 
-      // retrieve data like missing tokens, locations ...
+      // retrieve data like missing tokens ...
+      // all locations should've been retrieved above - location initialization
       const writeDataToFileDetermineMissingData = (records) => {
-        // retrieve missing tokens
+        // retrieve missing data
         // faster than a zombie
         const missingData = {
-          tokens: {},
-          locations: {}
+          tokens: {}
         };
         for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
           // get record data
@@ -3686,12 +3815,6 @@ function exportFilteredModelsList(
                 if (!sheetHandler.dictionaryMap[cellValue]) {
                   missingData.tokens[cellValue] = true;
                 }
-
-              // missing location ?
-              } else if (sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]) {
-                if (!sheetHandler.locationsMap[cellValue]) {
-                  missingData.locations[cellValue] = true;
-                }
               }
             }
           });
@@ -3699,69 +3822,6 @@ function exportFilteredModelsList(
 
         // finished
         return missingData;
-      };
-
-      // retrieve missing locations
-      const retrieveMissingLocations = (locationIds) => {
-        // default location projection
-        const locationTokenProjection = {
-          _id: 1,
-          name: 1,
-          identifiers: 1,
-          parentLocationId: 1
-        };
-
-        // retrieve locations
-        return location
-          .find({
-            _id: {
-              $in: locationIds
-            }
-          }, {
-            projection: locationTokenProjection
-          })
-          .toArray()
-          .then((locations) => {
-            // map locations
-            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
-              // get record data
-              const record = locations[locationIndex];
-              sheetHandler.locationsMap[record._id] = record;
-            }
-
-            // no need to retrieve parent locations ?
-            if (!sheetHandler.columns.includeParentLocationData) {
-              return;
-            }
-
-            // retrieve missing parent locations too
-            // - need to loop again because otherwise we might include in missing something that is already retrieved but not added to map
-            const missingParents = {};
-            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
-              // get record data
-              const record = locations[locationIndex];
-
-              // doesn't have parent, no point in continuing
-              if (!record.parentLocationId) {
-                continue;
-              }
-
-              // parent already retrieved ?
-              if (sheetHandler.locationsMap[record.parentLocationId]) {
-                continue;
-              }
-
-              // missing parent
-              missingParents[record.parentLocationId] = true;
-            }
-
-            // retrieve missing parents if we have any
-            if (!_.isEmpty(missingParents)) {
-              return retrieveMissingLocations(
-                Object.keys(missingParents)
-              );
-            }
-          });
       };
 
       // handle write data to file
@@ -3782,19 +3842,6 @@ function exportFilteredModelsList(
             return retrieveMissingTokens(
               sheetHandler.languageId,
               Object.keys(missingData.tokens)
-            );
-          })
-
-          // retrieve missing locations
-          .then(() => {
-            // no missing locations ?
-            if (_.isEmpty(missingData.locations)) {
-              return;
-            }
-
-            // retrieve missing locations
-            return retrieveMissingLocations(
-              Object.keys(missingData.locations)
             );
           })
 
@@ -3872,6 +3919,17 @@ function exportFilteredModelsList(
 
             // generate temporary collection - view
             .then(initializeCollectionView)
+
+            // change export status => Preparing locations
+            .then(() => {
+              return sheetHandler.updateExportLog({
+                statusStep: 'LNG_STATUS_STEP_PREPARING_LOCATIONS',
+                updatedAt: new Date()
+              });
+            })
+
+            // retrieve locations
+            .then(initializeLocations)
 
             // change export status => Preparing column headers
             .then(() => {
