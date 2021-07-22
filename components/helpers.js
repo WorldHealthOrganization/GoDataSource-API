@@ -3174,7 +3174,21 @@ function exportFilteredModelsList(
       headerKeys: fieldsList,
       headerColumns: [],
       arrayColumnMaxValues: {},
-      labels: fieldLabelsMap
+      labels: fieldLabelsMap,
+
+      // location fields
+      locationsFieldsMap: !modelOptions.locationFields || modelOptions.locationFields.length < 1 ?
+        {} :
+        modelOptions.locationFields.reduce(
+          (acc, property) => {
+            // attach prop
+            acc[property] = true;
+
+            // continue
+            return acc;
+          },
+          {}
+        )
     };
   };
 
@@ -3199,7 +3213,6 @@ function exportFilteredModelsList(
       languageId: options.contextUserLanguageId || defaultLanguage,
       exportLogId,
       temporaryCollectionName: `zExport_${exportLogId}`,
-      dictionaryMap: {},
       processedNo: 0,
       batchSize: config.export && config.export.batchSize > 0 ?
         config.export.batchSize :
@@ -3210,6 +3223,12 @@ function exportFilteredModelsList(
         workbook: tmpWorkbook,
         worksheet: tmpWorksheet
       },
+
+      // dictionary
+      dictionaryMap: {},
+
+      // locations
+      locationsMap: {},
 
       // retrieve only the fields that we need
       projection: columns.headerKeys.reduce(
@@ -3237,7 +3256,7 @@ function exportFilteredModelsList(
   };
 
   // used collection
-  let exportLog, temporaryCollection, languageToken;
+  let exportLog, temporaryCollection, languageToken, location;
 
   // defaultLanguage must be initialized before initializeTemporaryWorkbook
   const defaultLanguage = 'english_us';
@@ -3252,6 +3271,7 @@ function exportFilteredModelsList(
       const exportDataCollection = dbConn.collection(modelOptions.collectionName);
       exportLog = dbConn.collection('databaseActionLog');
       languageToken = dbConn.collection('languageToken');
+      location = dbConn.collection('location');
 
       // initialize export log
       const initializeExportLog = () => {
@@ -3449,11 +3469,13 @@ function exportFilteredModelsList(
             // handle adding columns to make sure they are all unitary
             const addHeaderColumn = (
               header,
-              path
+              path,
+              pathWithoutIndexes
             ) => {
               sheetHandler.columns.headerColumns.push({
                 header,
-                path
+                path,
+                pathWithoutIndexes
               });
             };
 
@@ -3517,7 +3539,8 @@ function exportFilteredModelsList(
                       // add columns
                       addHeaderColumn(
                         `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
-                        `${propertyName}[${arrayIndex}].${childProperty}`
+                        `${propertyName}[${arrayIndex}].${childProperty}`,
+                        `${propertyName}[].${childProperty}`
                       );
                     }
                   }
@@ -3559,12 +3582,14 @@ function exportFilteredModelsList(
                   if (parentPropertyTokenTranslation) {
                     addHeaderColumn(
                       `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
+                      propertyName,
                       propertyName
                     );
                   } else {
                     // add column
                     addHeaderColumn(
                       propertyLabelTokenTranslation,
+                      propertyName,
                       propertyName
                     );
                   }
@@ -3572,6 +3597,7 @@ function exportFilteredModelsList(
                   // add column
                   addHeaderColumn(
                     propertyLabelTokenTranslation,
+                    propertyName,
                     propertyName
                   );
                 }
@@ -3629,11 +3655,14 @@ function exportFilteredModelsList(
             }));
       };
 
-      // handle write data to file
-      const writeDataToFile = (records) => {
+      // retrieve data like missing tokens, locations ...
+      const writeDataToFileDetermineMissingData = (records) => {
         // retrieve missing tokens
         // faster than a zombie
-        const missingTokens = {};
+        const missingData = {
+          tokens: {},
+          locations: {}
+        };
         for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
           // get record data
           const record = records[recordIndex];
@@ -3644,34 +3673,124 @@ function exportFilteredModelsList(
               column.path
             );
 
-            // do we need to translate it / determine missing tokens
+            // check if we have missing tokens, locations ...
             if (
               cellValue &&
-              typeof cellValue === 'string' &&
-              cellValue.startsWith('LNG_')
+              typeof cellValue === 'string'
             ) {
               // missing token ?
-              if (!sheetHandler.dictionaryMap[cellValue]) {
-                missingTokens[cellValue] = true;
+              if (cellValue.startsWith('LNG_')) {
+                if (!sheetHandler.dictionaryMap[cellValue]) {
+                  missingData.tokens[cellValue] = true;
+                }
+
+              // missing location ?
+              } else if (sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]) {
+                if (!sheetHandler.locationsMap[cellValue]) {
+                  missingData.locations[cellValue] = true;
+                }
               }
             }
           });
         }
 
-        // retrieve missing language tokens & write data
+        // finished
+        return missingData;
+      };
+
+      // retrieve missing locations
+      const retrieveMissingLocations = (locationIds) => {
+        // default location projection
+        const locationTokenProjection = {
+          _id: 1,
+          name: 1,
+          identifiers: 1,
+          parentLocationId: 1
+        };
+
+        // retrieve locations
+        return location
+          .find({
+            _id: {
+              $in: locationIds
+            }
+          }, {
+            projection: locationTokenProjection
+          })
+          .toArray()
+          .then((locations) => {
+            // map locations
+            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+              // get record data
+              const record = locations[locationIndex];
+              sheetHandler.locationsMap[record._id] = record;
+            }
+
+            // retrieve missing parent locations too
+            // - need to loop again because otherwise we might include in missing something that is already retrieved but not added to map
+            const missingParents = {};
+            for (let locationIndex = 0; locationIndex < locations.length; locationIndex++) {
+              // get record data
+              const record = locations[locationIndex];
+
+              // doesn't have parent, no point in continuing
+              if (!record.parentLocationId) {
+                continue;
+              }
+
+              // parent already retrieved ?
+              if (sheetHandler.locationsMap[record.parentLocationId]) {
+                continue;
+              }
+
+              // missing parent
+              missingParents[record.parentLocationId] = true;
+            }
+
+            // retrieve missing parents if we have any
+            if (!_.isEmpty(missingParents)) {
+              return retrieveMissingLocations(
+                Object.keys(missingParents)
+              );
+            }
+          });
+      };
+
+      // handle write data to file
+      const writeDataToFile = (records) => {
+        // determine missing data like tokens, locations, ...
+        const missingData = writeDataToFileDetermineMissingData(records);
+
+        // retrieve necessary data & write record to file
         return Promise.resolve()
+          // retrieve missing language tokens & write data
           .then(() => {
             // no missing tokens ?
-            if (_.isEmpty(missingTokens)) {
+            if (_.isEmpty(missingData.tokens)) {
               return;
             }
 
             // retrieve missing tokens
             return retrieveMissingTokens(
               sheetHandler.languageId,
-              Object.keys(missingTokens)
+              Object.keys(missingData.tokens)
             );
           })
+
+          // retrieve missing locations
+          .then(() => {
+            // no missing locations ?
+            if (_.isEmpty(missingData.locations)) {
+              return;
+            }
+
+            // retrieve missing locations
+            return retrieveMissingLocations(
+              Object.keys(missingData.locations)
+            );
+          })
+
+          // write row to file
           .then(() => {
             // write data to file
             // for faster then forEach :) - monumental gain :)
@@ -3691,14 +3810,23 @@ function exportFilteredModelsList(
                   column.path
                 );
 
-                // do we need to translate it ?
+                // need to replace value with something else ?
                 if (
                   cellValue &&
-                  typeof cellValue === 'string' &&
-                  cellValue.startsWith('LNG_') &&
-                  sheetHandler.dictionaryMap[cellValue] !== undefined
+                  typeof cellValue === 'string'
                 ) {
-                  cellValue = sheetHandler.dictionaryMap[cellValue];
+                  // do we need to translate it ?
+                  if (cellValue.startsWith('LNG_')) {
+                    cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
+                      sheetHandler.dictionaryMap[cellValue] :
+                      cellValue;
+
+                  // missing location ?
+                  } else if (sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]) {
+                    cellValue = sheetHandler.locationsMap[cellValue] ?
+                      sheetHandler.locationsMap[cellValue].name :
+                      cellValue;
+                  }
                 }
 
                 // add value to row
@@ -3837,564 +3965,6 @@ function exportFilteredModelsList(
           parentCallback(err);
         });
     });
-
-
-
-
-
-  // query = query || {};
-  //
-  // let modelPropertiesExpandOnFlatFilesKeys = [];
-  //
-  // // make sure fieldsGroupList is valid
-  // if (!Array.isArray(fieldsGroupList)) {
-  //   fieldsGroupList = [];
-  // }
-  //
-  // // get the model export fields order
-  // let modelExportFieldsOrder = modelOptions.exportFieldsOrder ?
-  //   [...modelOptions.exportFieldsOrder] :
-  //   modelOptions.exportFieldsOrder;
-  //
-  // // get fields that need to be exported from model options
-  // let fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ? modelOptions.sanitizeFieldLabelsMapForExport() : modelOptions.fieldLabelsMap;
-  //
-  // // filter field labels list if fields groups were provided
-  // let exportLocationIdData = true;
-  // if (
-  //   fieldsGroupList.length &&
-  //   modelOptions.exportFieldsGroup
-  // ) {
-  //   // get all properties from each fields group
-  //   let exportFieldLabelsMap = {};
-  //   Object.keys(modelOptions.exportFieldsGroup).forEach((groupName) => {
-  //     if (fieldsGroupList.includes(groupName)) {
-  //       if (
-  //         modelOptions.exportFieldsGroup[groupName].properties &&
-  //         modelOptions.exportFieldsGroup[groupName].properties.length
-  //       ) {
-  //         modelOptions.exportFieldsGroup[groupName].properties.forEach((propertyName) => {
-  //           // add property and token
-  //           if (fieldLabelsMap[propertyName]) {
-  //             exportFieldLabelsMap[propertyName] = fieldLabelsMap[propertyName];
-  //           }
-  //         });
-  //       }
-  //     }
-  //   });
-  //
-  //   // use the headers come from export
-  //   if (Object.keys(exportFieldLabelsMap).length) {
-  //     fieldLabelsMap = exportFieldLabelsMap;
-  //
-  //     // ignore export fields order
-  //     modelExportFieldsOrder = undefined;
-  //
-  //     // check if location id data should be exported
-  //     exportLocationIdData = fieldsGroupList.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA');
-  //   }
-  // }
-  //
-  // // some models may have a specific order for headers
-  // let originalFieldsList = Object.keys(fieldLabelsMap);
-  // let fieldsList = [];
-  // if (
-  //   modelExportFieldsOrder &&
-  //   modelExportFieldsOrder.length
-  // ) {
-  //   fieldsList = [...modelExportFieldsOrder];
-  //   // sometimes the order list contains only a subset of the actual fields list
-  //   if (modelExportFieldsOrder.length !== originalFieldsList.length) {
-  //     fieldsList.push(...originalFieldsList.filter(f => modelExportFieldsOrder.indexOf(f) === -1));
-  //   }
-  // } else {
-  //   fieldsList = [...originalFieldsList];
-  // }
-  //
-  // // create results projection from fieldsList
-  // let resultsProjection = {};
-  // fieldsList.forEach(fieldRef => {
-  //   // get property projection by getting the first part of the fieldRef until a '.' or '[' is encountered
-  //   let propProjection = fieldRef.split(/[.\[]/g)[0];
-  //   if (!resultsProjection[propProjection]) {
-  //     resultsProjection[propProjection] = 1;
-  //   }
-  // });
-  //
-  // // initialize flag to know that model has array props defined separately
-  // const arrayPropsDefined = !!modelOptions.arrayProps;
-  //
-  // // cache results
-  // let results;
-  //
-  // // cache dictionary
-  // let dictionary;
-  //
-  // // get records
-  // let getRecordsPromise;
-  // // in some cases records might come from the calling function
-  // if (options.records) {
-  //   getRecordsPromise = Promise.resolve(options.records);
-  // } else {
-  //   // check for additional scope query that needs to be added
-  //   if (modelOptions.scopeQuery) {
-  //     query = mergeFilters(query, modelOptions.scopeQuery);
-  //   }
-  //
-  //   // check for deleted flag; by default all items will be retrieved including deleted
-  //   if (!query.deleted) {
-  //     query = mergeFilters(query, {
-  //       where: {
-  //         deleted: false
-  //       }
-  //     });
-  //   }
-  //
-  //   // get MongoDB query options from Loopback filter
-  //   let mongoDBOptions = MongoDBHelper.getMongoDBOptionsFromLoopbackFilter(query);
-  //   getRecordsPromise = MongoDBHelper.executeAction(
-  //     modelOptions.collectionName,
-  //     'find',
-  //     [
-  //       mongoDBOptions.where,
-  //       {
-  //         projection: resultsProjection
-  //       }
-  //     ]
-  //   );
-  // }
-  //
-  // return getRecordsPromise
-  //   .then(res => {
-  //     // cache results
-  //     results = res;
-  //
-  //     // get dictionary for required headers
-  //     let tokensQuery = {};
-  //     // start with model fields
-  //     let neededTokens = Object.values(fieldLabelsMap);
-  //     // all tokens from arrayProps
-  //     if (arrayPropsDefined) {
-  //       Object.values(modelOptions.arrayProps).forEach(arrayPropMap => {
-  //         neededTokens.push(...Object.values(arrayPropMap));
-  //       });
-  //     }
-  //
-  //     // location data tokens
-  //     neededTokens.push(
-  //       'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL',
-  //       'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION',
-  //       'LNG_LOCATION_FIELD_LABEL_ID',
-  //       'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
-  //       'LNG_LOCATION_FIELD_LABEL_IDENTIFIER');
-  //
-  //     // referenceDataFields categories and allowed values
-  //     if (modelOptions.referenceDataFieldsToCategoryMap) {
-  //       let refDataValuesRegex = '';
-  //
-  //       Object.values(modelOptions.referenceDataFieldsToCategoryMap).forEach(refCategory => {
-  //         // retrieve category
-  //         neededTokens.push(refCategory);
-  //
-  //         // add to allowed values regex
-  //         refDataValuesRegex += refDataValuesRegex.length ? `|${refCategory}` : refCategory;
-  //       });
-  //
-  //       if (refDataValuesRegex.length) {
-  //         // add regex to query
-  //         tokensQuery['$or'] = [{
-  //           token: {
-  //             $regex: `^${refDataValuesRegex}`
-  //           }
-  //         }];
-  //       }
-  //     }
-  //
-  //     // parse questionnaire to get headers and tokens that need to be retrieved
-  //     let parsedQuestionnaire;
-  //     // TODO: loops through all records
-  //     if (!modelPropertiesExpandOnFlatFiles.questionnaireAnswers && options.questionnaire && options.questionnaire.length) {
-  //       parsedQuestionnaire = getQuestionnaireVariablesMapping(
-  //         options.questionnaire,
-  //         'questionnaireAnswers',
-  //         options.useQuestionVariable,
-  //         // get max number of answers for each questionnaire question
-  //         getQuestionnaireMaxAnswersMap(options.questionnaire, results)
-  //       );
-  //
-  //       modelPropertiesExpandOnFlatFiles.questionnaireAnswers = parsedQuestionnaire.questionsList;
-  //
-  //       // add the questionnaire tokens in neededTokens
-  //       neededTokens.push(...Object.keys(parsedQuestionnaire.tokensToQuestionsMap));
-  //     }
-  //
-  //     // complete the tokens query with the needed tokens
-  //     // Note: No need to split the $in query to prevent MongoDB query size limit error as there would need to be more than 20000 tokens queried which is not the case
-  //     if (tokensQuery['$or']) {
-  //       tokensQuery['$or'].push({
-  //         token: {
-  //           $in: [...new Set(neededTokens)]
-  //         }
-  //       });
-  //     } else {
-  //       tokensQuery.token = {
-  //         $in: [...new Set(neededTokens)]
-  //       };
-  //     }
-  //
-  //     // load user language dictionary
-  //     return baseLanguageModel.helpers
-  //       .getLanguageDictionary(options.contextUserLanguageId, tokensQuery)
-  //       .then(res => {
-  //         // cache dictionary
-  //         dictionary = res;
-  //
-  //         // add translations to questionnaire headers if needed
-  //         if (
-  //           parsedQuestionnaire &&
-  //           parsedQuestionnaire.tokensToQuestionsMap
-  //         ) {
-  //           // get token translation placeholder
-  //           const translationPlaceholder = parsedQuestionnaire.translationPlaceholder;
-  //
-  //           // loop through tokens
-  //           for (let token in parsedQuestionnaire.tokensToQuestionsMap) {
-  //             // get translation
-  //             let tokenTranslation = dictionary.getTranslation(token);
-  //
-  //             // get token map
-  //             let tokenMap = parsedQuestionnaire.tokensToQuestionsMap[token];
-  //
-  //             // loop through questions for token
-  //             for (let questionIndex in tokenMap) {
-  //               let propsToReplace = tokenMap[questionIndex];
-  //
-  //               // loop through props to replace
-  //               for (let prop in propsToReplace) {
-  //                 // replace props values with the calculated one for the translation
-  //                 _.set(modelPropertiesExpandOnFlatFiles.questionnaireAnswers, `${questionIndex}.${prop}`, propsToReplace[prop].replace(translationPlaceholder, tokenTranslation));
-  //               }
-  //             }
-  //           }
-  //
-  //           // loop through headers and add variables to duplicate translations
-  //           if (
-  //             modelPropertiesExpandOnFlatFiles &&
-  //             modelPropertiesExpandOnFlatFiles.questionnaireAnswers &&
-  //             modelPropertiesExpandOnFlatFiles.questionnaireAnswers.length > 1
-  //           ) {
-  //             renameDuplicateQuestionnaireHeaderColumns(modelPropertiesExpandOnFlatFiles.questionnaireAnswers);
-  //           }
-  //
-  //         }
-  //       });
-  //   })
-  //   .then(() => {
-  //     // convert geo-points (if any)
-  //     results.forEach(function (result) {
-  //       covertAddressesGeoPointToLoopbackFormat(result);
-  //     });
-  //
-  //     // retrieve keys for expandable properties
-  //     modelPropertiesExpandOnFlatFilesKeys = modelPropertiesExpandOnFlatFiles ?
-  //       Object.keys(modelPropertiesExpandOnFlatFiles) : [];
-  //
-  //     // by default export CSV
-  //     if (!exportType) {
-  //       exportType = 'json';
-  //     } else {
-  //       // be more permissive, always convert to lowercase
-  //       exportType = exportType.toLowerCase();
-  //     }
-  //
-  //     const isJSONXMLExport = ['json', 'xml'].includes(exportType);
-  //
-  //     // calculate maximum number of elements for array props
-  //     // do this only if export type is flat
-  //     // TODO: loops through all records
-  //     let arrayPropsLengths = null;
-  //     if (!isJSONXMLExport && arrayPropsDefined) {
-  //       arrayPropsLengths = getMaximumLengthForArrays(results, Object.keys(modelOptions.arrayProps));
-  //     }
-  //
-  //     return attachLocationsNoModels(
-  //       modelOptions.locationFields,
-  //       results)
-  //       .then(result => {
-  //         let highestParentsChain = 0;
-  //         result = result || {};
-  //         results = result.records || results;
-  //         highestParentsChain = result.highestParentsChain || 0;
-  //
-  //         // get the maximum number of location identifiers
-  //         const highestIdentifiersChain = result.highestIdentifiersChain || 0;
-  //
-  //         // define a list of table headers
-  //         const headers = [];
-  //
-  //         // loop through the fields list to construct headers
-  //         fieldsList.forEach(function (propertyName) {
-  //           // new functionality, not supported by all models
-  //           // if model has array props defined and we need to export a flat file construct headers for all elements in array props
-  //           if (!isJSONXMLExport && arrayPropsDefined) {
-  //             if (modelOptions.arrayProps[propertyName]) {
-  //               // determine if we need to include parent token
-  //               const parentToken = fieldLabelsMap[propertyName];
-  //
-  //               // array properties map
-  //               const map = modelOptions.arrayProps[propertyName];
-  //
-  //               // create headers
-  //               let maxElements = arrayPropsLengths[propertyName];
-  //               // pdf has a limited width, include only one element
-  //               if (exportType === 'pdf') {
-  //                 maxElements = 1;
-  //               }
-  //               for (let i = 1; i <= maxElements; i++) {
-  //                 for (let prop in map) {
-  //                   // remove "." from the property name
-  //                   const propName = prop.replace(/\./g, ' ');
-  //
-  //                   headers.push({
-  //                     id: `${propertyName} ${i} ${propName}`,
-  //                     // use correct label translation for user language
-  //                     header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}]`
-  //                   });
-  //
-  //                   // check if we need to include additional location columns (id, identifiers and parent location)
-  //                   if (
-  //                     modelOptions.locationFields &&
-  //                     modelOptions.locationFields.indexOf(`${propertyName}[].${prop}`) !== -1
-  //                   ) {
-  //                     // include the location id as a new column because the original location id will be replaced with the location name
-  //                     if (exportLocationIdData) {
-  //                       headers.push({
-  //                         id: `${propertyName} ${i} ${propName}_uid`,
-  //                         // use correct label translation for user language
-  //                         header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')} [${i}]`
-  //                       });
-  //
-  //                       // include the location identifiers codes
-  //                       for (let j = 1; j <= highestIdentifiersChain; j++) {
-  //                         headers.push({
-  //                           id: `${propertyName} ${i} ${propName}_identifiers ${j}`,
-  //                           // use correct label translation for user language
-  //                           header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} [${i}] ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${j}]`
-  //                         });
-  //                       }
-  //                     }
-  //
-  //                     // include the parent locations columns
-  //                     for (let j = 1; j <= highestParentsChain; j++) {
-  //                       headers.push({
-  //                         id: `${propertyName} ${i} ${prop}_parentLocations ${j}`,
-  //                         // use correct label translation for user language
-  //                         header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(map[prop])} [${i}] ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${j}]`
-  //                       });
-  //                     }
-  //                   }
-  //                 }
-  //               }
-  //               return;
-  //             }
-  //
-  //             if (propertyName.endsWith('[]') && modelOptions.arrayProps[propertyName.replace('[]', '')]) {
-  //               const tmpPropertyName = propertyName.replace('[]', '');
-  //               // array with primitive values
-  //               let maxElements = arrayPropsLengths[tmpPropertyName];
-  //               // pdf has a limited width, include only one element
-  //               if (exportType === 'pdf') {
-  //                 maxElements = 1;
-  //               }
-  //               for (let i = 1; i <= maxElements; i++) {
-  //                 headers.push({
-  //                   id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
-  //                   header: `${dictionary.getTranslation(fieldLabelsMap[propertyName])} [${i}]`
-  //                 });
-  //               }
-  //               return;
-  //             }
-  //           }
-  //
-  //           // do not handle array properties from field labels map when we have arrayProps set on the model
-  //           if (!isJSONXMLExport && propertyName.indexOf('[]') > -1 && arrayPropsDefined) {
-  //             return;
-  //           }
-  //
-  //           // if a flat file is exported, data needs to be flattened, include 3 elements for each array
-  //           if (!isJSONXMLExport && propertyName.indexOf('[]') > -1) {
-  //             // determine if we need to include parent token
-  //             let parentToken;
-  //             const parentIndex = propertyName.indexOf('.');
-  //             if (parentIndex >= -1) {
-  //               const parentKey = propertyName.substr(0, parentIndex);
-  //               parentToken = fieldLabelsMap[parentKey];
-  //             }
-  //
-  //             // create headers
-  //             let maxElements = 3;
-  //             // pdf has a limited width, include only one element
-  //             if (exportType === 'pdf') {
-  //               maxElements = 1;
-  //             }
-  //             for (let i = 1; i <= maxElements; i++) {
-  //               headers.push({
-  //                 id: propertyName.replace('[]', ` ${i}`).replace(/\./g, ' '),
-  //                 // use correct label translation for user language
-  //                 header: `${parentToken ? dictionary.getTranslation(parentToken) + ' ' : ''}${dictionary.getTranslation(fieldLabelsMap[propertyName])}${/\[]/.test(propertyName) ? ' [' + i + ']' : ''}`
-  //               });
-  //             }
-  //           } else {
-  //             if (
-  //               !isJSONXMLExport &&
-  //               modelPropertiesExpandOnFlatFiles &&
-  //               modelPropertiesExpandOnFlatFiles[propertyName]
-  //             ) {
-  //               headers.push(...modelPropertiesExpandOnFlatFiles[propertyName]);
-  //             } else {
-  //               let headerTranslation = dictionary.getTranslation(fieldLabelsMap[propertyName]);
-  //
-  //               if (!isJSONXMLExport) {
-  //                 // determine if we need to include parent token
-  //                 let parentToken;
-  //                 const parentIndex = propertyName.indexOf('.');
-  //                 if (parentIndex >= -1) {
-  //                   const parentKey = propertyName.substr(0, parentIndex);
-  //                   parentToken = fieldLabelsMap[parentKey];
-  //                 }
-  //                 if (parentToken) {
-  //                   headerTranslation = dictionary.getTranslation(parentToken) + ' ' + headerTranslation;
-  //                 }
-  //               }
-  //
-  //               headers.push({
-  //                 id: !isJSONXMLExport ? propertyName.replace(/\./g, ' ') : propertyName,
-  //                 // use correct label translation for user language
-  //                 header: headerTranslation
-  //               });
-  //
-  //               // check if we need to include additional location columns (UID, identifiers and parent location)
-  //               if (
-  //                 modelOptions.locationFields &&
-  //                 modelOptions.locationFields.indexOf(propertyName) !== -1
-  //               ) {
-  //                 // include the location id as a new column because the original location id will be replaced with the location name
-  //                 if (exportLocationIdData) {
-  //                   headers.push({
-  //                     id: `${propertyName}_uid`,
-  //                     header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_ID')}`
-  //                   });
-  //                 }
-  //
-  //                 // include the location identifiers and parent locations columns
-  //                 if (isJSONXMLExport) {
-  //                   // include the location identifiers codes
-  //                   if (exportLocationIdData) {
-  //                     headers.push({
-  //                       id: `${propertyName}_identifiers`,
-  //                       header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')}`
-  //                     });
-  //                   }
-  //
-  //                   headers.push({
-  //                     id: `${propertyName}_parentLocations`,
-  //                     header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION')}`
-  //                   });
-  //                 } else {
-  //                   if (exportLocationIdData) {
-  //                     for (let i = 1; i <= highestIdentifiersChain; i++) {
-  //                       headers.push({
-  //                         id: `${propertyName.replace(/\./g, ' ')}_identifiers ${i}`,
-  //                         header: `${headerTranslation} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIERS')} ${dictionary.getTranslation('LNG_LOCATION_FIELD_LABEL_IDENTIFIER')} [${i}]`
-  //                       });
-  //                     }
-  //                   }
-  //
-  //                   for (let i = 1; i <= highestParentsChain; i++) {
-  //                     headers.push({
-  //                       id: `${propertyName.replace(/\./g, ' ')}_parentLocations ${i}`,
-  //                       header: `${headerTranslation} ${dictionary.getTranslation('LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL')} [${i}]`
-  //                     });
-  //                   }
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         });
-  //
-  //         // resolve model foreign keys (if any)
-  //         return resolveModelForeignKeysNoModels({
-  //           foreignKeyResolverMap: modelOptions.foreignKeyResolverMap,
-  //           referenceDataFields: modelOptions.referenceDataFields
-  //         }, results, dictionary)
-  //           .then(function (results) {
-  //             // expand sub items for non-flat files
-  //             if (isJSONXMLExport) {
-  //               modelPropertiesExpandOnFlatFilesKeys.forEach((propertyName) => {
-  //                 // map properties to labels
-  //                 const propertyMap = {};
-  //                 (modelPropertiesExpandOnFlatFiles[propertyName] || []).forEach((headerData) => {
-  //                   propertyMap[headerData.expandKey ? headerData.expandKey : headerData.id] = headerData.expandHeader ? headerData.expandHeader : headerData.header;
-  //                 });
-  //
-  //                 // convert record data
-  //                 (results || []).forEach((record) => {
-  //                   // for now we handle only object expanses ( e.g. questionnaireAnswers ) and not array of objects
-  //                   if (
-  //                     record[propertyName] &&
-  //                     _.isObject(record[propertyName]) &&
-  //                     !_.isEmpty(record[propertyName])
-  //                   ) {
-  //                     // construct the new object
-  //                     const newValue = {};
-  //                     Object.keys(record[propertyName]).forEach((childPropName) => {
-  //                       if (propertyMap[childPropName] !== undefined) {
-  //                         newValue[propertyMap[childPropName]] = record[propertyName][childPropName];
-  //                       } else {
-  //                         newValue[childPropName] = record[propertyName][childPropName];
-  //                       }
-  //                     });
-  //
-  //                     // replace the old object
-  //                     record[propertyName] = newValue;
-  //                   }
-  //                 });
-  //               });
-  //             }
-  //
-  //             // finished
-  //             return results;
-  //           })
-  //           .then(function (results) {
-  //             // if a there are fields to be anonymized
-  //             if (anonymizeFields.length) {
-  //               // anonymize them
-  //               anonymizeDatasetFields.anonymize(results, anonymizeFields);
-  //             }
-  //             return results;
-  //           })
-  //           .then(function (results) {
-  //             // create file with the results
-  //             return exportListFileSync(headers, results, exportType);
-  //           })
-  //           .then(function (file) {
-  //             if (file.name) {
-  //               // read file
-  //               file.data = fs.readFileSync(file.name);
-  //             }
-  //
-  //             if (encryptPassword) {
-  //               return aesCrypto.encrypt(encryptPassword, file.data)
-  //                 .then(function (data) {
-  //                   file.data = data;
-  //                   return file;
-  //                 });
-  //             } else {
-  //               return file;
-  //             }
-  //           });
-  //       });
-  //   });
 }
 
 /**
