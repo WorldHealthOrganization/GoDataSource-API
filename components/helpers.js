@@ -3707,6 +3707,58 @@ function exportFilteredModelsList(
               );
             };
 
+            // attach parent location identifiers
+            const attachLocationIdentifiers = (
+              header,
+              path,
+              pathWithoutIndexes
+            ) => {
+              // attach location identifiers
+              for (let identifierIndex = 0; identifierIndex < sheetHandler.locationsMaxNumberOfIdentifiers; identifierIndex++) {
+                // attach location identifier
+                addHeaderColumn(
+                  `${header} [${identifierIndex + 1}]`,
+                  path,
+                  pathWithoutIndexes,
+                  (function (localIdentifierIndex) {
+                    return (value) => {
+                      return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers &&
+                      sheetHandler.locationsMap[value].identifiers.length > localIdentifierIndex ?
+                        sheetHandler.locationsMap[value].identifiers[localIdentifierIndex].code :
+                        '';
+                    };
+                  })(identifierIndex)
+                );
+              }
+            };
+
+            // attach parent location details - only first level parent
+            const attachParentLocationDetails = (
+              header,
+              path,
+              pathWithoutIndexes
+            ) => {
+              // attach parent location details - only first level parent
+              for (let parentLocationIndex = 0; parentLocationIndex < sheetHandler.locationsMaxSizeOfParentsChain; parentLocationIndex++) {
+                // attach parent location geographical level
+                addHeaderColumn(
+                  `${header} [${parentLocationIndex + 1}]`,
+                  path,
+                  pathWithoutIndexes,
+                  (function (localParentLocationIndex) {
+                    return (value) => {
+                      return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChain &&
+                      sheetHandler.locationsMap[value].parentChain.length > localParentLocationIndex &&
+                      sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]] &&
+                      sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId ?
+                        sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId :
+                        '';
+                    };
+                  })(parentLocationIndex)
+                );
+              }
+            };
+
             // get properties of type array definitions if current model has one
             const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
               undefined :
@@ -3768,42 +3820,18 @@ function exportFilteredModelsList(
                         );
 
                         // attach location identifiers
-                        for (let identifierIndex = 0; identifierIndex < sheetHandler.locationsMaxNumberOfIdentifiers; identifierIndex++) {
-                          // attach location identifier
-                          addHeaderColumn(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']} [${identifierIndex + 1}]`,
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
-                            childColumn.pathWithoutIndexes,
-                            (function (localIdentifierIndex) {
-                              return (value) => {
-                                return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers &&
-                                  sheetHandler.locationsMap[value].identifiers.length > localIdentifierIndex ?
-                                    sheetHandler.locationsMap[value].identifiers[localIdentifierIndex].code :
-                                    '';
-                              };
-                            })(identifierIndex)
-                          );
-                        }
+                        attachLocationIdentifiers(
+                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']}`,
+                          `${propertyName}[${arrayIndex}].${childProperty}`,
+                          childColumn.pathWithoutIndexes
+                        );
 
                         // attach parent location details - only first level parent
-                        for (let parentLocationIndex = 0; parentLocationIndex < sheetHandler.locationsMaxSizeOfParentsChain; parentLocationIndex++) {
-                          // attach parent location geographical level
-                          addHeaderColumn(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']} [${parentLocationIndex + 1}]`,
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
-                            childColumn.pathWithoutIndexes,
-                            (function (localParentLocationIndex) {
-                              return (value) => {
-                                return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChain &&
-                                  sheetHandler.locationsMap[value].parentChain.length > localParentLocationIndex &&
-                                  sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]] &&
-                                  sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId ?
-                                    sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId :
-                                    '';
-                              };
-                            })(parentLocationIndex)
-                          );
-                        }
+                        attachParentLocationDetails(
+                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                          `${propertyName}[${arrayIndex}].${childProperty}`,
+                          childColumn.pathWithoutIndexes
+                        );
                       }
                     }
                   }
@@ -3824,7 +3852,9 @@ function exportFilteredModelsList(
 
               // if a flat file is exported, data needs to be flattened, include 3 elements for each array
               if (isPropertyOfAnArray) {
+                // bad model configuration - missing definition
                 // #TODO
+                throw new Error(`Missing array definition for property '${propertyName}'`);
               } else {
                 // check if property belongs to an object
                 const propertyOfAnObjectIndex = propertyName.indexOf('.');
@@ -3860,6 +3890,26 @@ function exportFilteredModelsList(
                   // add column
                   addHeaderColumn(
                     propertyLabelTokenTranslation,
+                    propertyName,
+                    propertyName
+                  );
+                }
+
+                // location field ?
+                if (
+                  sheetHandler.columns.includeParentLocationData &&
+                  sheetHandler.columns.locationsFieldsMap[propertyName]
+                ) {
+                  // attach location identifiers
+                  attachLocationIdentifiers(
+                    `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']}`,
+                    propertyName,
+                    propertyName
+                  );
+
+                  // attach parent location details - only first level parent
+                  attachParentLocationDetails(
+                    `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
                     propertyName,
                     propertyName
                   );
@@ -4164,6 +4214,9 @@ function exportFilteredModelsList(
     })
     .catch((err) => {
       // remove temporary table if it was created ?
+      // #TODO
+
+      // remove file if generated
       // #TODO
 
       // update export log to contain errors
