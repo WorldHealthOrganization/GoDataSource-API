@@ -48,6 +48,9 @@
         "LNG_STATUS_STEP_EXPORTING_RECORDS",
         "LNG_STATUS_STEP_EXPORT_FINISHED"
       ]
+    },
+    "errStack": {
+      "type": "any"
     }
   },
   "validations": [],

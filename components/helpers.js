@@ -3236,6 +3236,7 @@ function exportFilteredModelsList(
 
       // locations
       locationsMaxNumberOfIdentifiers: 0,
+      locationsMaxSizeOfParentsChain: 0,
       locationsMap: {},
 
       // retrieve only the fields that we need
@@ -3373,6 +3374,14 @@ function exportFilteredModelsList(
         // retrieve general language tokens
         const languageTokensToRetrieve = Object.values(sheetHandler.columns.labels);
 
+        // attach general tokens that are always useful to have in your pocket
+        languageTokensToRetrieve.push(
+          'LNG_LOCATION_FIELD_LABEL_ID',
+          'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
+          'LNG_LOCATION_FIELD_LABEL_IDENTIFIER',
+          'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL'
+        );
+
         // retrieve language tokens
         return retrieveMissingTokens(
           sheetHandler.languageId,
@@ -3478,14 +3487,6 @@ function exportFilteredModelsList(
 
       // retrieve missing locations
       const retrieveMissingLocations = (locationIds) => {
-        // default location projection
-        const locationTokenProjection = {
-          _id: 1,
-          name: 1,
-          identifiers: 1,
-          parentLocationId: 1
-        };
-
         // retrieve locations in batches - just in case
         const locationIdsMap = {};
         return new Promise((resolve, reject) => {
@@ -3512,7 +3513,13 @@ function exportFilteredModelsList(
                   $in: batchLocationIds
                 }
               }, {
-                projection: locationTokenProjection
+                projection: {
+                  _id: 1,
+                  name: 1,
+                  identifiers: 1,
+                  parentLocationId: 1,
+                  geographicalLevelId: 1
+                }
               })
               .toArray()
               .then((locations) => {
@@ -3521,6 +3528,9 @@ function exportFilteredModelsList(
                   // get record data
                   const record = locations[locationIndex];
                   sheetHandler.locationsMap[record._id] = record;
+
+                  // initialize parents chain
+                  record.parentChain = [];
 
                   // update max number of identifier if necessary
                   sheetHandler.locationsMaxNumberOfIdentifiers = record.identifiers && record.identifiers.length > 0 && record.identifiers.length > sheetHandler.locationsMaxNumberOfIdentifiers ?
@@ -3586,6 +3596,31 @@ function exportFilteredModelsList(
 
             // retrieve locations
             return retrieveMissingLocations(locationIds);
+          })
+          .then(() => {
+            // determine longest parent location chain
+            const locationIds = Object.keys(sheetHandler.locationsMap);
+            for (let locationIndex = 0; locationIndex < locationIds.length; locationIndex++) {
+              // get location
+              const location = sheetHandler.locationsMap[locationIds[locationIndex]];
+
+              // count parents
+              let parentLocationId = location.parentLocationId;
+              while (parentLocationId) {
+                // attach parent to list
+                location.parentChain.push(parentLocationId);
+
+                // retrieve next parent from chain
+                parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
+                  sheetHandler.locationsMap[parentLocationId].parentLocationId :
+                  undefined;
+              }
+
+              // update max chain size if necessary
+              sheetHandler.locationsMaxSizeOfParentsChain = location.parentChain.length > sheetHandler.locationsMaxSizeOfParentsChain ?
+                location.parentChain.length :
+                sheetHandler.locationsMaxSizeOfParentsChain;
+            }
           });
       };
 
@@ -3635,13 +3670,22 @@ function exportFilteredModelsList(
             const addHeaderColumn = (
               header,
               path,
-              pathWithoutIndexes
+              pathWithoutIndexes,
+              formula
             ) => {
-              sheetHandler.columns.headerColumns.push({
+              // create column
+              const columnData = {
                 header,
                 path,
-                pathWithoutIndexes
-              });
+                pathWithoutIndexes,
+                formula
+              };
+
+              // append column
+              sheetHandler.columns.headerColumns.push(columnData);
+
+              // in case we need it
+              return columnData;
             };
 
             // remove previous column if path condition is met
@@ -3702,11 +3746,65 @@ function exportFilteredModelsList(
                       }
 
                       // add columns
-                      addHeaderColumn(
+                      const childColumn = addHeaderColumn(
                         `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
                         `${propertyName}[${arrayIndex}].${childProperty}`,
                         `${propertyName}[].${childProperty}`
                       );
+
+                      // if location column we need to push some extra columns
+                      if (
+                        sheetHandler.columns.includeParentLocationData &&
+                        sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
+                      ) {
+                        // attach location guid
+                        addHeaderColumn(
+                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
+                          `${propertyName}[${arrayIndex}].${childProperty}`,
+                          childColumn.pathWithoutIndexes,
+                          (value) => {
+                            return value;
+                          }
+                        );
+
+                        // attach location identifiers
+                        for (let identifierIndex = 0; identifierIndex < sheetHandler.locationsMaxNumberOfIdentifiers; identifierIndex++) {
+                          // attach location identifier
+                          addHeaderColumn(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']} [${identifierIndex + 1}]`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.pathWithoutIndexes,
+                            (function (localIdentifierIndex) {
+                              return (value) => {
+                                return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers &&
+                                  sheetHandler.locationsMap[value].identifiers.length > localIdentifierIndex ?
+                                    sheetHandler.locationsMap[value].identifiers[localIdentifierIndex].code :
+                                    '';
+                              };
+                            })(identifierIndex)
+                          );
+                        }
+
+                        // attach parent location details - only first level parent
+                        for (let parentLocationIndex = 0; parentLocationIndex < sheetHandler.locationsMaxSizeOfParentsChain; parentLocationIndex++) {
+                          // attach parent location geographical level
+                          addHeaderColumn(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']} [${parentLocationIndex + 1}]`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.pathWithoutIndexes,
+                            (function (localParentLocationIndex) {
+                              return (value) => {
+                                return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChain &&
+                                  sheetHandler.locationsMap[value].parentChain.length > localParentLocationIndex &&
+                                  sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]] &&
+                                  sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId ?
+                                    sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId :
+                                    '';
+                              };
+                            })(parentLocationIndex)
+                          );
+                        }
+                      }
                     }
                   }
                 }
@@ -3832,11 +3930,20 @@ function exportFilteredModelsList(
           // get record data
           const record = records[recordIndex];
           sheetHandler.columns.headerColumns.forEach((column) => {
-            // determine value from column path
-            const cellValue = _.get(
-              record,
-              column.path
-            );
+            // do we have a formula ?
+            let cellValue;
+            if (column.formula) {
+              // retrieve result from formula
+              cellValue = column.formula(
+                _.get(record, column.path)
+              );
+            } else {
+              // determine value from column path
+              cellValue = _.get(
+                record,
+                column.path
+              );
+            }
 
             // check if we have missing tokens, locations ...
             if (
@@ -3892,29 +3999,41 @@ function exportFilteredModelsList(
               // go through data and add create data array taking in account columns order
               const data = [];
               sheetHandler.columns.headerColumns.forEach((column) => {
-                // determine value from column path
-                let cellValue = _.get(
-                  record,
-                  column.path
-                );
+                // do we have a formula ?
+                let cellValue;
+                if (column.formula) {
+                  cellValue = column.formula(
+                    _.get(record, column.path)
+                  );
+                } else {
+                  // determine value from column path
+                  cellValue = _.get(
+                    record,
+                    column.path
+                  );
 
-                // need to replace value with something else ?
-                if (
-                  cellValue &&
-                  typeof cellValue === 'string'
-                ) {
-                  // do we need to translate it ?
-                  if (cellValue.startsWith('LNG_')) {
-                    cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
-                      sheetHandler.dictionaryMap[cellValue] :
-                      cellValue;
-
-                  // missing location ?
-                  } else if (sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]) {
+                  // need to replace location id with location name ?
+                  if (
+                    cellValue &&
+                    typeof cellValue === 'string' &&
+                    sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]
+                  ) {
                     cellValue = sheetHandler.locationsMap[cellValue] ?
                       sheetHandler.locationsMap[cellValue].name :
                       cellValue;
                   }
+                }
+
+                // translate applies for all
+                // - formulas & values
+                if (
+                  cellValue &&
+                  typeof cellValue === 'string' &&
+                  cellValue.startsWith('LNG_')
+                ) {
+                  cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
+                    sheetHandler.dictionaryMap[cellValue] :
+                    cellValue;
                 }
 
                 // add value to row
@@ -4053,6 +4172,7 @@ function exportFilteredModelsList(
           status: 'LNG_SYNC_STATUS_FAILED',
           // statusStep - keep as it is because it could help to know where it failed, on what step
           error: err.message,
+          errStack: err.stack,
           updatedAt: new Date()
         })
         .then(() => {
