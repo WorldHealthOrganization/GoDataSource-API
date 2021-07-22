@@ -375,10 +375,7 @@ module.exports = function (Outbreak) {
           fieldLabelsMap: CaseModel.fieldLabelsMap,
           exportFieldsGroup: CaseModel.exportFieldsGroup,
           exportFieldsOrder: CaseModel.exportFieldsOrder,
-          locationFields: CaseModel.locationFields,
-          foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
-          referenceDataFields: CaseModel.referenceDataFields,
-          referenceDataFieldsToCategoryMap: CaseModel.referenceDataFieldsToCategoryMap
+          locationFields: CaseModel.locationFields
         };
 
         return WorkerRunner.helpers.exportFilteredModelsList(
