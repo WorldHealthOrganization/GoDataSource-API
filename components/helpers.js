@@ -20,9 +20,7 @@ const crypto = require('crypto');
 const EpiWeek = require('epi-week');
 const config = require('../server/config');
 const MongoDBHelper = require('./mongoDBHelper');
-const anonymizeDatasetFields = require('./anonymizeDatasetFields');
 const mergeFilters = require('./mergeFilters');
-const baseLanguageModel = require('./baseModelOptions/language');
 const aesCrypto = require('./aesCrypto');
 const { performance } = require('perf_hooks');
 const excel = require('exceljs');
@@ -3068,6 +3066,7 @@ function exportFilteredModelsList(
 
       // questionnaire
       questionnaireQuestionsData: prepareQuestionnaireData(),
+      questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
 
       // dictionary
       dictionaryMap: {},
@@ -3919,9 +3918,12 @@ function exportFilteredModelsList(
                       // add number of column necessary to export all responses
                       for (let answerIndex = 0; answerIndex < maxNoOfResponsesForThisQuestion; answerIndex++) {
                         // question header
-                        const questionHeader = sheetHandler.dictionaryMap[questionData.text] ?
-                          sheetHandler.dictionaryMap[questionData.text] :
-                          questionData.text;
+                        const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders ?
+                          questionData.variable : (
+                            sheetHandler.dictionaryMap[questionData.text] ?
+                              sheetHandler.dictionaryMap[questionData.text] :
+                              questionData.text
+                          );
 
                         // multiple dropdown ?
                         if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
