@@ -3029,6 +3029,8 @@ function exportFilteredModelsList(
       locationFindBatchSize: config.export && config.export.locationFindBatchSize > 0 ?
         config.export.locationFindBatchSize :
         1000,
+      saveFilter: config && config.export && !!config.export.saveFilter,
+      saveAggregateFilter: config && config.export && !!config.export.saveAggregateFilter,
       filePath,
       columns,
       excel: {
@@ -3126,7 +3128,9 @@ function exportFilteredModelsList(
             updatedBy: options.userId,
             mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             extension: exportType,
-            filter: JSON.stringify(dataFilter)
+            filter: sheetHandler.saveFilter ?
+              JSON.stringify(dataFilter) :
+              null
           })
           .then(() => {
             // send id to parent and proceed with doing the export
@@ -3382,7 +3386,9 @@ function exportFilteredModelsList(
         // update export log in case we need the aggregate filter
         return sheetHandler
           .updateExportLog({
-            aggregateFilter: JSON.stringify(aggregateFilter),
+            aggregateFilter: sheetHandler.saveAggregateFilter ?
+              JSON.stringify(aggregateFilter) :
+              null,
             updatedAt: new Date()
           })
           .then(() => {

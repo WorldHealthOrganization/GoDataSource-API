@@ -219,6 +219,8 @@
   },
   "export": {
     "batchSize": 7000,
-    "locationFindBatchSize": 1000
+    "locationFindBatchSize": 1000,
+    "saveFilter": false,
+    "saveAggregateFilter": false
   }
 }
