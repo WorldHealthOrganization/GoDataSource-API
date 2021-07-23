@@ -4284,7 +4284,7 @@ function exportFilteredModelsList(
       // handle write data to file
       const writeDataToFile = (data) => {
         // for context sake,need to define it locally
-          / - promise visibility
+        // - promise visibility
         const recordData = data;
 
         // determine missing data like tokens, locations, ...
