@@ -2903,7 +2903,37 @@ function exportFilteredModelsList(
             return acc;
           },
           {}
-        )
+        ),
+
+      // anonymize fields
+      anonymizeString: '***',
+      anonymizeMap: anonymizeFields && anonymizeFields.length > 0 ?
+        anonymizeFields.reduce(
+          (acc, property) => {
+            // attach prop
+            acc[property.toLowerCase()] = true;
+
+            // continue
+            return acc;
+          },
+          {}
+        ) : {},
+      shouldAnonymize: (path) => {
+        const levels = (path || '').toLowerCase().replace(/\[\]/g, '').split('.');
+        let pathSoFar = '';
+        for (let levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+          // shouldn't have empty values...but
+          if (!levels[levelIndex]) {
+            continue;
+          }
+
+          // check if this is anonymize
+          pathSoFar = `${pathSoFar ? pathSoFar + '.' : ''}${levels[levelIndex]}`;
+          if (sheetHandler.columns.anonymizeMap[pathSoFar]) {
+            return true;
+          }
+        }
+      }
     };
   };
 
@@ -3634,7 +3664,8 @@ function exportFilteredModelsList(
                 header,
                 path,
                 pathWithoutIndexes,
-                formula
+                formula,
+                anonymize: sheetHandler.columns.shouldAnonymize(pathWithoutIndexes)
               };
 
               // check for duplicates
@@ -4047,7 +4078,15 @@ function exportFilteredModelsList(
         for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
           // get record data
           const record = records[recordIndex];
-          sheetHandler.columns.headerColumns.forEach((column) => {
+          for (let columnIndex = 0; columnIndex < sheetHandler.columns.headerColumns.length; columnIndex++) {
+            // get data
+            const column = sheetHandler.columns.headerColumns[columnIndex];
+
+            // if column is anonymize then there is no need to retrieve data for this cell
+            if (column.anonymize) {
+              continue;
+            }
+
             // do we have a formula ?
             let cellValue;
             if (column.formula) {
@@ -4075,7 +4114,7 @@ function exportFilteredModelsList(
                 }
               }
             }
-          });
+          }
         }
 
         // finished
@@ -4116,7 +4155,16 @@ function exportFilteredModelsList(
 
               // go through data and add create data array taking in account columns order
               const data = [];
-              sheetHandler.columns.headerColumns.forEach((column) => {
+              for (let columnIndex = 0; columnIndex < sheetHandler.columns.headerColumns.length; columnIndex++) {
+                // get data
+                const column = sheetHandler.columns.headerColumns[columnIndex];
+
+                // if column is anonymize then there is no need to retrieve data for this cell
+                if (column.anonymize) {
+                  data.push(sheetHandler.columns.anonymizeString);
+                  continue;
+                }
+
                 // do we have a formula ?
                 let cellValue;
                 if (column.formula) {
@@ -4163,7 +4211,7 @@ function exportFilteredModelsList(
 
                 // add value to row
                 data.push(cellValue);
-              });
+              }
 
               // append row
               sheetHandler.excel.worksheet.addRow(data).commit();
