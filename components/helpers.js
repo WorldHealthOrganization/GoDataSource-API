@@ -2907,6 +2907,99 @@ function exportFilteredModelsList(
     };
   };
 
+  // prefix name so we don't encounter duplicates
+  const getQuestionnaireQuestionUniqueKey = (key) => {
+    return `_${key}`;
+  };
+
+  // prefix name so we don't encounter duplicates for multiple dropdown
+  const getQuestionnaireQuestionUniqueKeyForMultipleAnswers = (key) => {
+    return `${getQuestionnaireQuestionUniqueKey(key)}_multiple`;
+  };
+
+  // prepare questionnaire data
+  const prepareQuestionnaireData = () => {
+    // go through questionnaire questions and map them accordingly
+    const response = {
+      flat: [],
+      nonFlat: []
+    };
+    if (
+      options.questionnaire &&
+      options.questionnaire.length > 0
+    ) {
+      // what is important to keep from a question
+      const addQuestionData = (
+        flatArray,
+        nonFlatArray,
+        question
+      ) => {
+        // some types are ignored on export for now - maybe later we will address this part too
+        // #TODO - later
+        if (
+          !question.text ||
+          !question.text.startsWith('LNG_') ||
+          !question.variable ||
+          question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD' ||
+          question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP'
+        ) {
+          return;
+        }
+
+        // init question
+        const formattedQuestion = {
+          variable: question.variable,
+          text: question.text,
+          answerType : question.answerType,
+          childQuestions: []
+        };
+
+        // attach question to flat array
+        flatArray.push(formattedQuestion);
+
+        // add to non flat array if we have one
+        if (nonFlatArray) {
+          nonFlatArray.push(formattedQuestion);
+        }
+
+        // attach child question recursively so they keep the order of display
+        if (
+          question.answers &&
+          question.answers.length > 0
+        ) {
+          question.answers.forEach((answer) => {
+            if (
+              answer &&
+              answer.additionalQuestions &&
+              answer.additionalQuestions.length > 0
+            ) {
+              answer.additionalQuestions.forEach((childQuestion) => {
+                addQuestionData(
+                  flatArray,
+                  formattedQuestion.childQuestions,
+                  childQuestion
+                );
+              });
+            }
+          });
+        }
+      };
+
+      // format questionnaire
+      options.questionnaire.forEach((questionData) => {
+        // attach our question and it children question one after another
+        addQuestionData(
+          response.flat,
+          response.nonFlat,
+          questionData
+        );
+      });
+    }
+
+    // finished
+    return response;
+  };
+
   // prepare temporary workbook
   const initializeTemporaryWorkbook = () => {
     // create stream workbook so we can write in it when we have data
@@ -2942,6 +3035,9 @@ function exportFilteredModelsList(
         workbook: tmpWorkbook,
         worksheet: tmpWorksheet
       },
+
+      // questionnaire
+      questionnaireQuestionsData: prepareQuestionnaireData(),
 
       // dictionary
       dictionaryMap: {},
@@ -2980,9 +3076,25 @@ function exportFilteredModelsList(
   let exportLog, temporaryCollection, languageToken, location;
 
   // defaultLanguage must be initialized before initializeTemporaryWorkbook
+  const defaultQuestionnaireAnswersKey = 'questionnaireAnswers';
   const defaultLanguage = 'english_us';
   const dataFilter = initializeQueryFilters();
   const sheetHandler = initializeTemporaryWorkbook();
+
+  // drop collection
+  const dropTemporaryCollection = () => {
+    // temporary collection was initialized ?
+    if (temporaryCollection) {
+      return temporaryCollection
+        .drop()
+        .then(() => {
+          temporaryCollection = undefined;
+        });
+    }
+
+    // no temporary collection ?
+    return Promise.resolve();
+  };
 
   // retrieve mongo db connection - since this export will always run in a worker
   MongoDBHelper
@@ -3095,6 +3207,13 @@ function exportFilteredModelsList(
           'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL'
         );
 
+        // attach questionnaire tokens
+        if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
+          sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
+            languageTokensToRetrieve.push(questionData.text);
+          });
+        }
+
         // retrieve language tokens
         return retrieveMissingTokens(
           sheetHandler.languageId,
@@ -3110,6 +3229,13 @@ function exportFilteredModelsList(
           _id: 0,
           rowId: '$_id'
         };
+
+        // IMPORTANT!!!
+        // IMPORTANT!!!
+        // IMPORTANT!!!
+        // USING MongoDB 4.4+ would've allowed us to use $function to do all bellow which could've been much faster than having multiple lines of preparations
+        // - we might change it after we upgrade from 3.2 to a newer version
+        // #TODO
 
         // determine how many values we have for array properties
         const arrayProps = _.isEmpty(modelOptions.arrayProps) ?
@@ -3177,24 +3303,98 @@ function exportFilteredModelsList(
           project[sheetHandler.temporaryDistinctLocationsKey] = locationContactQuery;
         }
 
-        // prepare records that will be exported
-        return exportDataCollection
-          .aggregate([
-            {
-              $match: dataFilter.where
-            }, {
-              $sort: dataFilter.sort
-            }, {
-              $project: project
-            }, {
-              $out: sheetHandler.temporaryCollectionName
+        // attach questionnaire count to know how many columns we should attach
+        if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
+          // construct the queries that will be used to determine the number of max columns
+          sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
+            // attach size answers per date count (multiple answer flag)
+            const variableProp = `$${defaultQuestionnaireAnswersKey}.${questionData.variable}`;
+            project[getQuestionnaireQuestionUniqueKey(questionData.variable)] = {
+              $cond: {
+                if: {
+                  $isArray: variableProp
+                },
+                then: {
+                  $size: variableProp
+                },
+                else: 0
+              }
+            };
+
+            // attach max multiple answers per question answer (multi select dropdown)
+            if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+              const variablePropMultiple = `${variableProp}.value`;
+              project[getQuestionnaireQuestionUniqueKeyForMultipleAnswers(questionData.variable)] = {
+                $let: {
+                  vars: {
+                    maxValue: {
+                      $max: {
+                        $map: {
+                          input: {
+                            $cond: {
+                              if: {
+                                $isArray: variablePropMultiple
+                              },
+                              then: {
+                                $concatArrays: variablePropMultiple
+                              },
+                              else: []
+                            }
+                          },
+                          as: 'item',
+                          in: {
+                            $cond: {
+                              if: {
+                                $isArray: '$$item'
+                              },
+                              then: {
+                                $size: '$$item'
+                              },
+                              else: 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  in: {
+                    $ifNull: ['$$maxValue', 0]
+                  }
+                }
+              };
             }
-          ], {
-            allowDiskUse: true
+          });
+        }
+
+        // aggregate filter
+        const aggregateFilter = [
+          {
+            $match: dataFilter.where
+          }, {
+            $sort: dataFilter.sort
+          }, {
+            $project: project
+          }, {
+            $out: sheetHandler.temporaryCollectionName
+          }
+        ];
+
+        // update export log in case we need the aggregate filter
+        return sheetHandler
+          .updateExportLog({
+            aggregateFilter: JSON.stringify(aggregateFilter),
+            updatedAt: new Date()
           })
-          .toArray()
           .then(() => {
-            temporaryCollection = dbConn.collection(sheetHandler.temporaryCollectionName);
+            // prepare records that will be exported
+            return exportDataCollection
+              .aggregate(aggregateFilter, {
+                allowDiskUse: true
+              })
+              .toArray()
+              .then(() => {
+                temporaryCollection = dbConn.collection(sheetHandler.temporaryCollectionName);
+              });
           });
       };
 
@@ -3366,6 +3566,26 @@ function exportFilteredModelsList(
               };
             });
 
+            // determine maximum number of values per questionnaire answers too
+            if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
+              // construct the queries that will be used to determine the number of max columns
+              sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
+                // attach size answers per date count (multiple answer flag)
+                const variableProp = getQuestionnaireQuestionUniqueKey(questionData.variable);
+                projectMax[variableProp] = {
+                  $max: `$${variableProp}`
+                };
+
+                // attach max multiple answers per question answer (multi select dropdown)
+                if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+                  const variablePropMultiple = getQuestionnaireQuestionUniqueKeyForMultipleAnswers(questionData.variable);
+                  projectMax[variablePropMultiple] = {
+                    $max: `$${variablePropMultiple}`
+                  };
+                }
+              });
+            }
+
             // determine maximum number of items for each array field
             return temporaryCollection
               .aggregate([{
@@ -3384,15 +3604,33 @@ function exportFilteredModelsList(
               header,
               path,
               pathWithoutIndexes,
+              uniqueKeyInCaseOfDuplicate,
               formula
             ) => {
               // create column
               const columnData = {
+                originalHeader: header,
+                uniqueKeyInCaseOfDuplicate,
                 header,
                 path,
                 pathWithoutIndexes,
                 formula
               };
+
+              // check for duplicates
+              for (let columnIndex = 0; columnIndex < sheetHandler.columns.headerColumns.length; columnIndex++) {
+                // if not a duplicate header can jump over
+                const existingColumn = sheetHandler.columns.headerColumns[columnIndex];
+                if (existingColumn.originalHeader !== columnData.originalHeader) {
+                  continue;
+                }
+
+                // duplicate header - append unique key
+                columnData.header = `${columnData.originalHeader} (${columnData.uniqueKeyInCaseOfDuplicate})`;
+                existingColumn.header = `${existingColumn.originalHeader} (${existingColumn.uniqueKeyInCaseOfDuplicate})`;
+
+                // continue to check for other duplicates & replace their header too
+              }
 
               // append column
               sheetHandler.columns.headerColumns.push(columnData);
@@ -3433,6 +3671,7 @@ function exportFilteredModelsList(
                   `${header} [${identifierIndex + 1}]`,
                   path,
                   pathWithoutIndexes,
+                  uuid.v4(),
                   (function (localIdentifierIndex) {
                     return (value) => {
                       return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers &&
@@ -3458,6 +3697,7 @@ function exportFilteredModelsList(
                   `${header} [${parentLocationIndex + 1}]`,
                   path,
                   pathWithoutIndexes,
+                  uuid.v4(),
                   (function (localParentLocationIndex) {
                     return (value) => {
                       return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChain &&
@@ -3514,7 +3754,8 @@ function exportFilteredModelsList(
                       const childColumn = addHeaderColumn(
                         `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
                         `${propertyName}[${arrayIndex}].${childProperty}`,
-                        `${propertyName}[].${childProperty}`
+                        `${propertyName}[].${childProperty}`,
+                        uuid.v4()
                       );
 
                       // if location column we need to push some extra columns
@@ -3527,6 +3768,7 @@ function exportFilteredModelsList(
                           `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
                           `${propertyName}[${arrayIndex}].${childProperty}`,
                           childColumn.pathWithoutIndexes,
+                          uuid.v4(),
                           (value) => {
                             return value;
                           }
@@ -3589,23 +3831,116 @@ function exportFilteredModelsList(
                     addHeaderColumn(
                       `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
                       propertyName,
-                      propertyName
+                      propertyName,
+                      uuid.v4()
                     );
                   } else {
                     // add column
                     addHeaderColumn(
                       propertyLabelTokenTranslation,
                       propertyName,
-                      propertyName
+                      propertyName,
+                      uuid.v4()
                     );
                   }
                 } else {
-                  // add column
-                  addHeaderColumn(
-                    propertyLabelTokenTranslation,
-                    propertyName,
-                    propertyName
-                  );
+                  // questionnaire column needs to be handled differently
+                  if (
+                    propertyName === defaultQuestionnaireAnswersKey &&
+                    options.questionnaire &&
+                    sheetHandler.questionnaireQuestionsData.nonFlat.length > 0
+                  ) {
+                    // add questionnaire columns
+                    const addQuestionnaireColumns = (questionData) => {
+                      // determine number of responses for this question
+                      const queryKey = getQuestionnaireQuestionUniqueKey(questionData.variable);
+                      let maxNoOfResponsesForThisQuestion = sheetHandler.columns.arrayColumnMaxValues[queryKey] ?
+                        sheetHandler.columns.arrayColumnMaxValues[queryKey] :
+                        0;
+
+                      // we should export at least one round of columns even if we don't have data
+                      maxNoOfResponsesForThisQuestion = maxNoOfResponsesForThisQuestion < 1 ?
+                        1 :
+                        maxNoOfResponsesForThisQuestion;
+
+                      // we need to add question to which we don't have answers (we shouldn't have these cases)
+                      // - because otherwise you will see child questions that you don't know for which parent question they were
+                      // add number of column necessary to export all responses
+                      for (let answerIndex = 0; answerIndex < maxNoOfResponsesForThisQuestion; answerIndex++) {
+                        // question header
+                        const questionHeader = sheetHandler.dictionaryMap[questionData.text] ?
+                          sheetHandler.dictionaryMap[questionData.text] :
+                          questionData.text;
+
+                        // multiple dropdown ?
+                        if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
+                          // determine number of max responses
+                          const queryKeyForMultiple = getQuestionnaireQuestionUniqueKeyForMultipleAnswers(questionData.variable);
+                          let maxNoOfResponsesForThisMultipleQuestion = sheetHandler.columns.arrayColumnMaxValues[queryKeyForMultiple] ?
+                            sheetHandler.columns.arrayColumnMaxValues[queryKeyForMultiple] :
+                            0;
+
+                          // we should export at least one round of columns even if we don't have data
+                          maxNoOfResponsesForThisMultipleQuestion = maxNoOfResponsesForThisMultipleQuestion < 1 ?
+                            1 :
+                            maxNoOfResponsesForThisMultipleQuestion;
+
+                          // date needs to be printed just once
+                          addHeaderColumn(
+                            `${questionHeader} [MD ${answerIndex + 1}]`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                            questionData.variable
+                          );
+
+                          // attach responses
+                          for (let multipleAnswerIndex = 0; multipleAnswerIndex < maxNoOfResponsesForThisMultipleQuestion; multipleAnswerIndex++) {
+                            // value
+                            addHeaderColumn(
+                              `${questionHeader} [MV ${answerIndex + 1}] ${multipleAnswerIndex + 1}`,
+                              `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
+                              `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
+                              questionData.variable
+                            );
+                          }
+                        } else {
+                          // date
+                          addHeaderColumn(
+                            `${questionHeader} [MD ${answerIndex + 1}]`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                            questionData.variable
+                          );
+
+                          // value
+                          addHeaderColumn(
+                            `${questionHeader} [MV ${answerIndex + 1}]`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
+                            `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
+                            questionData.variable
+                          );
+                        }
+
+                        // need to add child question columns before adding next index column for this question - to keep order of responses for each question
+                        questionData.childQuestions.forEach((childQuestion) => {
+                          addQuestionnaireColumns(childQuestion);
+                        });
+                      }
+                    };
+
+                    // construct columns for our questionnaire
+                    sheetHandler.questionnaireQuestionsData.nonFlat.forEach((questionData) => {
+                      addQuestionnaireColumns(questionData);
+                    });
+                  } else {
+                    // add normal column
+                    addHeaderColumn(
+                      propertyLabelTokenTranslation,
+                      propertyName,
+                      propertyName,
+                      uuid.v4()
+                    );
+                  }
                 }
 
                 // location field ?
@@ -3911,11 +4246,10 @@ function exportFilteredModelsList(
     })
     .then(() => {
       // drop temporary collection since we finished the export and we don't need it anymore
-      return temporaryCollection
-        .drop();
+      return dropTemporaryCollection();
     })
     .then(() => {
-      // drop temporary collection on api restart
+      // drop temporary collection & file on api restart
       // #TODO
 
       // finished exporting data
@@ -3933,13 +4267,6 @@ function exportFilteredModelsList(
       });
     })
     .catch((err) => {
-      // remove temporary table if it was created ?
-      // #TODO
-
-      // remove file if generated
-      // #TODO
-
-      // update export log to contain errors
       sheetHandler.updateExportLog(
         {
           status: 'LNG_SYNC_STATUS_FAILED',
@@ -3948,6 +4275,14 @@ function exportFilteredModelsList(
           errStack: err.stack,
           updatedAt: new Date()
         })
+
+        // remove temporary collection if it was created ?
+        .then(dropTemporaryCollection)
+
+        // remove file if generated
+        // #TODO
+
+        // update export log to contain errors
         .then(() => {
           // throw parent error
           parentCallback(err);

@@ -54,6 +54,9 @@
     },
     "filter": {
       "type": "any"
+    },
+    "aggregateFilter": {
+      "type": "any"
     }
   },
   "validations": [],
