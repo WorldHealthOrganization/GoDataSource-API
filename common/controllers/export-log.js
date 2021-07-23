@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const tmp = require('tmp');
 const path = require('path');
 const fs = require('fs');
+const apiError = require('../../components/apiError');
 
 module.exports = function (ExportLog) {
   // disable some actions
@@ -25,11 +26,21 @@ module.exports = function (ExportLog) {
       !contextUser.id ||
       this.createdBy !== contextUser.id
     ) {
-      throw new Error('Not authorized');
+      callback(new Error('Not authorized'));
     }
 
-    // read file content
-    const filePath = path.resolve(tmp.tmpdir, this.id);
+    // file path
+    const filePath = path.resolve(tmp.tmpdir, `${this.id}.${this.extension}`);
+
+    // throw error if file doesn't exist
+    if (!fs.existsSync(filePath)) {
+      callback(apiError.getError('FILE_NOT_FOUND', {
+        contentType: 'JSON',
+        details: 'File not found'
+      }));
+    }
+
+    // prepare for file reading
     const fileStream = fs.createReadStream(filePath);
 
     // remove after download

@@ -27,6 +27,7 @@ const excel = require('exceljs');
 const uuid = require('uuid');
 const tmp = require('tmp');
 const path = require('path');
+const csvStringify = require('csv-stringify');
 
 const arrayFields = {
   'addresses': 'address',
@@ -3028,18 +3029,119 @@ function exportFilteredModelsList(
 
   // prepare temporary workbook
   const initializeTemporaryWorkbook = () => {
+    // format export type
+    exportType = exportType || 'json';
+    exportType = exportType.toLowerCase();
+
     // create stream workbook so we can write in it when we have data
     const exportLogId = uuid.v4();
-    const filePath = path.resolve(tmp.tmpdir, exportLogId);
-    const tmpWorkbook = new excel.stream.xlsx.WorkbookWriter({
-      filename: filePath
-    });
+    const filePath = path.resolve(tmp.tmpdir, `${exportLogId}.${exportType}`);
 
-    // add sheet where we will export data
-    const tmpWorksheet = tmpWorkbook.addWorksheet('Data');
+    // initialize object needed by each type
+    const exportIsNonFlat = ['json', 'xml'].includes(exportType);
+    let workbook, worksheet, csvWriteStream;
+    switch (exportType) {
+      case 'xlsx':
+        // workbook
+        workbook = new excel.stream.xlsx.WorkbookWriter({
+          filename: filePath
+        });
+
+        // add sheet where we will export data
+        worksheet = workbook.addWorksheet('Data');
+
+        // finished
+        break;
+
+      case 'csv':
+        // initialize write stream
+        csvWriteStream = fs.createWriteStream(
+          filePath, {
+            encoding: 'utf8'
+          }
+        );
+
+        // finished
+        break;
+    }
 
     // header columns will be filled later when we have data
     // COLUMNS will be added in a later step
+
+    // set columns depending of export type
+    const setColumns = () => {
+      switch (exportType) {
+        case 'xlsx':
+          // set columns
+          worksheet.columns = sheetHandler.columns.headerColumns;
+
+          // finished
+          break;
+
+        case 'csv':
+          // set columns
+          const columns = sheetHandler.columns.headerColumns.map((column) => column.header);
+          csvStringify(
+            [], {
+              header: true,
+              columns
+            },
+            (err, csvData) => {
+              // did we encounter an error ?
+              if (err) {
+                throw err;
+              }
+
+              // write data
+              csvWriteStream.write(csvData);
+            }
+          );
+
+          // finished
+          break;
+      }
+    };
+
+    // add row depending of export type
+    const addRow = (data) => {
+      switch (exportType) {
+        case 'xlsx':
+          // add row
+          worksheet.addRow(data).commit();
+
+          // finished
+          break;
+
+        case 'csv':
+          // add row
+          csvStringify(
+            [data],
+            (err, csvData) => {
+              // did we encounter an error ?
+              if (err) {
+                throw err;
+              }
+
+              // write data
+              csvWriteStream.write(csvData);
+            }
+          );
+      }
+    };
+
+    // close stream depending of export type
+    // - must return promise
+    const finalize = () => {
+      switch (exportType) {
+        case 'xlsx':
+          // finalize
+          return workbook.commit();
+        case 'csv':
+          // finalize
+          csvWriteStream.close();
+          return Promise.resolve();
+      }
+    };
 
     // finished
     const columns = initializeColumnHeaders();
@@ -3059,9 +3161,13 @@ function exportFilteredModelsList(
       saveAggregateFilter: config && config.export && !!config.export.saveAggregateFilter,
       filePath,
       columns,
-      excel: {
-        workbook: tmpWorkbook,
-        worksheet: tmpWorksheet
+
+      // process
+      process: {
+        exportIsNonFlat,
+        setColumns,
+        addRow,
+        finalize
       },
 
       // questionnaire
@@ -4055,7 +4161,7 @@ function exportFilteredModelsList(
             }
 
             // finished
-            sheetHandler.excel.worksheet.columns = sheetHandler.columns.headerColumns;
+            sheetHandler.process.setColumns();
           });
       };
 
@@ -4252,7 +4358,7 @@ function exportFilteredModelsList(
               }
 
               // append row
-              sheetHandler.excel.worksheet.addRow(data).commit();
+              sheetHandler.process.addRow(data);
             }
 
             // update export log
@@ -4346,10 +4452,7 @@ function exportFilteredModelsList(
           }
         });
     })
-    .then(() => {
-      // finished with temporary workbook file
-      return sheetHandler.excel.workbook.commit();
-    })
+    .then(sheetHandler.process.finalize)
     .then(() => {
       // drop temporary collection since we finished the export and we don't need it anymore
       return dropTemporaryCollection();
