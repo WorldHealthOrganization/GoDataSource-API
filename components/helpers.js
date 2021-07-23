@@ -3096,6 +3096,22 @@ function exportFilteredModelsList(
     return Promise.resolve();
   };
 
+  // delete file
+  const deleteTemporaryFile = () => {
+    return Promise.resolve()
+      .then(() => {
+        // temporary file was initialized ?
+        if (
+          sheetHandler &&
+          sheetHandler.filePath &&
+          fs.existsSync(sheetHandler.filePath)
+        ) {
+          fs.unlinkSync(sheetHandler.filePath);
+          sheetHandler.filePath = null;
+        }
+      });
+  };
+
   // retrieve mongo db connection - since this export will always run in a worker
   MongoDBHelper
     .getMongoDBConnection()
@@ -4253,9 +4269,6 @@ function exportFilteredModelsList(
       return dropTemporaryCollection();
     })
     .then(() => {
-      // drop temporary collection & file on api restart
-      // #TODO
-
       // finished exporting data
       return sheetHandler.updateExportLog({
         status: 'LNG_SYNC_STATUS_SUCCESS',
@@ -4284,7 +4297,7 @@ function exportFilteredModelsList(
         .then(dropTemporaryCollection)
 
         // remove file if generated
-        // #TODO
+        .then(deleteTemporaryFile)
 
         // update export log to contain errors
         .then(() => {
