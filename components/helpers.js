@@ -3141,6 +3141,42 @@ function exportFilteredModelsList(
       });
   };
 
+  // encrypt exported file
+  const encryptFile = () => {
+    // do we need to encrypt ?
+    if (!encryptPassword) {
+      return Promise.resolve();
+    }
+
+    // encrypt
+    const encryptPath = sheetHandler.filePath + '.encrypt';
+    const dataFileStream = fs.createReadStream(sheetHandler.filePath);
+    const encryptFileStream = fs.createWriteStream(encryptPath);
+    return sheetHandler
+      .updateExportLog({
+        statusStep: 'LNG_STATUS_STEP_ENCRYPT',
+        updatedAt: new Date()
+      })
+      .then(() => {
+        return aesCrypto
+          .encryptStream(
+            dataFileStream,
+            encryptFileStream,
+            encryptPassword
+          );
+      })
+      .then(() => {
+        // remove data file
+        fs.unlinkSync(sheetHandler.filePath);
+
+        // replace file with encrypted file
+        fs.renameSync(
+          encryptPath,
+          sheetHandler.filePath
+        );
+      });
+  };
+
   // retrieve mongo db connection - since this export will always run in a worker
   MongoDBHelper
     .getMongoDBConnection()
@@ -4318,6 +4354,7 @@ function exportFilteredModelsList(
       // drop temporary collection since we finished the export and we don't need it anymore
       return dropTemporaryCollection();
     })
+    .then(encryptFile)
     .then(() => {
       // finished exporting data
       return sheetHandler.updateExportLog({
