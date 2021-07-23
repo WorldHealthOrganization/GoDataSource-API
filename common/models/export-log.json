@@ -58,6 +58,9 @@
     },
     "aggregateFilter": {
       "type": "any"
+    },
+    "aggregateCompletionDate": {
+      "type": "date"
     }
   },
   "validations": [],

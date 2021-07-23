@@ -2778,8 +2778,8 @@ function exportFilteredModelsList(
     // check for additional scope query that needs to be added
     if (modelOptions.scopeQuery) {
       dataFilter = mergeFilters(
-        dataFilter,
-        modelOptions.scopeQuery
+        modelOptions.scopeQuery,
+        dataFilter
       );
     }
 
@@ -4205,23 +4205,39 @@ function exportFilteredModelsList(
                   }
                 })
                 .then(() => {
+                  // map for easy access because we need to keep order from rowIdsToRetrieve
+                  const recordsToExportMap = {};
+                  for (let recordIndex = 0; recordIndex < recordsToExport.length; recordIndex++) {
+                    recordsToExportMap[recordsToExport[recordIndex]._id] = recordsToExport[recordIndex];
+                  }
+
                   // finished
-                  return recordsToExport;
+                  return {
+                    records: recordsToExportMap,
+                    order: rowIdsToRetrieve
+                  };
                 });
             }));
       };
 
       // retrieve data like missing tokens ...
       // all locations should've been retrieved above - location initialization
-      const writeDataToFileDetermineMissingData = (records) => {
+      const writeDataToFileDetermineMissingData = (data) => {
         // retrieve missing data
         // faster than a zombie
         const missingData = {
           tokens: {}
         };
-        for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+        for (let recordIndex = 0; recordIndex < data.order.length; recordIndex++) {
           // get record data
-          const record = records[recordIndex];
+          const record = data.records[data.order[recordIndex]];
+
+          // record doesn't exist anymore - deleted ?
+          if (!record) {
+            continue;
+          }
+
+          // determine missing data
           for (let columnIndex = 0; columnIndex < sheetHandler.columns.headerColumns.length; columnIndex++) {
             // get data
             const column = sheetHandler.columns.headerColumns[columnIndex];
@@ -4266,9 +4282,14 @@ function exportFilteredModelsList(
       };
 
       // handle write data to file
-      const writeDataToFile = (records) => {
+      const writeDataToFile = (data) => {
+        // for context sake,need to define it locally
+          / - promise visibility
+        const recordData = data;
+
         // determine missing data like tokens, locations, ...
-        const missingData = writeDataToFileDetermineMissingData(records);
+        // - the order doesn't matter here
+        const missingData = writeDataToFileDetermineMissingData(recordData);
 
         // retrieve necessary data & write record to file
         return Promise.resolve()
@@ -4289,10 +4310,15 @@ function exportFilteredModelsList(
           // write row to file
           .then(() => {
             // write data to file
-            // for faster then forEach :) - monumental gain :)
-            for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+            // - keep order from sort
+            for (let recordIndex = 0; recordIndex < recordData.order.length; recordIndex++) {
               // get record data
-              const record = records[recordIndex];
+              const record = recordData.records[recordData.order[recordIndex]];
+
+              // record doesn't exist anymore - deleted ?
+              if (!record) {
+                continue;
+              }
 
               // convert geo-points (if any)
               covertAddressesGeoPointToLoopbackFormat(record);
@@ -4362,7 +4388,7 @@ function exportFilteredModelsList(
             }
 
             // update export log
-            sheetHandler.processedNo += records.length;
+            sheetHandler.processedNo += recordData.order.length;
             return sheetHandler.updateExportLog({
               processedNo: sheetHandler.processedNo,
               updatedAt: new Date()
@@ -4393,6 +4419,7 @@ function exportFilteredModelsList(
             .then(() => {
               return sheetHandler.updateExportLog({
                 statusStep: 'LNG_STATUS_STEP_PREPARING_LOCATIONS',
+                aggregateCompletionDate: new Date(),
                 updatedAt: new Date()
               });
             })
