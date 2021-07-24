@@ -1,6 +1,7 @@
 'use strict';
 
 const helpers = require('../helpers');
+const exportHelper = require('../exportHelper');
 const fileCrypto = require('../fileCrypto');
 const aesCrypto = require('../aesCrypto');
 const pdfDoc = require('../pdfDoc');
@@ -75,7 +76,7 @@ const worker = {
   /**
    * Export a filtered list of models
    */
-  exportFilteredModelsList: helpers.exportFilteredModelsList
+  exportFilteredModelsList: exportHelper.exportFilteredModelsList
 };
 
 process.on('message', function (message) {
