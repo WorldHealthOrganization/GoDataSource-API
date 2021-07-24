@@ -141,9 +141,29 @@ const encryptStream = (
 
       // start encrypting
       readableStream.on('data', (data) => {
+        // pause read until write finishes so we write doesn't miss writing data
+        readableStream.pause();
+
+        // encrypt data
         const encrypted = cipher.update(data);
+
+        // write to file
         if (encrypted) {
-          writableStream.write(encrypted);
+          // write data
+          writableStream.write(
+            encrypted,
+            (err) => {
+              // an error occurred...
+              if (err) {
+                throw err;
+              }
+
+              // resume read
+              readableStream.resume();
+            }
+          );
+        } else {
+          readableStream.resume();
         }
       });
 
