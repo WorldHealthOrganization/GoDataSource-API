@@ -3755,6 +3755,16 @@ function exportFilteredModelsList(
 
                   // initialize parents chain
                   record.parentChain = [];
+                  if (sheetHandler.process.exportIsNonFlat) {
+                    record.parentChainGeoLvlArray = [];
+                  }
+
+                  // identifier map
+                  if (sheetHandler.process.exportIsNonFlat) {
+                    record.identifiersCodes = record.identifiers && record.identifiers.length > 0 ?
+                      record.identifiers.map((identifier) => identifier.code) :
+                      [];
+                  }
 
                   // update max number of identifier if necessary
                   sheetHandler.locationsMaxNumberOfIdentifiers = record.identifiers && record.identifiers.length > 0 && record.identifiers.length > sheetHandler.locationsMaxNumberOfIdentifiers ?
@@ -3833,6 +3843,15 @@ function exportFilteredModelsList(
               while (parentLocationId) {
                 // attach parent to list
                 location.parentChain.push(parentLocationId);
+
+                // attach geo levels for easy print
+                if (sheetHandler.process.exportIsNonFlat) {
+                  location.parentChainGeoLvlArray.push(
+                    sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
+                      '-'
+                  );
+                }
 
                 // retrieve next parent from chain
                 parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
@@ -3921,7 +3940,8 @@ function exportFilteredModelsList(
               path,
               pathWithoutIndexes,
               uniqueKeyInCaseOfDuplicate,
-              formula
+              formula,
+              translate
             ) => {
               // create column
               const columnData = {
@@ -3931,7 +3951,8 @@ function exportFilteredModelsList(
                 path,
                 pathWithoutIndexes,
                 formula,
-                anonymize: sheetHandler.columns.shouldAnonymize(pathWithoutIndexes)
+                anonymize: sheetHandler.columns.shouldAnonymize(pathWithoutIndexes),
+                translate
               };
 
               // check for duplicates
@@ -3978,14 +3999,34 @@ function exportFilteredModelsList(
             // attach parent location identifiers
             const attachLocationIdentifiers = (
               header,
+              headerFlatSuffix,
               path,
               pathWithoutIndexes
             ) => {
+              // non flat ?
+              if (sheetHandler.process.exportIsNonFlat) {
+                // attach location identifier
+                addHeaderColumn(
+                  header,
+                  path,
+                  pathWithoutIndexes,
+                  uuid.v4(),
+                  (value) => {
+                    return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers ?
+                      sheetHandler.locationsMap[value].identifiersCodes :
+                      [];
+                  }
+                );
+
+                // finished
+                return;
+              }
+
               // attach location identifiers
               for (let identifierIndex = 0; identifierIndex < sheetHandler.locationsMaxNumberOfIdentifiers; identifierIndex++) {
                 // attach location identifier
                 addHeaderColumn(
-                  `${header} [${identifierIndex + 1}]`,
+                  `${header} ${headerFlatSuffix} [${identifierIndex + 1}]`,
                   path,
                   pathWithoutIndexes,
                   uuid.v4(),
@@ -4007,6 +4048,28 @@ function exportFilteredModelsList(
               path,
               pathWithoutIndexes
             ) => {
+              // non flat ?
+              if (sheetHandler.process.exportIsNonFlat) {
+                // attach parent location geographical level
+                addHeaderColumn(
+                  header,
+                  path,
+                  pathWithoutIndexes,
+                  uuid.v4(),
+                  (value) => {
+                    return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChainGeoLvlArray ?
+                      sheetHandler.locationsMap[value].parentChainGeoLvlArray :
+                      [];
+                  },
+                  (value, pipeTranslator) => {
+                    return value.map(pipeTranslator);
+                  }
+                );
+
+                // finished
+                return;
+              }
+
               // attach parent location details - only first level parent
               for (let parentLocationIndex = 0; parentLocationIndex < sheetHandler.locationsMaxSizeOfParentsChain; parentLocationIndex++) {
                 // attach parent location geographical level
@@ -4093,7 +4156,8 @@ function exportFilteredModelsList(
 
                         // attach location identifiers
                         attachLocationIdentifiers(
-                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']}`,
+                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
+                          sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
                           `${propertyName}[${arrayIndex}].${childProperty}`,
                           childColumn.pathWithoutIndexes
                         );
@@ -4409,14 +4473,10 @@ function exportFilteredModelsList(
                   sheetHandler.columns.includeParentLocationData &&
                   sheetHandler.columns.locationsFieldsMap[propertyName]
                 ) {
-// for now jump over parent locations
-if (sheetHandler.process.exportIsNonFlat) {
-  continue;
-}
-
                   // attach location identifiers
                   attachLocationIdentifiers(
-                    `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER']}`,
+                    `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']}`,
+                    sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
                     propertyName,
                     propertyName
                   );
@@ -4544,6 +4604,22 @@ if (sheetHandler.process.exportIsNonFlat) {
                   missingData.tokens[cellValue] = true;
                 }
               }
+            } else if (
+              // custom token generator ?
+              column.translate
+            ) {
+              column.translate(
+                cellValue,
+                (token) => {
+                  // add to translate if necessary
+                  if (!sheetHandler.dictionaryMap[token]) {
+                    missingData.tokens[token] = true;
+                  }
+
+                  // no need to return translation at this point
+                  // nothing
+                }
+              );
             }
           }
         }
@@ -4659,6 +4735,19 @@ if (sheetHandler.process.exportIsNonFlat) {
                     cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
                       sheetHandler.dictionaryMap[cellValue] :
                       cellValue;
+                  } else if (
+                    // custom token generator ?
+                    column.translate
+                  ) {
+                    cellValue = column.translate(
+                      cellValue,
+                      (token) => {
+                        // go through pipe
+                        return sheetHandler.dictionaryMap[token] ?
+                          sheetHandler.dictionaryMap[token] :
+                          token;
+                      }
+                    );
                   }
 
                   // format dates
@@ -4676,9 +4765,11 @@ if (sheetHandler.process.exportIsNonFlat) {
               }
 
               // append row
-              return (sheetHandler.process.exportIsNonFlat ?
-                sheetHandler.process.addRow(dataObject) :
-                sheetHandler.process.addRow(dataArray))
+              return sheetHandler.process
+                .addRow(sheetHandler.process.exportIsNonFlat ?
+                  dataObject :
+                  dataArray
+                )
                 .then(nextRecord);
             };
 
