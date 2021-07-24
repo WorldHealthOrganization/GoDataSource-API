@@ -4520,11 +4520,34 @@ function exportFilteredModelsList(
                                       sheetHandler.dictionaryMap[propPath] :
                                       propertyKey;
 
-                                    // set value
-                                    response[propPathTranslation] = format(
-                                      path,
-                                      childValue[propertyKey]
-                                    );
+                                    // check if value is location type
+                                    if (
+                                      childValue[propertyKey] &&
+                                      typeof childValue[propertyKey] === 'string' &&
+                                      sheetHandler.columns.locationsFieldsMap[path]
+                                    ) {
+                                      // need to replace location id with location name ?
+                                      const locationValue = childValue[propertyKey];
+                                      response[propPathTranslation] = sheetHandler.locationsMap[locationValue] ?
+                                        sheetHandler.locationsMap[locationValue].name :
+                                        locationValue;
+
+                                      // attach location identifiers
+                                      response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].identifiers ?
+                                        sheetHandler.locationsMap[locationValue].identifiersCodes :
+                                        [];
+
+                                      // attach parent location details - only first level parent
+                                      response[sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray ?
+                                        sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray.map(translatePipe) :
+                                        [];
+                                    } else {
+                                      // set value
+                                      response[propPathTranslation] = format(
+                                        path,
+                                        childValue[propertyKey]
+                                      );
+                                    }
                                   }
                                 } else {
                                   // normal value
