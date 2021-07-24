@@ -177,11 +177,19 @@ module.exports = function (Outbreak) {
     filter.where = filter.where || {};
 
     // parse useQuestionVariable query param
-    let useQuestionVariable = false;
+    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
     // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
+    }
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
     }
 
     // update filter for outbreak and geographical restriction
@@ -282,11 +290,19 @@ module.exports = function (Outbreak) {
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
 
     // parse useQuestionVariable query param
-    let useQuestionVariable = false;
+    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
     // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
+    }
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
     }
 
     new Promise((resolve, reject) => {
@@ -393,11 +409,19 @@ module.exports = function (Outbreak) {
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
 
     // parse useQuestionVariable query param
-    let useQuestionVariable = false;
+    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
     // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
+    }
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
     }
 
     new Promise((resolve, reject) => {

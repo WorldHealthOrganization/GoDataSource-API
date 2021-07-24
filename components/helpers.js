@@ -3280,6 +3280,10 @@ function exportFilteredModelsList(
       questionnaireQuestionsData: prepareQuestionnaireData(),
       questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
 
+      // no need for header translations ?
+      useDbColumns: !!options.useDbColumns,
+      dontTranslateValues: !!options.dontTranslateValues,
+
       // dictionary
       dictionaryMap: {},
 
@@ -3492,14 +3496,22 @@ function exportFilteredModelsList(
       // initialize language tokens
       const initializeLanguageTokens = () => {
         // retrieve general language tokens
-        const languageTokensToRetrieve = Object.values(sheetHandler.columns.labels);
+        const languageTokensToRetrieve = sheetHandler.useDbColumns ?
+          [] :
+          Object.values(sheetHandler.columns.labels);
+
+        // attach general tokens that are always useful to have in your pocket
+        // - needed only when not using db columns
+        if (!sheetHandler.useDbColumns) {
+          languageTokensToRetrieve.push(
+            // questionnaire related
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
+          );
+        }
 
         // attach general tokens that are always useful to have in your pocket
         languageTokensToRetrieve.push(
-          // questionnaire related
-          'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
-          'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE',
-
           // location related
           'LNG_LOCATION_FIELD_LABEL_ID',
           'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
@@ -3508,7 +3520,10 @@ function exportFilteredModelsList(
         );
 
         // attach questionnaire tokens
-        if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
+        if (
+          !sheetHandler.useDbColumns &&
+          sheetHandler.questionnaireQuestionsData.flat.length > 0
+        ) {
           sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
             // question
             languageTokensToRetrieve.push(questionData.text);
@@ -4062,7 +4077,9 @@ function exportFilteredModelsList(
                       [];
                   },
                   (value, pipeTranslator) => {
-                    return value.map(pipeTranslator);
+                    return sheetHandler.dontTranslateValues ?
+                      value :
+                      value.map(pipeTranslator);
                   }
                 );
 
@@ -4101,10 +4118,12 @@ function exportFilteredModelsList(
             for (let propIndex = 0; propIndex < sheetHandler.columns.headerKeys.length; propIndex++) {
               // get record data
               const propertyName = sheetHandler.columns.headerKeys[propIndex];
-              const propertyLabelToken = sheetHandler.columns.labels[propertyName];
+              const propertyLabelToken = sheetHandler.useDbColumns ?
+                undefined :
+                sheetHandler.columns.labels[propertyName];
               const propertyLabelTokenTranslation = propertyLabelToken && sheetHandler.dictionaryMap[propertyLabelToken] !== undefined ?
                 sheetHandler.dictionaryMap[propertyLabelToken] :
-                propertyLabelToken;
+                propertyName;
 
               // array property ?
               if (
@@ -4116,7 +4135,9 @@ function exportFilteredModelsList(
                   for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
                     for (let childProperty in arrayProps[propertyName]) {
                       // determine child property information
-                      const childPropertyTokenTranslation = sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+                      const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
+                        childProperty :
+                        sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
 
                       // child property contains parent info ?
                       const propertyOfAnObjectIndex = childProperty.indexOf('.');
@@ -4202,9 +4223,12 @@ function exportFilteredModelsList(
                 let parentProperty, parentPropertyTokenTranslation;
                 if (propertyOfAnObjectIndex > -1) {
                   parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
-                  parentPropertyTokenTranslation = parentProperty && sheetHandler.dictionaryMap[parentProperty] ?
-                    sheetHandler.dictionaryMap[parentProperty] :
-                    undefined;
+                  parentPropertyTokenTranslation = !sheetHandler.useDbColumns && parentProperty && sheetHandler.dictionaryMap[parentProperty] ?
+                    sheetHandler.dictionaryMap[parentProperty] : (
+                      sheetHandler.useDbColumns ?
+                        parentProperty :
+                        undefined
+                    );
                 }
 
                 // if property belongs to an object then maybe we should remove the parent column since it isn't necessary anymore
@@ -4251,6 +4275,14 @@ function exportFilteredModelsList(
                         propertyName,
                         uuid.v4(),
                         (value) => {
+                          // no processing ?
+                          if (
+                            sheetHandler.useDbColumns &&
+                            sheetHandler.dontTranslateValues
+                          ) {
+                            return value;
+                          }
+
                           // map and translate questions in proper order even if questionnaireAnswers is an object, and it won't keep the order, so same label questions will be confusing
                           const originalAnswersMap = {};
                           const formattedAnswers = {};
@@ -4259,7 +4291,7 @@ function exportFilteredModelsList(
                             const questionData = sheetHandler.questionnaireQuestionsData.flat[questionIndex];
 
                             // question header
-                            const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders ?
+                            const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders || sheetHandler.useDbColumns ?
                               questionData.variable : (
                                 sheetHandler.dictionaryMap[questionData.text] ?
                                   sheetHandler.dictionaryMap[questionData.text] :
@@ -4281,7 +4313,10 @@ function exportFilteredModelsList(
                                 // replace single / multiple answers with labels instead of answer text
                                 // - needs to be before replacing value / date labels
                                 if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER') {
-                                  if (answer.value) {
+                                  if (
+                                    !sheetHandler.dontTranslateValues &&
+                                    answer.value
+                                  ) {
                                     // answer to token
                                     answer.value = questionData.answerKeyToLabelMap[answer.value] ?
                                       questionData.answerKeyToLabelMap[answer.value] :
@@ -4295,6 +4330,7 @@ function exportFilteredModelsList(
                                 } else if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
                                   // go through all dropdown answers
                                   if (
+                                    !sheetHandler.dontTranslateValues &&
                                     answer.value &&
                                     answer.value.length
                                   ) {
@@ -4313,7 +4349,10 @@ function exportFilteredModelsList(
                                 }
 
                                 // replace value
-                                if (answer.hasOwnProperty('value')) {
+                                if (
+                                  !sheetHandler.useDbColumns &&
+                                  answer.hasOwnProperty('value')
+                                ) {
                                   answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'] ?
                                     sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'] :
                                     'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'
@@ -4322,7 +4361,10 @@ function exportFilteredModelsList(
                                 }
 
                                 // replace date
-                                if (answer.hasOwnProperty('date')) {
+                                if (
+                                  !sheetHandler.useDbColumns &&
+                                  answer.hasOwnProperty('date')
+                                ) {
                                   answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] ?
                                     sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] :
                                     'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
@@ -4358,7 +4400,7 @@ function exportFilteredModelsList(
                         }
                       );
                     } else {
-                      // add questionnaire columns
+                      // add questionnaire columns - flat file
                       const addQuestionnaireColumns = (questionData) => {
                         // determine number of responses for this question
                         const queryKey = getQuestionnaireQuestionUniqueKey(questionData.variable);
@@ -4376,7 +4418,7 @@ function exportFilteredModelsList(
                         // add number of column necessary to export all responses
                         for (let answerIndex = 0; answerIndex < maxNoOfResponsesForThisQuestion; answerIndex++) {
                           // question header
-                          const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders ?
+                          const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders || sheetHandler.useDbColumns ?
                             questionData.variable : (
                               sheetHandler.dictionaryMap[questionData.text] ?
                                 sheetHandler.dictionaryMap[questionData.text] :
@@ -4414,7 +4456,7 @@ function exportFilteredModelsList(
                                 questionData.variable,
                                 (function (localQuestionData) {
                                   return (value) => {
-                                    return localQuestionData.answerKeyToLabelMap[value] ?
+                                    return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
                                       localQuestionData.answerKeyToLabelMap[value] :
                                       value;
                                   };
@@ -4438,7 +4480,7 @@ function exportFilteredModelsList(
                               questionData.variable,
                               (function (localQuestionData) {
                                 return (value) => {
-                                  return localQuestionData.answerKeyToLabelMap[value] ?
+                                  return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
                                     localQuestionData.answerKeyToLabelMap[value] :
                                     value;
                                 };
@@ -4469,6 +4511,14 @@ function exportFilteredModelsList(
                         undefined :
                         (function (localPropertyName) {
                           return (value, translatePipe) => {
+                            // no processing ?
+                            if (
+                              sheetHandler.useDbColumns &&
+                              sheetHandler.dontTranslateValues
+                            ) {
+                              return value;
+                            }
+
                             // for non flat file types we might need to translate / format value
                             // - array condition must be before object since array ...is an object too...
                             if (
@@ -4515,7 +4565,9 @@ function exportFilteredModelsList(
                                   for (const propertyKey in childValue) {
                                     // check if we have a label for property
                                     const path = `${prefix}.${propertyKey}`;
-                                    const propPath = sheetHandler.columns.labels[path];
+                                    const propPath = sheetHandler.useDbColumns ?
+                                      undefined :
+                                      sheetHandler.columns.labels[path];
                                     const propPathTranslation = propPath && sheetHandler.dictionaryMap[propPath] ?
                                       sheetHandler.dictionaryMap[propPath] :
                                       propertyKey;
@@ -4551,9 +4603,8 @@ function exportFilteredModelsList(
                                   }
                                 } else {
                                   // normal value
-                                  response = childValue &&
-                                    typeof childValue === 'string' &&
-                                    childValue.startsWith('LNG_') ?
+                                  response = !sheetHandler.dontTranslateValues && childValue &&
+                                    typeof childValue === 'string' && childValue.startsWith('LNG_') ?
                                       translatePipe(childValue) :
                                       childValue;
                                 }
@@ -4663,11 +4714,19 @@ function exportFilteredModelsList(
       // retrieve data like missing tokens ...
       // all locations should've been retrieved above - location initialization
       const writeDataToFileDetermineMissingData = (data) => {
-        // retrieve missing data
-        // faster than a zombie
+        // missing data definitions
         const missingData = {
           tokens: {}
         };
+
+        // since all we do here is to retrieve missing tokens for now
+        // - if values don't need to be translated then there is no point in continuing
+        if (sheetHandler.dontTranslateValues) {
+          return missingData;
+        }
+
+        // retrieve missing data
+        // faster than a zombie
         for (let recordIndex = 0; recordIndex < data.order.length; recordIndex++) {
           // get record data
           const record = data.records[data.order[recordIndex]];
@@ -4824,7 +4883,7 @@ function exportFilteredModelsList(
                     _.get(record, column.path),
                     (token) => {
                       // go through pipe
-                      return sheetHandler.dictionaryMap[token] ?
+                      return !sheetHandler.dontTranslateValues && sheetHandler.dictionaryMap[token] ?
                         sheetHandler.dictionaryMap[token] :
                         token;
                     }
@@ -4850,7 +4909,10 @@ function exportFilteredModelsList(
 
                 // process data applies for all
                 // - formulas & values
-                if (cellValue) {
+                if (
+                  !sheetHandler.dontTranslateValues &&
+                  cellValue
+                ) {
                   // translate
                   if (
                     typeof cellValue === 'string' &&

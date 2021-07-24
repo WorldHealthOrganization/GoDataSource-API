@@ -338,11 +338,19 @@ module.exports = function (Outbreak) {
     filter = filter || {};
     filter.where = filter.where || {};
     // parse useQuestionVariable query param
-    let useQuestionVariable = false;
+    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
     // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
+    }
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
     }
 
     app.models.case.preFilterForOutbreak(this, filter, options)
@@ -362,6 +370,8 @@ module.exports = function (Outbreak) {
           outbreakId: self.id,
           questionnaire: self.caseInvestigationTemplate.toJSON(),
           useQuestionVariable: useQuestionVariable,
+          useDbColumns,
+          dontTranslateValues,
           contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
         };
 
