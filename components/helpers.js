@@ -4211,28 +4211,29 @@ function exportFilteredModelsList(
                 if (parentProperty) {
                   // if non flat child columns are handled by parents
                   if (sheetHandler.process.exportIsNonFlat) {
-                    continue;
-                  }
-
-                  // remove parent column
-                  removeLastColumnIfSamePath(parentProperty);
-
-                  // add column
-                  if (parentPropertyTokenTranslation) {
-                    addHeaderColumn(
-                      `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
-                      propertyName,
-                      propertyName,
-                      uuid.v4()
-                    );
+                    // if non flat child columns are handled by parents
+                    // nothing
                   } else {
+                    // remove parent column
+                    removeLastColumnIfSamePath(parentProperty);
+
                     // add column
-                    addHeaderColumn(
-                      propertyLabelTokenTranslation,
-                      propertyName,
-                      propertyName,
-                      uuid.v4()
-                    );
+                    if (parentPropertyTokenTranslation) {
+                      addHeaderColumn(
+                        `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
+                        propertyName,
+                        propertyName,
+                        uuid.v4()
+                      );
+                    } else {
+                      // add column
+                      addHeaderColumn(
+                        propertyLabelTokenTranslation,
+                        propertyName,
+                        propertyName,
+                        uuid.v4()
+                      );
+                    }
                   }
                 } else {
                   // questionnaire column needs to be handled differently
@@ -4463,7 +4464,92 @@ function exportFilteredModelsList(
                       propertyLabelTokenTranslation,
                       propertyName,
                       propertyName,
-                      uuid.v4()
+                      uuid.v4(),
+                      !sheetHandler.process.exportIsNonFlat ?
+                        undefined :
+                        (function (localPropertyName) {
+                          return (value, translatePipe) => {
+                            // for non flat file types we might need to translate / format value
+                            // - array condition must be before object since array ...is an object too...
+                            if (
+                              value && (
+                                Array.isArray(value) ||
+                                typeof value === 'object'
+                              )
+                            ) {
+                              // format property value
+                              const format = (
+                                prefix,
+                                childValue
+                              ) => {
+                                // no value ?
+                                if (!childValue) {
+                                  return childValue;
+                                }
+
+                                // response
+                                let response;
+
+                                // array ?
+                                if (Array.isArray(childValue)) {
+                                  // initialize response
+                                  response = [];
+
+                                  // start formatting every item
+                                  for (let arrayIndex = 0; arrayIndex < childValue.length; arrayIndex++) {
+                                    response.push(
+                                      format(
+                                        `${prefix}[]`,
+                                        childValue[arrayIndex]
+                                      )
+                                    );
+                                  }
+                                } else if (
+                                  typeof childValue === 'object' &&
+                                  !(childValue instanceof Date)
+                                ) {
+                                  // initialize object
+                                  response = {};
+
+                                  // go through each property and translate both key & value
+                                  for (const propertyKey in childValue) {
+                                    // check if we have a label for property
+                                    const path = `${prefix}.${propertyKey}`;
+                                    const propPath = sheetHandler.columns.labels[path];
+                                    const propPathTranslation = propPath && sheetHandler.dictionaryMap[propPath] ?
+                                      sheetHandler.dictionaryMap[propPath] :
+                                      propertyKey;
+
+                                    // set value
+                                    response[propPathTranslation] = format(
+                                      path,
+                                      childValue[propertyKey]
+                                    );
+                                  }
+                                } else {
+                                  // normal value
+                                  response = childValue &&
+                                    typeof childValue === 'string' &&
+                                    childValue.startsWith('LNG_') ?
+                                      translatePipe(childValue) :
+                                      childValue;
+                                }
+
+                                // finished
+                                return response;
+                              };
+
+                              // start formatting
+                              return format(
+                                localPropertyName,
+                                value
+                              );
+                            }
+
+                            // no custom formatter
+                            return value;
+                          };
+                        })(propertyName)
                     );
                   }
                 }
@@ -4583,7 +4669,16 @@ function exportFilteredModelsList(
             if (column.formula) {
               // retrieve result from formula
               cellValue = column.formula(
-                _.get(record, column.path)
+                _.get(record, column.path),
+                (token) => {
+                  // add to translate if necessary
+                  if (!sheetHandler.dictionaryMap[token]) {
+                    missingData.tokens[token] = true;
+                  }
+
+                  // no need to return translation at this point
+                  // nothing
+                }
               );
             } else {
               // determine value from column path
@@ -4703,7 +4798,13 @@ function exportFilteredModelsList(
                 let cellValue;
                 if (column.formula) {
                   cellValue = column.formula(
-                    _.get(record, column.path)
+                    _.get(record, column.path),
+                    (token) => {
+                      // go through pipe
+                      return sheetHandler.dictionaryMap[token] ?
+                        sheetHandler.dictionaryMap[token] :
+                        token;
+                    }
                   );
                 } else {
                   // determine value from column path
