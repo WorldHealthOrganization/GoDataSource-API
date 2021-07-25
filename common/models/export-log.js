@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const MongoDBHelper = require('./../../components/mongoDBHelper');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (ExportLog) {
   // set flag to get controller
@@ -40,7 +41,10 @@ module.exports = function (ExportLog) {
           const collection = data.collections.splice(0, 1)[0];
 
           // not interested in doing stuff to this collection ?
-          if (!collection.name.startsWith('zExport_')) {
+          if (
+            !exportHelper.TEMPORARY_DATABASE_PREFIX ||
+            !collection.name.startsWith(exportHelper.TEMPORARY_DATABASE_PREFIX)
+          ) {
             return nextCollection();
           }
 
