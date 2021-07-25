@@ -43,6 +43,14 @@ const NON_FLAT_TYPES = [
 // default export type - in case export type isn't provided
 const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 
+// spreadsheet limits
+const SHEET_LIMITS = {
+  XLSX: {
+    MAX_COLUMNS: 16000,
+    MAX_ROWS: 100
+  }
+};
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -341,7 +349,8 @@ function exportFilteredModelsList(
 
       // initialize object needed by each type
       const exportIsNonFlat = NON_FLAT_TYPES.includes(exportType);
-      let workbook, worksheet, csvWriteStream, jsonWriteStream, jsonWroteFirstRow;
+      let workbook, worksheets;
+      let csvWriteStream, jsonWriteStream, jsonWroteFirstRow;
       let mimeType;
       switch (exportType) {
         case EXPORT_TYPE.XLSX:
@@ -352,9 +361,6 @@ function exportFilteredModelsList(
           workbook = new excel.stream.xlsx.WorkbookWriter({
             filename: filePath
           });
-
-          // add sheet where we will export data
-          worksheet = workbook.addWorksheet('Data');
 
           // finished
           break;
@@ -414,8 +420,23 @@ function exportFilteredModelsList(
       const setColumns = () => {
         switch (exportType) {
           case EXPORT_TYPE.XLSX:
-            // set columns
-            worksheet.columns = sheetHandler.columns.headerColumns;
+            // initialize worksheets accordingly to max number of columns per worksheet
+            worksheets = [];
+            const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
+            for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
+              // create sheet
+              const sheet = workbook.addWorksheet(`Data ${sheetIndex + 1}`);
+
+              // set columns per sheet
+              const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
+              sheet.columns = sheetHandler.columns.headerColumns.slice(
+                startColumnsPos,
+                startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
+              );
+
+              // add it to the list
+              worksheets.push(sheet);
+            }
 
             // finished
             break;
@@ -458,9 +479,26 @@ function exportFilteredModelsList(
           switch (exportType) {
             case EXPORT_TYPE.XLSX:
               // add row
-              // does commit wait for stream to flush
-              // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-              worksheet.addRow(data).commit();
+              // - must split into sheets if there are more columns than we are allowed to export per sheet ?
+              if (sheetHandler.columns.headerColumns.length <= SHEET_LIMITS.XLSX.MAX_COLUMNS) {
+                // does commit wait for stream to flush
+                // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
+                worksheets[0].addRow(data).commit();
+              } else {
+                // append data for each sheet
+                const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
+                for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
+                  // set data per sheet
+                  const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
+
+                  // does commit wait for stream to flush
+                  // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
+                  worksheets[sheetIndex].addRow(data.slice(
+                    startColumnsPos,
+                    startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
+                  )).commit();
+                }
+              }
 
               // finished
               resolve();
