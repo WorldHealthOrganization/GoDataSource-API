@@ -782,31 +782,61 @@ function exportFilteredModelsList(
       }
 
       // encrypt
-      const encryptPath = sheetHandler.filePath + '.encrypt';
-      const dataFileStream = fs.createReadStream(sheetHandler.filePath);
-      const encryptFileStream = fs.createWriteStream(encryptPath);
+      const encryptFile = (filePath) => {
+        // encrypt
+        const encryptPath = `${filePath}.encrypt`;
+        const dataFileStream = fs.createReadStream(filePath);
+        const encryptFileStream = fs.createWriteStream(encryptPath);
+        return aesCrypto
+          .encryptStream(
+            dataFileStream,
+            encryptFileStream,
+            encryptPassword
+          )
+          .then(() => {
+            // remove data file
+            fs.unlinkSync(filePath);
+
+            // replace file with encrypted file
+            fs.renameSync(
+              encryptPath,
+              filePath
+            );
+          });
+      };
+
+      // start encrypting
       return sheetHandler
         .updateExportLog({
           statusStep: 'LNG_STATUS_STEP_ENCRYPT',
           updatedAt: new Date()
         })
         .then(() => {
-          return aesCrypto
-            .encryptStream(
-              dataFileStream,
-              encryptFileStream,
-              encryptPassword
-            );
-        })
-        .then(() => {
-          // remove data file
-          fs.unlinkSync(sheetHandler.filePath);
+          // single file to encrypt ?
+          if (sheetHandler.process.fileNo < 2) {
+            return encryptFile(sheetHandler.filePath);
+          }
 
-          // replace file with encrypted file
-          fs.renameSync(
-            encryptPath,
-            sheetHandler.filePath
-          );
+          // process encryption for next file
+          let fileNoToProcess = 0;
+          const nextFile = () => {
+            // next
+            fileNoToProcess++;
+
+            // nothing else to process ?
+            // last one in this case is handled above / bellow (encryptFile(sheetHandler.filePath).then)
+            if (fileNoToProcess >= sheetHandler.process.fileNo) {
+              return Promise.resolve();
+            }
+
+            // encrypt
+            return encryptFile(`${sheetHandler.filePath}_${fileNoToProcess}`)
+              .then(nextFile);
+          };
+
+          // go through each file & encrypt
+          return encryptFile(sheetHandler.filePath)
+            .then(nextFile);
         });
     };
 
