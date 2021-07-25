@@ -598,7 +598,7 @@ function exportFilteredModelsList(
                     // set columns for the new file
                     setColumns();
 
-                    // write row
+                    // write row to the new workbook
                     actualAddRow();
 
                     // finished
@@ -621,7 +621,8 @@ function exportFilteredModelsList(
               xlsDataBuffer.push(data);
 
               // reached the limit of rows per file ?
-              if (xlsDataBuffer.length >= SHEET_LIMITS.XLS.MAX_ROWS) {
+              // -1 because first row is contains headers
+              if (xlsDataBuffer.length >= SHEET_LIMITS.XLS.MAX_ROWS - 1) {
                 // close file
                 sheetHandler.process
                   .finalize()
