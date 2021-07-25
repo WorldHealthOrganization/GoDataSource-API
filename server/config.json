@@ -229,6 +229,10 @@
     "xls": {
       "maxColumnsPerSheet": 250,
       "maxRowsPerFile": 25000
+    },
+    "ods": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 25000
     }
   }
 }

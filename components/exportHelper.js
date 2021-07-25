@@ -36,7 +36,8 @@ const EXPORT_TYPE = {
   XML: 'xml',
   XLSX: 'xlsx',
   CSV: 'csv',
-  XLS: 'xls'
+  XLS: 'xls',
+  ODS: 'ods'
 };
 const NON_FLAT_TYPES = [
   EXPORT_TYPE.JSON,
@@ -62,7 +63,15 @@ const SHEET_LIMITS = {
       250,
     MAX_ROWS: config && config.export && config.export.xls && config.export.xls.maxRowsPerFile ?
       config.export.xls.maxRowsPerFile :
-      30000
+      25000
+  },
+  ODS: {
+    MAX_COLUMNS: config && config.export && config.export.ods && config.export.ods.maxColumnsPerSheet ?
+      config.export.ods.maxColumnsPerSheet :
+      250,
+    MAX_ROWS: config && config.export && config.export.ods && config.export.ods.maxRowsPerFile ?
+      config.export.ods.maxRowsPerFile :
+      25000
   }
 };
 
@@ -377,6 +386,12 @@ function exportFilteredModelsList(
         xlsDataBuffer = [];
       };
 
+      // initialize workbook file - ODS
+      let odsDataBuffer, odsColumnsPerSheet;
+      const initializeOds = () => {
+        odsDataBuffer = [];
+      };
+
       // initialize object needed by each type
       const exportIsNonFlat = NON_FLAT_TYPES.includes(exportType);
       let csvWriteStream, jsonWriteStream, jsonWroteFirstRow;
@@ -398,6 +413,16 @@ function exportFilteredModelsList(
 
           // initialize workbook file
           initializeXls();
+
+          // finished
+          break;
+
+        case EXPORT_TYPE.ODS:
+          // set mime type
+          mimeType = 'application/vnd.oasis.opendocument.spreadsheet';
+
+          // initialize workbook file
+          initializeOds();
 
           // finished
           break;
@@ -500,6 +525,38 @@ function exportFilteredModelsList(
                   columns.length > 0
                 ) {
                   xlsColumnsPerSheet.push(columns);
+                }
+              }
+            }
+
+            // finished
+            break;
+
+          case EXPORT_TYPE.ODS:
+
+            // no need to split ?
+            if (sheetHandler.columns.headerColumns.length < SHEET_LIMITS.ODS.MAX_COLUMNS) {
+              odsColumnsPerSheet = [
+                sheetHandler.columns.headerColumns.map((column) => column.header)
+              ];
+            } else {
+              // must split columns
+              odsColumnsPerSheet = [];
+              const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.ODS.MAX_COLUMNS) + 1;
+              for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
+                // determine columns for this sheet
+                const startColumnsPos = sheetIndex * SHEET_LIMITS.ODS.MAX_COLUMNS;
+                const columns = sheetHandler.columns.headerColumns.slice(
+                  startColumnsPos,
+                  startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
+                ).map((column) => column.header);
+
+                // attach sheet with columns
+                if (
+                  columns &&
+                  columns.length > 0
+                ) {
+                  odsColumnsPerSheet.push(columns);
                 }
               }
             }
@@ -655,6 +712,45 @@ function exportFilteredModelsList(
               // finished
               break;
 
+            case EXPORT_TYPE.ODS:
+              // append row
+              odsDataBuffer.push(data);
+
+              // reached the limit of rows per file ?
+              // -1 because first row is contains headers
+              if (odsDataBuffer.length >= SHEET_LIMITS.ODS.MAX_ROWS - 1) {
+                // close file
+                sheetHandler.process
+                  .finalize()
+                  .then(() => {
+                    // rename file
+                    fs.renameSync(
+                      sheetHandler.filePath,
+                      `${sheetHandler.filePath}_${sheetHandler.process.fileNo}`
+                    );
+
+                    // create new workbook
+                    sheetHandler.process.fileNo++;
+
+                    // initialize workbook file
+                    initializeOds();
+
+                    // set columns for the new file
+                    // - not really necessary to again, but for consistency sake..and since it not much of a fuss
+                    setColumns();
+
+                    // finished
+                    resolve();
+                  })
+                  .catch(reject);
+              } else {
+                // finished
+                resolve();
+              }
+
+              // finished
+              break;
+
             case EXPORT_TYPE.CSV:
               // add row
               csvStringify(
@@ -721,6 +817,7 @@ function exportFilteredModelsList(
       // - must return promise
       const finalize = () => {
         // update number of records
+        let currentWorkBook;
         return sheetHandler
           .updateExportLog({
             processedNo: sheetHandler.processedNo,
@@ -734,7 +831,7 @@ function exportFilteredModelsList(
 
               case EXPORT_TYPE.XLS:
                 // create workbook for current bulk of data
-                const currentWorkBook = xlsx.utils.book_new();
+                currentWorkBook = xlsx.utils.book_new();
 
                 // create sheets
                 for (let sheetIndex = 0; sheetIndex < xlsColumnsPerSheet.length; sheetIndex++) {
@@ -783,6 +880,63 @@ function exportFilteredModelsList(
                   sheetHandler.filePath, {
                     type: 'buffer',
                     bookType: 'biff8'
+                  }
+                );
+
+                // finished
+                return Promise.resolve();
+
+              case EXPORT_TYPE.ODS:
+                // create workbook for current bulk of data
+                currentWorkBook = xlsx.utils.book_new();
+
+                // create sheets
+                for (let sheetIndex = 0; sheetIndex < odsColumnsPerSheet.length; sheetIndex++) {
+                  // get columns
+                  const sheetColumns = odsColumnsPerSheet[sheetIndex];
+
+                  // single sheet ?
+                  let rows;
+                  if (odsColumnsPerSheet.length < 2) {
+                    rows = [
+                      sheetColumns,
+                      ...odsDataBuffer
+                    ];
+                  } else {
+                    // multiple sheets, must split data
+                    // - append headers
+                    rows = [
+                      sheetColumns
+                    ];
+
+                    // go through rows and retrieve only our columns data
+                    const startColumnsPos = sheetIndex * SHEET_LIMITS.ODS.MAX_COLUMNS;
+                    for (let rowIndex = 0; rowIndex < odsDataBuffer.length; rowIndex++) {
+                      // get record data
+                      const rowData = odsDataBuffer[rowIndex];
+                      rows.push(
+                        rowData.slice(
+                          startColumnsPos,
+                          startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
+                        )
+                      );
+                    }
+                  }
+
+                  // write sheet
+                  xlsx.utils.book_append_sheet(
+                    currentWorkBook,
+                    xlsx.utils.aoa_to_sheet(rows),
+                    `Data ${sheetIndex + 1}`
+                  );
+                }
+
+                // write file
+                xlsx.writeFile(
+                  currentWorkBook,
+                  sheetHandler.filePath, {
+                    type: 'buffer',
+                    bookType: 'ods'
                   }
                 );
 
