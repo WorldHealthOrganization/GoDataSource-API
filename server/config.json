@@ -225,6 +225,10 @@
     "xlsx": {
       "maxColumnsPerSheet": 16000,
       "maxRowsPerFile": 1000000
+    },
+    "xls": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 25000
     }
   }
 }

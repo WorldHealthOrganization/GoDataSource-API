@@ -12,6 +12,7 @@ const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
 const archiver = require('archiver');
+const xlsx = require('xlsx');
 
 // default language - in case we don't have user language
 // - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
@@ -34,7 +35,8 @@ const EXPORT_TYPE = {
   JSON: 'json',
   XML: 'xml',
   XLSX: 'xlsx',
-  CSV: 'csv'
+  CSV: 'csv',
+  XLS: 'xls'
 };
 const NON_FLAT_TYPES = [
   EXPORT_TYPE.JSON,
@@ -53,6 +55,14 @@ const SHEET_LIMITS = {
     MAX_ROWS: config && config.export && config.export.xlsx && config.export.xlsx.maxRowsPerFile ?
       config.export.xlsx.maxRowsPerFile :
       1000000
+  },
+  XLS: {
+    MAX_COLUMNS: config && config.export && config.export.xls && config.export.xls.maxColumnsPerSheet ?
+      config.export.xls.maxColumnsPerSheet :
+      250,
+    MAX_ROWS: config && config.export && config.export.xls && config.export.xls.maxRowsPerFile ?
+      config.export.xls.maxRowsPerFile :
+      30000
   }
 };
 
@@ -352,14 +362,20 @@ function exportFilteredModelsList(
       const exportLogId = uuid.v4();
       const filePath = path.resolve(tmp.tmpdir, `${exportLogId}.${exportType}`);
 
-      // initialize workbook file
-      let workbook, worksheets;
+      // initialize workbook file - XLSX
+      let xlsxWorkbook, xlsxWorksheets;
       const initializeXlsx = () => {
         // workbook
-        workbook = new excel.stream.xlsx.WorkbookWriter({
+        xlsxWorkbook = new excel.stream.xlsx.WorkbookWriter({
           filename: filePath
         });
-      } ;
+      };
+
+      // initialize workbook file - XLS
+      let xlsDataBuffer, xlsColumnsPerSheet;
+      const initializeXls = () => {
+        xlsDataBuffer = [];
+      };
 
       // initialize object needed by each type
       const exportIsNonFlat = NON_FLAT_TYPES.includes(exportType);
@@ -372,6 +388,16 @@ function exportFilteredModelsList(
 
           // initialize workbook file
           initializeXlsx();
+
+          // finished
+          break;
+
+        case EXPORT_TYPE.XLS:
+          // set mime type
+          mimeType = 'application/vnd.ms-excel';
+
+          // initialize workbook file
+          initializeXls();
 
           // finished
           break;
@@ -429,11 +455,11 @@ function exportFilteredModelsList(
         switch (exportType) {
           case EXPORT_TYPE.XLSX:
             // initialize worksheets accordingly to max number of columns per worksheet
-            worksheets = [];
+            xlsxWorksheets = [];
             const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
             for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
               // create sheet
-              const sheet = workbook.addWorksheet(`Data ${sheetIndex + 1}`);
+              const sheet = xlsxWorkbook.addWorksheet(`Data ${sheetIndex + 1}`);
 
               // set columns per sheet
               const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
@@ -443,7 +469,39 @@ function exportFilteredModelsList(
               );
 
               // add it to the list
-              worksheets.push(sheet);
+              xlsxWorksheets.push(sheet);
+            }
+
+            // finished
+            break;
+
+          case EXPORT_TYPE.XLS:
+
+            // no need to split ?
+            if (sheetHandler.columns.headerColumns.length < SHEET_LIMITS.XLS.MAX_COLUMNS) {
+              xlsColumnsPerSheet = [
+                sheetHandler.columns.headerColumns.map((column) => column.header)
+              ];
+            } else {
+              // must split columns
+              xlsColumnsPerSheet = [];
+              const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLS.MAX_COLUMNS) + 1;
+              for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
+                // determine columns for this sheet
+                const startColumnsPos = sheetIndex * SHEET_LIMITS.XLS.MAX_COLUMNS;
+                const columns = sheetHandler.columns.headerColumns.slice(
+                  startColumnsPos,
+                  startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
+                ).map((column) => column.header);
+
+                // attach sheet with columns
+                if (
+                  columns &&
+                  columns.length > 0
+                ) {
+                  xlsColumnsPerSheet.push(columns);
+                }
+              }
             }
 
             // finished
@@ -477,13 +535,12 @@ function exportFilteredModelsList(
 
             // finished
             break;
+
+          // not supported
+          default:
+            throw new Error('Export type not supported');
         }
       };
-
-      // close workbook file
-      const finalizeXlsx = () => {
-        return workbook.commit();
-      } ;
 
       // add row depending of export type
       // - returns a promise: wait for data to be written
@@ -498,7 +555,7 @@ function exportFilteredModelsList(
                 if (sheetHandler.columns.headerColumns.length <= SHEET_LIMITS.XLSX.MAX_COLUMNS) {
                   // does commit wait for stream to flush
                   // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-                  worksheets[0].addRow(data).commit();
+                  xlsxWorksheets[0].addRow(data).commit();
                 } else {
                   // append data for each sheet
                   const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
@@ -508,7 +565,7 @@ function exportFilteredModelsList(
 
                     // does commit wait for stream to flush
                     // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-                    worksheets[sheetIndex].addRow(data.slice(
+                    xlsxWorksheets[sheetIndex].addRow(data.slice(
                       startColumnsPos,
                       startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
                     )).commit();
@@ -522,8 +579,9 @@ function exportFilteredModelsList(
                 // reset row count
                 addRowCounted = 0;
 
-                // closed file
-                finalizeXlsx()
+                // close file
+                sheetHandler.process
+                  .finalize()
                   .then(() => {
                     // rename file
                     fs.renameSync(
@@ -551,6 +609,44 @@ function exportFilteredModelsList(
                 // write row
                 actualAddRow();
 
+                // finished
+                resolve();
+              }
+
+              // finished
+              break;
+
+            case EXPORT_TYPE.XLS:
+              // append row
+              xlsDataBuffer.push(data);
+
+              // reached the limit of rows per file ?
+              if (xlsDataBuffer.length >= SHEET_LIMITS.XLS.MAX_ROWS) {
+                // close file
+                sheetHandler.process
+                  .finalize()
+                  .then(() => {
+                    // rename file
+                    fs.renameSync(
+                      sheetHandler.filePath,
+                      `${sheetHandler.filePath}_${sheetHandler.process.fileNo}`
+                    );
+
+                    // create new workbook
+                    sheetHandler.process.fileNo++;
+
+                    // initialize workbook file
+                    initializeXls();
+
+                    // set columns for the new file
+                    // - not really necessary to again, but for consistency sake..and since it not much of a fuss
+                    setColumns();
+
+                    // finished
+                    resolve();
+                  })
+                  .catch(reject);
+              } else {
                 // finished
                 resolve();
               }
@@ -612,6 +708,10 @@ function exportFilteredModelsList(
 
               // finished
               break;
+
+            // not supported
+            default:
+              throw new Error('Export type not supported');
           }
         });
       };
@@ -619,24 +719,93 @@ function exportFilteredModelsList(
       // close stream depending of export type
       // - must return promise
       const finalize = () => {
-        switch (exportType) {
-          case EXPORT_TYPE.XLSX:
-            // finalize
-            return finalizeXlsx();
+        // update number of records
+        return sheetHandler
+          .updateExportLog({
+            processedNo: sheetHandler.processedNo,
+            updatedAt: new Date()
+          })
+          .then(() => {
+            switch (exportType) {
+              case EXPORT_TYPE.XLSX:
+                // finalize
+                return xlsxWorkbook.commit();
 
-          case EXPORT_TYPE.CSV:
-            // finalize
-            csvWriteStream.close();
-            return Promise.resolve();
+              case EXPORT_TYPE.XLS:
+                // create workbook for current bulk of data
+                const currentWorkBook = xlsx.utils.book_new();
 
-          case EXPORT_TYPE.JSON:
-            // write json end
-            jsonWriteStream.write(']');
+                // create sheets
+                for (let sheetIndex = 0; sheetIndex < xlsColumnsPerSheet.length; sheetIndex++) {
+                  // get columns
+                  const sheetColumns = xlsColumnsPerSheet[sheetIndex];
 
-            // finalize
-            jsonWriteStream.close();
-            return Promise.resolve();
-        }
+                  // single sheet ?
+                  let rows;
+                  if (xlsColumnsPerSheet.length < 2) {
+                    rows = [
+                      sheetColumns,
+                      ...xlsDataBuffer
+                    ];
+                  } else {
+                    // multiple sheets, must split data
+                    // - append headers
+                    rows = [
+                      sheetColumns
+                    ];
+
+                    // go through rows and retrieve only our columns data
+                    const startColumnsPos = sheetIndex * SHEET_LIMITS.XLS.MAX_COLUMNS;
+                    for (let rowIndex = 0; rowIndex < xlsDataBuffer.length; rowIndex++) {
+                      // get record data
+                      const rowData = xlsDataBuffer[rowIndex];
+                      rows.push(
+                        rowData.slice(
+                          startColumnsPos,
+                          startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
+                        )
+                      );
+                    }
+                  }
+
+                  // write sheet
+                  xlsx.utils.book_append_sheet(
+                    currentWorkBook,
+                    xlsx.utils.aoa_to_sheet(rows),
+                    `Data ${sheetIndex + 1}`
+                  );
+                }
+
+                // write file
+                xlsx.writeFile(
+                  currentWorkBook,
+                  sheetHandler.filePath, {
+                    type: 'buffer',
+                    bookType: 'biff8'
+                  }
+                );
+
+                // finished
+                return Promise.resolve();
+
+              case EXPORT_TYPE.CSV:
+                // finalize
+                csvWriteStream.close();
+                return Promise.resolve();
+
+              case EXPORT_TYPE.JSON:
+                // write json end
+                jsonWriteStream.write(']');
+
+                // finalize
+                jsonWriteStream.close();
+                return Promise.resolve();
+
+              // not supported
+              default:
+                throw new Error('Export type not supported');
+            }
+          });
       };
 
       // finished
@@ -2372,6 +2541,9 @@ function exportFilteredModelsList(
                   return Promise.resolve();
                 }
 
+                // processed
+                sheetHandler.processedNo++;
+
                 // get record data
                 const record = recordData.records[recordData.order[recordIndex]];
 
@@ -2489,7 +2661,6 @@ function exportFilteredModelsList(
               return nextRecord()
                 .then(() => {
                   // update export log
-                  sheetHandler.processedNo += recordData.order.length;
                   return sheetHandler.updateExportLog({
                     processedNo: sheetHandler.processedNo,
                     updatedAt: new Date()
