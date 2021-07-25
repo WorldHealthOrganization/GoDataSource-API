@@ -11,6 +11,7 @@ const MongoDBHelper = require('./mongoDBHelper');
 const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
+const archiver = require('archiver');
 
 // default language - in case we don't have user language
 // - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
@@ -46,8 +47,12 @@ const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 // spreadsheet limits
 const SHEET_LIMITS = {
   XLSX: {
-    MAX_COLUMNS: 16000,
-    MAX_ROWS: 100
+    MAX_COLUMNS: config && config.export && config.export.xlsx && config.export.xlsx.maxColumnsPerSheet ?
+      config.export.xlsx.maxColumnsPerSheet :
+      16000,
+    MAX_ROWS: config && config.export && config.export.xlsx && config.export.xlsx.maxRowsPerFile ?
+      config.export.xlsx.maxRowsPerFile :
+      1000000
   }
 };
 
@@ -347,9 +352,17 @@ function exportFilteredModelsList(
       const exportLogId = uuid.v4();
       const filePath = path.resolve(tmp.tmpdir, `${exportLogId}.${exportType}`);
 
+      // initialize workbook file
+      let workbook, worksheets;
+      const initializeXlsx = () => {
+        // workbook
+        workbook = new excel.stream.xlsx.WorkbookWriter({
+          filename: filePath
+        });
+      } ;
+
       // initialize object needed by each type
       const exportIsNonFlat = NON_FLAT_TYPES.includes(exportType);
-      let workbook, worksheets;
       let csvWriteStream, jsonWriteStream, jsonWroteFirstRow;
       let mimeType;
       switch (exportType) {
@@ -357,10 +370,8 @@ function exportFilteredModelsList(
           // set mime type
           mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-          // workbook
-          workbook = new excel.stream.xlsx.WorkbookWriter({
-            filename: filePath
-          });
+          // initialize workbook file
+          initializeXlsx();
 
           // finished
           break;
@@ -412,9 +423,6 @@ function exportFilteredModelsList(
         default:
           throw new Error('Export type not supported');
       }
-
-      // header columns will be filled later when we have data
-      // COLUMNS will be added in a later step
 
       // set columns depending of export type
       const setColumns = () => {
@@ -472,36 +480,80 @@ function exportFilteredModelsList(
         }
       };
 
+      // close workbook file
+      const finalizeXlsx = () => {
+        return workbook.commit();
+      } ;
+
       // add row depending of export type
       // - returns a promise: wait for data to be written
+      let addRowCounted = 0;
       const addRow = (data) => {
         return new Promise((resolve, reject) => {
           switch (exportType) {
             case EXPORT_TYPE.XLSX:
               // add row
-              // - must split into sheets if there are more columns than we are allowed to export per sheet ?
-              if (sheetHandler.columns.headerColumns.length <= SHEET_LIMITS.XLSX.MAX_COLUMNS) {
-                // does commit wait for stream to flush
-                // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-                worksheets[0].addRow(data).commit();
-              } else {
-                // append data for each sheet
-                const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
-                for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
-                  // set data per sheet
-                  const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
-
+              const actualAddRow = () => {
+                // - must split into sheets if there are more columns than we are allowed to export per sheet ?
+                if (sheetHandler.columns.headerColumns.length <= SHEET_LIMITS.XLSX.MAX_COLUMNS) {
                   // does commit wait for stream to flush
                   // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-                  worksheets[sheetIndex].addRow(data.slice(
-                    startColumnsPos,
-                    startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
-                  )).commit();
-                }
-              }
+                  worksheets[0].addRow(data).commit();
+                } else {
+                  // append data for each sheet
+                  const requiredNoOfSheets = Math.floor(sheetHandler.columns.headerColumns.length / SHEET_LIMITS.XLSX.MAX_COLUMNS) + 1;
+                  for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
+                    // set data per sheet
+                    const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
 
-              // finished
-              resolve();
+                    // does commit wait for stream to flush
+                    // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
+                    worksheets[sheetIndex].addRow(data.slice(
+                      startColumnsPos,
+                      startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
+                    )).commit();
+                  }
+                }
+              };
+
+              // reached the limit of rows per file ?
+              addRowCounted++;
+              if (addRowCounted >= SHEET_LIMITS.XLSX.MAX_ROWS) {
+                // reset row count
+                addRowCounted = 0;
+
+                // closed file
+                finalizeXlsx()
+                  .then(() => {
+                    // rename file
+                    fs.renameSync(
+                      sheetHandler.filePath,
+                      `${sheetHandler.filePath}_${sheetHandler.process.fileNo}`
+                    );
+
+                    // create new workbook
+                    sheetHandler.process.fileNo++;
+
+                    // initialize workbook file
+                    initializeXlsx();
+
+                    // set columns for the new file
+                    setColumns();
+
+                    // write row
+                    actualAddRow();
+
+                    // finished
+                    resolve();
+                  })
+                  .catch(reject);
+              } else {
+                // write row
+                actualAddRow();
+
+                // finished
+                resolve();
+              }
 
               // finished
               break;
@@ -570,7 +622,7 @@ function exportFilteredModelsList(
         switch (exportType) {
           case EXPORT_TYPE.XLSX:
             // finalize
-            return workbook.commit();
+            return finalizeXlsx();
 
           case EXPORT_TYPE.CSV:
             // finalize
@@ -609,6 +661,7 @@ function exportFilteredModelsList(
 
         // process
         process: {
+          fileNo: 1,
           exportIsNonFlat,
           setColumns,
           addRow,
@@ -679,6 +732,21 @@ function exportFilteredModelsList(
       return Promise.resolve();
     };
 
+    // delete secondary temporary files
+    const deleteSecondaryFiles = (basePath) => {
+      // check if there are further files to delete
+      for (let fileIndex = 1; fileIndex <= sheetHandler.process.fileNo; fileIndex++) {
+        const secondaryFile = `${basePath}_${fileIndex}`;
+        if (fs.existsSync(secondaryFile)) {
+          try {
+            fs.unlinkSync(secondaryFile);
+          } catch (e) {
+            // NOTHING
+          }
+        }
+      }
+    };
+
     // delete file
     const deleteTemporaryFile = () => {
       return Promise.resolve()
@@ -686,17 +754,28 @@ function exportFilteredModelsList(
           // temporary file was initialized ?
           if (
             sheetHandler &&
-            sheetHandler.filePath &&
-            fs.existsSync(sheetHandler.filePath)
+            sheetHandler.filePath
           ) {
-            fs.unlinkSync(sheetHandler.filePath);
+            // main file
+            if (fs.existsSync(sheetHandler.filePath)) {
+              try {
+                fs.unlinkSync(sheetHandler.filePath);
+              } catch (e) {
+                // NOTHING
+              }
+            }
+
+            // check if there are further files to delete
+            deleteSecondaryFiles(sheetHandler.filePath);
+
+            // reset
             sheetHandler.filePath = null;
           }
         });
     };
 
     // encrypt exported file
-    const encryptFile = () => {
+    const encryptFiles = () => {
       // do we need to encrypt ?
       if (!encryptPassword) {
         return Promise.resolve();
@@ -729,6 +808,85 @@ function exportFilteredModelsList(
             sheetHandler.filePath
           );
         });
+    };
+
+    // zip multiple files
+    const zipIfMultipleFiles = () => {
+      // single file ?
+      if (sheetHandler.process.fileNo < 2) {
+        return Promise.resolve();
+      }
+
+      // multiple files
+      try {
+        // rename main file to match the rest
+        // - main file is actually the last one in the order of files
+        fs.renameSync(
+          sheetHandler.filePath,
+          `${sheetHandler.filePath}_${sheetHandler.process.fileNo}`
+        );
+
+        // update file path to zip
+        const zipExtension = 'zip';
+        const oldFilePath = sheetHandler.filePath;
+        sheetHandler.filePath = path.resolve(tmp.tmpdir, `${sheetHandler.exportLogId}.${zipExtension}`);
+
+        // start archiving
+        return sheetHandler
+          .updateExportLog({
+            statusStep: 'LNG_STATUS_STEP_ARCHIVE',
+            extension: zipExtension,
+            mimeType: 'application/zip',
+            updatedAt: new Date()
+          })
+          .then(() => {
+            // handle archive async
+            return new Promise((resolve, reject) => {
+              try {
+                // initialize output
+                const output = fs.createWriteStream(sheetHandler.filePath);
+
+                // initialize archived
+                const archive = archiver('zip');
+
+                // listen for all archive data to be written
+                // 'close' event is fired only when a file descriptor is involved
+                output.on('close', function () {
+                  // cleanup
+                  // - remove files that were archived
+                  deleteSecondaryFiles(oldFilePath);
+
+                  // finished
+                  resolve();
+                });
+
+                // archiving errors
+                archive.on('error', function (err) {
+                  reject(err);
+                });
+
+                // pipe archive data to the output file
+                archive.pipe(output);
+
+                // append files
+                for (let fileIndex = 1; fileIndex <= sheetHandler.process.fileNo; fileIndex++) {
+                  archive.file(
+                    `${oldFilePath}_${fileIndex}`, {
+                      name: `${fileIndex}.${exportType}`
+                    }
+                  );
+                }
+
+                // wait for streams to complete
+                archive.finalize();
+              } catch (err) {
+                reject(err);
+              }
+            });
+          });
+      } catch (err) {
+        return Promise.reject(err);
+      }
     };
 
     // retrieve mongo db connection - since this export will always run in a worker
@@ -2398,7 +2556,8 @@ function exportFilteredModelsList(
         // drop temporary collection since we finished the export and we don't need it anymore
         return dropTemporaryCollection();
       })
-      .then(encryptFile)
+      .then(encryptFiles)
+      .then(zipIfMultipleFiles)
       .then(() => {
         // finished exporting data
         return sheetHandler.updateExportLog({

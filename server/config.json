@@ -221,6 +221,10 @@
     "batchSize": 7000,
     "locationFindBatchSize": 1000,
     "saveFilter": false,
-    "saveAggregateFilter": false
+    "saveAggregateFilter": false,
+    "xlsx": {
+      "maxColumnsPerSheet": 16000,
+      "maxRowsPerFile": 1000000
+    }
   }
 }

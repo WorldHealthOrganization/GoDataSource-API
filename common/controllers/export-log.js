@@ -34,14 +34,16 @@ module.exports = function (ExportLog) {
 
     // throw error if file doesn't exist
     if (!fs.existsSync(filePath)) {
-      callback(apiError.getError('FILE_NOT_FOUND', {
-        contentType: 'JSON',
-        details: 'File not found'
-      }));
+      return callback(apiError.getError('FILE_NOT_FOUND'));
     }
 
     // prepare for file reading
     const fileStream = fs.createReadStream(filePath);
+
+    // This catches any errors that happen while creating the readable stream (usually invalid names)
+    fileStream.on('error', function () {
+      callback(apiError.getError('FILE_NOT_FOUND'));
+    });
 
     // remove after download
     fileStream.on('end', () => {
