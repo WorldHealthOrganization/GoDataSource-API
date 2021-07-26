@@ -8,6 +8,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const WorkerRunner = require('./../../components/workerRunner');
 
 module.exports = function (Outbreak) {
   /**
@@ -376,10 +377,28 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    // const self = this;
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // prefilter
     app.models.relationship
       .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
+      .then((filter) => {
         // if encrypt password is not valid, remove it
         if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
           encryptPassword = null;
@@ -390,123 +409,158 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        // export list of relationships
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.relationship,
-          {},
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'relationship',
+            modelName: app.models.relationship.modelName,
+            scopeQuery: app.models.relationship.definition.settings.scope,
+            arrayProps: app.models.relationship.arrayProps,
+            fieldLabelsMap: app.models.relationship.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.relationship.exportFieldsGroup,
+            exportFieldsOrder: app.models.relationship.exportFieldsOrder,
+            locationFields: app.models.relationship.locationFields
+          },
           filter,
           exportType,
-          'Relationship List',
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          options,
-          function (results) {
-            // construct unique list of persons that we need to retrieve
-            let personIds = {};
-            results.forEach((relationship) => {
-              if (
-                relationship.persons &&
-                relationship.persons.length > 1
-              ) {
-                personIds[relationship.persons[0].id] = true;
-                personIds[relationship.persons[1].id] = true;
-              }
-            });
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: undefined,
+            useQuestionVariable: false,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          }
+        );
 
-            // flip object to array
-            personIds = Object.keys(personIds);
-
-            // start with a resolved promise (so we can link others)
-            let buildQuery = Promise.resolve();
-
-            // retrieve list of persons
-            const mappedPersons = {};
-            if (!_.isEmpty(personIds)) {
-              buildQuery = app.models.person
-                .rawFind({
-                  id: {
-                    inq: personIds
-                  }
-                })
-                .then((personRecords) => {
-                  // map list of persons ( ID => persons model )
-                  personRecords.forEach((personData) => {
-                    mappedPersons[personData.id] = personData;
-                  });
-                });
-            }
-
-            // attach persons to the list of relationships
-            return buildQuery
-              .then(() => {
-                // retrieve dictionary
-                return new Promise(function (resolve, reject) {
-                  // load context user
-                  const contextUser = app.utils.remote.getUserFromOptions(options);
-
-                  // load user language dictionary
-                  app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-                    // handle errors
-                    if (error) {
-                      return reject(error);
-                    }
-
-                    // finished
-                    resolve(dictionary);
-                  });
-                });
-              })
-              .then((dictionary) => {
-                // add source & target objects
-                results.forEach((relationship) => {
-                  // map source & target
-                  if (
-                    relationship.persons &&
-                    relationship.persons.length > 1
-                  ) {
-                    // retrieve person models
-                    const firstPerson = mappedPersons[relationship.persons[0].id];
-                    const secondPerson = mappedPersons[relationship.persons[1].id];
-                    if (
-                      firstPerson &&
-                      secondPerson
-                    ) {
-                      // attach target
-                      relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
-                      relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
-                    } else {
-                      // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
-                      relationship.sourcePerson = {};
-                      relationship.targetPerson = {};
-                    }
-                  }
-
-                  // add source and target flags
-                  relationship.sourcePerson.source = true;
-                  relationship.targetPerson.target = true;
-
-                  // translate data
-                  if (relationship.sourcePerson.gender) {
-                    relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
-                  }
-                  if (relationship.targetPerson.gender) {
-                    relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
-                  }
-                  if (relationship.sourcePerson.type) {
-                    relationship.sourcePerson.type = dictionary.getTranslation(relationship.sourcePerson.type);
-                  }
-                  if (relationship.targetPerson.type) {
-                    relationship.targetPerson.type = dictionary.getTranslation(relationship.targetPerson.type);
-                  }
-                });
-
-                // return results once we map everything we need
-                return results;
-              });
-          },
-          callback
+        // // export list of relationships
+        // app.utils.remote.helpers.exportFilteredModelsList(
+        //   app,
+        //   app.models.relationship,
+        //   {},
+        //   filter,
+        //   exportType,
+        //   'Relationship List',
+        //   encryptPassword,
+        //   anonymizeFields,
+        //   fieldsGroupList,
+        //   options,
+        //   function (results) {
+        //     // construct unique list of persons that we need to retrieve
+        //     let personIds = {};
+        //     results.forEach((relationship) => {
+        //       if (
+        //         relationship.persons &&
+        //         relationship.persons.length > 1
+        //       ) {
+        //         personIds[relationship.persons[0].id] = true;
+        //         personIds[relationship.persons[1].id] = true;
+        //       }
+        //     });
+        //
+        //     // flip object to array
+        //     personIds = Object.keys(personIds);
+        //
+        //     // start with a resolved promise (so we can link others)
+        //     let buildQuery = Promise.resolve();
+        //
+        //     // retrieve list of persons
+        //     const mappedPersons = {};
+        //     if (!_.isEmpty(personIds)) {
+        //       buildQuery = app.models.person
+        //         .rawFind({
+        //           id: {
+        //             inq: personIds
+        //           }
+        //         })
+        //         .then((personRecords) => {
+        //           // map list of persons ( ID => persons model )
+        //           personRecords.forEach((personData) => {
+        //             mappedPersons[personData.id] = personData;
+        //           });
+        //         });
+        //     }
+        //
+        //     // attach persons to the list of relationships
+        //     return buildQuery
+        //       .then(() => {
+        //         // retrieve dictionary
+        //         return new Promise(function (resolve, reject) {
+        //           // load context user
+        //           const contextUser = app.utils.remote.getUserFromOptions(options);
+        //
+        //           // load user language dictionary
+        //           app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
+        //             // handle errors
+        //             if (error) {
+        //               return reject(error);
+        //             }
+        //
+        //             // finished
+        //             resolve(dictionary);
+        //           });
+        //         });
+        //       })
+        //       .then((dictionary) => {
+        //         // add source & target objects
+        //         results.forEach((relationship) => {
+        //           // map source & target
+        //           if (
+        //             relationship.persons &&
+        //             relationship.persons.length > 1
+        //           ) {
+        //             // retrieve person models
+        //             const firstPerson = mappedPersons[relationship.persons[0].id];
+        //             const secondPerson = mappedPersons[relationship.persons[1].id];
+        //             if (
+        //               firstPerson &&
+        //               secondPerson
+        //             ) {
+        //               // attach target
+        //               relationship.sourcePerson = relationship.persons[0].source ? firstPerson : secondPerson;
+        //               relationship.targetPerson = relationship.persons[0].target ? firstPerson : secondPerson;
+        //             } else {
+        //               // relationship doesn't have source & target ( it should've been deleted ( cascade ... ) )
+        //               relationship.sourcePerson = {};
+        //               relationship.targetPerson = {};
+        //             }
+        //           }
+        //
+        //           // add source and target flags
+        //           relationship.sourcePerson.source = true;
+        //           relationship.targetPerson.target = true;
+        //
+        //           // translate data
+        //           if (relationship.sourcePerson.gender) {
+        //             relationship.sourcePerson.gender = dictionary.getTranslation(relationship.sourcePerson.gender);
+        //           }
+        //           if (relationship.targetPerson.gender) {
+        //             relationship.targetPerson.gender = dictionary.getTranslation(relationship.targetPerson.gender);
+        //           }
+        //           if (relationship.sourcePerson.type) {
+        //             relationship.sourcePerson.type = dictionary.getTranslation(relationship.sourcePerson.type);
+        //           }
+        //           if (relationship.targetPerson.type) {
+        //             relationship.targetPerson.type = dictionary.getTranslation(relationship.targetPerson.type);
+        //           }
+        //         });
+        //
+        //         // return results once we map everything we need
+        //         return results;
+        //       });
+        //   },
+        //   callback
+        // );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
         );
       })
       .catch(callback);

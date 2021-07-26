@@ -2546,15 +2546,6 @@ const removeFilterOptions = function (filter, options) {
   return filter;
 };
 
-const attachCustomDeleteFilterOption = function (filter) {
-  filter = filter || {};
-  filter.where = filter.where || {};
-  if (filter.deleted) {
-    filter.where.includeDeletedRecords = true;
-  }
-  return filter;
-};
-
 const getMaximumLengthForArrays = function (items, props) {
   const propsLengths = {};
   props.forEach(prop => {
@@ -2965,7 +2956,6 @@ Object.assign(module.exports, {
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,
   removeFilterOptions: removeFilterOptions,
-  attachCustomDeleteFilterOption: attachCustomDeleteFilterOption,
   getMaximumLengthForArrays: getMaximumLengthForArrays,
   getCaptchaConfig: getCaptchaConfig,
   handleActionsInBatches: handleActionsInBatches,

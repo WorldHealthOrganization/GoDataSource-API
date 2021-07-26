@@ -5592,10 +5592,10 @@
         "translation": "السن"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "السن (بالسنوات)"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "السن/بالأشهر"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "التصنيف"
@@ -5716,10 +5716,10 @@
         "translation": "عمر الفرد يمكنك تحديده بسنوات أو أشهر.  لا ينبغي استخدام الشهور إلا للرضع الذين تقل أعمارهم عن عام واحد "
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "السن/بالأشهر"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "السن (بالسنوات)"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "معرف هوية فريد للحالة"

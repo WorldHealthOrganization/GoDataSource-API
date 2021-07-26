@@ -23,16 +23,17 @@ module.exports = function (Model) {
 
   /**
    * Find using connector
-   * @param query
+   * @param filter
    * @param {object} [options]
    * @param {number} [options.skip]
    * @param {number} [options.limit]
    * @param {object} [options.includeDeletedRecords]
    * @return {Promise<number>}
    */
-  Model.rawCountDocuments = function (query, options = {}) {
+  Model.rawCountDocuments = function (filter, options = {}) {
     options = options || {};
-    query = query || {};
+    filter = filter || {};
+    let query = filter.where || {};
 
     // set query id and start timer (for logging purposes)
     const queryId = uuid.v4();
@@ -54,7 +55,10 @@ module.exports = function (Model) {
     query = app.utils.remote.convertLoopbackFilterToMongo(query);
 
     // where include ?
-    if (query.includeDeletedRecords) {
+    if (
+      query.includeDeletedRecords ||
+      filter.deleted
+    ) {
       delete query.includeDeletedRecords;
       options.includeDeletedRecords = true;
     }

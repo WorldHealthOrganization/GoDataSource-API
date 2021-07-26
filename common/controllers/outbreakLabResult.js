@@ -6,7 +6,6 @@
  */
 
 const app = require('../../server/server');
-const genericHelpers = require('../../components/helpers');
 
 module.exports = function (Outbreak) {
   /**
@@ -84,11 +83,8 @@ module.exports = function (Outbreak) {
             neq: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           };
         }
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.labResult.rawCountDocuments(filter.where);
+        return app.models.labResult.rawCountDocuments(filter);
       })
       .then(function (followUps) {
         callback(null, followUps);
@@ -113,8 +109,7 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter, options)
       .then(filter => {
         // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-        return app.models.labResult.rawCountDocuments(filter.where);
+        return app.models.labResult.rawCountDocuments(filter);
       })
       .then(result => callback(null, result))
       .catch(callback);
@@ -137,8 +132,7 @@ module.exports = function (Outbreak) {
       .preFilterForOutbreak(this, filter, options)
       .then(filter => {
         // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-        return app.models.labResult.rawCountDocuments(filter.where);
+        return app.models.labResult.rawCountDocuments(filter);
       })
       .then(result => callback(null, result))
       .catch(callback);

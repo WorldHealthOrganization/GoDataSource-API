@@ -5592,10 +5592,10 @@
         "translation": "Edad"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Idade / Años"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Idade / Mes"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Clasificación"
@@ -5716,10 +5716,10 @@
         "translation": "La edad del individuo, puede especificar en años o meses. Debe usar meses solo para bebés menores de 1 año"
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Edad/Meses"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Edad/Años"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "UID del caso"

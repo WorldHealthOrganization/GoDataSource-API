@@ -112,10 +112,7 @@ module.exports = function (Outbreak) {
         .then(updatedFilter => {
           updatedFilter && (filter.where = updatedFilter);
 
-          // handle custom filter options
-          filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
-          return app.models.event.rawCountDocuments(filter.where);
+          return app.models.event.rawCountDocuments(filter);
         });
     }
   };

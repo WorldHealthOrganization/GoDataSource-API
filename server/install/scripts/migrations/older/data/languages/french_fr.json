@@ -5595,10 +5595,10 @@
         "translation": "Age"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Années)"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Mois)"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Classification"
@@ -5719,10 +5719,10 @@
         "translation": ""
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Mois)"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Années)"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": ""

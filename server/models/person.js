@@ -1456,7 +1456,9 @@ module.exports = function (Person) {
         updatedFilter && (where = updatedFilter);
 
         // retrieve data
-        return Person.rawCountDocuments(where);
+        return Person.rawCountDocuments({
+          where
+        });
       });
   };
 

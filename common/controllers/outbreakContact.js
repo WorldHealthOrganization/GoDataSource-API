@@ -2120,11 +2120,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.contact.rawCountDocuments(filter.where);
+        return app.models.contact.rawCountDocuments(filter);
       })
       .then(function (contacts) {
         callback(null, contacts);

@@ -5592,10 +5592,10 @@
         "translation": "Возраст"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Возраст (годы)"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Возраст (месяцы)"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Классификация"
@@ -5716,10 +5716,10 @@
         "translation": "Вы можете указать возраст человека в годах или месяцах. Возраст в месяцах указывается только для детей до 1 года"
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Возраст (месяцы)"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Возраст (годы)"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "Уникальный идентификатор случая"

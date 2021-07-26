@@ -146,11 +146,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.contactOfContact.rawCountDocuments(filter.where);
+        return app.models.contactOfContact.rawCountDocuments(filter);
       })
       .then(function (records) {
         callback(null, records);

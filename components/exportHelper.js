@@ -1747,17 +1747,28 @@ function exportFilteredModelsList(
           }
 
           // aggregate filter
-          const aggregateFilter = [
-            {
+          const aggregateFilter = [];
+
+          // append where
+          if (!_.isEmpty(dataFilter.where)) {
+            aggregateFilter.push({
               $match: dataFilter.where
-            }, {
+            });
+          }
+
+          // append sort
+          if (!_.isEmpty(dataFilter.sort)) {
+            aggregateFilter.push({
               $sort: dataFilter.sort
-            }, {
-              $project: project
-            }, {
-              $out: sheetHandler.temporaryCollectionName
-            }
-          ];
+            });
+          }
+
+          // append rest...
+          aggregateFilter.push({
+            $project: project
+          }, {
+            $out: sheetHandler.temporaryCollectionName
+          });
 
           // update export log in case we need the aggregate filter
           return sheetHandler
@@ -1956,11 +1967,6 @@ function exportFilteredModelsList(
                 [] :
                 Object.keys(modelOptions.arrayProps);
 
-              // nothing to retrieve ?
-              if (arrayProps.length < 1) {
-                return;
-              }
-
               // go through array fields and construct query to determine maximum number of records
               arrayProps.forEach((property) => {
                 // array field value
@@ -1990,6 +1996,12 @@ function exportFilteredModelsList(
                     };
                   }
                 });
+              }
+
+              // nothing to retrieve ?
+              // - 1 is for the _id
+              if (Object.keys(projectMax).length < 2) {
+                return;
               }
 
               // determine maximum number of items for each array field
@@ -2279,8 +2291,8 @@ function exportFilteredModelsList(
                   let parentProperty, parentPropertyTokenTranslation;
                   if (propertyOfAnObjectIndex > -1) {
                     parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
-                    parentPropertyTokenTranslation = !sheetHandler.useDbColumns && parentProperty && sheetHandler.dictionaryMap[parentProperty] ?
-                      sheetHandler.dictionaryMap[parentProperty] : (
+                    parentPropertyTokenTranslation = !sheetHandler.useDbColumns && parentProperty && sheetHandler.columns.labels[parentProperty] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[parentProperty]] ?
+                      sheetHandler.dictionaryMap[sheetHandler.columns.labels[parentProperty]] : (
                         sheetHandler.useDbColumns ?
                           parentProperty :
                           undefined

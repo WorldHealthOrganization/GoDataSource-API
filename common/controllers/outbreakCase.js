@@ -85,11 +85,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.case.rawCountDocuments(filter.where);
+        return app.models.case.rawCountDocuments(filter);
       })
       .then(function (cases) {
         callback(null, cases);
@@ -333,26 +330,32 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, fieldsGroupList, options, callback) {
-    const self = this;
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+
     // parse useQuestionVariable query param
-    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
-    // if found, remove it form main query
+    let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
       useDbColumns = filter.where.useDbColumns;
       delete filter.where.useDbColumns;
     }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
     if (filter.where.hasOwnProperty('dontTranslateValues')) {
       dontTranslateValues = filter.where.dontTranslateValues;
       delete filter.where.dontTranslateValues;
     }
 
+    // prefilter
     app.models.case.preFilterForOutbreak(this, filter, options)
       .then((filter) => {
         // if encrypt password is not valid, remove it
@@ -365,37 +368,32 @@ module.exports = function (Outbreak) {
           anonymizeFields = [];
         }
 
-        let exportOptions = {
-          userId: _.get(options, 'accessToken.userId'),
-          outbreakId: self.id,
-          questionnaire: self.caseInvestigationTemplate.toJSON(),
-          useQuestionVariable: useQuestionVariable,
-          useDbColumns,
-          dontTranslateValues,
-          contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-        };
-
-        // get logged in user from request options in order to create author fields
-        const CaseModel = app.models.case;
-        let modelOptions = {
-          collectionName: 'person',
-          modelName: CaseModel.modelName,
-          scopeQuery: CaseModel.definition.settings.scope,
-          arrayProps: CaseModel.arrayProps,
-          fieldLabelsMap: CaseModel.fieldLabelsMap,
-          exportFieldsGroup: CaseModel.exportFieldsGroup,
-          exportFieldsOrder: CaseModel.exportFieldsOrder,
-          locationFields: CaseModel.locationFields
-        };
-
+        // export
         return WorkerRunner.helpers.exportFilteredModelsList(
-          modelOptions,
+          {
+            collectionName: 'person',
+            modelName: app.models.case.modelName,
+            scopeQuery: app.models.case.definition.settings.scope,
+            arrayProps: app.models.case.arrayProps,
+            fieldLabelsMap: app.models.case.fieldLabelsMap,
+            exportFieldsGroup: app.models.case.exportFieldsGroup,
+            exportFieldsOrder: app.models.case.exportFieldsOrder,
+            locationFields: app.models.case.locationFields
+          },
           filter,
           exportType,
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          exportOptions
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.caseInvestigationTemplate.toJSON(),
+            useQuestionVariable: useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          }
         );
       })
       .then((exportData) => {

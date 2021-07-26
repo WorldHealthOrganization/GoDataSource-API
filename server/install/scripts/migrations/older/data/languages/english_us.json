@@ -5592,10 +5592,10 @@
         "translation": "Age"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age / Years"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age / Months"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Classification"
@@ -5716,10 +5716,10 @@
         "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age / Months"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age / Years"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "Case UID"
