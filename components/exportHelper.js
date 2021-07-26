@@ -408,18 +408,18 @@ function exportFilteredModelsList(
       };
 
       // initialize workbook file - PDF
-      let pdfDoc, pdfStream, pdfTable, pdfDataBuffer;
+      let pdfDoc, pdfWriteStream, pdfTable, pdfDataBuffer;
       const initializePDF = () => {
         // create new pdf document
         pdfDoc = new pdfkit(PDF_CONFIG);
 
         // output
-        pdfStream = fs.createWriteStream(filePath);
-        pdfDoc.pipe(pdfStream);
+        pdfWriteStream = fs.createWriteStream(filePath);
+        pdfDoc.pipe(pdfWriteStream);
 
         // handle errors
         // - for now just throw them further
-        pdfStream.on('error', (err) => {
+        pdfWriteStream.on('error', (err) => {
           throw err;
         });
 
@@ -1104,12 +1104,12 @@ function exportFilteredModelsList(
         return new Promise((resolve, reject) => {
 
           // stream error - not really relevant since we set it this ...far into the process
-          pdfStream.on('error', function (err) {
+          pdfWriteStream.on('error', function (err) {
             reject(err);
           });
 
           // wait for stream to finish writing then finalize pdf
-          pdfStream.on('finish', function () {
+          pdfWriteStream.on('finish', function () {
             resolve();
           });
 
