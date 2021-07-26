@@ -102,7 +102,8 @@ module.exports = function (ContactOfContact) {
     'vaccinesReceived[].vaccine': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE',
     'vaccinesReceived[].date': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_STATUS',
-    'pregnancyStatus': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS'
+    'pregnancyStatus': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
+    'responsibleUserId': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID'
   });
 
   // map language token labels for export fields group
@@ -156,7 +157,8 @@ module.exports = function (ContactOfContact) {
         'dateOfBurial',
         'dateBecomeContact',
         'transferRefused',
-        'dateBecomeCase'
+        'dateBecomeCase',
+        'responsibleUserId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {

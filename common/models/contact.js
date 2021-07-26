@@ -112,6 +112,7 @@ module.exports = function (Contact) {
     'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
+    'responsibleUserId': 'LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -174,7 +175,8 @@ module.exports = function (Contact) {
         'outcomeId',
         'dateOfOutcome',
         'dateBecomeContact',
-        'dateBecomeCase'
+        'dateBecomeCase',
+        'responsibleUserId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {

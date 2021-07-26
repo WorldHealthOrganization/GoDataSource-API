@@ -244,7 +244,8 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
             outbreakId: 1,
             addresses: 1,
             followUp: 1,
-            followUpTeamId: 1
+            followUpTeamId: 1,
+            responsibleUserId: 1
           }
         });
     });
@@ -276,7 +277,8 @@ module.exports.getContactFollowups = function (startDate, endDate, contactId) {
         date: 1,
         personId: 1,
         statusId: 1,
-        teamId: 1
+        teamId: 1,
+        responsibleUserId: 1
       }
     });
 };
@@ -666,7 +668,8 @@ module.exports.generateFollowupsForContact = function (
         targeted: targeted,
         // split the follow ups work equally across teams
         teamId: getTeamIdToAssign(followUpDate),
-        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED',
+        responsibleUserId: contact.responsibleUserId
       }, contact);
 
       // do we need to update this follow-ups ?
@@ -690,7 +693,8 @@ module.exports.generateFollowupsForContact = function (
         targeted: targeted,
         // split the follow ups work equally across teams
         teamId: getTeamIdToAssign(followUpDate),
-        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED'
+        statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED',
+        responsibleUserId: contact.responsibleUserId
       }, contact);
 
       // do we need to create this follow-ups ?
