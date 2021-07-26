@@ -90,6 +90,9 @@ const PDF_CONFIG = {
   compress: false
 };
 
+// precompile regex replace new lines expression
+const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -3004,7 +3007,7 @@ function exportFilteredModelsList(
                     typeof cellValue === 'string'
                   ) {
                     cellValue = cellValue.replace(
-                      /\r?\n|\r/g,
+                      REPLACE_NEW_LINE_EXPR,
                       ' '
                     );
                   }
