@@ -6,13 +6,15 @@ const csvStringify = require('csv-stringify');
 const _ = require('lodash');
 const fs = require('fs');
 const moment = require('moment');
+const archiver = require('archiver');
+const xlsx = require('xlsx');
 const config = require('../server/config');
 const MongoDBHelper = require('./mongoDBHelper');
 const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
-const archiver = require('archiver');
-const xlsx = require('xlsx');
+const pdfkit = require('pdfkit');
+const pdfkitTable = require('voilab-pdf-table');
 
 // default language - in case we don't have user language
 // - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
@@ -37,7 +39,8 @@ const EXPORT_TYPE = {
   XLSX: 'xlsx',
   CSV: 'csv',
   XLS: 'xls',
-  ODS: 'ods'
+  ODS: 'ods',
+  PDF: 'pdf'
 };
 const NON_FLAT_TYPES = [
   EXPORT_TYPE.JSON,
@@ -73,6 +76,18 @@ const SHEET_LIMITS = {
       config.export.ods.maxRowsPerFile :
       25000
   }
+};
+
+// pdf file config
+const PDF_CONFIG = {
+  size: '4A0',
+  widthForPageSize: 6740,
+  autoFirstPage: false,
+  layout: 'landscape',
+  margin: 20,
+  fontSize: 8,
+  lineWidth: 1,
+  compress: false
 };
 
 /**
@@ -392,6 +407,51 @@ function exportFilteredModelsList(
         odsDataBuffer = [];
       };
 
+      // initialize workbook file - PDF
+      let pdfDoc, pdfStream, pdfTable, pdfDataBuffer;
+      const initializePDF = () => {
+        // create new pdf document
+        pdfDoc = new pdfkit(PDF_CONFIG);
+
+        // output
+        pdfStream = fs.createWriteStream(filePath);
+        pdfDoc.pipe(pdfStream);
+
+        // initialize table renderer
+        pdfTable = new pdfkitTable(pdfDoc);
+
+        // set default values for columns
+        pdfTable.setColumnsDefaults({
+          headerBorder: 'B',
+          align: 'left',
+          headerPadding: [2],
+          padding: [2],
+          fill: true
+        });
+
+        // alternate background on rows
+        pdfTable.onCellBackgroundAdd((table, column, row, index) => {
+          if (index % 2 === 0) {
+            table.pdf.fillColor('#ececec');
+          } else {
+            table.pdf.fillColor('#ffffff');
+          }
+        });
+
+        // reset fill color after setting background as the fill color is used for all elements
+        pdfTable.onCellBackgroundAdded(function (table) {
+          table.pdf.fillColor('#000000');
+        });
+
+        // add table header on all pages
+        pdfTable.onPageAdded((tb) => {
+          tb.addHeader();
+        });
+
+        // initialize data buffer
+        pdfDataBuffer = [];
+      };
+
       // initialize object needed by each type
       const exportIsNonFlat = NON_FLAT_TYPES.includes(exportType);
       let csvWriteStream, jsonWriteStream, jsonWroteFirstRow;
@@ -423,6 +483,16 @@ function exportFilteredModelsList(
 
           // initialize workbook file
           initializeOds();
+
+          // finished
+          break;
+
+        case EXPORT_TYPE.PDF:
+          // set mime type
+          mimeType = 'application/pdf';
+
+          // initialize workbook file
+          initializePDF();
 
           // finished
           break;
@@ -560,6 +630,26 @@ function exportFilteredModelsList(
                 }
               }
             }
+
+            // finished
+            break;
+
+          case EXPORT_TYPE.PDF:
+
+            // no need to split ?
+            const tableColumns = sheetHandler.columns.headerColumns.map((column) => {
+              return {
+                id: column.uniqueKeyInCaseOfDuplicate,
+                header: column.header,
+                width: Math.max(50, Math.floor(PDF_CONFIG.widthForPageSize / sheetHandler.columns.headerColumns.length))
+              };
+            });
+
+            // setup columns
+            pdfTable.addColumns(tableColumns);
+
+            // add page with table headers
+            pdfDoc.addPage();
 
             // finished
             break;
@@ -751,6 +841,25 @@ function exportFilteredModelsList(
               // finished
               break;
 
+            case EXPORT_TYPE.PDF:
+
+              // format row
+              const row = {};
+              data.forEach((value, index) => {
+                row[sheetHandler.columns.headerColumns[index].uniqueKeyInCaseOfDuplicate] = value !== undefined && value !== null ?
+                  value.toString() :
+                  '';
+              });
+
+              // append row to buffer
+              pdfDataBuffer.push(row);
+
+              // finished
+              resolve();
+
+              // finished
+              break;
+
             case EXPORT_TYPE.CSV:
               // add row
               csvStringify(
@@ -813,11 +922,189 @@ function exportFilteredModelsList(
         });
       };
 
+      // entire batch added
+      // - must return promise
+      const addedBatch = () => {
+        switch (exportType) {
+          case EXPORT_TYPE.XLSX:
+            // nothing to do
+            return Promise.resolve();
+
+          case EXPORT_TYPE.XLS:
+            // nothing to do
+            return Promise.resolve();
+
+          case EXPORT_TYPE.ODS:
+            // nothing to do
+            return Promise.resolve();
+
+          case EXPORT_TYPE.PDF:
+            // add batch
+            pdfTable.addBody(pdfDataBuffer);
+
+            // empty buffer
+            pdfDataBuffer = [];
+
+            // finished
+            return Promise.resolve();
+
+          case EXPORT_TYPE.CSV:
+            // nothing to do
+            return Promise.resolve();
+
+          case EXPORT_TYPE.JSON:
+            // nothing to do
+            return Promise.resolve();
+
+          // not supported
+          default:
+            throw new Error('Export type not supported');
+        }
+      };
+
+      /**
+       * Finalize Xls
+       */
+      const finalizeXls = () => {
+        // create workbook for current bulk of data
+        const currentWorkBook = xlsx.utils.book_new();
+
+        // create sheets
+        for (let sheetIndex = 0; sheetIndex < xlsColumnsPerSheet.length; sheetIndex++) {
+          // get columns
+          const sheetColumns = xlsColumnsPerSheet[sheetIndex];
+
+          // single sheet ?
+          let rows;
+          if (xlsColumnsPerSheet.length < 2) {
+            rows = [
+              sheetColumns,
+              ...xlsDataBuffer
+            ];
+          } else {
+            // multiple sheets, must split data
+            // - append headers
+            rows = [
+              sheetColumns
+            ];
+
+            // go through rows and retrieve only our columns data
+            const startColumnsPos = sheetIndex * SHEET_LIMITS.XLS.MAX_COLUMNS;
+            for (let rowIndex = 0; rowIndex < xlsDataBuffer.length; rowIndex++) {
+              // get record data
+              const rowData = xlsDataBuffer[rowIndex];
+              rows.push(
+                rowData.slice(
+                  startColumnsPos,
+                  startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
+                )
+              );
+            }
+          }
+
+          // write sheet
+          xlsx.utils.book_append_sheet(
+            currentWorkBook,
+            xlsx.utils.aoa_to_sheet(rows),
+            `Data ${sheetIndex + 1}`
+          );
+        }
+
+        // write file
+        xlsx.writeFile(
+          currentWorkBook,
+          sheetHandler.filePath, {
+            type: 'buffer',
+            bookType: 'biff8'
+          }
+        );
+
+        // finished
+        return Promise.resolve();
+      };
+
+      // finalize ods
+      const finalizeOds = () => {
+        // create workbook for current bulk of data
+        const currentWorkBook = xlsx.utils.book_new();
+
+        // create sheets
+        for (let sheetIndex = 0; sheetIndex < odsColumnsPerSheet.length; sheetIndex++) {
+          // get columns
+          const sheetColumns = odsColumnsPerSheet[sheetIndex];
+
+          // single sheet ?
+          let rows;
+          if (odsColumnsPerSheet.length < 2) {
+            rows = [
+              sheetColumns,
+              ...odsDataBuffer
+            ];
+          } else {
+            // multiple sheets, must split data
+            // - append headers
+            rows = [
+              sheetColumns
+            ];
+
+            // go through rows and retrieve only our columns data
+            const startColumnsPos = sheetIndex * SHEET_LIMITS.ODS.MAX_COLUMNS;
+            for (let rowIndex = 0; rowIndex < odsDataBuffer.length; rowIndex++) {
+              // get record data
+              const rowData = odsDataBuffer[rowIndex];
+              rows.push(
+                rowData.slice(
+                  startColumnsPos,
+                  startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
+                )
+              );
+            }
+          }
+
+          // write sheet
+          xlsx.utils.book_append_sheet(
+            currentWorkBook,
+            xlsx.utils.aoa_to_sheet(rows),
+            `Data ${sheetIndex + 1}`
+          );
+        }
+
+        // write file
+        xlsx.writeFile(
+          currentWorkBook,
+          sheetHandler.filePath, {
+            type: 'buffer',
+            bookType: 'ods'
+          }
+        );
+
+        // finished
+        return Promise.resolve();
+      };
+
+      // finalize pdf
+      const finalizePDF = () => {
+        return new Promise((resolve, reject) => {
+
+          // stream error - not really relevant since we set it this ...far into the process
+          pdfStream.on('error', function (err) {
+            reject(err);
+          });
+
+          // wait for stream to finish writing then finalize pdf
+          pdfStream.on('finish', function () {
+            resolve();
+          });
+
+          // finished adding data, prepare doc to be closed
+          pdfDoc.end();
+        });
+      };
+
       // close stream depending of export type
       // - must return promise
       const finalize = () => {
         // update number of records
-        let currentWorkBook;
         return sheetHandler
           .updateExportLog({
             processedNo: sheetHandler.processedNo,
@@ -830,118 +1117,16 @@ function exportFilteredModelsList(
                 return xlsxWorkbook.commit();
 
               case EXPORT_TYPE.XLS:
-                // create workbook for current bulk of data
-                currentWorkBook = xlsx.utils.book_new();
-
-                // create sheets
-                for (let sheetIndex = 0; sheetIndex < xlsColumnsPerSheet.length; sheetIndex++) {
-                  // get columns
-                  const sheetColumns = xlsColumnsPerSheet[sheetIndex];
-
-                  // single sheet ?
-                  let rows;
-                  if (xlsColumnsPerSheet.length < 2) {
-                    rows = [
-                      sheetColumns,
-                      ...xlsDataBuffer
-                    ];
-                  } else {
-                    // multiple sheets, must split data
-                    // - append headers
-                    rows = [
-                      sheetColumns
-                    ];
-
-                    // go through rows and retrieve only our columns data
-                    const startColumnsPos = sheetIndex * SHEET_LIMITS.XLS.MAX_COLUMNS;
-                    for (let rowIndex = 0; rowIndex < xlsDataBuffer.length; rowIndex++) {
-                      // get record data
-                      const rowData = xlsDataBuffer[rowIndex];
-                      rows.push(
-                        rowData.slice(
-                          startColumnsPos,
-                          startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
-                        )
-                      );
-                    }
-                  }
-
-                  // write sheet
-                  xlsx.utils.book_append_sheet(
-                    currentWorkBook,
-                    xlsx.utils.aoa_to_sheet(rows),
-                    `Data ${sheetIndex + 1}`
-                  );
-                }
-
-                // write file
-                xlsx.writeFile(
-                  currentWorkBook,
-                  sheetHandler.filePath, {
-                    type: 'buffer',
-                    bookType: 'biff8'
-                  }
-                );
-
-                // finished
-                return Promise.resolve();
+                // finalize
+                return finalizeXls();
 
               case EXPORT_TYPE.ODS:
-                // create workbook for current bulk of data
-                currentWorkBook = xlsx.utils.book_new();
+                // finalize
+                return finalizeOds();
 
-                // create sheets
-                for (let sheetIndex = 0; sheetIndex < odsColumnsPerSheet.length; sheetIndex++) {
-                  // get columns
-                  const sheetColumns = odsColumnsPerSheet[sheetIndex];
-
-                  // single sheet ?
-                  let rows;
-                  if (odsColumnsPerSheet.length < 2) {
-                    rows = [
-                      sheetColumns,
-                      ...odsDataBuffer
-                    ];
-                  } else {
-                    // multiple sheets, must split data
-                    // - append headers
-                    rows = [
-                      sheetColumns
-                    ];
-
-                    // go through rows and retrieve only our columns data
-                    const startColumnsPos = sheetIndex * SHEET_LIMITS.ODS.MAX_COLUMNS;
-                    for (let rowIndex = 0; rowIndex < odsDataBuffer.length; rowIndex++) {
-                      // get record data
-                      const rowData = odsDataBuffer[rowIndex];
-                      rows.push(
-                        rowData.slice(
-                          startColumnsPos,
-                          startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
-                        )
-                      );
-                    }
-                  }
-
-                  // write sheet
-                  xlsx.utils.book_append_sheet(
-                    currentWorkBook,
-                    xlsx.utils.aoa_to_sheet(rows),
-                    `Data ${sheetIndex + 1}`
-                  );
-                }
-
-                // write file
-                xlsx.writeFile(
-                  currentWorkBook,
-                  sheetHandler.filePath, {
-                    type: 'buffer',
-                    bookType: 'ods'
-                  }
-                );
-
-                // finished
-                return Promise.resolve();
+              case EXPORT_TYPE.PDF:
+                // finalize
+                return finalizePDF();
 
               case EXPORT_TYPE.CSV:
                 // finalize
@@ -989,6 +1174,7 @@ function exportFilteredModelsList(
           exportIsNonFlat,
           setColumns,
           addRow,
+          addedBatch,
           finalize
         },
 
@@ -2693,7 +2879,7 @@ function exportFilteredModelsList(
 
                 // finished ?
                 if (recordIndex >= recordData.order.length) {
-                  return Promise.resolve();
+                  return sheetHandler.process.addedBatch();
                 }
 
                 // processed
