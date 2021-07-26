@@ -93,6 +93,16 @@ const PDF_CONFIG = {
 // precompile regex replace new lines expression
 const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
 
+// relations types
+const RELATION_TYPE = {
+  HAS_ONE: 'HAS_ONE'
+};
+
+// relations types retrieval mode
+const RELATION_RETRIEVAL_TYPE = {
+  KEY_IN: 'KEY_IN'
+};
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -112,9 +122,142 @@ function exportFilteredModelsList(
   encryptPassword,
   anonymizeFields,
   fieldsGroupList,
-  options
+  options,
+  relations
 ) {
   try {
+    // validate & parse relations
+    const validateAndParseRelations = () => {
+      // no relations to validate ?
+      if (_.isEmpty(relations)) {
+        return;
+      }
+
+      // throw error
+      const throwError = (
+        relationName,
+        details
+      ) => {
+        throw new Error(`Invalid relation "${relationName}" - ${details}`);
+      };
+
+      // go through relations and check that we have the expected data
+      Object.keys(relations).forEach((relationName) => {
+        // get relation data
+        const relationData = relations[relationName];
+
+        // not an object ?
+        if (
+          !relationData ||
+          !_.isObject(relationData)
+        ) {
+          throwError(
+            relationName,
+            'expecting object'
+          );
+        }
+
+        // no type or invalid type ?
+        if (
+          !relationData.type ||
+          RELATION_TYPE[relationData.type] === undefined
+        ) {
+          throwError(
+            relationName,
+            'invalid type'
+          );
+        }
+
+        // validate accordingly to its type
+        switch (relationData.type) {
+          case RELATION_TYPE.HAS_ONE:
+            // must have collection name
+            if (
+              !relationData.collection ||
+              typeof relationData.collection !== 'string'
+            ) {
+              throwError(
+                relationName,
+                `invalid collection name (${typeof relationData.collection})`
+              );
+            }
+
+            // must have project so we force retrieval of only what is necessary
+            if (
+              !relationData.project ||
+              !Array.isArray(relationData.project) ||
+              relationData.project.length < 1
+            ) {
+              throwError(
+                relationName,
+                'invalid project provided'
+              );
+            }
+
+            // must have key
+            if (
+              !relationData.key ||
+              typeof relationData.key !== 'string'
+            ) {
+              throwError(
+                relationName,
+                `invalid key name (${typeof relationData.key})`
+              );
+            }
+
+            // must have keyValue
+            if (
+              !relationData.keyValue ||
+              typeof relationData.keyValue !== 'string'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid key value (${typeof relationData.keyValue})`
+              );
+            } else {
+              // transform to method
+              try {
+                relationData.keyValue = eval(relationData.keyValue);
+              } catch (e) {
+                throwError(
+                  relationName,
+                  'invalid key value method content'
+                );
+              }
+            }
+
+            // after is optional
+            if (
+              relationData.after &&
+              typeof relationData.after !== 'string'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid after (${typeof relationData.after})`
+              );
+            } else {
+              // transform to method
+              try {
+                relationData.after = eval(relationData.after);
+              } catch (e) {
+                throwError(
+                  relationName,
+                  'invalid after method content'
+                );
+              }
+            }
+
+            // finished
+            break;
+        }
+      });
+    };
+
+    // validate & parse relations
+    validateAndParseRelations();
+
     // prepare query filters
     const initializeQueryFilters = () => {
       // filter
@@ -1168,8 +1311,41 @@ function exportFilteredModelsList(
           });
       };
 
-      // finished
+      // format relations
+      const mappedRelations = [];
+      const formattedRelations = [];
+      _.each(
+        relations,
+        (relationData, relationName) =>{
+          // create relation handler
+          const relHandler = {
+            name: relationName,
+            data: relationData
+          };
+
+          // attach to map for easy access too
+          mappedRelations[relHandler.name] = relHandler;
+
+          // add to relations
+          formattedRelations.push(relHandler);
+        }
+      );
+
+      // fields to retrieve from db
       const columns = initializeColumnHeaders();
+      const projection = {};
+      columns.headerKeys.forEach((field) => {
+        // attach prop
+        projection[field] = 1;
+      });
+
+      // extra fields requested
+      (modelOptions.projection || []).forEach((field) => {
+        // attach prop
+        projection[field] = 1;
+      });
+
+      // finished
       return {
         languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
         exportLogId,
@@ -1187,6 +1363,10 @@ function exportFilteredModelsList(
         filePath,
         mimeType,
         columns,
+
+        // database connection
+        // - configured later
+        dbConnection: null,
 
         // process
         process: {
@@ -1215,16 +1395,7 @@ function exportFilteredModelsList(
         locationsMap: {},
 
         // retrieve only the fields that we need
-        projection: columns.headerKeys.reduce(
-          (acc, property) => {
-            // attach prop
-            acc[property] = 1;
-
-            // continue
-            return acc;
-          },
-          {}
-        ),
+        projection,
 
         // update export log
         updateExportLog: (dataToUpdate) => {
@@ -1235,7 +1406,11 @@ function exportFilteredModelsList(
             }, {
               '$set': dataToUpdate
             });
-        }
+        },
+
+        // convert relations to array for easier access
+        relations: formattedRelations,
+        relationsMap: mappedRelations
       };
     };
 
@@ -1458,6 +1633,9 @@ function exportFilteredModelsList(
         exportLog = dbConn.collection('databaseActionLog');
         languageToken = dbConn.collection('languageToken');
         location = dbConn.collection('location');
+
+        // keep for use if necessary
+        sheetHandler.dbConnection = dbConn;
 
         // initialize export log
         const initializeExportLog = () => {
@@ -2008,7 +2186,9 @@ function exportFilteredModelsList(
               return temporaryCollection
                 .aggregate([{
                   $group: projectMax
-                }])
+                }], {
+                  allowDiskUse: true
+                })
                 .toArray();
             })
             .then((maxValues) => {
@@ -2287,16 +2467,36 @@ function exportFilteredModelsList(
                   throw new Error(`Missing array definition for property '${propertyName}'`);
                 } else {
                   // check if property belongs to an object
-                  const propertyOfAnObjectIndex = propertyName.indexOf('.');
+                  const propertyOfAnObjectIndex = propertyName.lastIndexOf('.');
                   let parentProperty, parentPropertyTokenTranslation;
                   if (propertyOfAnObjectIndex > -1) {
+                    // determine entire parent property path
                     parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
-                    parentPropertyTokenTranslation = !sheetHandler.useDbColumns && parentProperty && sheetHandler.columns.labels[parentProperty] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[parentProperty]] ?
-                      sheetHandler.dictionaryMap[sheetHandler.columns.labels[parentProperty]] : (
-                        sheetHandler.useDbColumns ?
-                          parentProperty :
-                          undefined
-                      );
+
+                    // we're interested in removing columns only for non flat file types
+                    if (!sheetHandler.process.exportIsNonFlat) {
+                      // parent property is split between multiple levels ?
+                      const parentPropertyValues = parentProperty.split('.');
+                      parentPropertyTokenTranslation = '';
+                      let splitParentFull = '';
+                      for (let parentPropertyValueIndex = 0; parentPropertyValueIndex < parentPropertyValues.length; parentPropertyValueIndex++) {
+                        // retrieve parent of parent :)
+                        const splitParent = parentPropertyValues[parentPropertyValueIndex];
+
+                        // remove parent column
+                        splitParentFull = `${splitParentFull ? splitParentFull + '.' : splitParentFull}${splitParent}`;
+                        removeLastColumnIfSamePath(splitParentFull);
+
+                        // append parent name
+                        parentPropertyTokenTranslation = parentPropertyTokenTranslation ? parentPropertyTokenTranslation + ' ' : parentPropertyTokenTranslation;
+                        parentPropertyTokenTranslation += !sheetHandler.useDbColumns && splitParent && sheetHandler.columns.labels[splitParent] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[splitParent]] ?
+                          sheetHandler.dictionaryMap[sheetHandler.columns.labels[splitParent]] : (
+                            sheetHandler.useDbColumns ?
+                              splitParent :
+                              undefined
+                          );
+                      }
+                    }
                   }
 
                   // if property belongs to an object then maybe we should remove the parent column since it isn't necessary anymore
@@ -2306,9 +2506,6 @@ function exportFilteredModelsList(
                       // if non flat child columns are handled by parents
                       // nothing
                     } else {
-                      // remove parent column
-                      removeLastColumnIfSamePath(parentProperty);
-
                       // add column
                       if (parentPropertyTokenTranslation) {
                         addHeaderColumn(
@@ -2779,7 +2976,277 @@ function exportFilteredModelsList(
               }));
         };
 
-        // retrieve data like missing tokens ...
+        // handle relation
+        const writeDataToFileDetermineMissingRelationsData = (
+          relationsAccumulator,
+          record
+        ) => {
+          for (let relationIndex = 0; relationIndex < sheetHandler.relations.length; relationIndex++) {
+            // get relation data
+            const relation = sheetHandler.relations[relationIndex];
+
+            // take action accordingly
+            // - relations should be ...valid at this point, at least the format
+            switch (relation.data.type) {
+
+              // has one
+              case RELATION_TYPE.HAS_ONE:
+
+                // determine if we have something to retrieve
+                const keyValue = relation.data.keyValue(record);
+                if (!keyValue) {
+                  continue;
+                }
+
+                // initialize retrieval if necessary
+                if (!relationsAccumulator[relation.data.collection]) {
+                  relationsAccumulator[relation.data.collection] = {};
+                }
+
+                // specific type of retrieval
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN] = {};
+                }
+
+                // attach request for our key if necessary
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key] = {
+                    relations: {},
+                    values: {}
+                  };
+                }
+
+                // attach relation if necessary, for identification
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name] = {};
+                }
+
+                // map id with our relation
+                relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name][keyValue] = true;
+
+                // attach value to list of records to retrieve
+                relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].values[keyValue] = true;
+
+                // finished
+                break;
+            }
+          }
+        };
+
+        // process relations
+        // - must return promise
+        const writeDataToFileProcessRelations = (data) => {
+          // no relations ?
+          if (sheetHandler.relations.length < 1) {
+            return Promise.resolve();
+          }
+
+          // determine relations for which we need to retrieve data
+          const relationsToProcess = {};
+
+          // retrieve missing data
+          for (let recordIndex = 0; recordIndex < data.order.length; recordIndex++) {
+            // get record data
+            const record = data.records[data.order[recordIndex]];
+
+            // record doesn't exist anymore - deleted ?
+            if (!record) {
+              continue;
+            }
+
+            // do we have relations ?
+            writeDataToFileDetermineMissingRelationsData(
+              relationsToProcess,
+              record
+            );
+          }
+
+          // retrieve relations data
+          return new Promise((resolve, reject) => {
+            // used to keep data for all relations
+            // relation name - relation data
+            const relationsResults = {};
+
+            // prepare requests that we need to do to db
+            const dbRequests = [];
+            Object.keys(relationsToProcess).forEach((collectionName) => {
+              // retrieve collection relations
+              const collectionRelations = relationsToProcess[collectionName];
+
+              // go through all types of requests that we need to do on this collection
+              Object.keys(collectionRelations).forEach((relationRetrieveType) => {
+                dbRequests.push({
+                  collection: collectionName,
+                  retrieveType: relationRetrieveType
+                });
+              });
+            });
+
+            // api request - we will do them synchronously so we use...less memory
+            const getNextRelationData = () => {
+              // finished ?
+              if (dbRequests.length < 1) {
+                return resolve(relationsResults);
+              }
+
+              // retrieve next request
+              const requestData = dbRequests.splice(0, 1)[0];
+
+              // retrieve request definitions
+              const requestDefinitions = relationsToProcess[requestData.collection][requestData.retrieveType];
+
+              // depending of relation type we need to handle things differently
+              const projection = {
+                _id: 1
+              };
+              let query = {};
+              switch (requestData.retrieveType) {
+                case RELATION_RETRIEVAL_TYPE.KEY_IN:
+                  // do we need to create a simple request or ...and or
+                  const propKeys = Object.keys(requestDefinitions);
+                  const hasOrConditions = propKeys.length > 1;
+
+                  // construct query condition
+                  query = hasOrConditions ? {
+                    $or: []
+                  } : null;
+
+                  // attach conditions
+                  propKeys.forEach((key) => {
+                    // construct condition for this key
+                    const condition = {
+                      [key]: {
+                        $in: Object.keys(requestDefinitions[key].values)
+                      }
+                    };
+
+                    // attach condition
+                    if (hasOrConditions) {
+                      query.$or.push(condition);
+                    } else {
+                      query = condition;
+                    }
+
+                    // make sure we retrieve key too
+                    projection[key] = 1;
+
+                    // construct project
+                    Object.keys(requestDefinitions[key].relations).forEach((relationName) => {
+                      sheetHandler.relationsMap[relationName].data.project.forEach((field) => {
+                        projection[field] = 1;
+                      });
+                    });
+                  });
+
+                  // finish
+                  break;
+              }
+
+              // make the request
+              sheetHandler.dbConnection
+                .collection(requestData.collection)
+                .find(
+                  query, {
+                    projection
+                  }
+                )
+                .toArray()
+
+                // map data for these relations
+                .then((relationRecords) => {
+                  // go through each relation and map responses
+                  switch (requestData.retrieveType) {
+                    case RELATION_RETRIEVAL_TYPE.KEY_IN:
+
+                      // retrieve
+                      const propKeys = Object.keys(requestDefinitions);
+                      propKeys.forEach((key) => {
+                        // map records for fast access
+                        const relationRecordsMap = {};
+                        for (let relRecordIndex = 0; relRecordIndex < relationRecords.length; relRecordIndex++) {
+                          // map
+                          relationRecordsMap[relationRecords[relRecordIndex][key]] = relationRecords[relRecordIndex];
+
+                          // replace id
+                          relationRecords[relRecordIndex].id = relationRecords[relRecordIndex]._id;
+                          delete relationRecords[relRecordIndex]._id;
+                        }
+
+                        // determine relations for this request and map ids
+                        const relationsForThisRequest = requestDefinitions[key].relations;
+                        Object.keys(relationsForThisRequest).forEach((relationName) => {
+                          // initialize response if necessary
+                          // - it should be necessary :)
+                          if (!relationsResults[relationName]) {
+                            relationsResults[relationName] = {};
+                          }
+
+                          // go through our records and map data
+                          const relationExpectingRecords = relationsForThisRequest[relationName];
+                          for (let keyValue in relationExpectingRecords) {
+                            // not found
+                            if (!relationRecordsMap[keyValue]) {
+                              continue;
+                            }
+
+                            // map
+                            relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
+                          }
+                        });
+                      });
+
+                      // finished
+                      break;
+                  }
+                })
+
+                // next relation
+                .then(getNextRelationData)
+                .catch(reject);
+            };
+
+            // start retrieving data
+            getNextRelationData();
+          });
+        };
+
+        // attach relations data to record
+        const writeDataToFileAttachRelations = (
+          record,
+          relationsData
+        ) => {
+          for (let relIndex = 0; relIndex < sheetHandler.relations.length; relIndex++) {
+            // get relation
+            const relation = sheetHandler.relations[relIndex];
+
+            // nothing to set here ?
+            if (!relationsData[relation.name]) {
+              continue;
+            }
+
+            // set data
+            switch (relation.data.type) {
+              case RELATION_TYPE.HAS_ONE:
+                // relationship value
+                const keyValue = relation.data.keyValue(record);
+
+                // set value for this relationship
+                record[relation.name] = relationsData[relation.name][keyValue] ?
+                  _.cloneDeep(relationsData[relation.name][keyValue]) :
+                  undefined;
+
+                // do we have an after method ?
+                if (relation.data.after) {
+                  relation.data.after(record);
+                }
+
+                // finished
+                break;
+            }
+          }
+        };
+
+        // retrieve data like missing tokens, ...
         // all locations should've been retrieved above - location initialization
         const writeDataToFileDetermineMissingData = (data) => {
           // missing data definitions
@@ -2879,14 +3346,47 @@ function exportFilteredModelsList(
           // - promise visibility
           const recordData = data;
 
-          // determine missing data like tokens, locations, ...
-          // - the order doesn't matter here
-          const missingData = writeDataToFileDetermineMissingData(recordData);
-
           // retrieve necessary data & write record to file
           return Promise.resolve()
+            // retrieve relations data
+            .then(() => {
+              return writeDataToFileProcessRelations(recordData);
+            })
+
+            // map relation data
+            .then((relationsData) => {
+              // no relations ?
+              if (
+                sheetHandler.relations.length < 1 ||
+                !relationsData
+              ) {
+                return;
+              }
+
+              // map relations
+              for (let recordIndex = 0; recordIndex < data.order.length; recordIndex++) {
+                // get record data
+                const record = data.records[data.order[recordIndex]];
+
+                // record doesn't exist anymore - deleted ?
+                if (!record) {
+                  continue;
+                }
+
+                // process relations
+                writeDataToFileAttachRelations(
+                  record,
+                  relationsData
+                );
+              }
+            })
+
             // retrieve missing language tokens & write data
             .then(() => {
+              // determine missing data like tokens, locations, ...
+              // - the order doesn't matter here
+              const missingData = writeDataToFileDetermineMissingData(recordData);
+
               // no missing tokens ?
               if (_.isEmpty(missingData.tokens)) {
                 return;
@@ -3153,6 +3653,11 @@ function exportFilteredModelsList(
         });
       })
       .then(() => {
+        // close db connection
+        // sheetHandler.dbConnection.close();
+        //  #TODO
+      })
+      .then(() => {
         // finished - stop worker
         parentCallback(null, {
           subject: 'KILL'
@@ -3193,6 +3698,7 @@ function exportFilteredModelsList(
 // exported constants & methods
 module.exports = {
   // constants
+  RELATION_TYPE,
   TEMPORARY_DATABASE_PREFIX,
 
   // methods

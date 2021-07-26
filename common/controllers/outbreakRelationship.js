@@ -9,6 +9,7 @@ const app = require('../../server/server');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
 const WorkerRunner = require('./../../components/workerRunner');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -419,7 +420,12 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.relationship.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.relationship.exportFieldsGroup,
             exportFieldsOrder: app.models.relationship.exportFieldsOrder,
-            locationFields: app.models.relationship.locationFields
+            locationFields: app.models.relationship.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'persons'
+            ]
           },
           filter,
           exportType,
@@ -434,6 +440,83 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          }, {
+            sourcePerson: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'type',
+                'name',
+                'lastName',
+                'firstName',
+                'middleName',
+                'gender',
+                'dob',
+                'age'
+              ],
+              key: '_id',
+              keyValue: `(relationship) => {
+                return relationship && relationship.persons && relationship.persons.length === 2 ?
+                  (
+                    relationship.persons[0].source && relationship.persons[1].target ?
+                      relationship.persons[0].id : (
+                        relationship.persons[1].source && relationship.persons[0].target ?
+                          relationship.persons[1].id :
+                          undefined
+                      )
+                  ) :
+                  undefined;
+              }`,
+              after: `(relationship) => {
+                // no person ?
+                if (!relationship.sourcePerson) {
+                  return;
+                }
+
+                // attach properties
+                relationship.sourcePerson.source = true;
+              }`
+            },
+            targetPerson: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'type',
+                'name',
+                'lastName',
+                'firstName',
+                'middleName',
+                'gender',
+                'dob',
+                'age'
+              ],
+              key: '_id',
+              keyValue: `(relationship) => {
+                return relationship && relationship.persons && relationship.persons.length === 2 ?
+                  (
+                    relationship.persons[0].source && relationship.persons[1].target ?
+                      relationship.persons[1].id : (
+                        relationship.persons[1].source && relationship.persons[0].target ?
+                          relationship.persons[0].id :
+                          undefined
+                      )
+                  ) :
+                  undefined;
+              }`,
+              after: `(relationship) => {
+                // no person ?
+                if (!relationship.targetPerson) {
+                  return;
+                }
+
+                // attach properties
+                relationship.targetPerson.target = true;
+              }`
+            }
           }
         );
 
