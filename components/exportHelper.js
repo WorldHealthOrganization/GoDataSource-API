@@ -417,6 +417,12 @@ function exportFilteredModelsList(
         pdfStream = fs.createWriteStream(filePath);
         pdfDoc.pipe(pdfStream);
 
+        // handle errors
+        // - for now just throw them further
+        pdfStream.on('error', (err) => {
+          throw err;
+        });
+
         // initialize table renderer
         pdfTable = new pdfkitTable(pdfDoc);
 
@@ -546,6 +552,7 @@ function exportFilteredModelsList(
       }
 
       // set columns depending of export type
+      // - must return promise
       const setColumns = () => {
         switch (exportType) {
           case EXPORT_TYPE.XLSX:
@@ -568,7 +575,7 @@ function exportFilteredModelsList(
             }
 
             // finished
-            break;
+            return Promise.resolve();
 
           case EXPORT_TYPE.XLS:
 
@@ -600,7 +607,7 @@ function exportFilteredModelsList(
             }
 
             // finished
-            break;
+            return Promise.resolve();
 
           case EXPORT_TYPE.ODS:
 
@@ -632,7 +639,7 @@ function exportFilteredModelsList(
             }
 
             // finished
-            break;
+            return Promise.resolve();
 
           case EXPORT_TYPE.PDF:
 
@@ -652,36 +659,46 @@ function exportFilteredModelsList(
             pdfDoc.addPage();
 
             // finished
-            break;
+            return Promise.resolve();
 
           case EXPORT_TYPE.CSV:
             // set columns
-            const columns = sheetHandler.columns.headerColumns.map((column) => column.header);
-            csvStringify(
-              [], {
-                header: true,
-                columns
-              },
-              (err, csvData) => {
-                // did we encounter an error ?
-                if (err) {
-                  throw err;
+            return new Promise((resolve, reject) => {
+              const columns = sheetHandler.columns.headerColumns.map((column) => column.header);
+              csvStringify(
+                [], {
+                  header: true,
+                  columns
+                },
+                (err, csvData) => {
+                  // did we encounter an error ?
+                  if (err) {
+                    return reject(err);
+                  }
+
+                  // write data
+                  csvWriteStream.write(
+                    csvData,
+                    (err) => {
+                      // error occurred ?
+                      if (err) {
+                        return reject(err);
+                      }
+
+                      // flushed
+                      resolve();
+                    }
+                  );
                 }
-
-                // write data
-                csvWriteStream.write(csvData);
-              }
-            );
-
-            // finished
-            break;
+              );
+            });
 
           case EXPORT_TYPE.JSON:
             // for json we don't need to write column definitions
             // nothing
 
             // finished
-            break;
+            return Promise.resolve();
 
           // not supported
           default:
@@ -2688,7 +2705,7 @@ function exportFilteredModelsList(
               }
 
               // finished
-              sheetHandler.process.setColumns();
+              return sheetHandler.process.setColumns();
             });
         };
 
@@ -2979,6 +2996,17 @@ function exportFilteredModelsList(
                     if (cellValue instanceof Date) {
                       cellValue = moment(cellValue).toISOString();
                     }
+                  }
+
+                  // remove new lines since these might break files like csv and others
+                  if (
+                    cellValue &&
+                    typeof cellValue === 'string'
+                  ) {
+                    cellValue = cellValue.replace(
+                      /\r?\n|\r/g,
+                      ' '
+                    );
                   }
 
                   // add value to row
