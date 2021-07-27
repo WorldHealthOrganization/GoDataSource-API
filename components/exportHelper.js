@@ -8,13 +8,14 @@ const fs = require('fs');
 const moment = require('moment');
 const archiver = require('archiver');
 const xlsx = require('xlsx');
+const pdfkit = require('pdfkit');
+const pdfkitTable = require('voilab-pdf-table');
 const config = require('../server/config');
 const MongoDBHelper = require('./mongoDBHelper');
 const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
-const pdfkit = require('pdfkit');
-const pdfkitTable = require('voilab-pdf-table');
+const convertLoopbackQueryToMongo = require('./convertLoopbackFilterToMongo');
 
 // default language - in case we don't have user language
 // - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
@@ -31,6 +32,10 @@ const ANONYMIZE_VALUE = '***';
 const FLAT_MAX_ANSWERS_PREFIX = '_';
 // - used to determine max number of columns for questionnaire with multiple answer dropdowns
 const FLAT_MULTIPLE_ANSWER_SUFFIX = '_multiple';
+// - used to determine max number of columns for questionnaire with multiple answer dropdowns
+const PREFILTER_PREFIX = '___';
+// - used to determine max number of columns for questionnaire with multiple answer dropdowns
+const PREFILTER_SUFFIX = '_v';
 
 // FLAT / NON FLAT TYPES
 const EXPORT_TYPE = {
@@ -113,6 +118,8 @@ const RELATION_RETRIEVAL_TYPE = {
  * @param anonymizeFields
  * @param fieldsGroupList
  * @param options
+ * @param prefilters
+ * @param relations
  */
 function exportFilteredModelsList(
   parentCallback,
@@ -123,6 +130,7 @@ function exportFilteredModelsList(
   anonymizeFields,
   fieldsGroupList,
   options,
+  prefilters,
   relations
 ) {
   try {
@@ -1358,6 +1366,9 @@ function exportFilteredModelsList(
         locationFindBatchSize: config.export && config.export.locationFindBatchSize > 0 ?
           config.export.locationFindBatchSize :
           1000,
+        noLookupIfPrefilterTotalCountLessThen: config.export && config.export.noLookupIfPrefilterTotalCountLessThen > 0 ?
+          config.export.noLookupIfPrefilterTotalCountLessThen :
+          5000,
         saveFilter: config && config.export && !!config.export.saveFilter,
         saveAggregateFilter: config && config.export && !!config.export.saveAggregateFilter,
         filePath,
@@ -1410,7 +1421,21 @@ function exportFilteredModelsList(
 
         // convert relations to array for easier access
         relations: formattedRelations,
-        relationsMap: mappedRelations
+        relationsMap: mappedRelations,
+
+        // filters
+        prefiltersDisableLookup: false,
+        prefiltersIds: {},
+        prefilters: _.transform(
+          prefilters,
+          (accumulator, definition, relationName) => {
+            accumulator.push({
+              name: relationName,
+              definition
+            });
+          },
+          []
+        )
       };
     };
 
@@ -1425,16 +1450,34 @@ function exportFilteredModelsList(
     // drop collection
     const dropTemporaryCollection = () => {
       // temporary collection was initialized ?
-      if (temporaryCollection) {
-        return temporaryCollection
-          .drop()
-          .then(() => {
-            temporaryCollection = undefined;
-          });
-      }
+      return (temporaryCollection ? temporaryCollection.drop() : Promise.resolve())
+        .then(() => {
+          temporaryCollection = undefined;
+        })
+        .then(() => {
+          // drop prefilter tables too
+          const tmpPrefilters = [
+            ...sheetHandler.prefilters
+          ];
 
-      // no temporary collection ?
-      return Promise.resolve();
+          // drop collection
+          const dropNextPrefilterCollection = () => {
+            // nothing more ?
+            if (tmpPrefilters.length < 1) {
+              return Promise.resolve();
+            }
+
+            // retrieve prefilter
+            const prefilter = tmpPrefilters.splice(0, 1)[0];
+            return sheetHandler.dbConnection
+              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .drop()
+              .then(dropNextPrefilterCollection);
+          };
+
+          // drop collections
+          return dropNextPrefilterCollection();
+        });
     };
 
     // delete secondary temporary files
@@ -1776,6 +1819,163 @@ function exportFilteredModelsList(
           );
         };
 
+        // initialize filter collections
+        // - returns promise
+        const initializeFilterCollections = () => {
+          // append collections that we need to create
+          // kinda a clone since we need to alter it
+          const tmpPrefilters = [
+            ...sheetHandler.prefilters
+          ];
+
+          // generate next collection
+          const generateNextCollection = () => {
+            // nothing more ?
+            if (tmpPrefilters.length < 1) {
+              return Promise.resolve();
+            }
+
+            // retrieve prefilter
+            const prefilter = tmpPrefilters.splice(0, 1)[0];
+
+            // construct filter aggregation
+            const aggregateFilter = [
+              {
+                $match: prefilter.definition.filter.where
+              }, {
+                $project: {
+                  _id: 1
+                }
+              }, {
+                $out: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`
+              }
+            ];
+
+            // update export log in case we need the aggregate filter
+            return sheetHandler
+              .updateExportLog({
+                [`aggregateFilter_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
+                  JSON.stringify(aggregateFilter) :
+                  null,
+                updatedAt: new Date()
+              })
+              .then(() => {
+                // prepare records that will be exported
+                return dbConn
+                  .collection(prefilter.definition.collection)
+                  .aggregate(aggregateFilter, {
+                    allowDiskUse: true
+                  })
+                  .toArray()
+                  .then(generateNextCollection);
+              });
+
+          };
+
+          // generate prefilters
+          return generateNextCollection();
+        };
+
+        // get ids determined by prefilters
+        const determineFilterIds = () => {
+          // no prefilters used ?
+          if (sheetHandler.prefilters.length < 1) {
+            return Promise.resolve();
+          }
+
+          // prefilters
+          const tmpPrefilters = [
+            ...sheetHandler.prefilters
+          ];
+
+          // retrieve prefilter ids
+          sheetHandler.prefiltersIds = {};
+          const nextPrefilterIds = () => {
+            // nothing more ?
+            if (tmpPrefilters.length < 1) {
+              return Promise.resolve();
+            }
+
+            // retrieve prefilter
+            const prefilter = tmpPrefilters.splice(0, 1)[0];
+
+            // initiate prefilter ids list
+            sheetHandler.prefiltersIds[prefilter.name] = [];
+
+            // count no of records
+            return sheetHandler.dbConnection
+              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .find(
+                {}, {
+                  projection: {
+                    _id: 1
+                  }
+                }
+              )
+              .toArray()
+              .then((ids) => {
+                // add count
+                sheetHandler.prefiltersIds[prefilter.name] = (ids || []).map((record) => record._id);
+
+                // continue with next filter
+                return nextPrefilterIds();
+              });
+          };
+
+          // retrieve list of ids for each prefilter
+          return nextPrefilterIds();
+        };
+
+        // determine if we need to do prefilter lookups
+        const determineFilterIfNeedLookup = () => {
+          // no prefilters used ?
+          if (sheetHandler.prefilters.length < 1) {
+            return Promise.resolve();
+          }
+
+          // prefilters
+          const tmpPrefilters = [
+            ...sheetHandler.prefilters
+          ];
+
+          // count found data for this prefilter
+          let prefiltersToTalRows = 0;
+          const nextPrefilterCount = () => {
+            // nothing more ?
+            if (tmpPrefilters.length < 1) {
+              return Promise.resolve();
+            }
+
+            // retrieve prefilter
+            const prefilter = tmpPrefilters.splice(0, 1)[0];
+
+            // count no of records
+            return sheetHandler.dbConnection
+              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .countDocuments()
+              .then((counted) => {
+                // add count
+                prefiltersToTalRows += counted;
+
+                // continue with next filter
+                return nextPrefilterCount();
+              });
+          };
+
+          // count total number of records from all prefilters
+          return nextPrefilterCount()
+            .then(() => {
+              // do we need to disable lookup since there is a faster way of doing things ?
+              if (prefiltersToTalRows <= sheetHandler.noLookupIfPrefilterTotalCountLessThen) {
+                // disable
+                sheetHandler.prefiltersDisableLookup = true;
+
+                // determine prefilters ids
+                return determineFilterIds();
+              }
+            });
+        };
+
         // initialize collection view
         const initializeCollectionView = () => {
           // original project
@@ -1825,7 +2025,7 @@ function exportFilteredModelsList(
           });
 
           // attach location pipe if we have one
-          if (locationContactQuery.$concatArrays) {
+          if (locationContactQuery.$concatArrays.length > 0) {
             project[sheetHandler.temporaryDistinctLocationsKey] = locationContactQuery;
           }
 
@@ -1924,13 +2124,48 @@ function exportFilteredModelsList(
             }
           }
 
+          // determine if we need to do lookup
+          let prefiltersConditions = [];
+          if (sheetHandler.prefiltersDisableLookup) {
+            // attach ids conditions
+            sheetHandler.prefilters.forEach((prefilter) => {
+              // add to prefilter condition
+              const prefilterKey = prefilter.definition.matchKey.replace(/\[\]/g, '');
+              prefiltersConditions.push({
+                [prefilterKey]: {
+                  $in: sheetHandler.prefiltersIds[prefilter.name]
+                }
+              });
+
+              // no need to keep it in memory, release once we finish with this promise
+              delete sheetHandler.prefiltersIds[prefilter.name];
+            });
+          }
+
           // aggregate filter
           const aggregateFilter = [];
 
-          // append where
+          // construct where condition
+          let whereConditions;
           if (!_.isEmpty(dataFilter.where)) {
+            whereConditions = dataFilter.where;
+          }
+
+          // attach prefilter if necessary
+          if (prefiltersConditions.length > 0) {
+            whereConditions = {
+              $and: _.isEmpty(whereConditions) ?
+                prefiltersConditions : [
+                  ...prefiltersConditions,
+                  whereConditions
+                ]
+            };
+          }
+
+          // append where only if necessary
+          if (!_.isEmpty(whereConditions)) {
             aggregateFilter.push({
-              $match: dataFilter.where
+              $match: whereConditions
             });
           }
 
@@ -1941,10 +2176,123 @@ function exportFilteredModelsList(
             });
           }
 
-          // append rest...
+          // do we have prefilters, then projection will be don here, before the lookup & match
+          let matchKeyProject;
+          let cleanupProject;
+          if (!sheetHandler.prefiltersDisableLookup) {
+            if (sheetHandler.prefilters.length > 0) {
+              // at the end keep only what is interesting for us
+              cleanupProject = Object.keys(project).reduce(
+                (accumulator, fieldKey) => {
+                  // keep field
+                  accumulator[fieldKey] = 1;
+
+                  // continue
+                  return accumulator;
+                },
+                {}
+              );
+
+              // make sure we do the math
+              // - rowId, arrays sizes ...
+              matchKeyProject = project;
+            }
+
+            // prepare array for prefilters
+            sheetHandler.prefilters.forEach((prefilter) => {
+              // not array? no need for custom projection
+              const arrayIndex = prefilter.definition.matchKey.indexOf('[]');
+              if (arrayIndex < 0) {
+                return;
+              }
+
+              // match key is an array ?
+              // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
+              // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
+              const arrayKey = prefilter.definition.matchKey.substr(0, arrayIndex);
+              for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+                // attach element
+                matchKeyProject[`${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}${PREFILTER_SUFFIX}`] = {
+                  $arrayElemAt: [
+                    `$${arrayKey}`,
+                    matchKeyIndex
+                  ]
+                };
+              }
+            });
+
+            // attach match key project if necessary
+            if (!_.isEmpty(matchKeyProject)) {
+              aggregateFilter.push({
+                $project: matchKeyProject
+              });
+            }
+
+            // prefilter if necessary
+            sheetHandler.prefilters.forEach((prefilter) => {
+              // not array? no need for custom projection
+              const arrayIndex = prefilter.definition.matchKey.indexOf('[]');
+              if (arrayIndex < 0) {
+                // retrieve related data so we can do something like an 'inner join'
+                // #TODO - there are better ways to do it in newer mongo..
+                throw new Error('not implemented since it isn\'t needed for now');
+
+                // filter
+                // #TODO
+              } else {
+                // match key is an array ?
+                // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
+                // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
+                const childKey = prefilter.definition.matchKey.substr(arrayIndex + 2);
+                for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+                  // determine related prefilter
+                  aggregateFilter.push({
+                    $lookup: {
+                      from: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`,
+                      localField: `${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
+                      foreignField: '_id',
+                      as: `${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}`
+                    }
+                  });
+                }
+
+                // filter
+                // @TODO - must replace once upgrade to newer mongo version
+                const prefilterMatchArray = {
+                  $or: []
+                };
+                for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+                  // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
+                  prefilterMatchArray.$or.push({
+                    [`${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}._id`]: {
+                      $exists: true
+                    }
+                  });
+                }
+
+                // attach filter
+                aggregateFilter.push({
+                  $match: prefilterMatchArray
+                });
+              }
+            });
+          }
+
+          // no need to do project with determining the limits, it was done above
+          if (_.isEmpty(matchKeyProject)) {
+            aggregateFilter.push({
+              $project: project
+            });
+          } else {
+            // do a cleanup since we don't want to save everything
+            // #TODO - after upgrading to newer mongo we can use $unset if we still need it after lookup pipelines logic
+            aggregateFilter.push({
+              $project: cleanupProject
+            });
+          }
+
+          // make sure we save the collection
           aggregateFilter.push({
-            $project: project
-          }, {
             $out: sheetHandler.temporaryCollectionName
           });
 
@@ -3564,6 +3912,20 @@ function exportFilteredModelsList(
               // change export status => Preparing records
               .then(() => {
                 return sheetHandler.updateExportLog({
+                  statusStep: 'LNG_STATUS_STEP_PREPARING_PREFILTERS',
+                  updatedAt: new Date()
+                });
+              })
+
+              // generate temporary filter collections
+              .then(initializeFilterCollections)
+
+              // count records from prefilters to determine the best approach of how to export data
+              .then(determineFilterIfNeedLookup)
+
+              // change export status => Preparing records
+              .then(() => {
+                return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_RECORDS',
                   updatedAt: new Date()
                 });
@@ -3695,6 +4057,93 @@ function exportFilteredModelsList(
   }
 }
 
+// generate a filter that will be used by exportFilteredModelsList to do extra filtering based on other collections than the one that is exported
+function generateAggregateFiltersFromNormalFilter(
+  filter,
+  appendWhere,
+  acceptedDefinitions
+) {
+  // aggregate temporary collection definitions
+  const collectionFilterDefinitions = {};
+
+  // go through expected definitions
+  _.each(acceptedDefinitions, (definition, relationName) => {
+    // check if we have everything we need
+    if (
+      !definition.queryPath ||
+      typeof definition.queryPath !== 'string' ||
+      !definition.matchKey ||
+      typeof definition.matchKey !== 'string' ||
+      !definition.collection ||
+      typeof definition.collection !== 'string'
+    ) {
+      throw new Error('Invalid definition');
+    }
+
+    // validate array match key
+    if (definition.matchKey.indexOf('[]') > -1) {
+      if (
+        !definition.matchKeyArraySize ||
+        typeof definition.matchKeyArraySize !== 'number' ||
+        typeof definition.matchKeyArraySize < 1
+      ) {
+        throw new Error('Invalid definition');
+      }
+    }
+
+
+    // format definitions
+    let relationQuery = _.get(filter, definition.queryPath);
+    if (relationQuery) {
+      // cleanup
+      _.unset(filter, definition.queryPath);
+
+      // nothing to do here
+      // - needed so we do unset if empty object is sent
+      if (_.isEmpty(relationQuery)) {
+        return;
+      }
+
+      // append deleted if necessary
+      if (!filter.deleted) {
+        relationQuery = {
+          $and: [
+            relationQuery, {
+              deleted: false
+            }
+          ]
+        };
+      }
+
+      // append extra details if necessary
+      if (!_.isEmpty(appendWhere)) {
+        relationQuery = {
+          $and: [
+            relationQuery,
+            appendWhere
+          ]
+        };
+      }
+
+      // attach geo restrictions, outbreak, delete conditions, etc & other things ... ?
+      // #TODO
+
+      // construct collection aggregate query
+      collectionFilterDefinitions[relationName] = {
+        filter: {
+          where: convertLoopbackQueryToMongo(relationQuery)
+        },
+        matchKey: definition.matchKey,
+        matchKeyArraySize: definition.matchKeyArraySize,
+        collection: definition.collection
+      };
+    }
+  });
+
+  // finished
+  return collectionFilterDefinitions;
+}
+
 // exported constants & methods
 module.exports = {
   // constants
@@ -3702,5 +4151,6 @@ module.exports = {
   TEMPORARY_DATABASE_PREFIX,
 
   // methods
-  exportFilteredModelsList
+  exportFilteredModelsList,
+  generateAggregateFiltersFromNormalFilter
 };

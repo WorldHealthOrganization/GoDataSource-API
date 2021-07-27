@@ -62,6 +62,15 @@
     }
   },
   "indexes": {
+    "outbreak_deleted_index": {
+      "outbreakId": 1,
+      "deleted": 1
+    },
+    "outbreak_deleted_person_index": {
+      "outbreakId": 1,
+      "deleted": 1,
+      "persons.id": 1
+    },
     "persons_type_index": {
       "persons.type": 1
     },
