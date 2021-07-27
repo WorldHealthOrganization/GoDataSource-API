@@ -6395,10 +6395,10 @@
         "translation": ""
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Mois)"
+        "translation": "Months"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Années)"
+        "translation": "Years"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
         "translation": "Date d'identification de contact"
@@ -16942,10 +16942,10 @@
         "translation": "L'âge de la personne, vous pouvez le préciser en années ou en mois.  Vous devez utiliser les mois pour les enfants de moins d'un an uniquement"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Mois)"
+        "translation": "Months"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Années)"
+        "translation": "Years"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
         "translation": "Date de naissance"

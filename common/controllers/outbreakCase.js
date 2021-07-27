@@ -329,7 +329,15 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, fieldsGroupList, options, callback) {
+  Outbreak.prototype.exportFilteredCases = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
@@ -355,19 +363,19 @@ module.exports = function (Outbreak) {
       delete filter.where.dontTranslateValues;
     }
 
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
     // prefilter
     app.models.case.preFilterForOutbreak(this, filter, options)
       .then((filter) => {
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
@@ -389,7 +397,7 @@ module.exports = function (Outbreak) {
             userId: _.get(options, 'accessToken.userId'),
             outbreakId: this.id,
             questionnaire: this.caseInvestigationTemplate.toJSON(),
-            useQuestionVariable: useQuestionVariable,
+            useQuestionVariable,
             useDbColumns,
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId

@@ -6392,10 +6392,10 @@
         "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Months)"
+        "translation": "Months"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Years)"
+        "translation": "Years"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
         "translation": "Date of becoming contact"
@@ -16940,10 +16940,10 @@
         "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Months)"
+        "translation": "Months"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Years)"
+        "translation": "Years"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
         "translation": "Date of birth"

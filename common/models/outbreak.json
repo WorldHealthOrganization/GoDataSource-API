@@ -4603,7 +4603,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -4646,24 +4646,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of contacts",

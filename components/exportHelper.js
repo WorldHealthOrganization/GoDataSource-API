@@ -100,12 +100,14 @@ const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
 
 // relations types
 const RELATION_TYPE = {
-  HAS_ONE: 'HAS_ONE'
+  HAS_ONE: 'HAS_ONE',
+  GET_ONE: 'GET_ONE'
 };
 
 // relations types retrieval mode
 const RELATION_RETRIEVAL_TYPE = {
-  KEY_IN: 'KEY_IN'
+  KEY_IN: 'KEY_IN',
+  GET_ONE: 'GET_ONE'
 };
 
 /**
@@ -176,32 +178,32 @@ function exportFilteredModelsList(
           );
         }
 
+        // must have collection name
+        if (
+          !relationData.collection ||
+          typeof relationData.collection !== 'string'
+        ) {
+          throwError(
+            relationName,
+            `invalid collection name (${typeof relationData.collection})`
+          );
+        }
+
+        // must have project so we force retrieval of only what is necessary
+        if (
+          !relationData.project ||
+          !Array.isArray(relationData.project) ||
+          relationData.project.length < 1
+        ) {
+          throwError(
+            relationName,
+            'invalid project provided'
+          );
+        }
+
         // validate accordingly to its type
         switch (relationData.type) {
           case RELATION_TYPE.HAS_ONE:
-            // must have collection name
-            if (
-              !relationData.collection ||
-              typeof relationData.collection !== 'string'
-            ) {
-              throwError(
-                relationName,
-                `invalid collection name (${typeof relationData.collection})`
-              );
-            }
-
-            // must have project so we force retrieval of only what is necessary
-            if (
-              !relationData.project ||
-              !Array.isArray(relationData.project) ||
-              relationData.project.length < 1
-            ) {
-              throwError(
-                relationName,
-                'invalid project provided'
-              );
-            }
-
             // must have key
             if (
               !relationData.key ||
@@ -233,6 +235,66 @@ function exportFilteredModelsList(
                   'invalid key value method content'
                 );
               }
+            }
+
+            // after is optional
+            if (
+              relationData.after &&
+              typeof relationData.after !== 'string'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid after (${typeof relationData.after})`
+              );
+            } else {
+              // transform to method
+              try {
+                relationData.after = eval(relationData.after);
+              } catch (e) {
+                throwError(
+                  relationName,
+                  'invalid after method content'
+                );
+              }
+            }
+
+            // finished
+            break;
+
+          case RELATION_TYPE.GET_ONE:
+            // must have query
+            if (
+              !relationData.query ||
+              typeof relationData.query !== 'string'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid query (${typeof relationData.query})`
+              );
+            } else {
+              // transform to method
+              try {
+                relationData.query = eval(relationData.query);
+              } catch (e) {
+                throwError(
+                  relationName,
+                  'invalid query method content'
+                );
+              }
+            }
+
+            // must have sort
+            if (
+              !relationData.sort ||
+              typeof relationData.sort !== 'object'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid sort (${typeof relationData.sort})`
+              );
             }
 
             // after is optional
@@ -3377,6 +3439,33 @@ function exportFilteredModelsList(
 
                 // finished
                 break;
+
+              // get one
+              case RELATION_TYPE.GET_ONE:
+
+                // determine if we have something to retrieve
+                const query = relation.data.query(record);
+                if (!query) {
+                  continue;
+                }
+
+                // initialize retrieval if necessary
+                if (!relationsAccumulator[relation.data.collection]) {
+                  relationsAccumulator[relation.data.collection] = {};
+                }
+
+                // specific type of retrieval
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.GET_ONE]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.GET_ONE] = {};
+                }
+
+                // attach request for our key if necessary
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.GET_ONE][relation.name]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.GET_ONE][relation.name] = true;
+                }
+
+                // finished
+                break;
             }
           }
         };
@@ -3430,68 +3519,54 @@ function exportFilteredModelsList(
               });
             });
 
-            // api request - we will do them synchronously so we use...less memory
-            const getNextRelationData = () => {
-              // finished ?
-              if (dbRequests.length < 1) {
-                return resolve(relationsResults);
-              }
-
-              // retrieve next request
-              const requestData = dbRequests.splice(0, 1)[0];
-
+            // KEY IN HANDLE
+            const keyInHandler = (
+              requestData
+            ) => {
               // retrieve request definitions
               const requestDefinitions = relationsToProcess[requestData.collection][requestData.retrieveType];
 
-              // depending of relation type we need to handle things differently
+              // do we need to create a simple request or ...and or
+              const propKeys = Object.keys(requestDefinitions);
+              const hasOrConditions = propKeys.length > 1;
+
+              // construct query condition
+              let query = hasOrConditions ? {
+                $or: []
+              } : null;
+
+              // attach conditions
               const projection = {
                 _id: 1
               };
-              let query = {};
-              switch (requestData.retrieveType) {
-                case RELATION_RETRIEVAL_TYPE.KEY_IN:
-                  // do we need to create a simple request or ...and or
-                  const propKeys = Object.keys(requestDefinitions);
-                  const hasOrConditions = propKeys.length > 1;
+              propKeys.forEach((key) => {
+                // construct condition for this key
+                const condition = {
+                  [key]: {
+                    $in: Object.keys(requestDefinitions[key].values)
+                  }
+                };
 
-                  // construct query condition
-                  query = hasOrConditions ? {
-                    $or: []
-                  } : null;
+                // attach condition
+                if (hasOrConditions) {
+                  query.$or.push(condition);
+                } else {
+                  query = condition;
+                }
 
-                  // attach conditions
-                  propKeys.forEach((key) => {
-                    // construct condition for this key
-                    const condition = {
-                      [key]: {
-                        $in: Object.keys(requestDefinitions[key].values)
-                      }
-                    };
+                // make sure we retrieve key too
+                projection[key] = 1;
 
-                    // attach condition
-                    if (hasOrConditions) {
-                      query.$or.push(condition);
-                    } else {
-                      query = condition;
-                    }
-
-                    // make sure we retrieve key too
-                    projection[key] = 1;
-
-                    // construct project
-                    Object.keys(requestDefinitions[key].relations).forEach((relationName) => {
-                      sheetHandler.relationsMap[relationName].data.project.forEach((field) => {
-                        projection[field] = 1;
-                      });
-                    });
+                // construct project
+                Object.keys(requestDefinitions[key].relations).forEach((relationName) => {
+                  sheetHandler.relationsMap[relationName].data.project.forEach((field) => {
+                    projection[field] = 1;
                   });
-
-                  // finish
-                  break;
-              }
+                });
+              });
 
               // make the request
-              sheetHandler.dbConnection
+              return sheetHandler.dbConnection
                 .collection(requestData.collection)
                 .find(
                   query, {
@@ -3502,55 +3577,164 @@ function exportFilteredModelsList(
 
                 // map data for these relations
                 .then((relationRecords) => {
-                  // go through each relation and map responses
-                  switch (requestData.retrieveType) {
-                    case RELATION_RETRIEVAL_TYPE.KEY_IN:
+                  // retrieve
+                  const propKeys = Object.keys(requestDefinitions);
+                  propKeys.forEach((key) => {
+                    // map records for fast access
+                    const relationRecordsMap = {};
+                    for (let relRecordIndex = 0; relRecordIndex < relationRecords.length; relRecordIndex++) {
+                      // map
+                      relationRecordsMap[relationRecords[relRecordIndex][key]] = relationRecords[relRecordIndex];
 
-                      // retrieve
-                      const propKeys = Object.keys(requestDefinitions);
-                      propKeys.forEach((key) => {
-                        // map records for fast access
-                        const relationRecordsMap = {};
-                        for (let relRecordIndex = 0; relRecordIndex < relationRecords.length; relRecordIndex++) {
-                          // map
-                          relationRecordsMap[relationRecords[relRecordIndex][key]] = relationRecords[relRecordIndex];
+                      // replace id
+                      relationRecords[relRecordIndex].id = relationRecords[relRecordIndex]._id;
+                      delete relationRecords[relRecordIndex]._id;
+                    }
 
-                          // replace id
-                          relationRecords[relRecordIndex].id = relationRecords[relRecordIndex]._id;
-                          delete relationRecords[relRecordIndex]._id;
+                    // determine relations for this request and map ids
+                    const relationsForThisRequest = requestDefinitions[key].relations;
+                    Object.keys(relationsForThisRequest).forEach((relationName) => {
+                      // initialize response if necessary
+                      // - it should be necessary :)
+                      if (!relationsResults[relationName]) {
+                        relationsResults[relationName] = {};
+                      }
+
+                      // go through our records and map data
+                      const relationExpectingRecords = relationsForThisRequest[relationName];
+                      for (let keyValue in relationExpectingRecords) {
+                        // not found
+                        if (!relationRecordsMap[keyValue]) {
+                          continue;
                         }
 
-                        // determine relations for this request and map ids
-                        const relationsForThisRequest = requestDefinitions[key].relations;
-                        Object.keys(relationsForThisRequest).forEach((relationName) => {
-                          // initialize response if necessary
-                          // - it should be necessary :)
-                          if (!relationsResults[relationName]) {
-                            relationsResults[relationName] = {};
-                          }
+                        // map
+                        relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
+                      }
+                    });
+                  });
+                });
+            };
 
-                          // go through our records and map data
-                          const relationExpectingRecords = relationsForThisRequest[relationName];
-                          for (let keyValue in relationExpectingRecords) {
-                            // not found
-                            if (!relationRecordsMap[keyValue]) {
-                              continue;
-                            }
+            // get one relation
+            const getOneHandler = (
+              requestData,
+              data
+            ) => {
+              // retrieve request definitions
+              const requestDefinitions = relationsToProcess[requestData.collection][requestData.retrieveType];
 
-                            // map
-                            relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
-                          }
-                        });
-                      });
+              // clone so we can change it
+              const relationNames = Object.keys(requestDefinitions);
 
-                      // finished
-                      break;
+              // retrieve data for next relation
+              let getOnRecordIndex = -1;
+              const getOneHandlerGetNextRelation = () => {
+                // finished ?
+                if (relationNames.length < 1){
+                  return Promise.resolve();
+                }
+
+                // get next relation name
+                const relationName = relationNames.splice(0, 1)[0];
+
+                // get relation definition
+                const relationDefinition = sheetHandler.relationsMap[relationName];
+
+                // construct project
+                const projection = {
+                  _id: 1
+                };
+                relationDefinition.data.project.forEach((field) => {
+                  projection[field] = 1;
+                });
+
+                // construct sort
+                const sort = relationDefinition.data.sort;
+
+                // make requests for each record
+                const nextRecord = () => {
+                  // finished ?
+                  getOnRecordIndex++;
+                  if (getOnRecordIndex >= data.order.length) {
+                    return Promise.resolve();
                   }
-                })
 
-                // next relation
-                .then(getNextRelationData)
-                .catch(reject);
+                  // get record
+                  const record = data.records[data.order[getOnRecordIndex]];
+
+                  // construct query
+                  const query = relationDefinition.data.query(record);
+
+                  // make request
+                  return sheetHandler.dbConnection
+                    .collection(requestData.collection)
+                    .find(
+                      query, {
+                        projection,
+                        sort,
+                        limit: 1
+                      }
+                    )
+                    .toArray()
+                    .then((relationData) => {
+                      // get relation data
+                      relationData = relationData && relationData.length > 0 ?
+                        relationData[0] :
+                        undefined;
+
+                      // initialize relation results if necessary
+                      if (!relationsResults[relationName]) {
+                        relationsResults[relationName] = {};
+                      }
+
+                      // store it for later use
+                      relationsResults[relationName][record._id] = relationData;
+                    })
+                    .then(nextRecord);
+                };
+
+                // get relations
+                return nextRecord()
+                  .then(getOneHandlerGetNextRelation);
+              };
+
+              // make db requests
+              return getOneHandlerGetNextRelation();
+            };
+
+            // api request - we will do them synchronously so we use...less memory
+            const getNextRelationData = () => {
+              // finished ?
+              if (dbRequests.length < 1) {
+                return resolve(relationsResults);
+              }
+
+              // retrieve next request
+              const requestData = dbRequests.splice(0, 1)[0];
+
+              // depending of relation type we need to handle things differently
+              switch (requestData.retrieveType) {
+                case RELATION_RETRIEVAL_TYPE.KEY_IN:
+                  keyInHandler(requestData)
+                    .then(getNextRelationData)
+                    .catch(reject);
+
+                  // finish
+                  break;
+
+                case RELATION_RETRIEVAL_TYPE.GET_ONE:
+                  getOneHandler(
+                    requestData,
+                    data
+                  )
+                    .then(getNextRelationData)
+                    .catch(reject);
+
+                  // finish
+                  break;
+              }
+
             };
 
             // start retrieving data
@@ -3582,6 +3766,18 @@ function exportFilteredModelsList(
                 record[relation.name] = relationsData[relation.name][keyValue] ?
                   _.cloneDeep(relationsData[relation.name][keyValue]) :
                   undefined;
+
+                // do we have an after method ?
+                if (relation.data.after) {
+                  relation.data.after(record);
+                }
+
+                // finished
+                break;
+
+              case RELATION_TYPE.GET_ONE:
+                // set value for this relationship
+                record[relation.name] = relationsData[relation.name][record._id];
 
                 // do we have an after method ?
                 if (relation.data.after) {
