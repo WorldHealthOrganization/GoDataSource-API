@@ -2210,6 +2210,7 @@ function exportFilteredModelsList(
           // construct where condition
           let whereConditions;
           if (!_.isEmpty(dataFilter.where)) {
+            // attach where condition
             whereConditions = dataFilter.where;
           }
 
@@ -2359,13 +2360,74 @@ function exportFilteredModelsList(
           });
 
           // update export log in case we need the aggregate filter
-          return sheetHandler
-            .updateExportLog({
-              aggregateFilter: sheetHandler.saveAggregateFilter ?
-                JSON.stringify(aggregateFilter) :
-                null,
-              updatedAt: new Date()
+          return Promise.resolve()
+            .then(() => {
+              // since there is no #hint in mongo 3.2
+              // little trick to force a specific index - more exactly pk index
+              // #TODO - replace with $hint after mongodb upgraded
+              // prepare records that will be exported
+              return exportDataCollection
+                .aggregate(aggregateFilter, {
+                  explain: true,
+                  allowDiskUse: true
+                })
+                .toArray()
+                .then((data) => {
+                  // if we have an id condition, then alter request to force our index to be used
+                  if (
+                    data &&
+                    data.length > 0 &&
+                    data[0].stages &&
+                    data[0].stages.length > 0 &&
+                    data[0].stages[0].$cursor &&
+                    data[0].stages[0].$cursor.queryPlanner &&
+                    data[0].stages[0].$cursor.queryPlanner.parsedQuery
+                  ) {
+                    // get parsed query
+                    const parsedQuery = data[0].stages[0].$cursor.queryPlanner.parsedQuery;
+
+                    // check if we have an id query, only if we have at least 2 conditions we should do this
+                    if (
+                      parsedQuery.$and &&
+                      parsedQuery.$and.length > 1
+                    ) {
+                      // search for id condition
+                      for (let andIndex = 0; andIndex < parsedQuery.$and.length; andIndex++) {
+                        const condition = parsedQuery.$and[andIndex];
+                        if (condition._id) {
+                          // force id index use since we will have less records by filtering by pk instead of any other filter index
+                          // - skip needed, otherwise the 2 consecutive matches are merged and ....
+                          aggregateFilter.splice(
+                            0,
+                            0,
+                            {
+                              $match: condition
+                            }, {
+                              $skip: 0
+                            }
+                          );
+
+                          // no need to continue
+                          break;
+                        }
+                      }
+                    }
+                  }
+                });
             })
+
+            // save aggregate filter
+            .then(() => {
+              return sheetHandler
+                .updateExportLog({
+                  aggregateFilter: sheetHandler.saveAggregateFilter ?
+                    JSON.stringify(aggregateFilter) :
+                    null,
+                  updatedAt: new Date()
+                });
+            })
+
+            // retrieve records that will be exported
             .then(() => {
               // prepare records that will be exported
               return exportDataCollection

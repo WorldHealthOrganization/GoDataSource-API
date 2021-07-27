@@ -410,6 +410,9 @@ module.exports = function (Outbreak) {
     filter.where = filter.where || {};
     filter.where.outbreakId = this.id;
 
+    // include geo restrictions if necessary
+    // #TODO
+
     // relationship prefilters
     // #TODO - still to implement if necessary for followUp
     // anyways even if the export won't fail, the list page request will fail because it doesn't use this system..which is kinda slow for listing
