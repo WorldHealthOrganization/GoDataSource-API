@@ -11,7 +11,7 @@ const worker = {
    * Export a list in a file (asynchronously)
    * @param headers file list headers
    * @param dataSet {Array} actual data set
-   * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+   * @param fileType {enum} [json, csv, xls, xlsx, ods, pdf]
    * @return {Promise<any>}
    */
   exportListFile: helpers.exportListFileSync,

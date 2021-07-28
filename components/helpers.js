@@ -8,7 +8,6 @@ const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(momentLib);
 const _ = require('lodash');
 const apiError = require('./apiError');
-const xml2js = require('xml2js');
 const spreadSheetFile = require('./spreadSheetFile');
 const pdfDoc = require('./pdfDoc');
 const streamUtils = require('./streamUtils');
@@ -518,58 +517,16 @@ const extractImportableFieldsNoModel = function (modelImportableTopLevelProperti
 };
 
 /**
- * Get a JSON that has XML friendly property names
- * @param jsonObj
- * @return {*}
- */
-const getXmlFriendlyJson = function (jsonObj) {
-  // define a replacement
-  let _replacement;
-  // if the json is an array
-  if (Array.isArray(jsonObj)) {
-    // replacement must be an array
-    _replacement = [];
-    // go through all elements
-    jsonObj.forEach(function (jsObj) {
-      // and make them XML friendly
-      _replacement.push(getXmlFriendlyJson(jsObj));
-    });
-  }
-  // json is a non-empty object
-  else if (typeof jsonObj === 'object' && jsonObj != null) {
-    // replacement must be a non-empty object
-    _replacement = {};
-    // go trough all the object keys
-    Object.keys(jsonObj).forEach(function (property) {
-      // get XML friendly key
-      let replacementProperty = _.camelCase(property);
-      // if the value is a complex one
-      if (typeof jsonObj[property] === 'object' && jsonObj != null) {
-        // make it XML friendly
-        _replacement[replacementProperty] = getXmlFriendlyJson(jsonObj[property]);
-      } else {
-        // otherwise just store it
-        _replacement[replacementProperty] = jsonObj[property];
-      }
-    });
-  } else {
-    // empty object, just copy it
-    _replacement = jsonObj;
-  }
-  return _replacement;
-};
-
-/**
  * Export a list in a file (synchronously)
  * @param headers file list headers
  * @param dataSet {Array} actual data set
- * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @param fileType {enum} [json, csv, xls, xlsx, ods, pdf]
  * @return {Promise<any>}
  */
 const exportListFileSync = function (headers, dataSet, fileType, title = 'List') {
 
   /**
-   * Build headers map in a way compatible with files that support hierarchical structures (XML, JSON)
+   * Build headers map in a way compatible with files that support hierarchical structures (JSON)
    * @param headers
    */
   function buildHeadersMap(headers, jsonHeadersMap = {}) {
@@ -688,7 +645,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
       return reject(new Error('Invalid dataSet. DataSet must be an array.'));
     }
 
-    let headersMap, remappedDataSet, builder;
+    let headersMap, remappedDataSet;
     // handle each file individually
     switch (fileType) {
       case 'json':
@@ -704,24 +661,6 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
             }
             return value;
           }, 2);
-        resolve(file);
-        break;
-      case 'xml':
-        file.mimeType = 'text/xml';
-        builder = new xml2js.Builder();
-        // build headers map
-        headersMap = buildHeadersMap(headers);
-        remappedDataSet = dataSet.map(function (item) {
-          return {
-            // XML does not have an array data type, repeating an "entry" will simulate an array
-            entry: objectRemap(item, headersMap)
-          };
-        });
-        // Make sure the response looks the same for single element arrays (native library behaviour is weird in this case)
-        if (remappedDataSet.length === 1) {
-          remappedDataSet = {root: remappedDataSet[0]};
-        }
-        file.data = builder.buildObject(getXmlFriendlyJson(remappedDataSet));
         resolve(file);
         break;
       case 'csv':
@@ -775,7 +714,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         });
         break;
       default:
-        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, xml, csv, xls, xlsx, ods, pdf`}));
+        reject(apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid Export Type: ${fileType}. Supported options: json, csv, xls, xlsx, ods, pdf`}));
         break;
     }
   });
@@ -785,7 +724,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
  * Export a list in a file (asynchronously)
  * @param headers file list headers
  * @param dataSet {Array} actual data set
- * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+ * @param fileType {enum} [json, csv, xls, xlsx, ods, pdf]
  * @return {Promise<any>}
  */
 const exportListFile = workerRunner.helpers.exportListFile;

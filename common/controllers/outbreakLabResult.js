@@ -151,7 +151,7 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered lab results to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList
@@ -310,7 +310,7 @@ module.exports = function (Outbreak) {
    * Export filtered case lab results to file
    * @param caseId
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList
@@ -351,7 +351,7 @@ module.exports = function (Outbreak) {
    * Export filtered case lab results to file
    * @param contactId
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList

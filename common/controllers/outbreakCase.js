@@ -321,7 +321,7 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered cases to file
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList

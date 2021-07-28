@@ -49,14 +49,14 @@ module.exports = function (ExportLog) {
           }
 
           // log
-          console.log(`'${collection.name}' is a temporary collection. Dropping collection`);
+          app.logger.info(`'${collection.name}' is a temporary collection. Dropping collection`);
 
           // drop collection and jump to next collection
           return data.dbConn.collection(collection.name)
             .drop()
             .then(() => {
               // log
-              console.log(`'${collection.name}' dropped`);
+              app.logger.info(`'${collection.name}' dropped`);
             })
             .then(nextCollection);
         };

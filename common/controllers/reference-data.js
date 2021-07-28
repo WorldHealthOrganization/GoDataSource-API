@@ -19,7 +19,7 @@ module.exports = function (ReferenceData) {
   /**
    * Export filtered reference data to a file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param options
    * @param callback
    */

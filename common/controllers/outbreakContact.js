@@ -1459,7 +1459,7 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered contacts to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList

@@ -2977,14 +2977,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -3036,14 +3035,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -3249,14 +3247,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -4711,14 +4708,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -4976,14 +4972,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -7642,14 +7637,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8131,14 +8125,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8421,14 +8414,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8485,14 +8477,13 @@
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",

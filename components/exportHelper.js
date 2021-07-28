@@ -40,7 +40,6 @@ const PREFILTER_SUFFIX = '_v';
 // FLAT / NON FLAT TYPES
 const EXPORT_TYPE = {
   JSON: 'json',
-  XML: 'xml',
   XLSX: 'xlsx',
   CSV: 'csv',
   XLS: 'xls',
@@ -48,8 +47,7 @@ const EXPORT_TYPE = {
   PDF: 'pdf'
 };
 const NON_FLAT_TYPES = [
-  EXPORT_TYPE.JSON,
-  EXPORT_TYPE.XML
+  EXPORT_TYPE.JSON
 ];
 
 // default export type - in case export type isn't provided

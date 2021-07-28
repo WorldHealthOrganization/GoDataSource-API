@@ -9,7 +9,6 @@ const _ = require('lodash');
 const Moment = require('moment');
 const uuid = require('uuid');
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
-const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (User) {
 
@@ -630,7 +629,7 @@ module.exports = function (User) {
   /**
    * Export filtered cases to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList
