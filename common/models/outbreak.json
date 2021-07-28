@@ -1315,6 +1315,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredEvents"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_import_lab_result",
       "permission": "ALLOW",
       "property": "importImportableCaseLabResultsFileUsingMap"
@@ -3010,6 +3016,65 @@
       "http": {
         "verb": "get",
         "path": "/cases/export"
+      }
+    },
+    "prototype.exportFilteredEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "xml",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export filtered list of events",
+      "http": {
+        "verb": "get",
+        "path": "/events/export"
       }
     },
     "prototype.getBarsTransmissionChains": {

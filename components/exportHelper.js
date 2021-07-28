@@ -434,10 +434,25 @@ function exportFilteredModelsList(
           1,
           '_id'
         );
+      } else {
+        // always include id
+        const _idIndex = fieldsList.indexOf('_id');
+        if (_idIndex < 0) {
+          fieldsList.splice(
+            0,
+            0,
+            '_id'
+          );
+        }
       }
       if (fieldLabelsMap.id) {
         fieldLabelsMap._id = fieldLabelsMap.id;
         delete fieldLabelsMap.id;
+      } else {
+        // always include id
+        if (!fieldLabelsMap._id) {
+          fieldLabelsMap._id = 'LNG_COMMON_MODEL_FIELD_LABEL_ID';
+        }
       }
 
       // finished

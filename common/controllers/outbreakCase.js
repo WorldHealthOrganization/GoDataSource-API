@@ -46,7 +46,7 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
     // remove custom filter options
@@ -102,7 +102,6 @@ module.exports = function (Outbreak) {
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation(
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
       context,
       modelInstance,
       next
@@ -258,7 +257,7 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
    */
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
     Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
@@ -312,7 +311,7 @@ module.exports = function (Outbreak) {
     context.args = context.args || {};
     context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
 
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
 
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
