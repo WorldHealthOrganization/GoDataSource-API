@@ -336,7 +336,8 @@ module.exports = function (Outbreak) {
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
 
     // trigger export
-    Outbreak.prototype.exportFilteredLabResults(
+    Outbreak.prototype.exportFilteredLabResults.call(
+      this,
       filter,
       exportType,
       encryptPassword,
@@ -377,7 +378,8 @@ module.exports = function (Outbreak) {
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
 
     // trigger export
-    Outbreak.prototype.exportFilteredLabResults(
+    Outbreak.prototype.exportFilteredLabResults.call(
+      this,
       filter,
       exportType,
       encryptPassword,
