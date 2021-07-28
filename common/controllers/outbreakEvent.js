@@ -9,6 +9,12 @@ const app = require('../../server/server');
 const genericHelpers = require('../../components/helpers');
 const WorkerRunner = require('./../../components/workerRunner');
 const _ = require('lodash');
+const Platform = require('../../components/platform');
+const Config = require('../../server/config.json');
+const importableFile = require('./../../components/importableFile');
+
+// used in event import
+const eventImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
 
@@ -221,6 +227,79 @@ module.exports = function (Outbreak) {
         );
       })
       .catch(callback);
+  };
+
+  /**
+   * Import an importable events file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableEventsFileUsingMap = function (body, options, callback) {
+    const self = this;
+
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of create operations for this batch
+      const createEvents = [];
+
+      // go through all batch entries
+      batchData.forEach(function (eventData) {
+        createEvents.push(function (asyncCallback) {
+          // sync the event
+          return app.utils.dbSync.syncRecord(logger, app.models.event, eventData.save, options)
+            .then(function () {
+              asyncCallback();
+            })
+            .catch(function (error) {
+              asyncCallback(null, {
+                success: false,
+                error: {
+                  error: error,
+                  data: {
+                    file: eventData.raw,
+                    save: eventData.save
+                  }
+                }
+              });
+            });
+        });
+      });
+
+      return createEvents;
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.event._booleanProperties) {
+      app.models.event._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.event);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'event',
+      batchSize: eventImportBatchSize,
+      outbreakId: self.id,
+      modelBooleanProperties: app.models.event._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.event.modelName,
+      outbreakId: self.id,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 
   /**

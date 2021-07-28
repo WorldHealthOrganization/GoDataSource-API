@@ -11649,6 +11649,9 @@
       "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_EXPORT_SELECTED_EVENTS": {
         "translation": "Export the selected events"
       },
+      "LNG_PAGE_LIST_EVENTS_IMPORT_BUTTON": {
+        "translation": "Import event data"
+      },
       "LNG_PAGE_LIST_EVENTS_TITLE": {
         "translation": "Événements"
       },
@@ -13235,6 +13238,11 @@
     "uiImportCaseData": {
       "LNG_PAGE_IMPORT_CASE_DATA_TITLE": {
         "translation": "Importer des données de cas"
+      }
+    },
+    "uiImportEventData": {
+      "LNG_PAGE_IMPORT_EVENT_DATA_TITLE": {
+        "translation": "Import event data"
       }
     },
     "uiImportCaseLabData": {
@@ -16281,6 +16289,9 @@
     "savedImportMappingsPages": {
       "LNG_APP_PAGE_IMPORT_CASES": {
         "translation": "Cas"
+      },
+      "LNG_APP_PAGE_IMPORT_EVENT": {
+        "translation": "Events"
       },
       "LNG_APP_PAGE_IMPORT_CONTACTS": {
         "translation": "Contacts"
