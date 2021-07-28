@@ -447,24 +447,36 @@ function exportFilteredModelsList(
       }
 
       // replace id with _id since were using mongo without loopback
+      // id should always be at the start
+      // - remove to add at the start
       const idIndex = fieldsList.indexOf('id');
       if (idIndex > -1) {
+        // remove id
         fieldsList.splice(
           idIndex,
-          1,
-          '_id'
+          1
         );
-      } else {
-        // always include id
-        const _idIndex = fieldsList.indexOf('_id');
-        if (_idIndex < 0) {
-          fieldsList.splice(
-            0,
-            0,
-            '_id'
-          );
-        }
       }
+
+      // remove _id to add at the start
+      const _idIndex = fieldsList.indexOf('_id');
+      if (_idIndex > -1) {
+        // remove _id
+        fieldsList.splice(
+          _idIndex,
+          1
+        );
+      }
+
+      // add _id to the start of items order to be exported
+      // always include id
+      fieldsList.splice(
+        0,
+        0,
+        '_id'
+      );
+
+      // map id to _id label, so we replace _id with token translation later
       if (fieldLabelsMap.id) {
         fieldLabelsMap._id = fieldLabelsMap.id;
         delete fieldLabelsMap.id;
@@ -816,10 +828,23 @@ function exportFilteredModelsList(
 
               // set columns per sheet
               const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
-              sheet.columns = sheetHandler.columns.headerColumns.slice(
+              const columns = sheetHandler.columns.headerColumns.slice(
                 startColumnsPos,
                 startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
               );
+              if (sheetIndex > 0) {
+                // id column at the start
+                columns.splice(
+                  0,
+                  0,
+
+                  // 0 will always be _id column
+                  sheetHandler.columns.headerColumns[0]
+                );
+              }
+
+              // set columns
+              sheet.columns = columns;
 
               // add it to the list
               xlsxWorksheets.push(sheet);
@@ -842,10 +867,23 @@ function exportFilteredModelsList(
               for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
                 // determine columns for this sheet
                 const startColumnsPos = sheetIndex * SHEET_LIMITS.XLS.MAX_COLUMNS;
-                const columns = sheetHandler.columns.headerColumns.slice(
+                let columns = sheetHandler.columns.headerColumns.slice(
                   startColumnsPos,
                   startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
-                ).map((column) => column.header);
+                );
+                if (sheetIndex > 0) {
+                  // id column at the start
+                  columns.splice(
+                    0,
+                    0,
+
+                    // 0 will always be _id column
+                    sheetHandler.columns.headerColumns[0]
+                  );
+                }
+
+                // set columns
+                columns = columns.map((column) => column.header);
 
                 // attach sheet with columns
                 if (
@@ -874,10 +912,23 @@ function exportFilteredModelsList(
               for (let sheetIndex = 0; sheetIndex < requiredNoOfSheets; sheetIndex++) {
                 // determine columns for this sheet
                 const startColumnsPos = sheetIndex * SHEET_LIMITS.ODS.MAX_COLUMNS;
-                const columns = sheetHandler.columns.headerColumns.slice(
+                let columns = sheetHandler.columns.headerColumns.slice(
                   startColumnsPos,
                   startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
-                ).map((column) => column.header);
+                );
+                if (sheetIndex > 0) {
+                  // id column at the start
+                  columns.splice(
+                    0,
+                    0,
+
+                    // 0 will always be _id column
+                    sheetHandler.columns.headerColumns[0]
+                  );
+                }
+
+                // set columns
+                columns = columns.map((column) => column.header);
 
                 // attach sheet with columns
                 if (
@@ -978,12 +1029,25 @@ function exportFilteredModelsList(
                     // set data per sheet
                     const startColumnsPos = sheetIndex * SHEET_LIMITS.XLSX.MAX_COLUMNS;
 
-                    // does commit wait for stream to flush
-                    // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
-                    xlsxWorksheets[sheetIndex].addRow(data.slice(
+                    // data
+                    const dataSlice = data.slice(
                       startColumnsPos,
                       startColumnsPos + SHEET_LIMITS.XLSX.MAX_COLUMNS
-                    )).commit();
+                    );
+
+                    // each sheet needs to have id as the first column
+                    if (sheetIndex > 0) {
+                      dataSlice.splice(
+                        0,
+                        0,
+                        // always _id
+                        data[0]
+                      );
+                    }
+
+                    // does commit wait for stream to flush
+                    // - or we might loose data just as we did with jsonWriteStream.write until we waited for write to flush - promise per record ?
+                    xlsxWorksheets[sheetIndex].addRow(dataSlice).commit();
                   }
                 }
               };
@@ -1261,12 +1325,25 @@ function exportFilteredModelsList(
             for (let rowIndex = 0; rowIndex < xlsDataBuffer.length; rowIndex++) {
               // get record data
               const rowData = xlsDataBuffer[rowIndex];
-              rows.push(
-                rowData.slice(
-                  startColumnsPos,
-                  startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
-                )
+
+              // data
+              const dataSlice = rowData.slice(
+                startColumnsPos,
+                startColumnsPos + SHEET_LIMITS.XLS.MAX_COLUMNS
               );
+
+              // each sheet needs to have id as the first column
+              if (sheetIndex > 0) {
+                dataSlice.splice(
+                  0,
+                  0,
+                  // always _id
+                  rowData[0]
+                );
+              }
+
+              // add row
+              rows.push(dataSlice);
             }
           }
 
@@ -1320,12 +1397,25 @@ function exportFilteredModelsList(
             for (let rowIndex = 0; rowIndex < odsDataBuffer.length; rowIndex++) {
               // get record data
               const rowData = odsDataBuffer[rowIndex];
-              rows.push(
-                rowData.slice(
-                  startColumnsPos,
-                  startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
-                )
+
+              // data
+              const dataSlice = rowData.slice(
+                startColumnsPos,
+                startColumnsPos + SHEET_LIMITS.ODS.MAX_COLUMNS
               );
+
+              // each sheet needs to have id as the first column
+              if (sheetIndex > 0) {
+                dataSlice.splice(
+                  0,
+                  0,
+                  // always _id
+                  rowData[0]
+                );
+              }
+
+              // add row
+              rows.push(dataSlice);
             }
           }
 
@@ -4213,9 +4303,10 @@ function exportFilteredModelsList(
 
                 // append row
                 return sheetHandler.process
-                  .addRow(sheetHandler.process.exportIsNonFlat ?
-                    dataObject :
-                    dataArray
+                  .addRow(
+                    sheetHandler.process.exportIsNonFlat ?
+                      dataObject :
+                      dataArray
                   )
                   .then(nextRecord);
               };
