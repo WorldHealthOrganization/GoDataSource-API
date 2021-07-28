@@ -646,168 +646,174 @@ module.exports = function (User) {
     options,
     callback
   ) {
-    // defensive checks
-    filter = filter || {};
-    filter.where = filter.where || {};
+    // disabled until implemented properly - ticket was de-prioritized a long time ago
+    callback();
 
-    new Promise((resolve, reject) => {
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(dictionary);
-      });
-    }).then(dictionary => {
-      if (!Array.isArray(anonymizeFields)) {
-        anonymizeFields = [];
-      }
-      if (anonymizeFields.indexOf('password') === -1) {
-        anonymizeFields.push('password');
-      }
-
-      options.dictionary = dictionary;
-      // #TODO - must replace with exportHelper
-      return app.utils.remote.helpers.exportFilteredModelsList(
-        app,
-        app.models.user,
-        {},
-        filter,
-        exportType,
-        'Users List',
-        (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
-        anonymizeFields,
-        fieldsGroupList,
-        options,
-        results => Promise.resolve(results),
-        callback
-      );
-    }).catch(callback);
+    // // defensive checks
+    // filter = filter || {};
+    // filter.where = filter.where || {};
+    //
+    // new Promise((resolve, reject) => {
+    //   const contextUser = app.utils.remote.getUserFromOptions(options);
+    //   app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+    //     if (err) {
+    //       return reject(err);
+    //     }
+    //     return resolve(dictionary);
+    //   });
+    // }).then(dictionary => {
+    //   if (!Array.isArray(anonymizeFields)) {
+    //     anonymizeFields = [];
+    //   }
+    //   if (anonymizeFields.indexOf('password') === -1) {
+    //     anonymizeFields.push('password');
+    //   }
+    //
+    //   options.dictionary = dictionary;
+    //   // #TODO - must replace with exportHelper - see other exports (cases, contact, ...)
+    //   return app.utils.remote.helpers.exportFilteredModelsList(
+    //     app,
+    //     app.models.user,
+    //     {},
+    //     filter,
+    //     exportType,
+    //     'Users List',
+    //     (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
+    //     anonymizeFields,
+    //     fieldsGroupList,
+    //     options,
+    //     results => Promise.resolve(results),
+    //     callback
+    //   );
+    // }).catch(callback);
   };
 
   User.import = function (data, options, callback) {
-    options._sync = false;
+    // disabled until implemented properly - ticket was de-prioritized a long time ago
+    callback();
 
-    importableFileHelpers
-      .getTemporaryFileById(data.fileId)
-      .then(file => {
-        const rawUsersList = file.data;
-        const usersList = app.utils.helpers.convertBooleanProperties(
-          app.models.user,
-          app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
-
-        const asyncOps = [];
-        const asyncOpsErrors = [];
-
-        asyncOpsErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-
-        // role, outbreak name <-> id mappings
-        const resourceMaps = {};
-
-        let roleNames = [];
-        let outbreakNames = [];
-        usersList.forEach(user => {
-          roleNames.push(...user.roleIds);
-          outbreakNames.push(...user.outbreakIds.concat([user.activeOutbreakId]));
-        });
-        roleNames = [...new Set(roleNames)];
-        outbreakNames = [...new Set(outbreakNames)];
-
-        return Promise.all([
-          new Promise((resolve, reject) => {
-            const rolesMap = {};
-            app.models.role
-              .rawFind({
-                name: {
-                  inq: roleNames
-                }
-              })
-              .then(roles => {
-                roles.forEach(role => {
-                  rolesMap[role.name] = role.id;
-                });
-                resourceMaps.roles = rolesMap;
-                return resolve();
-              })
-              .catch(reject);
-          }),
-          new Promise((resolve, reject) => {
-            const outbreaksMap = {};
-            app.models.outbreak
-              .rawFind({
-                name: {
-                  inq: outbreakNames
-                }
-              })
-              .then(outbreaks => {
-                outbreaks.forEach(outbreak => {
-                  outbreaksMap[outbreak.name] = outbreak.id;
-                });
-                resourceMaps.outbreaks = outbreaksMap;
-                return resolve();
-              })
-              .catch(reject);
-          })
-        ]).then(() => {
-          usersList.forEach((user, index) => {
-            asyncOps.push(cb => {
-              user.roleIds = user.roleIds.map(roleName => {
-                return resourceMaps.roles[roleName] || roleName;
-              });
-              user.outbreakIds = user.outbreakIds.map(outbreakName => {
-                return resourceMaps.outbreaks[outbreakName] || outbreakName;
-              });
-              user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
-
-              return app.utils.dbSync.syncRecord(
-                options.remotingContext.req.logger,
-                app.models.user,
-                user,
-                options)
-                .then(result => cb(null, result.record))
-                .catch(err => {
-                  // on error, store the error, but don't stop, continue with other items
-                  asyncOpsErrors.push({
-                    message: `Failed to import user ${index + 1}`,
-                    error: err,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawUsersList[index],
-                      save: user
-                    }
-                  });
-                  return cb(null, null);
-                });
-            });
-          });
-
-          async.parallelLimit(asyncOps, 10, (err, results) => {
-            if (err) {
-              return callback(err);
-            }
-            // if import errors were found
-            if (asyncOpsErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // overload toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.user.modelName,
-                failed: asyncOpsErrors,
-                success: results
-              }));
-            }
-            // send the result
-            return callback(null, results);
-          });
-        });
-      })
-      .catch(callback);
+    // options._sync = false;
+    //
+    // importableFileHelpers
+    //   .getTemporaryFileById(data.fileId)
+    //   .then(file => {
+    //     const rawUsersList = file.data;
+    //     const usersList = app.utils.helpers.convertBooleanProperties(
+    //       app.models.user,
+    //       app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
+    //
+    //     const asyncOps = [];
+    //     const asyncOpsErrors = [];
+    //
+    //     asyncOpsErrors.toString = function () {
+    //       return JSON.stringify(this);
+    //     };
+    //
+    //     // role, outbreak name <-> id mappings
+    //     const resourceMaps = {};
+    //
+    //     let roleNames = [];
+    //     let outbreakNames = [];
+    //     usersList.forEach(user => {
+    //       roleNames.push(...user.roleIds);
+    //       outbreakNames.push(...user.outbreakIds.concat([user.activeOutbreakId]));
+    //     });
+    //     roleNames = [...new Set(roleNames)];
+    //     outbreakNames = [...new Set(outbreakNames)];
+    //
+    //     return Promise.all([
+    //       new Promise((resolve, reject) => {
+    //         const rolesMap = {};
+    //         app.models.role
+    //           .rawFind({
+    //             name: {
+    //               inq: roleNames
+    //             }
+    //           })
+    //           .then(roles => {
+    //             roles.forEach(role => {
+    //               rolesMap[role.name] = role.id;
+    //             });
+    //             resourceMaps.roles = rolesMap;
+    //             return resolve();
+    //           })
+    //           .catch(reject);
+    //       }),
+    //       new Promise((resolve, reject) => {
+    //         const outbreaksMap = {};
+    //         app.models.outbreak
+    //           .rawFind({
+    //             name: {
+    //               inq: outbreakNames
+    //             }
+    //           })
+    //           .then(outbreaks => {
+    //             outbreaks.forEach(outbreak => {
+    //               outbreaksMap[outbreak.name] = outbreak.id;
+    //             });
+    //             resourceMaps.outbreaks = outbreaksMap;
+    //             return resolve();
+    //           })
+    //           .catch(reject);
+    //       })
+    //     ]).then(() => {
+    //       usersList.forEach((user, index) => {
+    //         asyncOps.push(cb => {
+    //           user.roleIds = user.roleIds.map(roleName => {
+    //             return resourceMaps.roles[roleName] || roleName;
+    //           });
+    //           user.outbreakIds = user.outbreakIds.map(outbreakName => {
+    //             return resourceMaps.outbreaks[outbreakName] || outbreakName;
+    //           });
+    //           user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
+    //
+    //           return app.utils.dbSync.syncRecord(
+    //             options.remotingContext.req.logger,
+    //             app.models.user,
+    //             user,
+    //             options)
+    //             .then(result => cb(null, result.record))
+    //             .catch(err => {
+    //               // on error, store the error, but don't stop, continue with other items
+    //               asyncOpsErrors.push({
+    //                 message: `Failed to import user ${index + 1}`,
+    //                 error: err,
+    //                 recordNo: index + 1,
+    //                 data: {
+    //                   file: rawUsersList[index],
+    //                   save: user
+    //                 }
+    //               });
+    //               return cb(null, null);
+    //             });
+    //         });
+    //       });
+    //
+    //       async.parallelLimit(asyncOps, 10, (err, results) => {
+    //         if (err) {
+    //           return callback(err);
+    //         }
+    //         // if import errors were found
+    //         if (asyncOpsErrors.length) {
+    //           // remove results that failed to be added
+    //           results = results.filter(result => result !== null);
+    //           // overload toString function to be used by error handler
+    //           results.toString = function () {
+    //             return JSON.stringify(this);
+    //           };
+    //           // return error with partial success
+    //           return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+    //             model: app.models.user.modelName,
+    //             failed: asyncOpsErrors,
+    //             success: results
+    //           }));
+    //         }
+    //         // send the result
+    //         return callback(null, results);
+    //       });
+    //     });
+    //   })
+    //   .catch(callback);
   };
 
   /**

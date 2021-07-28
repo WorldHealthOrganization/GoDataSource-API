@@ -1564,209 +1564,6 @@ const getSourceAndTargetFromModelHookContext = function (context) {
 };
 
 /**
- * Go through questionnaire columns and rename if they have the same header name
- */
-const renameDuplicateQuestionnaireHeaderColumns = (questionnaireData) => {
-  // determine items for which we need to change column headers due to duplicate conflicts
-  const addKeysToHeaderWithIndexes = {};
-  questionnaireData.forEach((questionnaireColumnData1, questionnaireColumnDataIndex1) => {
-    questionnaireData.forEach((questionnaireColumnData2, questionnaireColumnDataIndex2) => {
-      // if same then we need to jump over
-      if (
-        !questionnaireColumnData1.expandKey ||
-        !questionnaireColumnData2.expandKey ||
-        questionnaireColumnData1.expandKey === questionnaireColumnData2.expandKey
-      ) {
-        return;
-      }
-
-      // same translation ?
-      if (questionnaireColumnData1.expandHeader.toLowerCase() === questionnaireColumnData2.expandHeader.toLowerCase()) {
-        addKeysToHeaderWithIndexes[questionnaireColumnDataIndex1] = true;
-        addKeysToHeaderWithIndexes[questionnaireColumnDataIndex2] = true;
-      }
-    });
-  });
-
-  // change headers
-  Object.keys(addKeysToHeaderWithIndexes).forEach((questionnaireColumnDataIndex) => {
-    const questionnaireColumnData = questionnaireData[questionnaireColumnDataIndex];
-    questionnaireColumnData.expandHeader = `${questionnaireColumnData.expandHeader} (${questionnaireColumnData.expandKey})`;
-    questionnaireColumnData.header = `${questionnaireColumnData.header} (${questionnaireColumnData.expandKey})`;
-  });
-};
-
-/**
- * Retrieve list of questionnaire questions and their variables
- * @param questionnaire
- * @param idHeaderPrefix
- * @param dictionary
- * @param useVariable
- * @param multiDateLengthsMap
- * @param isNestedMultiDate
- * @param multiDateIndex
- * @returns {[{id, header}]}
- */
-const retrieveQuestionnaireVariables = (questionnaire, idHeaderPrefix, dictionary, useVariable, multiDateLengthsMap, isNestedMultiDate, multiDateIndex) => {
-  if (_.isEmpty(questionnaire)) {
-    return [];
-  }
-
-  const result = [];
-  _.each(questionnaire, (question) => {
-    if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP') {
-      result.push({
-        expandKey: question.variable,
-        expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-        id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable,
-        header: useVariable ? question.variable : dictionary.getTranslation(question.text)
-      });
-      return;
-    }
-    if (!_.isEmpty(question.variable)) {
-      const isMultiDate = question.multiAnswer || isNestedMultiDate;
-      multiDateLengthsMap[question.variable] = multiDateLengthsMap[question.variable] || 0;
-
-      if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
-        if (!_.isEmpty(question.answers)) {
-          if (isMultiDate) {
-            const addQuestionAndAnswers = (multiDateIndex) => {
-              _.each(question.answers, (answer, answerIndex) => {
-                result.push({
-                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
-                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${multiDateIndex}]`
-                });
-
-                result.push({
-                  expandKey: question.variable,
-                  expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-                  id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value ${(answerIndex + 1)}`,
-                  header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)} [MV ${multiDateIndex}]`
-                });
-
-                if (!_.isEmpty(answer.additionalQuestions)) {
-                  result.push(...retrieveQuestionnaireVariables(
-                    answer.additionalQuestions,
-                    idHeaderPrefix,
-                    dictionary,
-                    useVariable,
-                    multiDateLengthsMap,
-                    isMultiDate,
-                    multiDateIndex
-                  ));
-                }
-              });
-            };
-            if (multiDateIndex) {
-              addQuestionAndAnswers(multiDateIndex);
-            } else {
-              for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
-                addQuestionAndAnswers(i + 1);
-              }
-            }
-          } else {
-            _.each(question.answers, (answer, answerIndex) => {
-              result.push({
-                expandKey: question.variable,
-                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} 1 value ${(answerIndex + 1)}`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} ${(answerIndex + 1)}`
-              });
-
-              if (!_.isEmpty(answer.additionalQuestions)) {
-                result.push(...retrieveQuestionnaireVariables(
-                  answer.additionalQuestions,
-                  idHeaderPrefix,
-                  dictionary,
-                  useVariable,
-                  multiDateLengthsMap,
-                  isMultiDate,
-                  multiDateIndex
-                ));
-              }
-            });
-          }
-        }
-      } else {
-        if (isMultiDate) {
-          const addQuestionAndAnswers = (multiDateIndex) => {
-            result.push(
-              {
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} date`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MD ${multiDateIndex}]`
-              },
-              {
-                expandKey: question.variable,
-                expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-                id: `${(idHeaderPrefix ? idHeaderPrefix : '')} ${question.variable} ${multiDateIndex} value`,
-                header: `${(useVariable ? question.variable : dictionary.getTranslation(question.text))} [MV ${multiDateIndex}]`
-              }
-            );
-
-            // add children questions
-            if (!_.isEmpty(question.answers)) {
-              _.each(question.answers, (answer) => {
-                if (!_.isEmpty(answer.additionalQuestions)) {
-                  result.push(...retrieveQuestionnaireVariables(
-                    answer.additionalQuestions,
-                    idHeaderPrefix,
-                    dictionary,
-                    useVariable,
-                    multiDateLengthsMap,
-                    isMultiDate,
-                    multiDateIndex
-                  ));
-                }
-              });
-            }
-          };
-          if (multiDateIndex) {
-            addQuestionAndAnswers(multiDateIndex);
-          } else {
-            for (let i = 0; i < multiDateLengthsMap[question.variable]; i++) {
-              addQuestionAndAnswers(i + 1);
-            }
-          }
-        } else {
-          result.push({
-            expandKey: question.variable,
-            expandHeader: useVariable ? question.variable : dictionary.getTranslation(question.text),
-            id: (idHeaderPrefix ? idHeaderPrefix + ' ' : '') + question.variable + ' 1 value',
-            header: useVariable ? question.variable : dictionary.getTranslation(question.text)
-          });
-
-          if (!_.isEmpty(question.answers)) {
-            _.each(question.answers, (answer) => {
-              if (!_.isEmpty(answer.additionalQuestions)) {
-                result.push(...retrieveQuestionnaireVariables(
-                  answer.additionalQuestions,
-                  idHeaderPrefix,
-                  dictionary,
-                  useVariable,
-                  multiDateLengthsMap,
-                  isMultiDate,
-                  multiDateIndex
-                ));
-              }
-            });
-          }
-        }
-      }
-    }
-  });
-
-  // loop through headers and add variables to duplicate translations
-  if (
-    result &&
-    result.length > 1
-  ) {
-    renameDuplicateQuestionnaireHeaderColumns(result);
-  }
-
-  return result;
-};
-
-/**
  * Replaces answer values with their translate labels
  * @param question
  * @param answers
@@ -2546,33 +2343,6 @@ const removeFilterOptions = function (filter, options) {
   return filter;
 };
 
-const getMaximumLengthForArrays = function (items, props) {
-  const propsLengths = {};
-  props.forEach(prop => {
-    propsLengths[prop] = [];
-  });
-
-  items.forEach(item => {
-    props.forEach(prop => {
-      if (Array.isArray(item[prop])) {
-        propsLengths[prop].push(item[prop].length);
-      }
-    });
-  });
-
-  for (let p in propsLengths) {
-    if (propsLengths.hasOwnProperty(p)) {
-      let max = 0;
-      if (propsLengths[p].length) {
-        max = Math.max(...propsLengths[p]);
-      }
-      propsLengths[p] = max;
-    }
-  }
-
-  return propsLengths;
-};
-
 /**
  * Retrieve enabled captcha items
  * @returns {{login: boolean, forgotPassword: boolean, resetPasswordQuestions: boolean}|{}}
@@ -2948,7 +2718,6 @@ Object.assign(module.exports, {
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
-  retrieveQuestionnaireVariables: retrieveQuestionnaireVariables,
   getDateChunks: getDateChunks,
   getDaysSince: getDaysSince,
   getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
@@ -2956,7 +2725,6 @@ Object.assign(module.exports, {
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,
   removeFilterOptions: removeFilterOptions,
-  getMaximumLengthForArrays: getMaximumLengthForArrays,
   getCaptchaConfig: getCaptchaConfig,
   handleActionsInBatches: handleActionsInBatches,
   extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
