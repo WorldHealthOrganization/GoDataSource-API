@@ -6,6 +6,9 @@
  */
 
 const app = require('../../server/server');
+const WorkerRunner = require('./../../components/workerRunner');
+const _ = require('lodash');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -164,90 +167,141 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    const self = this;
-
-    // defensive checks
+    // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
 
     // parse useQuestionVariable query param
-    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
-    // if found, remove it form main query
+    let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
       useDbColumns = filter.where.useDbColumns;
       delete filter.where.useDbColumns;
     }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
     if (filter.where.hasOwnProperty('dontTranslateValues')) {
       dontTranslateValues = filter.where.dontTranslateValues;
       delete filter.where.dontTranslateValues;
     }
 
-    // update filter for outbreak and geographical restriction
-    app.models.labResult.preFilterForOutbreak(this, filter, options)
-      .then(updatedFilter => {
-        filter = updatedFilter;
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
 
-        return new Promise((resolve, reject) => {
-          const contextUser = app.utils.remote.getUserFromOptions(options);
-          app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(dictionary);
-          });
-        });
-      })
-      .then(dictionary => {
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
 
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
+    // prefilter
+    app.models.contact.preFilterForOutbreak(this, filter, options)
+      .then((filter) => {
 
-        // retrieve lab results with person data
-        app.models.labResult.retrieveAggregateLabResults(
-          this,
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'labResult',
+            modelName: app.models.labResult.modelName,
+            scopeQuery: app.models.labResult.definition.settings.scope,
+            arrayProps: app.models.labResult.arrayProps,
+            fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.labResult.exportFieldsGroup,
+            exportFieldsOrder: app.models.labResult.exportFieldsOrder,
+            locationFields: app.models.labResult.locationFields
+          },
           filter,
-          false,
-          (err, results) => {
-            if (err) {
-              return callback(err);
+          exportType,
+          encryptPassword,
+          anonymizeFields,
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.labResultsTemplate ?
+              this.labResultsTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          undefined,
+          {
+            person: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'type',
+                'lastName',
+                'firstName',
+                'middleName',
+                'dateOfOnset',
+                'dateOfReporting',
+                'addresses'
+              ],
+              key: '_id',
+              keyValue: `(labResult) => {
+                return labResult && labResult.personId ?
+                  labResult.personId :
+                  undefined;
+              }`,
+              applyToAll: `(
+                person,
+                helperMethods
+              ) => {
+                // finished
+                const addresses = person.addresses;
+                delete person.addresses;
+
+                // get only the current address
+                if (
+                  addresses &&
+                  addresses.length > 0
+                ) {
+                  for (let addressIndex = 0; addressIndex < addresses.length; addressIndex++) {
+                    const address = addresses[addressIndex];
+                    if (
+                      address &&
+                      address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                    ) {
+                      // set address
+                      person.address = address;
+
+                      // transform geo location
+                      helperMethods.covertAddressesGeoPointToLoopbackFormat(person);
+
+                      // do we need to retrieve location ?
+                      if (person.address.locationId) {
+                        helperMethods.retrieveLocation(person.address.locationId);
+                      }
+
+                      // finished
+                      break;
+                    }
+                  }
+                }
+              }`
             }
-
-            options.questionnaire = self.labResultsTemplate;
-            options.dictionary = dictionary;
-            options.useQuestionVariable = useQuestionVariable;
-
-            // need to export only the usual place of residence for the person
-            results.forEach((labResult) => {
-              !labResult.person && (labResult.person = {});
-              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
-              delete labResult.person.addresses;
-            });
-
-            options.records = results;
-
-            app.utils.remote.helpers.exportFilteredModelsList(
-              app,
-              app.models.labResult,
-              {},
-              filter,
-              exportType,
-              'LabResult-List',
-              encryptPassword,
-              anonymizeFields,
-              fieldsGroupList,
-              options,
-              null,
-              callback
-            );
-          });
+          }
+        );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
       })
       .catch(callback);
   };
@@ -273,8 +327,6 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    const self = this;
-
     // defensive checks
     filter = filter || {};
     filter.where = filter.where || {};
@@ -283,92 +335,16 @@ module.exports = function (Outbreak) {
     filter.where.personId = caseId;
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
 
-    // parse useQuestionVariable query param
-    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
-    // if found, remove it form main query
-    if (filter.where.hasOwnProperty('useQuestionVariable')) {
-      useQuestionVariable = filter.where.useQuestionVariable;
-      delete filter.where.useQuestionVariable;
-    }
-    if (filter.where.hasOwnProperty('useDbColumns')) {
-      useDbColumns = filter.where.useDbColumns;
-      delete filter.where.useDbColumns;
-    }
-    if (filter.where.hasOwnProperty('dontTranslateValues')) {
-      dontTranslateValues = filter.where.dontTranslateValues;
-      delete filter.where.dontTranslateValues;
-    }
-
-    new Promise((resolve, reject) => {
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(dictionary);
-      });
-    })
-      .then(dictionary => {
-        return app.models.labResult.preFilterForOutbreak(this, filter, options)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
-
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        // retrieve lab results with person data
-        app.models.labResult.retrieveAggregateLabResults(
-          this,
-          filter,
-          false,
-          (err, results) => {
-            if (err) {
-              return callback(err);
-            }
-
-            options.questionnaire = self.labResultsTemplate;
-            options.dictionary = dictionary;
-            options.useQuestionVariable = useQuestionVariable;
-
-            // need to export only the usual place of residence for the person
-            results.forEach((labResult) => {
-              !labResult.person && (labResult.person = {});
-              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
-              delete labResult.person.addresses;
-            });
-
-            options.records = results;
-
-            app.utils.remote.helpers.exportFilteredModelsList(
-              app,
-              app.models.labResult,
-              {},
-              filter,
-              exportType,
-              'LabResult-List',
-              encryptPassword,
-              anonymizeFields,
-              fieldsGroupList,
-              options,
-              null,
-              callback
-            );
-          });
-      })
-      .catch(callback);
+    // trigger export
+    Outbreak.prototype.exportFilteredLabResults(
+      filter,
+      exportType,
+      encryptPassword,
+      anonymizeFields,
+      fieldsGroupList,
+      options,
+      callback
+    );
   };
 
   /**
@@ -392,102 +368,24 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    const self = this;
-
     // defensive checks
     filter = filter || {};
     filter.where = filter.where || {};
 
-    // only contact lab results
+    // only case lab results
     filter.where.personId = contactId;
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
 
-    // parse useQuestionVariable query param
-    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
-    // if found, remove it form main query
-    if (filter.where.hasOwnProperty('useQuestionVariable')) {
-      useQuestionVariable = filter.where.useQuestionVariable;
-      delete filter.where.useQuestionVariable;
-    }
-    if (filter.where.hasOwnProperty('useDbColumns')) {
-      useDbColumns = filter.where.useDbColumns;
-      delete filter.where.useDbColumns;
-    }
-    if (filter.where.hasOwnProperty('dontTranslateValues')) {
-      dontTranslateValues = filter.where.dontTranslateValues;
-      delete filter.where.dontTranslateValues;
-    }
-
-    new Promise((resolve, reject) => {
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(dictionary);
-      });
-    })
-      .then(dictionary => {
-        return app.models.labResult.preFilterForOutbreak(this, filter, options)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
-
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        // retrieve lab results with person data
-        app.models.labResult.retrieveAggregateLabResults(
-          this,
-          filter,
-          false,
-          (err, results) => {
-            if (err) {
-              return callback(err);
-            }
-
-            options.questionnaire = self.labResultsTemplate;
-            options.dictionary = dictionary;
-            options.useQuestionVariable = useQuestionVariable;
-
-            // need to export only the usual place of residence for the person
-            results.forEach((labResult) => {
-              !labResult.person && (labResult.person = {});
-              labResult.person.address = (labResult.person.addresses || []).find(address => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE') || {};
-              delete labResult.person.addresses;
-            });
-
-            options.records = results;
-
-            app.utils.remote.helpers.exportFilteredModelsList(
-              app,
-              app.models.labResult,
-              {},
-              filter,
-              exportType,
-              'LabResult-List',
-              encryptPassword,
-              anonymizeFields,
-              fieldsGroupList,
-              options,
-              null,
-              callback
-            );
-          });
-      })
-      .catch(callback);
+    // trigger export
+    Outbreak.prototype.exportFilteredLabResults(
+      filter,
+      exportType,
+      encryptPassword,
+      anonymizeFields,
+      fieldsGroupList,
+      options,
+      callback
+    );
   };
 
   /**

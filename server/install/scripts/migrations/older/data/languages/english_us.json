@@ -16930,6 +16930,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_PERSON": {
         "translation": "Person"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_PERSON_ADDRESS": {
+        "translation": "Address"
       }
     },
     "uiCreateLabResultPage": {

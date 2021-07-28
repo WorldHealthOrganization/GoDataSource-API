@@ -259,6 +259,28 @@ function exportFilteredModelsList(
               }
             }
 
+            // apply to all
+            if (
+              relationData.applyToAll &&
+              typeof relationData.applyToAll !== 'string'
+            ) {
+              // invalid content
+              throwError(
+                relationName,
+                `invalid applyToAll (${typeof relationData.applyToAll})`
+              );
+            } else {
+              // transform to method
+              try {
+                relationData.applyToAll = eval(relationData.applyToAll);
+              } catch (e) {
+                throwError(
+                  relationName,
+                  'invalid applyToAll method content'
+                );
+              }
+            }
+
             // finished
             break;
 
@@ -1481,6 +1503,7 @@ function exportFilteredModelsList(
         locationsMaxNumberOfIdentifiers: 0,
         locationsMaxSizeOfParentsChain: 0,
         locationsMap: {},
+        locationsMissing: {},
 
         // retrieve only the fields that we need
         projection,
@@ -1523,6 +1546,20 @@ function exportFilteredModelsList(
     const defaultQuestionnaireAnswersKey = 'questionnaireAnswers';
     const dataFilter = initializeQueryFilters();
     const sheetHandler = initializeTemporaryWorkbook();
+
+    // list of methods that can be used by relation functions
+    const helperMethods = {
+      covertAddressesGeoPointToLoopbackFormat: genericHelpers.covertAddressesGeoPointToLoopbackFormat,
+      retrieveLocation: (locationId) => {
+        // location already retrieved ?
+        if (sheetHandler.locationsMap[locationId]) {
+          return;
+        }
+
+        // retrieve location
+        sheetHandler.locationsMissing[locationId] = true;
+      }
+    };
 
     // drop collection
     const dropTemporaryCollection = () => {
@@ -2975,9 +3012,12 @@ function exportFilteredModelsList(
                         removeLastColumnIfSamePath(splitParentFull);
 
                         // append parent name
+                        const possibleParentToken = sheetHandler.columns.labels[splitParentFull] ?
+                          sheetHandler.columns.labels[splitParentFull] :
+                          sheetHandler.columns.labels[splitParent];
                         parentPropertyTokenTranslation = parentPropertyTokenTranslation ? parentPropertyTokenTranslation + ' ' : parentPropertyTokenTranslation;
-                        parentPropertyTokenTranslation += !sheetHandler.useDbColumns && splitParent && sheetHandler.columns.labels[splitParent] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[splitParent]] ?
-                          sheetHandler.dictionaryMap[sheetHandler.columns.labels[splitParent]] : (
+                        parentPropertyTokenTranslation += !sheetHandler.useDbColumns && splitParent && possibleParentToken && sheetHandler.dictionaryMap[possibleParentToken] ?
+                          sheetHandler.dictionaryMap[possibleParentToken] : (
                             sheetHandler.useDbColumns ?
                               splitParent :
                               undefined
@@ -3687,6 +3727,14 @@ function exportFilteredModelsList(
 
                         // map
                         relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
+
+                        // apply to all
+                        if (sheetHandler.relationsMap[relationName].data.applyToAll) {
+                          sheetHandler.relationsMap[relationName].data.applyToAll(
+                            relationsResults[relationName][keyValue],
+                            helperMethods
+                          );
+                        }
                       }
                     });
                   });
@@ -4000,6 +4048,18 @@ function exportFilteredModelsList(
                   relationsData
                 );
               }
+            })
+
+            // retrieve missing locations
+            .then(() => {
+              // do we have missing locations ?
+              const missingLocations = Object.keys(sheetHandler.locationsMissing);
+              if (missingLocations.length < 1) {
+                return;
+              }
+
+              // retrieve missing locations
+              return retrieveMissingLocations(missingLocations);
             })
 
             // retrieve missing language tokens & write data

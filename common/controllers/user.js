@@ -667,6 +667,7 @@ module.exports = function (User) {
       }
 
       options.dictionary = dictionary;
+      // #TODO - must replace with exportHelper
       return app.utils.remote.helpers.exportFilteredModelsList(
         app,
         app.models.user,

@@ -1544,7 +1544,9 @@ module.exports = function (Outbreak) {
           {
             userId: _.get(options, 'accessToken.userId'),
             outbreakId: this.id,
-            questionnaire: this.contactInvestigationTemplate.toJSON(),
+            questionnaire: this.contactInvestigationTemplate ?
+              this.contactInvestigationTemplate.toJSON() :
+              undefined,
             useQuestionVariable,
             useDbColumns,
             dontTranslateValues,
