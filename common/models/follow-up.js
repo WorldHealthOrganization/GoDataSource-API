@@ -164,6 +164,13 @@ module.exports = function (FollowUp) {
     }
   };
 
+  // default export order
+  FollowUp.exportFieldsOrder = [
+    'id',
+    'date',
+    'index'
+  ];
+
   // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
   // this is relevant only when we update a record since on create we don't have old data that we need to merge
   FollowUp.mergeFieldsOnUpdate = [

@@ -5012,24 +5012,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of follow ups",

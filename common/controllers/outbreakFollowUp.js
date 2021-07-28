@@ -12,6 +12,7 @@ const _ = require('lodash');
 const Config = require('./../../server/config.json');
 const genericHelpers = require('../../components/helpers');
 const Platform = require('../../components/platform');
+const WorkerRunner = require('./../../components/workerRunner');
 
 module.exports = function (Outbreak) {
   /**
@@ -389,95 +390,89 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    let self = this;
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+
     // parse useQuestionVariable query param
-    let useQuestionVariable = false, useDbColumns = false, dontTranslateValues = false;
-    // if found, remove it form main query
+    let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
       useDbColumns = filter.where.useDbColumns;
       delete filter.where.useDbColumns;
     }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
     if (filter.where.hasOwnProperty('dontTranslateValues')) {
       dontTranslateValues = filter.where.dontTranslateValues;
       delete filter.where.dontTranslateValues;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
-        }
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
 
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then((dictionary) => {
-        return app.models.followUp.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(function (data) {
-        // add geographical restriction to filter if needed
-        return app.models.followUp
-          .addGeographicalRestrictions(options.remotingContext, data.filter.where)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (data.filter.where = updatedFilter);
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
 
-            // finished
-            return data;
-          });
-      })
-      .then(function (data) {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
+    // prefilter
+    app.models.followUp.preFilterForOutbreak(this, filter)
+      .then((filter) => {
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
+        // geo restrictions
+        // #TODO
+        // return app.models.followUp
+        //   .addGeographicalRestrictions(options.remotingContext, data.filter.where)
+        //   .then(updatedFilter => {
+        //     // update where if needed
+        //     updatedFilter && (data.filter.where = updatedFilter);
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        options.questionnaire = self.contactFollowUpTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.followUp,
-          {},
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'followUp',
+            modelName: app.models.followUp.modelName,
+            scopeQuery: app.models.followUp.definition.settings.scope,
+            arrayProps: undefined,
+            fieldLabelsMap: app.models.followUp.fieldLabelsMap,
+            exportFieldsGroup: app.models.followUp.exportFieldsGroup,
+            exportFieldsOrder: app.models.followUp.exportFieldsOrder,
+            locationFields: app.models.followUp.locationFields
+          },
           filter,
           exportType,
-          'Follow-Up List',
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          options,
-          function (results) {
-            return Promise.resolve(results);
-          },
-          callback
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.contactFollowUpTemplate.toJSON(),
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          }
         );
-      });
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
   };
 
   /**

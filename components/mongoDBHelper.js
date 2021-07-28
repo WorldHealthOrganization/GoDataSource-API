@@ -25,7 +25,7 @@ function getMongoDBClient(mongoOptions = {}) {
     keepAlive: true,
     connectTimeoutMS: 1800000, // 30 minutes
     socketTimeoutMS: 1800000, // 30 minutes
-    reconnectTries: 30000 // too many
+    reconnectTries: 300 // too many
   });
 
   // attach auth credentials
