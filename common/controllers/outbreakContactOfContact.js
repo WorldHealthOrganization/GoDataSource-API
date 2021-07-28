@@ -14,6 +14,8 @@ const AdmZip = require('adm-zip');
 const moment = require('moment');
 const apiError = require('../../components/apiError');
 const Config = require('../../server/config.json');
+const WorkerRunner = require('./../../components/workerRunner');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -178,111 +180,130 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // prefilter
     app.models.contactOfContact
       .preFilterForOutbreak(this, filter, options)
-      .then(filter => {
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.contactOfContact,
-          {},
+      .then((filter) => {
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'person',
+            modelName: app.models.contactOfContact.modelName,
+            scopeQuery: app.models.contactOfContact.definition.settings.scope,
+            arrayProps: app.models.contactOfContact.arrayProps,
+            fieldLabelsMap: app.models.contactOfContact.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.contactOfContact.exportFieldsGroup,
+            exportFieldsOrder: app.models.contactOfContact.exportFieldsOrder,
+            locationFields: app.models.contactOfContact.locationFields
+          },
           filter,
           exportType,
-          'Contacts Of Contacts List',
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          options,
-          (results, dictionary) => {
-            return new Promise(function (resolve, reject) {
-              // determine contacts of contacts for which we need to retrieve the first relationship
-              const contactOfContactsMap = _.transform(
-                results,
-                (r, v) => {
-                  r[v.id] = v;
-                },
-                {}
-              );
-
-              // retrieve contact of contacts relationships ( sorted by creation date )
-              // only those for which source is a contact ( at this point it shouldn't be anything else than a contact, but we should handle this case since date & source flags should be enough... )
-              // in case we don't have any contact of contact Ids there is no point in searching for relationships
-              const contactOfContactIds = Object.keys(contactOfContactsMap);
-              const promise = contactOfContactIds.length < 1 ?
-                Promise.resolve([]) :
-                app.models.relationship.find({
-                  order: 'createdAt ASC',
-                  where: {
-                    'persons.id': {
-                      inq: contactOfContactIds
-                    }
-                  }
-                });
-
-              // handle exceptions
-              promise.catch(reject);
-
-              // retrieve contact of contacts relationships ( sorted by creation date )
-              const relationshipsPromises = [];
-              promise.then((relationshipResults) => {
-                // keep only the first relationship
-                // assign relationships to contacts
-                _.each(relationshipResults, (relationship) => {
-                  // incomplete relationship ?
-                  if (relationship.persons.length < 2) {
-                    return;
-                  }
-
-                  // determine contact of contacts & related ids
-                  let contactOfContactId, relatedId;
-                  if (relationship.persons[0].target) {
-                    contactOfContactId = relationship.persons[0].id;
-                    relatedId = relationship.persons[1].id;
-                  } else {
-                    contactOfContactId = relationship.persons[1].id;
-                    relatedId = relationship.persons[0].id;
-                  }
-
-                  // check if this is the first relationship for this contact of contacts
-                  // if it is, then we need to map information
-                  if (
-                    contactOfContactsMap[contactOfContactId] &&
-                    !contactOfContactsMap[contactOfContactId].relationship
-                  ) {
-                    // get relationship data
-                    contactOfContactsMap[contactOfContactId].relationship = relationship.toJSON();
-
-                    // set related ID
-                    contactOfContactsMap[contactOfContactId].relationship.relatedId = relatedId;
-
-                    // resolve relationship foreign keys here
-                    relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
-                      app,
-                      app.models.relationship,
-                      [contactOfContactsMap[contactOfContactId].relationship],
-                      dictionary
-                    ).then(relationship => {
-                      contactOfContactsMap[contactOfContactId].relationship = relationship[0];
-                    }));
-                  }
-                });
-
-                // finished
-                return Promise.all(relationshipsPromises).then(() => resolve(results));
-              });
-
-            });
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: undefined,
+            useQuestionVariable: false,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          callback
+          undefined, {
+            relationship: {
+              type: exportHelper.RELATION_TYPE.GET_ONE,
+              collection: 'relationship',
+              project: [
+                '_id',
+                'contactDate',
+                'contactDateEstimated',
+                'certaintyLevelId',
+                'exposureTypeId',
+                'exposureFrequencyId',
+                'exposureDurationId',
+                'socialRelationshipTypeId',
+                'socialRelationshipDetail',
+                'clusterId',
+                'comment',
+                'createdAt',
+                'createdBy',
+                'updatedAt',
+                'updatedBy',
+                'deleted',
+                'deletedAt',
+                'createdOn',
+                'persons'
+              ],
+              query: `(person) => {
+                return person ?
+                  {
+                    outbreakId: '${this.id}',
+                    deleted: false,
+                    'persons.id': person._id
+                  } :
+                  undefined;
+              }`,
+              sort: {
+                createdAt: 1
+              },
+              after: `(person) => {
+                // nothing to do ?
+                if (
+                  !person.relationship ||
+                  !person.relationship.persons ||
+                  person.relationship.persons.length !== 2
+                ) {
+                  return;
+                }
+
+                // determine related person
+                person.relationship.relatedId = person.relationship.persons[0].id === person._id ?
+                  person.relationship.persons[1].id :
+                  person.relationship.persons[0].id;
+
+                // cleanup
+                delete person.relationship.persons;
+                person.relationship.id = person.relationship._id;
+                delete person.relationship._id;
+              }`
+            }
+          }
+        );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
         );
       })
       .catch(callback);

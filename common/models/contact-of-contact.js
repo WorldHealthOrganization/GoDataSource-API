@@ -44,16 +44,16 @@ module.exports = function (ContactOfContact) {
     // append source export fields
     Object.assign(
       fieldLabelsMap,
-      ContactOfContact.fieldLabelsMap,
+      ContactOfContact.fieldLabelsMap, {
+        'relationship': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RELATIONSHIP'
+      },
       _.transform(
         relationshipFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`relationship.${property}`] = token;
         },
         {}
-      ), {
-        'relationship': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RELATIONSHIP'
-      }
+      )
     );
 
     // finished
