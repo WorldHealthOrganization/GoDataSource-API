@@ -573,7 +573,6 @@ function exportFilteredModelsList(
           // some types are ignored since there is no point in exporting them ?
           if (
             !question.text ||
-            !question.text.startsWith('LNG_') ||
             !question.variable ||
             question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP'
           ) {
