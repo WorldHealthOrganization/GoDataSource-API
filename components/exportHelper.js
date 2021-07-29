@@ -2641,46 +2641,63 @@ function exportFilteredModelsList(
                 // not array? no need for custom projection
                 const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
                 if (foreignKeyArrayIndex < 0) {
-                  // retrieve related data so we can do something like an 'inner join'
-                  // #TODO - there are better ways to do it in newer mongo..
-                  throw new Error('Not implemented: Prefilters - local key not array, foreignKey not array');
-                }
-
-                // match key is an array ?
-                // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
-                // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
-                const childKey = prefilter.definition.foreignKey.substr(foreignKeyArrayIndex + 2);
-                for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
                   // determine related prefilter
+                  const asKey = `${PREFILTER_PREFIX}${prefilter.name}`;
                   aggregateFilter.push({
                     $lookup: {
                       from: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`,
                       localField: prefilter.definition.localKey === '_id' ?
                         'rowId' : prefilter.definition.localKey,
-                      foreignField: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
-                      as: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}`
+                      foreignField: prefilter.definition.foreignKey,
+                      as: asKey
                     }
                   });
-                }
 
-                // filter
-                // @TODO - must replace once upgrade to newer mongo version
-                const prefilterMatchArray = {
-                  $or: []
-                };
-                for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
-                  // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
-                  prefilterMatchArray.$or.push({
-                    [`${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}._id`]: {
-                      $exists: true
+                  // attach filter
+                  aggregateFilter.push({
+                    $match: {
+                      [`${asKey}._id`]: {
+                        $exists: true
+                      }
                     }
                   });
-                }
+                } else {
+                  // match key is an array ?
+                  // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
+                  // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
+                  const childKey = prefilter.definition.foreignKey.substr(foreignKeyArrayIndex + 2);
+                  for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
+                    // determine related prefilter
+                    aggregateFilter.push({
+                      $lookup: {
+                        from: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`,
+                        localField: prefilter.definition.localKey === '_id' ?
+                          'rowId' : prefilter.definition.localKey,
+                        foreignField: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
+                        as: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}`
+                      }
+                    });
+                  }
 
-                // attach filter
-                aggregateFilter.push({
-                  $match: prefilterMatchArray
-                });
+                  // filter
+                  // @TODO - must replace once upgrade to newer mongo version
+                  const prefilterMatchArray = {
+                    $or: []
+                  };
+                  for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
+                    // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
+                    prefilterMatchArray.$or.push({
+                      [`${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}._id`]: {
+                        $exists: true
+                      }
+                    });
+                  }
+
+                  // attach filter
+                  aggregateFilter.push({
+                    $match: prefilterMatchArray
+                  });
+                }
               } else {
                 // not array? no need for custom projection
                 const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
