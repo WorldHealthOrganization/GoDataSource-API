@@ -2040,14 +2040,20 @@ function exportFilteredModelsList(
             // retrieve prefilter
             const prefilter = tmpPrefilters.splice(0, 1)[0];
 
+            // construct project
+            const project = {
+              _id: 1
+            };
+            if (prefilter.definition.foreignKey !== '_id') {
+              project[prefilter.definition.foreignKey.replace(/\[\]/g, '')] = 1;
+            }
+
             // construct filter aggregation
             const aggregateFilter = [
               {
                 $match: prefilter.definition.filter.where
               }, {
-                $project: {
-                  _id: 1
-                }
+                $project: project
               }, {
                 $out: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`
               }
@@ -2105,19 +2111,46 @@ function exportFilteredModelsList(
             sheetHandler.prefiltersIds[prefilter.name] = [];
 
             // count no of records
+            const foreignKey = prefilter.definition.foreignKey.replace(/\[\]/g, '');
             return sheetHandler.dbConnection
               .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
               .find(
                 {}, {
                   projection: {
-                    _id: 1
+                    [foreignKey]: 1
                   }
                 }
               )
               .toArray()
-              .then((ids) => {
-                // add count
-                sheetHandler.prefiltersIds[prefilter.name] = (ids || []).map((record) => record._id);
+              .then((prefilterRecords) => {
+                // determine ids
+                const prefilterIds = {};
+                for (let foreignKeyIndex = 0; foreignKeyIndex < prefilterRecords.length; foreignKeyIndex++) {
+                  // get record
+                  const record = prefilterRecords[foreignKeyIndex];
+
+                  // if array we need to handle it differently
+                  const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
+                  if (foreignKeyArrayIndex < 0) {
+                    prefilterIds[record[prefilter.definition.foreignKey]] = true;
+                  } else {
+                    const parentKey = prefilter.definition.foreignKey.substr(0, foreignKeyArrayIndex);
+                    const childKey = prefilter.definition.foreignKey.substr(foreignKeyArrayIndex + 3);
+                    const arrayValues = _.get(record, parentKey);
+                    if (arrayValues) {
+                      for (let arrayIndex = 0; arrayIndex < arrayValues.length; arrayIndex++) {
+                        const childValue = _.get(arrayValues[arrayIndex], childKey);
+                        if (childValue) {
+                          prefilterIds[childValue] = true;
+                        }
+                      }
+                    }
+                  }
+                }
+
+                // set prefilter filter ids
+                // - sort needed to keep order of items when comparing to remove from condition
+                sheetHandler.prefiltersIds[prefilter.name] = Object.keys(prefilterIds).sort();
 
                 // continue with next filter
                 return nextPrefilterIds();
@@ -2332,7 +2365,7 @@ function exportFilteredModelsList(
             // attach ids conditions
             sheetHandler.prefilters.forEach((prefilter) => {
               // add to prefilter condition
-              const prefilterKey = prefilter.definition.matchKey.replace(/\[\]/g, '');
+              const prefilterKey = prefilter.definition.localKey.replace(/\[\]/g, '');
               prefiltersConditions.push({
                 [prefilterKey]: {
                   $in: sheetHandler.prefiltersIds[prefilter.name]
@@ -2380,7 +2413,7 @@ function exportFilteredModelsList(
           }
 
           // do we have prefilters, then projection will be don here, before the lookup & match
-          let matchKeyProject;
+          let localKeyProject;
           let cleanupProject;
           if (!sheetHandler.prefiltersDisableLookup) {
             if (sheetHandler.prefilters.length > 0) {
@@ -2398,13 +2431,13 @@ function exportFilteredModelsList(
 
               // make sure we do the math
               // - rowId, arrays sizes ...
-              matchKeyProject = project;
+              localKeyProject = project;
             }
 
             // prepare array for prefilters
             sheetHandler.prefilters.forEach((prefilter) => {
               // not array? no need for custom projection
-              const arrayIndex = prefilter.definition.matchKey.indexOf('[]');
+              const arrayIndex = prefilter.definition.localKey.indexOf('[]');
               if (arrayIndex < 0) {
                 return;
               }
@@ -2412,29 +2445,29 @@ function exportFilteredModelsList(
               // match key is an array ?
               // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
               // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
-              const arrayKey = prefilter.definition.matchKey.substr(0, arrayIndex);
-              for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+              const arrayKey = prefilter.definition.localKey.substr(0, arrayIndex);
+              for (let localKeyIndex = 0; localKeyIndex < prefilter.definition.localKeyArraySize; localKeyIndex++) {
                 // attach element
-                matchKeyProject[`${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}${PREFILTER_SUFFIX}`] = {
+                localKeyProject[`${PREFILTER_PREFIX}${prefilter.name}_${localKeyIndex}${PREFILTER_SUFFIX}`] = {
                   $arrayElemAt: [
                     `$${arrayKey}`,
-                    matchKeyIndex
+                    localKeyIndex
                   ]
                 };
               }
             });
 
             // attach match key project if necessary
-            if (!_.isEmpty(matchKeyProject)) {
+            if (!_.isEmpty(localKeyProject)) {
               aggregateFilter.push({
-                $project: matchKeyProject
+                $project: localKeyProject
               });
             }
 
             // prefilter if necessary
             sheetHandler.prefilters.forEach((prefilter) => {
               // not array? no need for custom projection
-              const arrayIndex = prefilter.definition.matchKey.indexOf('[]');
+              const arrayIndex = prefilter.definition.localKey.indexOf('[]');
               if (arrayIndex < 0) {
                 // retrieve related data so we can do something like an 'inner join'
                 // #TODO - there are better ways to do it in newer mongo..
@@ -2446,15 +2479,15 @@ function exportFilteredModelsList(
                 // match key is an array ?
                 // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
                 // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
-                const childKey = prefilter.definition.matchKey.substr(arrayIndex + 2);
-                for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+                const childKey = prefilter.definition.localKey.substr(arrayIndex + 2);
+                for (let localKeyIndex = 0; localKeyIndex < prefilter.definition.localKeyArraySize; localKeyIndex++) {
                   // determine related prefilter
                   aggregateFilter.push({
                     $lookup: {
                       from: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`,
-                      localField: `${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
-                      foreignField: '_id',
-                      as: `${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}`
+                      localField: `${PREFILTER_PREFIX}${prefilter.name}_${localKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
+                      foreignField: prefilter.definition.foreignKey,
+                      as: `${PREFILTER_PREFIX}${prefilter.name}_${localKeyIndex}`
                     }
                   });
                 }
@@ -2464,10 +2497,10 @@ function exportFilteredModelsList(
                 const prefilterMatchArray = {
                   $or: []
                 };
-                for (let matchKeyIndex = 0; matchKeyIndex < prefilter.definition.matchKeyArraySize; matchKeyIndex++) {
+                for (let localKeyIndex = 0; localKeyIndex < prefilter.definition.localKeyArraySize; localKeyIndex++) {
                   // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
                   prefilterMatchArray.$or.push({
-                    [`${PREFILTER_PREFIX}${prefilter.name}_${matchKeyIndex}._id`]: {
+                    [`${PREFILTER_PREFIX}${prefilter.name}_${localKeyIndex}._id`]: {
                       $exists: true
                     }
                   });
@@ -2482,7 +2515,7 @@ function exportFilteredModelsList(
           }
 
           // no need to do project with determining the limits, it was done above
-          if (_.isEmpty(matchKeyProject)) {
+          if (_.isEmpty(localKeyProject)) {
             aggregateFilter.push({
               $project: project
             });
@@ -2535,6 +2568,46 @@ function exportFilteredModelsList(
                       for (let andIndex = 0; andIndex < parsedQuery.$and.length; andIndex++) {
                         const condition = parsedQuery.$and[andIndex];
                         if (condition._id) {
+                          // remove first match by id, since the next ones will be done afterwards
+                          // - this way it will still work to do an AND between prefilters
+                          const removeFirstIdThatMatches = (items) => {
+                            if (Array.isArray(items)) {
+                              items.forEach((item) => {
+                                // stop on first find
+                                if (removeFirstIdThatMatches(item) === false) {
+                                  return false;
+                                }
+                              });
+                            } else if (typeof items === 'object') {
+                              _.each(items, (item, key) => {
+                                if (
+                                  key === '_id' &&
+                                  _.isEqual(
+                                    item,
+                                    condition._id
+                                  )
+                                ) {
+                                  // remove _id
+                                  delete items[key];
+
+                                  // found - you can stop
+                                  return false;
+                                } else if (
+                                  Array.isArray(item) ||
+                                  typeof item === 'object'
+                                ) {
+                                  // stop on first find
+                                  if (removeFirstIdThatMatches(item) === false) {
+                                    return false;
+                                  }
+                                }
+                              });
+                            }
+                          };
+
+                          // remove first match by id, since the next ones will be done afterwards
+                          removeFirstIdThatMatches(aggregateFilter);
+
                           // force id index use since we will have less records by filtering by pk instead of any other filter index
                           // - skip needed, otherwise the 2 consecutive matches are merged and ....
                           aggregateFilter.splice(
@@ -4494,8 +4567,8 @@ function generateAggregateFiltersFromNormalFilter(
     if (
       !definition.queryPath ||
       typeof definition.queryPath !== 'string' ||
-      !definition.matchKey ||
-      typeof definition.matchKey !== 'string' ||
+      !definition.localKey ||
+      typeof definition.localKey !== 'string' ||
       !definition.collection ||
       typeof definition.collection !== 'string'
     ) {
@@ -4503,11 +4576,11 @@ function generateAggregateFiltersFromNormalFilter(
     }
 
     // validate array match key
-    if (definition.matchKey.indexOf('[]') > -1) {
+    if (definition.localKey.indexOf('[]') > -1) {
       if (
-        !definition.matchKeyArraySize ||
-        typeof definition.matchKeyArraySize !== 'number' ||
-        typeof definition.matchKeyArraySize < 1
+        !definition.localKeyArraySize ||
+        typeof definition.localKeyArraySize !== 'number' ||
+        typeof definition.localKeyArraySize < 1
       ) {
         throw new Error('Invalid definition');
       }
@@ -4552,12 +4625,15 @@ function generateAggregateFiltersFromNormalFilter(
 
       // construct collection aggregate query
       collectionFilterDefinitions[relationName] = {
+        collection: definition.collection,
         filter: {
           where: convertLoopbackQueryToMongo(relationQuery)
         },
-        matchKey: definition.matchKey,
-        matchKeyArraySize: definition.matchKeyArraySize,
-        collection: definition.collection
+        localKey: definition.localKey,
+        localKeyArraySize: definition.localKeyArraySize,
+        foreignKey: definition.foreignKey ?
+          definition.foreignKey :
+          '_id'
       };
     }
   });

@@ -18,6 +18,7 @@ const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
 const apiError = require('../../components/apiError');
+const exportHelper = require('./../../components/exportHelper');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -372,6 +373,22 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
+    // relationship prefilters
+    // #TODO - still to implement if necessary for followUp
+    // anyways even if the export won't fail, the list page request will fail because it doesn't use this system..which is kinda slow for listing
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        relationship: {
+          collection: 'relationship',
+          queryPath: 'where.relationship',
+          localKey: '_id',
+          foreignKey: 'persons[].id'
+        }
+      }
+    );
+
     // prefilter
     app.models.case.preFilterForOutbreak(this, filter, options)
       .then((filter) => {
@@ -402,7 +419,8 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-          }
+          },
+          prefilters
         );
       })
       .then((exportData) => {

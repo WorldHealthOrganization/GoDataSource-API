@@ -421,10 +421,10 @@ module.exports = function (Outbreak) {
         outbreakId: this.id
       }, {
         person: {
+          collection: 'person',
           queryPath: 'where.person',
-          matchKey: 'persons[].id',
-          matchKeyArraySize: 2,
-          collection: 'person'
+          localKey: 'persons[].id',
+          localKeyArraySize: 2
         }
       }
     );
