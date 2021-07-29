@@ -341,6 +341,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
@@ -385,13 +386,27 @@ module.exports = function (Outbreak) {
           queryPath: 'where.relationship',
           localKey: '_id',
           foreignKey: 'persons[].id'
+        },
+        labResult: {
+          collection: 'labResult',
+          queryPath: 'where.labResult',
+          localKey: '_id',
+          foreignKey: 'personId'
         }
       }
     );
 
     // prefilter
-    app.models.case.preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
+    app.models.case
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+      })
+      .then(() => {
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
