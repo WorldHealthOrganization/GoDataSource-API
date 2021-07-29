@@ -2107,7 +2107,24 @@ function exportFilteredModelsList(
                   _id: 1
                 };
                 if (prefilter.definition.foreignKey !== '_id') {
-                  project[prefilter.definition.foreignKey.replace(/\[\]/g, '')] = 1;
+                  // not array? no need for custom projection
+                  const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
+                  if (foreignKeyArrayIndex < 0) {
+                    project[prefilter.definition.foreignKey] = 1;
+                  } else {
+                    // match key is an array ?
+                    // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
+                    const arrayKey = prefilter.definition.foreignKey.substr(0, foreignKeyArrayIndex);
+                    for (let localKeyIndex = 0; localKeyIndex < prefilter.definition.foreignKeyArraySize; localKeyIndex++) {
+                      // attach element
+                      project[`${PREFILTER_PREFIX}${prefilter.name}_${localKeyIndex}${PREFILTER_SUFFIX}`] = {
+                        $arrayElemAt: [
+                          `$${arrayKey}`,
+                          localKeyIndex
+                        ]
+                      };
+                    }
+                  }
                 }
 
                 // go through prefilters and determine if we need to add conditions
@@ -2138,11 +2155,20 @@ function exportFilteredModelsList(
                     // handle not arrays
                     // go through prefilters of prefilter and attach lookup
                     prefilter.definition.prefilters.forEach((prefilterOfPrefilter) => {
+                      // local key array ?
                       const arrayIndex = prefilterOfPrefilter.definition.localKey.indexOf('[]');
-                      if (arrayIndex > 0) {
+                      if (arrayIndex > -1) {
                         // retrieve related data so we can do something like an 'inner join'
                         // #TODO - there are better ways to do it in newer mongo..
-                        throw new Error('not implemented since it isn\'t needed for now (array)');
+                        throw new Error('Not implemented: Prefilters of prefilters - localKey array');
+                      }
+
+                      // not array? no need for custom projection
+                      const foreignKeyArrayIndex = prefilterOfPrefilter.definition.foreignKey.indexOf('[]');
+                      if (foreignKeyArrayIndex > -1) {
+                        // retrieve related data so we can do something like an 'inner join'
+                        // #TODO - there are better ways to do it in newer mongo..
+                        throw new Error('Not implemented: Prefilters of prefilters - foreignKey array');
                       }
 
                       // attach lookup
@@ -2251,16 +2277,9 @@ function exportFilteredModelsList(
             sheetHandler.prefiltersIds[prefilterKey] = [];
 
             // count no of records
-            const foreignKey = prefilter.definition.foreignKey.replace(/\[\]/g, '');
             return sheetHandler.dbConnection
               .collection(`${sheetHandler.temporaryCollectionName}_${prefilterKey}`)
-              .find(
-                {}, {
-                  projection: {
-                    [foreignKey]: 1
-                  }
-                }
-              )
+              .find({})
               .toArray()
               .then((prefilterRecords) => {
                 // determine ids
@@ -2274,15 +2293,13 @@ function exportFilteredModelsList(
                   if (foreignKeyArrayIndex < 0) {
                     prefilterIds[record[prefilter.definition.foreignKey]] = true;
                   } else {
-                    const parentKey = prefilter.definition.foreignKey.substr(0, foreignKeyArrayIndex);
+                    // get each item id
                     const childKey = prefilter.definition.foreignKey.substr(foreignKeyArrayIndex + 3);
-                    const arrayValues = _.get(record, parentKey);
-                    if (arrayValues) {
-                      for (let arrayIndex = 0; arrayIndex < arrayValues.length; arrayIndex++) {
-                        const childValue = _.get(arrayValues[arrayIndex], childKey);
-                        if (childValue) {
-                          prefilterIds[childValue] = true;
-                        }
+                    for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
+                      const prefilterFieldKey = `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}${PREFILTER_SUFFIX}`;
+                      const childValue = _.get(record, `${prefilterFieldKey}.${childKey}`);
+                      if (childValue) {
+                        prefilterIds[childValue] = true;
                       }
                     }
                   }
@@ -2621,13 +2638,58 @@ function exportFilteredModelsList(
               // not array? no need for custom projection
               const arrayIndex = prefilter.definition.localKey.indexOf('[]');
               if (arrayIndex < 0) {
-                // retrieve related data so we can do something like an 'inner join'
-                // #TODO - there are better ways to do it in newer mongo..
-                throw new Error('not implemented since it isn\'t needed for now (not array)');
+                // not array? no need for custom projection
+                const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
+                if (foreignKeyArrayIndex < 0) {
+                  // retrieve related data so we can do something like an 'inner join'
+                  // #TODO - there are better ways to do it in newer mongo..
+                  throw new Error('Not implemented: Prefilters - local key not array, foreignKey not array');
+                }
+
+                // match key is an array ?
+                // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
+                // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
+                const childKey = prefilter.definition.foreignKey.substr(foreignKeyArrayIndex + 2);
+                for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
+                  // determine related prefilter
+                  aggregateFilter.push({
+                    $lookup: {
+                      from: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`,
+                      localField: prefilter.definition.localKey === '_id' ?
+                        'rowId' : prefilter.definition.localKey,
+                      foreignField: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}${PREFILTER_SUFFIX}${childKey}`,
+                      as: `${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}`
+                    }
+                  });
+                }
 
                 // filter
-                // #TODO
+                // @TODO - must replace once upgrade to newer mongo version
+                const prefilterMatchArray = {
+                  $or: []
+                };
+                for (let foreignKeyIndex = 0; foreignKeyIndex < prefilter.definition.foreignKeyArraySize; foreignKeyIndex++) {
+                  // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
+                  prefilterMatchArray.$or.push({
+                    [`${PREFILTER_PREFIX}${prefilter.name}_${foreignKeyIndex}._id`]: {
+                      $exists: true
+                    }
+                  });
+                }
+
+                // attach filter
+                aggregateFilter.push({
+                  $match: prefilterMatchArray
+                });
               } else {
+                // not array? no need for custom projection
+                const foreignKeyArrayIndex = prefilter.definition.foreignKey.indexOf('[]');
+                if (foreignKeyArrayIndex > -1) {
+                  // retrieve related data so we can do something like an 'inner join'
+                  // #TODO - there are better ways to do it in newer mongo..
+                  throw new Error('Not implemented: Prefilters - local key array, foreignKey array');
+                }
+
                 // match key is an array ?
                 // transform match key array into multiple fields so $lookup works...because in 3.2 it doesn't work with arrays
                 // @TODO - after Mongo upgrade use lookup with pipelines instead of having initializeCollectionView aggregates and all these hacks
@@ -4747,6 +4809,19 @@ function generateAggregateFiltersFromNormalFilter(
       }
     }
 
+    // validate array match key
+    if (
+      definition.foreignKey &&
+      definition.foreignKey.indexOf('[]') > -1
+    ) {
+      if (
+        !definition.foreignKeyArraySize ||
+        typeof definition.foreignKeyArraySize !== 'number' ||
+        typeof definition.foreignKeyArraySize < 1
+      ) {
+        throw new Error('Invalid definition');
+      }
+    }
 
     // format definitions
     let relationQuery = _.get(filter, definition.queryPath);
@@ -4798,6 +4873,7 @@ function generateAggregateFiltersFromNormalFilter(
         foreignKey: definition.foreignKey ?
           definition.foreignKey :
           '_id',
+        foreignKeyArraySize: definition.foreignKeyArraySize,
         prefilters: definition.prefilters
       };
     }
