@@ -411,8 +411,6 @@ module.exports = function (Outbreak) {
     // #TODO
 
     // relationship prefilters
-    // #TODO - still to implement if necessary for followUp
-    // anyways even if the export won't fail, the list page request will fail because it doesn't use this system..which is kinda slow for listing
     const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
       filter, {
         outbreakId: this.id
@@ -429,6 +427,12 @@ module.exports = function (Outbreak) {
               followUp: {
                 collection: 'followUp',
                 queryPath: 'where.followUp',
+                localKey: '_id',
+                foreignKey: 'personId'
+              },
+              labResult: {
+                collection: 'labResult',
+                queryPath: 'where.labResult',
                 localKey: '_id',
                 foreignKey: 'personId'
               }

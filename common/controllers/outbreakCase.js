@@ -374,9 +374,7 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // relationship prefilters
-    // #TODO - not working if for example: on cases list you filter by relationship.field, exporting cases works, but exporting relationships doesn't work because on export relationships doesn't goo for deep cases search
-    // #TODO - to resolve above issues we need prefilters for ..prefilters
+    // prefilters
     const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
       filter, {
         outbreakId: this.id
@@ -385,7 +383,8 @@ module.exports = function (Outbreak) {
           collection: 'relationship',
           queryPath: 'where.relationship',
           localKey: '_id',
-          foreignKey: 'persons[].id'
+          foreignKey: 'persons[].id',
+          foreignKeyArraySize: 2
         },
         labResult: {
           collection: 'labResult',

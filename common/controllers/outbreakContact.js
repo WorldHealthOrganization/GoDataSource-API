@@ -1511,9 +1511,7 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // relationship prefilters
-    // #TODO - not working if for example: on contact list you filter by followUp.field, exporting contact works, but exporting relationships doesn't work because on export relationships doesn't goo for deep contacts.followUp search
-    // #TODO - to resolve above issues we need prefilters for ..prefilters
+    // prefilters
     const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
       filter, {
         outbreakId: this.id
@@ -1523,23 +1521,40 @@ module.exports = function (Outbreak) {
           queryPath: 'where.followUp',
           localKey: '_id',
           foreignKey: 'personId'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: '_id',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2
+          //   }
+          // }
         }
       }
     );
 
     // prefilter
-    app.models.contact.preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
-
-        //           // resolve relationship foreign keys here
-        //           relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
-        //             app,
-        //             app.models.relationship,
-        //             [contactsMap[contactId].relationship],
-        //             dictionary
-        //           ).then(relationship => {
-        //             contactsMap[contactId].relationship = relationship[0];
-        //           }));
+    app.models.contact
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
 
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(

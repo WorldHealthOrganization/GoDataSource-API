@@ -183,6 +183,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useDbColumns query param
     let useDbColumns = false;
@@ -208,10 +209,45 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
+    // relationship prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        contact: {
+          collection: 'person',
+          queryPath: 'where.contact',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          localKey: '_id',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2
+          //   }
+          // }
+        }
+      }
+    );
+
     // prefilter
     app.models.contactOfContact
-      .preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
@@ -238,7 +274,7 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          undefined, {
+          prefilters, {
             relationship: {
               type: exportHelper.RELATION_TYPE.GET_ONE,
               collection: 'relationship',

@@ -170,6 +170,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
@@ -202,100 +203,140 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // prefilter
-    app.models.contact.preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
+    // include geo restrictions if necessary
+    // #TODO
 
-        // export
-        return WorkerRunner.helpers.exportFilteredModelsList(
-          {
-            collectionName: 'labResult',
-            modelName: app.models.labResult.modelName,
-            scopeQuery: app.models.labResult.definition.settings.scope,
-            arrayProps: app.models.labResult.arrayProps,
-            fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
-            exportFieldsGroup: app.models.labResult.exportFieldsGroup,
-            exportFieldsOrder: app.models.labResult.exportFieldsOrder,
-            locationFields: app.models.labResult.locationFields
+    // // prefilter
+    // app.models.labResult
+    //   .addGeographicalRestrictions(
+    //     options.remotingContext,
+    //     filter.where
+    //   )
+    //   .then(updatedFilter => {
+    //     // update casesQuery if needed
+    //     updatedFilter && (filter.where = updatedFilter);
+
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        contact: {
+          collection: 'person',
+          queryPath: 'where.contact',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           },
-          filter,
-          exportType,
-          encryptPassword,
-          anonymizeFields,
-          fieldsGroupList,
-          {
-            userId: _.get(options, 'accessToken.userId'),
-            outbreakId: this.id,
-            questionnaire: this.labResultsTemplate ?
-              this.labResultsTemplate.toJSON() :
-              undefined,
-            useQuestionVariable,
-            useDbColumns,
-            dontTranslateValues,
-            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          localKey: 'personId',
+          foreignKey: '_id'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
           },
+          localKey: 'personId',
+          foreignKey: '_id'
+        },
+        person: {
+          collection: 'person',
+          queryPath: 'where.person',
+          localKey: 'personId',
+          foreignKey: '_id'
+        }
+      }
+    );
+
+    // export
+    WorkerRunner.helpers.exportFilteredModelsList(
+      {
+        collectionName: 'labResult',
+        modelName: app.models.labResult.modelName,
+        scopeQuery: app.models.labResult.definition.settings.scope,
+        arrayProps: app.models.labResult.arrayProps,
+        fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
+        exportFieldsGroup: app.models.labResult.exportFieldsGroup,
+        exportFieldsOrder: app.models.labResult.exportFieldsOrder,
+        locationFields: app.models.labResult.locationFields
+      },
+      filter,
+      exportType,
+      encryptPassword,
+      anonymizeFields,
+      fieldsGroupList,
+      {
+        userId: _.get(options, 'accessToken.userId'),
+        outbreakId: this.id,
+        questionnaire: this.labResultsTemplate ?
+          this.labResultsTemplate.toJSON() :
           undefined,
-          {
-            person: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'person',
-              project: [
-                '_id',
-                'visualId',
-                'type',
-                'lastName',
-                'firstName',
-                'middleName',
-                'dateOfOnset',
-                'dateOfReporting',
-                'addresses'
-              ],
-              key: '_id',
-              keyValue: `(labResult) => {
-                return labResult && labResult.personId ?
-                  labResult.personId :
-                  undefined;
-              }`,
-              applyToAll: `(
-                person,
-                helperMethods
-              ) => {
-                // finished
-                const addresses = person.addresses;
-                delete person.addresses;
+        useQuestionVariable,
+        useDbColumns,
+        dontTranslateValues,
+        contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+      },
+      prefilters,
+      {
+        person: {
+          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          collection: 'person',
+          project: [
+            '_id',
+            'visualId',
+            'type',
+            'lastName',
+            'firstName',
+            'middleName',
+            'dateOfOnset',
+            'dateOfReporting',
+            'addresses'
+          ],
+          key: '_id',
+          keyValue: `(labResult) => {
+            return labResult && labResult.personId ?
+              labResult.personId :
+              undefined;
+          }`,
+          applyToAll: `(
+            person,
+            helperMethods
+          ) => {
+            // finished
+            const addresses = person.addresses;
+            delete person.addresses;
 
-                // get only the current address
+            // get only the current address
+            if (
+              addresses &&
+              addresses.length > 0
+            ) {
+              for (let addressIndex = 0; addressIndex < addresses.length; addressIndex++) {
+                const address = addresses[addressIndex];
                 if (
-                  addresses &&
-                  addresses.length > 0
+                  address &&
+                  address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
                 ) {
-                  for (let addressIndex = 0; addressIndex < addresses.length; addressIndex++) {
-                    const address = addresses[addressIndex];
-                    if (
-                      address &&
-                      address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                    ) {
-                      // set address
-                      person.address = address;
+                  // set address
+                  person.address = address;
 
-                      // transform geo location
-                      helperMethods.covertAddressesGeoPointToLoopbackFormat(person);
+                  // transform geo location
+                  helperMethods.covertAddressesGeoPointToLoopbackFormat(person);
 
-                      // do we need to retrieve location ?
-                      if (person.address.locationId) {
-                        helperMethods.retrieveLocation(person.address.locationId);
-                      }
-
-                      // finished
-                      break;
-                    }
+                  // do we need to retrieve location ?
+                  if (person.address.locationId) {
+                    helperMethods.retrieveLocation(person.address.locationId);
                   }
+
+                  // finished
+                  break;
                 }
-              }`
+              }
             }
-          }
-        );
-      })
+          }`
+        }
+      }
+    )
       .then((exportData) => {
         // send export id further
         callback(

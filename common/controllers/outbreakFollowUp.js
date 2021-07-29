@@ -13,6 +13,7 @@ const Config = require('./../../server/config.json');
 const genericHelpers = require('../../components/helpers');
 const Platform = require('../../components/platform');
 const WorkerRunner = require('./../../components/workerRunner');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -393,6 +394,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
@@ -425,17 +427,66 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // prefilter
-    app.models.followUp.preFilterForOutbreak(this, filter)
-      .then((filter) => {
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        contact: {
+          collection: 'person',
+          queryPath: 'where.contact',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          localKey: 'personId',
+          foreignKey: '_id'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: 'personId',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2,
+          //     prefilters: {
+          //         contact: {
+          //           collection: 'person...',
+          //           queryPath: 'where.relationship',
+          //           localKey: '_id',
+          //           foreignKey: 'persons[].id',
+          //           foreignKeyArraySize: 2
+          //         }
+          //       }
+          //   }
+          // }
+        },
 
-        // geo restrictions
-        // #TODO
-        // return app.models.followUp
-        //   .addGeographicalRestrictions(options.remotingContext, data.filter.where)
-        //   .then(updatedFilter => {
-        //     // update where if needed
-        //     updatedFilter && (data.filter.where = updatedFilter);
+        // #TODO - implement
+        // where.timeLastSeen
+        // where.weekNumber
+      }
+    );
+
+    // prefilter
+    app.models.followUp
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
 
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
@@ -464,7 +515,8 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-          }
+          },
+          prefilters
         );
       })
       .then((exportData) => {

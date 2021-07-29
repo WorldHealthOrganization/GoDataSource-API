@@ -4849,8 +4849,10 @@ function generateAggregateFiltersFromNormalFilter(
       // nothing to do here
       // - needed so we do unset if empty object is sent
       if (
-        _.isEmpty(relationQuery) &&
-        _.isEmpty(definition.prefilters)
+        definition.ignore || (
+          _.isEmpty(relationQuery) &&
+          _.isEmpty(definition.prefilters)
+        )
       ) {
         return;
       }
@@ -4872,6 +4874,16 @@ function generateAggregateFiltersFromNormalFilter(
           $and: [
             relationQuery,
             appendWhere
+          ]
+        };
+      }
+
+      // append extra details if necessary
+      if (!_.isEmpty(definition.queryAppend)) {
+        relationQuery = {
+          $and: [
+            relationQuery,
+            definition.queryAppend
           ]
         };
       }
