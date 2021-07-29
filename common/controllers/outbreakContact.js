@@ -1478,6 +1478,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
@@ -1509,6 +1510,22 @@ module.exports = function (Outbreak) {
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
     }
+
+    // relationship prefilters
+    // #TODO - not working if for example: on contact list you filter by followUp.field, exporting contact works, but exporting relationships doesn't work because on export relationships doesn't goo for deep contacts.followUp search
+    // #TODO - to resolve above issues we need prefilters for ..prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        followUp: {
+          collection: 'followUp',
+          queryPath: 'where.followUp',
+          localKey: '_id',
+          foreignKey: 'personId'
+        }
+      }
+    );
 
     // prefilter
     app.models.contact.preFilterForOutbreak(this, filter, options)
@@ -1552,7 +1569,7 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          undefined, {
+          prefilters, {
             relationship: {
               type: exportHelper.RELATION_TYPE.GET_ONE,
               collection: 'relationship',

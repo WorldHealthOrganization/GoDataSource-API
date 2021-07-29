@@ -375,8 +375,8 @@ module.exports = function (Outbreak) {
     }
 
     // relationship prefilters
-    // #TODO - still to implement if necessary for followUp
-    // anyways even if the export won't fail, the list page request will fail because it doesn't use this system..which is kinda slow for listing
+    // #TODO - not working if for example: on cases list you filter by relationship.field, exporting cases works, but exporting relationships doesn't work because on export relationships doesn't goo for deep cases search
+    // #TODO - to resolve above issues we need prefilters for ..prefilters
     const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
       filter, {
         outbreakId: this.id
