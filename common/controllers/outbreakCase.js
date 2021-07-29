@@ -405,8 +405,7 @@ module.exports = function (Outbreak) {
       .then(updatedFilter => {
         // update casesQuery if needed
         updatedFilter && (filter.where = updatedFilter);
-      })
-      .then(() => {
+
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
