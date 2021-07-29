@@ -2199,7 +2199,7 @@ function exportFilteredModelsList(
                 let whereConditions;
                 if (!_.isEmpty(prefilter.definition.filter.where)) {
                   // attach where condition
-                  whereConditions = prefilter.definition.filter.where;
+                  whereConditions = convertLoopbackQueryToMongo(prefilter.definition.filter.where);
                 }
 
                 // attach prefilter if necessary
@@ -4895,7 +4895,7 @@ function generateAggregateFiltersFromNormalFilter(
       collectionFilterDefinitions[relationName] = {
         collection: definition.collection,
         filter: {
-          where: convertLoopbackQueryToMongo(relationQuery)
+          where: relationQuery
         },
         localKey: definition.localKey,
         localKeyArraySize: definition.localKeyArraySize,
