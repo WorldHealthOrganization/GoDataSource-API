@@ -1539,6 +1539,33 @@ function exportFilteredModelsList(
         projection[field] = 1;
       });
 
+      // format prefilters
+      const formatPrefilters = (prefiltersToFormat) => {
+        // init
+        const response = [];
+
+        // go through and format prefilters
+        _.each(prefiltersToFormat, (definition, relationName) => {
+          // format
+          response.push({
+            name: relationName,
+            definition
+          });
+
+          // prefilter has prefilters ?
+          // format prefilters of prefilter
+          if (definition.prefilters) {
+            definition.prefilters = formatPrefilters(definition.prefilters);
+          }
+        });
+
+        // finished
+        return response;
+      };
+
+      // format prefilters
+      const formattedPrefilters = formatPrefilters(prefilters);
+
       // finished
       return {
         languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
@@ -1612,17 +1639,9 @@ function exportFilteredModelsList(
 
         // filters
         prefiltersDisableLookup: false,
+        prefiltersOfPrefiltersDisableLookup: {},
         prefiltersIds: {},
-        prefilters: _.transform(
-          prefilters,
-          (accumulator, definition, relationName) => {
-            accumulator.push({
-              name: relationName,
-              definition
-            });
-          },
-          []
-        )
+        prefilters: formattedPrefilters
       };
     };
 
@@ -1656,28 +1675,49 @@ function exportFilteredModelsList(
           temporaryCollection = undefined;
         })
         .then(() => {
-          // drop prefilter tables too
-          const tmpPrefilters = [
-            ...sheetHandler.prefilters
-          ];
-
           // drop collection
-          const dropNextPrefilterCollection = () => {
+          const dropNextPrefilterCollection = (
+            prefixPath,
+            tmpPrefilters
+          ) => {
             // nothing more ?
-            if (tmpPrefilters.length < 1) {
+            if (
+              !tmpPrefilters ||
+              tmpPrefilters.length < 1
+            ) {
               return Promise.resolve();
             }
 
             // retrieve prefilter
             const prefilter = tmpPrefilters.splice(0, 1)[0];
             return sheetHandler.dbConnection
-              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .collection(`${sheetHandler.temporaryCollectionName}${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`)
               .drop()
-              .then(dropNextPrefilterCollection);
+              .then(() => {
+                // prefilter has prefilters ?
+                if (
+                  prefilter.definition.prefilters &&
+                  prefilter.definition.prefilters.length > 0
+                ) {
+                  return dropNextPrefilterCollection(
+                    `${prefixPath ? prefixPath + '_' : ''}${prefilter.name}`, [
+                      ...prefilter.definition.prefilters
+                    ]
+                  );
+                }
+              })
+              .then(() => {
+                return dropNextPrefilterCollection(
+                  prefixPath,
+                  tmpPrefilters
+                );
+              });
           };
 
           // drop collections
-          return dropNextPrefilterCollection();
+          return dropNextPrefilterCollection('', [
+            ...sheetHandler.prefilters
+          ]);
         });
     };
 
@@ -2022,12 +2062,10 @@ function exportFilteredModelsList(
 
         // initialize filter collections
         // - returns promise
-        const initializeFilterCollections = () => {
-          // append collections that we need to create
-          // kinda a clone since we need to alter it
-          const tmpPrefilters = [
-            ...sheetHandler.prefilters
-          ];
+        const initializeFilterCollections = (
+          prefixPath,
+          tmpPrefilters
+        ) => {
 
           // generate next collection
           const generateNextCollection = () => {
@@ -2039,44 +2077,146 @@ function exportFilteredModelsList(
             // retrieve prefilter
             const prefilter = tmpPrefilters.splice(0, 1)[0];
 
-            // construct project
-            const project = {
-              _id: 1
-            };
-            if (prefilter.definition.foreignKey !== '_id') {
-              project[prefilter.definition.foreignKey.replace(/\[\]/g, '')] = 1;
-            }
+            // handle prefilters of prefilters
+            return Promise.resolve()
+              .then(() => {
+                // no prefilters ?
+                if (
+                  !prefilter.definition.prefilters ||
+                  prefilter.definition.prefilters.length < 1
+                ) {
+                  return;
+                }
 
-            // construct filter aggregation
-            const aggregateFilter = [
-              {
-                $match: prefilter.definition.filter.where
-              }, {
-                $project: project
-              }, {
-                $out: `${sheetHandler.temporaryCollectionName}_${prefilter.name}`
-              }
-            ];
-
-            // update export log in case we need the aggregate filter
-            return sheetHandler
-              .updateExportLog({
-                [`aggregateFilter_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
-                  JSON.stringify(aggregateFilter) :
-                  null,
-                updatedAt: new Date()
+                // has prefilters
+                return initializeFilterCollections(
+                  (prefixPath ? prefixPath + '_' : '') + prefilter.name, [
+                    ...prefilter.definition.prefilters
+                  ]
+                ).then(() => {
+                  return determineFilterIfNeedLookup(
+                    (prefixPath ? prefixPath + '_' : '') + prefilter.name,
+                    prefilter.definition.prefilters
+                  );
+                });
               })
               .then(() => {
-                // prepare records that will be exported
-                return dbConn
-                  .collection(prefilter.definition.collection)
-                  .aggregate(aggregateFilter, {
-                    allowDiskUse: true
-                  })
-                  .toArray()
-                  .then(generateNextCollection);
-              });
+                // construct project
+                const aggregateFilter = [];
+                const project = {
+                  _id: 1
+                };
+                if (prefilter.definition.foreignKey !== '_id') {
+                  project[prefilter.definition.foreignKey.replace(/\[\]/g, '')] = 1;
+                }
 
+                // go through prefilters and determine if we need to add conditions
+                let prefiltersConditions = [];
+                if (prefilter.definition.prefilters) {
+                  // add search criteria from prefilters of prefilter :))
+                  const prefilterOfPrefilterPath = `${prefixPath ? prefixPath + '_' : ''}${prefilter.name}`;
+                  if (sheetHandler.prefiltersOfPrefiltersDisableLookup[prefilterOfPrefilterPath]) {
+                    // WITHOUT LOOKUP
+
+                    // attach ids conditions
+                    prefilter.definition.prefilters.forEach((prefilterOfPrefilter) => {
+                      // add to prefilter condition
+                      const prefiltersIdsKey = (prefilterOfPrefilterPath ? prefilterOfPrefilterPath + '_' : '') + prefilterOfPrefilter.name;
+                      const prefilterKey = prefilterOfPrefilter.definition.localKey.replace(/\[\]/g, '');
+                      prefiltersConditions.push({
+                        [prefilterKey]: {
+                          $in: sheetHandler.prefiltersIds[prefiltersIdsKey]
+                        }
+                      });
+
+                      // no need to keep it in memory, release once we finish with this promise
+                      delete sheetHandler.prefiltersIds[prefiltersIdsKey];
+                    });
+                  } else {
+                    // WITH LOOKUP
+
+                    // handle not arrays
+                    // go through prefilters of prefilter and attach lookup
+                    prefilter.definition.prefilters.forEach((prefilterOfPrefilter) => {
+                      const arrayIndex = prefilterOfPrefilter.definition.localKey.indexOf('[]');
+                      if (arrayIndex > 0) {
+                        // retrieve related data so we can do something like an 'inner join'
+                        // #TODO - there are better ways to do it in newer mongo..
+                        throw new Error('not implemented since it isn\'t needed for now (array)');
+                      }
+
+                      // attach lookup
+                      const asKey = `${PREFILTER_PREFIX}${prefilterOfPrefilterPath ? prefilterOfPrefilterPath + '_' : ''}${prefilterOfPrefilter.name}`;
+                      aggregateFilter.push({
+                        $lookup: {
+                          from: `${sheetHandler.temporaryCollectionName}${prefilterOfPrefilterPath ? '_' + prefilterOfPrefilterPath : ''}_${prefilterOfPrefilter.name}`,
+                          localField: prefilterOfPrefilter.definition.localKey,
+                          foreignField: prefilterOfPrefilter.definition.foreignKey,
+                          as: asKey
+                        }
+                      });
+
+                      // make sure there is at least one key matching the prefilter, otherwise we need to take out the record
+                      aggregateFilter.push({
+                        $match: {
+                          [`${asKey}._id`]: {
+                            $exists: true
+                          }
+                        }
+                      });
+
+                    });
+                  }
+                }
+
+                // construct where condition
+                let whereConditions;
+                if (!_.isEmpty(prefilter.definition.filter.where)) {
+                  // attach where condition
+                  whereConditions = prefilter.definition.filter.where;
+                }
+
+                // attach prefilter if necessary
+                if (prefiltersConditions.length > 0) {
+                  whereConditions = {
+                    $and: _.isEmpty(whereConditions) ?
+                      prefiltersConditions : [
+                        ...prefiltersConditions,
+                        whereConditions
+                      ]
+                  };
+                }
+
+                // construct filter aggregation
+                aggregateFilter.push(
+                  {
+                    $match: whereConditions
+                  }, {
+                    $project: project
+                  }, {
+                    $out: `${sheetHandler.temporaryCollectionName}${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`
+                  }
+                );
+
+                // update export log in case we need the aggregate filter
+                return sheetHandler
+                  .updateExportLog({
+                    [`aggregateFilter${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
+                      JSON.stringify(aggregateFilter) :
+                      null,
+                    updatedAt: new Date()
+                  })
+                  .then(() => {
+                    // prepare records that will be exported
+                    return dbConn
+                      .collection(prefilter.definition.collection)
+                      .aggregate(aggregateFilter, {
+                        allowDiskUse: true
+                      })
+                      .toArray()
+                      .then(generateNextCollection);
+                  });
+              });
           };
 
           // generate prefilters
@@ -2084,19 +2224,19 @@ function exportFilteredModelsList(
         };
 
         // get ids determined by prefilters
-        const determineFilterIds = () => {
+        const determineFilterIds = (
+          prefixPath,
+          tmpPrefilters
+        ) => {
           // no prefilters used ?
-          if (sheetHandler.prefilters.length < 1) {
+          if (
+            !tmpPrefilters ||
+            tmpPrefilters.length < 1
+          ) {
             return Promise.resolve();
           }
 
-          // prefilters
-          const tmpPrefilters = [
-            ...sheetHandler.prefilters
-          ];
-
           // retrieve prefilter ids
-          sheetHandler.prefiltersIds = {};
           const nextPrefilterIds = () => {
             // nothing more ?
             if (tmpPrefilters.length < 1) {
@@ -2107,12 +2247,13 @@ function exportFilteredModelsList(
             const prefilter = tmpPrefilters.splice(0, 1)[0];
 
             // initiate prefilter ids list
-            sheetHandler.prefiltersIds[prefilter.name] = [];
+            const prefilterKey = (prefixPath ? prefixPath + '_' : '') + prefilter.name;
+            sheetHandler.prefiltersIds[prefilterKey] = [];
 
             // count no of records
             const foreignKey = prefilter.definition.foreignKey.replace(/\[\]/g, '');
             return sheetHandler.dbConnection
-              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .collection(`${sheetHandler.temporaryCollectionName}_${prefilterKey}`)
               .find(
                 {}, {
                   projection: {
@@ -2149,7 +2290,7 @@ function exportFilteredModelsList(
 
                 // set prefilter filter ids
                 // - sort needed to keep order of items when comparing to remove from condition
-                sheetHandler.prefiltersIds[prefilter.name] = Object.keys(prefilterIds).sort();
+                sheetHandler.prefiltersIds[prefilterKey] = Object.keys(prefilterIds).sort();
 
                 // continue with next filter
                 return nextPrefilterIds();
@@ -2161,15 +2302,21 @@ function exportFilteredModelsList(
         };
 
         // determine if we need to do prefilter lookups
-        const determineFilterIfNeedLookup = () => {
+        const determineFilterIfNeedLookup = (
+          prefixPath,
+          prefilters
+        ) => {
           // no prefilters used ?
-          if (sheetHandler.prefilters.length < 1) {
+          if (
+            !prefilters ||
+            prefilters.length < 1
+          ) {
             return Promise.resolve();
           }
 
-          // prefilters
+          // initialize count prefilters
           const tmpPrefilters = [
-            ...sheetHandler.prefilters
+            ...prefilters
           ];
 
           // count found data for this prefilter
@@ -2185,7 +2332,7 @@ function exportFilteredModelsList(
 
             // count no of records
             return sheetHandler.dbConnection
-              .collection(`${sheetHandler.temporaryCollectionName}_${prefilter.name}`)
+              .collection(`${sheetHandler.temporaryCollectionName}${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`)
               .countDocuments()
               .then((counted) => {
                 // add count
@@ -2202,10 +2349,16 @@ function exportFilteredModelsList(
               // do we need to disable lookup since there is a faster way of doing things ?
               if (prefiltersToTalRows <= sheetHandler.noLookupIfPrefilterTotalCountLessThen) {
                 // disable
-                sheetHandler.prefiltersDisableLookup = true;
+                if (!prefixPath) {
+                  sheetHandler.prefiltersDisableLookup = true;
+                } else {
+                  sheetHandler.prefiltersOfPrefiltersDisableLookup[prefixPath] = true;
+                }
 
                 // determine prefilters ids
-                return determineFilterIds();
+                return determineFilterIds(prefixPath, [
+                  ...prefilters
+                ]);
               }
             });
         };
@@ -2470,7 +2623,7 @@ function exportFilteredModelsList(
               if (arrayIndex < 0) {
                 // retrieve related data so we can do something like an 'inner join'
                 // #TODO - there are better ways to do it in newer mongo..
-                throw new Error('not implemented since it isn\'t needed for now');
+                throw new Error('not implemented since it isn\'t needed for now (not array)');
 
                 // filter
                 // #TODO
@@ -4412,10 +4565,19 @@ function exportFilteredModelsList(
               })
 
               // generate temporary filter collections
-              .then(initializeFilterCollections)
+              .then(() => {
+                return initializeFilterCollections('', [
+                  ...sheetHandler.prefilters
+                ]);
+              })
 
               // count records from prefilters to determine the best approach of how to export data
-              .then(determineFilterIfNeedLookup)
+              .then(() => {
+                return determineFilterIfNeedLookup(
+                  '',
+                  sheetHandler.prefilters
+                );
+              })
 
               // change export status => Preparing records
               .then(() => {
@@ -4594,7 +4756,10 @@ function generateAggregateFiltersFromNormalFilter(
 
       // nothing to do here
       // - needed so we do unset if empty object is sent
-      if (_.isEmpty(relationQuery)) {
+      if (
+        _.isEmpty(relationQuery) &&
+        _.isEmpty(definition.prefilters)
+      ) {
         return;
       }
 
@@ -4632,7 +4797,8 @@ function generateAggregateFiltersFromNormalFilter(
         localKeyArraySize: definition.localKeyArraySize,
         foreignKey: definition.foreignKey ?
           definition.foreignKey :
-          '_id'
+          '_id',
+        prefilters: definition.prefilters
       };
     }
   });

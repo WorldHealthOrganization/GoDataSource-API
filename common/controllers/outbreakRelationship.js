@@ -381,6 +381,7 @@ module.exports = function (Outbreak) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
 
     // parse useDbColumns query param
     let useDbColumns = false;
@@ -406,10 +407,6 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // relationships only from our outbreak
-    filter.where = filter.where || {};
-    filter.where.outbreakId = this.id;
-
     // include geo restrictions if necessary
     // #TODO
 
@@ -424,7 +421,19 @@ module.exports = function (Outbreak) {
           collection: 'person',
           queryPath: 'where.person',
           localKey: 'persons[].id',
-          localKeyArraySize: 2
+          localKeyArraySize: 2,
+          prefilters: exportHelper.generateAggregateFiltersFromNormalFilter(
+            filter, {
+              outbreakId: this.id
+            }, {
+              followUp: {
+                collection: 'followUp',
+                queryPath: 'where.followUp',
+                localKey: '_id',
+                foreignKey: 'personId'
+              }
+            }
+          )
         }
       }
     );
