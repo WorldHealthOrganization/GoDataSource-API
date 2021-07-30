@@ -1,6 +1,7 @@
 'use strict';
 
 const helpers = require('../helpers');
+const exportHelper = require('../exportHelper');
 const fileCrypto = require('../fileCrypto');
 const aesCrypto = require('../aesCrypto');
 const pdfDoc = require('../pdfDoc');
@@ -10,7 +11,7 @@ const worker = {
    * Export a list in a file (asynchronously)
    * @param headers file list headers
    * @param dataSet {Array} actual data set
-   * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+   * @param fileType {enum} [json, csv, xls, xlsx, ods, pdf]
    * @return {Promise<any>}
    */
   exportListFile: helpers.exportListFileSync,
@@ -75,18 +76,42 @@ const worker = {
   /**
    * Export a filtered list of models
    */
-  exportFilteredModelsList: helpers.exportFilteredModelsList
+  exportFilteredModelsList: exportHelper.exportFilteredModelsList
 };
 
 process.on('message', function (message) {
-  worker[message.fn](...message.args)
-    .then(function (result) {
-      process.send([null, result]);
-    })
-    .catch(function (error) {
-      process.send([error instanceof Error ? {
-        message: error.message,
-        stack: error.stack
-      } : error]);
-    });
+  // background worker ?
+  if (message.backgroundWorker) {
+    // trigger worker
+    worker[message.fn](
+      (error, result) => {
+        // an error occurred ?
+        if (error) {
+          // send error to parent
+          process.send([error instanceof Error ? {
+            message: error.message,
+            stack: error.stack
+          } : error]);
+
+          // finished
+          return;
+        }
+
+        // trigger worker job
+        process.send([null, result]);
+      },
+      ...message.args
+    );
+  } else {
+    worker[message.fn](...message.args)
+      .then(function (result) {
+        process.send([null, result]);
+      })
+      .catch(function (error) {
+        process.send([error instanceof Error ? {
+          message: error.message,
+          stack: error.stack
+        } : error]);
+      });
+  }
 });

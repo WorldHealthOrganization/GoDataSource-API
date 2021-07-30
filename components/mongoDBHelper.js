@@ -20,18 +20,26 @@ let mongoDBConnection;
  * @returns {Promise<MongoClient>}
  */
 function getMongoDBClient(mongoOptions = {}) {
+  // make sure it doesn't timeout
+  mongoOptions = Object.assign({}, mongoOptions, {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000, // 30 minutes
+    reconnectTries: 300 // too many
+  });
+
+  // attach auth credentials
   if (dbConfig.password) {
     mongoOptions = Object.assign(mongoOptions, {
       auth: {
         user: dbConfig.user,
         password: dbConfig.password
       },
-      authSource: dbConfig.authSource,
-      keepAlive: true,
-      socketTimeoutMS: 1800000, // 30 minutes
-      reconnectTries: 30
+      authSource: dbConfig.authSource
     });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions);
 }
@@ -155,7 +163,6 @@ function executeAction(collectionName, actionName, params, logger = console) {
 module.exports = {
   getMongoDBClient,
   getMongoDBConnection,
-  getMongoDBProjectionFromLoopbackFields,
   getMongoDBOptionsFromLoopbackFilter,
   executeAction
 };

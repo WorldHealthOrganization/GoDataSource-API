@@ -7,6 +7,14 @@
 
 const app = require('../../server/server');
 const genericHelpers = require('../../components/helpers');
+const WorkerRunner = require('./../../components/workerRunner');
+const _ = require('lodash');
+const Platform = require('../../components/platform');
+const Config = require('../../server/config.json');
+const importableFile = require('./../../components/importableFile');
+
+// used in event import
+const eventImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
 
@@ -17,7 +25,7 @@ module.exports = function (Outbreak) {
     // filter information based on available permissions
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context);
     // Enhance events list request to support optional filtering of events that don't have any relations
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
 
   /**
@@ -81,7 +89,7 @@ module.exports = function (Outbreak) {
     context.args = context.args || {};
     context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
 
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
 
   /**
@@ -112,12 +120,186 @@ module.exports = function (Outbreak) {
         .then(updatedFilter => {
           updatedFilter && (filter.where = updatedFilter);
 
-          // handle custom filter options
-          filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
-          return app.models.event.rawCountDocuments(filter.where);
+          return app.models.event.rawCountDocuments(filter);
         });
     }
+  };
+
+  /**
+   * Attach before remote (GET outbreaks/{id}/events/export) hooks
+   */
+  Outbreak.beforeRemote('prototype.exportFilteredEvents', function (context, modelInstance, next) {
+    // remove custom filter options
+    context.args = context.args || {};
+    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
+  });
+
+  /**
+   * Export filtered events to file
+   * @param filter Supports MongoDB compatible queries
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param fieldsGroupList
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredEvents = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // add geographical restriction to filter if needed
+    app.models.event
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
+      .then(updatedFilter => {
+        // updated filter
+        updatedFilter && (filter.where = updatedFilter);
+
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'person',
+            modelName: app.models.event.modelName,
+            scopeQuery: app.models.event.definition.settings.scope,
+            arrayProps: app.models.event.arrayProps,
+            fieldLabelsMap: app.models.event.fieldLabelsMap,
+            exportFieldsGroup: app.models.event.exportFieldsGroup,
+            exportFieldsOrder: app.models.event.exportFieldsOrder,
+            locationFields: app.models.event.locationFields
+          },
+          filter,
+          exportType,
+          encryptPassword,
+          anonymizeFields,
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: undefined,
+            useQuestionVariable: false,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          }
+        );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Import an importable events file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableEventsFileUsingMap = function (body, options, callback) {
+    const self = this;
+
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of create operations for this batch
+      const createEvents = [];
+
+      // go through all batch entries
+      batchData.forEach(function (eventData) {
+        createEvents.push(function (asyncCallback) {
+          // sync the event
+          return app.utils.dbSync.syncRecord(logger, app.models.event, eventData.save, options)
+            .then(function () {
+              asyncCallback();
+            })
+            .catch(function (error) {
+              asyncCallback(null, {
+                success: false,
+                error: {
+                  error: error,
+                  data: {
+                    file: eventData.raw,
+                    save: eventData.save
+                  }
+                }
+              });
+            });
+        });
+      });
+
+      return createEvents;
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.event._booleanProperties) {
+      app.models.event._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.event);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'event',
+      batchSize: eventImportBatchSize,
+      outbreakId: self.id,
+      modelBooleanProperties: app.models.event._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.event.modelName,
+      outbreakId: self.id,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 
   /**
@@ -145,17 +327,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for an event
    * @param eventId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, where, options, callback) {
+  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         eventId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

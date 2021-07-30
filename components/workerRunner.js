@@ -8,9 +8,16 @@ const workersPath = `${__dirname}/../components/workers`;
  * @param workerName
  * @param method
  * @param args
+ * @param backgroundWorker
  * @param callback
  */
-function invokeWorkerMethod(workerName, method, args, callback) {
+function invokeWorkerMethod(
+  workerName,
+  method,
+  args,
+  backgroundWorker,
+  callback
+) {
   // callback is the initial one
   let cb = callback;
 
@@ -23,8 +30,7 @@ function invokeWorkerMethod(workerName, method, args, callback) {
     // execute callback
     cb(error, result);
     // replace callback with no-op to prevent calling it multiple times
-    cb = function noOp() {
-    };
+    cb = function noOp() {};
   }
 
   // fork the worker
@@ -32,16 +38,51 @@ function invokeWorkerMethod(workerName, method, args, callback) {
     execArgv: [],
     windowsHide: true
   });
+
   // invoke it
-  worker.send({fn: method, args});
+  worker.send({
+    fn: method,
+    backgroundWorker,
+    args
+  });
+
   // wait for it's response and process it
   worker.on('message', function (args) {
+    // did we get an error ?
     if (args[0]) {
+      // kill worker if not dead already
+      try {
+        worker.kill();
+      } catch (e) {
+        // nothing
+      }
+
+      // send error down the road to be processed
       return next(args[0]);
     }
-    next(null, args[1]);
-    worker.kill();
+
+    // should this worker continue in background until it finishes ?
+    if (
+      args[1] &&
+      args[1].subject === 'WAIT'
+    ) {
+      // send response back to listener parent
+      next(null, args[1].response);
+    } else if (
+        args[1] &&
+        args[1].subject === 'KILL'
+      ) {
+      // kill worker since his job is done
+      worker.kill();
+    } else {
+      // send response back to listener parent
+      next(null, args[1]);
+
+      // kill worker since his job is done
+      worker.kill();
+    }
   });
+
   // in case of failure, stop with error
   ['close', 'disconnect', 'error', 'exit'].forEach(function (event) {
     worker.on(event, function () {
@@ -117,7 +158,7 @@ module.exports = {
      * @param callback
      */
     build: function (relationships, followUpPeriod, options, callback) {
-      invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod, options], callback);
+      invokeWorkerMethod('transmissionChain', 'build', [relationships, followUpPeriod, options], false, callback);
     },
     /**
      * Count transmission chains
@@ -127,7 +168,7 @@ module.exports = {
      * @param callback
      */
     count: function (relationships, followUpPeriod, options, callback) {
-      invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod, options], callback);
+      invokeWorkerMethod('transmissionChain', 'count', [relationships, followUpPeriod, options], false, callback);
     }
   },
   personDuplicate: {
@@ -138,7 +179,7 @@ module.exports = {
      * @param callback
      */
     find: function (people, filter, callback) {
-      invokeWorkerMethod('personDuplicate', 'find', [people, filter], callback);
+      invokeWorkerMethod('personDuplicate', 'find', [people, filter], false, callback);
     },
     /**
      * Count the groups of duplicate people
@@ -146,7 +187,7 @@ module.exports = {
      * @param callback
      */
     count: function (people, callback) {
-      invokeWorkerMethod('personDuplicate', 'count', [people], callback);
+      invokeWorkerMethod('personDuplicate', 'count', [people], false, callback);
     }
   },
   cases: {
@@ -172,6 +213,7 @@ module.exports = {
           periodMap,
           caseClassifications
         ],
+        false,
         callback
       );
     },
@@ -197,6 +239,7 @@ module.exports = {
           periodMap,
           caseOutcomeList
         ],
+        false,
         callback
       );
     },
@@ -222,6 +265,7 @@ module.exports = {
           periodMap,
           caseClassifications
         ],
+        false,
         callback
       );
     }
@@ -235,7 +279,7 @@ module.exports = {
      */
     exportCollections: function (collections, options) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('sync', 'exportCollections', [collections, options], function (error, result) {
+        invokeWorkerMethod('sync', 'exportCollections', [collections, options], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -251,7 +295,7 @@ module.exports = {
      */
     extractAndDecryptSnapshotArchive: function (snapshotFile, options) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('sync', 'extractAndDecryptSnapshotArchive', [snapshotFile, options], function (error, result) {
+        invokeWorkerMethod('sync', 'extractAndDecryptSnapshotArchive', [snapshotFile, options], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -265,12 +309,12 @@ module.exports = {
      * Export a list in a file
      * @param headers file list headers
      * @param dataSet {Array} actual data set
-     * @param fileType {enum} [json, xml, csv, xls, xlsx, ods, pdf]
+     * @param fileType {enum} [json, csv, xls, xlsx, ods, pdf]
      * @return {Promise<any>}
      */
     exportListFile: function (headers, dataSet, fileType, title = 'List') {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'exportListFile', [headers, dataSet, fileType, title], function (error, result) {
+        invokeWorkerMethod('helpers', 'exportListFile', [headers, dataSet, fileType, title], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -294,7 +338,7 @@ module.exports = {
      */
     encryptFile: function (password, options, filePath) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'encryptFile', [password, options, filePath], function (error, result) {
+        invokeWorkerMethod('helpers', 'encryptFile', [password, options, filePath], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -318,7 +362,7 @@ module.exports = {
      */
     decryptFile: function (password, options, filePath) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'decryptFile', [password, options, filePath], function (error, result) {
+        invokeWorkerMethod('helpers', 'decryptFile', [password, options, filePath], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -341,7 +385,7 @@ module.exports = {
      */
     encrypt: function (password, data) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'encrypt', [password, data], function (error, result) {
+        invokeWorkerMethod('helpers', 'encrypt', [password, data], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -364,7 +408,7 @@ module.exports = {
      */
     decrypt: function (password, data) {
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'decrypt', [password, data], function (error, result) {
+        invokeWorkerMethod('helpers', 'decrypt', [password, data], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -380,19 +424,19 @@ module.exports = {
       });
     },
     exportFilteredModelsList: function () {
-      let originalArguments = arguments;
+      // get method arguments
+      const originalArguments = arguments;
+
+      // our worker will work in background
+      // trigger worker
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('helpers', 'exportFilteredModelsList', [...originalArguments], function (error, result) {
+        invokeWorkerMethod('helpers', 'exportFilteredModelsList', [...originalArguments], true, function (error, result) {
+          // an error occurred ?
           if (error) {
             return reject(error);
           }
-          // if data was buffer, transform it back to buffer
-          if (
-            result &&
-            result.data &&
-            result.data.type === 'Buffer') {
-            result.data = Buffer.from(result.data.data);
-          }
+
+          // send export log id further
           resolve(result);
         });
       });
@@ -402,7 +446,7 @@ module.exports = {
     upload: function () {
       let originalArguments = arguments;
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('importableFile', 'upload', [...originalArguments], function (error, result) {
+        invokeWorkerMethod('importableFile', 'upload', [...originalArguments], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -414,7 +458,7 @@ module.exports = {
     getDistinctValuesForHeaders: function () {
       let originalArguments = arguments;
       return new Promise(function (resolve, reject) {
-        invokeWorkerMethod('importableFile', 'getDistinctValuesForHeaders', [...originalArguments], function (error, result) {
+        invokeWorkerMethod('importableFile', 'getDistinctValuesForHeaders', [...originalArguments], false, function (error, result) {
           if (error) {
             return reject(error);
           }
@@ -444,7 +488,7 @@ module.exports = {
     whereFilter
   ) {
     return new Promise(function (resolve, reject) {
-      invokeWorkerMethod('contactFollowUpReport', 'get', [outbreakId, startDate, endDate, whereFilter], (error, result) => {
+      invokeWorkerMethod('contactFollowUpReport', 'get', [outbreakId, startDate, endDate, whereFilter], false, (error, result) => {
         if (error) {
           return reject(error);
         }

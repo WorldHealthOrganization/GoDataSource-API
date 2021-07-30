@@ -987,6 +987,18 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION": {
         "translation": "يسمح هذا الإذن باستعادة معلومات الحدث المحذوف"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT": {
+        "translation": "Case - export"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_DESCRIPTION": {
+        "translation": "This permission allows export of case data"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT": {
+        "translation": "Case - import"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT_DESCRIPTION": {
+        "translation": "This permission allows import of case data"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT": {
         "translation": "حدث - خلق جهة اتصال"
       },
@@ -4467,9 +4479,6 @@
       "LNG_COMMON_LABEL_NO_RECORDS_SELECTED": {
         "translation": "لم يتم تحديد أي سجلات"
       },
-      "LNG_COMMON_LABEL_RECORDS_NUMBER": {
-        "translation": "نتائج {{value}}"
-      },
       "LNG_COMMON_LABEL_YES": {
         "translation": " نعم"
       },
@@ -4488,8 +4497,50 @@
       "LNG_COMMON_LABEL_FILTERS_USED": {
         "translation": "**Filters are applied on this list (may include hidden fields)"
       },
-      "LNG_COMMON_LABEL__INVALID_URL_FILTERS": {
+      "LNG_COMMON_LABEL_INVALID_URL_FILTERS": {
         "translation": "Ignored invalid URL filters"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_ITEMS_PER_PAGE": {
+        "translation": "Items per page:"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_FIRST_PAGE": {
+        "translation": "First page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_LAST_PAGE": {
+        "translation": "Last page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_NEXT_PAGE": {
+        "translation": "Next page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_PREVIOUS_PAGE": {
+        "translation": "Previous page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_COUNT_BEFORE_LENGTH": {
+        "translation": "more than"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_COUNT_AFTER_LENGTH": {
+        "translation": "results"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_RANGE": {
+        "translation": "{{pageLabel}} of {{beforeLength}} {{length}} {{afterLength}}"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_RANGE_PAGE_START_END": {
+        "translation": "-"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_SHOW_EXACT_COUNT": {
+        "translation": "show exact count"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS": {
+        "translation": "Use database column headers"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_DESCRIPTION": {
+        "translation": "Use as column headers the properties from database (useful for scripts)"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES": {
+        "translation": "Don't translate values"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES_DESCRIPTION": {
+        "translation": "Receive values the same way they are in database (useful for scripts)"
       }
     },
     "uiGeneralActions": {
@@ -5592,10 +5643,10 @@
         "translation": "السن"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "السن (بالسنوات)"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "السن/بالأشهر"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "التصنيف"
@@ -5716,10 +5767,10 @@
         "translation": "عمر الفرد يمكنك تحديده بسنوات أو أشهر.  لا ينبغي استخدام الشهور إلا للرضع الذين تقل أعمارهم عن عام واحد "
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "السن/بالأشهر"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "السن (بالسنوات)"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "معرف هوية فريد للحالة"
@@ -6153,7 +6204,7 @@
         "translation": "تصدير علاقات الحالات"
       },
       "LNG_PAGE_LIST_CASES_GROUP_ACTION_EXPORT_SELECTED_CASES_RELATIONSHIPS": {
-        "translation": "تصدير علاقات الحالات"
+        "translation": "Export selected case relationships"
       },
       "LNG_PAGE_LIST_CASES_EXPORT_RELATIONSHIP_FILE_NAME": {
         "translation": "علاقات الحالات"
@@ -6392,10 +6443,10 @@
         "translation": "عمر الفرد يمكنك تحديده بسنوات أو أشهر.  لا ينبغي استخدام الشهور إلا للرضع الذين تقل أعمارهم عن عام واحد "
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "العمر/بالأشهر"
+        "translation": "Months"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "العمر (بالسنوات)"
+        "translation": "Years"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
         "translation": "التاريخ الذي أصبح فيه الفرد مخالطا"
@@ -7430,6 +7481,9 @@
       },
       "LNG_EVENT_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_EVENT_FIELD_LABEL_ID": {
+        "translation": "ID"
       },
       "LNG_EVENT_FIELD_LABEL_PHONE_NUMBER": {
         "translation": "رقم الهاتف"
@@ -11586,6 +11640,18 @@
       "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_EVENT": {
         "translation": "استعادة حدث"
       },
+      "LNG_PAGE_LIST_EVENTS_EXPORT_BUTTON": {
+        "translation": "Export event data"
+      },
+      "LNG_PAGE_LIST_EVENTS_EXPORT_TITLE": {
+        "translation": "Export event data"
+      },
+      "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_EXPORT_SELECTED_EVENTS": {
+        "translation": "Export the selected events"
+      },
+      "LNG_PAGE_LIST_EVENTS_IMPORT_BUTTON": {
+        "translation": "Import event data"
+      },
       "LNG_PAGE_LIST_EVENTS_TITLE": {
         "translation": "الأحداث "
       },
@@ -13172,6 +13238,11 @@
     "uiImportCaseData": {
       "LNG_PAGE_IMPORT_CASE_DATA_TITLE": {
         "translation": "استيراد بيانات الحالة"
+      }
+    },
+    "uiImportEventData": {
+      "LNG_PAGE_IMPORT_EVENT_DATA_TITLE": {
+        "translation": "Import event data"
       }
     },
     "uiImportCaseLabData": {
@@ -16219,6 +16290,9 @@
       "LNG_APP_PAGE_IMPORT_CASES": {
         "translation": "الحالات"
       },
+      "LNG_APP_PAGE_IMPORT_EVENT": {
+        "translation": "Events"
+      },
       "LNG_APP_PAGE_IMPORT_CONTACTS": {
         "translation": "المخالطون"
       },
@@ -16858,6 +16932,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_PERSON": {
         "translation": "Person"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_PERSON_ADDRESS": {
+        "translation": "Address"
       }
     },
     "uiCreateLabResultPage": {
@@ -16939,10 +17016,10 @@
         "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Months)"
+        "translation": "Months"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Years)"
+        "translation": "Years"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
         "translation": "Date of birth"
@@ -17768,6 +17845,35 @@
       },
       "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_31": {
         "translation": "31"
+      }
+    },
+    "uiExportData": {
+      "LNG_PAGE_EXPORT_DATA_EXPORT_RETRIEVING_LANGUAGE_TOKENS": {
+        "translation": "Retrieving language"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_PREFILTERS": {
+        "translation": "Preparing filters. This step might take up to a few minutes"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING": {
+        "translation": "Preparing data. This step might take up to a few minutes"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_LOCATIONS": {
+        "translation": "Determine and retrieve locations"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_CONFIGURE_HEADERS": {
+        "translation": "Determine and save header columns"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PROCESSED": {
+        "translation": "Processed {{processed}} / {{total}}. Estimated end date: {{estimatedEnd}}"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_ENCRYPTING": {
+        "translation": "Export finished, encrypting file(s)"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_ARCHIVING": {
+        "translation": "Export finished, archiving files"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_DOWNLOADING": {
+        "translation": "Export finished, downloading file"
       }
     }
   }

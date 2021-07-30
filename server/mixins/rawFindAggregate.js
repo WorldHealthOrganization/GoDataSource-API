@@ -47,6 +47,15 @@ module.exports = function (Model) {
     options = options || {};
     filter = filter || {};
 
+    // extract applyHasMoreLimit
+    let applyHasMoreLimit = false;
+    if (
+      filter.flags &&
+      filter.flags.applyHasMoreLimit
+    ) {
+      applyHasMoreLimit = true;
+    }
+
     // include not supported
     if (filter.include) {
       delete filter.include;
@@ -186,7 +195,7 @@ module.exports = function (Model) {
       undefined : (
         filter.limit > 0 ?
           filter.limit : (
-            config.count && config.count.limit > 0 ?
+            applyHasMoreLimit && config.count && config.count.limit > 0 ?
               config.count.limit :
               undefined
           )
@@ -194,19 +203,22 @@ module.exports = function (Model) {
 
     // no need to retrieve data, sort & skip records if we just need to count
     if (options.countOnly) {
-      // count
-      aggregatePipeline.push(
-        {
+      // limit count
+      if (countLimit > 0) {
+        aggregatePipeline.push({
           $limit: countLimit
-        }, {
-          $group: {
-            _id: null,
-            count: {
-              $sum: 1
-            }
+        });
+      }
+
+      // count
+      aggregatePipeline.push({
+        $group: {
+          _id: null,
+          count: {
+            $sum: 1
           }
         }
-      );
+      });
     } else {
       // parse order props
       const knownOrderTypes = {
@@ -296,7 +308,7 @@ module.exports = function (Model) {
             0;
           return {
             count: counted,
-            hasMore: countLimit > 0 && counted >= countLimit
+            hasMore: countLimit && countLimit > 0 && counted >= countLimit
           };
         }
 

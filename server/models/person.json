@@ -208,6 +208,15 @@
       "lastName": 1,
       "firstName": 1
     },
+    "outbreak_deleted_type_location_name_index": {
+      "outbreakId": 1,
+      "deleted": 1,
+      "type": 1,
+      "usualPlaceOfResidenceLocationId": 1,
+      "name": 1,
+      "lastName": 1,
+      "firstName": 1
+    },
     "type_index": {
       "type": 1
     },
