@@ -279,6 +279,35 @@ function exportFilteredModelsList(
               }
             }
 
+            // replace
+            if (
+              relationData.replace &&
+              typeof relationData.replace !== 'object'
+            ) {
+              // invalid definition
+              throwError(
+                relationName,
+                `invalid replace (${typeof relationData.replace})`
+              );
+            } else {
+              _.each(relationData.replace, (value, key) => {
+                if (
+                  !key ||
+                  typeof key !== 'string' ||
+                  !value ||
+                  typeof value !== 'object' ||
+                  !value.value ||
+                  typeof value.value !== 'string'
+                ) {
+                  // invalid definition
+                  throwError(
+                    relationName,
+                    `invalid replace (${typeof relationData.replace})`
+                  );
+                }
+              });
+            }
+
             // finished
             break;
 
@@ -1566,6 +1595,22 @@ function exportFilteredModelsList(
       // format prefilters
       const formattedPrefilters = formatPrefilters(prefilters);
 
+      // determine replacements
+      // - for now only relationships ofer the possibility of replacements
+      const replacements = {};
+      formattedRelations.forEach((relation) => {
+        // nothing to do here
+        if (!relation.data.replace) {
+          return;
+        }
+
+        // merge replacements
+        Object.assign(
+          replacements,
+          relation.data.replace
+        );
+      });
+
       // finished
       return {
         languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
@@ -1636,6 +1681,7 @@ function exportFilteredModelsList(
         // convert relations to array for easier access
         relations: formattedRelations,
         relationsMap: mappedRelations,
+        replacements,
 
         // filters
         prefiltersDisableLookup: false,
@@ -4553,31 +4599,39 @@ function exportFilteredModelsList(
 
                   // process data applies for all
                   // - formulas & values
-                  if (
-                    !sheetHandler.dontTranslateValues &&
-                    cellValue
-                  ) {
-                    // translate
-                    if (
-                      typeof cellValue === 'string' &&
-                      cellValue.startsWith('LNG_')
-                    ) {
-                      cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
-                        sheetHandler.dictionaryMap[cellValue] :
-                        cellValue;
-                    } else if (
-                      // custom token generator ?
-                      column.translate
-                    ) {
-                      cellValue = column.translate(
-                        cellValue,
-                        (token) => {
-                          // go through pipe
-                          return sheetHandler.dictionaryMap[token] ?
-                            sheetHandler.dictionaryMap[token] :
-                            token;
-                        }
+                  if (!sheetHandler.dontTranslateValues) {
+                    // replace value ?
+                    if (sheetHandler.replacements[column.path]) {
+                      cellValue = _.get(
+                        record,
+                        sheetHandler.replacements[column.path].value
                       );
+                    }
+
+                    // do we have a value ?
+                    if (cellValue) {
+                      // translate
+                      if (
+                        typeof cellValue === 'string' &&
+                        cellValue.startsWith('LNG_')
+                      ) {
+                        cellValue = sheetHandler.dictionaryMap[cellValue] !== undefined ?
+                          sheetHandler.dictionaryMap[cellValue] :
+                          cellValue;
+                      } else if (
+                        // custom token generator ?
+                        column.translate
+                      ) {
+                        cellValue = column.translate(
+                          cellValue,
+                          (token) => {
+                            // go through pipe
+                            return sheetHandler.dictionaryMap[token] ?
+                              sheetHandler.dictionaryMap[token] :
+                              token;
+                          }
+                        );
+                      }
                     }
 
                     // format dates

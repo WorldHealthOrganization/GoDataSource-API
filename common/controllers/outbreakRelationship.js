@@ -474,6 +474,25 @@ module.exports = function (Outbreak) {
         contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
       },
       prefilters, {
+        cluster: {
+          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          collection: 'cluster',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValue: `(relationship) => {
+            return relationship && relationship.clusterId ?
+              relationship.clusterId :
+              undefined;
+          }`,
+          replace: {
+            'clusterId': {
+              value: 'cluster.name'
+            }
+          }
+        },
         sourcePerson: {
           type: exportHelper.RELATION_TYPE.HAS_ONE,
           collection: 'person',
