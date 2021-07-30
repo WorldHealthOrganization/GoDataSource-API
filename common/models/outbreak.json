@@ -879,25 +879,25 @@
       "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "contact_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
@@ -1910,9 +1910,9 @@
           "description": "Foreign key for cases"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
         },
         {
           "arg": "options",
@@ -2183,9 +2183,9 @@
           "description": "Foreign key for contacts"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
         },
         {
           "arg": "options",
@@ -2456,9 +2456,9 @@
           "description": "Foreign key for events"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
         },
         {
           "arg": "options",
@@ -6461,6 +6461,36 @@
         "path": "/people"
       }
     },
+    "prototype.countPeople": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of records that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Counts people of outbreak.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/people/filtered-count"
+        }
+      ]
+    },
     "prototype.findEvents": {
       "accepts": [
         {
@@ -8031,9 +8061,9 @@
           "description": "Foreign key for contacts of contacts"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
         },
         {
           "arg": "options",

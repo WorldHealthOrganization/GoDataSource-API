@@ -327,17 +327,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for an event
    * @param eventId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, where, options, callback) {
+  Outbreak.prototype.countEventRelationshipsAvailablePeople = function (eventId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         eventId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

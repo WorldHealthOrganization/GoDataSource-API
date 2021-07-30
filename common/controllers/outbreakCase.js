@@ -1430,17 +1430,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a case
    * @param caseId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, options, callback) {
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         caseId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

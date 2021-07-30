@@ -4527,6 +4527,9 @@
       "LNG_COMMON_LABEL_PAGINATOR_RANGE_PAGE_START_END": {
         "translation": "-"
       },
+      "LNG_COMMON_LABEL_PAGINATOR_SHOW_EXACT_COUNT": {
+        "translation": "show exact count"
+      },
       "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS": {
         "translation": "Use database column headers"
       },

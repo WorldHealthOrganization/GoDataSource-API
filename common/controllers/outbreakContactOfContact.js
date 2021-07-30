@@ -54,18 +54,20 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a contact of contact
    * @param contactOfContactId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, where, options, callback) {
+  Outbreak.prototype.countContactOfContactRelationshipsAvailablePeople = function (contactOfContactId, filter, options, callback) {
     // we only make relations with contacts
-    where = {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where = {
       and: [
         {
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
         },
-        where || {}
+        filter.where || {}
       ]
     };
 
@@ -73,7 +75,7 @@ module.exports = function (Outbreak) {
       .getAvailablePeopleCount(
         this.id,
         contactOfContactId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

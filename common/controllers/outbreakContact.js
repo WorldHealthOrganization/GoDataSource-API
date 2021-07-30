@@ -3021,17 +3021,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a contact
    * @param contactId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, options, callback) {
+  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         contactId,
-        where,
+        filter,
         options
       )
       .then((counted) => {
