@@ -1585,6 +1585,25 @@ module.exports = function (Outbreak) {
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
           prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(contact) => {
+                return contact && contact.followUpTeamId ?
+                  contact.followUpTeamId :
+                  undefined;
+              }`,
+              replace: {
+                'followUpTeamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
             relationship: {
               type: exportHelper.RELATION_TYPE.GET_ONE,
               collection: 'relationship',

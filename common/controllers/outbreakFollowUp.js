@@ -498,7 +498,12 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.followUp.fieldLabelsMap,
             exportFieldsGroup: app.models.followUp.exportFieldsGroup,
             exportFieldsOrder: app.models.followUp.exportFieldsOrder,
-            locationFields: app.models.followUp.locationFields
+            locationFields: app.models.followUp.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'personId'
+            ]
           },
           filter,
           exportType,
@@ -516,7 +521,43 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          prefilters
+          prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.teamId ?
+                  followUp.teamId :
+                  undefined;
+              }`,
+              replace: {
+                'teamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
+            contact: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.personId ?
+                  followUp.personId :
+                  undefined;
+              }`
+            }
+          }
         );
       })
       .then((exportData) => {
