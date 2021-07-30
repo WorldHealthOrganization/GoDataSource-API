@@ -1912,7 +1912,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2185,7 +2185,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2458,7 +2458,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2908,7 +2908,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2942,7 +2942,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -4856,7 +4856,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5226,7 +5226,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5259,7 +5259,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5292,7 +5292,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5350,7 +5350,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries"
+          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -6466,7 +6466,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})\n. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -6564,7 +6564,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -7783,7 +7783,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact' MongoDB compatible query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact' MongoDB compatible query. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -8063,7 +8063,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
