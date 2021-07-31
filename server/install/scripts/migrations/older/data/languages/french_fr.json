@@ -2726,6 +2726,12 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_UNCLASSIFIED": {
+        "translation": "No classification",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryPersonType": {

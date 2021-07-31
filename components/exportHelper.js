@@ -3064,35 +3064,49 @@ function exportFilteredModelsList(
                 const location = sheetHandler.locationsMap[locationIds[locationIndex]];
 
                 // count parents
-                let parentLocationId = location.parentLocationId;
-                while (parentLocationId) {
-                  // attach parent to list
-                  location.parentChain.push(parentLocationId);
-
-                  // json file export ?
-                  if (sheetHandler.process.exportIsNonFlat) {
-                    // attach geo levels for easy print
-                    location.parentChainGeoLvlArray.push(
-                      sheetHandler.locationsMap[parentLocationId] ?
-                        sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
-                        '-'
-                    );
-
-                    // attach parent levels for easy print
-                    location.parentLocationNamesArrayNames.push(
-                      sheetHandler.locationsMap[parentLocationId] ?
-                        sheetHandler.locationsMap[parentLocationId].name :
-                        '-'
-                    );
-                    location.parentLocationNamesArrayIds.push(
+                // - include self location too
+                // - create array only if we have at least one parent
+                if (location.parentLocationId) {
+                  let parentLocationId = location._id;
+                  while (parentLocationId) {
+                    // attach parent to list
+                    location.parentChain.splice(
+                      0,
+                      0,
                       parentLocationId
                     );
-                  }
 
-                  // retrieve next parent from chain
-                  parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
-                    sheetHandler.locationsMap[parentLocationId].parentLocationId :
-                    undefined;
+                    // json file export ?
+                    if (sheetHandler.process.exportIsNonFlat) {
+                      // attach geo levels for easy print
+                      location.parentChainGeoLvlArray.splice(
+                        0,
+                        0,
+                        sheetHandler.locationsMap[parentLocationId] ?
+                          sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
+                          '-'
+                      );
+
+                      // attach parent levels for easy print
+                      location.parentLocationNamesArrayNames.splice(
+                        0,
+                        0,
+                        sheetHandler.locationsMap[parentLocationId] ?
+                          sheetHandler.locationsMap[parentLocationId].name :
+                          '-'
+                      );
+                      location.parentLocationNamesArrayIds.splice(
+                        0,
+                        0,
+                        parentLocationId
+                      );
+                    }
+
+                    // retrieve next parent from chain
+                    parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].parentLocationId :
+                      undefined;
+                  }
                 }
 
                 // update max chain size if necessary

@@ -353,36 +353,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsOfContactsPerRiskLevel = function (filter, options, callback) {
-    app.models.contactOfContact
-      .preFilterForOutbreak(this, filter, options)
-      .then(filter => app.models.contactOfContact.rawFind(
-        filter.where,
-        {
-          projection: {riskLevel: 1},
-          includeDeletedRecords: filter.deleted
-        })
+    app.models.person
+      .groupCount(
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+        filter,
+        'riskLevel',
+        'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED'
       )
-      .then(contacts => {
-        const result = {
-          riskLevel: {},
-          count: contacts.length
-        };
-        contacts.forEach(contactRecord => {
-          // risk level is optional
-          if (contactRecord.riskLevel == null) {
-            contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
-          }
-          // init contact riskLevel group if needed
-          if (!result.riskLevel[contactRecord.riskLevel]) {
-            result.riskLevel[contactRecord.riskLevel] = {
-              count: 0
-            };
-          }
-          // classify records by their risk level
-          result.riskLevel[contactRecord.riskLevel].count++;
-        });
-        // send back the result
-        callback(null, result);
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
