@@ -271,35 +271,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCasesPerClassification = function (filter, options, callback) {
-    app.models.case
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // count using query
-        return app.models.case.rawFind(filter.where, {
-          projection: {classification: 1},
-          includeDeletedRecords: filter.deleted
-        });
-      })
-      .then(function (cases) {
-        // build a result
-        const result = {
-          classification: {},
-          count: cases.length
-        };
-        // go through all case records
-        cases.forEach(function (caseRecord) {
-          // init case classification group if needed
-          if (!result.classification[caseRecord.classification]) {
-            result.classification[caseRecord.classification] = {
-              count: 0
-            };
-          }
-
-          // classify records by their classification
-          result.classification[caseRecord.classification].count++;
-        });
-        // send back the result
-        callback(null, result);
+    app.models.person
+      .groupCount(
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+        filter,
+        'classification',
+        'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };

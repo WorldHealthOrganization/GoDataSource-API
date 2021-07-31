@@ -2555,39 +2555,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsPerRiskLevel = function (filter, options, callback) {
-    // pre-filter using related data (case, followUps)
-    app.models.contact
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // find follow-ups using filter
-        return app.models.contact.rawFind(filter.where, {
-          projection: {riskLevel: 1},
-          includeDeletedRecords: filter.deleted
-        });
-      })
-      .then(function (contacts) {
-        // build a result
-        const result = {
-          riskLevel: {},
-          count: contacts.length
-        };
-        // go through all contact records
-        contacts.forEach(function (contactRecord) {
-          // risk level is optional
-          if (contactRecord.riskLevel == null) {
-            contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
-          }
-          // init contact riskLevel group if needed
-          if (!result.riskLevel[contactRecord.riskLevel]) {
-            result.riskLevel[contactRecord.riskLevel] = {
-              count: 0
-            };
-          }
-          // classify records by their risk level
-          result.riskLevel[contactRecord.riskLevel].count++;
-        });
-        // send back the result
-        callback(null, result);
+    app.models.person
+      .groupCount(
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+        filter,
+        'riskLevel',
+        'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
