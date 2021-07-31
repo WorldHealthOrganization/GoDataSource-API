@@ -2080,7 +2080,8 @@ function exportFilteredModelsList(
             'LNG_LOCATION_FIELD_LABEL_ID',
             'LNG_LOCATION_FIELD_LABEL_IDENTIFIERS',
             'LNG_LOCATION_FIELD_LABEL_IDENTIFIER',
-            'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL'
+            'LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL',
+            'LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION'
           );
 
           // attach questionnaire tokens
@@ -2979,6 +2980,8 @@ function exportFilteredModelsList(
                     record.parentChain = [];
                     if (sheetHandler.process.exportIsNonFlat) {
                       record.parentChainGeoLvlArray = [];
+                      record.parentLocationNamesArrayNames = [];
+                      record.parentLocationNamesArrayIds = [];
                     }
 
                     // identifier map
@@ -3066,12 +3069,23 @@ function exportFilteredModelsList(
                   // attach parent to list
                   location.parentChain.push(parentLocationId);
 
-                  // attach geo levels for easy print
+                  // json file export ?
                   if (sheetHandler.process.exportIsNonFlat) {
+                    // attach geo levels for easy print
                     location.parentChainGeoLvlArray.push(
                       sheetHandler.locationsMap[parentLocationId] ?
                         sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
                         '-'
+                    );
+
+                    // attach parent levels for easy print
+                    location.parentLocationNamesArrayNames.push(
+                      sheetHandler.locationsMap[parentLocationId] ?
+                        sheetHandler.locationsMap[parentLocationId].name :
+                        '-'
+                    );
+                    location.parentLocationNamesArrayIds.push(
+                      parentLocationId
                     );
                   }
 
@@ -3267,8 +3281,8 @@ function exportFilteredModelsList(
                 }
               };
 
-              // attach parent location details - only first level parent
-              const attachParentLocationDetails = (
+              // attach parent location geographical level details
+              const attachParentLocationGeographicalLevelDetails = (
                 header,
                 path,
                 pathWithoutIndexes
@@ -3312,6 +3326,61 @@ function exportFilteredModelsList(
                         sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]] &&
                         sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId ?
                           sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId :
+                          '';
+                      };
+                    })(parentLocationIndex)
+                  );
+                }
+              };
+
+              // attach parent location geographical level details
+              const attachParentLocationsNameDetails = (
+                header,
+                path,
+                pathWithoutIndexes
+              ) => {
+                // non flat ?
+                if (sheetHandler.process.exportIsNonFlat) {
+                  // attach parent location geographical level
+                  addHeaderColumn(
+                    header,
+                    path,
+                    pathWithoutIndexes,
+                    uuid.v4(),
+                    (value) => {
+                      return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentLocationNamesArrayNames ?
+                        (
+                          sheetHandler.dontTranslateValues ?
+                            sheetHandler.locationsMap[value].parentLocationNamesArrayIds :
+                            sheetHandler.locationsMap[value].parentLocationNamesArrayNames
+                        ) :
+                        [];
+                    }
+                  );
+
+                  // finished
+                  return;
+                }
+
+                // attach parent location details
+                for (let parentLocationIndex = 0; parentLocationIndex < sheetHandler.locationsMaxSizeOfParentsChain; parentLocationIndex++) {
+                  // attach parent location names
+                  addHeaderColumn(
+                    `${header} [${parentLocationIndex + 1}]`,
+                    path,
+                    pathWithoutIndexes,
+                    uuid.v4(),
+                    (function (localParentLocationIndex) {
+                      return (value) => {
+                        return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].parentChain &&
+                        sheetHandler.locationsMap[value].parentChain.length > localParentLocationIndex &&
+                        sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]] &&
+                        sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].name ?
+                          (
+                            sheetHandler.dontTranslateValues ?
+                              sheetHandler.locationsMap[value].parentChain[localParentLocationIndex] :
+                              sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].name
+                          ) :
                           '';
                       };
                     })(parentLocationIndex)
@@ -3375,15 +3444,17 @@ function exportFilteredModelsList(
                           sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
                         ) {
                           // attach location guid
-                          addHeaderColumn(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
-                            childColumn.pathWithoutIndexes,
-                            uuid.v4(),
-                            (value) => {
-                              return value;
-                            }
-                          );
+                          if (!sheetHandler.dontTranslateValues) {
+                            addHeaderColumn(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
+                              `${propertyName}[${arrayIndex}].${childProperty}`,
+                              childColumn.pathWithoutIndexes,
+                              uuid.v4(),
+                              (value) => {
+                                return value;
+                              }
+                            );
+                          }
 
                           // attach location identifiers
                           attachLocationIdentifiers(
@@ -3393,9 +3464,16 @@ function exportFilteredModelsList(
                             childColumn.pathWithoutIndexes
                           );
 
-                          // attach parent location details - only first level parent
-                          attachParentLocationDetails(
+                          // attach parent location geographical level details
+                          attachParentLocationGeographicalLevelDetails(
                             `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.pathWithoutIndexes
+                          );
+
+                          // attach parent locations name details
+                          attachParentLocationsNameDetails(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
                             `${propertyName}[${arrayIndex}].${childProperty}`,
                             childColumn.pathWithoutIndexes
                           );
@@ -3741,14 +3819,6 @@ function exportFilteredModelsList(
                           undefined :
                           (function (localPropertyName) {
                             return (value, translatePipe) => {
-                              // no processing ?
-                              if (
-                                sheetHandler.useDbColumns &&
-                                sheetHandler.dontTranslateValues
-                              ) {
-                                return value;
-                              }
-
                               // for non flat file types we might need to translate / format value
                               // - array condition must be before object since array ...is an object too...
                               if (
@@ -3810,18 +3880,32 @@ function exportFilteredModelsList(
                                       ) {
                                         // need to replace location id with location name ?
                                         const locationValue = childValue[propertyKey];
-                                        response[propPathTranslation] = sheetHandler.locationsMap[locationValue] ?
+                                        response[propPathTranslation] = !sheetHandler.dontTranslateValues && sheetHandler.locationsMap[locationValue] ?
                                           sheetHandler.locationsMap[locationValue].name :
                                           locationValue;
+
+                                        // attach location id
+                                        if (!sheetHandler.dontTranslateValues) {
+                                          response[`${propPathTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']}`] = locationValue;
+                                        }
 
                                         // attach location identifiers
                                         response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].identifiers ?
                                           sheetHandler.locationsMap[locationValue].identifiersCodes :
                                           [];
 
-                                        // attach parent location details - only first level parent
+                                        // attach parent location geographical level details
                                         response[sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray ?
                                           sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray.map(translatePipe) :
+                                          [];
+
+                                        // attach parent location name details
+                                        response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames ?
+                                          (
+                                            sheetHandler.dontTranslateValues ?
+                                              sheetHandler.locationsMap[locationValue].parentLocationNamesArrayIds :
+                                              sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames
+                                          ) :
                                           [];
                                       } else {
                                         // set value
@@ -3834,9 +3918,9 @@ function exportFilteredModelsList(
                                   } else {
                                     // normal value
                                     response = !sheetHandler.dontTranslateValues && childValue &&
-                                    typeof childValue === 'string' && childValue.startsWith('LNG_') ?
-                                      translatePipe(childValue) :
-                                      childValue;
+                                      typeof childValue === 'string' && childValue.startsWith('LNG_') ?
+                                        translatePipe(childValue) :
+                                        childValue;
                                   }
 
                                   // finished
@@ -3850,7 +3934,20 @@ function exportFilteredModelsList(
                                 );
                               }
 
+                              // check if value is location type
+                              if (
+                                value &&
+                                typeof value === 'string' &&
+                                sheetHandler.columns.locationsFieldsMap[localPropertyName]
+                              ) {
+                                // need to replace location id with location name ?
+                                return !sheetHandler.dontTranslateValues && sheetHandler.locationsMap[value] ?
+                                  sheetHandler.locationsMap[value].name :
+                                  value;
+                              }
+
                               // no custom formatter
+                              // - translation takes place at next step
                               return value;
                             };
                           })(propertyName)
@@ -3863,6 +3960,19 @@ function exportFilteredModelsList(
                     sheetHandler.columns.includeParentLocationData &&
                     sheetHandler.columns.locationsFieldsMap[propertyName]
                   ) {
+                    // attach location id
+                    if (!sheetHandler.dontTranslateValues) {
+                      addHeaderColumn(
+                        `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']}`,
+                        propertyName,
+                        propertyName,
+                        uuid.v4(),
+                        (value) => {
+                          return value;
+                        }
+                      );
+                    }
+
                     // attach location identifiers
                     attachLocationIdentifiers(
                       `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']}`,
@@ -3871,9 +3981,16 @@ function exportFilteredModelsList(
                       propertyName
                     );
 
-                    // attach parent location details - only first level parent
-                    attachParentLocationDetails(
+                    // attach parent location geographical details
+                    attachParentLocationGeographicalLevelDetails(
                       `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                      propertyName,
+                      propertyName
+                    );
+
+                    // attach parent locations name details
+                    attachParentLocationsNameDetails(
+                      `${propertyLabelTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
                       propertyName,
                       propertyName
                     );
@@ -4393,7 +4510,10 @@ function exportFilteredModelsList(
               if (column.formula) {
                 // retrieve result from formula
                 cellValue = column.formula(
+                  // value
                   _.get(record, column.path),
+
+                  // translate pipe
                   (token) => {
                     // add to translate if necessary
                     if (!sheetHandler.dictionaryMap[token]) {
@@ -4570,7 +4690,10 @@ function exportFilteredModelsList(
                   let cellValue;
                   if (column.formula) {
                     cellValue = column.formula(
+                      // value
                       _.get(record, column.path),
+
+                      // translate pipe
                       (token) => {
                         // go through pipe
                         return !sheetHandler.dontTranslateValues && sheetHandler.dictionaryMap[token] ?
@@ -4591,7 +4714,7 @@ function exportFilteredModelsList(
                       typeof cellValue === 'string' &&
                       sheetHandler.columns.locationsFieldsMap[column.pathWithoutIndexes]
                     ) {
-                      cellValue = sheetHandler.locationsMap[cellValue] ?
+                      cellValue = !sheetHandler.dontTranslateValues && sheetHandler.locationsMap[cellValue] ?
                         sheetHandler.locationsMap[cellValue].name :
                         cellValue;
                     }
