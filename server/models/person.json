@@ -217,6 +217,12 @@
       "lastName": 1,
       "firstName": 1
     },
+    "outbreak_deleted_type_classification_index": {
+      "outbreakId": 1,
+      "deleted": 1,
+      "type": 1,
+      "classification": 1
+    },
     "type_index": {
       "type": 1
     },
