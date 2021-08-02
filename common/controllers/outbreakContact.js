@@ -19,6 +19,7 @@ const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
 const apiError = require('../../components/apiError');
+const exportHelper = require('./../../components/exportHelper');
 
 // used in contact import
 const contactImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -1458,7 +1459,7 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered contacts to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList
@@ -1474,150 +1475,200 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    const self = this;
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        followUp: {
+          collection: 'followUp',
+          queryPath: 'where.followUp',
+          localKey: '_id',
+          foreignKey: 'personId'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: '_id',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2
+          //   }
+          // }
         }
+      }
+    );
 
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then(dictionary => {
-        return app.models.contact.preFilterForOutbreak(this, filter, options)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
+    // prefilter
+    app.models.contact
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
-
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
-
-        options.questionnaire = self.contactInvestigationTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
-
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.contact,
-          {},
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'person',
+            modelName: app.models.contact.modelName,
+            scopeQuery: app.models.contact.definition.settings.scope,
+            arrayProps: app.models.contact.arrayProps,
+            fieldLabelsMap: app.models.contact.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.contact.exportFieldsGroup,
+            exportFieldsOrder: app.models.contact.exportFieldsOrder,
+            locationFields: app.models.contact.locationFields
+          },
           filter,
           exportType,
-          'Contacts List',
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          options,
-          (results, dictionary) => {
-            return new Promise(function (resolve, reject) {
-              // determine contacts for which we need to retrieve the first relationship
-              const contactsMap = _.transform(
-                results,
-                (r, v) => {
-                  r[v.id] = v;
-                },
-                {}
-              );
-
-              // retrieve contacts relationships ( sorted by creation date )
-              // only those for which source is a case / event ( at this point it shouldn't be possible to be a contact, but we should handle this case since date & source flags should be enough... )
-              // in case we don't have any contact Ids there is no point in searching for relationships
-              const contactIds = Object.keys(contactsMap);
-              const promise = contactIds.length < 1 ?
-                Promise.resolve([]) :
-                app.models.relationship.find({
-                  order: 'createdAt ASC',
-                  where: {
-                    'persons.id': {
-                      inq: contactIds
-                    }
-                  }
-                });
-
-              // handle exceptions
-              promise.catch(reject);
-
-              // retrieve contacts relationships ( sorted by creation date )
-              const relationshipsPromises = [];
-              promise.then((relationshipResults) => {
-                // keep only the first relationship
-                // assign relationships to contacts
-                _.each(relationshipResults, (relationship) => {
-                  // incomplete relationship ?
-                  if (relationship.persons.length < 2) {
-                    return;
-                  }
-
-                  // determine contact & related ids
-                  let contactId, relatedId;
-                  if (relationship.persons[0].target) {
-                    contactId = relationship.persons[0].id;
-                    relatedId = relationship.persons[1].id;
-                  } else {
-                    contactId = relationship.persons[1].id;
-                    relatedId = relationship.persons[0].id;
-                  }
-
-                  // check if this is the first relationship for this contact
-                  // if it is, then we need to map information
-                  if (
-                    contactsMap[contactId] &&
-                    !contactsMap[contactId].relationship
-                  ) {
-                    // get relationship data
-                    contactsMap[contactId].relationship = relationship.toJSON();
-
-                    // set related ID
-                    contactsMap[contactId].relationship.relatedId = relatedId;
-
-                    // resolve relationship foreign keys here
-                    relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
-                      app,
-                      app.models.relationship,
-                      [contactsMap[contactId].relationship],
-                      dictionary
-                    ).then(relationship => {
-                      contactsMap[contactId].relationship = relationship[0];
-                    }));
-                  }
-                });
-
-                // finished
-                return Promise.all(relationshipsPromises).then(() => resolve(results));
-              });
-
-            });
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.contactInvestigationTemplate ?
+              this.contactInvestigationTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          callback
+          prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(contact) => {
+                return contact && contact.followUpTeamId ?
+                  contact.followUpTeamId :
+                  undefined;
+              }`,
+              replace: {
+                'followUpTeamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
+            relationship: {
+              type: exportHelper.RELATION_TYPE.GET_ONE,
+              collection: 'relationship',
+              project: [
+                '_id',
+                'contactDate',
+                'contactDateEstimated',
+                'certaintyLevelId',
+                'exposureTypeId',
+                'exposureFrequencyId',
+                'exposureDurationId',
+                'socialRelationshipTypeId',
+                'socialRelationshipDetail',
+                'clusterId',
+                'comment',
+                'createdAt',
+                'createdBy',
+                'updatedAt',
+                'updatedBy',
+                'deleted',
+                'deletedAt',
+                'createdOn',
+                'persons'
+              ],
+              query: `(person) => {
+                return person ?
+                  {
+                    outbreakId: '${this.id}',
+                    deleted: false,
+                    'persons.id': person._id
+                  } :
+                  undefined;
+              }`,
+              sort: {
+                createdAt: 1
+              },
+              after: `(person) => {
+                // nothing to do ?
+                if (
+                  !person.relationship ||
+                  !person.relationship.persons ||
+                  person.relationship.persons.length !== 2
+                ) {
+                  return;
+                }
+
+                // determine related person
+                person.relationship.relatedId = person.relationship.persons[0].id === person._id ?
+                  person.relationship.persons[1].id :
+                  person.relationship.persons[0].id;
+
+                // cleanup
+                delete person.relationship.persons;
+                person.relationship.id = person.relationship._id;
+                delete person.relationship._id;
+              }`
+            }
+          }
+        );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
         );
       })
       .catch(callback);
@@ -2112,11 +2163,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.contact.rawCountDocuments(filter.where);
+        return app.models.contact.rawCountDocuments(filter);
       })
       .then(function (contacts) {
         callback(null, contacts);
@@ -2507,39 +2555,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsPerRiskLevel = function (filter, options, callback) {
-    // pre-filter using related data (case, followUps)
-    app.models.contact
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // find follow-ups using filter
-        return app.models.contact.rawFind(filter.where, {
-          projection: {riskLevel: 1},
-          includeDeletedRecords: filter.deleted
-        });
-      })
-      .then(function (contacts) {
-        // build a result
-        const result = {
-          riskLevel: {},
-          count: contacts.length
-        };
-        // go through all contact records
-        contacts.forEach(function (contactRecord) {
-          // risk level is optional
-          if (contactRecord.riskLevel == null) {
-            contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
-          }
-          // init contact riskLevel group if needed
-          if (!result.riskLevel[contactRecord.riskLevel]) {
-            result.riskLevel[contactRecord.riskLevel] = {
-              count: 0
-            };
-          }
-          // classify records by their risk level
-          result.riskLevel[contactRecord.riskLevel].count++;
-        });
-        // send back the result
-        callback(null, result);
+    app.models.person
+      .groupCount(
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+        filter,
+        'riskLevel',
+        'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
@@ -2973,17 +3001,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a contact
    * @param contactId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, options, callback) {
+  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         contactId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

@@ -57,6 +57,11 @@
     }
   },
   "indexes": {
+    "outbreak_deleted_date_index": {
+      "outbreakId": 1,
+      "deleted": 1,
+      "date": 1
+    },
     "personId_index": {
       "personId": 1
     },

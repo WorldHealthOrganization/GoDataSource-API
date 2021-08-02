@@ -18,6 +18,7 @@ const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
 const apiError = require('../../components/apiError');
+const exportHelper = require('./../../components/exportHelper');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -46,7 +47,7 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
     // remove custom filter options
@@ -85,11 +86,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.case.rawCountDocuments(filter.where);
+        return app.models.case.rawCountDocuments(filter);
       })
       .then(function (cases) {
         callback(null, cases);
@@ -105,7 +103,6 @@ module.exports = function (Outbreak) {
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation(
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
       context,
       modelInstance,
       next
@@ -261,7 +258,7 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
    */
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
     Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
@@ -274,35 +271,19 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCasesPerClassification = function (filter, options, callback) {
-    app.models.case
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // count using query
-        return app.models.case.rawFind(filter.where, {
-          projection: {classification: 1},
-          includeDeletedRecords: filter.deleted
-        });
-      })
-      .then(function (cases) {
-        // build a result
-        const result = {
-          classification: {},
-          count: cases.length
-        };
-        // go through all case records
-        cases.forEach(function (caseRecord) {
-          // init case classification group if needed
-          if (!result.classification[caseRecord.classification]) {
-            result.classification[caseRecord.classification] = {
-              count: 0
-            };
-          }
-
-          // classify records by their classification
-          result.classification[caseRecord.classification].count++;
-        });
-        // send back the result
-        callback(null, result);
+    app.models.person
+      .groupCount(
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+        filter,
+        'classification',
+        'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
@@ -315,7 +296,7 @@ module.exports = function (Outbreak) {
     context.args = context.args || {};
     context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
 
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
 
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
@@ -325,71 +306,126 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered cases to file
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
    * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, fieldsGroupList, options, callback) {
-    const self = this;
+  Outbreak.prototype.exportFilteredCases = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    app.models.case.preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        relationship: {
+          collection: 'relationship',
+          queryPath: 'where.relationship',
+          localKey: '_id',
+          foreignKey: 'persons[].id',
+          foreignKeyArraySize: 2
+        },
+        labResult: {
+          collection: 'labResult',
+          queryPath: 'where.labResult',
+          localKey: '_id',
+          foreignKey: 'personId'
         }
+      }
+    );
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
+    // prefilter
+    app.models.case
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
 
-        let exportOptions = {
-          questionnaire: self.caseInvestigationTemplate.toJSON(),
-          useQuestionVariable: useQuestionVariable,
-          contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-        };
-
-        const CaseModel = app.models.case;
-        let modelOptions = {
-          collectionName: 'person',
-          scopeQuery: CaseModel.definition.settings.scope,
-          arrayProps: CaseModel.arrayProps,
-          fieldLabelsMap: CaseModel.fieldLabelsMap,
-          exportFieldsGroup: CaseModel.exportFieldsGroup,
-          exportFieldsOrder: CaseModel.exportFieldsOrder,
-          locationFields: CaseModel.locationFields,
-          foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
-          referenceDataFields: CaseModel.referenceDataFields,
-          referenceDataFieldsToCategoryMap: CaseModel.referenceDataFieldsToCategoryMap
-        };
-
+        // export
         return WorkerRunner.helpers.exportFilteredModelsList(
-          modelOptions,
-          {},
+          {
+            collectionName: 'person',
+            modelName: app.models.case.modelName,
+            scopeQuery: app.models.case.definition.settings.scope,
+            arrayProps: app.models.case.arrayProps,
+            fieldLabelsMap: app.models.case.fieldLabelsMap,
+            exportFieldsGroup: app.models.case.exportFieldsGroup,
+            exportFieldsOrder: app.models.case.exportFieldsOrder,
+            locationFields: app.models.case.locationFields
+          },
           filter,
           exportType,
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          exportOptions
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.caseInvestigationTemplate ?
+              this.caseInvestigationTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          prefilters
         );
       })
-      .then((file) => {
-        return app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case List.${file.extension}`, callback);
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
       })
       .catch(callback);
   };
@@ -1378,17 +1414,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a case
    * @param caseId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, options, callback) {
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         caseId,
-        where,
+        filter,
         options
       )
       .then((counted) => {

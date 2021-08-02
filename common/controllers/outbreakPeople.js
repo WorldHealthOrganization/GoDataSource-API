@@ -65,21 +65,38 @@ module.exports = function (Outbreak) {
   /**
    * Add support for disallowed person types and geo restrictions
    */
-  Outbreak.beforeRemote('prototype.__count__people', function (context, modelInstance, next) {
+  Outbreak.beforeRemote('prototype.countPeople', function (context, modelInstance, next) {
     // merge the disallowed person types filter
-    context.args.where = app.utils.remote.mergeFilters(_generatePersonTypesFilter(context), context.args || {}).where;
+    context.args = context.args || {};
+    context.args.filter = context.args.filter || {};
+    context.args.filter.where = app.utils.remote.mergeFilters(_generatePersonTypesFilter(context), context.args.filter).where;
 
     // add geographical restrictions if needed
     app.models.person
-      .addGeographicalRestrictions(context, context.args.where)
+      .addGeographicalRestrictions(context, context.args.filter.where)
       .then(updatedFilter => {
         // update where if needed
-        updatedFilter && (context.args.where = updatedFilter);
+        updatedFilter && (context.args.filter.where = updatedFilter);
 
         return next();
       })
       .catch(next);
   });
+
+  /**
+   * Count people
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countPeople = function (filter, options, callback) {
+    // count using query
+    app.models.person.rawCountDocuments(filter)
+      .then(function (count) {
+        callback(null, count);
+      })
+      .catch(callback);
+  };
 
   /**
    * List of contacts/cases where inconsistencies were found between dates.

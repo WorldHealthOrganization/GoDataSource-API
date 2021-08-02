@@ -12,6 +12,8 @@ const _ = require('lodash');
 const Config = require('./../../server/config.json');
 const genericHelpers = require('../../components/helpers');
 const Platform = require('../../components/platform');
+const WorkerRunner = require('./../../components/workerRunner');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -389,87 +391,183 @@ module.exports = function (Outbreak) {
     options,
     callback
   ) {
-    let self = this;
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
-        }
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
 
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then((dictionary) => {
-        return app.models.followUp.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(function (data) {
-        // add geographical restriction to filter if needed
-        return app.models.followUp
-          .addGeographicalRestrictions(options.remotingContext, data.filter.where)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (data.filter.where = updatedFilter);
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
 
-            // finished
-            return data;
-          });
-      })
-      .then(function (data) {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        contact: {
+          collection: 'person',
+          queryPath: 'where.contact',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          localKey: 'personId',
+          foreignKey: '_id'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: 'personId',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2,
+          //     prefilters: {
+          //         contact: {
+          //           collection: 'person...',
+          //           queryPath: 'where.relationship',
+          //           localKey: '_id',
+          //           foreignKey: 'persons[].id',
+          //           foreignKeyArraySize: 2
+          //         }
+          //       }
+          //   }
+          // }
+        },
 
-        options.questionnaire = self.contactFollowUpTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
+        // #TODO - implement
+        // where.timeLastSeen
+        // where.weekNumber
+      }
+    );
 
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.followUp,
-          {},
+    // prefilter
+    app.models.followUp
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'followUp',
+            modelName: app.models.followUp.modelName,
+            scopeQuery: app.models.followUp.definition.settings.scope,
+            arrayProps: undefined,
+            fieldLabelsMap: app.models.followUp.fieldLabelsMap,
+            exportFieldsGroup: app.models.followUp.exportFieldsGroup,
+            exportFieldsOrder: app.models.followUp.exportFieldsOrder,
+            locationFields: app.models.followUp.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'personId'
+            ]
+          },
           filter,
           exportType,
-          'Follow-Up List',
           encryptPassword,
           anonymizeFields,
           fieldsGroupList,
-          options,
-          function (results) {
-            return Promise.resolve(results);
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.contactFollowUpTemplate ?
+              this.contactFollowUpTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          callback
+          prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.teamId ?
+                  followUp.teamId :
+                  undefined;
+              }`,
+              replace: {
+                'teamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
+            contact: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.personId ?
+                  followUp.personId :
+                  undefined;
+              }`
+            }
+          }
         );
-      });
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
   };
 
   /**

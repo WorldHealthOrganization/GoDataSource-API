@@ -23,16 +23,35 @@ module.exports = function (Model) {
 
   /**
    * Find using connector
-   * @param query
+   * @param filter
    * @param {object} [options]
    * @param {number} [options.skip]
    * @param {number} [options.limit]
    * @param {object} [options.includeDeletedRecords]
+   * @param {object} [options.applyHasMoreLimit]
    * @return {Promise<number>}
    */
-  Model.rawCountDocuments = function (query, options = {}) {
+  Model.rawCountDocuments = function (filter, options = {}) {
     options = options || {};
-    query = query || {};
+    filter = filter || {};
+    let query = filter.where || {};
+
+    // extract applyHasMoreLimit
+    let applyHasMoreLimit = false;
+    if (
+      filter.flags &&
+      filter.flags.applyHasMoreLimit
+    ) {
+      applyHasMoreLimit = true;
+    }
+
+    // filter limit
+    if (
+      !options.limit &&
+      filter.limit
+    ) {
+      options.limit = filter.limit;
+    }
 
     // set query id and start timer (for logging purposes)
     const queryId = uuid.v4();
@@ -54,7 +73,10 @@ module.exports = function (Model) {
     query = app.utils.remote.convertLoopbackFilterToMongo(query);
 
     // where include ?
-    if (query.includeDeletedRecords) {
+    if (
+      query.includeDeletedRecords ||
+      filter.deleted
+    ) {
       delete query.includeDeletedRecords;
       options.includeDeletedRecords = true;
     }
@@ -79,7 +101,7 @@ module.exports = function (Model) {
       undefined : (
         options.limit > 0 ?
           options.limit : (
-            config.count && config.count.limit > 0 ?
+            applyHasMoreLimit && config.count && config.count.limit > 0 ?
               config.count.limit :
               undefined
           )
@@ -99,7 +121,7 @@ module.exports = function (Model) {
         // finished
         return {
           count: counted,
-          hasMore: countLimit > 0 && counted >= countLimit
+          hasMore: countLimit && countLimit > 0 && counted >= countLimit
         };
       });
   };

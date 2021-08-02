@@ -257,21 +257,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit - must be a JSON-encoded string ({\"something\":\"value\"})."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",

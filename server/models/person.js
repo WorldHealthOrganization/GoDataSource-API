@@ -1430,18 +1430,20 @@ module.exports = function (Person) {
    * retrieve available people for a specific case / contact / event
    * @param outbreakId
    * @param personId
-   * @param where
+   * @param filter
    * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeopleCount = function (
     outbreakId,
     personId,
-    where,
+    filter,
     options
   ) {
     // attach our conditions
-    where = {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where = {
       and: [
         {
           outbreakId: outbreakId
@@ -1450,19 +1452,19 @@ module.exports = function (Person) {
             neq: personId
           }
         },
-        where ? where : {}
+        filter.where ? filter.where : {}
       ]
     };
 
     // update filter for geographical restriction if needed
     return Person
-      .addGeographicalRestrictions(options.remotingContext, where)
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
       .then(updatedFilter => {
         // update filter if needed
-        updatedFilter && (where = updatedFilter);
+        updatedFilter && (filter.where = updatedFilter);
 
         // retrieve data
-        return Person.rawCountDocuments(where);
+        return Person.rawCountDocuments(filter);
       });
   };
 
@@ -2261,6 +2263,167 @@ module.exports = function (Person) {
       })
       .then((person) => {
         return person.notDuplicatesIds;
+      });
+  };
+
+  /**
+   * Group count
+   */
+  Person.groupCount = (
+    outbreakId,
+    personType,
+    filter,
+    groupByProperty,
+    nullGroupKey
+  ) => {
+    // initialization
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // attach prefilters
+    filter.where.outbreakId = outbreakId;
+    filter.where.type = personType;
+    if (!filter.deleted) {
+      filter.where.deleted = false;
+    }
+
+    // convert to mongo filter
+    const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
+
+    // construct aggregate filter
+    const aggregateFilters = [];
+
+    // filter by relationship ?
+    // - case, contact ...
+    let relationshipQuery;
+    if (!_.isEmpty(mongoFilter.where.relationship)) {
+      // get conditions
+      relationshipQuery = mongoFilter.where.relationship;
+      delete mongoFilter.where.relationship;
+    }
+
+    // filter by lab result ?
+    // - case
+    // #TODO - not needed for now since UI doesn't use it, but API find supports it, if someone uses it..then too bad
+
+    // filter by follow-up ?
+    // - case, contact ...
+    let followUpQuery;
+    if (!_.isEmpty(mongoFilter.where.followUp)) {
+      // get conditions
+      followUpQuery = mongoFilter.where.followUp;
+      delete mongoFilter.where.followUp;
+    }
+
+    // filter by case ?
+    // - contact
+    // #TODO - kinda complicated to implement at this point, contact - relationship - case (implement after mongo upgrade)
+
+    // filter by contact ?
+    // - contact of contact
+    // #TODO - kinda complicated to implement at this point, contact of contact - relationship - contact (implement after mongo upgrade)
+
+    // query
+    aggregateFilters.push({
+      $match: mongoFilter.where
+    });
+
+    // filter by relationship ?
+    if (relationshipQuery) {
+      // lookup
+      aggregateFilters.push({
+        $lookup: {
+          from: 'relationship',
+          localField: '_id',
+          foreignField: 'persons.id',
+          as: 'relationships'
+        }
+      });
+
+      // search
+      aggregateFilters.push({
+        $match: {
+          relationships: {
+            $elemMatch: Object.assign({
+              deleted: false,
+
+            }, relationshipQuery)
+          }
+        }
+      });
+    }
+
+    // filter by follow-up ?
+    if (followUpQuery) {
+      // lookup
+      aggregateFilters.push({
+        $lookup: {
+          from: 'followUp',
+          localField: '_id',
+          foreignField: 'personId',
+          as: 'followUps'
+        }
+      });
+
+      // search
+      aggregateFilters.push({
+        $match: {
+          followUps: {
+            $elemMatch: Object.assign({
+              deleted: false,
+
+            }, followUpQuery)
+          }
+        }
+      });
+    }
+
+    // group by classification
+    aggregateFilters.push({
+      $group: {
+        _id: `$${groupByProperty}`,
+        count: {
+          $sum: 1
+        }
+      }
+    });
+
+    // sort by group size
+    aggregateFilters.push({
+      $sort: {
+        count: 1
+      }
+    });
+
+    // retrieve data
+    return app.dataSources.mongoDb.connector
+      .collection('person')
+      .aggregate(
+        aggregateFilters, {
+          allowDiskUse: true
+        }
+      )
+      .toArray()
+      .then((data) => {
+        // result
+        const result = {
+          [groupByProperty]: {},
+          count: 0
+        };
+
+        // format
+        (data || []).forEach((record) => {
+          // count
+          result[groupByProperty][record._id ? record._id : nullGroupKey] = {
+            count: record.count
+          };
+
+          // count cases
+          result.count += record.count;
+        });
+
+        // finished
+        return result;
       });
   };
 };

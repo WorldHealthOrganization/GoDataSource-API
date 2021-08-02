@@ -6,7 +6,6 @@ const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid');
 const os = require('os');
-const xml2js = require('xml2js');
 const xlsx = require('xlsx');
 const sort = require('alphanum-sort');
 const apiError = require('./apiError');
@@ -21,7 +20,6 @@ const WorkerRunner = require('./workerRunner');
 // define a list of supported file extensions
 const supportedFileExtensions = [
   '.json',
-  '.xml',
   '.csv',
   '.xls',
   '.xlsx',
@@ -145,126 +143,6 @@ const getJsonHeaders = function ({data}, callback) {
 };
 
 /**
- * Get XML string as JSON and its headers
- * @param xmlString
- * @param modelOptions
- * @param dictionary
- * @param questionnaire
- * @param callback
- */
-const getXmlHeaders = function ({data, modelOptions, dictionary, questionnaire}, callback) {
-  const parserOpts = {
-    explicitArray: true,
-    explicitRoot: false
-  };
-
-  const questionsTypeMap = {};
-  const arrayProps = modelOptions.arrayProps;
-  // some models don't own a questionnaire
-  // but surely we need an array map otherwise we can't decide which properties should be left as arrays
-  // after parser converts arrays with 1 element to object
-  if (arrayProps.length || questionnaire) {
-    parserOpts.explicitArray = false;
-
-    if (questionnaire) {
-      // build a map of questions and their types
-      (function traverse(questions) {
-        return (questions || []).map(q => {
-          questionsTypeMap[q.variable] = q.answerType;
-          if (Array.isArray(q.answers) && q.answers.length) {
-            for (let a of q.answers) {
-              traverse(a.additionalQuestions);
-            }
-          }
-        });
-      })(questionnaire);
-    }
-  }
-
-  // parse XML string
-  xml2js.parseString(data, parserOpts, function (error, jsonObj) {
-    // handle parse errors
-    if (error) {
-      return callback(error);
-    }
-    // XML arrays are stored within a prop, get the first property of the object
-    const firstProp = Object.keys(jsonObj).shift();
-
-    // list of records to parse
-    let records = jsonObj[firstProp];
-    if (typeof records === 'object' && !Array.isArray(records)) {
-      records = [records];
-    }
-
-    // build a list of headers
-    const headers = [];
-    // store list of properties for each header
-    const headersToPropsMap = {};
-    records = records.map(record => {
-      // convert array properties to correct format
-      // this is needed because XML might contain a single element of type array props
-      // and the parser is converting it into object, rather than array, cause has only one
-      for (let propName in record) {
-        if (arrayProps[propName] || arrayProps[dictionary.getTranslation(propName)]) {
-          if (!Array.isArray(record[propName]) && typeof record[propName] === 'object') {
-            record[propName] = [record[propName]];
-          }
-        }
-      }
-
-      // parse questions from XML
-      // make sure multi answers/multi date questions are of type array
-      if (record.questionnaireAnswers && Object.keys(questionsTypeMap).length) {
-        for (let q in record.questionnaireAnswers) {
-          if (record.questionnaireAnswers.hasOwnProperty(q)) {
-            const questionType = questionsTypeMap[q];
-
-            // make sure answers is an array
-            if (!Array.isArray(record.questionnaireAnswers[q])) {
-              record.questionnaireAnswers[q] = [record.questionnaireAnswers[q]];
-            }
-            if (questionType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
-              // go through each answers, make sure value is array
-              record.questionnaireAnswers[q] = record.questionnaireAnswers[q].map(a => {
-                if (!Array.isArray(a.value)) {
-                  a.value = [a.value];
-                }
-                return a;
-              });
-            }
-          }
-        }
-      }
-
-      // go through all properties of flatten item
-      const flatRecord = helpers.getFlatObject(record);
-      Object.keys(flatRecord)
-        .forEach(function (property) {
-          const sanitizedProperty = property
-            // don't replace basic types arrays ( string, number, dates etc )
-            .replace(/\[\d+]$/g, '')
-            // sanitize arrays containing objects object
-            .replace(/\[\d+]/g, '[]')
-            .replace(/^\[]\.*/, '');
-          // add the header if not already included
-          if (!headersToPropsMap[sanitizedProperty]) {
-            headers.push(sanitizedProperty);
-            headersToPropsMap[sanitizedProperty] = new Set();
-          }
-
-          // add prop to headers map if simple property; children of object properties will be added separately
-          if (typeof flatRecord[property] !== 'object') {
-            headersToPropsMap[sanitizedProperty].add(property);
-          }
-        });
-      return record;
-    });
-    // send back the parsed object and its headers
-    callback(null, {obj: records, headers: headers, headersToPropsMap: headersToPropsMap});
-  });
-};
-
-/**
  * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
  * @param data
  * @param callback
@@ -374,10 +252,6 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
       getHeaders = getJsonHeaders;
       headersFormat = 'json';
       break;
-    case '.xml':
-      getHeaders = getXmlHeaders;
-      headersFormat = 'xml';
-      break;
     case '.csv':
     case '.xls':
     case '.xlsx':
@@ -455,7 +329,7 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
  *   "simple prop in an array of objects [1]": ...
  *   "Addresses Location [1] Location Geographical Level [1]"
  * }]
- * headersFormat: 'json/xml/xlsx',
+ * headersFormat: 'json/xlsx',
  * headersToPropMap: {
  *   'header': ['prop1', 'prop2']
  * }
@@ -480,8 +354,7 @@ const getDistinctPropertyValues = function (fileContents, properties) {
 
   // check for the format of the headers in file
   switch (fileContents.headersFormat) {
-    case 'json':
-    case 'xml': {
+    case 'json': {
       // for JSON the properties for each header were stored when the file was imported
       const headersToPropMap = fileContents.headersToPropMap;
       // get each requested property values from the dataset
@@ -722,7 +595,7 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
 /**
  * Get mapping suggestions for model extended form
  * @param outbreak
- * @param importType ( json, xml, xls... )
+ * @param importType ( json, xls... )
  * @param modelExtendedForm
  * @param headers
  * @param normalizedHeaders
@@ -747,16 +620,6 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
   // construct variable name
   const getVarName = (variable) => {
     return variable.name;
-    /*
-    // multi answers need to be basic data arrays which aren't handled by flat file types ( non flat file should work properly without this functionality )
-    + (
-      !['.json', '.xml'].includes(importType) &&
-      app.models[modelName].extendedForm.isBasicArray &&
-      app.models[modelName].extendedForm.isBasicArray(variable) ?
-        '_____A' :
-        ''
-    );
-     */
   };
 
   // extract variables from template
@@ -796,7 +659,7 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
     });
   }
 
-  if (['.json', '.xml'].includes(importType)) {
+  if (['.json'].includes(importType)) {
     const multiDateQuestions = outbreak[modelExtendedForm.template].filter(q => q.multiAnswer);
 
     // create a question variable to translation map
@@ -825,22 +688,7 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
 
     const maxAnswersMap = helpers.getQuestionnaireMaxAnswersMap(
       multiDateQuestions,
-      importType === '.xml' ? dataset.map(r => {
-        let propToChange = containerProp;
-        if (!r[containerProp]) {
-          if (!r[containerPropTranslation]) {
-            return r;
-          } else {
-            propToChange = containerPropTranslation;
-          }
-        }
-
-        if (Array.isArray(r[propToChange]) && r[propToChange].length) {
-          r[propToChange] = r[propToChange][0];
-        }
-
-        return r;
-      }) : dataset,
+      dataset,
       {containerPropTranslation, questionToTranslationMap}
     );
 
@@ -1063,7 +911,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           }
 
           // get array properties maximum length for non-flat files
-          if (['.json', '.xml'].includes(extension)) {
+          if (['.json'].includes(extension)) {
             steps.push(callback => {
               results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
               return callback(null, results[modelName]);

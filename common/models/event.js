@@ -27,6 +27,65 @@ module.exports = function (Event) {
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
   };
 
+  // map language token labels for export fields group
+  Event.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'name',
+        'type',
+        'date',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'description'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'address',
+        'address.typeId',
+        'address.country',
+        'address.city',
+        'address.addressLine1',
+        'address.postalCode',
+        'address.locationId',
+        'address.geoLocation',
+        'address.geoLocation.lat',
+        'address.geoLocation.lng',
+        'address.geoLocationAccurate',
+        'address.date',
+        'address.phoneNumber',
+        'address.emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    }
+  };
+
+  // default export order
+  Event.exportFieldsOrder = [
+    'id',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
+
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Event.nestedGeoPoints = [
     'address.geoLocation'

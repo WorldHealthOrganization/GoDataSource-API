@@ -585,13 +585,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Attach filter people without relation behavior (before remote hook)
-   * @param type
    * @param context
    * @param modelInstance
    * @param next
    * @return {*}
    */
-  Outbreak.helpers.attachFilterPeopleWithoutRelation = function (type, context, modelInstance, next) {
+  Outbreak.helpers.attachFilterPeopleWithoutRelation = function (context, modelInstance, next) {
     // get custom noRelationships filter
     const noRelationship = _.get(context, 'args.filter.where.noRelationships', false);
     // remove custom filter before it reaches the model
