@@ -1039,7 +1039,8 @@ const processImportableFileData = function (app, options, formatterOptions, batc
           _id: uuid.v4(),
           importLogId: importLogEntry.id,
           error: notProcessedError,
-          recordNo: i
+          recordNo: i,
+          deleted: false
         });
       }
 
@@ -1088,6 +1089,34 @@ const processImportableFileData = function (app, options, formatterOptions, batc
       .then(dbConn => {
         const importResultCollection = dbConn.collection('importResult');
 
+        // encode properties if necessary
+        const restrictedCharactersRegex = /\.|\$|\\/g;
+        const escapeRestrictedMongoCharacters = (value) => {
+          if (Array.isArray(value)) {
+            value.forEach((item) => {
+              escapeRestrictedMongoCharacters(item);
+            });
+          } else if (typeof value === 'object') {
+            Object.keys(value).forEach((key) => {
+              // make sure we look further into children values
+              escapeRestrictedMongoCharacters(value[key]);
+
+              // replace property
+              if (restrictedCharactersRegex.test(key)) {
+                const newKey = key.replace(restrictedCharactersRegex, '_');
+                value[newKey] = value[key];
+                delete value[key];
+              }
+            });
+          } else {
+            // NO NEED TO MAKE CHANGES
+          }
+        };
+
+        // escape
+        escapeRestrictedMongoCharacters(batchErrors);
+
+        // bulk insert
         return importResultCollection
           .insertMany(batchErrors);
       })
@@ -1200,7 +1229,8 @@ const processImportableFileData = function (app, options, formatterOptions, batc
             createErrors.push(Object.assign({
               _id: uuid.v4(),
               importLogId: importLogEntry.id,
-              recordNo: processed + index + 1
+              recordNo: processed + index + 1,
+              deleted: false
             }, itemResult.error || {}));
           });
 

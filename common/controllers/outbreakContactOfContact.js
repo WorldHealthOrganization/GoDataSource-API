@@ -355,6 +355,7 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.countContactsOfContactsPerRiskLevel = function (filter, options, callback) {
     app.models.person
       .groupCount(
+        options,
         this.id,
         'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
         filter,
