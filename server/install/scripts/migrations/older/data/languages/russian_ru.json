@@ -4827,9 +4827,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "Вы уверены, что хотите создать связь с этим ответом?"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "Местоположение '{{name}} ' не может быть удалено, так как с ним связаны местоположения второго уровня"
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "Местоположение '{{name}} ' не может быть удалено, так как оно используется. Хотите увидеть записи, в которых оно используется?"
       },
@@ -13353,6 +13350,12 @@
     "uiOutbreakSearchResultListPage": {
       "LNG_PAGE_LIST_SEARCH_RESULT_TITLE": {
         "translation": "Search results"
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_DESCRIPTION": {
+        "translation": "* The listed entities are the search result across all ids, entity Ids and document numbers."
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_ENTITY_ID": {
+        "translation": "Entity Id"
       }
     },
     "uiTeamsFields": {
