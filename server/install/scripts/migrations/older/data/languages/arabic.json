@@ -4821,9 +4821,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "هل أنت متأكد من رغبتك في ربط هذا الجواب؟"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "لا يمكن إزالة المكان '{{name}}' لأنه  يحتوي على مواقع للأطفال"
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "لا يمكن إزالة المكان '{{name}}' لأنه مستخدم، هل تريد أن ترى أين؟"
       },

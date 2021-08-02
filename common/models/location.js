@@ -982,7 +982,27 @@ module.exports = function (Location) {
     // reset user cache
     app.models.user.cache.reset();
 
-    return next();
+    // delete sub locations
+    // - when we tried to delete parent location we checked if we can delete children as well, so there is no need to check anymore
+    Location.getSubLocations([ctx.instance.id], [], (err, childLocationIds) => {
+      // an error occurred ?
+      if (err) {
+        return next(err);
+      }
+
+      // delete sub locations
+      app.models.location
+        .rawBulkDelete({
+          _id: {
+            $in: childLocationIds
+          }
+        })
+        .then(() => {
+          // finished
+          next();
+        })
+        .catch(next);
+    });
   });
 
   /**

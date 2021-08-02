@@ -4821,9 +4821,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "Are you sure you want to link this answer?"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "Location '{{name}}' can't be removed because it has child locations"
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "Location '{{name}}' can't be removed because it is used, do you want to see where?"
       },
