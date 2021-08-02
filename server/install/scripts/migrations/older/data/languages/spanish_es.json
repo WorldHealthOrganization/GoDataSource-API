@@ -4821,9 +4821,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "¿Está seguro de que desea vincular esta respuesta?"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "El área geográfica '{{name}}' no se puede eliminar porque hay localidades vinculadas a ella"
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "'{{name}}' no se puede eliminar porque se está utilizando. ¿Desea ver dónde?"
       },

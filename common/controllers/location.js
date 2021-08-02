@@ -240,7 +240,17 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.prototype.getUsage = function (filter, callback) {
-    Location.findModelUsage(this.id, filter, false)
+    return new Promise((resolve, reject) => {
+      Location.getSubLocations([this.id], [], (err, locations) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(locations);
+      });
+    })
+      .then((locationIds) => {
+        return Location.findModelUsage(locationIds, filter, false);
+      })
       .then(function (usage) {
         callback(null, usage);
       })

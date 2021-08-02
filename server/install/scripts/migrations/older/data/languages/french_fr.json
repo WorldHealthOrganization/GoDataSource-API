@@ -4821,9 +4821,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "Êtes-vous sûr de vouloir lier cette réponse?"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "L'endroit '{{name}}' ne peut pas être supprimé car il contient des endroits enfants."
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "L'endroit '{{name}}' ne peut pas être supprimé car elle est utilisé. Voulez-vous voir où?"
       },

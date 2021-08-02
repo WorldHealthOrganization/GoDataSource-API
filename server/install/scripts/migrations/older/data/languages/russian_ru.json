@@ -4821,9 +4821,6 @@
       "LNG_DIALOG_CONFIRM_LINK_QUESTION_ANSWER": {
         "translation": "Вы уверены, что хотите создать связь с этим ответом?"
       },
-      "LNG_DIALOG_CONFIRM_LOCATION_HAS_CHILDREN": {
-        "translation": "Местоположение '{{name}} ' не может быть удалено, так как с ним связаны местоположения второго уровня"
-      },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
         "translation": "Местоположение '{{name}} ' не может быть удалено, так как оно используется. Хотите увидеть записи, в которых оно используется?"
       },
