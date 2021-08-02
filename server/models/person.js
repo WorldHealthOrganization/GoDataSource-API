@@ -776,9 +776,7 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           },
           where || {}
         ]
@@ -1390,6 +1388,15 @@ module.exports = function (Person) {
       ]
     };
 
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
+
     // update filter for geographical restriction if needed
     return Person
       .addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -1402,11 +1409,14 @@ module.exports = function (Person) {
           .find(filter);
       })
       .then((records) => {
-        return Person.determineIfRelationshipsExist(
-          outbreakId,
+        // attach possible duplicates
+        Person.determineIfRelationshipsExist(
           personId,
           records
         );
+
+        // finished
+        return records;
       });
   };
 
@@ -1414,18 +1424,20 @@ module.exports = function (Person) {
    * retrieve available people for a specific case / contact / event
    * @param outbreakId
    * @param personId
-   * @param where
+   * @param filter
    * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeopleCount = function (
     outbreakId,
     personId,
-    where,
+    filter,
     options
   ) {
     // attach our conditions
-    where = {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where = {
       and: [
         {
           outbreakId: outbreakId
@@ -1434,87 +1446,70 @@ module.exports = function (Person) {
             neq: personId
           }
         },
-        where ? where : {}
+        filter.where ? filter.where : {}
       ]
     };
 
     // update filter for geographical restriction if needed
     return Person
-      .addGeographicalRestrictions(options.remotingContext, where)
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
       .then(updatedFilter => {
         // update filter if needed
-        updatedFilter && (where = updatedFilter);
+        updatedFilter && (filter.where = updatedFilter);
 
         // retrieve data
-        return Person.count(where);
+        return Person.rawCountDocuments(filter);
       });
   };
 
   /**
    * Determine which relationships could be a duplicate ( add property to each record from the relatedPeopleDara array )
-   * @param outbreakId
    * @param personId
    * @param relatedPeopleData
    * @returns {Promise<any>}
    */
   Person.determineIfRelationshipsExist = function (
-    outbreakId,
     personId,
     relatedPeopleData
   ) {
-    return new Promise((resolve, reject) => {
-      // determine people ids which we need to check if they are duplicates
-      const peopleIds = (relatedPeopleData || []).map((r) => r.id);
+    // go through our records and determine possible duplicates
+    (relatedPeopleData || []).forEach((record) => {
+      // initialize matches ?
+      record.matchedDuplicateRelationships = [];
 
-      // retrieve all relationships of interest
-      app.models.relationship
-        .rawFind({
-          or: [{
-            'persons.0.id': personId,
-            'persons.1.id': {
-              inq: peopleIds
-            }
-          }, {
-            'persons.1.id': personId,
-            'persons.0.id': {
-              inq: peopleIds
-            }
-          }]
-        }, {
-          projection: {
-            _id: 1,
-            persons: 1
-          }
-        })
-        .then((relationshipsData) => {
-          // match relationship data to people
-          (relationshipsData || []).forEach((relData) => {
-            // first person is the main person ?
-            let indexOfRelatedPerson = 0;
-            if (relData.persons[0].id === personId) {
-              indexOfRelatedPerson = 1;
-            }
+      // go through relationship data and determine contacts / exposures count
+      (record.relationshipsRepresentation || []).forEach((relData) => {
+        // is our record already in relationships ?
+        if (relData.otherParticipantId !== personId) {
+          return;
+        }
 
-            // add person match
-            const relatedRecord = _.find(relatedPeopleData, (r) => r.id === relData.persons[indexOfRelatedPerson].id);
-            if (relatedRecord) {
-              // initialize matches ?
-              if (!relatedRecord.matchedDuplicateRelationships) {
-                relatedRecord.matchedDuplicateRelationships = [];
-              }
-
-              // add our match
-              relatedRecord.matchedDuplicateRelationships.push({
-                relationshipId: relData.id,
-                relatedPerson: relData.persons[indexOfRelatedPerson]
-              });
+        // add our match
+        record.matchedDuplicateRelationships.push({
+          relationshipId: relData.id,
+          relatedPerson: relData.source ? [
+            {
+              id: record.id,
+              type: record.type,
+              source: true
+            }, {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              target: true
             }
-          });
-
-          // finished
-          resolve(relatedPeopleData);
-        })
-        .catch(reject);
+          ] : [
+            {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              source: true
+            }, {
+              id: record.id,
+              type: record.type,
+              target: true
+            }
+          ]
+        });
+      });
     });
   };
 
@@ -1592,9 +1587,7 @@ module.exports = function (Person) {
               {
                 outbreakId: outbreakId,
                 // retrieve only non-deleted records
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 // retrieve cases & events
                 type: {
                   $in: [
@@ -2054,42 +2047,25 @@ module.exports = function (Person) {
 
   /**
    * Count contacts/exposures for a list of records
-   * @param outbreakId
-   * @param peopleIds
+   * @param records
    */
-  Person.getPeopleContactsAndExposures = function (outbreakId, peopleIds) {
-    const peopleMap = {};
-    for (let id of peopleIds) {
-      peopleMap[id] = {
-        numberOfContacts: 0,
-        numberOfExposures: 0
-      };
-    }
+  Person.getPeopleContactsAndExposures = function (records) {
+    // determine records
+    records = records || [];
+    for (let record of records) {
+      // initialize number of contacts / exposures
+      record.numberOfContacts = 0;
+      record.numberOfExposures = 0;
 
-    return app.models.relationship
-      .find({
-        where: {
-          outbreakId: outbreakId,
-          'persons.id': {
-            inq: peopleIds
-          }
+      // go through relationship data and determine contacts / exposures count
+      (record.relationshipsRepresentation || []).forEach((relData) => {
+        if (relData.source) {
+          record.numberOfContacts++;
+        } else {
+          record.numberOfExposures++;
         }
-      })
-      .then((relations) => {
-        for (let relation of relations) {
-          const relationParticipants = relation.persons;
-          for (let participant of relationParticipants) {
-            if (peopleMap[participant.id]) {
-              if (participant.source) {
-                peopleMap[participant.id].numberOfContacts++;
-              } else {
-                peopleMap[participant.id].numberOfExposures++;
-              }
-            }
-          }
-        }
-      })
-      .then(() => peopleMap);
+      });
+    }
   };
 
   /**
@@ -2281,6 +2257,179 @@ module.exports = function (Person) {
       })
       .then((person) => {
         return person.notDuplicatesIds;
+      });
+  };
+
+  /**
+   * Group count
+   */
+  Person.groupCount = (
+    options,
+    outbreakId,
+    personType,
+    filter,
+    groupByProperty,
+    nullGroupKey
+  ) => {
+    // initialization
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // update filter for geographical restriction if needed
+    return Person
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // attach prefilters
+        filter.where.outbreakId = outbreakId;
+        filter.where.type = personType;
+        if (!filter.deleted) {
+          filter.where.deleted = false;
+        }
+
+        // convert to mongo filter
+        const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
+
+        // construct aggregate filter
+        const aggregateFilters = [];
+
+        // filter by relationship ?
+        // - case, contact ...
+        let relationshipQuery;
+        if (!_.isEmpty(mongoFilter.where.relationship)) {
+          // get conditions
+          relationshipQuery = mongoFilter.where.relationship;
+          delete mongoFilter.where.relationship;
+        }
+
+        // filter by lab result ?
+        // - case
+        // #TODO - not needed for now since UI doesn't use it, but API find supports it, if someone uses it..then too bad
+
+        // filter by follow-up ?
+        // - case, contact ...
+        let followUpQuery;
+        if (!_.isEmpty(mongoFilter.where.followUp)) {
+          // get conditions
+          followUpQuery = mongoFilter.where.followUp;
+          delete mongoFilter.where.followUp;
+        }
+
+        // filter by case ?
+        // - contact
+        // #TODO - kinda complicated to implement at this point, contact - relationship - case (implement after mongo upgrade)
+
+        // filter by contact ?
+        // - contact of contact
+        // #TODO - kinda complicated to implement at this point, contact of contact - relationship - contact (implement after mongo upgrade)
+
+        // query
+        aggregateFilters.push({
+          $match: mongoFilter.where
+        });
+
+        // filter by relationship ?
+        if (relationshipQuery) {
+          // lookup
+          aggregateFilters.push({
+            $lookup: {
+              from: 'relationship',
+              localField: '_id',
+              foreignField: 'persons.id',
+              as: 'relationships'
+            }
+          });
+
+          // search
+          aggregateFilters.push({
+            $match: {
+              relationships: {
+                $elemMatch: Object.assign({
+                  deleted: false,
+
+                }, relationshipQuery)
+              }
+            }
+          });
+        }
+
+        // filter by follow-up ?
+        if (followUpQuery) {
+          // lookup
+          aggregateFilters.push({
+            $lookup: {
+              from: 'followUp',
+              localField: '_id',
+              foreignField: 'personId',
+              as: 'followUps'
+            }
+          });
+
+          // search
+          aggregateFilters.push({
+            $match: {
+              followUps: {
+                $elemMatch: Object.assign({
+                  deleted: false,
+
+                }, followUpQuery)
+              }
+            }
+          });
+        }
+
+        // group by classification
+        aggregateFilters.push({
+          $group: {
+            _id: `$${groupByProperty}`,
+            count: {
+              $sum: 1
+            }
+          }
+        });
+
+        // sort by group size
+        aggregateFilters.push({
+          $sort: {
+            count: 1
+          }
+        });
+
+        // retrieve data
+        return app.dataSources.mongoDb.connector
+          .collection('person')
+          .aggregate(
+            aggregateFilters, {
+              allowDiskUse: true
+            }
+          )
+          .toArray()
+          .then((data) => {
+            // result
+            const result = {
+              [groupByProperty]: {},
+              count: 0
+            };
+
+            // format
+            (data || []).forEach((record) => {
+              // count
+              result[groupByProperty][record._id ? record._id : nullGroupKey] = {
+                count: record.count
+              };
+
+              // count cases
+              result.count += record.count;
+            });
+
+            // finished
+            return result;
+          });
       });
   };
 };

@@ -987,6 +987,18 @@
       "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION": {
         "translation": "This permission allows restoring deleted event information"
       },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT": {
+        "translation": "Case - export"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_DESCRIPTION": {
+        "translation": "This permission allows export of case data"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT": {
+        "translation": "Case - import"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT_DESCRIPTION": {
+        "translation": "This permission allows import of case data"
+      },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT": {
         "translation": "Event - create contact"
       },
@@ -2711,6 +2723,12 @@
       },
       "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT_DESCRIPTION": {
         "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_UNCLASSIFIED": {
+        "translation": "No classification",
         "modules": [
           "referenceData"
         ]
@@ -4467,9 +4485,6 @@
       "LNG_COMMON_LABEL_NO_RECORDS_SELECTED": {
         "translation": "Nenhum registro selecionado"
       },
-      "LNG_COMMON_LABEL_RECORDS_NUMBER": {
-        "translation": "{{value}} RESULTADOS"
-      },
       "LNG_COMMON_LABEL_YES": {
         "translation": "Sim"
       },
@@ -4488,8 +4503,50 @@
       "LNG_COMMON_LABEL_FILTERS_USED": {
         "translation": "**Filters are applied on this list (may include hidden fields)"
       },
-      "LNG_COMMON_LABEL__INVALID_URL_FILTERS": {
+      "LNG_COMMON_LABEL_INVALID_URL_FILTERS": {
         "translation": "Ignored invalid URL filters"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_ITEMS_PER_PAGE": {
+        "translation": "Items per page:"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_FIRST_PAGE": {
+        "translation": "First page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_LAST_PAGE": {
+        "translation": "Last page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_NEXT_PAGE": {
+        "translation": "Next page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_PREVIOUS_PAGE": {
+        "translation": "Previous page"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_COUNT_BEFORE_LENGTH": {
+        "translation": "more than"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_COUNT_AFTER_LENGTH": {
+        "translation": "results"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_RANGE": {
+        "translation": "{{pageLabel}} of {{beforeLength}} {{length}} {{afterLength}}"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_RANGE_PAGE_START_END": {
+        "translation": "-"
+      },
+      "LNG_COMMON_LABEL_PAGINATOR_SHOW_EXACT_COUNT": {
+        "translation": "show exact count"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS": {
+        "translation": "Use database column headers"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_DESCRIPTION": {
+        "translation": "Use as column headers the properties from database (useful for scripts)"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES": {
+        "translation": "Don't translate values"
+      },
+      "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES_DESCRIPTION": {
+        "translation": "Receive values the same way they are in database (useful for scripts)"
       }
     },
     "uiGeneralActions": {
@@ -5592,10 +5649,10 @@
         "translation": "Idade"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Idade / Anhos"
+        "translation": "Years"
       },
       "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Idade / Mes"
+        "translation": "Months"
       },
       "LNG_ENTITY_FIELD_LABEL_CLASSIFICATION": {
         "translation": "Classificação"
@@ -5716,10 +5773,10 @@
         "translation": "A idade do indivíduo, você pode especificar em anos ou meses. Você deve usar meses apenas para bebês com menos de 1 ano de idade"
       },
       "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Idade / Meses"
+        "translation": "Months"
       },
       "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Idade / Anos"
+        "translation": "Years"
       },
       "LNG_CASE_FIELD_LABEL_CASE_UID": {
         "translation": "UID do caso"
@@ -6153,7 +6210,7 @@
         "translation": "Exportar relacionamientos de casos"
       },
       "LNG_PAGE_LIST_CASES_GROUP_ACTION_EXPORT_SELECTED_CASES_RELATIONSHIPS": {
-        "translation": "Exportar relacionamientos de casos"
+        "translation": "Export selected case relationships"
       },
       "LNG_PAGE_LIST_CASES_EXPORT_RELATIONSHIP_FILE_NAME": {
         "translation": "Relações de casos"
@@ -6392,10 +6449,10 @@
         "translation": "A idade do indivíduo, você pode especificar em anos ou meses. Você deve usar meses apenas para bebês com menos de 1 ano de idade"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Idade (meses)"
+        "translation": "Months"
       },
       "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Idade (Anos)"
+        "translation": "Years"
       },
       "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
         "translation": "Data em que tornou-se um contato"
@@ -7430,6 +7487,9 @@
       },
       "LNG_EVENT_FIELD_LABEL_NAME_DESCRIPTION": {
         "translation": ""
+      },
+      "LNG_EVENT_FIELD_LABEL_ID": {
+        "translation": "ID"
       },
       "LNG_EVENT_FIELD_LABEL_PHONE_NUMBER": {
         "translation": "Número de telefone"
@@ -11586,6 +11646,18 @@
       "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_EVENT": {
         "translation": "Rastaurar evento"
       },
+      "LNG_PAGE_LIST_EVENTS_EXPORT_BUTTON": {
+        "translation": "Export event data"
+      },
+      "LNG_PAGE_LIST_EVENTS_EXPORT_TITLE": {
+        "translation": "Export event data"
+      },
+      "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_EXPORT_SELECTED_EVENTS": {
+        "translation": "Export the selected events"
+      },
+      "LNG_PAGE_LIST_EVENTS_IMPORT_BUTTON": {
+        "translation": "Import event data"
+      },
       "LNG_PAGE_LIST_EVENTS_TITLE": {
         "translation": "Eventos"
       },
@@ -13174,6 +13246,11 @@
         "translation": "Importar dados de casos"
       }
     },
+    "uiImportEventData": {
+      "LNG_PAGE_IMPORT_EVENT_DATA_TITLE": {
+        "translation": "Import event data"
+      }
+    },
     "uiImportCaseLabData": {
       "LNG_PAGE_IMPORT_CASE_LAB_DATA_TITLE": {
         "translation": "Importar dados de casos do laboratório****"
@@ -13217,6 +13294,17 @@
     "uiOutbreakDateInconsistenciesListPage": {
       "LNG_PAGE_LIST_INCONSISTENCIES_TITLE": {
         "translation": "Inconsistências nas principais datas"
+      }
+    },
+    "uiOutbreakSearchResultListPage": {
+      "LNG_PAGE_LIST_SEARCH_RESULT_TITLE": {
+        "translation": "Search results"
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_DESCRIPTION": {
+        "translation": "* The listed entities are the search result across all ids, entity Ids and document numbers."
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_ENTITY_ID": {
+        "translation": "Entity Id"
       }
     },
     "uiTeamsFields": {
@@ -15725,6 +15813,9 @@
       },
       "LNG_HUB_CONFIGURATION_SCREEN_DELETE_HUB_SYNC_DATA": {
         "translation": "There is data that has not been sent to the server and will be lost. Please synchronize your data first, then try to delete the hub again."
+      },
+      "LNG_DIAL_NUMBER_DESCRIPTION": {
+        "translation": "Are you sure you want to dial this number?"
       }
     },
     "reportDailyFollowUpList": {
@@ -16210,6 +16301,9 @@
     "savedImportMappingsPages": {
       "LNG_APP_PAGE_IMPORT_CASES": {
         "translation": "Casos"
+      },
+      "LNG_APP_PAGE_IMPORT_EVENT": {
+        "translation": "Events"
       },
       "LNG_APP_PAGE_IMPORT_CONTACTS": {
         "translation": "Contactos"
@@ -16850,6 +16944,9 @@
       },
       "LNG_LAB_RESULT_FIELD_LABEL_PERSON": {
         "translation": "Person"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_PERSON_ADDRESS": {
+        "translation": "Address"
       }
     },
     "uiCreateLabResultPage": {
@@ -16931,10 +17028,10 @@
         "translation": "The age of the individual, you can specify in years or months.  You should use months for infants less than 1 year old only"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
-        "translation": "Age (Months)"
+        "translation": "Months"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
-        "translation": "Age (Years)"
+        "translation": "Years"
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_BIRTH": {
         "translation": "Date of birth"
@@ -17760,6 +17857,35 @@
       },
       "LNG_DATEPICKER_CALENDAR_LABEL_DATE_NAMES_31": {
         "translation": "31"
+      }
+    },
+    "uiExportData": {
+      "LNG_PAGE_EXPORT_DATA_EXPORT_RETRIEVING_LANGUAGE_TOKENS": {
+        "translation": "Retrieving language"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_PREFILTERS": {
+        "translation": "Preparing filters. This step might take up to a few minutes"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING": {
+        "translation": "Preparing data. This step might take up to a few minutes"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_LOCATIONS": {
+        "translation": "Determine and retrieve locations"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_CONFIGURE_HEADERS": {
+        "translation": "Determine and save header columns"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_PROCESSED": {
+        "translation": "Processed {{processed}} / {{total}}. Estimated end date: {{estimatedEnd}}"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_ENCRYPTING": {
+        "translation": "Export finished, encrypting file(s)"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_ARCHIVING": {
+        "translation": "Export finished, archiving files"
+      },
+      "LNG_PAGE_EXPORT_DATA_EXPORT_DOWNLOADING": {
+        "translation": "Export finished, downloading file"
       }
     }
   }

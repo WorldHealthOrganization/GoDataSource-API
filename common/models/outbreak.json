@@ -879,25 +879,25 @@
       "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "contact_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
-      "property": "__count__people"
+      "property": "countPeople"
     },
     {
       "principalType": "ROLE",
@@ -1315,6 +1315,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredEvents"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_import_lab_result",
       "permission": "ALLOW",
       "property": "importImportableCaseLabResultsFileUsingMap"
@@ -1336,6 +1342,12 @@
       "principalId": "case_import",
       "permission": "ALLOW",
       "property": "importImportableCasesFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_import",
+      "permission": "ALLOW",
+      "property": "importImportableEventsFileUsingMap"
     },
     {
       "principalType": "ROLE",
@@ -1898,9 +1910,9 @@
           "description": "Foreign key for cases"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -1913,6 +1925,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a case",
+          "root": true,
           "required": true
         }
       ],
@@ -2170,9 +2183,9 @@
           "description": "Foreign key for contacts"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2185,6 +2198,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact",
+          "root": true,
           "required": true
         }
       ],
@@ -2442,9 +2456,9 @@
           "description": "Foreign key for events"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2457,6 +2471,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a event",
+          "root": true,
           "required": true
         }
       ],
@@ -2893,7 +2908,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2906,6 +2921,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of contacts that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -2926,7 +2942,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: this request also accepts a `noRelationships` flag on the first level of `where`. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -2939,6 +2955,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of events that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -2953,21 +2970,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -2996,30 +3012,73 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of cases",
       "http": {
         "verb": "get",
         "path": "/cases/export"
+      }
+    },
+    "prototype.exportFilteredEvents": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export filtered list of events",
+      "http": {
+        "verb": "get",
+        "path": "/events/export"
       }
     },
     "prototype.getBarsTransmissionChains": {
@@ -3181,21 +3240,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' & 'where.followUp' MongoDB compatible queries. If you include both person & followUp conditions, then and AND will be applied between them."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' & 'where.followUp' MongoDB compatible queries. If you include both person & followUp conditions, then and AND will be applied between them. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -3224,24 +3282,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of relationships",
@@ -4593,6 +4636,36 @@
         "path": "/cases/import-importable-file-using-map"
       }
     },
+    "prototype.importImportableEventsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "importLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Import a list of events from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/events/import-importable-file-using-map"
+      }
+    },
     "prototype.importImportableContactsFileUsingMap": {
       "accepts": [
         {
@@ -4628,21 +4701,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -4671,24 +4743,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of contacts",
@@ -4799,7 +4856,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -4812,6 +4869,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of follow-ups that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -4907,21 +4965,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -4950,24 +5007,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of follow ups",
@@ -5184,7 +5226,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5197,6 +5239,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5216,7 +5259,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5229,6 +5272,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5248,7 +5292,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5261,6 +5305,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -5305,7 +5350,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries"
+          "description": "Filter defining fields, where, order, skip, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'case.field' MongoDB compatible queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -5318,6 +5363,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of lab results that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -6395,7 +6441,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: it supports 'identifier' property on the first level of where. This allows searching people based on id, visualId and documents.number"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
         }
       ],
       "returns": [
@@ -6414,6 +6460,36 @@
         "verb": "get",
         "path": "/people"
       }
+    },
+    "prototype.countPeople": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})\n. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of records that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Counts people of outbreak.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/people/filtered-count"
+        }
+      ]
     },
     "prototype.findEvents": {
       "accepts": [
@@ -6488,7 +6564,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.relationship', 'where.labResult' MongoDB compatible queries and 'where.noRelationships' query. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -6501,6 +6577,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of cases that match the search criteria",
+          "root": true,
           "required": true
         }
       ],
@@ -7583,21 +7660,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -7626,24 +7702,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of lab results",
@@ -7722,7 +7783,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact' MongoDB compatible query"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact' MongoDB compatible query. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -7735,6 +7796,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of contacts that pass the filter",
+          "root": true,
           "required": true
         }
       ],
@@ -7999,9 +8061,9 @@
           "description": "Foreign key for contacts of contacts"
         },
         {
-          "arg": "where",
+          "arg": "filter",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
@@ -8014,6 +8076,7 @@
           "arg": "count",
           "type": "number",
           "description": "Number of of people that match the search criteria and belong to a contact of contact",
+          "root": true,
           "required": true
         }
       ],
@@ -8085,21 +8148,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8128,24 +8190,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of contacts of contacts",
@@ -8390,21 +8437,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8433,24 +8479,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of lab results",
@@ -8469,21 +8500,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns and where.dontTranslateValues - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -8512,24 +8542,9 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of lab results",

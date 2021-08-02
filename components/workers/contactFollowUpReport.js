@@ -29,16 +29,26 @@ const isFollowUpPerformed = function (obj) {
 
 // create MongoDB connection and return it
 const getMongoDBConnection = function () {
-  let mongoOptions = {};
+  // make sure it doesn't timeout
+  let mongoOptions = {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000, // 30 minutes
+    reconnectTries: 300 // too many
+  };
+
+  // attach auth credentials
   if (DbConfig.password) {
-    mongoOptions = {
+    mongoOptions = Object.assign(mongoOptions, {
       auth: {
         user: DbConfig.user,
         password: DbConfig.password
       },
       authSource: DbConfig.authSource
-    };
+    });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${DbConfig.host}:${DbConfig.port}`, mongoOptions)
     .then(client => client.db(DbConfig.database));
@@ -93,18 +103,8 @@ const worker = {
       $and: [
         {
           outbreakId: outbreakId,
-          date: filterDate
-        }, {
-          $or: [
-            {
-              deleted: false
-            },
-            {
-              deleted: {
-                $eq: null
-              }
-            }
-          ]
+          date: filterDate,
+          deleted: false
         }
       ]
     };
@@ -138,9 +138,7 @@ const worker = {
               .find({
                 outbreakId: outbreakId,
                 type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 classification: convertLoopbackFilterToMongo(classification)
               }, {
                 projection: {
@@ -168,9 +166,7 @@ const worker = {
                     .collection('relationship')
                     .find({
                       outbreakId: outbreakId,
-                      deleted: {
-                        $ne: true
-                      },
+                      deleted: false,
                       $or: [
                         {
                           'persons.0.source': true,

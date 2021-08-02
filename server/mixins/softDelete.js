@@ -214,7 +214,7 @@ module.exports = function (Model) {
 
           // initialize props to be updated
           let props = {
-            [deletedFlag]: true,
+            [deletedFlag]: true
           };
 
           // update the deletedAt property only if the action is not a sync or the property is missing from the instance
@@ -318,9 +318,7 @@ module.exports = function (Model) {
   Model.prototype.delete = Model.prototype.destroy;
 
   const filterNonDeleted = {
-    [deletedFlag]: {
-      neq: true
-    }
+    [deletedFlag]: false
   };
 
   const _findOrCreate = Model.findOrCreate;

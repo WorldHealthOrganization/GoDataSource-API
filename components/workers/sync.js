@@ -73,16 +73,26 @@ function createZipArchive(fileName, archiveName, logger) {
  * @returns {Promise<Db | never>}
  */
 function getMongoDBConnection() {
-  let mongoOptions = {};
+  // make sure it doesn't timeout
+  let mongoOptions = {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000, // 30 minutes
+    reconnectTries: 300 // too many
+  };
+
+  // attach auth credentials
   if (dbConfig.password) {
-    mongoOptions = {
+    mongoOptions = Object.assign(mongoOptions, {
       auth: {
         user: dbConfig.user,
         password: dbConfig.password
       },
       authSource: dbConfig.authSource
-    };
+    });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
     .then(function (client) {
@@ -142,9 +152,7 @@ function exportCollectionInBatches(
     ) {
       // query
       const notDeletedQuery = {
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       };
 
       // add to filter
@@ -324,15 +332,11 @@ const worker = {
                     _id: typeof outbreakIds === 'string' ?
                       outbreakIds :
                       convertLoopbackFilterToMongo(outbreakIds),
-                    deleted: {
-                      $ne: true
-                    }
+                    deleted: false
                   };
                 } else {
                   outbreakFilter = {
-                    deleted: {
-                      $ne: true
-                    }
+                    deleted: false
                   };
                 }
 

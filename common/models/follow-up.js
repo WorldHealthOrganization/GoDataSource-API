@@ -164,6 +164,13 @@ module.exports = function (FollowUp) {
     }
   };
 
+  // default export order
+  FollowUp.exportFieldsOrder = [
+    'id',
+    'date',
+    'index'
+  ];
+
   // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
   // this is relevant only when we update a record since on create we don't have old data that we need to merge
   FollowUp.mergeFieldsOnUpdate = [
@@ -520,9 +527,7 @@ module.exports = function (FollowUp) {
         $and: [
           parsedFilter,
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           }
         ]
       };
@@ -863,21 +868,10 @@ module.exports = function (FollowUp) {
           {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
-              {
-                outbreakId: outbreakId
-              },
               // retrieve only non-deleted records
               {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                outbreakId: outbreakId,
+                deleted: false
               },
               // filter by contact
               ...(contactIds === undefined ? [] : [{

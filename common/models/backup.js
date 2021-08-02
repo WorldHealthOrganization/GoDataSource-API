@@ -159,4 +159,22 @@ module.exports = function (Backup) {
     // set backup size
     record.sizeBytes = sizeBytes;
   };
+
+  // after the application started (all models finished loading)
+  app.on('started', function () {
+    // fail any in progress actions;
+    Backup
+      .updateAll({
+        status: 'LNG_BACKUP_STATUS_PENDING'
+      }, {
+        status: 'LNG_BACKUP_STATUS_FAILED',
+        error: 'Application was restarted before finalizing processing data'
+      })
+      .then(function (info) {
+        app.logger.debug(`Startup: ${info.count} sync/export actions that were 'in progress' after application restart. Changed status to failed`);
+      })
+      .catch(function (err) {
+        app.logger.debug(`Startup: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
+      });
+  });
 };

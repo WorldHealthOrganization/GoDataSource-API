@@ -45,17 +45,25 @@ module.exports = function (Contact) {
     // append source export fields
     Object.assign(
       fieldLabelsMap,
-      Contact.fieldLabelsMap,
+      Contact.fieldLabelsMap, {
+        'relationship': 'LNG_CONTACT_FIELD_LABEL_RELATIONSHIP'
+      },
       _.transform(
         relationshipFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`relationship.${property}`] = token;
         },
         {}
-      ), {
-        'relationship': 'LNG_CONTACT_FIELD_LABEL_RELATIONSHIP'
-      }
+      )
     );
+
+    // questionnaire answers should always be at the end
+    // - pb that parent is object, and order isn't guaranteed
+    if (fieldLabelsMap.questionnaireAnswers) {
+      const tmpQuestionnaireAnswers = fieldLabelsMap.questionnaireAnswers;
+      delete fieldLabelsMap.questionnaireAnswers;
+      fieldLabelsMap.questionnaireAnswers = tmpQuestionnaireAnswers;
+    }
 
     // finished
     return fieldLabelsMap;
@@ -461,6 +469,11 @@ module.exports = function (Contact) {
         order: 'contactDate DESC',
         where: {
           'persons.id': contactInstance.id,
+          'persons.type': {
+            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          },
           active: true
         }
       })

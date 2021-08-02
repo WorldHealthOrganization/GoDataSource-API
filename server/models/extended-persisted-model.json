@@ -23,7 +23,8 @@
     "RawUpdateOne": true,
     "RawBulkInsert": true,
     "RawBulkDelete": true,
-    "RawBulkUpdate": true
+    "RawBulkUpdate": true,
+    "RawCountDocuments": true
   },
   "replaceOnPUT": false,
   "properties": {

@@ -22,7 +22,7 @@ const migrationVersions = [{
     fileName: 'defaultLanguages.js',
     actions: [{
       name: 'run',
-      buildNo: 2
+      buildNo: 18
     }]
   }, {
     fileName: 'defaultReferenceData.js',
@@ -145,6 +145,18 @@ const migrationVersions = [{
     fileName: 'person.js',
     actions: [{
       name: 'updateMissingDuplicateKeys',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'labResults.js',
+    actions: [{
+      name: 'updatePersonType',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'missing-property-deleted.js',
+    actions: [{
+      name: 'addMissingDeletedProperty',
       buildNo: 1
     }]
   }]

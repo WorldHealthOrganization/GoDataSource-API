@@ -31,9 +31,7 @@ const run = function (cb) {
       // retrieve source & destination templates
       return dbConnection.collection('template')
         .find({
-          deleted: {
-            $ne: true
-          },
+          deleted: false,
           name: {
             $in: [
               module.methodRelevantArgs.sourceTemplate,
@@ -152,9 +150,7 @@ const run = function (cb) {
       // retrieve source tokens
       return dbConnection.collection('language')
         .find({
-          deleted: {
-            $ne: true
-          }
+          deleted: false
         }, {
           projection: {
             _id: 1

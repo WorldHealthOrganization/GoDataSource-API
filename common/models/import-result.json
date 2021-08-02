@@ -31,6 +31,12 @@
       "description": "Record data (raw data from file and data that was sent to save function)"
     }
   },
+  "indexes": {
+    "deleted_importLogId_index": {
+      "deleted": 1,
+      "importLogId": 1
+    }
+  },
   "validations": [],
   "relations": {},
   "acls": [

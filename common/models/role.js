@@ -1154,6 +1154,20 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'event_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'event_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'event_create_contact',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION',

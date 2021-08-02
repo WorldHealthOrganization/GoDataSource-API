@@ -39,32 +39,34 @@ module.exports = function (Relationship) {
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap,
+      {
+        'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
+        'sourcePerson.source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
+      },
       _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`sourcePerson.${property}`] = token;
         },
         {}
-      ), {
-        'sourcePerson.source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
-        'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
-      }
+      )
     );
 
     // append target export fields
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap,
+      {
+        'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+        'targetPerson.target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
+      },
       _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`targetPerson.${property}`] = token;
         },
         {}
-      ), {
-        'targetPerson.target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
-        'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
-      }
+      )
     );
 
     // sanitize
@@ -157,6 +159,15 @@ module.exports = function (Relationship) {
         'clusterId',
         'comment'
       ]
+    }
+  };
+
+  Relationship.arrayProps = {
+    persons: {
+      'id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
+      'type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
+      'target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+      'source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
     }
   };
 
@@ -1603,9 +1614,7 @@ module.exports = function (Relationship) {
         // check for isolated cases
         return app.models.relationship
           .rawFind({
-            deleted: {
-              $ne: true
-            },
+            deleted: false,
             'persons.id': {
               $in: Object.keys(isolatedContactsData)
             }

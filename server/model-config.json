@@ -72,6 +72,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "exportLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "databaseActionLog": {
     "dataSource": "mongoDb",
     "public": false

@@ -4,6 +4,7 @@ const _ = require('lodash');
 const app = require('../server');
 const Timer = require('../../components/Timer');
 const uuid = require('uuid');
+const config = require('../config');
 
 /**
  * Raw Find Aggregate (avoid loopback ODM)
@@ -46,6 +47,15 @@ module.exports = function (Model) {
     options = options || {};
     filter = filter || {};
 
+    // extract applyHasMoreLimit
+    let applyHasMoreLimit = false;
+    if (
+      filter.flags &&
+      filter.flags.applyHasMoreLimit
+    ) {
+      applyHasMoreLimit = true;
+    }
+
     // include not supported
     if (filter.include) {
       delete filter.include;
@@ -73,9 +83,7 @@ module.exports = function (Model) {
     if (!filter.deleted) {
       // deleted condition
       const whereAdditionalConditions = {
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       };
 
       // construct the final query filter
@@ -182,11 +190,33 @@ module.exports = function (Model) {
       });
     }
 
+    // determine if we need to apply count limit
+    const countLimit = filter.limit === false ?
+      undefined : (
+        filter.limit > 0 ?
+          filter.limit : (
+            applyHasMoreLimit && config.count && config.count.limit > 0 ?
+              config.count.limit :
+              undefined
+          )
+      );
+
     // no need to retrieve data, sort & skip records if we just need to count
     if (options.countOnly) {
+      // limit count
+      if (countLimit > 0) {
+        aggregatePipeline.push({
+          $limit: countLimit
+        });
+      }
+
+      // count
       aggregatePipeline.push({
-        $project: {
-          _id: 1
+        $group: {
+          _id: null,
+          count: {
+            $sum: 1
+          }
         }
       });
     } else {
@@ -273,7 +303,13 @@ module.exports = function (Model) {
 
         // count records ?
         if (options.countOnly) {
-          return records.length;
+          const counted = records && records.length > 0 ?
+            records[0].count :
+            0;
+          return {
+            count: counted,
+            hasMore: countLimit && countLimit > 0 && counted >= countLimit
+          };
         }
 
         // format records
