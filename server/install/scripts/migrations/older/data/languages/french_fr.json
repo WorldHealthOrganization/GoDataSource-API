@@ -13302,6 +13302,12 @@
     "uiOutbreakSearchResultListPage": {
       "LNG_PAGE_LIST_SEARCH_RESULT_TITLE": {
         "translation": "Search results"
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_DESCRIPTION": {
+        "translation": "* The listed entities are the search result across all ids, entity Ids and document numbers."
+      },
+      "LNG_PAGE_LIST_SEARCH_RESULT_ENTITY_ID": {
+        "translation": "Entity Id"
       }
     },
     "uiTeamsFields": {
