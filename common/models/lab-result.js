@@ -114,6 +114,11 @@ module.exports = function (LabResult) {
     }
   };
 
+  // default export order
+  LabResult.exportFieldsOrder = [
+    'id'
+  ];
+
   // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
   // this is relevant only when we update a record since on create we don't have old data that we need to merge
   LabResult.mergeFieldsOnUpdate = [
@@ -189,7 +194,7 @@ module.exports = function (LabResult) {
       'middleName': 'LNG_ENTITY_FIELD_LABEL_MIDDLE_NAME',
       'dateOfOnset': 'LNG_ENTITY_FIELD_LABEL_DATE_OF_ONSET',
       'dateOfReporting': 'LNG_ENTITY_FIELD_LABEL_DATE_OF_REPORTING',
-      'address': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
+      'address': 'LNG_LAB_RESULT_FIELD_LABEL_PERSON_ADDRESS',
       'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
       'address.country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
       'address.city': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_CITY',
@@ -208,17 +213,25 @@ module.exports = function (LabResult) {
     // append person export fields
     Object.assign(
       fieldLabelsMap,
-      LabResult.fieldLabelsMap,
+      LabResult.fieldLabelsMap, {
+        'person': 'LNG_LAB_RESULT_FIELD_LABEL_PERSON'
+      },
       _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`person.${property}`] = token;
         },
         {}
-      ), {
-        'person': 'LNG_LAB_RESULT_FIELD_LABEL_PERSON'
-      }
+      )
     );
+
+    // questionnaire answers should always be at the end
+    // - pb that parent is object, and order isn't guaranteed
+    if (fieldLabelsMap.questionnaireAnswers) {
+      const tmpQuestionnaireAnswers = fieldLabelsMap.questionnaireAnswers;
+      delete fieldLabelsMap.questionnaireAnswers;
+      fieldLabelsMap.questionnaireAnswers = tmpQuestionnaireAnswers;
+    }
 
     // finished
     return fieldLabelsMap;

@@ -215,6 +215,25 @@
     "executeCheckOnlyOnDuplicateDataChange": false
   },
   "count": {
-    "limit": 30000
+    "limit": 10000
+  },
+  "export": {
+    "batchSize": 7000,
+    "locationFindBatchSize": 1000,
+    "noLookupIfPrefilterTotalCountLessThen": 20000,
+    "saveFilter": false,
+    "saveAggregateFilter": false,
+    "xlsx": {
+      "maxColumnsPerSheet": 16000,
+      "maxRowsPerFile": 1000000
+    },
+    "xls": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 25000
+    },
+    "ods": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 25000
+    }
   }
 }

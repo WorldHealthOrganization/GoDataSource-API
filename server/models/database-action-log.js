@@ -16,7 +16,7 @@ module.exports = function (DatabaseActionLog) {
         status: 'LNG_SYNC_STATUS_IN_PROGRESS'
       }, {
         status: 'LNG_SYNC_STATUS_FAILED',
-        error: 'Application was restarted before finalizing the sync/export action'
+        error: 'Application was restarted before finalizing processing data'
       })
       .then(function (info) {
         app.logger.debug(`Startup: ${info.count} sync/export actions that were 'in progress' after application restart. Changed status to failed`);

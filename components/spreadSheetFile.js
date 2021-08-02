@@ -1,10 +1,6 @@
 'use strict';
 
 const xlsx = require('xlsx');
-const Excel = require('exceljs');
-const Uuid = require('uuid');
-const Tmp = require('tmp');
-const Path = require('path');
 
 /**
  * Build a spread sheet using headers and data
@@ -107,37 +103,9 @@ function createOdsFile(headers, data, callback) {
   createExcelFile(headers, data, 'ods', callback);
 }
 
-/**
- *
- * @param headers
- * @param data
- * @returns {Promise<string>}
- */
-function createAndSaveXlsxFile(headers, data) {
-  const options = {
-    filename: Path.resolve(Tmp.tmpdir, Uuid.v4())
-  };
-
-  const workBook = new Excel.stream.xlsx.WorkbookWriter(options);
-  const worksheet = workBook.addWorksheet('Sheet 1');
-
-  worksheet.columns = headers;
-
-  data.forEach(item => {
-    worksheet.addRow(item).commit();
-  });
-
-  return workBook
-    .commit()
-    .then(() => {
-      return Promise.resolve(options.filename);
-    });
-}
-
 module.exports = {
   createCsvFile: createCsvFile,
   createXlsFile: createXlsFile,
   createXlsxFile: createXlsxFile,
-  createOdsFile: createOdsFile,
-  createAndSaveXlsxFile: createAndSaveXlsxFile
+  createOdsFile: createOdsFile
 };

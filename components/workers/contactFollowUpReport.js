@@ -29,16 +29,26 @@ const isFollowUpPerformed = function (obj) {
 
 // create MongoDB connection and return it
 const getMongoDBConnection = function () {
-  let mongoOptions = {};
+  // make sure it doesn't timeout
+  let mongoOptions = {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000, // 30 minutes
+    reconnectTries: 300 // too many
+  };
+
+  // attach auth credentials
   if (DbConfig.password) {
-    mongoOptions = {
+    mongoOptions = Object.assign(mongoOptions, {
       auth: {
         user: DbConfig.user,
         password: DbConfig.password
       },
       authSource: DbConfig.authSource
-    };
+    });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${DbConfig.host}:${DbConfig.port}`, mongoOptions)
     .then(client => client.db(DbConfig.database));

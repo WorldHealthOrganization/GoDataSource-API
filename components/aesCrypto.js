@@ -116,7 +116,74 @@ function decrypt(password, data) {
   });
 }
 
+/**
+ * Encrypt stream
+ */
+const encryptStream = (
+  readableStream,
+  writableStream,
+  password
+) => {
+  return new Promise(function (resolve, reject) {
+    // prepare encryption key & IV
+    createKeyIv(password, function (err, key) {
+      // an error occurred ?
+      if (err) {
+        return reject(err);
+      }
+
+      // encipher data
+      const cipher = crypto.createCipheriv(algorithm, key.key, key.iv);
+
+      // write key data
+      writableStream.write(key.iv);
+      writableStream.write(key.salt);
+
+      // start encrypting
+      readableStream.on('data', (data) => {
+        // pause read until write finishes so we write doesn't miss writing data
+        readableStream.pause();
+
+        // encrypt data
+        const encrypted = cipher.update(data);
+
+        // write to file
+        if (encrypted) {
+          // write data
+          writableStream.write(
+            encrypted,
+            (err) => {
+              // an error occurred...
+              if (err) {
+                throw err;
+              }
+
+              // resume read
+              readableStream.resume();
+            }
+          );
+        } else {
+          readableStream.resume();
+        }
+      });
+
+      // finished writing
+      readableStream.on('close', function() {
+        // finalize encryption
+        writableStream.write(cipher.final());
+
+        // finished with temporary file used for encryption
+        writableStream.close();
+
+        // finished
+        resolve();
+      });
+    });
+  });
+};
+
 module.exports = {
   encrypt: encrypt,
-  decrypt: decrypt
+  decrypt: decrypt,
+  encryptStream
 };

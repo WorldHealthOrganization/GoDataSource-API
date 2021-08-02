@@ -50,6 +50,7 @@ module.exports = function (Outbreak) {
     'prototype.__destroyById__followUps',
     'prototype.__create__people',
     'prototype.__delete__people',
+    'prototype.__count__people',
     'prototype.__findById__people',
     'prototype.__updateById__people',
     'prototype.__destroyById__people',
@@ -2285,6 +2286,7 @@ module.exports = function (Outbreak) {
       genericHelpers.includeSubLocationsInLocationFilter(
         app,
         context.args.filter,
+        'locationId',
         next
       );
     } else if (context.args.where) {
@@ -2293,6 +2295,7 @@ module.exports = function (Outbreak) {
         app, {
           where: context.args.where
         },
+        'locationId',
         next
       );
     } else {

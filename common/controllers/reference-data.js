@@ -3,6 +3,8 @@
 const app = require('../../server/server');
 const async = require('async');
 const importableFileHelpers = require('./../../components/importableFile');
+const WorkerRunner = require('./../../components/workerRunner');
+const _ = require('lodash');
 
 module.exports = function (ReferenceData) {
 
@@ -17,46 +19,64 @@ module.exports = function (ReferenceData) {
   /**
    * Export filtered reference data to a file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param options
    * @param callback
    */
   ReferenceData.exportFilteredReferenceData = function (filter, exportType, options, callback) {
+    // set a default filter
     filter = filter || {};
-    app.utils.remote.helpers.exportFilteredModelsList(
-      app,
-      app.models.referenceData,
-      {},
+    filter.where = filter.where || {};
+
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // export
+    WorkerRunner.helpers.exportFilteredModelsList(
+      {
+        collectionName: 'referenceData',
+        modelName: app.models.referenceData.modelName,
+        scopeQuery: app.models.referenceData.definition.settings.scope,
+        arrayProps: undefined,
+        fieldLabelsMap: app.models.referenceData.fieldLabelsMap,
+        exportFieldsGroup: undefined,
+        exportFieldsOrder: undefined,
+        locationFields: undefined
+      },
       filter,
       exportType,
-      'Reference Data',
-      null,
-      [],
-      [],
-      options,
-      function (results) {
-        // translate category, value and description fields
-        return new Promise(function (resolve, reject) {
-          // load context user
-          const contextUser = app.utils.remote.getUserFromOptions(options);
-          // load user language dictionary
-          app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-            // handle errors
-            if (error) {
-              return reject(error);
-            }
-            // go through all results
-            results.forEach(function (result) {
-              // translate category, value and description
-              result.categoryId = dictionary.getTranslation(result.categoryId);
-              result.value = dictionary.getTranslation(result.value);
-              result.description = dictionary.getTranslation(result.description);
-            });
-            resolve(results);
-          });
-        });
-      },
-      callback);
+      undefined,
+      undefined,
+      undefined,
+      {
+        userId: _.get(options, 'accessToken.userId'),
+        outbreakId: this.id,
+        questionnaire: undefined,
+        useQuestionVariable: false,
+        useDbColumns,
+        dontTranslateValues,
+        contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+      }
+    )
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
   };
 
   /**
