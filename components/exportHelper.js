@@ -3930,11 +3930,21 @@ function exportFilteredModelsList(
                                       }
                                     }
                                   } else {
-                                    // normal value
-                                    response = !sheetHandler.dontTranslateValues && childValue &&
-                                      typeof childValue === 'string' && childValue.startsWith('LNG_') ?
-                                        translatePipe(childValue) :
-                                        childValue;
+                                    // no reason to change it if we don't have a value
+                                    if (!childValue) {
+                                      response = childValue;
+                                    } else {
+                                      // date value
+                                      childValue = childValue instanceof Date ?
+                                          moment(childValue).toISOString() :
+                                          childValue;
+
+                                      // normal value
+                                      response = !sheetHandler.dontTranslateValues &&
+                                        typeof childValue === 'string' && childValue.startsWith('LNG_') ?
+                                          translatePipe(childValue) :
+                                          childValue;
+                                    }
                                   }
 
                                   // finished
@@ -4770,11 +4780,14 @@ function exportFilteredModelsList(
                         );
                       }
                     }
+                  }
 
-                    // format dates
-                    if (cellValue instanceof Date) {
-                      cellValue = moment(cellValue).toISOString();
-                    }
+                  // format dates
+                  if (
+                    cellValue &&
+                    cellValue instanceof Date
+                  ) {
+                    cellValue = moment(cellValue).toISOString();
                   }
 
                   // remove new lines since these might break files like csv and others
