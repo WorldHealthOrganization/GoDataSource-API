@@ -90,6 +90,10 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countPeople = function (filter, options, callback) {
+    // attach outbreak id
+    filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // count using query
     app.models.person.rawCountDocuments(filter)
       .then(function (count) {
