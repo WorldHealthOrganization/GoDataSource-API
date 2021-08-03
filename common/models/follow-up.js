@@ -88,6 +88,7 @@ module.exports = function (FollowUp) {
     'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
+    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -124,7 +125,8 @@ module.exports = function (FollowUp) {
         'statusId',
         'isGenerated',
         'targeted',
-        'comment'
+        'comment',
+        'responsibleUserId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
@@ -220,7 +222,15 @@ module.exports = function (FollowUp) {
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
-    }
+    },
+    'responsibleUserId': {
+      modelName: 'user',
+      useProperty: [
+        'id',
+        'firstName',
+        'lastName'
+      ]
+    },
   };
 
   FollowUp.extendedForm = {
@@ -1094,6 +1104,14 @@ module.exports = function (FollowUp) {
           localField: 'personId',
           foreignField: '_id',
           as: 'contact'
+        },
+        unwind: true
+      }, {
+        lookup: {
+          from: 'user',
+          localField: 'responsibleUserId',
+          foreignField: '_id',
+          as: 'responsibleUser'
         },
         unwind: true
       });

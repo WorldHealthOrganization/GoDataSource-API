@@ -2546,6 +2546,12 @@
       },
       "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_KPI_DESCRIPTION": {
         "translation": "This permission allows export of kpi report. You need to be able to view at least one of the kpi dashlets"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD": {
+        "translation": "User - list workload"
+      },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD_DESCRIPTION": {
+        "translation": "This permission allows listing user workload information"
       }
     },
     "referenceDataCategoryQuestionAnswerType": {
@@ -6113,6 +6119,12 @@
       },
       "LNG_CASE_FIELD_LABEL_EMAIL": {
         "translation": "Email"
+      },
+      "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
+      },
+      "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiCasesListPage": {
@@ -6708,6 +6720,12 @@
       },
       "LNG_CONTACT_FIELD_LABEL_EMAIL": {
         "translation": "Email"
+      },
+      "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
+      },
+      "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": "Select user to follow-up this person. Users assigned to contacts will be also automatically assigned to contact follow-ups for specified contacts."
       }
     },
     "uiContactsListPage": {
@@ -6880,6 +6898,9 @@
       },
       "LNG_PAGE_CREATE_CONTACT_CANT_SET_FOLLOW_UP_TEAM_TITLE": {
         "translation": "You need Team - list permission to change contact follow-up team"
+      },
+      "LNG_PAGE_CREATE_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to set contact assigned user"
       }
     },
     "uiModifyContactPage": {
@@ -6939,6 +6960,9 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_TAB_CASE_QUESTIONNAIRE_TITLE": {
         "translation": "Questionnaire"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_CANT_SET__RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change contact assigned user"
       }
     },
     "uiRelationshipFields": {
@@ -7207,6 +7231,9 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_EMAIL": {
         "translation": "Email"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
       }
     },
     "uiTermsOfUsePage": {
@@ -7446,6 +7473,15 @@
       },
       "LNG_PAGE_MODIFY_FOLLOW_UP_REGISTERED_AS_CONTACT_MESSAGE": {
         "translation": "* You cannot edit the follow-up because this person is now a case and follow-up was performed at the time when \"{{ personName }}\" was registered as a contact"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": "Assigned User should be set only if you want all generated follow-ups to be assigned to a specific user"
+      },
+      "LNG_PAGE_MODIFY_FOLLOW_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change follow-up assigned user"
       }
     },
     "uiEventFields": {
@@ -7523,6 +7559,12 @@
       },
       "LNG_EVENT_FIELD_LABEL_EMAIL": {
         "translation": "Email"
+      },
+      "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
+      },
+      "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiCreateEventPage": {
@@ -11446,6 +11488,15 @@
       },
       "LNG_PAGE_LIST_USERS_TITLE": {
         "translation": "Utilizadors"
+      },
+      "LNG_PAGE_LIST_USERS_ACTION_VIEW_USERS_WORKLOAD": {
+        "translation": "Workload"
+      },
+      "LNG_PAGE_LIST_USERS_LABEL_DATE": {
+        "translation": "Date range"
+      },
+      "LNG_PAGE_LIST_USERS_LABEL_DATE_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiCreateUserPage": {
@@ -11698,6 +11749,9 @@
       },
       "LNG_PAGE_MODIFY_EVENT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
         "translation": "Record Details"
+      },
+      "LNG_PAGE_MODIFY_EVENT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change event assigned user"
       }
     },
     "uiIconFields": {
@@ -14485,6 +14539,20 @@
         "translation": "de"
       }
     },
+    "uiUsersWorkload": {
+      "LNG_PAGE_USERS_WORKLOAD_USER_LABEL": {
+        "translation": "User"
+      },
+      "LNG_PAGE_USERS_WORKLOAD_TITLE": {
+        "translation": "Users workload"
+      },
+      "LNG_PAGE_USERS_WORKLOAD_NO_USER_LABEL": {
+        "translation": "- No user assigned -"
+      },
+      "LNG_PAGE_USERS_WORKLOAD_TABLE_OF_LABEL": {
+        "translation": "of"
+      }
+    },
     "uiMyProfilePage": {
       "LNG_PAGE_MY_PROFILE_TITLE": {
         "translation": "Meu perfil"
@@ -17227,6 +17295,12 @@
       },
       "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
         "translation": "Number of exposures"
+      },
+      "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+        "translation": "Assigned User"
+      },
+      "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiMarkedAsNotDuplicatesListPage": {
@@ -17422,6 +17496,9 @@
       },
       "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
         "translation": "Not duplicates"
+      },
+      "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change contact of contact assigned user"
       }
     },
     "uiImportContactOfContactData": {

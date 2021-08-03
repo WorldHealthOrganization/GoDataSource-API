@@ -359,6 +359,15 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'user_list_workload',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'user_list'
+          ]
         }
       ]
     },

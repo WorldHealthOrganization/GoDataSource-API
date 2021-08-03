@@ -1366,6 +1366,166 @@ module.exports = function (Outbreak) {
       .catch(callback);
   };
 
+  /**
+   * Count the followups per user per day
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsPerUserPerDay = function (filter, options, callback) {
+    // initialize result
+    let result = {
+      totalFollowupsCount: 0,
+      successfulFollowupsCount: 0,
+      users: []
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize default filter
+    let defaultFilter = {
+      where: {
+        outbreakId: outbreakId
+      },
+      order: 'date ASC'
+    };
+
+    // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
+    if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
+      // to get the entire day today, filter between today 00:00 and tomorrow 00:00
+      let today = genericHelpers.getDate().toString();
+      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+
+      defaultFilter.where.date = {
+        between: [today, todayEndOfDay]
+      };
+    }
+
+    // retrieve all users to make sure that follow-ups users still exist
+    // - there is no need right now to restrict users by locations to which I have access since there will be just a small number of users and they will be filter out further
+    let existingUsersMap = {};
+    app.models.user
+      .find({
+        fields: {
+          id: true
+        }
+      })
+      .then(function (users) {
+        // map users
+        users.forEach((user) => {
+          existingUsersMap[user.id] = true;
+        });
+
+        // construct follow-up filter
+        const followUpFilter = app.utils.remote.mergeFilters(
+          defaultFilter,
+          filter || {}
+        );
+
+        // define fields that we always need to retrieve
+        // there is no point why frontend will request other fields since we don't return follow-ups
+        followUpFilter.fields = {
+          personId: true,
+          responsibleUserId: true,
+          date: true,
+          statusId: true
+        };
+
+        // get all the followups for the filtered period
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, followUpFilter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (followUpFilter.where = updatedFilter);
+
+            // retrieve follow-ups
+            return app.models.followUp
+              .find(followUpFilter);
+          });
+      })
+      .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+        // initialize users map
+        let usersMap = {};
+        // initialize helper user to date to contacts map
+        let userDateContactsMap = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          const contactId = followup.personId;
+
+          // get responsibleUserId; there might be no user id, set null
+          let responsibleUserId;
+          if (
+            followup.responsibleUserId &&
+            existingUsersMap[followup.responsibleUserId]
+          ) {
+            responsibleUserId = followup.responsibleUserId;
+          } else {
+            responsibleUserId = null;
+          }
+
+          // get date; format it to UTC 00:00:00
+          const date = genericHelpers.getDate(followup.date).toString();
+
+          // initialize user entry if not already initialized
+          if (!usersMap[responsibleUserId]) {
+            usersMap[responsibleUserId] = {
+              id: responsibleUserId,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              dates: {}
+            };
+
+            userDateContactsMap[responsibleUserId] = {};
+          }
+
+          // initialize date entry for the user if not already initialized
+          if (!usersMap[responsibleUserId].dates[date]) {
+            usersMap[responsibleUserId].dates[date] = {
+              date: date,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              contactIDs: []
+            };
+
+            userDateContactsMap[responsibleUserId][date] = {};
+          }
+
+          // increase counters
+          usersMap[responsibleUserId].dates[date].totalFollowupsCount++;
+          usersMap[responsibleUserId].totalFollowupsCount++;
+
+          if (app.models.followUp.isPerformed(followup)) {
+            usersMap[responsibleUserId].dates[date].successfulFollowupsCount++;
+            usersMap[responsibleUserId].successfulFollowupsCount++;
+            result.successfulFollowupsCount++;
+          }
+
+          // add contactId to the user/date container if not already added
+          if (!userDateContactsMap[responsibleUserId][date][contactId]) {
+            // keep flag to not add contact twice for user
+            userDateContactsMap[responsibleUserId][date][contactId] = true;
+            usersMap[responsibleUserId].dates[date].contactIDs.push(contactId);
+          }
+        });
+
+        // update results; sending array with users and contacts information
+        result.totalFollowupsCount = followups.length;
+        result.users = _.map(usersMap, (value) => {
+          value.dates = Object.values(value.dates);
+          return value;
+        });
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
+
   Outbreak.beforeRemote('prototype.countFollowUpsByTeam', function (context, modelInstance, next) {
     Outbreak.helpers.findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);
   });

@@ -245,7 +245,8 @@ module.exports = function (Case) {
         'safeBurial',
         'dateOfBurial',
         'burialLocationId',
-        'burialPlaceName'
+        'burialPlaceName',
+        'responsibleUserId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {

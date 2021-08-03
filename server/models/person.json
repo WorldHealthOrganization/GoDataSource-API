@@ -194,6 +194,10 @@
           "type": ["string"]
         }
       }
+    },
+    "responsibleUserId": {
+      "description": "Id for the responsible user",
+      "type": "string"
     }
   },
   "removeIndexes": [

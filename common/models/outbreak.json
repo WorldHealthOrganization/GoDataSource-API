@@ -1291,6 +1291,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "user_list_workload",
+      "permission": "ALLOW",
+      "property": "countFollowUpsPerUserPerDay"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_convert_to_contact",
       "permission": "ALLOW",
       "property": "convertCaseToContact"
@@ -4258,6 +4264,60 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/per-team-per-day/count"
+      }
+    },
+    "prototype.countFollowUpsPerUserPerDay": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalFollowupsCount": "number",
+            "successfulFollowupsCount": "number",
+            "users": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "dates": {
+                      "type": [
+                        {
+                          "type": {
+                            "date": "date",
+                            "totalFollowupsCount": "number",
+                            "successfulFollowupsCount": "number",
+                            "contactsIDs": [
+                              "string"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for follow-ups per day",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of followups and successful followups",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/per-user-per-day/count"
       }
     },
     "prototype.mergePeople": {

@@ -38,6 +38,12 @@ module.exports = function (Person) {
       model: 'location',
       foreignKeyContainer: 'dateRanges',
       foreignKey: 'locationId'
+    },
+    // responsible user
+    responsibleUser: {
+      type: 'belongsToEmbedded',
+      model: 'user',
+      foreignKey: 'responsibleUserId'
     }
   };
 
