@@ -23,7 +23,8 @@ module.exports = function (ExtendedPersistedModel) {
   // define custom relations related to user ( create & modified by user ) supported by all extended models
   ExtendedPersistedModel.userSupportedRelations = [
     'createdByUser',
-    'updatedByUser'
+    'updatedByUser',
+    'responsibleUser'
   ];
 
   // after the application started (all models finished loading)
@@ -189,7 +190,7 @@ module.exports = function (ExtendedPersistedModel) {
   });
 
   /**
-   * Retrieve createdByUser, updatedByUser relations
+   * Retrieve createdByUser, updatedByUser, responsibleUser relations
    * - At this point this works only for the first level includes, later this can be extended to take in scan relations scopes to see if we want to include user data in child relations as well
    * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
    */
@@ -327,7 +328,7 @@ module.exports = function (ExtendedPersistedModel) {
   });
 
   /**
-   * Retrieve createdByUser, updatedByUser relations
+   * Retrieve createdByUser, updatedByUser, responsibleUser relations
    * - At this point this works only for the first level includes, later this can be extended to take in scan relations scopes to see if we want to include user data in child relations as well
    * - At this point filters on user relationships don't work, in case we need to add support for this then we will need to allow inclusion on all count methods as well
    */
@@ -341,7 +342,7 @@ module.exports = function (ExtendedPersistedModel) {
   });
 
   /**
-   * Retrieve and map createdByUser, updatedByUser relations data
+   * Retrieve and map createdByUser, responsibleUser relations data
    * @param context
    * @param returnedResult
    * @param next
@@ -359,6 +360,7 @@ module.exports = function (ExtendedPersistedModel) {
       // determine relations for which we need to retrieve data
       const includeCreatedByUser = !!_.find(userRelations, {relation: 'createdByUser'});
       const includeUpdatedByUser = !!_.find(userRelations, {relation: 'updatedByUser'});
+      const includeResponsibleUser = !!_.find(userRelations, {relation: 'responsibleUser'});
 
       // determine results for which we need to map the user data
       const result = _.isArray(returnedResult) ?
@@ -386,6 +388,15 @@ module.exports = function (ExtendedPersistedModel) {
             record.updatedBy !== 'unavailable'
           ) {
             userIds[record.updatedBy] = true;
+          }
+
+          // responsible user
+          if (
+            includeResponsibleUser &&
+            record.responsibleUserId &&
+            record.responsibleUserId !== 'unavailable'
+          ) {
+            userIds[record.responsibleUserId] = true;
           }
         }
       );
@@ -432,6 +443,15 @@ module.exports = function (ExtendedPersistedModel) {
                   users[record.updatedBy]
                 ) {
                   record.updatedByUser = users[record.updatedBy];
+                }
+
+                // responsible user
+                if (
+                  includeResponsibleUser &&
+                  record.responsibleUserId &&
+                  users[record.responsibleUserId]
+                ) {
+                  record.responsibleUser = users[record.responsibleUserId];
                 }
               }
             );
