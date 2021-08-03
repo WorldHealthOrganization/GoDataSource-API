@@ -3194,7 +3194,8 @@ function exportFilteredModelsList(
                 pathWithoutIndexes,
                 uniqueKeyInCaseOfDuplicate,
                 formula,
-                translate
+                translate,
+                doesntContainLanguageToken
               ) => {
                 // create column
                 const columnData = {
@@ -3205,7 +3206,8 @@ function exportFilteredModelsList(
                   pathWithoutIndexes,
                   formula,
                   anonymize: sheetHandler.columns.shouldAnonymize(pathWithoutIndexes),
-                  translate
+                  translate,
+                  doesntContainLanguageToken
                 };
 
                 // check for duplicates
@@ -3268,7 +3270,9 @@ function exportFilteredModelsList(
                       return value && sheetHandler.locationsMap[value] && sheetHandler.locationsMap[value].identifiers ?
                         sheetHandler.locationsMap[value].identifiersCodes :
                         [];
-                    }
+                    },
+                    undefined,
+                    true
                   );
 
                   // finished
@@ -3290,7 +3294,9 @@ function exportFilteredModelsList(
                           sheetHandler.locationsMap[value].identifiers[localIdentifierIndex].code :
                           '';
                       };
-                    })(identifierIndex)
+                    })(identifierIndex),
+                    undefined,
+                    true
                   );
                 }
               };
@@ -3318,7 +3324,8 @@ function exportFilteredModelsList(
                       return sheetHandler.dontTranslateValues ?
                         value :
                         value.map(pipeTranslator);
-                    }
+                    },
+                    false
                   );
 
                   // finished
@@ -3342,7 +3349,9 @@ function exportFilteredModelsList(
                           sheetHandler.locationsMap[sheetHandler.locationsMap[value].parentChain[localParentLocationIndex]].geographicalLevelId :
                           '';
                       };
-                    })(parentLocationIndex)
+                    })(parentLocationIndex),
+                    undefined,
+                    false
                   );
                 }
               };
@@ -3369,7 +3378,9 @@ function exportFilteredModelsList(
                             sheetHandler.locationsMap[value].parentLocationNamesArrayNames
                         ) :
                         [];
-                    }
+                    },
+                    undefined,
+                    true
                   );
 
                   // finished
@@ -3397,7 +3408,9 @@ function exportFilteredModelsList(
                           ) :
                           '';
                       };
-                    })(parentLocationIndex)
+                    })(parentLocationIndex),
+                    undefined,
+                    true
                   );
                 }
               };
@@ -3445,11 +3458,15 @@ function exportFilteredModelsList(
                         }
 
                         // add columns
+                        const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
                         const childColumn = addHeaderColumn(
                           `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
                           `${propertyName}[${arrayIndex}].${childProperty}`,
-                          `${propertyName}[].${childProperty}`,
-                          uuid.v4()
+                          childPathWithoutIndexes,
+                          uuid.v4(),
+                          undefined,
+                          undefined,
+                          !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
                         );
 
                         // if location column we need to push some extra columns
@@ -3461,12 +3478,14 @@ function exportFilteredModelsList(
                           if (!sheetHandler.dontTranslateValues) {
                             addHeaderColumn(
                               `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
-                              `${propertyName}[${arrayIndex}].${childProperty}`,
+                              childColumn.path,
                               childColumn.pathWithoutIndexes,
                               uuid.v4(),
                               (value) => {
                                 return value;
-                              }
+                              },
+                              undefined,
+                              true
                             );
                           }
 
@@ -3474,21 +3493,21 @@ function exportFilteredModelsList(
                           attachLocationIdentifiers(
                             `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
                             sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.path,
                             childColumn.pathWithoutIndexes
                           );
 
                           // attach parent location geographical level details
                           attachParentLocationGeographicalLevelDetails(
                             `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.path,
                             childColumn.pathWithoutIndexes
                           );
 
                           // attach parent locations name details
                           attachParentLocationsNameDetails(
                             `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
-                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childColumn.path,
                             childColumn.pathWithoutIndexes
                           );
                         }
@@ -3569,7 +3588,10 @@ function exportFilteredModelsList(
                           `${parentPropertyTokenTranslation} ${propertyLabelTokenTranslation}`,
                           propertyName,
                           propertyName,
-                          uuid.v4()
+                          uuid.v4(),
+                          undefined,
+                          undefined,
+                          false
                         );
                       } else {
                         // add column
@@ -3577,7 +3599,10 @@ function exportFilteredModelsList(
                           propertyLabelTokenTranslation,
                           propertyName,
                           propertyName,
-                          uuid.v4()
+                          uuid.v4(),
+                          undefined,
+                          undefined,
+                          false
                         );
                       }
                     }
@@ -3719,7 +3744,9 @@ function exportFilteredModelsList(
 
                             // finished
                             return formattedAnswers;
-                          }
+                          },
+                          undefined,
+                          true
                         );
                       } else {
                         // add questionnaire columns - flat file
@@ -3765,7 +3792,10 @@ function exportFilteredModelsList(
                                 `${questionHeader} [MD ${answerIndex + 1}]`,
                                 `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
                                 `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                questionData.variable
+                                questionData.variable,
+                                undefined,
+                                undefined,
+                                true
                               );
 
                               // attach responses
@@ -3778,11 +3808,16 @@ function exportFilteredModelsList(
                                   questionData.variable,
                                   (function (localQuestionData) {
                                     return (value) => {
-                                      return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
-                                        localQuestionData.answerKeyToLabelMap[value] :
+                                      return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
+                                          sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
+                                            sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
+                                            localQuestionData.answerKeyToLabelMap[value]
+                                        ) :
                                         value;
                                     };
-                                  })(questionData)
+                                  })(questionData),
+                                  undefined,
+                                  true
                                 );
                               }
                             } else {
@@ -3791,7 +3826,10 @@ function exportFilteredModelsList(
                                 `${questionHeader} [MD ${answerIndex + 1}]`,
                                 `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
                                 `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                questionData.variable
+                                questionData.variable,
+                                undefined,
+                                undefined,
+                                true
                               );
 
                               // value
@@ -3802,11 +3840,16 @@ function exportFilteredModelsList(
                                 questionData.variable,
                                 (function (localQuestionData) {
                                   return (value) => {
-                                    return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
-                                      localQuestionData.answerKeyToLabelMap[value] :
+                                    return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
+                                        sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
+                                          sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
+                                          localQuestionData.answerKeyToLabelMap[value]
+                                      ) :
                                       value;
                                   };
-                                })(questionData)
+                                })(questionData),
+                                undefined,
+                                true
                               );
                             }
 
@@ -3974,7 +4017,9 @@ function exportFilteredModelsList(
                               // - translation takes place at next step
                               return value;
                             };
-                          })(propertyName)
+                          })(propertyName),
+                        undefined,
+                        false
                       );
                     }
                   }
@@ -3993,7 +4038,9 @@ function exportFilteredModelsList(
                         uuid.v4(),
                         (value) => {
                           return value;
-                        }
+                        },
+                        undefined,
+                        true
                       );
                     }
 
@@ -4525,7 +4572,11 @@ function exportFilteredModelsList(
               const column = sheetHandler.columns.headerColumns[columnIndex];
 
               // if column is anonymize then there is no need to retrieve data for this cell
-              if (column.anonymize) {
+              // - or column can't contain language tokens
+              if (
+                column.anonymize ||
+                column.doesntContainLanguageToken
+              ) {
                 continue;
               }
 
@@ -4759,6 +4810,7 @@ function exportFilteredModelsList(
                     if (cellValue) {
                       // translate
                       if (
+                        !column.doesntContainLanguageToken &&
                         typeof cellValue === 'string' &&
                         cellValue.startsWith('LNG_')
                       ) {
