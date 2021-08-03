@@ -4828,7 +4828,7 @@
         "translation": "هل أنت متأكد من رغبتك في ربط هذا الجواب؟"
       },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
-        "translation": "لا يمكن إزالة المكان '{{name}}' لأنه مستخدم، هل تريد أن ترى أين؟"
+        "translation": "Location '{{name}}' and its sub-locations can't be removed because they are used, do you want to see where?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
         "translation": "هل أنت متأكد من أنك تريد أن تكون هذه الفاشية نشطة؟ <br> سيتم تعطيل الفاشية النشطة الحالية."
@@ -7240,6 +7240,9 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID": {
         "translation": "Assigned User"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiTermsOfUsePage": {

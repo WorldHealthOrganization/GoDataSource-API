@@ -4828,7 +4828,7 @@
         "translation": "Êtes-vous sûr de vouloir lier cette réponse?"
       },
       "LNG_DIALOG_CONFIRM_LOCATION_USED": {
-        "translation": "L'endroit '{{name}}' ne peut pas être supprimé car elle est utilisé. Voulez-vous voir où?"
+        "translation": "Location '{{name}}' and its sub-locations can't be removed because they are used, do you want to see where?"
       },
       "LNG_DIALOG_CONFIRM_MAKE_OUTBREAK_ACTIVE": {
         "translation": "Êtes-vous sûr de vouloir activer cette épidémie? <br/> L’autre épidémie active sera désactivée."
@@ -7243,6 +7243,9 @@
       },
       "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID": {
         "translation": "Assigned User"
+      },
+      "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+        "translation": ""
       }
     },
     "uiTermsOfUsePage": {
