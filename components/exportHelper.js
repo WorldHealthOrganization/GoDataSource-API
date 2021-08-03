@@ -1558,6 +1558,16 @@ function exportFilteredModelsList(
       const columns = initializeColumnHeaders();
       const projection = {};
       columns.headerKeys.forEach((field) => {
+        // we need to retrieve all values from a route property, otherwise there might be cases where we don't export data
+        // - like address.geoLocation.lat doesn't exist in database, and since we do a projection on that geoLocation.coordinates isn't retrieved...and not lat & lng are exported
+        const fieldRootIndex = field.indexOf('.');
+        if (fieldRootIndex > -1) {
+          field = field.substr(
+            0,
+            fieldRootIndex
+          );
+        }
+
         // attach prop
         projection[field] = 1;
       });
@@ -4839,18 +4849,27 @@ function exportFilteredModelsList(
                     cellValue &&
                     cellValue instanceof Date
                   ) {
+                    // format date as string
                     cellValue = moment(cellValue).toISOString();
-                  }
 
                   // remove new lines since these might break files like csv and others
-                  if (
+                  } else if (
                     cellValue &&
                     typeof cellValue === 'string'
                   ) {
+                    // remove eol from string
                     cellValue = cellValue.replace(
                       REPLACE_NEW_LINE_EXPR,
                       ' '
                     );
+                  } else if (
+                    typeof cellValue === 'boolean'
+                  ) {
+                    // convert boolean to a string that can be handled by import
+                    cellValue = sheetHandler.process.exportIsNonFlat ?
+                      cellValue : (
+                        cellValue ? 'TRUE' : 'FALSE'
+                      );
                   }
 
                   // add value to row
