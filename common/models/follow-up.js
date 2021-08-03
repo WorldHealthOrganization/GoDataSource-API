@@ -222,15 +222,7 @@ module.exports = function (FollowUp) {
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
-    },
-    'responsibleUserId': {
-      modelName: 'user',
-      useProperty: [
-        'id',
-        'firstName',
-        'lastName'
-      ]
-    },
+    }
   };
 
   FollowUp.extendedForm = {
@@ -1104,14 +1096,6 @@ module.exports = function (FollowUp) {
           localField: 'personId',
           foreignField: '_id',
           as: 'contact'
-        },
-        unwind: true
-      }, {
-        lookup: {
-          from: 'user',
-          localField: 'responsibleUserId',
-          foreignField: '_id',
-          as: 'responsibleUser'
         },
         unwind: true
       });

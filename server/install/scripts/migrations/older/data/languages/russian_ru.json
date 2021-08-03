@@ -6270,6 +6270,9 @@
       },
       "LNG_PAGE_CREATE_CASE_WITH_UID_TITLE": {
         "translation": "Создать случай с UID {{uid}}"
+      },
+      "LNG_PAGE_CREATE_CASE_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change case assigned user"
       }
     },
     "uiModifyCasePage": {
@@ -6326,6 +6329,9 @@
       },
       "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_CONTACT_FOLLOW_UPS": {
         "translation": "View follow-ups"
+      },
+      "LNG_PAGE_MODIFY_CASE_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to change case assigned user"
       }
     },
     "uiEntityRelationshipsListPage": {
@@ -6961,7 +6967,7 @@
       "LNG_PAGE_MODIFY_CONTACT_TAB_CASE_QUESTIONNAIRE_TITLE": {
         "translation": "Questionnaire"
       },
-      "LNG_PAGE_MODIFY_CONTACT_CANT_SET__RESPONSIBLE_ID_TITLE": {
+      "LNG_PAGE_MODIFY_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
         "translation": "You need User - list permission to change contact assigned user"
       }
     },
@@ -7480,7 +7486,7 @@
       "LNG_PAGE_MODIFY_FOLLOW_RESPONSIBLE_USER_ID_DESCRIPTION": {
         "translation": "Assigned User should be set only if you want all generated follow-ups to be assigned to a specific user"
       },
-      "LNG_PAGE_MODIFY_FOLLOW_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "LNG_PAGE_MODIFY_FOLLOW_UP_CANT_SET_RESPONSIBLE_ID_TITLE": {
         "translation": "You need User - list permission to change follow-up assigned user"
       }
     },
@@ -7582,6 +7588,9 @@
       },
       "LNG_PAGE_CREATE_EVENT_TITLE": {
         "translation": "Создать новое событие"
+      },
+      "LNG_PAGE_CREATE_EVENT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to set event assigned user"
       }
     },
     "uiReferenceDataCategories": {
@@ -17446,6 +17455,9 @@
       },
       "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_WARNING_CASE_OR_EVENT_REQUIRED": {
         "translation": "You can only add a contact of contact through a contact"
+      },
+      "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+        "translation": "You need User - list permission to set contact of contact assigned user"
       }
     },
     "uiModifyContactOfContactPage": {

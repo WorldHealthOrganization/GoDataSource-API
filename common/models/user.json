@@ -129,11 +129,6 @@
       "type": "belongsTo",
       "model": "outbreak",
       "foreignKey": "activeOutbreakId"
-    },
-    "followUps": {
-      "type": "hasMany",
-      "model": "followUp",
-      "foreignKey": "responsibleUserId"
     }
   },
   "acls": [

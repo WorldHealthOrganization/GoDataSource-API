@@ -98,11 +98,6 @@
       "type": "belongsTo",
       "model": "team",
       "foreignKey": "teamId"
-    },
-    "responsibleUser": {
-      "type": "belongsTo",
-      "model": "user",
-      "foreignKey": "responsibleUserId"
     }
   },
   "acls": [],
