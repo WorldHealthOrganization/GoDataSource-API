@@ -13295,6 +13295,15 @@
       },
       "LNG_PAGE_IMPORT_DATA_RECORD_DATA_DIALOG_TITLE": {
         "translation": "Record data"
+      },
+      "LNG_PAGE_IMPORT_DATA_NO_FILE_COLUMN_MAPPED": {
+        "translation": "{{no}} from {{total}} columns from file are mapped"
+      },
+      "LNG_PAGE_IMPORT_DATA_BUTTON_SHOW_NOT_MAPPED_COLUMNS": {
+        "translation": "show not mapped columns"
+      },
+      "LNG_PAGE_IMPORT_DATA_SHOW_NOT_MAPPED_COLUMNS_TITLE": {
+        "translation": "File columns that aren't mapped"
       }
     },
     "uiImportHierarchicalLocations": {
