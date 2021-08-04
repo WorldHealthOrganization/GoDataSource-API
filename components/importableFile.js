@@ -1092,6 +1092,11 @@ const processImportableFileData = function (app, options, formatterOptions, batc
         // encode properties if necessary
         const restrictedCharactersRegex = /\.|\$|\\/g;
         const escapeRestrictedMongoCharacters = (value) => {
+          // might be null
+          if (!value) {
+            return;
+          }
+
           if (Array.isArray(value)) {
             value.forEach((item) => {
               escapeRestrictedMongoCharacters(item);
