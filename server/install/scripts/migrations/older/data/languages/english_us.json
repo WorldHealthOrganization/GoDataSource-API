@@ -14004,10 +14004,10 @@
         "translation": "Days"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_PERSON": {
-        "translation": "You are currently seeing the chains for person:"
+        "translation": "You need to generate a new snapshot to see the chains for person:"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_SIZE": {
-        "translation": "You are currently seeing the chains with size:"
+        "translation": "You need to generate a new snapshot to see the chains with size:"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_COLOR_CRITERIA_TIMELINE_VIEW_TOOLTIP": {
         "translation": "Read-only in Timeline View"

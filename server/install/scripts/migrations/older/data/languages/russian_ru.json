@@ -14004,10 +14004,10 @@
         "translation": "Дни"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_PERSON": {
-        "translation": "Вы просматриваете цепочки для человека:"
+        "translation": "You need to generate a new snapshot to see the chains for person:"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_SIZE": {
-        "translation": "Вы просматриваете цепочки длиной:"
+        "translation": "You need to generate a new snapshot to see the chains with size:"
       },
       "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_COLOR_CRITERIA_TIMELINE_VIEW_TOOLTIP": {
         "translation": "Только для чтения в режиме временной шкалы"
