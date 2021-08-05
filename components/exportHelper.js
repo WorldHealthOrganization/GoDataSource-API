@@ -597,7 +597,8 @@ function exportFilteredModelsList(
         const addQuestionData = (
           flatArray,
           nonFlatArray,
-          question
+          question,
+          multiAnswer
         ) => {
           // some types are ignored since there is no point in exporting them ?
           if (
@@ -613,6 +614,9 @@ function exportFilteredModelsList(
             variable: question.variable,
             text: question.text,
             answerType: question.answerType,
+            multiAnswer: multiAnswer !== undefined ?
+              multiAnswer :
+              question.multiAnswer,
             childQuestions: [],
             answerKeyToLabelMap: {}
           };
@@ -644,7 +648,8 @@ function exportFilteredModelsList(
                   addQuestionData(
                     flatArray,
                     formattedQuestion.childQuestions,
-                    childQuestion
+                    childQuestion,
+                    formattedQuestion.multiAnswer
                   );
                 });
               }
@@ -658,7 +663,8 @@ function exportFilteredModelsList(
           addQuestionData(
             response.flat,
             response.nonFlat,
-            questionData
+            questionData,
+            undefined
           );
         });
       }
@@ -3798,15 +3804,18 @@ function exportFilteredModelsList(
                                 maxNoOfResponsesForThisMultipleQuestion;
 
                               // date needs to be printed just once
-                              addHeaderColumn(
-                                `${questionHeader} [MD ${answerIndex + 1}]`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                questionData.variable,
-                                undefined,
-                                undefined,
-                                true
-                              );
+                              // - add column only if needed
+                              if (questionData.multiAnswer) {
+                                addHeaderColumn(
+                                  `${questionHeader} [MD ${answerIndex + 1}]`,
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                                  questionData.variable,
+                                  undefined,
+                                  undefined,
+                                  true
+                                );
+                              }
 
                               // attach responses
                               for (let multipleAnswerIndex = 0; multipleAnswerIndex < maxNoOfResponsesForThisMultipleQuestion; multipleAnswerIndex++) {
@@ -3832,15 +3841,18 @@ function exportFilteredModelsList(
                               }
                             } else {
                               // date
-                              addHeaderColumn(
-                                `${questionHeader} [MD ${answerIndex + 1}]`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                questionData.variable,
-                                undefined,
-                                undefined,
-                                true
-                              );
+                              // - add column only if needed
+                              if (questionData.multiAnswer) {
+                                addHeaderColumn(
+                                  `${questionHeader} [MD ${answerIndex + 1}]`,
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
+                                  questionData.variable,
+                                  undefined,
+                                  undefined,
+                                  true
+                                );
+                              }
 
                               // value
                               addHeaderColumn(
