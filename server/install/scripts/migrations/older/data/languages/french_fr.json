@@ -17986,7 +17986,7 @@
         "translation": "Export finished, archiving files"
       },
       "LNG_PAGE_EXPORT_DATA_EXPORT_DOWNLOADING": {
-        "translation": "Export finished, downloading file"
+        "translation": "Export finished, downloading file ({{downloaded}} / {{total}})"
       }
     }
   }
