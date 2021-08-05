@@ -598,7 +598,8 @@ function exportFilteredModelsList(
           flatArray,
           nonFlatArray,
           question,
-          multiAnswer
+          multiAnswer,
+          isRootQuestion
         ) => {
           // some types are ignored since there is no point in exporting them ?
           if (
@@ -618,7 +619,8 @@ function exportFilteredModelsList(
               multiAnswer :
               question.multiAnswer,
             childQuestions: [],
-            answerKeyToLabelMap: {}
+            answerKeyToLabelMap: {},
+            isRootQuestion
           };
 
           // attach question to flat array
@@ -649,7 +651,8 @@ function exportFilteredModelsList(
                     flatArray,
                     formattedQuestion.childQuestions,
                     childQuestion,
-                    formattedQuestion.multiAnswer
+                    formattedQuestion.multiAnswer,
+                    false
                   );
                 });
               }
@@ -664,7 +667,8 @@ function exportFilteredModelsList(
             response.flat,
             response.nonFlat,
             questionData,
-            undefined
+            undefined,
+            true
           );
         });
       }
@@ -2531,19 +2535,24 @@ function exportFilteredModelsList(
             if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
               // construct the queries that will be used to determine the number of max columns
               sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
-                // attach size answers per date count (multiple answer flag)
+                // variable path
                 const variableProp = `$${defaultQuestionnaireAnswersKey}.${questionData.variable}`;
-                project[getQuestionnaireQuestionUniqueKey(questionData.variable)] = {
-                  $cond: {
-                    if: {
-                      $isArray: variableProp
-                    },
-                    then: {
-                      $size: variableProp
-                    },
-                    else: 0
-                  }
-                };
+
+                // attach size answers per date count (multiple answer flag)
+                // - since only multiAnswer questions can have multi answers there is no point to count if not a root questions, because child question answers will be mapped accordingly to parent date
+                if (questionData.isRootQuestion) {
+                  project[getQuestionnaireQuestionUniqueKey(questionData.variable)] = {
+                    $cond: {
+                      if: {
+                        $isArray: variableProp
+                      },
+                      then: {
+                        $size: variableProp
+                      },
+                      else: 0
+                    }
+                  };
+                }
 
                 // attach max multiple answers per question answer (multi select dropdown)
                 if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -3166,11 +3175,15 @@ function exportFilteredModelsList(
               if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
                 // construct the queries that will be used to determine the number of max columns
                 sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
-                  // attach size answers per date count (multiple answer flag)
+                  // variable path
                   const variableProp = getQuestionnaireQuestionUniqueKey(questionData.variable);
-                  projectMax[variableProp] = {
-                    $max: `$${variableProp}`
-                  };
+
+                  // attach size answers per date count (multiple answer flag)
+                  if (questionData.isRootQuestion) {
+                    projectMax[variableProp] = {
+                      $max: `$${variableProp}`
+                    };
+                  }
 
                   // attach max multiple answers per question answer (multi select dropdown)
                   if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -3766,22 +3779,34 @@ function exportFilteredModelsList(
                         );
                       } else {
                         // add questionnaire columns - flat file
-                        const addQuestionnaireColumns = (questionData) => {
+                        const addQuestionnaireColumns = (
+                          questionData,
+                          multiAnswerParentDatePath,
+                          multiAnswerParentIndex
+                        ) => {
                           // determine number of responses for this question
                           const queryKey = getQuestionnaireQuestionUniqueKey(questionData.variable);
                           let maxNoOfResponsesForThisQuestion = sheetHandler.columns.arrayColumnMaxValues[queryKey] ?
                             sheetHandler.columns.arrayColumnMaxValues[queryKey] :
                             0;
 
-                          // we should export at least one round of columns even if we don't have data
-                          maxNoOfResponsesForThisQuestion = maxNoOfResponsesForThisQuestion < 1 ?
-                            1 :
-                            maxNoOfResponsesForThisQuestion;
+                          // determine how many columns we need to render for this question / children question
+                          let answerIndex = 0;
+                          if (multiAnswerParentDatePath) {
+                            // multi answer children questions need to print only records with a specific date
+                            answerIndex = multiAnswerParentIndex;
+                            maxNoOfResponsesForThisQuestion = answerIndex + 1;
+                          } else {
+                            // we should export at least one round of columns even if we don't have data
+                            maxNoOfResponsesForThisQuestion = maxNoOfResponsesForThisQuestion < 1 ?
+                              1 :
+                              maxNoOfResponsesForThisQuestion;
+                          }
 
                           // we need to add question to which we don't have answers (we shouldn't have these cases)
                           // - because otherwise you will see child questions that you don't know for which parent question they were
                           // add number of column necessary to export all responses
-                          for (let answerIndex = 0; answerIndex < maxNoOfResponsesForThisQuestion; answerIndex++) {
+                          while (answerIndex < maxNoOfResponsesForThisQuestion) {
                             // question header
                             const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders || sheetHandler.useDbColumns ?
                               questionData.variable : (
@@ -3789,6 +3814,27 @@ function exportFilteredModelsList(
                                   sheetHandler.dictionaryMap[questionData.text] :
                                   questionData.text
                               );
+
+                            // date needs to be printed just once
+                            // - add column only if needed
+                            let questionMultiAnswerDatePath;
+                            if (questionData.multiAnswer) {
+                              // get multi answer date
+                              questionMultiAnswerDatePath = multiAnswerParentDatePath ?
+                                multiAnswerParentDatePath :
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`;
+
+                              // add date column
+                              addHeaderColumn(
+                                `${questionHeader} [MD ${answerIndex + 1}]`,
+                                questionMultiAnswerDatePath,
+                                questionMultiAnswerDatePath,
+                                questionData.variable,
+                                undefined,
+                                undefined,
+                                true
+                              );
+                            }
 
                             // multiple dropdown ?
                             if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -3803,30 +3849,38 @@ function exportFilteredModelsList(
                                 1 :
                                 maxNoOfResponsesForThisMultipleQuestion;
 
-                              // date needs to be printed just once
-                              // - add column only if needed
-                              if (questionData.multiAnswer) {
-                                addHeaderColumn(
-                                  `${questionHeader} [MD ${answerIndex + 1}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  questionData.variable,
-                                  undefined,
-                                  undefined,
-                                  true
-                                );
-                              }
-
                               // attach responses
                               for (let multipleAnswerIndex = 0; multipleAnswerIndex < maxNoOfResponsesForThisMultipleQuestion; multipleAnswerIndex++) {
+                                // path
+                                const answerPath = multiAnswerParentDatePath ?
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"]` :
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`;
+
                                 // value
                                 addHeaderColumn(
                                   `${questionHeader} [MV ${answerIndex + 1}] ${multipleAnswerIndex + 1}`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
+                                  answerPath,
+                                  answerPath,
                                   questionData.variable,
-                                  (function (localQuestionData) {
-                                    return (value) => {
+                                  (function (localQuestionData, localMultiAnswerParentDatePath, localMultipleAnswerIndex) {
+                                    return (value, translatePipe, record) => {
+                                      // multi answer map ?
+                                      if (localMultiAnswerParentDatePath) {
+                                        // determine answer date
+                                        const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
+
+                                        // find answer
+                                        value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                        value = value ?
+                                          (
+                                            value.value ?
+                                              value.value[localMultipleAnswerIndex] :
+                                              value.value
+                                          ) :
+                                          value;
+                                      }
+
+                                      // not multi answer
                                       return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                             sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
@@ -3834,34 +3888,38 @@ function exportFilteredModelsList(
                                         ) :
                                         value;
                                     };
-                                  })(questionData),
+                                  })(questionData, multiAnswerParentDatePath, multipleAnswerIndex),
                                   undefined,
                                   true
                                 );
                               }
                             } else {
-                              // date
-                              // - add column only if needed
-                              if (questionData.multiAnswer) {
-                                addHeaderColumn(
-                                  `${questionHeader} [MD ${answerIndex + 1}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  questionData.variable,
-                                  undefined,
-                                  undefined,
-                                  true
-                                );
-                              }
+                              // path
+                              const answerPath = multiAnswerParentDatePath ?
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"]` :
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`;
 
                               // value
                               addHeaderColumn(
                                 `${questionHeader} [MV ${answerIndex + 1}]`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
+                                answerPath,
+                                answerPath,
                                 questionData.variable,
-                                (function (localQuestionData) {
-                                  return (value) => {
+                                (function (localQuestionData, localMultiAnswerParentDatePath) {
+                                  return (value, translatePipe, record) => {
+                                    // multi answer map ?
+                                    if (localMultiAnswerParentDatePath) {
+                                      // determine answer date
+                                      const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
+
+                                      // find answer
+                                      value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                      value = value ?
+                                        value.value :
+                                        value;
+                                    }
+
+                                    // not multi answer
                                     return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
                                         sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
@@ -3869,7 +3927,7 @@ function exportFilteredModelsList(
                                       ) :
                                       value;
                                   };
-                                })(questionData),
+                                })(questionData, multiAnswerParentDatePath),
                                 undefined,
                                 true
                               );
@@ -3877,14 +3935,35 @@ function exportFilteredModelsList(
 
                             // need to add child question columns before adding next index column for this question - to keep order of responses for each question
                             questionData.childQuestions.forEach((childQuestion) => {
-                              addQuestionnaireColumns(childQuestion);
+                              addQuestionnaireColumns(
+                                childQuestion,
+                                multiAnswerParentDatePath ?
+                                  multiAnswerParentDatePath : (
+                                    questionData.multiAnswer ?
+                                      questionMultiAnswerDatePath :
+                                      undefined
+                                  ),
+                                multiAnswerParentIndex !== undefined ?
+                                  multiAnswerParentIndex : (
+                                    questionData.multiAnswer ?
+                                      answerIndex :
+                                      undefined
+                                  )
+                              );
                             });
+
+                            // next answer index
+                            answerIndex++;
                           }
                         };
 
                         // construct columns for our questionnaire
                         sheetHandler.questionnaireQuestionsData.nonFlat.forEach((questionData) => {
-                          addQuestionnaireColumns(questionData);
+                          addQuestionnaireColumns(
+                            questionData,
+                            undefined,
+                            undefined
+                          );
                         });
                       }
                     } else {
@@ -4619,7 +4698,10 @@ function exportFilteredModelsList(
 
                     // no need to return translation at this point
                     // nothing
-                  }
+                  },
+
+                  // record data
+                  record
                 );
               } else {
                 // determine value from column path
@@ -4796,7 +4878,10 @@ function exportFilteredModelsList(
                         return !sheetHandler.dontTranslateValues && sheetHandler.dictionaryMap[token] ?
                           sheetHandler.dictionaryMap[token] :
                           token;
-                      }
+                      },
+
+                      // record data
+                      record
                     );
                   } else {
                     // determine value from column path
