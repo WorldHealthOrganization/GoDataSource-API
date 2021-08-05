@@ -1028,4 +1028,163 @@ module.exports = function (Case) {
         return Object.assign(filter, {where: casesQuery});
       });
   };
+
+  /**
+   * Count hospitalized cases
+   */
+  Case.countCasesHospitalized = (
+    options,
+    outbreakId,
+    filter
+  ) => {
+    // initialization
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // date limit
+    const dateLimit = app.utils.helpers.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
+
+    // update filter for geographical restriction if needed
+    return Case
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // attach prefilters
+        filter.where.outbreakId = outbreakId;
+        filter.where.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+        if (!filter.deleted) {
+          filter.where.deleted = false;
+        }
+
+        // convert to mongo filter
+        const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
+
+        // construct aggregate filter
+        const aggregateFilters = [];
+
+        // query
+        aggregateFilters.push({
+          $match: mongoFilter.where
+        });
+
+        // count hospitalized, isolated records
+        const groupQuery = {
+          $group: {
+            _id: null
+          }
+        };
+
+        // group
+        aggregateFilters.push(groupQuery);
+
+        // count hospitalized & isolated
+        [
+          {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION',
+            key: 'hospitalized'
+          }, {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION',
+            key: 'isolated'
+          }
+        ].forEach((dateRangeData) => {
+          groupQuery.$group[dateRangeData.key] = {
+            $sum: {
+              $cond: {
+                if: {
+                  $gt: [
+                    {
+                      $let: {
+                        vars: {
+                          dateRangesMatch: {
+                            $ifNull: [
+                              {
+                                $filter: {
+                                  input: '$dateRanges',
+                                  as: 'item',
+                                  cond: {
+                                    $and: [
+                                      {
+                                        $eq: [
+                                          '$$item.typeId',
+                                          dateRangeData.type
+                                        ]
+                                      }, {
+                                        $lte: [
+                                          '$$item.startDate',
+                                          dateLimit
+                                        ]
+                                      }, {
+                                        $or: [
+                                          {
+                                            $eq: [
+                                              '$$item.endDate',
+                                              null
+                                            ]
+                                          }, {
+                                            $gte: [
+                                              '$$item.endDate',
+                                              dateLimit
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              []
+                            ]
+                          }
+                        },
+                        in: {
+                          $size: '$$dateRangesMatch'
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                then: 1,
+                else: 0
+              }
+            }
+          };
+        });
+
+        // determine total too
+        groupQuery.$group.total = {
+          $sum: 1
+        };
+
+        // retrieve data
+        return app.dataSources.mongoDb.connector
+          .collection('person')
+          .aggregate(
+            aggregateFilters, {
+              allowDiskUse: true
+            }
+          )
+          .toArray()
+          .then((data) => {
+            // determine not hospitalized
+            data = data && data.length > 0 ?
+              data[0] : {
+                hospitalized: 0,
+                isolated: 0,
+                total: 0
+              };
+
+            // determine not hospitalized
+            data.notHospitalized = data.total - data.hospitalized;
+
+            // finished
+            return data;
+          });
+      });
+  };
 };
