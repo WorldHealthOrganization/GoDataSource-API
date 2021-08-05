@@ -5113,12 +5113,20 @@ function exportFilteredModelsList(
       .then(encryptFiles)
       .then(zipIfMultipleFiles)
       .then(() => {
+        // get file size
+        let sizeBytes;
+        if (fs.existsSync(sheetHandler.filePath)) {
+          const stats = fs.statSync(sheetHandler.filePath);
+          sizeBytes = stats.size;
+        }
+
         // finished exporting data
         return sheetHandler.updateExportLog({
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
           updatedAt: new Date(),
-          actionCompletionDate: new Date()
+          actionCompletionDate: new Date(),
+          sizeBytes
         });
       })
       .then(() => {
