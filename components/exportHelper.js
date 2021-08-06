@@ -36,6 +36,8 @@ const FLAT_MULTIPLE_ANSWER_SUFFIX = '_multiple';
 const PREFILTER_PREFIX = '___';
 // - used to determine max number of columns for questionnaire with multiple answer dropdowns
 const PREFILTER_SUFFIX = '_v';
+// - used to make sure join field names don't conflict with prefilter names
+const JOIN_PREFIX = '_join_';
 
 // FLAT / NON FLAT TYPES
 const EXPORT_TYPE = {
@@ -108,6 +110,11 @@ const RELATION_RETRIEVAL_TYPE = {
   GET_ONE: 'GET_ONE'
 };
 
+// join types
+const JOIN_TYPE = {
+  HAS_ONE: 'HAS_ONE'
+};
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -118,8 +125,9 @@ const RELATION_RETRIEVAL_TYPE = {
  * @param anonymizeFields
  * @param fieldsGroupList
  * @param options
- * @param prefilters
- * @param relations
+ * @param prefilters Uses joins to filter data (e.g. filter follow-ups by contact information)
+ * @param relations Made after records are retrieved
+ * @param joins Made while constructing what will be exported and concatenated with records to be processed. Also, can be used to determine missing data like 'person.address.locationId'
  */
 function exportFilteredModelsList(
   parentCallback,
@@ -131,7 +139,8 @@ function exportFilteredModelsList(
   fieldsGroupList,
   options,
   prefilters,
-  relations
+  relations,
+  joins
 ) {
   try {
     // validate & parse relations
@@ -257,28 +266,6 @@ function exportFilteredModelsList(
               }
             }
 
-            // apply to all
-            if (
-              relationData.applyToAll &&
-              typeof relationData.applyToAll !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid applyToAll (${typeof relationData.applyToAll})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.applyToAll = eval(relationData.applyToAll);
-              } catch (e) {
-                throwError(
-                  relationName,
-                  'invalid applyToAll method content'
-                );
-              }
-            }
-
             // replace
             if (
               relationData.replace &&
@@ -376,6 +363,97 @@ function exportFilteredModelsList(
 
     // validate & parse relations
     validateAndParseRelations();
+
+    // validate & parse joins
+    const validateAndParseJoins = () => {
+      // no joins to validate ?
+      if (_.isEmpty(joins)) {
+        return;
+      }
+
+      // throw error
+      const throwError = (
+        joinName,
+        details
+      ) => {
+        throw new Error(`Invalid join "${joinName}" - ${details}`);
+      };
+
+      // go through joins and check that we have the expected data
+      Object.keys(joins).forEach((joinName) => {
+        // get join data
+        const joinData = joins[joinName];
+
+        // not an object ?
+        if (
+          !joinData ||
+          !_.isObject(joinData)
+        ) {
+          throwError(
+            joinName,
+            'expecting object'
+          );
+        }
+
+        // no type or invalid type ?
+        if (
+          !joinData.type ||
+          JOIN_TYPE[joinData.type] === undefined
+        ) {
+          throwError(
+            joinName,
+            'invalid type'
+          );
+        }
+
+        // must have collection name
+        if (
+          !joinData.collection ||
+          typeof joinData.collection !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid collection name (${typeof joinData.collection})`
+          );
+        }
+
+        // must have project so we force retrieval of only what is necessary
+        if (
+          !joinData.project ||
+          !_.isObject(joinData.project)
+        ) {
+          throwError(
+            joinName,
+            'invalid project provided'
+          );
+        }
+
+        // must have local key
+        if (
+          !joinData.localField ||
+          typeof joinData.localField !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid local field (${typeof joinData.localField})`
+          );
+        }
+
+        // must have foreign key
+        if (
+          !joinData.foreignField ||
+          typeof joinData.foreignField !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid foreign field (${typeof joinData.foreignField})`
+          );
+        }
+      });
+    };
+
+    // validate & parse joins
+    validateAndParseJoins();
 
     // prepare query filters
     const initializeQueryFilters = () => {
@@ -1545,7 +1623,7 @@ function exportFilteredModelsList(
       };
 
       // format relations
-      const mappedRelations = [];
+      const mappedRelations = {};
       const formattedRelations = [];
       _.each(
         relations,
@@ -1561,6 +1639,22 @@ function exportFilteredModelsList(
 
           // add to relations
           formattedRelations.push(relHandler);
+        }
+      );
+
+      // format joins
+      const formattedJoins = [];
+      _.each(
+        joins,
+        (joinData, joinName) =>{
+          // create join handler
+          const joinHandler = {
+            name: joinName,
+            data: joinData
+          };
+
+          // add to join
+          formattedJoins.push(joinHandler);
         }
       );
 
@@ -1682,7 +1776,6 @@ function exportFilteredModelsList(
         locationsMaxNumberOfIdentifiers: 0,
         locationsMaxSizeOfParentsChain: 0,
         locationsMap: {},
-        locationsMissing: {},
 
         // retrieve only the fields that we need
         projection,
@@ -1703,6 +1796,9 @@ function exportFilteredModelsList(
         relationsMap: mappedRelations,
         replacements,
 
+        // convert joins to array for easier access
+        joins: formattedJoins,
+
         // filters
         prefiltersDisableLookup: false,
         prefiltersOfPrefiltersDisableLookup: {},
@@ -1718,20 +1814,6 @@ function exportFilteredModelsList(
     const defaultQuestionnaireAnswersKey = 'questionnaireAnswers';
     const dataFilter = initializeQueryFilters();
     const sheetHandler = initializeTemporaryWorkbook();
-
-    // list of methods that can be used by relation functions
-    const helperMethods = {
-      covertAddressesGeoPointToLoopbackFormat: genericHelpers.covertAddressesGeoPointToLoopbackFormat,
-      retrieveLocation: (locationId) => {
-        // location already retrieved ?
-        if (sheetHandler.locationsMap[locationId]) {
-          return;
-        }
-
-        // retrieve location
-        sheetHandler.locationsMissing[locationId] = true;
-      }
-    };
 
     // drop collection
     const dropTemporaryCollection = () => {
@@ -2817,16 +2899,65 @@ function exportFilteredModelsList(
             });
           }
 
+          // attach joins
+          const joinsProject = {};
+          if (
+            sheetHandler.joins &&
+            sheetHandler.joins.length > 0
+          ) {
+            sheetHandler.joins.forEach((join) => {
+              // $TODO - after mongo upgrade we can replace the 2 step lookup + project with one step lookup with project pipeline
+              // attach lookup
+              const joinName = `${JOIN_PREFIX}${join.name}`;
+              aggregateFilter.push({
+                $lookup: {
+                  from: join.data.collection,
+                  localField: join.data.localField,
+                  foreignField: join.data.foreignField,
+                  as: joinName
+                }
+              });
+
+              // convert to proper type
+              switch (join.data.type) {
+                case JOIN_TYPE.HAS_ONE:
+                  // bring first item to the top
+                  joinsProject[joinName] = {
+                    $let: {
+                      vars: {
+                        joinValue: {
+                          $arrayElemAt: [
+                            `$${joinName}`,
+                            0
+                          ]
+                        }
+                      },
+                      in: join.data.project
+                    }
+                  };
+
+                  // finished
+                  break;
+              }
+            });
+          }
+
           // no need to do project with determining the limits, it was done above
           if (_.isEmpty(localKeyProject)) {
             aggregateFilter.push({
-              $project: project
+              $project: Object.assign(
+                project,
+                joinsProject
+              )
             });
           } else {
             // do a cleanup since we don't want to save everything
             // #TODO - after upgrading to newer mongo we can use $unset if we still need it after lookup pipelines logic
             aggregateFilter.push({
-              $project: cleanupProject
+              $project: Object.assign(
+                cleanupProject,
+                joinsProject
+              )
             });
           }
 
@@ -4187,14 +4318,26 @@ function exportFilteredModelsList(
 
         // determine next batch of rows that we need to export
         const determineBatchOfRecordsToExport = (batchSize) => {
+          // retrieve join information too
+          const projection = {
+            _id: 1,
+            rowId: 1
+          };
+          if (
+            sheetHandler.joins &&
+            sheetHandler.joins.length > 0
+          ) {
+            sheetHandler.joins.forEach((join) => {
+              projection[`${JOIN_PREFIX}${join.name}`] = 1;
+            });
+          }
+
+          // determine what we need to export
           return temporaryCollection
             .find(
               {}, {
                 limit: batchSize,
-                projection: {
-                  _id: 1,
-                  rowId: 1
-                }
+                projection
               }
             )
             .toArray();
@@ -4202,9 +4345,37 @@ function exportFilteredModelsList(
 
         // retrieve batch of rows to export
         const retrieveBatchToExport = (records) => {
-          // do we have something to retrieve ?
+          // prepare to retrieve records data
           records = records || [];
-          const rowIdsToRetrieve = records.map((record) => record.rowId);
+          const rowIdsToRetrieve = [];
+          const rowJoinData = {};
+          for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+            // get record data
+            const recordInfo = records[recordIndex];
+
+            // do we have joins to merge ?
+            if (
+              sheetHandler.joins &&
+              sheetHandler.joins.length > 0
+            ) {
+              // attach join data
+              rowJoinData[recordInfo.rowId] = {};
+
+              // map join data to record id
+              for (let joinIndex = 0; joinIndex < sheetHandler.joins.length; joinIndex++) {
+                // get join definitions
+                const joinInfo = sheetHandler.joins[joinIndex];
+
+                // map join data to record id
+                rowJoinData[recordInfo.rowId][joinInfo.name] = recordInfo[`${JOIN_PREFIX}${joinInfo.name}`];
+              }
+
+              // attach to records that we need to retrieve from database
+              rowIdsToRetrieve.push(recordInfo.rowId);
+            }
+          }
+
+          // do we have something to retrieve ?
           return records.length < 1 ?
             [] :
             (exportDataCollection
@@ -4228,7 +4399,20 @@ function exportFilteredModelsList(
                     // map for easy access because we need to keep order from rowIdsToRetrieve
                     const recordsToExportMap = {};
                     for (let recordIndex = 0; recordIndex < recordsToExport.length; recordIndex++) {
-                      recordsToExportMap[recordsToExport[recordIndex]._id] = recordsToExport[recordIndex];
+                      // get record data
+                      const recordData = recordsToExport[recordIndex];
+
+                      // attach joins data if we have any
+                      const recordId = recordsToExport[recordIndex]._id;
+                      if (rowJoinData[recordId]) {
+                        Object.assign(
+                          recordData,
+                          rowJoinData[recordId]
+                        );
+                      }
+
+                      // map for easy export
+                      recordsToExportMap[recordId] = recordData;
                     }
 
                     // finished
@@ -4464,14 +4648,6 @@ function exportFilteredModelsList(
 
                         // map
                         relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
-
-                        // apply to all
-                        if (sheetHandler.relationsMap[relationName].data.applyToAll) {
-                          sheetHandler.relationsMap[relationName].data.applyToAll(
-                            relationsResults[relationName][keyValue],
-                            helperMethods
-                          );
-                        }
                       }
                     });
                   });
@@ -4795,22 +4971,6 @@ function exportFilteredModelsList(
                   relationsData
                 );
               }
-            })
-
-            // retrieve missing locations
-            .then(() => {
-              // do we have missing locations ?
-              const missingLocations = Object.keys(sheetHandler.locationsMissing);
-              if (missingLocations.length < 1) {
-                return;
-              }
-
-              // retrieve missing locations
-              return retrieveMissingLocations([...missingLocations])
-                .then(() => {
-                  // add identifiers, geo ...
-                  updateLocationsData(missingLocations);
-                });
             })
 
             // retrieve missing language tokens & write data
@@ -5310,6 +5470,7 @@ function generateAggregateFiltersFromNormalFilter(
 module.exports = {
   // constants
   RELATION_TYPE,
+  JOIN_TYPE,
   TEMPORARY_DATABASE_PREFIX,
 
   // methods
