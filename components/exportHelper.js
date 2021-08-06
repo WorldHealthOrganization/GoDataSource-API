@@ -3104,6 +3104,9 @@ function exportFilteredModelsList(
 
         // retrieve missing locations
         const retrieveMissingLocations = (locationIds) => {
+          // filter out locations that were retrieved already
+          locationIds = (locationIds || []).filter((locationId) => !sheetHandler.locationsMap[locationId]);
+
           // retrieve locations in batches - just in case
           const locationIdsMap = {};
           return new Promise((resolve, reject) => {
@@ -4427,10 +4430,10 @@ function exportFilteredModelsList(
                 // format geo location coordinates
                 genericHelpers.covertAddressesGeoPointToLoopbackFormat(rowJoinData[recordInfo.rowId][joinInfo.name]);
               }
-
-              // attach to records that we need to retrieve from database
-              rowIdsToRetrieve.push(recordInfo.rowId);
             }
+
+            // attach to records that we need to retrieve from database
+            rowIdsToRetrieve.push(recordInfo.rowId);
           }
 
           // do we have something to retrieve ?
