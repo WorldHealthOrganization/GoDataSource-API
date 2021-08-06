@@ -115,6 +115,7 @@ module.exports = function (Relationship) {
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
       properties: [
+        'sourcePerson',
         'sourcePerson.id',
         'sourcePerson.visualId',
         'sourcePerson.type',
@@ -128,7 +129,7 @@ module.exports = function (Relationship) {
         'sourcePerson.age.years',
         'sourcePerson.age.months',
         'sourcePerson.source',
-        'sourcePerson',
+        'targetPerson',
         'targetPerson.id',
         'targetPerson.visualId',
         'targetPerson.type',
@@ -141,8 +142,7 @@ module.exports = function (Relationship) {
         'targetPerson.age',
         'targetPerson.age.years',
         'targetPerson.age.months',
-        'targetPerson.target',
-        'targetPerson'
+        'targetPerson.target'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {

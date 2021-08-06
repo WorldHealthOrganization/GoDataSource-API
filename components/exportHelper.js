@@ -3062,6 +3062,65 @@ function exportFilteredModelsList(
 
         };
 
+        // update parent location names, identifiers, geo locations ...
+        const updateLocationsData = (locationIds) => {
+          for (let locationIndex = 0; locationIndex < locationIds.length; locationIndex++) {
+            // get location
+            const location = sheetHandler.locationsMap[locationIds[locationIndex]];
+
+            // count parents
+            // - include self location too
+            // - create array only if we have at least one parent
+            if (location.parentLocationId) {
+              let parentLocationId = location._id;
+              while (parentLocationId) {
+                // attach parent to list
+                location.parentChain.splice(
+                  0,
+                  0,
+                  parentLocationId
+                );
+
+                // json file export ?
+                if (sheetHandler.process.exportIsNonFlat) {
+                  // attach geo levels for easy print
+                  location.parentChainGeoLvlArray.splice(
+                    0,
+                    0,
+                    sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
+                      '-'
+                  );
+
+                  // attach parent levels for easy print
+                  location.parentLocationNamesArrayNames.splice(
+                    0,
+                    0,
+                    sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].name :
+                      '-'
+                  );
+                  location.parentLocationNamesArrayIds.splice(
+                    0,
+                    0,
+                    parentLocationId
+                  );
+                }
+
+                // retrieve next parent from chain
+                parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
+                  sheetHandler.locationsMap[parentLocationId].parentLocationId :
+                  undefined;
+              }
+            }
+
+            // update max chain size if necessary
+            sheetHandler.locationsMaxSizeOfParentsChain = location.parentChain.length > sheetHandler.locationsMaxSizeOfParentsChain ?
+              location.parentChain.length :
+              sheetHandler.locationsMaxSizeOfParentsChain;
+          }
+        };
+
         // retrieve locations and determine how many columns we will have - depending of identifiers
         const initializeLocations = () => {
           // retrieve all locations which are used in this export
@@ -3084,61 +3143,7 @@ function exportFilteredModelsList(
             .then(() => {
               // determine longest parent location chain
               const locationIds = Object.keys(sheetHandler.locationsMap);
-              for (let locationIndex = 0; locationIndex < locationIds.length; locationIndex++) {
-                // get location
-                const location = sheetHandler.locationsMap[locationIds[locationIndex]];
-
-                // count parents
-                // - include self location too
-                // - create array only if we have at least one parent
-                if (location.parentLocationId) {
-                  let parentLocationId = location._id;
-                  while (parentLocationId) {
-                    // attach parent to list
-                    location.parentChain.splice(
-                      0,
-                      0,
-                      parentLocationId
-                    );
-
-                    // json file export ?
-                    if (sheetHandler.process.exportIsNonFlat) {
-                      // attach geo levels for easy print
-                      location.parentChainGeoLvlArray.splice(
-                        0,
-                        0,
-                        sheetHandler.locationsMap[parentLocationId] ?
-                          sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
-                          '-'
-                      );
-
-                      // attach parent levels for easy print
-                      location.parentLocationNamesArrayNames.splice(
-                        0,
-                        0,
-                        sheetHandler.locationsMap[parentLocationId] ?
-                          sheetHandler.locationsMap[parentLocationId].name :
-                          '-'
-                      );
-                      location.parentLocationNamesArrayIds.splice(
-                        0,
-                        0,
-                        parentLocationId
-                      );
-                    }
-
-                    // retrieve next parent from chain
-                    parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
-                      sheetHandler.locationsMap[parentLocationId].parentLocationId :
-                      undefined;
-                  }
-                }
-
-                // update max chain size if necessary
-                sheetHandler.locationsMaxSizeOfParentsChain = location.parentChain.length > sheetHandler.locationsMaxSizeOfParentsChain ?
-                  location.parentChain.length :
-                  sheetHandler.locationsMaxSizeOfParentsChain;
-              }
+              updateLocationsData(locationIds);
             });
         };
 
@@ -3572,6 +3577,11 @@ function exportFilteredModelsList(
                   const propertyOfAnObjectIndex = propertyName.lastIndexOf('.');
                   let parentProperty, parentPropertyTokenTranslation;
                   if (propertyOfAnObjectIndex > -1) {
+                    // if non flat child columns are handled by parents
+                    if (sheetHandler.process.exportIsNonFlat) {
+                      continue;
+                    }
+
                     // determine entire parent property path
                     parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
 
@@ -4796,7 +4806,11 @@ function exportFilteredModelsList(
               }
 
               // retrieve missing locations
-              return retrieveMissingLocations(missingLocations);
+              return retrieveMissingLocations([...missingLocations])
+                .then(() => {
+                  // add identifiers, geo ...
+                  updateLocationsData(missingLocations);
+                });
             })
 
             // retrieve missing language tokens & write data
