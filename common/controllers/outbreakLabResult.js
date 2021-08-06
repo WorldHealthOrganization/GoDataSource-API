@@ -277,63 +277,39 @@ module.exports = function (Outbreak) {
         contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
       },
       prefilters,
+      undefined,
       {
         person: {
-          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          type: exportHelper.JOIN_TYPE.HAS_ONE,
           collection: 'person',
-          project: [
-            '_id',
-            'visualId',
-            'type',
-            'lastName',
-            'firstName',
-            'middleName',
-            'dateOfOnset',
-            'dateOfReporting',
-            'addresses'
-          ],
-          key: '_id',
-          keyValue: `(labResult) => {
-            return labResult && labResult.personId ?
-              labResult.personId :
-              undefined;
-          }`,
-          applyToAll: `(
-            person,
-            helperMethods
-          ) => {
-            // finished
-            const addresses = person.addresses;
-            delete person.addresses;
-
-            // get only the current address
-            if (
-              addresses &&
-              addresses.length > 0
-            ) {
-              for (let addressIndex = 0; addressIndex < addresses.length; addressIndex++) {
-                const address = addresses[addressIndex];
-                if (
-                  address &&
-                  address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                ) {
-                  // set address
-                  person.address = address;
-
-                  // transform geo location
-                  helperMethods.covertAddressesGeoPointToLoopbackFormat(person);
-
-                  // do we need to retrieve location ?
-                  if (person.address.locationId) {
-                    helperMethods.retrieveLocation(person.address.locationId);
+          localField: 'personId',
+          foreignField: '_id',
+          project: {
+            visualId: '$$joinValue.visualId',
+            type: '$$joinValue.type',
+            lastName: '$$joinValue.lastName',
+            firstName: '$$joinValue.firstName',
+            middleName: '$$joinValue.middleName',
+            dateOfOnset: '$$joinValue.dateOfOnset',
+            dateOfReporting: '$$joinValue.dateOfReporting',
+            address: {
+              $arrayElemAt: [
+                {
+                  $filter: {
+                    input: '$$joinValue.addresses',
+                    as: 'item',
+                    cond: {
+                      $eq: [
+                        '$$item.typeId',
+                        'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                      ]
+                    }
                   }
-
-                  // finished
-                  break;
-                }
-              }
+                },
+                0
+              ]
             }
-          }`
+          }
         }
       }
     )

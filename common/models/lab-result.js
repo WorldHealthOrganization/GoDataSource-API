@@ -54,13 +54,13 @@ module.exports = function (LabResult) {
     'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
       properties: [
         'personId',
+        'person',
         'person.visualId',
         'person.type',
         'person.lastName',
         'person.firstName',
         'person.middleName',
-        'person.dateOfReporting',
-        'person'
+        'person.dateOfReporting'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {

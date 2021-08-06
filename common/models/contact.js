@@ -233,6 +233,7 @@ module.exports = function (Contact) {
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_RELATIONSHIPS_DATA': {
       properties: [
+        'relationship',
         'relationship.relatedId',
         'relationship.contactDate',
         'relationship.contactDateEstimated',
@@ -251,8 +252,7 @@ module.exports = function (Contact) {
         'relationship.updatedBy',
         'relationship.deleted',
         'relationship.deletedAt',
-        'relationship.createdOn',
-        'relationship'
+        'relationship.createdOn'
       ]
     }
   };

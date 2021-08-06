@@ -290,6 +290,28 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count cases by case classification
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesHospitalized = function (filter, options, callback) {
+    app.models.case
+      .countCasesHospitalized(
+        options,
+        this.id,
+        filter
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
    * Attach before remote (GET outbreaks/{id}/cases/export) hooks
    */
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {

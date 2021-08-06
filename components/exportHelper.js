@@ -36,6 +36,8 @@ const FLAT_MULTIPLE_ANSWER_SUFFIX = '_multiple';
 const PREFILTER_PREFIX = '___';
 // - used to determine max number of columns for questionnaire with multiple answer dropdowns
 const PREFILTER_SUFFIX = '_v';
+// - used to make sure join field names don't conflict with prefilter names
+const JOIN_PREFIX = '_join_';
 
 // FLAT / NON FLAT TYPES
 const EXPORT_TYPE = {
@@ -108,6 +110,11 @@ const RELATION_RETRIEVAL_TYPE = {
   GET_ONE: 'GET_ONE'
 };
 
+// join types
+const JOIN_TYPE = {
+  HAS_ONE: 'HAS_ONE'
+};
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -118,8 +125,9 @@ const RELATION_RETRIEVAL_TYPE = {
  * @param anonymizeFields
  * @param fieldsGroupList
  * @param options
- * @param prefilters
- * @param relations
+ * @param prefilters Uses joins to filter data (e.g. filter follow-ups by contact information)
+ * @param relations Made after records are retrieved
+ * @param joins Made while constructing what will be exported and concatenated with records to be processed. Also, can be used to determine missing data like 'person.address.locationId'
  */
 function exportFilteredModelsList(
   parentCallback,
@@ -131,7 +139,8 @@ function exportFilteredModelsList(
   fieldsGroupList,
   options,
   prefilters,
-  relations
+  relations,
+  joins
 ) {
   try {
     // validate & parse relations
@@ -257,28 +266,6 @@ function exportFilteredModelsList(
               }
             }
 
-            // apply to all
-            if (
-              relationData.applyToAll &&
-              typeof relationData.applyToAll !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid applyToAll (${typeof relationData.applyToAll})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.applyToAll = eval(relationData.applyToAll);
-              } catch (e) {
-                throwError(
-                  relationName,
-                  'invalid applyToAll method content'
-                );
-              }
-            }
-
             // replace
             if (
               relationData.replace &&
@@ -376,6 +363,97 @@ function exportFilteredModelsList(
 
     // validate & parse relations
     validateAndParseRelations();
+
+    // validate & parse joins
+    const validateAndParseJoins = () => {
+      // no joins to validate ?
+      if (_.isEmpty(joins)) {
+        return;
+      }
+
+      // throw error
+      const throwError = (
+        joinName,
+        details
+      ) => {
+        throw new Error(`Invalid join "${joinName}" - ${details}`);
+      };
+
+      // go through joins and check that we have the expected data
+      Object.keys(joins).forEach((joinName) => {
+        // get join data
+        const joinData = joins[joinName];
+
+        // not an object ?
+        if (
+          !joinData ||
+          !_.isObject(joinData)
+        ) {
+          throwError(
+            joinName,
+            'expecting object'
+          );
+        }
+
+        // no type or invalid type ?
+        if (
+          !joinData.type ||
+          JOIN_TYPE[joinData.type] === undefined
+        ) {
+          throwError(
+            joinName,
+            'invalid type'
+          );
+        }
+
+        // must have collection name
+        if (
+          !joinData.collection ||
+          typeof joinData.collection !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid collection name (${typeof joinData.collection})`
+          );
+        }
+
+        // must have project so we force retrieval of only what is necessary
+        if (
+          !joinData.project ||
+          !_.isObject(joinData.project)
+        ) {
+          throwError(
+            joinName,
+            'invalid project provided'
+          );
+        }
+
+        // must have local key
+        if (
+          !joinData.localField ||
+          typeof joinData.localField !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid local field (${typeof joinData.localField})`
+          );
+        }
+
+        // must have foreign key
+        if (
+          !joinData.foreignField ||
+          typeof joinData.foreignField !== 'string'
+        ) {
+          throwError(
+            joinName,
+            `invalid foreign field (${typeof joinData.foreignField})`
+          );
+        }
+      });
+    };
+
+    // validate & parse joins
+    validateAndParseJoins();
 
     // prepare query filters
     const initializeQueryFilters = () => {
@@ -598,7 +676,8 @@ function exportFilteredModelsList(
           flatArray,
           nonFlatArray,
           question,
-          multiAnswer
+          multiAnswer,
+          isRootQuestion
         ) => {
           // some types are ignored since there is no point in exporting them ?
           if (
@@ -618,7 +697,8 @@ function exportFilteredModelsList(
               multiAnswer :
               question.multiAnswer,
             childQuestions: [],
-            answerKeyToLabelMap: {}
+            answerKeyToLabelMap: {},
+            isRootQuestion
           };
 
           // attach question to flat array
@@ -649,7 +729,8 @@ function exportFilteredModelsList(
                     flatArray,
                     formattedQuestion.childQuestions,
                     childQuestion,
-                    formattedQuestion.multiAnswer
+                    formattedQuestion.multiAnswer,
+                    false
                   );
                 });
               }
@@ -664,7 +745,8 @@ function exportFilteredModelsList(
             response.flat,
             response.nonFlat,
             questionData,
-            undefined
+            undefined,
+            true
           );
         });
       }
@@ -1541,7 +1623,7 @@ function exportFilteredModelsList(
       };
 
       // format relations
-      const mappedRelations = [];
+      const mappedRelations = {};
       const formattedRelations = [];
       _.each(
         relations,
@@ -1557,6 +1639,22 @@ function exportFilteredModelsList(
 
           // add to relations
           formattedRelations.push(relHandler);
+        }
+      );
+
+      // format joins
+      const formattedJoins = [];
+      _.each(
+        joins,
+        (joinData, joinName) =>{
+          // create join handler
+          const joinHandler = {
+            name: joinName,
+            data: joinData
+          };
+
+          // add to join
+          formattedJoins.push(joinHandler);
         }
       );
 
@@ -1678,7 +1776,6 @@ function exportFilteredModelsList(
         locationsMaxNumberOfIdentifiers: 0,
         locationsMaxSizeOfParentsChain: 0,
         locationsMap: {},
-        locationsMissing: {},
 
         // retrieve only the fields that we need
         projection,
@@ -1699,6 +1796,10 @@ function exportFilteredModelsList(
         relationsMap: mappedRelations,
         replacements,
 
+        // convert joins to array for easier access
+        joins: formattedJoins,
+        joinDistinctLocationsFields: {},
+
         // filters
         prefiltersDisableLookup: false,
         prefiltersOfPrefiltersDisableLookup: {},
@@ -1714,20 +1815,6 @@ function exportFilteredModelsList(
     const defaultQuestionnaireAnswersKey = 'questionnaireAnswers';
     const dataFilter = initializeQueryFilters();
     const sheetHandler = initializeTemporaryWorkbook();
-
-    // list of methods that can be used by relation functions
-    const helperMethods = {
-      covertAddressesGeoPointToLoopbackFormat: genericHelpers.covertAddressesGeoPointToLoopbackFormat,
-      retrieveLocation: (locationId) => {
-        // location already retrieved ?
-        if (sheetHandler.locationsMap[locationId]) {
-          return;
-        }
-
-        // retrieve location
-        sheetHandler.locationsMissing[locationId] = true;
-      }
-    };
 
     // drop collection
     const dropTemporaryCollection = () => {
@@ -2531,19 +2618,24 @@ function exportFilteredModelsList(
             if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
               // construct the queries that will be used to determine the number of max columns
               sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
-                // attach size answers per date count (multiple answer flag)
+                // variable path
                 const variableProp = `$${defaultQuestionnaireAnswersKey}.${questionData.variable}`;
-                project[getQuestionnaireQuestionUniqueKey(questionData.variable)] = {
-                  $cond: {
-                    if: {
-                      $isArray: variableProp
-                    },
-                    then: {
-                      $size: variableProp
-                    },
-                    else: 0
-                  }
-                };
+
+                // attach size answers per date count (multiple answer flag)
+                // - since only multiAnswer questions can have multi answers there is no point to count if not a root questions, because child question answers will be mapped accordingly to parent date
+                if (questionData.isRootQuestion) {
+                  project[getQuestionnaireQuestionUniqueKey(questionData.variable)] = {
+                    $cond: {
+                      if: {
+                        $isArray: variableProp
+                      },
+                      then: {
+                        $size: variableProp
+                      },
+                      else: 0
+                    }
+                  };
+                }
 
                 // attach max multiple answers per question answer (multi select dropdown)
                 if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -2808,16 +2900,78 @@ function exportFilteredModelsList(
             });
           }
 
+          // attach joins
+          const joinsProject = {};
+          if (
+            sheetHandler.joins &&
+            sheetHandler.joins.length > 0
+          ) {
+            sheetHandler.joins.forEach((join) => {
+              // $TODO - after mongo upgrade we can replace the 2 step lookup + project with one step lookup with project pipeline
+              // attach lookup
+              const joinName = `${JOIN_PREFIX}${join.name}`;
+              aggregateFilter.push({
+                $lookup: {
+                  from: join.data.collection,
+                  localField: join.data.localField,
+                  foreignField: join.data.foreignField,
+                  as: joinName
+                }
+              });
+
+              // convert to proper type
+              switch (join.data.type) {
+                case JOIN_TYPE.HAS_ONE:
+                  // bring first item to the top
+                  joinsProject[joinName] = {
+                    $let: {
+                      vars: {
+                        joinValue: {
+                          $arrayElemAt: [
+                            `$${joinName}`,
+                            0
+                          ]
+                        }
+                      },
+                      in: join.data.project
+                    }
+                  };
+
+                  // do we have any locations in this join result ?
+                  locationProps.forEach((locationField) => {
+                    // location field has a parent ?
+                    const locationFieldParentIndex = locationField.indexOf('.');
+                    if (locationFieldParentIndex > -1) {
+                      // check if parent belongs to our join
+                      const locationFieldParent = locationField.substr(0, locationFieldParentIndex);
+                      if (locationFieldParent === join.name) {
+                        sheetHandler.joinDistinctLocationsFields[`${JOIN_PREFIX}${locationField}`] = 1;
+                      }
+                    }
+                  });
+
+                  // finished
+                  break;
+              }
+            });
+          }
+
           // no need to do project with determining the limits, it was done above
           if (_.isEmpty(localKeyProject)) {
             aggregateFilter.push({
-              $project: project
+              $project: Object.assign(
+                project,
+                joinsProject
+              )
             });
           } else {
             // do a cleanup since we don't want to save everything
             // #TODO - after upgrading to newer mongo we can use $unset if we still need it after lookup pipelines logic
             aggregateFilter.push({
-              $project: cleanupProject
+              $project: Object.assign(
+                cleanupProject,
+                joinsProject
+              )
             });
           }
 
@@ -3053,6 +3207,65 @@ function exportFilteredModelsList(
 
         };
 
+        // update parent location names, identifiers, geo locations ...
+        const updateLocationsData = (locationIds) => {
+          for (let locationIndex = 0; locationIndex < locationIds.length; locationIndex++) {
+            // get location
+            const location = sheetHandler.locationsMap[locationIds[locationIndex]];
+
+            // count parents
+            // - include self location too
+            // - create array only if we have at least one parent
+            if (location.parentLocationId) {
+              let parentLocationId = location._id;
+              while (parentLocationId) {
+                // attach parent to list
+                location.parentChain.splice(
+                  0,
+                  0,
+                  parentLocationId
+                );
+
+                // json file export ?
+                if (sheetHandler.process.exportIsNonFlat) {
+                  // attach geo levels for easy print
+                  location.parentChainGeoLvlArray.splice(
+                    0,
+                    0,
+                    sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
+                      '-'
+                  );
+
+                  // attach parent levels for easy print
+                  location.parentLocationNamesArrayNames.splice(
+                    0,
+                    0,
+                    sheetHandler.locationsMap[parentLocationId] ?
+                      sheetHandler.locationsMap[parentLocationId].name :
+                      '-'
+                  );
+                  location.parentLocationNamesArrayIds.splice(
+                    0,
+                    0,
+                    parentLocationId
+                  );
+                }
+
+                // retrieve next parent from chain
+                parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
+                  sheetHandler.locationsMap[parentLocationId].parentLocationId :
+                  undefined;
+              }
+            }
+
+            // update max chain size if necessary
+            sheetHandler.locationsMaxSizeOfParentsChain = location.parentChain.length > sheetHandler.locationsMaxSizeOfParentsChain ?
+              location.parentChain.length :
+              sheetHandler.locationsMaxSizeOfParentsChain;
+          }
+        };
+
         // retrieve locations and determine how many columns we will have - depending of identifiers
         const initializeLocations = () => {
           // retrieve all locations which are used in this export
@@ -3072,64 +3285,51 @@ function exportFilteredModelsList(
               // retrieve locations
               return retrieveMissingLocations(locationIds);
             })
+
+            // retrieve join locations too
+            .then(() => {
+              // nothing to do here ?
+              if (_.isEmpty(sheetHandler.joinDistinctLocationsFields)) {
+                return;
+              }
+
+              // retrieve joins locations
+              const locationFields = Object.keys(sheetHandler.joinDistinctLocationsFields);
+              const retrieveData = () => {
+                // finished ?
+                if (locationFields.length < 1) {
+                  return Promise.resolve();
+                }
+
+                // get next field
+                const locationField = locationFields.splice(0, 1)[0];
+                return temporaryCollection
+                  .distinct(locationField)
+                  .then((locationIds) => {
+                    // no locations ?
+                    if (
+                      !locationIds ||
+                      locationIds.length < 1 ||
+                      (locationIds = locationIds.filter((locationId) => locationId)).length < 1
+                    ) {
+                      return;
+                    }
+
+                    // retrieve locations
+                    return retrieveMissingLocations(locationIds);
+                  })
+                  .then(retrieveData);
+              };
+
+              // retrieve first join location field locations
+              return retrieveData();
+            })
+
+            // update location data
             .then(() => {
               // determine longest parent location chain
               const locationIds = Object.keys(sheetHandler.locationsMap);
-              for (let locationIndex = 0; locationIndex < locationIds.length; locationIndex++) {
-                // get location
-                const location = sheetHandler.locationsMap[locationIds[locationIndex]];
-
-                // count parents
-                // - include self location too
-                // - create array only if we have at least one parent
-                if (location.parentLocationId) {
-                  let parentLocationId = location._id;
-                  while (parentLocationId) {
-                    // attach parent to list
-                    location.parentChain.splice(
-                      0,
-                      0,
-                      parentLocationId
-                    );
-
-                    // json file export ?
-                    if (sheetHandler.process.exportIsNonFlat) {
-                      // attach geo levels for easy print
-                      location.parentChainGeoLvlArray.splice(
-                        0,
-                        0,
-                        sheetHandler.locationsMap[parentLocationId] ?
-                          sheetHandler.locationsMap[parentLocationId].geographicalLevelId :
-                          '-'
-                      );
-
-                      // attach parent levels for easy print
-                      location.parentLocationNamesArrayNames.splice(
-                        0,
-                        0,
-                        sheetHandler.locationsMap[parentLocationId] ?
-                          sheetHandler.locationsMap[parentLocationId].name :
-                          '-'
-                      );
-                      location.parentLocationNamesArrayIds.splice(
-                        0,
-                        0,
-                        parentLocationId
-                      );
-                    }
-
-                    // retrieve next parent from chain
-                    parentLocationId = sheetHandler.locationsMap[parentLocationId] ?
-                      sheetHandler.locationsMap[parentLocationId].parentLocationId :
-                      undefined;
-                  }
-                }
-
-                // update max chain size if necessary
-                sheetHandler.locationsMaxSizeOfParentsChain = location.parentChain.length > sheetHandler.locationsMaxSizeOfParentsChain ?
-                  location.parentChain.length :
-                  sheetHandler.locationsMaxSizeOfParentsChain;
-              }
+              updateLocationsData(locationIds);
             });
         };
 
@@ -3166,11 +3366,15 @@ function exportFilteredModelsList(
               if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
                 // construct the queries that will be used to determine the number of max columns
                 sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
-                  // attach size answers per date count (multiple answer flag)
+                  // variable path
                   const variableProp = getQuestionnaireQuestionUniqueKey(questionData.variable);
-                  projectMax[variableProp] = {
-                    $max: `$${variableProp}`
-                  };
+
+                  // attach size answers per date count (multiple answer flag)
+                  if (questionData.isRootQuestion) {
+                    projectMax[variableProp] = {
+                      $max: `$${variableProp}`
+                    };
+                  }
 
                   // attach max multiple answers per question answer (multi select dropdown)
                   if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -3559,6 +3763,11 @@ function exportFilteredModelsList(
                   const propertyOfAnObjectIndex = propertyName.lastIndexOf('.');
                   let parentProperty, parentPropertyTokenTranslation;
                   if (propertyOfAnObjectIndex > -1) {
+                    // if non flat child columns are handled by parents
+                    if (sheetHandler.process.exportIsNonFlat) {
+                      continue;
+                    }
+
                     // determine entire parent property path
                     parentProperty = propertyName.substr(0, propertyOfAnObjectIndex);
 
@@ -3766,22 +3975,34 @@ function exportFilteredModelsList(
                         );
                       } else {
                         // add questionnaire columns - flat file
-                        const addQuestionnaireColumns = (questionData) => {
+                        const addQuestionnaireColumns = (
+                          questionData,
+                          multiAnswerParentDatePath,
+                          multiAnswerParentIndex
+                        ) => {
                           // determine number of responses for this question
                           const queryKey = getQuestionnaireQuestionUniqueKey(questionData.variable);
                           let maxNoOfResponsesForThisQuestion = sheetHandler.columns.arrayColumnMaxValues[queryKey] ?
                             sheetHandler.columns.arrayColumnMaxValues[queryKey] :
                             0;
 
-                          // we should export at least one round of columns even if we don't have data
-                          maxNoOfResponsesForThisQuestion = maxNoOfResponsesForThisQuestion < 1 ?
-                            1 :
-                            maxNoOfResponsesForThisQuestion;
+                          // determine how many columns we need to render for this question / children question
+                          let answerIndex = 0;
+                          if (multiAnswerParentDatePath) {
+                            // multi answer children questions need to print only records with a specific date
+                            answerIndex = multiAnswerParentIndex;
+                            maxNoOfResponsesForThisQuestion = answerIndex + 1;
+                          } else {
+                            // we should export at least one round of columns even if we don't have data
+                            maxNoOfResponsesForThisQuestion = maxNoOfResponsesForThisQuestion < 1 ?
+                              1 :
+                              maxNoOfResponsesForThisQuestion;
+                          }
 
                           // we need to add question to which we don't have answers (we shouldn't have these cases)
                           // - because otherwise you will see child questions that you don't know for which parent question they were
                           // add number of column necessary to export all responses
-                          for (let answerIndex = 0; answerIndex < maxNoOfResponsesForThisQuestion; answerIndex++) {
+                          while (answerIndex < maxNoOfResponsesForThisQuestion) {
                             // question header
                             const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders || sheetHandler.useDbColumns ?
                               questionData.variable : (
@@ -3789,6 +4010,27 @@ function exportFilteredModelsList(
                                   sheetHandler.dictionaryMap[questionData.text] :
                                   questionData.text
                               );
+
+                            // date needs to be printed just once
+                            // - add column only if needed
+                            let questionMultiAnswerDatePath;
+                            if (questionData.multiAnswer) {
+                              // get multi answer date
+                              questionMultiAnswerDatePath = multiAnswerParentDatePath ?
+                                multiAnswerParentDatePath :
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`;
+
+                              // add date column
+                              addHeaderColumn(
+                                `${questionHeader} [MD ${answerIndex + 1}]`,
+                                questionMultiAnswerDatePath,
+                                questionMultiAnswerDatePath,
+                                questionData.variable,
+                                undefined,
+                                undefined,
+                                true
+                              );
+                            }
 
                             // multiple dropdown ?
                             if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS') {
@@ -3803,30 +4045,38 @@ function exportFilteredModelsList(
                                 1 :
                                 maxNoOfResponsesForThisMultipleQuestion;
 
-                              // date needs to be printed just once
-                              // - add column only if needed
-                              if (questionData.multiAnswer) {
-                                addHeaderColumn(
-                                  `${questionHeader} [MD ${answerIndex + 1}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  questionData.variable,
-                                  undefined,
-                                  undefined,
-                                  true
-                                );
-                              }
-
                               // attach responses
                               for (let multipleAnswerIndex = 0; multipleAnswerIndex < maxNoOfResponsesForThisMultipleQuestion; multipleAnswerIndex++) {
+                                // path
+                                const answerPath = multiAnswerParentDatePath ?
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"]` :
+                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`;
+
                                 // value
                                 addHeaderColumn(
                                   `${questionHeader} [MV ${answerIndex + 1}] ${multipleAnswerIndex + 1}`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value[${multipleAnswerIndex}]`,
+                                  answerPath,
+                                  answerPath,
                                   questionData.variable,
-                                  (function (localQuestionData) {
-                                    return (value) => {
+                                  (function (localQuestionData, localMultiAnswerParentDatePath, localMultipleAnswerIndex) {
+                                    return (value, translatePipe, record) => {
+                                      // multi answer map ?
+                                      if (localMultiAnswerParentDatePath) {
+                                        // determine answer date
+                                        const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
+
+                                        // find answer
+                                        value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                        value = value ?
+                                          (
+                                            value.value ?
+                                              value.value[localMultipleAnswerIndex] :
+                                              value.value
+                                          ) :
+                                          value;
+                                      }
+
+                                      // not multi answer
                                       return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                             sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
@@ -3834,34 +4084,38 @@ function exportFilteredModelsList(
                                         ) :
                                         value;
                                     };
-                                  })(questionData),
+                                  })(questionData, multiAnswerParentDatePath, multipleAnswerIndex),
                                   undefined,
                                   true
                                 );
                               }
                             } else {
-                              // date
-                              // - add column only if needed
-                              if (questionData.multiAnswer) {
-                                addHeaderColumn(
-                                  `${questionHeader} [MD ${answerIndex + 1}]`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].date`,
-                                  questionData.variable,
-                                  undefined,
-                                  undefined,
-                                  true
-                                );
-                              }
+                              // path
+                              const answerPath = multiAnswerParentDatePath ?
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"]` :
+                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`;
 
                               // value
                               addHeaderColumn(
                                 `${questionHeader} [MV ${answerIndex + 1}]`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
-                                `${defaultQuestionnaireAnswersKey}["${questionData.variable}"][${answerIndex}].value`,
+                                answerPath,
+                                answerPath,
                                 questionData.variable,
-                                (function (localQuestionData) {
-                                  return (value) => {
+                                (function (localQuestionData, localMultiAnswerParentDatePath) {
+                                  return (value, translatePipe, record) => {
+                                    // multi answer map ?
+                                    if (localMultiAnswerParentDatePath) {
+                                      // determine answer date
+                                      const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
+
+                                      // find answer
+                                      value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                      value = value ?
+                                        value.value :
+                                        value;
+                                    }
+
+                                    // not multi answer
                                     return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
                                         sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
@@ -3869,7 +4123,7 @@ function exportFilteredModelsList(
                                       ) :
                                       value;
                                   };
-                                })(questionData),
+                                })(questionData, multiAnswerParentDatePath),
                                 undefined,
                                 true
                               );
@@ -3877,14 +4131,35 @@ function exportFilteredModelsList(
 
                             // need to add child question columns before adding next index column for this question - to keep order of responses for each question
                             questionData.childQuestions.forEach((childQuestion) => {
-                              addQuestionnaireColumns(childQuestion);
+                              addQuestionnaireColumns(
+                                childQuestion,
+                                multiAnswerParentDatePath ?
+                                  multiAnswerParentDatePath : (
+                                    questionData.multiAnswer ?
+                                      questionMultiAnswerDatePath :
+                                      undefined
+                                  ),
+                                multiAnswerParentIndex !== undefined ?
+                                  multiAnswerParentIndex : (
+                                    questionData.multiAnswer ?
+                                      answerIndex :
+                                      undefined
+                                  )
+                              );
                             });
+
+                            // next answer index
+                            answerIndex++;
                           }
                         };
 
                         // construct columns for our questionnaire
                         sheetHandler.questionnaireQuestionsData.nonFlat.forEach((questionData) => {
-                          addQuestionnaireColumns(questionData);
+                          addQuestionnaireColumns(
+                            questionData,
+                            undefined,
+                            undefined
+                          );
                         });
                       }
                     } else {
@@ -4098,14 +4373,26 @@ function exportFilteredModelsList(
 
         // determine next batch of rows that we need to export
         const determineBatchOfRecordsToExport = (batchSize) => {
+          // retrieve join information too
+          const projection = {
+            _id: 1,
+            rowId: 1
+          };
+          if (
+            sheetHandler.joins &&
+            sheetHandler.joins.length > 0
+          ) {
+            sheetHandler.joins.forEach((join) => {
+              projection[`${JOIN_PREFIX}${join.name}`] = 1;
+            });
+          }
+
+          // determine what we need to export
           return temporaryCollection
             .find(
               {}, {
                 limit: batchSize,
-                projection: {
-                  _id: 1,
-                  rowId: 1
-                }
+                projection
               }
             )
             .toArray();
@@ -4113,9 +4400,40 @@ function exportFilteredModelsList(
 
         // retrieve batch of rows to export
         const retrieveBatchToExport = (records) => {
-          // do we have something to retrieve ?
+          // prepare to retrieve records data
           records = records || [];
-          const rowIdsToRetrieve = records.map((record) => record.rowId);
+          const rowIdsToRetrieve = [];
+          const rowJoinData = {};
+          for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+            // get record data
+            const recordInfo = records[recordIndex];
+
+            // do we have joins to merge ?
+            if (
+              sheetHandler.joins &&
+              sheetHandler.joins.length > 0
+            ) {
+              // attach join data
+              rowJoinData[recordInfo.rowId] = {};
+
+              // map join data to record id
+              for (let joinIndex = 0; joinIndex < sheetHandler.joins.length; joinIndex++) {
+                // get join definitions
+                const joinInfo = sheetHandler.joins[joinIndex];
+
+                // map join data to record id
+                rowJoinData[recordInfo.rowId][joinInfo.name] = recordInfo[`${JOIN_PREFIX}${joinInfo.name}`];
+
+                // format geo location coordinates
+                genericHelpers.covertAddressesGeoPointToLoopbackFormat(rowJoinData[recordInfo.rowId][joinInfo.name]);
+              }
+
+              // attach to records that we need to retrieve from database
+              rowIdsToRetrieve.push(recordInfo.rowId);
+            }
+          }
+
+          // do we have something to retrieve ?
           return records.length < 1 ?
             [] :
             (exportDataCollection
@@ -4139,7 +4457,20 @@ function exportFilteredModelsList(
                     // map for easy access because we need to keep order from rowIdsToRetrieve
                     const recordsToExportMap = {};
                     for (let recordIndex = 0; recordIndex < recordsToExport.length; recordIndex++) {
-                      recordsToExportMap[recordsToExport[recordIndex]._id] = recordsToExport[recordIndex];
+                      // get record data
+                      const recordData = recordsToExport[recordIndex];
+
+                      // attach joins data if we have any
+                      const recordId = recordsToExport[recordIndex]._id;
+                      if (rowJoinData[recordId]) {
+                        Object.assign(
+                          recordData,
+                          rowJoinData[recordId]
+                        );
+                      }
+
+                      // map for easy export
+                      recordsToExportMap[recordId] = recordData;
                     }
 
                     // finished
@@ -4375,14 +4706,6 @@ function exportFilteredModelsList(
 
                         // map
                         relationsResults[relationName][keyValue] = relationRecordsMap[keyValue];
-
-                        // apply to all
-                        if (sheetHandler.relationsMap[relationName].data.applyToAll) {
-                          sheetHandler.relationsMap[relationName].data.applyToAll(
-                            relationsResults[relationName][keyValue],
-                            helperMethods
-                          );
-                        }
                       }
                     });
                   });
@@ -4619,7 +4942,10 @@ function exportFilteredModelsList(
 
                     // no need to return translation at this point
                     // nothing
-                  }
+                  },
+
+                  // record data
+                  record
                 );
               } else {
                 // determine value from column path
@@ -4705,18 +5031,6 @@ function exportFilteredModelsList(
               }
             })
 
-            // retrieve missing locations
-            .then(() => {
-              // do we have missing locations ?
-              const missingLocations = Object.keys(sheetHandler.locationsMissing);
-              if (missingLocations.length < 1) {
-                return;
-              }
-
-              // retrieve missing locations
-              return retrieveMissingLocations(missingLocations);
-            })
-
             // retrieve missing language tokens & write data
             .then(() => {
               // determine missing data like tokens, locations, ...
@@ -4796,7 +5110,10 @@ function exportFilteredModelsList(
                         return !sheetHandler.dontTranslateValues && sheetHandler.dictionaryMap[token] ?
                           sheetHandler.dictionaryMap[token] :
                           token;
-                      }
+                      },
+
+                      // record data
+                      record
                     );
                   } else {
                     // determine value from column path
@@ -5028,12 +5345,20 @@ function exportFilteredModelsList(
       .then(encryptFiles)
       .then(zipIfMultipleFiles)
       .then(() => {
+        // get file size
+        let sizeBytes;
+        if (fs.existsSync(sheetHandler.filePath)) {
+          const stats = fs.statSync(sheetHandler.filePath);
+          sizeBytes = stats.size;
+        }
+
         // finished exporting data
         return sheetHandler.updateExportLog({
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
           updatedAt: new Date(),
-          actionCompletionDate: new Date()
+          actionCompletionDate: new Date(),
+          sizeBytes
         });
       })
       .then(() => {
@@ -5203,6 +5528,7 @@ function generateAggregateFiltersFromNormalFilter(
 module.exports = {
   // constants
   RELATION_TYPE,
+  JOIN_TYPE,
   TEMPORARY_DATABASE_PREFIX,
 
   // methods
