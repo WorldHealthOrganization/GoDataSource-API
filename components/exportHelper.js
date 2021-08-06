@@ -1798,6 +1798,7 @@ function exportFilteredModelsList(
 
         // convert joins to array for easier access
         joins: formattedJoins,
+        joinDistinctLocationsFields: {},
 
         // filters
         prefiltersDisableLookup: false,
@@ -2936,6 +2937,19 @@ function exportFilteredModelsList(
                     }
                   };
 
+                  // do we have any locations in this join result ?
+                  locationProps.forEach((locationField) => {
+                    // location field has a parent ?
+                    const locationFieldParentIndex = locationField.indexOf('.');
+                    if (locationFieldParentIndex > -1) {
+                      // check if parent belongs to our join
+                      const locationFieldParent = locationField.substr(0, locationFieldParentIndex);
+                      if (locationFieldParent === join.name) {
+                        sheetHandler.joinDistinctLocationsFields[`${JOIN_PREFIX}${locationField}`] = 1;
+                      }
+                    }
+                  });
+
                   // finished
                   break;
               }
@@ -3271,6 +3285,47 @@ function exportFilteredModelsList(
               // retrieve locations
               return retrieveMissingLocations(locationIds);
             })
+
+            // retrieve join locations too
+            .then(() => {
+              // nothing to do here ?
+              if (_.isEmpty(sheetHandler.joinDistinctLocationsFields)) {
+                return;
+              }
+
+              // retrieve joins locations
+              const locationFields = Object.keys(sheetHandler.joinDistinctLocationsFields);
+              const retrieveData = () => {
+                // finished ?
+                if (locationFields.length < 1) {
+                  return Promise.resolve();
+                }
+
+                // get next field
+                const locationField = locationFields.splice(0, 1)[0];
+                return temporaryCollection
+                  .distinct(locationField)
+                  .then((locationIds) => {
+                    // no locations ?
+                    if (
+                      !locationIds ||
+                      locationIds.length < 1 ||
+                      (locationIds = locationIds.filter((locationId) => locationId)).length < 1
+                    ) {
+                      return;
+                    }
+
+                    // retrieve locations
+                    return retrieveMissingLocations(locationIds);
+                  })
+                  .then(retrieveData);
+              };
+
+              // retrieve first join location field locations
+              return retrieveData();
+            })
+
+            // update location data
             .then(() => {
               // determine longest parent location chain
               const locationIds = Object.keys(sheetHandler.locationsMap);
@@ -4368,6 +4423,9 @@ function exportFilteredModelsList(
 
                 // map join data to record id
                 rowJoinData[recordInfo.rowId][joinInfo.name] = recordInfo[`${JOIN_PREFIX}${joinInfo.name}`];
+
+                // format geo location coordinates
+                genericHelpers.covertAddressesGeoPointToLoopbackFormat(rowJoinData[recordInfo.rowId][joinInfo.name]);
               }
 
               // attach to records that we need to retrieve from database
