@@ -14522,6 +14522,9 @@
       },
       "LNG_PAGE_LIST_LAB_RESULTS_EXPORT_TITLE": {
         "translation": "Export lab result data"
+      },
+      "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_EXPORT_SELECTED_LAB_RESULTS": {
+        "translation": "Export the selected lab results"
       }
     },
     "uiEntityRelationshipsListShareAssignCreatePages": {
