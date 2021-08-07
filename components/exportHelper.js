@@ -3026,7 +3026,10 @@ function exportFilteredModelsList(
                                   return false;
                                 }
                               });
-                            } else if (typeof items === 'object') {
+                            } else if (
+                              items &&
+                              typeof items === 'object'
+                            ) {
                               _.each(items, (item, key) => {
                                 if (
                                   key === '_id' &&
@@ -3041,8 +3044,10 @@ function exportFilteredModelsList(
                                   // found - you can stop
                                   return false;
                                 } else if (
-                                  Array.isArray(item) ||
-                                  typeof item === 'object'
+                                  Array.isArray(item) || (
+                                    item &&
+                                    typeof item === 'object'
+                                  )
                                 ) {
                                   // stop on first find
                                   if (removeFirstIdThatMatches(item) === false) {
@@ -3105,7 +3110,7 @@ function exportFilteredModelsList(
         // retrieve missing locations
         const retrieveMissingLocations = (locationIds) => {
           // filter out locations that were retrieved already
-          locationIds = (locationIds || []).filter((locationId) => !sheetHandler.locationsMap[locationId]);
+          locationIds = (locationIds || []).filter((locationId) => locationId && !sheetHandler.locationsMap[locationId]);
 
           // retrieve locations in batches - just in case
           const locationIdsMap = {};
@@ -3275,19 +3280,7 @@ function exportFilteredModelsList(
           // - should we split into bulk? shouldn't be necessary..just for some ids
           return temporaryCollection
             .distinct(sheetHandler.temporaryDistinctLocationsKey)
-            .then((locationIds) => {
-              // no locations ?
-              if (
-                !locationIds ||
-                locationIds.length < 1 ||
-                (locationIds = locationIds.filter((locationId) => locationId)).length < 1
-              ) {
-                return;
-              }
-
-              // retrieve locations
-              return retrieveMissingLocations(locationIds);
-            })
+            .then(retrieveMissingLocations)
 
             // retrieve join locations too
             .then(() => {
@@ -3308,19 +3301,7 @@ function exportFilteredModelsList(
                 const locationField = locationFields.splice(0, 1)[0];
                 return temporaryCollection
                   .distinct(locationField)
-                  .then((locationIds) => {
-                    // no locations ?
-                    if (
-                      !locationIds ||
-                      locationIds.length < 1 ||
-                      (locationIds = locationIds.filter((locationId) => locationId)).length < 1
-                    ) {
-                      return;
-                    }
-
-                    // retrieve locations
-                    return retrieveMissingLocations(locationIds);
-                  })
+                  .then(retrieveMissingLocations)
                   .then(retrieveData);
               };
 
@@ -4212,6 +4193,7 @@ function exportFilteredModelsList(
                                       );
                                     }
                                   } else if (
+                                    childValue &&
                                     typeof childValue === 'object' &&
                                     !(childValue instanceof Date)
                                   ) {
