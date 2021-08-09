@@ -229,11 +229,11 @@
     },
     "xls": {
       "maxColumnsPerSheet": 250,
-      "maxRowsPerFile": 25000
+      "maxRowsPerFile": 12000
     },
     "ods": {
       "maxColumnsPerSheet": 250,
-      "maxRowsPerFile": 25000
+      "maxRowsPerFile": 12000
     }
   }
 }
