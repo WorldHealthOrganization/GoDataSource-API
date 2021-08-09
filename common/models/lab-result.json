@@ -63,6 +63,9 @@
     },
     "deletedByParent": {
       "type": "string"
+    },
+    "sequence": {
+      "type": "labResultSequence"
     }
   },
   "indexes": {

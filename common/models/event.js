@@ -4,7 +4,16 @@ module.exports = function (Event) {
   // set flag to not get controller
   Event.hasController = false;
 
-  Event.fieldLabelsMap = Object.assign({}, Event.fieldLabelsMap, {
+  // important => DON'T use "Event.fieldLabelsMap = Object.assign({}, Event.fieldLabelsMap, {" since it gets all fields from person and we don't want that
+  Event.fieldLabelsMap = {
+    id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
     'name': 'LNG_EVENT_FIELD_LABEL_NAME',
     'date': 'LNG_EVENT_FIELD_LABEL_DATE',
@@ -26,7 +35,7 @@ module.exports = function (Event) {
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID'
-  });
+  };
 
   // map language token labels for export fields group
   Event.exportFieldsGroup = {

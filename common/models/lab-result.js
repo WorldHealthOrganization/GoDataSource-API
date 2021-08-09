@@ -33,6 +33,15 @@ module.exports = function (LabResult) {
     notes: 'LNG_LAB_RESULT_FIELD_LABEL_NOTES',
     status: 'LNG_LAB_RESULT_FIELD_LABEL_STATUS',
 
+    // lab result sequence
+    'sequence': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE',
+    'sequence.hasSequence': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_HAS_SEQUENCE',
+    'sequence.noSequenceReason': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_NO_SEQUENCE_REASON',
+    'sequence.dateSampleSent': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_SAMPLE_SENT',
+    'sequence.labId': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB',
+    'sequence.dateResult': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT',
+    'sequence.resultId': 'LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT',
+
     // must be last item from the list
     questionnaireAnswers: 'LNG_LAB_RESULT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
@@ -78,7 +87,16 @@ module.exports = function (LabResult) {
         'quantitativeResult',
         'notes',
         'status',
-        'person.dateOfOnset'
+        'person.dateOfOnset',
+
+        // lab result sequence
+        'sequence',
+        'sequence.hasSequence',
+        'sequence.noSequenceReason',
+        'sequence.dateSampleSent',
+        'sequence.labId',
+        'sequence.dateResult',
+        'sequence.resultId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
@@ -131,6 +149,11 @@ module.exports = function (LabResult) {
     testType: 'LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST',
     result: 'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT',
     status: 'LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS',
+
+    // sequence
+    'sequence.labId': 'LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY',
+    'sequence.resultId': 'LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT',
+
     // person properties
     'person.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     'person.address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE'
