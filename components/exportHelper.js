@@ -489,12 +489,10 @@ function exportFilteredModelsList(
     // initialize column headers
     const initializeColumnHeaders = () => {
       // get fields that need to be exported from model options
-      let fieldLabelsMap = modelOptions.sanitizeFieldLabelsMapForExport ?
-        modelOptions.sanitizeFieldLabelsMapForExport() :
-        Object.assign(
-          {},
-          modelOptions.fieldLabelsMap
-        );
+      let fieldLabelsMap = Object.assign(
+        {},
+        modelOptions.fieldLabelsMap
+      );
 
       // filter field labels list if fields groups were provided
       let modelExportFieldsOrder = modelOptions.exportFieldsOrder;
