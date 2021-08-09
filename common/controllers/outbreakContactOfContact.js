@@ -306,7 +306,8 @@ module.exports = function (Outbreak) {
                   {
                     outbreakId: '${this.id}',
                     deleted: false,
-                    'persons.id': person._id
+                    'persons.id': person._id,
+                    'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
                   } :
                   undefined;
               }`,

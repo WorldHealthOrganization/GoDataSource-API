@@ -406,7 +406,7 @@ module.exports = function (User) {
     }
   };
 
-  User.fieldLabelsMap = {
+  User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
@@ -427,5 +427,5 @@ module.exports = function (User) {
     'roleIds[]': 'LNG_USER_FIELD_LABEL_ROLES',
     'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
     disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS'
-  };
+  });
 };

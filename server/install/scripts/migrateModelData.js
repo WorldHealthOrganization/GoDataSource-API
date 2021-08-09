@@ -22,7 +22,7 @@ const migrationVersions = [{
     fileName: 'defaultLanguages.js',
     actions: [{
       name: 'run',
-      buildNo: 25
+      buildNo: 26
     }]
   }, {
     fileName: 'defaultReferenceData.js',

@@ -4,7 +4,7 @@ module.exports = function (Event) {
   // set flag to not get controller
   Event.hasController = false;
 
-  Event.fieldLabelsMap = {
+  Event.fieldLabelsMap = Object.assign({}, Event.fieldLabelsMap, {
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
     'name': 'LNG_EVENT_FIELD_LABEL_NAME',
     'date': 'LNG_EVENT_FIELD_LABEL_DATE',
@@ -24,8 +24,9 @@ module.exports = function (Event) {
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
-    'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
-  };
+    'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
+    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID'
+  });
 
   // map language token labels for export fields group
   Event.exportFieldsGroup = {
@@ -48,7 +49,8 @@ module.exports = function (Event) {
         'date',
         'dateOfReporting',
         'isDateOfReportingApproximate',
-        'description'
+        'description',
+        'responsibleUserId'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {

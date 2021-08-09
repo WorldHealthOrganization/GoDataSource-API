@@ -1042,7 +1042,8 @@ module.exports = function (Case) {
     filter.where = filter.where || {};
 
     // date limit
-    const dateLimit = app.utils.helpers.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
+    const dateLimitEndOfDay = app.utils.helpers.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
+    const dateLimitStartOfDay = app.utils.helpers.getDate(filter.flags ? filter.flags.date : undefined).toDate();
 
     // update filter for geographical restriction if needed
     return Case
@@ -1114,9 +1115,18 @@ module.exports = function (Case) {
                                           dateRangeData.type
                                         ]
                                       }, {
-                                        $lte: [
-                                          '$$item.startDate',
-                                          dateLimit
+                                        $or: [
+                                          {
+                                            $eq: [
+                                              '$$item.startDate',
+                                              null
+                                            ]
+                                          }, {
+                                            $lte: [
+                                              '$$item.startDate',
+                                              dateLimitEndOfDay
+                                            ]
+                                          }
                                         ]
                                       }, {
                                         $or: [
@@ -1128,7 +1138,7 @@ module.exports = function (Case) {
                                           }, {
                                             $gte: [
                                               '$$item.endDate',
-                                              dateLimit
+                                              dateLimitStartOfDay
                                             ]
                                           }
                                         ]

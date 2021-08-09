@@ -12809,6 +12809,9 @@
       "LNG_PAGE_LIST_FILTER_CASES_NOT_HOSPITALISED": {
         "translation": "الحالات التي لم تدخل المستشفى"
       },
+      "LNG_PAGE_LIST_FILTER_CASES_ISOLATED": {
+        "translation": "Cases isolated"
+      },
       "LNG_PAGE_DASHBOARD_CASE_BY_LOCATION": {
         "translation": "الحالات حسب الموقع الجغرافي"
       },
