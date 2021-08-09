@@ -1169,5 +1169,7 @@
     "VectorTile-VectorTileLayer": {
       "readOnly": true
     }
-  }
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {},
+  "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT": {}
 }

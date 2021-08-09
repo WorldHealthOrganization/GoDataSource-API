@@ -3487,6 +3487,30 @@
         "modules": [
           "referenceData"
         ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+        "translation": "Lab result sequence laboratory",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT": {
+        "translation": "Lab result sequence result",
+        "modules": [
+          "referenceData"
+        ]
+      },
+      "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT_DESCRIPTION": {
+        "translation": "",
+        "modules": [
+          "referenceData"
+        ]
       }
     },
     "referenceDataCategoryDocumentType": {
@@ -16984,6 +17008,45 @@
         "translation": "الحالة ‬"
       },
       "LNG_LAB_RESULT_FIELD_LABEL_STATUS_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE": {
+        "translation": "Sequence"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_HAS_SEQUENCE": {
+        "translation": "Has sequence?"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_HAS_SEQUENCE_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_NO_SEQUENCE_REASON": {
+        "translation": "Reason"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_NO_SEQUENCE_REASON_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_SAMPLE_SENT": {
+        "translation": "Date sample sent for sequencing"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_SAMPLE_SENT_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+        "translation": "Laboratory"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT": {
+        "translation": "Sequencing result date"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT_DESCRIPTION": {
+        "translation": ""
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT": {
+        "translation": "Sequencing result"
+      },
+      "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT_DESCRIPTION": {
         "translation": ""
       },
       "LNG_LAB_RESULT_FIELD_LABEL_TEST_TYPE": {
