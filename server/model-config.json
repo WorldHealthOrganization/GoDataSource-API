@@ -411,5 +411,9 @@
   "transmissionChainCalculate": {
     "dataSource": null,
     "public": false
+  },
+  "labResultSequence": {
+    "dataSource": null,
+    "public": false
   }
 }
