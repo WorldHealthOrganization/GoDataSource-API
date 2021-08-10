@@ -2778,7 +2778,7 @@ function exportFilteredModelsList(
             });
           }
 
-          // do we have prefilters, then projection will be don here, before the lookup & match
+          // do we have prefilters, then projection will be done here, before the lookup & match
           let localKeyProject;
           let cleanupProject;
           if (!sheetHandler.prefiltersDisableLookup) {
@@ -2802,6 +2802,18 @@ function exportFilteredModelsList(
 
             // prepare array for prefilters
             sheetHandler.prefilters.forEach((prefilter) => {
+              // make sure we project the local key
+              const localKeyParentPathIndex = prefilter.definition.localKey.indexOf('.');
+              let tmpLocalKey = localKeyParentPathIndex > -1 ?
+                prefilter.definition.localKey.substr(0, localKeyParentPathIndex) :
+                prefilter.definition.localKey;
+
+              // remove array
+              tmpLocalKey = tmpLocalKey.replace(/\[\]/g, '');
+
+              // get key
+              localKeyProject[tmpLocalKey] = 1;
+
               // not array? no need for custom projection
               const arrayIndex = prefilter.definition.localKey.indexOf('[]');
               if (arrayIndex < 0) {
@@ -2822,6 +2834,26 @@ function exportFilteredModelsList(
                 };
               }
             });
+
+            // attach join keys too
+            if (
+              sheetHandler.joins &&
+              sheetHandler.joins.length > 0
+            ) {
+              sheetHandler.joins.forEach((join) => {
+                // make sure we project the local key
+                const localKeyParentPathIndex = join.data.localField.indexOf('.');
+                let tmpLocalKey = localKeyParentPathIndex > -1 ?
+                  join.data.localField.substr(0, localKeyParentPathIndex) :
+                  join.data.localField;
+
+                // remove array
+                tmpLocalKey = tmpLocalKey.replace(/\[\]/g, '');
+
+                // get key
+                localKeyProject[tmpLocalKey] = 1;
+              });
+            }
 
             // attach match key project if necessary
             if (!_.isEmpty(localKeyProject)) {
