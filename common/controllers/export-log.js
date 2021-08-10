@@ -26,7 +26,7 @@ module.exports = function (ExportLog) {
       !contextUser.id ||
       this.createdBy !== contextUser.id
     ) {
-      callback(new Error('Not authorized'));
+      return callback(new Error('Not authorized'));
     }
 
     // file path

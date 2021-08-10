@@ -71,7 +71,7 @@ const SHEET_LIMITS = {
       250,
     MAX_ROWS: config && config.export && config.export.xls && config.export.xls.maxRowsPerFile ?
       config.export.xls.maxRowsPerFile :
-      25000
+      12000
   },
   ODS: {
     MAX_COLUMNS: config && config.export && config.export.ods && config.export.ods.maxColumnsPerSheet ?
@@ -79,7 +79,7 @@ const SHEET_LIMITS = {
       250,
     MAX_ROWS: config && config.export && config.export.ods && config.export.ods.maxRowsPerFile ?
       config.export.ods.maxRowsPerFile :
-      25000
+      12000
   }
 };
 
@@ -1339,6 +1339,50 @@ function exportFilteredModelsList(
               // divider
               if (jsonWroteFirstRow) {
                 jsonWriteStream.write(',');
+              }
+
+              // must replace undefined with null ?
+              if (options.jsonReplaceUndefinedWithNull) {
+                // check array for undefined
+                const jsonReplaceWithNullCheckArray = (jsonArray) => {
+                  // go through array
+                  jsonArray.forEach((arrayValue) => {
+                    // nothing to do ?
+                    if (!arrayValue) {
+                      return;
+                    }
+
+                    // array ?
+                    if (Array.isArray(arrayValue)) {
+                      jsonReplaceWithNullCheckArray(arrayValue);
+                    } else if (typeof arrayValue === 'object') {
+                      jsonReplaceWithNull(arrayValue);
+                    }
+                  });
+                };
+
+                // check object for undefined values and replace them
+                const jsonReplaceWithNull = (objectValue) => {
+                  Object.keys(data).forEach((objectValueKey) => {
+                    // undefined value ?
+                    if (objectValue[objectValueKey] === undefined) {
+                      objectValue[objectValueKey] = null;
+                    } else if (
+                      objectValue[objectValueKey] &&
+                      Array.isArray(objectValue[objectValueKey])
+                    ) {
+                      jsonReplaceWithNullCheckArray(objectValue[objectValueKey]);
+                    } else if (
+                      objectValue[objectValueKey] &&
+                      typeof objectValue[objectValueKey] === 'object'
+                    ) {
+                      jsonReplaceWithNull(objectValue[objectValueKey]);
+                    }
+                  });
+                };
+
+                // replace
+                jsonReplaceWithNull(data);
               }
 
               // append row

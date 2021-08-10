@@ -42,6 +42,13 @@ module.exports = function (ReferenceData) {
       delete filter.where.dontTranslateValues;
     }
 
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
+
     // export
     WorkerRunner.helpers.exportFilteredModelsList(
       {
@@ -66,6 +73,7 @@ module.exports = function (ReferenceData) {
         useQuestionVariable: false,
         useDbColumns,
         dontTranslateValues,
+        jsonReplaceUndefinedWithNull,
         contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
       }
     )
