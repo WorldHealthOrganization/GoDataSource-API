@@ -3459,7 +3459,7 @@
     },
     "referenceDataCategoryLabTestResultStatus": {
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS": {
-        "translation": "Résultat du test de laboratoire"
+        "translation": "État du résultat du test de laboratoire"
       },
       "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS_COMPLETED": {
         "translation": "Terminé",
