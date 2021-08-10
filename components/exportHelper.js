@@ -2835,28 +2835,29 @@ function exportFilteredModelsList(
               }
             });
 
-            // attach join keys too
-            if (
-              sheetHandler.joins &&
-              sheetHandler.joins.length > 0
-            ) {
-              sheetHandler.joins.forEach((join) => {
-                // make sure we project the local key
-                const localKeyParentPathIndex = join.data.localField.indexOf('.');
-                let tmpLocalKey = localKeyParentPathIndex > -1 ?
-                  join.data.localField.substr(0, localKeyParentPathIndex) :
-                  join.data.localField;
-
-                // remove array
-                tmpLocalKey = tmpLocalKey.replace(/\[\]/g, '');
-
-                // get key
-                localKeyProject[tmpLocalKey] = 1;
-              });
-            }
-
             // attach match key project if necessary
             if (!_.isEmpty(localKeyProject)) {
+              // attach join keys too
+              if (
+                sheetHandler.joins &&
+                sheetHandler.joins.length > 0
+              ) {
+                sheetHandler.joins.forEach((join) => {
+                  // make sure we project the local key
+                  const localKeyParentPathIndex = join.data.localField.indexOf('.');
+                  let tmpLocalKey = localKeyParentPathIndex > -1 ?
+                    join.data.localField.substr(0, localKeyParentPathIndex) :
+                    join.data.localField;
+
+                  // remove array
+                  tmpLocalKey = tmpLocalKey.replace(/\[\]/g, '');
+
+                  // get key
+                  localKeyProject[tmpLocalKey] = 1;
+                });
+              }
+
+              // initial project
               aggregateFilter.push({
                 $project: localKeyProject
               });
