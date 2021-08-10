@@ -14437,7 +14437,7 @@
     },
     "contactFinalFollowUpStatusType": {
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
-        "translation": "statut final du suivi du contact"
+        "translation": "Statut final du suivi du contact"
       },
       "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_DESCRIPTION": {
         "translation": ""

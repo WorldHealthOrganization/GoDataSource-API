@@ -397,6 +397,13 @@ module.exports = function (Outbreak) {
       delete filter.where.dontTranslateValues;
     }
 
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
+
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword) {
       encryptPassword = null;
@@ -471,6 +478,7 @@ module.exports = function (Outbreak) {
         useQuestionVariable: false,
         useDbColumns,
         dontTranslateValues,
+        jsonReplaceUndefinedWithNull,
         contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
       },
       prefilters, {
