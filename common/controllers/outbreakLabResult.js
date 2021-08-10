@@ -210,117 +210,115 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // include geo restrictions if necessary
-    // #TODO
+    // apply geo restrictions
+    app.models.person
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where.person
+      )
+      .then((updatedFilter) => {
+        // update where if needed
+        updatedFilter && (filter.where.person = updatedFilter);
 
-    // // prefilter
-    // app.models.labResult
-    //   .addGeographicalRestrictions(
-    //     options.remotingContext,
-    //     filter.where
-    //   )
-    //   .then(updatedFilter => {
-    //     // update casesQuery if needed
-    //     updatedFilter && (filter.where = updatedFilter);
-
-    // prefilters
-    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
-      filter, {
-        outbreakId: this.id
-      }, {
-        contact: {
-          collection: 'person',
-          queryPath: 'where.contact',
-          queryAppend: {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-          },
-          localKey: 'personId',
-          foreignKey: '_id'
-        },
-        case: {
-          collection: 'person',
-          queryPath: 'where.case',
-          queryAppend: {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-          },
-          localKey: 'personId',
-          foreignKey: '_id'
-        },
-        person: {
-          collection: 'person',
-          queryPath: 'where.person',
-          localKey: 'personId',
-          foreignKey: '_id'
-        }
-      }
-    );
-
-    // export
-    WorkerRunner.helpers.exportFilteredModelsList(
-      {
-        collectionName: 'labResult',
-        modelName: app.models.labResult.modelName,
-        scopeQuery: app.models.labResult.definition.settings.scope,
-        arrayProps: app.models.labResult.arrayProps,
-        fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
-        exportFieldsGroup: app.models.labResult.exportFieldsGroup,
-        exportFieldsOrder: app.models.labResult.exportFieldsOrder,
-        locationFields: app.models.labResult.locationFields
-      },
-      filter,
-      exportType,
-      encryptPassword,
-      anonymizeFields,
-      fieldsGroupList,
-      {
-        userId: _.get(options, 'accessToken.userId'),
-        outbreakId: this.id,
-        questionnaire: this.labResultsTemplate ?
-          this.labResultsTemplate.toJSON() :
-          undefined,
-        useQuestionVariable,
-        useDbColumns,
-        dontTranslateValues,
-        jsonReplaceUndefinedWithNull,
-        contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-      },
-      prefilters,
-      undefined,
-      {
-        person: {
-          type: exportHelper.JOIN_TYPE.HAS_ONE,
-          collection: 'person',
-          localField: 'personId',
-          foreignField: '_id',
-          project: {
-            visualId: '$$joinValue.visualId',
-            type: '$$joinValue.type',
-            lastName: '$$joinValue.lastName',
-            firstName: '$$joinValue.firstName',
-            middleName: '$$joinValue.middleName',
-            dateOfOnset: '$$joinValue.dateOfOnset',
-            dateOfReporting: '$$joinValue.dateOfReporting',
-            address: {
-              $arrayElemAt: [
-                {
-                  $filter: {
-                    input: '$$joinValue.addresses',
-                    as: 'item',
-                    cond: {
-                      $eq: [
-                        '$$item.typeId',
-                        'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                      ]
-                    }
-                  }
-                },
-                0
-              ]
+        // prefilters
+        const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+          filter, {
+            outbreakId: this.id
+          }, {
+            contact: {
+              collection: 'person',
+              queryPath: 'where.contact',
+              queryAppend: {
+                type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+              },
+              localKey: 'personId',
+              foreignKey: '_id'
+            },
+            case: {
+              collection: 'person',
+              queryPath: 'where.case',
+              queryAppend: {
+                type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+              },
+              localKey: 'personId',
+              foreignKey: '_id'
+            },
+            person: {
+              collection: 'person',
+              queryPath: 'where.person',
+              localKey: 'personId',
+              foreignKey: '_id'
             }
           }
-        }
-      }
-    )
+        );
+
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'labResult',
+            modelName: app.models.labResult.modelName,
+            scopeQuery: app.models.labResult.definition.settings.scope,
+            arrayProps: app.models.labResult.arrayProps,
+            fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.labResult.exportFieldsGroup,
+            exportFieldsOrder: app.models.labResult.exportFieldsOrder,
+            locationFields: app.models.labResult.locationFields
+          },
+          filter,
+          exportType,
+          encryptPassword,
+          anonymizeFields,
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.labResultsTemplate ?
+              this.labResultsTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            jsonReplaceUndefinedWithNull,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          prefilters,
+          undefined,
+          {
+            person: {
+              type: exportHelper.JOIN_TYPE.HAS_ONE,
+              collection: 'person',
+              localField: 'personId',
+              foreignField: '_id',
+              project: {
+                visualId: '$$joinValue.visualId',
+                type: '$$joinValue.type',
+                lastName: '$$joinValue.lastName',
+                firstName: '$$joinValue.firstName',
+                middleName: '$$joinValue.middleName',
+                dateOfOnset: '$$joinValue.dateOfOnset',
+                dateOfReporting: '$$joinValue.dateOfReporting',
+                address: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: '$$joinValue.addresses',
+                        as: 'item',
+                        cond: {
+                          $eq: [
+                            '$$item.typeId',
+                            'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                          ]
+                        }
+                      }
+                    },
+                    0
+                  ]
+                }
+              }
+            }
+          }
+        );
+      })
       .then((exportData) => {
         // send export id further
         callback(
