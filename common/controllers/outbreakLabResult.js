@@ -258,6 +258,7 @@ module.exports = function (Outbreak) {
             collectionName: 'labResult',
             modelName: app.models.labResult.modelName,
             scopeQuery: app.models.labResult.definition.settings.scope,
+            excludeBaseProperties: app.models.labResult.definition.settings.excludeBaseProperties,
             arrayProps: app.models.labResult.arrayProps,
             fieldLabelsMap: app.models.labResult.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.labResult.exportFieldsGroup,

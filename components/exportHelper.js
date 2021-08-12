@@ -551,6 +551,37 @@ function exportFilteredModelsList(
         fieldsList = fieldLabelsKeys;
       }
 
+      // must exclude properties ?
+      // - this applies mostly for person extended models because they clone person.fieldLabelMap which contains properties from all 4 models
+      if (!_.isEmpty(modelOptions.excludeBaseProperties)) {
+        // map excluded properties for easy check later
+        const excludeBasePropertiesMap = {};
+        modelOptions.excludeBaseProperties.forEach((excludedProperty) => {
+          excludeBasePropertiesMap[excludedProperty] = true;
+        });
+
+        // go through fields list and remove excluded properties
+        // - start from the end to be able to remove data on the go, otherwise the for won't work
+        for (let checkPropertyIndex = fieldsList.length - 1; checkPropertyIndex >= 0 ; checkPropertyIndex--) {
+          // get an determine root property
+          let checkProperty = fieldsList[checkPropertyIndex];
+
+          // remove array
+          checkProperty = checkProperty.replace(/\[\]/g, '');
+
+          // get root property
+          const checkPropertyRootPropIndex = checkProperty.indexOf('.');
+          if (checkPropertyRootPropIndex > -1) {
+            checkProperty = checkProperty.substr(0, checkPropertyRootPropIndex);
+          }
+
+          // do we need to exclude this field ?
+          if (excludeBasePropertiesMap[checkProperty]) {
+            fieldsList.splice(checkPropertyIndex, 1);
+          }
+        }
+      }
+
       // replace id with _id since were using mongo without loopback
       // id should always be at the start
       // - remove to add at the start
@@ -2210,14 +2241,11 @@ function exportFilteredModelsList(
             Object.values(sheetHandler.columns.labels);
 
           // attach general tokens that are always useful to have in your pocket
-          // - needed only when not using db columns
-          if (!sheetHandler.useDbColumns) {
-            languageTokensToRetrieve.push(
-              // questionnaire related
-              'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
-              'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
-            );
-          }
+          languageTokensToRetrieve.push(
+            // questionnaire related
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
+          );
 
           // attach general tokens that are always useful to have in your pocket
           languageTokensToRetrieve.push(
@@ -2230,10 +2258,7 @@ function exportFilteredModelsList(
           );
 
           // attach questionnaire tokens
-          if (
-            !sheetHandler.useDbColumns &&
-            sheetHandler.questionnaireQuestionsData.flat.length > 0
-          ) {
+          if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
             sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
               // question
               languageTokensToRetrieve.push(questionData.text);

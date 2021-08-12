@@ -1569,6 +1569,7 @@ module.exports = function (Outbreak) {
             collectionName: 'person',
             modelName: app.models.contact.modelName,
             scopeQuery: app.models.contact.definition.settings.scope,
+            excludeBaseProperties: app.models.contact.definition.settings.excludeBaseProperties,
             arrayProps: app.models.contact.arrayProps,
             fieldLabelsMap: app.models.contact.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.contact.exportFieldsGroup,

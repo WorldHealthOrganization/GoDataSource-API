@@ -55,6 +55,7 @@ module.exports = function (ReferenceData) {
         collectionName: 'referenceData',
         modelName: app.models.referenceData.modelName,
         scopeQuery: app.models.referenceData.definition.settings.scope,
+        excludeBaseProperties: app.models.referenceData.definition.settings.excludeBaseProperties,
         arrayProps: undefined,
         fieldLabelsMap: app.models.referenceData.fieldLabelsMap,
         exportFieldsGroup: undefined,

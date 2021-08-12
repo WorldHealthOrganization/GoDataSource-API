@@ -485,7 +485,7 @@ module.exports = function (Outbreak) {
       }
     );
 
-    // prefilter
+    // attach geo restrictions if necessary
     app.models.followUp
       .addGeographicalRestrictions(
         options.remotingContext,
@@ -501,6 +501,7 @@ module.exports = function (Outbreak) {
             collectionName: 'followUp',
             modelName: app.models.followUp.modelName,
             scopeQuery: app.models.followUp.definition.settings.scope,
+            excludeBaseProperties: app.models.followUp.definition.settings.excludeBaseProperties,
             arrayProps: undefined,
             fieldLabelsMap: app.models.followUp.fieldLabelsMap,
             exportFieldsGroup: app.models.followUp.exportFieldsGroup,
