@@ -2210,14 +2210,11 @@ function exportFilteredModelsList(
             Object.values(sheetHandler.columns.labels);
 
           // attach general tokens that are always useful to have in your pocket
-          // - needed only when not using db columns
-          if (!sheetHandler.useDbColumns) {
-            languageTokensToRetrieve.push(
-              // questionnaire related
-              'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
-              'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
-            );
-          }
+          languageTokensToRetrieve.push(
+            // questionnaire related
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE',
+            'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
+          );
 
           // attach general tokens that are always useful to have in your pocket
           languageTokensToRetrieve.push(
@@ -2230,10 +2227,7 @@ function exportFilteredModelsList(
           );
 
           // attach questionnaire tokens
-          if (
-            !sheetHandler.useDbColumns &&
-            sheetHandler.questionnaireQuestionsData.flat.length > 0
-          ) {
+          if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
             sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
               // question
               languageTokensToRetrieve.push(questionData.text);
