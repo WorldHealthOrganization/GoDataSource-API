@@ -485,7 +485,7 @@ module.exports = function (Outbreak) {
       }
     );
 
-    // prefilter
+    // attach geo restrictions if necessary
     app.models.followUp
       .addGeographicalRestrictions(
         options.remotingContext,

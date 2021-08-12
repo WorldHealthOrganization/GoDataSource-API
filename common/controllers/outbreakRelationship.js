@@ -414,169 +414,177 @@ module.exports = function (Outbreak) {
       anonymizeFields = [];
     }
 
-    // include geo restrictions if necessary
-    // #TODO
+    // attach geo restrictions if necessary
+    app.models.person
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where.person
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where.person = updatedFilter);
 
-    // relationship prefilters
-    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
-      filter, {
-        outbreakId: this.id
-      }, {
-        person: {
-          collection: 'person',
-          queryPath: 'where.person',
-          localKey: 'persons[].id',
-          localKeyArraySize: 2,
-          prefilters: exportHelper.generateAggregateFiltersFromNormalFilter(
-            filter, {
-              outbreakId: this.id
-            }, {
-              followUp: {
-                collection: 'followUp',
-                queryPath: 'where.followUp',
-                localKey: '_id',
-                foreignKey: 'personId'
-              },
-              labResult: {
-                collection: 'labResult',
-                queryPath: 'where.labResult',
-                localKey: '_id',
-                foreignKey: 'personId'
-              }
-            }
-          )
-        }
-      }
-    );
-
-    // export
-    WorkerRunner.helpers
-      .exportFilteredModelsList({
-        collectionName: 'relationship',
-        modelName: app.models.relationship.modelName,
-        scopeQuery: app.models.relationship.definition.settings.scope,
-        arrayProps: app.models.relationship.arrayProps,
-        fieldLabelsMap: app.models.relationship.helpers.sanitizeFieldLabelsMapForExport(),
-        exportFieldsGroup: app.models.relationship.exportFieldsGroup,
-        exportFieldsOrder: app.models.relationship.exportFieldsOrder,
-        locationFields: app.models.relationship.locationFields,
-
-        // fields that we need to bring from db, but we don't want to include in the export
-        projection: [
-          'persons'
-        ]
-      },
-      filter,
-      exportType,
-      encryptPassword,
-      anonymizeFields,
-      fieldsGroupList,
-      {
-        userId: _.get(options, 'accessToken.userId'),
-        outbreakId: this.id,
-        questionnaire: undefined,
-        useQuestionVariable: false,
-        useDbColumns,
-        dontTranslateValues,
-        jsonReplaceUndefinedWithNull,
-        contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-      },
-      prefilters, {
-        cluster: {
-          type: exportHelper.RELATION_TYPE.HAS_ONE,
-          collection: 'cluster',
-          project: [
-            '_id',
-            'name'
-          ],
-          key: '_id',
-          keyValue: `(relationship) => {
-            return relationship && relationship.clusterId ?
-              relationship.clusterId :
-              undefined;
-          }`,
-          replace: {
-            'clusterId': {
-              value: 'cluster.name'
+        // relationship prefilters
+        const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+          filter, {
+            outbreakId: this.id
+          }, {
+            person: {
+              collection: 'person',
+              queryPath: 'where.person',
+              localKey: 'persons[].id',
+              localKeyArraySize: 2,
+              prefilters: exportHelper.generateAggregateFiltersFromNormalFilter(
+                filter, {
+                  outbreakId: this.id
+                }, {
+                  followUp: {
+                    collection: 'followUp',
+                    queryPath: 'where.followUp',
+                    localKey: '_id',
+                    foreignKey: 'personId'
+                  },
+                  labResult: {
+                    collection: 'labResult',
+                    queryPath: 'where.labResult',
+                    localKey: '_id',
+                    foreignKey: 'personId'
+                  }
+                }
+              )
             }
           }
-        },
-        sourcePerson: {
-          type: exportHelper.RELATION_TYPE.HAS_ONE,
-          collection: 'person',
-          project: [
-            '_id',
-            'visualId',
-            'type',
-            'name',
-            'lastName',
-            'firstName',
-            'middleName',
-            'gender',
-            'dob',
-            'age'
-          ],
-          key: '_id',
-          keyValue: `(relationship) => {
-            return relationship && relationship.persons && relationship.persons.length === 2 ?
-              (
-                relationship.persons[0].source && relationship.persons[1].target ?
-                  relationship.persons[0].id : (
-                    relationship.persons[1].source && relationship.persons[0].target ?
-                      relationship.persons[1].id :
-                      undefined
-                  )
-              ) :
-              undefined;
-          }`,
-          after: `(relationship) => {
-            // no person ?
-            if (!relationship.sourcePerson) {
-              return;
-            }
+        );
 
-            // attach properties
-            relationship.sourcePerson.source = true;
-          }`
-        },
-        targetPerson: {
-          type: exportHelper.RELATION_TYPE.HAS_ONE,
-          collection: 'person',
-          project: [
-            '_id',
-            'visualId',
-            'type',
-            'name',
-            'lastName',
-            'firstName',
-            'middleName',
-            'gender',
-            'dob',
-            'age'
-          ],
-          key: '_id',
-          keyValue: `(relationship) => {
-            return relationship && relationship.persons && relationship.persons.length === 2 ?
-              (
-                relationship.persons[0].source && relationship.persons[1].target ?
-                  relationship.persons[1].id : (
-                    relationship.persons[1].source && relationship.persons[0].target ?
-                      relationship.persons[0].id :
-                      undefined
-                  )
-              ) :
-              undefined;
-          }`,
-          after: `(relationship) => {
-            // no person ?
-            if (!relationship.targetPerson) {
-              return;
-            }
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'relationship',
+            modelName: app.models.relationship.modelName,
+            scopeQuery: app.models.relationship.definition.settings.scope,
+            arrayProps: app.models.relationship.arrayProps,
+            fieldLabelsMap: app.models.relationship.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.relationship.exportFieldsGroup,
+            exportFieldsOrder: app.models.relationship.exportFieldsOrder,
+            locationFields: app.models.relationship.locationFields,
 
-            // attach properties
-            relationship.targetPerson.target = true;
-          }`
-        }
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'persons'
+            ]
+          },
+          filter,
+          exportType,
+          encryptPassword,
+          anonymizeFields,
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: undefined,
+            useQuestionVariable: false,
+            useDbColumns,
+            dontTranslateValues,
+            jsonReplaceUndefinedWithNull,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          prefilters, {
+            cluster: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'cluster',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(relationship) => {
+                return relationship && relationship.clusterId ?
+                  relationship.clusterId :
+                  undefined;
+              }`,
+              replace: {
+                'clusterId': {
+                  value: 'cluster.name'
+                }
+              }
+            },
+            sourcePerson: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'type',
+                'name',
+                'lastName',
+                'firstName',
+                'middleName',
+                'gender',
+                'dob',
+                'age'
+              ],
+              key: '_id',
+              keyValue: `(relationship) => {
+                return relationship && relationship.persons && relationship.persons.length === 2 ?
+                  (
+                    relationship.persons[0].source && relationship.persons[1].target ?
+                      relationship.persons[0].id : (
+                        relationship.persons[1].source && relationship.persons[0].target ?
+                          relationship.persons[1].id :
+                          undefined
+                      )
+                  ) :
+                  undefined;
+              }`,
+              after: `(relationship) => {
+                // no person ?
+                if (!relationship.sourcePerson) {
+                  return;
+                }
+
+                // attach properties
+                relationship.sourcePerson.source = true;
+              }`
+            },
+            targetPerson: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'type',
+                'name',
+                'lastName',
+                'firstName',
+                'middleName',
+                'gender',
+                'dob',
+                'age'
+              ],
+              key: '_id',
+              keyValue: `(relationship) => {
+                return relationship && relationship.persons && relationship.persons.length === 2 ?
+                  (
+                    relationship.persons[0].source && relationship.persons[1].target ?
+                      relationship.persons[1].id : (
+                        relationship.persons[1].source && relationship.persons[0].target ?
+                          relationship.persons[0].id :
+                          undefined
+                      )
+                  ) :
+                  undefined;
+              }`,
+              after: `(relationship) => {
+                // no person ?
+                if (!relationship.targetPerson) {
+                  return;
+                }
+
+                // attach properties
+                relationship.targetPerson.target = true;
+              }`
+            }
+          });
       })
       .then((exportData) => {
         // send export id further
