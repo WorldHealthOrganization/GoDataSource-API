@@ -1117,9 +1117,8 @@ module.exports = function (Case) {
                                       }, {
                                         $or: [
                                           {
-                                            $eq: [
-                                              '$$item.startDate',
-                                              null
+                                            $not: [
+                                              '$$item.startDate'
                                             ]
                                           }, {
                                             $lte: [
@@ -1131,9 +1130,8 @@ module.exports = function (Case) {
                                       }, {
                                         $or: [
                                           {
-                                            $eq: [
-                                              '$$item.endDate',
-                                              null
+                                            $not: [
+                                              '$$item.endDate'
                                             ]
                                           }, {
                                             $gte: [
