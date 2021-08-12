@@ -462,6 +462,7 @@ module.exports = function (Outbreak) {
             collectionName: 'relationship',
             modelName: app.models.relationship.modelName,
             scopeQuery: app.models.relationship.definition.settings.scope,
+            excludeBaseProperties: app.models.relationship.definition.settings.excludeBaseProperties,
             arrayProps: app.models.relationship.arrayProps,
             fieldLabelsMap: app.models.relationship.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.relationship.exportFieldsGroup,

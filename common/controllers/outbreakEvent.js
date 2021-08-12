@@ -204,6 +204,7 @@ module.exports = function (Outbreak) {
             collectionName: 'person',
             modelName: app.models.event.modelName,
             scopeQuery: app.models.event.definition.settings.scope,
+            excludeBaseProperties: app.models.event.definition.settings.excludeBaseProperties,
             arrayProps: app.models.event.arrayProps,
             fieldLabelsMap: app.models.event.fieldLabelsMap,
             exportFieldsGroup: app.models.event.exportFieldsGroup,

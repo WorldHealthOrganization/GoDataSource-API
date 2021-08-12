@@ -425,6 +425,7 @@ module.exports = function (Outbreak) {
             collectionName: 'person',
             modelName: app.models.case.modelName,
             scopeQuery: app.models.case.definition.settings.scope,
+            excludeBaseProperties: app.models.case.definition.settings.excludeBaseProperties,
             arrayProps: app.models.case.arrayProps,
             fieldLabelsMap: app.models.case.fieldLabelsMap,
             exportFieldsGroup: app.models.case.exportFieldsGroup,
