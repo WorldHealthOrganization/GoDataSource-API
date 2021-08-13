@@ -1,0 +1,13 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_COMMON_LABEL_EXPORT_JSON_REPLACE_UNDEFINED_WITH_NULL": {
+      "translation": "Replace undefined values with null",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_JSON_REPLACE_UNDEFINED_WITH_NULL_DESCRIPTION": {
+      "translation": "Replace undefined values with null (only for json)",
+      "section": "uiCommonLabels"
+    }
+  }
+}

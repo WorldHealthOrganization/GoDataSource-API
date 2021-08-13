@@ -1394,7 +1394,7 @@ function exportFilteredModelsList(
 
                 // check object for undefined values and replace them
                 const jsonReplaceWithNull = (objectValue) => {
-                  Object.keys(data).forEach((objectValueKey) => {
+                  Object.keys(objectValue).forEach((objectValueKey) => {
                     // undefined value ?
                     if (objectValue[objectValueKey] === undefined) {
                       objectValue[objectValueKey] = null;
