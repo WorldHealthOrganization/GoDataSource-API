@@ -195,11 +195,6 @@ module.exports = function (Contact) {
         'vaccinesReceived[].status'
       ]
     },
-    'LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA': {
-      properties: [
-        'dateRanges'
-      ]
-    },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
       properties: [
         'addresses',
