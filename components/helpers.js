@@ -1323,12 +1323,12 @@ const getModelBooleanProperties = function (model, prefix = '') {
         // store property name
         result.push(prefix + propertyName);
       }
-        // check for model definition
+      // check for model definition
       // eg: address: "address"
       else if (typeof model.definition.properties[propertyName].type === 'function') {
         result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type, propertyName + '.'));
       }
-        // check for array of model definitions
+      // check for array of model definitions
       // eg: persons: ["relationshipParticipant"]
       else if (
         Array.isArray(model.definition.properties[propertyName].type) &&

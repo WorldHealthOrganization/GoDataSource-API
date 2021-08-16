@@ -1330,8 +1330,8 @@ module.exports = function (Outbreak) {
     if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
       caseArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
-        baseProps[arrayProp] = baseProps[arrayProp].concat(...
-          people
+        baseProps[arrayProp] = baseProps[arrayProp].concat(
+          ...people
             .filter((item) => item[arrayProp])
             .map((item) => item[arrayProp])
         );
@@ -1342,8 +1342,8 @@ module.exports = function (Outbreak) {
     if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
       contactArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
-        baseProps[arrayProp] = baseProps[arrayProp].concat(...
-          people
+        baseProps[arrayProp] = baseProps[arrayProp].concat(
+          ...people
             .filter((item) => item[arrayProp])
             .map((item) => item[arrayProp])
         );

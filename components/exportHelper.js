@@ -4012,7 +4012,7 @@ function exportFilteredModelsList(
                                     answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'] ?
                                       sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'] :
                                       'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE'
-                                      ] = answer.value;
+                                    ] = answer.value;
                                     delete answer.value;
                                   }
 
@@ -4024,7 +4024,7 @@ function exportFilteredModelsList(
                                     answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] ?
                                       sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] :
                                       'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
-                                      ] = answer.date;
+                                    ] = answer.date;
                                     delete answer.date;
                                   }
                                 }
@@ -4161,7 +4161,8 @@ function exportFilteredModelsList(
                                       }
 
                                       // not multi answer
-                                      return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
+                                      return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
+                                        (
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                             sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
                                             localQuestionData.answerKeyToLabelMap[value]
@@ -4200,7 +4201,8 @@ function exportFilteredModelsList(
                                     }
 
                                     // not multi answer
-                                    return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ? (
+                                    return !sheetHandler.dontTranslateValues && localQuestionData.answerKeyToLabelMap[value] ?
+                                      (
                                         sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] !== undefined ?
                                           sheetHandler.dictionaryMap[localQuestionData.answerKeyToLabelMap[value]] :
                                           localQuestionData.answerKeyToLabelMap[value]
@@ -4361,14 +4363,14 @@ function exportFilteredModelsList(
                                     } else {
                                       // date value
                                       childValue = childValue instanceof Date ?
-                                          moment(childValue).toISOString() :
-                                          childValue;
+                                        moment(childValue).toISOString() :
+                                        childValue;
 
                                       // normal value
                                       response = !sheetHandler.dontTranslateValues &&
                                         typeof childValue === 'string' && childValue.startsWith('LNG_') ?
-                                          translatePipe(childValue) :
-                                          childValue;
+                                        translatePipe(childValue) :
+                                        childValue;
                                     }
                                   }
 

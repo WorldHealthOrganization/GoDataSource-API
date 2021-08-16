@@ -71,12 +71,11 @@
     "xlsx": "0.17.0"
   },
   "devDependencies": {
-    "eslint": "3.19.0",
-    "eslint-config-loopback": "8.0.0",
-    "gulp": "3.9.1",
+    "eslint": "7.32.0",
+    "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
-    "gulp-run-command": "0.0.9",
-    "gulp-uglify-es": "1.0.4",
+    "gulp-run-command": "0.0.10",
+    "gulp-uglify-es": "3.0.0",
     "pump": "3.0.0"
   },
   "optionalDependencies": {
