@@ -115,6 +115,13 @@ const JOIN_TYPE = {
   HAS_ONE: 'HAS_ONE'
 };
 
+// replace undefined with null constants
+const JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE = {
+  OBJECT: 'O',
+  ARRAY: 'A',
+  VALUE: 'V'
+};
+
 /**
  * Export filtered model list
  * @param parentCallback Used to send data to parent (export log id / errors)
@@ -626,6 +633,10 @@ function exportFilteredModelsList(
       // finished
       return {
         headerKeys: fieldsList,
+        headerKeysMap: {
+          keys: [],
+          definitions: {}
+        },
         headerColumns: [],
         arrayColumnMaxValues: {},
         labels: fieldLabelsMap,
@@ -1141,8 +1152,134 @@ function exportFilteredModelsList(
             });
 
           case EXPORT_TYPE.JSON:
-            // for json we don't need to write column definitions
-            // nothing
+            // split columns for easy map later
+            if (options.jsonReplaceUndefinedWithNull) {
+              // reset values
+              sheetHandler.columns.headerKeysMap = {
+                keys: [],
+                definitions: {}
+              };
+
+              // check if array
+              const attachData = (
+                parent,
+                prefixName,
+                propertyName
+              ) => {
+                // nothing to do ?
+                if (!propertyName) {
+                  return;
+                }
+
+                // array ?
+                // take action depending if field belong to an array of not
+                const propertyArrayIndex = propertyName.indexOf('[]');
+                if (propertyArrayIndex > -1) {
+                  // get parent name
+                  const arrayField = propertyName.substr(0, propertyArrayIndex);
+
+                  // get array field translation if necessary
+                  const arrayFieldTokenPath = `${prefixName}${arrayField}`;
+                  const arrayFieldTranslated = sheetHandler.useDbColumns ?
+                    arrayField : (
+                      sheetHandler.columns.labels[arrayFieldTokenPath] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[arrayFieldTokenPath]] ?
+                        sheetHandler.dictionaryMap[sheetHandler.columns.labels[arrayFieldTokenPath]] :
+                        arrayField
+                    );
+
+                  // set array
+                  if (
+                    !parent[arrayFieldTranslated] ||
+                    parent[arrayFieldTranslated].type !== JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.ARRAY
+                  ) {
+                    parent[arrayFieldTranslated] = {
+                      type: JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.ARRAY,
+                      name: arrayFieldTranslated,
+                      fields: {},
+                      fieldsKeys: []
+                    };
+                  }
+
+                  // attach property
+                  attachData(
+                    parent[arrayFieldTranslated].fields,
+                    `${arrayFieldTokenPath}[].`,
+                    propertyName.substr(propertyArrayIndex + 3)
+                  );
+
+                  // set fields keys
+                  // kinda redundant to do it here, because we redo it multiple times, correctly would be to at the end a deep replace
+                  parent[arrayFieldTranslated].fieldsKeys = Object.keys(parent[arrayFieldTranslated].fields);
+                } else {
+                  // not array, maybe object ?
+                  const propertyObjectIndex = propertyName.indexOf('.');
+                  if (propertyObjectIndex > -1) {
+                    // get parent name
+                    const objectField = propertyName.substr(0, propertyObjectIndex);
+
+                    // get object field translation if necessary
+                    const objectFieldTokenPath = `${prefixName}${objectField}`;
+                    const objectFieldTranslated = sheetHandler.useDbColumns ?
+                      objectField : (
+                        sheetHandler.columns.labels[objectFieldTokenPath] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[objectFieldTokenPath]] ?
+                          sheetHandler.dictionaryMap[sheetHandler.columns.labels[objectFieldTokenPath]] :
+                          objectField
+                      );
+
+                    // set object
+                    if (
+                      !parent[objectFieldTranslated] ||
+                      parent[objectFieldTranslated].type !== JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.OBJECT
+                    ) {
+                      parent[objectFieldTranslated] = {
+                        type: JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.OBJECT,
+                        name: objectFieldTranslated,
+                        fields: {},
+                        fieldsKeys: []
+                      };
+                    }
+
+                    // attach property
+                    attachData(
+                      parent[objectFieldTranslated].fields,
+                      `${prefixName}${objectField}.`,
+                      propertyName.substr(propertyObjectIndex + 1)
+                    );
+
+                    // set fields keys
+                    // kinda redundant to do it here, because we redo it multiple times, correctly would be to at the end a deep replace
+                    parent[objectFieldTranslated].fieldsKeys = Object.keys(parent[objectFieldTranslated].fields);
+                  } else {
+                    // get field translation if necessary
+                    const propertyTokenPath = `${prefixName}${propertyName}`;
+                    const propertyTranslated = sheetHandler.useDbColumns ?
+                      propertyName : (
+                        sheetHandler.columns.labels[propertyTokenPath] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[propertyTokenPath]] ?
+                          sheetHandler.dictionaryMap[sheetHandler.columns.labels[propertyTokenPath]] :
+                          propertyName
+                      );
+
+                    // not array and not object
+                    parent[propertyTranslated] = {
+                      type: JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.VALUE,
+                      name: propertyTranslated
+                    };
+                  }
+                }
+              };
+
+              // go through all columns
+              for (let propIndex = 0; propIndex < sheetHandler.columns.headerKeys.length; propIndex++) {
+                attachData(
+                  sheetHandler.columns.headerKeysMap.definitions,
+                  '',
+                  sheetHandler.columns.headerKeys[propIndex]
+                );
+              }
+
+              // update keys
+              sheetHandler.columns.headerKeysMap.keys = Object.keys(sheetHandler.columns.headerKeysMap.definitions);
+            }
 
             // finished
             return Promise.resolve();
@@ -1374,46 +1511,101 @@ function exportFilteredModelsList(
 
               // must replace undefined with null ?
               if (options.jsonReplaceUndefinedWithNull) {
-                // check array for undefined
-                const jsonReplaceWithNullCheckArray = (jsonArray) => {
-                  // go through array
-                  jsonArray.forEach((arrayValue) => {
-                    // nothing to do ?
-                    if (!arrayValue) {
-                      return;
-                    }
+                // map properties to null
+                const jsonMapToNull = (
+                  parentData,
+                  jsonDefColumn
+                ) => {
+                  // handle accordingly to type
+                  switch (jsonDefColumn.type) {
+                    case JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.VALUE:
+                      // set value
+                      if (parentData[jsonDefColumn.name] === undefined) {
+                        parentData[jsonDefColumn.name] = null;
+                      }
 
-                    // array ?
-                    if (Array.isArray(arrayValue)) {
-                      jsonReplaceWithNullCheckArray(arrayValue);
-                    } else if (typeof arrayValue === 'object') {
-                      jsonReplaceWithNull(arrayValue);
-                    }
-                  });
+                      // finished
+                      break;
+
+                    case JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.OBJECT:
+                      // check if we have any data
+                      if (parentData[jsonDefColumn.name] === undefined) {
+                        parentData[jsonDefColumn.name] = null;
+                      } else {
+                        // must check children
+                        for (let propIndex = 0; propIndex < jsonDefColumn.fieldsKeys.length; propIndex++) {
+                          jsonMapToNull(
+                            parentData[jsonDefColumn.name],
+                            jsonDefColumn.fields[jsonDefColumn.fieldsKeys[propIndex]]
+                          );
+                        }
+                      }
+
+                      // finished
+                      break;
+
+                    case JSON_REPLACE_UNDEFINED_WITH_NULL_TYPE.ARRAY:
+                      // check if we have any data
+                      if (parentData[jsonDefColumn.name] === undefined) {
+                        parentData[jsonDefColumn.name] = null;
+                      } else {
+                        // must check children
+                        for (let itemIndex = 0; itemIndex < parentData[jsonDefColumn.name].length; itemIndex++) {
+                          for (let propIndex = 0; propIndex < jsonDefColumn.fieldsKeys.length; propIndex++) {
+                            jsonMapToNull(
+                              parentData[jsonDefColumn.name][itemIndex],
+                              jsonDefColumn.fields[jsonDefColumn.fieldsKeys[propIndex]]
+                            );
+                          }
+                        }
+                      }
+
+                      // finished
+                      break;
+                  }
                 };
 
-                // check object for undefined values and replace them
-                const jsonReplaceWithNull = (objectValue) => {
-                  Object.keys(objectValue).forEach((objectValueKey) => {
-                    // undefined value ?
-                    if (objectValue[objectValueKey] === undefined) {
-                      objectValue[objectValueKey] = null;
-                    } else if (
-                      objectValue[objectValueKey] &&
-                      Array.isArray(objectValue[objectValueKey])
-                    ) {
-                      jsonReplaceWithNullCheckArray(objectValue[objectValueKey]);
-                    } else if (
-                      objectValue[objectValueKey] &&
-                      typeof objectValue[objectValueKey] === 'object'
-                    ) {
-                      jsonReplaceWithNull(objectValue[objectValueKey]);
-                    }
-                  });
-                };
+                // go through custom definitions
+                for (let propIndex = 0; propIndex < sheetHandler.columns.headerKeysMap.keys.length; propIndex++) {
+                  jsonMapToNull(
+                    data,
+                    sheetHandler.columns.headerKeysMap.definitions[sheetHandler.columns.headerKeysMap.keys[propIndex]]
+                  );
+                }
 
-                // replace
-                jsonReplaceWithNull(data);
+                // attach custom case - questionnaire answers
+                if (options.questionnaire) {
+                  // questionnaire key translated
+                  const translatedQuestionnaireKey = sheetHandler.useDbColumns ?
+                    defaultQuestionnaireAnswersKey : (
+                      sheetHandler.columns.labels[defaultQuestionnaireAnswersKey] && sheetHandler.dictionaryMap[sheetHandler.columns.labels[defaultQuestionnaireAnswersKey]] ?
+                        sheetHandler.dictionaryMap[sheetHandler.columns.labels[defaultQuestionnaireAnswersKey]] :
+                        defaultQuestionnaireAnswersKey
+                    );
+
+                  // no questionnaire ?
+                  if (!data[translatedQuestionnaireKey]) {
+                    data[translatedQuestionnaireKey] = null;
+                  } else {
+                    for (let questionIndex = 0; questionIndex < sheetHandler.questionnaireQuestionsData.flat.length; questionIndex++) {
+                      // get record data
+                      const questionData = sheetHandler.questionnaireQuestionsData.flat[questionIndex];
+
+                      // question header
+                      const questionHeader = sheetHandler.questionnaireUseVariablesAsHeaders || sheetHandler.useDbColumns ?
+                        questionData.variable : (
+                          sheetHandler.dictionaryMap[questionData.text] ?
+                            sheetHandler.dictionaryMap[questionData.text] :
+                            questionData.text
+                        );
+
+                      // replace undefined with value
+                      if (data[translatedQuestionnaireKey][questionHeader] === undefined) {
+                        data[translatedQuestionnaireKey][questionHeader] = null;
+                      }
+                    }
+                  }
+                }
               }
 
               // append row
