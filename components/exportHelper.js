@@ -1574,7 +1574,10 @@ function exportFilteredModelsList(
                 }
 
                 // attach custom case - questionnaire answers
-                if (options.questionnaire) {
+                if (
+                  options.questionnaire &&
+                  sheetHandler.columns.labels[defaultQuestionnaireAnswersKey]
+                ) {
                   // questionnaire key translated
                   const translatedQuestionnaireKey = sheetHandler.useDbColumns ?
                     defaultQuestionnaireAnswersKey : (
