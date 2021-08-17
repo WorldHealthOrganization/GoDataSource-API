@@ -160,6 +160,15 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.38.1',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 5
+    }]
+  }]
 }];
 
 /**
