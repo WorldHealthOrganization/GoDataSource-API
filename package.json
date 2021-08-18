@@ -62,6 +62,7 @@
     "request": "2.88.2",
     "rr": "0.1.0",
     "serve-favicon": "2.5.0",
+    "sharp": "0.29.0",
     "strong-error-handler": "2.3.2",
     "svg-captcha": "1.4.0",
     "tmp": "0.0.33",
@@ -77,9 +78,6 @@
     "gulp-run-command": "0.0.10",
     "gulp-uglify-es": "3.0.0",
     "pump": "3.0.0"
-  },
-  "optionalDependencies": {
-    "sharp": "^0.22.0"
   },
   "repository": {
     "type": "",
