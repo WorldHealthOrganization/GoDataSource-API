@@ -30,7 +30,7 @@
     "alphanum-sort": "1.0.2",
     "archiver": "4.0.2",
     "async": "2.6.3",
-    "bcrypt": "3.0.8",
+    "bcrypt": "5.0.1",
     "compression": "1.7.4",
     "connect-mongo": "3.2.0",
     "cors": "2.8.5",
