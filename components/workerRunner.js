@@ -69,9 +69,9 @@ function invokeWorkerMethod(
       // send response back to listener parent
       next(null, args[1].response);
     } else if (
-        args[1] &&
-        args[1].subject === 'KILL'
-      ) {
+      args[1] &&
+      args[1].subject === 'KILL'
+    ) {
       // kill worker since his job is done
       worker.kill();
     } else {

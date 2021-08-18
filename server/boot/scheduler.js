@@ -381,16 +381,16 @@ module.exports = function (app) {
         // determine after how much time we should remove snapshot files
         if (fs.existsSync(tmp.tmpdir)) {
           // used to determine when can we delete snapshot files
-          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}\_\d{2}-\d{2}-\d{2}.zip$/i;
+          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}.zip$/i;
           const removeSyncSnapshotsAfterHours = configSettings.removeSyncSnapshotsAfter || 24;
           const deleteSnapshotBeforeDateTime = moment().subtract(removeSyncSnapshotsAfterHours, 'hours');
 
           // used to determine when can we delete snapshot files
           // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
-          const snapshotTmpDirMatchRegex = /^tmp-[a-zA-Z0-9\_]{10,20}$/i;
+          const snapshotTmpDirMatchRegex = /^tmp-[a-zA-Z0-9_]{10,20}$/i;
 
           // used to determine when can we delete uploaded files with formidable.IncomingForm
-          const uploadedMatchRegex = /^upload_[a-zA-Z0-9\_]+$/i;
+          const uploadedMatchRegex = /^upload_[a-zA-Z0-9_]+$/i;
           const removeTmpUploadedFilesAfter = configSettings.removeTmpUploadedFilesAfter || 24;
           const deleteTmpUploadBeforeDateTime = moment().subtract(removeTmpUploadedFilesAfter, 'hours');
 

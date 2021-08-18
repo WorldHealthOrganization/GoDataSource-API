@@ -1399,7 +1399,7 @@ function run(callback) {
                           existingRelationships[otherPerson.id] &&
                           existingRelationships[otherPerson.id][personData.id]
                         )
-                        ) {
+                      ) {
                         // case / event / contact ?
                         const idsPool = personData.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ?
                           caseAndEventsIds :

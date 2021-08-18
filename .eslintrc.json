@@ -1,6 +1,6 @@
 {
   "env": {
-    "es6": true,
+    "es2017": true,
     "node": true
   },
   "extends": "eslint:recommended",
@@ -25,6 +25,7 @@
       "error",
       "always"
     ],
-    "no-case-declarations": 0
+    "no-case-declarations": 0,
+    "no-prototype-builtins": 0
   }
 }
