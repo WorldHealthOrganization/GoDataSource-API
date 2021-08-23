@@ -105,13 +105,12 @@ const worker = {
           })
           .then(({ data, info }) => {
             // decode the resized image
-            const resizedImage = Sharp(data);
-
-            // remove pixels limit
-            resizedImage.limitInputPixels(false);
-
-            // it reduces the memory footprint and increases performance on some systems
-            resizedImage.sequentialRead(true);
+            const resizedImage = Sharp(data, {
+              // remove pixels limit
+              limitInputPixels: false,
+              // it reduces the memory footprint and increases performance on some systems
+              sequentialRead: true
+            });
 
             // cache its sizes
             const imageWidth = info.width;
