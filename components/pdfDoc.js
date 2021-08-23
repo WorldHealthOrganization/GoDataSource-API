@@ -3,7 +3,6 @@
 const PdfKit = require('pdfkit');
 const PdfTable = require('voilab-pdf-table');
 const streamUtils = require('./streamUtils');
-const Jimp = require('jimp');
 const _ = require('lodash');
 
 // PDF mime type

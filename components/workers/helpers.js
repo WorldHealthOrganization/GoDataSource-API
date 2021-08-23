@@ -4,7 +4,6 @@ const helpers = require('../helpers');
 const exportHelper = require('../exportHelper');
 const fileCrypto = require('../fileCrypto');
 const aesCrypto = require('../aesCrypto');
-const pdfDoc = require('../pdfDoc');
 
 const worker = {
   /**
