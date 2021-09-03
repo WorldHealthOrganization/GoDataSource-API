@@ -2982,7 +2982,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.includeContactFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includeContactFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -3040,7 +3040,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -3252,7 +3252,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' & 'where.followUp' MongoDB compatible queries. If you include both person & followUp conditions, then and AND will be applied between them. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Supports 'where.person' & 'where.followUp' MongoDB compatible queries. If you include both person & followUp conditions, then and AND will be applied between them. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -4767,7 +4767,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -5031,7 +5031,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -7759,7 +7759,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -8247,7 +8247,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -8536,7 +8536,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -8599,7 +8599,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",

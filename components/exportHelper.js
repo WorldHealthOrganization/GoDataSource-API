@@ -654,6 +654,71 @@ function exportFilteredModelsList(
         modelOptions.locationFields.push(...modelOptions.additionalFieldsToExport.locationFields);
       }
 
+      // keep only what we need if a projection was included
+      if (
+        dataFilter &&
+        !_.isEmpty(dataFilter.projection)
+      ) {
+        // replace id
+        if (dataFilter.projection.id) {
+          delete dataFilter.projection.id;
+          dataFilter.projection._id = 1;
+        }
+
+        // keep only visible fields
+        fieldsList = fieldsList.filter((field) => dataFilter.projection[field]);
+
+        // clean fields that we don't need to export
+        Object.keys(fieldLabelsMap).forEach((field) => {
+          // must exclude field ?
+          let excludeField = !dataFilter.projection[field];
+
+          // check for parent properties
+          if (excludeField) {
+            // split into parent values
+            const fieldParts = field.split('.');
+            if (fieldParts.length > 1) {
+              let checkField = '';
+              for (let partIndex = 0; partIndex < fieldParts.length; partIndex++) {
+                // attach this part
+                checkField += `${checkField ? '.' : ''}${fieldParts[partIndex]}`;
+
+                // must include ?
+                if (
+                  dataFilter.projection[checkField] ||
+                  dataFilter.projection[checkField.replace(/\[\]/g, '')]
+                ) {
+                  // include field
+                  excludeField = false;
+
+                  // finished
+                  break;
+                }
+              }
+            }
+          }
+
+          // check if we need to exclude field
+          if (excludeField) {
+            delete fieldLabelsMap[field];
+          }
+        });
+      }
+
+      // exclude array count if there is no need to retrieve that data
+      if (!_.isEmpty(modelOptions.arrayProps)) {
+        Object.keys(modelOptions.arrayProps).forEach((arrayField) => {
+          if (!fieldLabelsMap[arrayField]) {
+            delete modelOptions.arrayProps[arrayField];
+          }
+        });
+      }
+
+      // exclude locations if no location data is exported
+      if (modelOptions.locationFields) {
+        modelOptions.locationFields = modelOptions.locationFields.filter((locationField) => fieldLabelsMap[locationField]);
+      }
+
       // finished
       return {
         headerKeys: fieldsList,
@@ -725,12 +790,19 @@ function exportFilteredModelsList(
     };
 
     // prepare questionnaire data
-    const prepareQuestionnaireData = () => {
-      // go through questionnaire questions and map them accordingly
+    const prepareQuestionnaireData = (columns) => {
+      // initialize response
       const response = {
         flat: [],
         nonFlat: []
       };
+
+      // do we need to include questionnaire data ?
+      if (!columns.labels[defaultQuestionnaireAnswersKey]) {
+        return response;
+      }
+
+      // go through questionnaire questions and map them accordingly
       if (
         options.questionnaire &&
         options.questionnaire.length > 0
@@ -2054,7 +2126,7 @@ function exportFilteredModelsList(
         },
 
         // questionnaire
-        questionnaireQuestionsData: prepareQuestionnaireData(),
+        questionnaireQuestionsData: prepareQuestionnaireData(columns),
         questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
 
         // no need for header translations ?
