@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const helpers = require('./helpers');
-const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
@@ -763,7 +762,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
   const collectionOpts = collectionsWithFiles[collectionName];
 
   // create the temporary directory matching the configured path
-  return mkdirp(path.join(tmpDir, collectionOpts.targetDir), (err) => {
+  return fs.mkdir(path.join(tmpDir, collectionOpts.targetDir), {recursive: true}, (err) => {
     if (err) {
       return done(err);
     }
