@@ -350,6 +350,13 @@ module.exports = function (Outbreak) {
     filter.where = filter.where || {};
     filter.where.outbreakId = this.id;
 
+    // parse includeContactFields query param
+    let includeContactFields = false;
+    if (filter.where.hasOwnProperty('includeContactFields')) {
+      includeContactFields = filter.where.includeContactFields;
+      delete filter.where.includeContactFields;
+    }
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
@@ -409,6 +416,100 @@ module.exports = function (Outbreak) {
       }
     );
 
+    // do we need to include contact data in case exported data if case was a contact ?
+    let additionalFieldsToExport;
+    if (includeContactFields) {
+      // initialize additional fields to export
+      additionalFieldsToExport = {
+        fields: {},
+        arrayProps: {},
+        locationFields: []
+      };
+
+      // determine case fields
+      const caseFields = {};
+      _.each(
+        app.models.case.fieldLabelsMap,
+        (caseFieldToken, caseField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.case.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
+              if (
+                caseField === excludedField ||
+                caseField.startsWith(`${excludedField}.`) ||
+                caseField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            caseFields[caseField] = caseFieldToken;
+          }
+        }
+      );
+
+      // determine contact fields
+      const contactFields = {};
+      _.each(
+        app.models.contact.fieldLabelsMap,
+        (contactFieldToken, contactField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.contact.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
+              if (
+                contactField === excludedField ||
+                contactField.startsWith(`${excludedField}.`) ||
+                contactField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            contactFields[contactField] = contactFieldToken;
+          }
+        }
+      );
+
+      // determine what fields from contact are missing from case
+      _.each(
+        contactFields,
+        (contactFieldToken, contactField) => {
+          if (!caseFields[contactField]) {
+            // add field
+            additionalFieldsToExport.fields[contactField] = contactFieldToken;
+
+            // is array property ?
+            if (app.models.contact.arrayProps[contactField]) {
+              additionalFieldsToExport.arrayProps[contactField] = app.models.contact.arrayProps[contactField];
+            }
+
+            // is location property ?
+            if (app.models.contact.locationFields.indexOf(contactField) > -1) {
+              additionalFieldsToExport.locationFields.push(contactField);
+            }
+          }
+        }
+      );
+    }
+
     // prefilter
     app.models.case
       .addGeographicalRestrictions(
@@ -430,7 +531,8 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.case.fieldLabelsMap,
             exportFieldsGroup: app.models.case.exportFieldsGroup,
             exportFieldsOrder: app.models.case.exportFieldsOrder,
-            locationFields: app.models.case.locationFields
+            locationFields: app.models.case.locationFields,
+            additionalFieldsToExport
           },
           filter,
           exportType,
