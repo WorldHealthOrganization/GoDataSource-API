@@ -630,6 +630,30 @@ function exportFilteredModelsList(
         }
       }
 
+      // attach additional fields
+      if (!_.isEmpty(modelOptions.additionalFieldsToExport)) {
+        // attach fields
+        fieldsList.push(
+          ...Object.keys(modelOptions.additionalFieldsToExport.fields)
+        );
+
+        // attach fields tokens
+        Object.assign(
+          fieldLabelsMap,
+          modelOptions.additionalFieldsToExport.fields
+        );
+
+        // make sure we add array information
+        modelOptions.arrayProps = Object.assign(
+          {},
+          modelOptions.arrayProps,
+          modelOptions.additionalFieldsToExport.arrayProps
+        );
+
+        // make sure we add location information
+        modelOptions.locationFields.push(...modelOptions.additionalFieldsToExport.locationFields);
+      }
+
       // finished
       return {
         headerKeys: fieldsList,
