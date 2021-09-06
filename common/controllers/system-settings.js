@@ -3,8 +3,6 @@
 const app = require('../../server/server');
 const uuid = require('uuid');
 const moment = require('moment');
-const request = require('request');
-const packageJson = require('../../package');
 const config = require('../../server/config');
 const _ = require('lodash');
 const path = require('path');
@@ -166,57 +164,6 @@ module.exports = function (SystemSettings) {
         date: moment.utc()
       }
     );
-  };
-
-  /**
-   * Check if the application has available updates
-   * @param callback
-   */
-  SystemSettings.checkForUpdates = function (callback) {
-    // build a base bath for the requests
-    const basePath = `${config.updatesServer.protocol}://${config.updatesServer.host}:${config.updatesServer.port}/api/applications`;
-    // query updates server for updates
-    request({
-      uri: `${basePath}/check-for-updates`,
-      qs: {
-        platform: packageJson.build.platform,
-        version: packageJson.version
-      },
-      json: true
-    }, function (error, response, body) {
-      // handle communication errors
-      if (error) {
-        return callback(app.utils.apiError.getError('EXTERNAL_API_CONNECTION_ERROR', {
-          serviceName: 'Go.Data Version Manager',
-          error: error
-        }));
-      }
-      // handle invalid response errors
-      if (response.statusCode !== 200) {
-        return callback(app.utils.apiError.getError('UNEXPECTED_EXTERNAL_API_RESPONSE', {
-          serviceName: 'Go.Data Version Manager',
-          statusCode: response.statusCode,
-          response: body
-        }));
-      }
-      // assume no update available
-      let application = {
-        update: false
-      };
-      // if the response contains an update
-      if (body && body.id) {
-        // add update information to the response
-        application = {
-          update: true,
-          name: body.name,
-          description: body.description,
-          version: body.version,
-          platform: body.platform,
-          download: `${basePath}/${body.id}/download`
-        };
-      }
-      callback(null, application);
-    });
   };
 
   /**

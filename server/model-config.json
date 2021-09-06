@@ -284,10 +284,6 @@
     "dataSource": null,
     "public": false
   },
-  "maps": {
-    "dataSource": "memory",
-    "public": true
-  },
   "contactAndRelationship": {
     "dataSource": null,
     "public": false
