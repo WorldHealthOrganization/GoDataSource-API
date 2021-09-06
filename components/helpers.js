@@ -2506,6 +2506,7 @@ const sanitizePersonAddresses = function (person) {
  */
 const sanitizePersonVisualId = (visualId) => {
   return !visualId ? visualId : visualId
+    .toString()
     .replace(/YYYY/g, moment().format('YYYY'))
     .replace(/\*/g, '');
 };
