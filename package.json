@@ -42,7 +42,7 @@
     "express-session": "1.17.2",
     "form-data": "4.0.0",
     "formidable": "1.2.2",
-    "fs-extra": "7.0.1",
+    "fs-extra": "10.0.0",
     "got": "11.8.2",
     "helmet": "4.6.0",
     "ip": "1.1.5",
