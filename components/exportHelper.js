@@ -4616,29 +4616,32 @@ function exportFilteredModelsList(
                                           sheetHandler.locationsMap[locationValue].name :
                                           locationValue;
 
-                                        // attach location id
-                                        if (!sheetHandler.dontTranslateValues) {
-                                          response[`${propPathTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']}`] = locationValue;
+                                        // attach extra information only if it was requested
+                                        if (sheetHandler.columns.includeParentLocationData) {
+                                          // attach location id
+                                          if (!sheetHandler.dontTranslateValues) {
+                                            response[`${propPathTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']}`] = locationValue;
+                                          }
+
+                                          // attach location identifiers
+                                          response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].identifiers ?
+                                            sheetHandler.locationsMap[locationValue].identifiersCodes :
+                                            [];
+
+                                          // attach parent location geographical level details
+                                          response[sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray ?
+                                            sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray.map(translatePipe) :
+                                            [];
+
+                                          // attach parent location name details
+                                          response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames ?
+                                            (
+                                              sheetHandler.dontTranslateValues ?
+                                                sheetHandler.locationsMap[locationValue].parentLocationNamesArrayIds :
+                                                sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames
+                                            ) :
+                                            [];
                                         }
-
-                                        // attach location identifiers
-                                        response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].identifiers ?
-                                          sheetHandler.locationsMap[locationValue].identifiersCodes :
-                                          [];
-
-                                        // attach parent location geographical level details
-                                        response[sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray ?
-                                          sheetHandler.locationsMap[locationValue].parentChainGeoLvlArray.map(translatePipe) :
-                                          [];
-
-                                        // attach parent location name details
-                                        response[sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']] = sheetHandler.locationsMap[locationValue] && sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames ?
-                                          (
-                                            sheetHandler.dontTranslateValues ?
-                                              sheetHandler.locationsMap[locationValue].parentLocationNamesArrayIds :
-                                              sheetHandler.locationsMap[locationValue].parentLocationNamesArrayNames
-                                          ) :
-                                          [];
                                       } else {
                                         // set value
                                         response[propPathTranslation] = format(
