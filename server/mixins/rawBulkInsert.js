@@ -61,7 +61,7 @@ module.exports = function (Model) {
     });
 
     // set query id and start timer (for logging purposes)
-    const queryId = Uuid.v4();
+    const queryId = Uuid();
     const timer = new Timer();
     timer.start();
 

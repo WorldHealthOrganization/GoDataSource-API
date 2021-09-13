@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
 const Moment = require('moment');
-const uuid = require('uuid');
+const uuid = require('uuid').v4;
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
 
 module.exports = function (User) {
