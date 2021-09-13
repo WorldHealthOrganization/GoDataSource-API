@@ -190,7 +190,7 @@ function determineMissingLanguageTokens(
                 // generate id
                 const tokenID = localMainLanguageTokenData._id.startsWith('LNG_') ?
                   generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId) :
-                  uuid();
+                  uuid.v4();
 
                 // prepare object to save
                 const newTokenData = Object.assign({
