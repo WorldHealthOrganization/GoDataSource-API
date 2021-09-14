@@ -22,7 +22,9 @@
     "populate-with-dummy-data": "node ./server/install/install.js populate-with-dummy-data",
     "determine-and-dump-reference-data-items": "node ./server/install/install.js determine-and-dump-reference-data-items",
     "copy-language-from-template-questionnaires-to-template-questionnaires": "node ./server/install/install.js copy-language-from-template-questionnaires-to-template-questionnaires",
-    "update-persons-missing-duplicate-keys": "node ./server/install/install.js update-persons-missing-duplicate-keys"
+    "update-persons-missing-duplicate-keys": "node ./server/install/install.js update-persons-missing-duplicate-keys",
+    "remove-duplicate-language-tokens": "node ./server/install/install.js remove-duplicate-language-tokens",
+    "add-missing-language-tokens": "node ./server/install/install.js add-missing-language-tokens"
   },
   "dependencies": {
     "adm-zip": "0.5.5",
