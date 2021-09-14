@@ -678,13 +678,13 @@ function run(callback) {
                 .catch(callback);
             }, batchSize);
 
-            subLocationQueue.drain = function () {
+            subLocationQueue.drain(function () {
               // display log
               app.logger.debug('Finished creating sub-locations');
               resolve();
-            };
+            });
 
-            subLocationQueue.error = reject;
+            subLocationQueue.error(reject);
 
             // create sublocations only for the newly created locations
             _.each(
