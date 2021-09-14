@@ -76,10 +76,10 @@ module.exports = function (fileLogger = false, isMasterProcess = false) {
 
   /* eslint-disable no-console */
   // redirect console output to winston
-  console.log = logger.debug;
-  console.info = logger.info;
-  console.warn = logger.warn;
-  console.error = logger.error;
+  console.log = logger.debug.bind(logger);
+  console.info = logger.info.bind(logger);
+  console.warn = logger.warn.bind(logger);
+  console.error = logger.error.bind(logger);
   /* eslint-enable no-console */
 
   // initialize flag to prevent attaching the transport flush handler multiple times
