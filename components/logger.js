@@ -67,7 +67,7 @@ module.exports = function (fileLogger = false, isMasterProcess = false) {
     level: config.logging.level,
     exitOnError: false,
     format,
-    transports: transports
+    transports
   });
 
   // handle winston errors
