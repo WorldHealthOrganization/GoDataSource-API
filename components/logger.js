@@ -12,48 +12,74 @@ if (config.logging.level === 'warning') {
 /**
  * Get logger
  * @param {boolean} fileLogger - Flag specifying if logs should be written to file
- * @param {object} fileLoggerOptions - Additional options for the file logger
+ * @param {object} isMasterProcess - Flag specifying whether the logger is for the master process in a cluster configuration
  * @returns {winston.LoggerInstance}
  */
-module.exports = function (fileLogger = false, fileLoggerOptions = {}) {
+module.exports = function (fileLogger = false, isMasterProcess = false) {
   let logger;
+
+  // init transports
+  const transports = [];
+  // init format
+  let format;
+
   // check if we need to write logs in file
   if (fileLogger) {
-    winston.loggers.add('fileLogger', {
-      file: Object.assign({
+    transports.push(
+      new winston.transports.File({
         filename: `${__dirname}/../logs/application.log`,
-        level: config.logging.level,
         maxsize: config.logging.maxSize,
         maxFiles: config.logging.maxFiles,
         tailable: true
-      }, fileLoggerOptions),
-      console: Object.assign({
-        stderrLevels: ['error'],
-        level: config.logging.level
-      }, fileLoggerOptions)
-    });
+      }),
+      new winston.transports.Console({
+        stderrLevels: ['error']
+      })
+    );
 
-    logger = winston.loggers.get('fileLogger');
+    if (isMasterProcess) {
+      // don't add additional formatting and stringify the message
+      format = winston.format.printf(({message}) => {
+        return message;
+      });
+    } else {
+      format = winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      );
+    }
   } else {
-    winston.loggers.add('consoleLogger', {
-      console: {
-        stderrLevels: ['error'],
-        level: config.logging.level,
-        json: true,
-        timestamp: true,
-        stringify: true
-      }
-    });
+    transports.push(
+      new winston.transports.Console({
+        stderrLevels: ['error']
+      })
+    );
 
-    logger = winston.loggers.get('consoleLogger');
+    format = winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    );
   }
+
+  // create logger
+  logger = winston.createLogger({
+    level: config.logging.level,
+    exitOnError: false,
+    format,
+    transports
+  });
+
+  // handle winston errors
+  logger.on('error', function (err) {
+    process.stderr.write(`Logger error: ${err}`);
+  });
 
   /* eslint-disable no-console */
   // redirect console output to winston
-  console.log = logger.debug;
-  console.info = logger.info;
-  console.warn = logger.warn;
-  console.error = logger.error;
+  console.log = logger.debug.bind(logger);
+  console.info = logger.info.bind(logger);
+  console.warn = logger.warn.bind(logger);
+  console.error = logger.error.bind(logger);
   /* eslint-enable no-console */
 
   // initialize flag to prevent attaching the transport flush handler multiple times
@@ -66,15 +92,16 @@ module.exports = function (fileLogger = false, fileLoggerOptions = {}) {
   logger.exitProcessAfterFlush = function (code) {
     // attach flush handler only once
     if (!flushHandlerAdded) {
-      if (logger.transports.file) {
-        logger.transports.file.once('flush', function () {
-          process.exit(code);
-        });
-
-        flushHandlerAdded = true;
-      } else {
+      // flush logs to file
+      logger.transports.file && logger.transports.file.on('finish', function () {
         process.exit(code);
-      }
+      });
+
+      flushHandlerAdded = true;
+
+      this.end();
+    } else {
+      process.exit(code);
     }
   };
 

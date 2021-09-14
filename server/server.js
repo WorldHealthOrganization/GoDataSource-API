@@ -172,11 +172,7 @@ if (
     });
 
     // get logger; will get stdout and stderr from child processes so no need for formatting
-    const logger = require('../components/logger')(true, {
-      json: false,
-      timestamp: false,
-      showLevel: false
-    });
+    const logger = require('../components/logger')(true, true);
     logger.debug(`Master ${process.pid} is running. Forking ${processesNo} processes`);
 
     // remove access tokens if needed
