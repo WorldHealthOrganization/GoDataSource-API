@@ -52,7 +52,6 @@ module.exports = function (fileLogger = false, isMasterProcess = false) {
     transports.push(
       new winston.transports.Console({
         stderrLevels: ['error']
-        // stringify: true
       })
     );
 
