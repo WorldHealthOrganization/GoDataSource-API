@@ -22,7 +22,9 @@ const supportedArguments = [
   'populate-missing-language-tokens',
   'migrate-case-centre-name',
   'copy-language-from-template-questionnaires-to-template-questionnaires',
-  'update-persons-missing-duplicate-keys'
+  'update-persons-missing-duplicate-keys',
+  'remove-duplicate-language-tokens',
+  'add-missing-language-tokens'
 ];
 // keep a list of functions that will be run
 const runFunctions = [];
@@ -390,6 +392,24 @@ const routines = {
       require('./scripts/migrations/2.38.0/person').updateMissingDuplicateKeys(cb);
     });
   },
+  removeDuplicateLanguageTokens: function () {
+    // log
+    console.log('Check and remove duplicate language tokens');
+
+    // execute
+    runFunctions.push((cb) => {
+      require('./scripts/removeDuplicateLanguageTokens').checkAndRemoveLanguageTokens(cb);
+    });
+  },
+  addMissingLanguageTokens: function () {
+    // log
+    console.log('Checking for missing language tokens in all languages and add them');
+
+    // execute
+    runFunctions.push((cb) => {
+      require('./scripts/addMissingLanguageTokens').checkAndAddMissingLanguageTokens(cb);
+    });
+  }
 };
 
 // check which routines should be run based on the passed arguments

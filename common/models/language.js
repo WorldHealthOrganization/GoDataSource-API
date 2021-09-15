@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const async = require('async');
 const _ = require('lodash');
+const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
 
 module.exports = function (Language) {
 
@@ -305,4 +306,20 @@ module.exports = function (Language) {
   Language.getFieldTranslationFromDictionary = function (field, languageId, dictionary) {
     return dictionary.getTranslation(field);
   };
+
+  /**
+   * Clone english tokens if this is a new language
+   */
+  Language.observe('after save', (ctx, next) => {
+    // clone tokens from another language - preferably english
+    if (ctx.isNewInstance) {
+      // clone tokens for this language and fix other languages in case they have missing language tokens
+      addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
+        next,
+        ctx.instance.id
+      );
+    } else {
+      next();
+    }
+  });
 };
