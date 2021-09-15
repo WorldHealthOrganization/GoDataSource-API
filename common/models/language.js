@@ -314,8 +314,10 @@ module.exports = function (Language) {
     // clone tokens from another language - preferably english
     if (ctx.isNewInstance) {
       // clone tokens for this language and fix other languages in case they have missing language tokens
-      // - even if checking for other languages will take more time, this process isn't done often and it could fix any issue caused by...
-      addMissingLanguageTokens.checkAndAddMissingLanguageTokens(next);
+      addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
+        next,
+        ctx.instance.id
+      );
     } else {
       next();
     }

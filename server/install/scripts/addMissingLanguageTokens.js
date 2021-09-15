@@ -14,7 +14,7 @@ const updateBatchSize = 10;
 /**
  * Create / Update language tokens
  */
-const checkAndAddMissingLanguageTokens = (callback) => {
+const checkAndAddMissingLanguageTokens = (callback, updateOnlyLanguageWithId) => {
   // create Mongo DB connection
   const defaultLanguageId = 'english_us';
   let language, languageToken;
@@ -128,7 +128,13 @@ const checkAndAddMissingLanguageTokens = (callback) => {
             }
 
             // same language as the one that is currently checked ?
-            if (languageIndex === compareLanguageIndex) {
+            // - or we aren't interested in updating this language ?
+            if (
+              languageIndex === compareLanguageIndex || (
+                updateOnlyLanguageWithId &&
+                updateOnlyLanguageWithId !== languageModels[compareLanguageIndex]._id
+              )
+            ) {
               // next compare language
               compareLanguageIndex++;
 
@@ -197,7 +203,7 @@ const checkAndAddMissingLanguageTokens = (callback) => {
                       duplicateRecord.languageId = languageModels[compareLanguageIndex]._id;
 
                       // log
-                      console.debug(`Creating missing token for '${duplicateRecord.languageId}', token '${duplicateRecord.token}'`);
+                      console.debug(`Creating missing token for '${languageModels[compareLanguageIndex].name}', token '${duplicateRecord.token}'`);
 
                       // create token
                       return languageToken

@@ -11,7 +11,7 @@ const findBatchSize = 3000;
  */
 const checkAndRemoveLanguageTokens = (callback) => {
   // check for duplicates
-  console.debug('Checking duplicate tokens...');
+  console.debug('Checking for duplicate tokens...');
 
   // create Mongo DB connection
   let languageToken;

@@ -178,10 +178,10 @@ const migrationVersions = [{
       buildNo: 3
     }, {
       name: 'checkAndRemoveLanguageTokens',
-      buildNo: 2
+      buildNo: 3
     }, {
       name: 'checkAndAddMissingLanguageTokens',
-      buildNo: 1
+      buildNo: 2
     }]
   }]
 }];
