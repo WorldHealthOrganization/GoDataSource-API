@@ -176,6 +176,12 @@ const migrationVersions = [{
     actions: [{
       name: 'createUpdateLanguageTokens',
       buildNo: 3
+    }, {
+      name: 'checkAndRemoveLanguageTokens',
+      buildNo: 2
+    }, {
+      name: 'checkAndAddMissingLanguageTokens',
+      buildNo: 1
     }]
   }]
 }];

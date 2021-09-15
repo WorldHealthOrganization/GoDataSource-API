@@ -10,6 +10,9 @@ const findBatchSize = 3000;
  * Create / Update language tokens
  */
 const checkAndRemoveLanguageTokens = (callback) => {
+  // check for duplicates
+  console.debug('Checking duplicate tokens...');
+
   // create Mongo DB connection
   let languageToken;
   MongoDBHelper
@@ -109,7 +112,7 @@ const checkAndRemoveLanguageTokens = (callback) => {
                   }
 
                   // log
-                  console.log(`Removing duplicates for language '${duplicateRecord._id.languageId}', token '${duplicateRecord._id.token}'`);
+                  console.debug(`Removing duplicates for language '${duplicateRecord._id.languageId}', token '${duplicateRecord._id.token}'`);
 
                   // remove duplicate
                   return languageToken

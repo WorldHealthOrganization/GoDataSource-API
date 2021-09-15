@@ -2,7 +2,6 @@
 
 const MongoDBHelper = require('../../../components/mongoDBHelper');
 const Helpers = require('../../../components/helpers');
-const common = require('./_common');
 const uuid = require('uuid').v4;
 
 // Number of find requests at the same time
@@ -240,13 +239,6 @@ const checkAndAddMissingLanguageTokens = (callback) => {
           return nextLanguage(languageIndex);
         });
       };
-
-      // languageModels
-      // alreadyCheckedTokens
-      // languageToken
-
-      // go through each language and retrieve tokens that we need to check
-      // we can't do where not in because it might fail on big databases
 
       // start with first language to check
       return nextLanguage(0);

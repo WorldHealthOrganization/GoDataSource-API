@@ -102,9 +102,7 @@ const routines = {
     [
       require('./scripts/migrateDatabaseCollections'),
       require('./scripts/migrateModelData'),
-      require('./scripts/updateAdminEmail'),
-      require('./scripts/removeDuplicateLanguageTokens').checkAndRemoveLanguageTokens,
-      require('./scripts/addMissingLanguageTokens').checkAndAddMissingLanguageTokens
+      require('./scripts/updateAdminEmail')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
