@@ -184,15 +184,15 @@ const worker = {
             }, 1 /* do not change!!!, otherwise we encounter race conditions */);
 
             // notify parent process that intensive task is done
-            asyncQ.drain = function () {
+            asyncQ.drain(function () {
               process.send([null, { done: true }]);
-            };
+            });
 
             // if a image fails to be processed, kill the queue and notify the master process
-            asyncQ.error = function (err) {
+            asyncQ.error(function (err) {
               asyncQ.kill();
               process.send([{ error: err.message }]);
-            };
+            });
 
             // build a matrix of images, each cropped to its own position in the matrix
             for (let row = 0; row < rows; row++) {
