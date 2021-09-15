@@ -6,6 +6,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const moment = require('moment');
 const apiError = require('../../components/apiError');
+const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
 
 module.exports = function (Language) {
 
@@ -96,7 +97,14 @@ module.exports = function (Language) {
         // start updating translations
         self.updateLanguageTranslations(languageTokens, options, true)
           .then(function (languageTokens) {
-            callback(null, languageTokens);
+            // add missing language tokens from other languages
+            // - this shouldn't be necessary but it is a way to fix translation issue until a fix is delivered in next build after issue was reported
+            addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
+              (err) => {
+                callback(err, languageTokens);
+              },
+              self.id
+            );
           })
           .catch(function (error) {
             // make error response readable
