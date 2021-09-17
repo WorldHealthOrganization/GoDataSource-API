@@ -129,12 +129,16 @@ module.exports = function (Language) {
 
               // determine if there is a different language that has modules and maybe outbreakId for this token
               return app.models.languageToken
-                .find({
-                  where: {
-                    token: languageToken.token,
-                    modules: {
-                      exists: true
-                    }
+                .rawFind({
+                  token: languageToken.token,
+                  modules: {
+                    exists: true
+                  }
+                }, {
+                  projection: {
+                    _id: 1,
+                    outbreakId: 1,
+                    modules: 1
                   }
                 })
                 .then(function (tokens) {
@@ -312,7 +316,12 @@ module.exports = function (Language) {
    */
   Language.observe('after save', (ctx, next) => {
     // clone tokens from another language - preferably english
-    if (ctx.isNewInstance) {
+    if (
+      ctx.isNewInstance && (
+        !ctx.options ||
+        !ctx.options._init
+      )
+    ) {
       // clone tokens for this language and fix other languages in case they have missing language tokens
       addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
         next,
