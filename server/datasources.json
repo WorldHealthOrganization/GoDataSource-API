@@ -13,7 +13,8 @@
     "ignoreUndefined": true,
     "maxDepthOfQuery": 24,
     "lazyConnect": true,
-    "authSource": "admin"
+    "authSource": "admin",
+    "prohibitHiddenPropertiesInQuery": false
   },
   "email": {
     "name": "email",
