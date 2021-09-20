@@ -166,7 +166,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 5
+      buildNo: 9
     }]
   }]
 }, {
@@ -175,7 +175,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 3
+      buildNo: 11
     }, {
       name: 'checkAndRemoveLanguageTokens',
       buildNo: 3

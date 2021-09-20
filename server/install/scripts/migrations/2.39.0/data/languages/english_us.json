@@ -20,6 +20,30 @@
     "LNG_PAGE_EXPORT_DATA_EXPORT_FINISHING": {
       "translation": "Almost done...",
       "section": "uiExportData"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiSavedFiltersFields"
     }
   }
 }
