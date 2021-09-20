@@ -89,7 +89,8 @@ const createUpdateLanguageTokens = (languagesDirPath) => {
                       projection: {
                         _id: 1,
                         token: 1,
-                        translation: 1
+                        translation: 1,
+                        section: 1
                       }
                     })
                     .toArray()
@@ -100,7 +101,12 @@ const createUpdateLanguageTokens = (languagesDirPath) => {
                         tokensAlreadyHandled[languageTokenModel.token] = true;
 
                         // no change ?
-                        if (languageTokenModel.translation === languageFileData.tokens[languageTokenModel.token].translation) {
+                        if (
+                          languageTokenModel.translation === languageFileData.tokens[languageTokenModel.token].translation && (
+                            !languageFileData.tokens[languageTokenModel.token].section ||
+                            languageTokenModel.section === languageFileData.tokens[languageTokenModel.token].section
+                          )
+                        ) {
                           return;
                         }
 
@@ -114,7 +120,10 @@ const createUpdateLanguageTokens = (languagesDirPath) => {
                               _id: languageTokenModel._id
                             }, {
                               $set: {
-                                translation: languageFileData.tokens[languageTokenModel.token].translation
+                                translation: languageFileData.tokens[languageTokenModel.token].translation,
+                                section: languageFileData.tokens[languageTokenModel.token].section ?
+                                  languageFileData.tokens[languageTokenModel.token].section :
+                                  languageTokenModel.section
                               }
                             })
                         );
@@ -140,8 +149,8 @@ const createUpdateLanguageTokens = (languagesDirPath) => {
                               token,
                               tokenSortKey: token,
                               translation: languageFileData.tokens[token].translation,
-                              modules: languageFileData.tokens[token].translation.modules,
-                              section: languageFileData.tokens[token].translation.section,
+                              modules: languageFileData.tokens[token].modules,
+                              section: languageFileData.tokens[token].section,
                               deleted: false,
                               createdAt: common.install.timestamps.createdAt,
                               createdBy: 'system',
