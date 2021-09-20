@@ -15,7 +15,7 @@ const startServer = function (logger, startScheduler) {
   const got = require('got');
   const config = require('./config');
   const path = require('path');
-  const fs = require('fs');
+  const fs = require('fs-extra');
   const url = require('url');
   const v8 = require('v8');
 
@@ -30,7 +30,7 @@ const startServer = function (logger, startScheduler) {
       app.logger.exitProcessAfterFlush(1);
     } else {
       /* eslint-disable no-console */
-      console.error(e);
+      console.error(e && typeof e === 'object' && e.message ? e.message : e);
       /* eslint-enable no-console*/
       process.exit(1);
     }
@@ -51,6 +51,17 @@ const startServer = function (logger, startScheduler) {
     });
   } catch (err) {
     logger.debug('Failed to calculate heap statistics', err);
+  }
+
+  // before bootstraping loopback set the prohibitHiddenPropertiesInQuery = false in datasources.json if needed
+  // will throw error and process will stop on failure
+  const datasourcePath = path.resolve(__dirname + '/datasources.json');
+  const datasourceContents = fs.readJsonSync(datasourcePath);
+  if (_.get(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery') !== false) {
+    _.set(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery', false);
+    fs.writeJsonSync(datasourcePath, datasourceContents, {
+      spaces: 2
+    });
   }
 
   const loopback = require('loopback');
