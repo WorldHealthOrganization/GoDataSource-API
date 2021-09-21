@@ -44,6 +44,38 @@
     "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_AT": {
       "translation": "Updated at (UTC)",
       "section": "uiSavedFiltersFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS": {
+      "translation": "System Settings - modify saved filters",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION": {
+      "translation": "This permission allows modifying saved filters no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS": {
+      "translation": "System Settings - delete saved filters",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION": {
+      "translation": "This permission allows deleting saved filters no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT": {
+      "translation": "System Settings - modify saved imports",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION": {
+      "translation": "This permission allows modifying saved imports no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT": {
+      "translation": "System Settings - delete saved imports",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION": {
+      "translation": "This permission allows deleting saved imports no matter of who created them",
+      "section": "availablePermissions"
     }
   }
 }
