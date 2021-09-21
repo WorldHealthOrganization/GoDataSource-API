@@ -26,10 +26,15 @@ module.exports = function (ImportMapping) {
    */
   ImportMapping.beforeRemote('find', function (context, modelInstance, next) {
     // filter out records that you don't have access to
-    context.args.filter = ImportMapping.helpers.retrieveOnlyAllowedRecords(
-      context.req.authData.user.id,
-      context.args.filter
-    );
+    if (
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_import') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_import'].groupAllId) < 0
+    ) {
+      context.args.filter = ImportMapping.helpers.retrieveOnlyAllowedRecords(
+        context.req.authData.user.id,
+        context.args.filter
+      );
+    }
 
     // finished - continue
     next();
@@ -40,10 +45,15 @@ module.exports = function (ImportMapping) {
    */
   ImportMapping.beforeRemote('count', function (context, modelInstance, next) {
     // filter out records that you don't have access to
-    context.args.where = ImportMapping.helpers.retrieveOnlyAllowedRecords(
-      context.req.authData.user.id,
-      {where: _.get(context, 'args.where', {})}
-    ).where;
+    if (
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_import') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_import'].groupAllId) < 0
+    ) {
+      context.args.where = ImportMapping.helpers.retrieveOnlyAllowedRecords(
+        context.req.authData.user.id,
+        {where: _.get(context, 'args.where', {})}
+      ).where;
+    }
 
     // finished - continue
     next();
@@ -112,7 +122,11 @@ module.exports = function (ImportMapping) {
    */
   ImportMapping.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     // are we allowed to change this one ?
-    if (ImportMapping.helpers.isReadOnly(context.req.authData.user.id, context.instance)) {
+    if (
+      ImportMapping.helpers.isReadOnly(context.req.authData.user.id, context.instance) &&
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_import') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_import'].groupAllId) < 0
+    ) {
       // throw error
       next(app.utils.apiError.getError('ACCESS_DENIED', {
         accessErrors: 'Client is not allowed to change this record'
@@ -132,7 +146,11 @@ module.exports = function (ImportMapping) {
       .findById(context.args.id)
       .then((importMapping) => {
         // are we allowed to delete this one ?
-        if (ImportMapping.helpers.isReadOnly(context.req.authData.user.id, importMapping)) {
+        if (
+          ImportMapping.helpers.isReadOnly(context.req.authData.user.id, importMapping) &&
+          context.req.authData.user.permissionsList.indexOf('system_settings_delete_saved_import') < 0 &&
+          context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_delete_saved_import'].groupAllId) < 0
+        ) {
           // throw error
           next(app.utils.apiError.getError('ACCESS_DENIED', {
             accessErrors: 'Client is not allowed to delete this record'

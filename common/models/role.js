@@ -59,13 +59,33 @@ module.exports = function (Role) {
           id: 'system_settings_modify_saved_filters',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION',
-          requires: []
+          requires: [
+            'user_list_for_filters'
+          ]
         },
         {
           id: 'system_settings_delete_saved_filters',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION',
-          requires: []
+          requires: [
+            'system_settings_modify_saved_filters'
+          ]
+        },
+        {
+          id: 'system_settings_modify_saved_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'system_settings_delete_saved_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION',
+          requires: [
+            'system_settings_modify_saved_import'
+          ]
         }
       ]
     },
