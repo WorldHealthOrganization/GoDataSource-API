@@ -1434,7 +1434,8 @@ function exportFilteredModelsList(
               addRowCounted++;
               if (addRowCounted >= SHEET_LIMITS.XLSX.MAX_ROWS) {
                 // reset row count
-                addRowCounted = 0;
+                // - take in account that we need to account for columns row
+                addRowCounted = 1;
 
                 // close file
                 sheetHandler.process
