@@ -76,6 +76,12 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION": {
       "translation": "This permission allows deleting saved imports no matter of who created them",
       "section": "availablePermissions"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Sequencing Lab Name"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Sequencing Lab Name"
     }
   }
 }
