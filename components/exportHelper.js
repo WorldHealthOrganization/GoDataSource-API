@@ -665,10 +665,8 @@ function exportFilteredModelsList(
           dataFilter.projection._id = 1;
         }
 
-        // keep only visible fields
-        fieldsList = fieldsList.filter((field) => dataFilter.projection[field]);
-
         // clean fields that we don't need to export
+        const projectionAsArray = Object.keys(dataFilter.projection);
         Object.keys(fieldLabelsMap).forEach((field) => {
           // must exclude field ?
           let excludeField = !dataFilter.projection[field];
@@ -695,12 +693,35 @@ function exportFilteredModelsList(
                   break;
                 }
               }
+            } else {
+              // check if there is a child that includes it
+              const fieldAsParent = `${field}.`;
+              const fieldAsParentArray = `${field}[].`;
+              for (let projFieldIndex = 0; projFieldIndex < projectionAsArray.length; projFieldIndex++) {
+                if (
+                  projectionAsArray[projFieldIndex].startsWith(fieldAsParent) ||
+                  projectionAsArray[projFieldIndex].startsWith(fieldAsParentArray)
+                ) {
+                  // include field
+                  excludeField = false;
+
+                  // finished
+                  break;
+                }
+              }
             }
           }
 
           // check if we need to exclude field
           if (excludeField) {
+            // delete from map
             delete fieldLabelsMap[field];
+
+            // delete from list of exported fields
+            const fieldIndex = fieldsList.indexOf(field);
+            if (fieldIndex > -1) {
+              fieldsList.splice(fieldIndex, 1);
+            }
           }
         });
       }
@@ -710,6 +731,21 @@ function exportFilteredModelsList(
         Object.keys(modelOptions.arrayProps).forEach((arrayField) => {
           if (!fieldLabelsMap[arrayField]) {
             delete modelOptions.arrayProps[arrayField];
+          } else {
+            if (
+              dataFilter &&
+              !_.isEmpty(dataFilter.projection) &&
+              !dataFilter.projection[arrayField]
+            ) {
+              Object.keys(modelOptions.arrayProps[arrayField]).forEach((arrayFieldProperty) => {
+                if (
+                  !dataFilter.projection[`${arrayField}.${arrayFieldProperty}`] &&
+                  !dataFilter.projection[`${arrayField}[].${arrayFieldProperty}`]
+                ) {
+                  delete modelOptions.arrayProps[arrayField][arrayFieldProperty];
+                }
+              });
+            }
           }
         });
       }
@@ -4596,8 +4632,20 @@ function exportFilteredModelsList(
 
                                     // go through each property and translate both key & value
                                     for (const propertyKey in childValue) {
-                                      // check if we have a label for property
+                                      // get object path
                                       const path = `${prefix}.${propertyKey}`;
+
+                                      // check if we should exclude it
+                                      if (
+                                        dataFilter &&
+                                        dataFilter.projection &&
+                                        !dataFilter.projection[path]
+                                      ) {
+                                        // jump to next property
+                                        continue;
+                                      }
+
+                                      // check if we have a label for property
                                       const propPath = sheetHandler.useDbColumns ?
                                         undefined :
                                         sheetHandler.columns.labels[path];
