@@ -352,8 +352,8 @@
     "messagePattern": "This action has been blocked temporarily"
   },
   "LOGIN_FAILED": {
-    "defaultStatusCode": 422,
-    "messagePattern": "Login failed"
+    "defaultStatusCode": 401,
+    "messagePattern": "login failed"
   },
   "CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED": {
     "defaultStatusCode": 422,
