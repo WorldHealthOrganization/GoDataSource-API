@@ -3182,67 +3182,70 @@ module.exports = function (Outbreak) {
      * @returns {[]}
      */
     const createBatchActions = function (batchData) {
-      // build a list of create operations for this batch
-      const createContacts = [];
-      // go through all entries
-      batchData.forEach(function (recordData) {
-        const dataToSave = recordData.save;
-        createContacts.push(function (asyncCallback) {
-          // sync the contact
-          return app.utils.dbSync.syncRecord(logger, app.models.contact, dataToSave.contact, options)
-            .then(function (syncResult) {
-              const contactRecord = syncResult.record;
-              // promisify next step
-              return new Promise(function (resolve, reject) {
-                // normalize people
-                Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', dataToSave.relationship, true, function (error) {
-                  if (error) {
-                    // delete contact since contact was created without an error while relationship failed
-                    return app.models.contact.destroyById(
-                      contactRecord.id,
-                      () => {
-                        // return error
-                        return reject(error);
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.contact.addresses', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createContacts = [];
+          // go through all entries
+          batchData.forEach(function (recordData) {
+            const dataToSave = recordData.save;
+            createContacts.push(function (asyncCallback) {
+              // sync the contact
+              return app.utils.dbSync.syncRecord(logger, app.models.contact, dataToSave.contact, options)
+                .then(function (syncResult) {
+                  const contactRecord = syncResult.record;
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', dataToSave.relationship, true, function (error) {
+                      if (error) {
+                        // delete contact since contact was created without an error while relationship failed
+                        return app.models.contact.destroyById(
+                          contactRecord.id,
+                          () => {
+                            // return error
+                            return reject(error);
+                          }
+                        );
                       }
-                    );
-                  }
 
-                  // sync relationship
-                  return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
-                    .then(function () {
-                      // relationship successfully created, move to tne next one
-                      resolve();
-                    })
-                    .catch(function (error) {
-                      // failed to create relationship, remove the contact if it was created during sync
-                      if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                        contactRecord.destroy(options);
-                      }
-                      reject(error);
+                      // sync relationship
+                      return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                        .then(function () {
+                          // relationship successfully created, move to tne next one
+                          resolve();
+                        })
+                        .catch(function (error) {
+                          // failed to create relationship, remove the contact if it was created during sync
+                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                            contactRecord.destroy(options);
+                          }
+                          reject(error);
+                        });
                     });
+                  });
+                })
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: recordData.raw,
+                        save: recordData.save
+                      }
+                    }
+                  });
                 });
-              });
-            })
-            .then(function () {
-              asyncCallback();
-            })
-            .catch(function (error) {
-              // on error, store the error, but don't stop, continue with other items
-              asyncCallback(null, {
-                success: false,
-                error: {
-                  error: error,
-                  data: {
-                    file: recordData.raw,
-                    save: recordData.save
-                  }
-                }
-              });
             });
-        });
-      });
+          });
 
-      return createContacts;
+          return createContacts;
+        });
     };
 
     // construct options needed by the formatter worker

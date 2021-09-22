@@ -40,7 +40,8 @@ const worker = {
       case: './../baseModelOptions/case',
       event: './../baseModelOptions/event',
       contact: './../baseModelOptions/contact',
-      labResult: './../baseModelOptions/labResult'
+      labResult: './../baseModelOptions/labResult',
+      contactOfContact: './../baseModelOptions/contactOfContact'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {

@@ -1214,88 +1214,92 @@ const processImportableFileData = function (app, options, formatterOptions, batc
         logger.debug(`Received ${batchSize} items from worker`);
 
         // get operations to be executed for batch
-        const operations = batchHandler(batchData);
+        Promise.resolve()
+          .then(() => {
+            return batchHandler(batchData);
+          })
+          .then(operations => {
+            // run batch operations; will never error
+            // some actions support parallel processing some don't
+            async.parallelLimit(operations, options.parallelActionsLimit || 1, function (err, results) {
+              // check results and increase counters
+              const createErrors = [];
+              results.forEach((itemResult, index) => {
+                if (!itemResult || itemResult.success !== false) {
+                  // success
+                  importSuccess++;
+                  return;
+                }
 
-        // run batch operations; will never error
-        // some actions support parallel processing some don't
-        async.parallelLimit(operations, options.parallelActionsLimit || 1, function (err, results) {
-          // check results and increase counters
-          const createErrors = [];
-          results.forEach((itemResult, index) => {
-            if (!itemResult || itemResult.success !== false) {
-              // success
-              importSuccess++;
-              return;
-            }
+                // item failed
+                importErrors++;
 
-            // item failed
-            importErrors++;
+                createErrors.push(Object.assign({
+                  _id: uuid.v4(),
+                  importLogId: importLogEntry.id,
+                  recordNo: processed + index + 1,
+                  deleted: false
+                }, itemResult.error || {}));
+              });
 
-            createErrors.push(Object.assign({
-              _id: uuid.v4(),
-              importLogId: importLogEntry.id,
-              recordNo: processed + index + 1,
-              deleted: false
-            }, itemResult.error || {}));
-          });
+              // increase processed counter
+              processed += batchSize;
+              logger.debug(`Resources processed: ${processed}/${total}`);
 
-          // increase processed counter
-          processed += batchSize;
-          logger.debug(`Resources processed: ${processed}/${total}`);
+              // finished batch
+              batchInProgress = false;
 
-          // finished batch
-          batchInProgress = false;
-
-          // save any errors
-          if (createErrors.length) {
-            saveErrorsFromBatch(createErrors);
-          }
-
-          // check if we still have data to process
-          if (processed < total) {
-            // check if worker is still active
-            if (!stoppedWorker) {
-              logger.debug('Processing next batch');
-
-              // save log entry
-              const updatePayload = {
-                processedNo: processed
-              };
-              if (importErrors) {
-                updatePayload.result = app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                  model: options.modelName,
-                  success: importSuccess,
-                  failed: importErrors
-                });
+              // save any errors
+              if (createErrors.length) {
+                saveErrorsFromBatch(createErrors);
               }
-              importLogEntry
-                .updateAttributes(updatePayload)
-                .catch(err => {
-                  logger.debug(`Import in progress but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
-                })
-                .then(() => {
-                  // get next batch; doesn't matter if import log entry update succeeded or failed
-                  sendMessageToWorker({
-                    subject: 'nextBatch'
-                  });
-                });
-            } else {
-              // save response with data that we have until now
+
+              // check if we still have data to process
+              if (processed < total) {
+                // check if worker is still active
+                if (!stoppedWorker) {
+                  logger.debug('Processing next batch');
+
+                  // save log entry
+                  const updatePayload = {
+                    processedNo: processed
+                  };
+                  if (importErrors) {
+                    updatePayload.result = app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+                      model: options.modelName,
+                      success: importSuccess,
+                      failed: importErrors
+                    });
+                  }
+                  importLogEntry
+                    .updateAttributes(updatePayload)
+                    .catch(err => {
+                      logger.debug(`Import in progress but import log entry (${importLogEntry.id}) update failed with error ${err}. Import log payload: ${JSON.stringify(updatePayload)}`);
+                    })
+                    .then(() => {
+                      // get next batch; doesn't matter if import log entry update succeeded or failed
+                      sendMessageToWorker({
+                        subject: 'nextBatch'
+                      });
+                    });
+                } else {
+                  // save response with data that we have until now
+                  updateImportLogEntry();
+                }
+
+                return;
+              }
+
+              // all data has been processed
+              logger.debug('All data was processed');
+              // stop child process if not already stopped
+              if (!stoppedWorker) {
+                stopWorker();
+              }
+
               updateImportLogEntry();
-            }
-
-            return;
-          }
-
-          // all data has been processed
-          logger.debug('All data was processed');
-          // stop child process if not already stopped
-          if (!stoppedWorker) {
-            stopWorker();
-          }
-
-          updateImportLogEntry();
-        });
+            });
+          });
 
         break;
       }

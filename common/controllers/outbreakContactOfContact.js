@@ -16,6 +16,11 @@ const apiError = require('../../components/apiError');
 const Config = require('../../server/config.json');
 const WorkerRunner = require('./../../components/workerRunner');
 const exportHelper = require('./../../components/exportHelper');
+const Platform = require('../../components/platform');
+const importableFile = require('./../../components/importableFile');
+
+// used in contact of contact import
+const contactOfContactImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
   /**
@@ -664,5 +669,128 @@ module.exports = function (Outbreak) {
             });
         });
       });
+  };
+
+  /**
+   * Import an importable contacts of contacts file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableContactsOfContactsFileUsingMap = function (body, options, callback) {
+    const self = this;
+
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.contactOfContact.addresses', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createContactsOfContacts = [];
+          // go through all entries
+          batchData.forEach(function (recordData) {
+            const dataToSave = recordData.save;
+
+            createContactsOfContacts.push(function (asyncCallback) {
+              // sync the record
+              return app.utils.dbSync.syncRecord(logger, app.models.contactOfContact, dataToSave.contactOfContact, options)
+                .then(function (syncResult) {
+                  const syncedRecord = syncResult.record;
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(
+                      self.id,
+                      syncedRecord.id,
+                      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
+                      dataToSave.relationship,
+                      true,
+                      function (error) {
+                        if (error) {
+                          // delete record since it was created without an error while relationship failed
+                          return app.models.contactOfContact.destroyById(
+                            syncedRecord.id,
+                            () => {
+                              // return error
+                              return reject(error);
+                            }
+                          );
+                        }
+
+                        // sync relationship
+                        return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                          .then(function () {
+                            // relationship successfully created, move to tne next one
+                            resolve();
+                          })
+                          .catch(function (error) {
+                            // failed to create relationship, remove the record if it was created during sync
+                            if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                              syncedRecord.destroy(options);
+                            }
+                            reject(error);
+                          });
+                      });
+                  });
+                })
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: recordData.raw,
+                        save: recordData.save
+                      }
+                    }
+                  });
+                });
+            });
+          });
+
+          return createContactsOfContacts;
+        });
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.contactOfContact._booleanProperties) {
+      app.models.contactOfContact._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.contactOfContact);
+    }
+    if (!app.models.relationship._booleanProperties) {
+      app.models.relationship._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.relationship);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'contactOfContact',
+      batchSize: contactOfContactImportBatchSize,
+      outbreakId: self.id,
+      contactOfContactModelBooleanProperties: app.models.contactOfContact._booleanProperties,
+      relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
+      contactOfContactImportableTopLevelProperties: app.models.contactOfContact._importableTopLevelProperties,
+      relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.contactOfContact.modelName,
+      outbreakId: self.id,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 };
