@@ -8319,11 +8319,8 @@
       ],
       "returns": [
         {
-          "arg": "contacts",
-          "type": [
-            "contact"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],

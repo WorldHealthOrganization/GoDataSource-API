@@ -1731,36 +1731,39 @@ module.exports = function (Outbreak) {
      * Create array of actions that will be executed in series for each batch
      * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
      * @param {Array} batchData - Batch data
-     * @returns {[]}
+     * @returns {Promise<*[]>}
      */
     const createBatchActions = function (batchData) {
-      // build a list of create operations for this batch
-      const createCases = [];
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.addresses', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createCases = [];
 
-      // go through all batch entries
-      batchData.forEach(function (caseData) {
-        createCases.push(function (asyncCallback) {
-          // sync the case
-          return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
-            .then(function () {
-              asyncCallback();
-            })
-            .catch(function (error) {
-              asyncCallback(null, {
-                success: false,
-                error: {
-                  error: error,
-                  data: {
-                    file: caseData.raw,
-                    save: caseData.save
-                  }
-                }
-              });
+          // go through all batch entries
+          batchData.forEach(function (caseData) {
+            createCases.push(function (asyncCallback) {
+              // sync the case
+              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: caseData.raw,
+                        save: caseData.save
+                      }
+                    }
+                  });
+                });
             });
-        });
-      });
+          });
 
-      return createCases;
+          return createCases;
+        });
     };
 
     // construct options needed by the formatter worker

@@ -262,33 +262,36 @@ module.exports = function (Outbreak) {
      * @returns {[]}
      */
     const createBatchActions = function (batchData) {
-      // build a list of create operations for this batch
-      const createEvents = [];
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.address', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createEvents = [];
 
-      // go through all batch entries
-      batchData.forEach(function (eventData) {
-        createEvents.push(function (asyncCallback) {
-          // sync the event
-          return app.utils.dbSync.syncRecord(logger, app.models.event, eventData.save, options)
-            .then(function () {
-              asyncCallback();
-            })
-            .catch(function (error) {
-              asyncCallback(null, {
-                success: false,
-                error: {
-                  error: error,
-                  data: {
-                    file: eventData.raw,
-                    save: eventData.save
-                  }
-                }
-              });
+          // go through all batch entries
+          batchData.forEach(function (eventData) {
+            createEvents.push(function (asyncCallback) {
+              // sync the event
+              return app.utils.dbSync.syncRecord(logger, app.models.event, eventData.save, options)
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: eventData.raw,
+                        save: eventData.save
+                      }
+                    }
+                  });
+                });
             });
-        });
-      });
+          });
 
-      return createEvents;
+          return createEvents;
+        });
     };
 
     // construct options needed by the formatter worker

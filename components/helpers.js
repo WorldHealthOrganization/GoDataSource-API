@@ -18,7 +18,7 @@ const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
 const EpiWeek = require('epi-week');
 const config = require('../server/config');
-const { performance } = require('perf_hooks');
+const {performance} = require('perf_hooks');
 
 const arrayFields = {
   'addresses': 'address',
@@ -2601,6 +2601,99 @@ const attachDuplicateKeys = (
   }
 };
 
+/**
+ * Fill geoLocation information for items in data
+ * @param {Array} data - List of items that need to be checked for geolocation information
+ * @param {string} addressPath - Path to an item's address/addresses
+ * @param {Object} app - Loopback app
+ * @returns {Promise<void>|*}
+ */
+const fillGeoLocationInformation = (data, addressPath, app) => {
+  // create map of locations for which we need to get lat/lng information to the paths that need to be filled
+  const locationsToFillPathsMap = data.reduce((acc, item, itemIndex) => {
+    const address = _.get(item, addressPath);
+    if (!address) {
+      return acc;
+    }
+
+    // normalize item address to array of addresses to continue with only one code
+    let isArray = true;
+    let addressesArray;
+    if (!Array.isArray(address)) {
+      addressesArray = [address];
+      isArray = false;
+    } else {
+      addressesArray = address;
+    }
+
+    addressesArray.forEach((address, addressIndex) => {
+      const addressLat = _.get(address, 'geoLocation.lat');
+      const addressLng = _.get(address, 'geoLocation.lng');
+      const addressLatSet = addressLat || addressLat === 0;
+      const addressLngSet = addressLng || addressLng === 0;
+
+      // stop if locationId is not set or both geolocation properties are set
+      if (
+        !address.locationId ||
+        addressLatSet && addressLngSet
+      ) {
+        return;
+      }
+
+      // add paths that will need to be filled with lat/lng for the address
+      if (!acc[address.locationId]) {
+        acc[address.locationId] = {
+          lat: [],
+          lng: []
+        };
+      }
+
+      // set both lat/lng; doesn't matter if one of them is sent
+      acc[address.locationId].lat.push(`${itemIndex}.${addressPath}${isArray ? `.${addressIndex}` : ''}.geoLocation.lat`);
+      acc[address.locationId].lng.push(`${itemIndex}.${addressPath}${isArray ? `.${addressIndex}` : ''}.geoLocation.lng`);
+    });
+
+    return acc;
+  }, {});
+
+  const locationIds = Object.keys(locationsToFillPathsMap);
+
+  // stop if there are no locations to be retrieved
+  if (!locationIds.length) {
+    return Promise.resolve();
+  }
+
+  // get locations and fill recorded paths with the needed information
+  return app.models.location
+    .rawFind({
+      _id: {
+        '$in': locationIds
+      }
+    }, {
+      projection: {
+        geoLocation: 1
+      }
+    })
+    .then(locations => {
+      locations.forEach(location => {
+        const locationCoordinates = _.get(location, 'geoLocation.coordinates', []);
+        if (!locationCoordinates.length) {
+          return;
+        }
+
+        const pathsToFill = locationsToFillPathsMap[location.id];
+        pathsToFill.lat.forEach(path => {
+          _.set(data, path, location.geoLocation.coordinates[1]);
+        });
+        pathsToFill.lng.forEach(path => {
+          _.set(data, path, location.geoLocation.coordinates[0]);
+        });
+      });
+
+      return Promise.resolve();
+    });
+};
+
 Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2661,5 +2754,6 @@ Object.assign(module.exports, {
   processMapLists: processMapLists,
   remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap,
   getDuplicateKey,
-  attachDuplicateKeys
+  attachDuplicateKeys,
+  fillGeoLocationInformation
 });
