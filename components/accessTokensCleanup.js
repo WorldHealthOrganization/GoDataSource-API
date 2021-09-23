@@ -11,8 +11,11 @@ module.exports = function (logger) {
     const MongoDBHelper = require('./mongoDBHelper');
     MongoDBHelper
       .executeAction('accessToken', 'remove', [{}])
+      .then(() => {
+        logger.debug('Success removing existing access tokens on restart');
+      })
       .catch(err => {
-        logger.debug(`Failed removing existing access tokens on restart: ${err}`);
+        logger.error(`Failed removing existing access tokens on restart: ${err}`);
       });
   }
 };
