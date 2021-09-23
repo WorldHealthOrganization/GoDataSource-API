@@ -9,6 +9,10 @@ const Async = require('async');
 let Sharp = null;
 try {
   // load lib
+  // !!!!!!!!!!!!!!!!!!
+  // Note: Updating sharp library over version 0.28.3 will break current functionality in case of error as sharp will close the process and no longer throw error
+  // See /lib/sharp.js in 0.29+ versions of sharp
+  // !!!!!!!!!!!!!!!!!!
   Sharp = require('sharp');
 
   // do not allow concurrent executions
