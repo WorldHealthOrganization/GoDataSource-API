@@ -4639,7 +4639,8 @@ function exportFilteredModelsList(
                                       if (
                                         dataFilter &&
                                         dataFilter.projection &&
-                                        !dataFilter.projection[path]
+                                        !dataFilter.projection[path] &&
+                                        !sheetHandler.columns.labels[path]
                                       ) {
                                         // jump to next property
                                         continue;
