@@ -78,10 +78,52 @@
       "section": "availablePermissions"
     },
     "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
-      "translation": "Sequencing Lab Name"
+      "translation": "Sequencing Lab Name",
+      "section": "uiLabResultsFields"
     },
     "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
-      "translation": "Sequencing Lab Name"
+      "translation": "Sequencing Lab Name",
+      "section": "referenceDataCategoryLabSeqResult"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE": {
+      "translation": "Matches filter",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE_DESCRIPTION": {
+      "translation": "Nodes matching snapshot filters will be surrounded by double border of this color",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab Sequence Colour",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE": {
+      "translation": "Has more sequences",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE_DESCRIPTION": {
+      "translation": "Node has more than one lab results with sequence information. Only the most recent one is displayed",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
+      "translation": "There is no data that matches the search criteria",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_LAB_RESULTS_SEQUENCE_DATA": {
+      "translation": "Show lab results sequence data",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_FIRST_NAME_LABEL": {
+      "translation": "First name",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAST_NAME_LABEL": {
+      "translation": "Last name",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAB_SEQ_RESULT_LABEL": {
+      "translation": "Lab result sequence result",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
     }
   }
 }
