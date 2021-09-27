@@ -78,11 +78,11 @@
       "section": "availablePermissions"
     },
     "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
-      "translation": "Sequencing Lab Name",
+      "translation": "Variant Lab Name",
       "section": "uiLabResultsFields"
     },
     "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
-      "translation": "Sequencing Lab Name",
+      "translation": "Variant Lab Name",
       "section": "referenceDataCategoryLabSeqResult"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE": {
@@ -94,15 +94,15 @@
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
-      "translation": "Lab Sequence Colour",
+      "translation": "Lab Variant Colour",
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE": {
-      "translation": "Has more sequences",
+      "translation": "Has more variants",
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE_DESCRIPTION": {
-      "translation": "Node has more than one lab results with sequence information. Only the most recent one is displayed",
+      "translation": "Node has more than one lab results with variant information. Only the most recent one is displayed",
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
@@ -110,7 +110,7 @@
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_LAB_RESULTS_SEQUENCE_DATA": {
-      "translation": "Show lab results sequence data",
+      "translation": "Show lab results variant data",
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_FIRST_NAME_LABEL": {
@@ -122,8 +122,26 @@
       "section": "uiChainsOfTransmissionSnapshotFilter"
     },
     "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAB_SEQ_RESULT_LABEL": {
-      "translation": "Lab result sequence result",
+      "translation": "Lab result variant result",
       "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant result"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE": {
+      "translation": "Variant"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_HAS_SEQUENCE": {
+      "translation": "Has variant?"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_SAMPLE_SENT": {
+      "translation": "Date sample sent for determining variant"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT": {
+      "translation": "Variant result date"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT": {
+      "translation": "Variant result"
     }
   }
 }
