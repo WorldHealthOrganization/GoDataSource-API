@@ -210,6 +210,33 @@ module.exports = function (User) {
 
             return Promise.resolve();
           })
+          .then(() => {
+            // no language ?
+            if (!user.languageId) {
+              return;
+            }
+
+            // check if language exits
+            return app.models.language
+              .findOne({
+                where: {
+                  id: user.languageId
+                }
+              })
+              .then((language) => {
+                // language found ?
+                if (language) {
+                  return;
+                }
+
+                // no language, then reset to english
+                user.languageId = 'english_us';
+                return user
+                  .updateAttributes({
+                    languageId: user.languageId
+                  });
+              });
+          })
           .then(() => next());
       })
       .catch(next);
