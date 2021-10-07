@@ -1,0 +1,9 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_NOT_SELECTED_OUTBREAK": {
+      "translation": "The proper outbreak isn't selected",
+      "section": "uiLocationsUsageListPage"
+    }
+  }
+}
