@@ -190,7 +190,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 2
+      buildNo: 3
     }]
   }]
 }];
