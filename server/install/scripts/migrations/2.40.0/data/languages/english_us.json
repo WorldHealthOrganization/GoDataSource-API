@@ -4,6 +4,10 @@
     "LNG_PAGE_LIST_USAGE_LOCATIONS_NOT_SELECTED_OUTBREAK": {
       "translation": "The proper outbreak isn't selected",
       "section": "uiLocationsUsageListPage"
+    },
+    "LNG_API_ERROR_CODE_REFERENCE_ENTRY_NAME_NOT_UNIQUE": {
+      "translation": "Reference entry with name '{{name}}' exists already",
+      "section": "uiAPIErrors"
     }
   }
 }
