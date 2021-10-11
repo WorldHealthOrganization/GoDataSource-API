@@ -11,7 +11,10 @@
     },
     "LNG_API_ERROR_CODE_PASSWORD_RECOVERY_FAILED": {
       "translation": "Information provided is incorrect",
-      "section": "uiAPIErrors"
+      "section": "uiAPIErrors",
+      "modules": [
+        "unauthenticated"
+      ]
     }
   }
 }
