@@ -8,6 +8,10 @@
     "LNG_API_ERROR_CODE_REFERENCE_ENTRY_NAME_NOT_UNIQUE": {
       "translation": "Reference entry with name '{{name}}' exists already",
       "section": "uiAPIErrors"
+    },
+    "LNG_API_ERROR_CODE_PASSWORD_RECOVERY_FAILED": {
+      "translation": "Information provided is incorrect",
+      "section": "uiAPIErrors"
     }
   }
 }
