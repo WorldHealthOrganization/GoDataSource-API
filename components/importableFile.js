@@ -829,6 +829,15 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
               const normalizedModelProperties = assocModelOptions.importableProperties.map(function (property) {
                 // split the property in sub components
                 const propertyComponents = property.split('.');
+
+                // retrieve normalized token
+                const normalizedToken = fieldLabelsMap[property] ?
+                  fieldLabelsMap[property] : (
+                    property && property.indexOf('[]') && fieldLabelsMap[property.replace(/\[]/g, '')] ?
+                      fieldLabelsMap[property.replace(/\[]/g, '')] :
+                      fieldLabelsMap[property]
+                  );
+
                 // if there are sub components
                 if (propertyComponents.length > 1) {
                   // define parent component
@@ -849,9 +858,9 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
                   }
                 } else {
                   // no sub components, store property directly
-                  results[modelName].modelProperties[property] = fieldLabelsMap[property];
+                  results[modelName].modelProperties[property] = normalizedToken;
                 }
-                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(fieldLabelsMap[property]));
+                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(normalizedToken));
               });
 
               // try to find mapping suggestions between file headers and model headers (property labels)
