@@ -154,13 +154,12 @@ function getChunkFilters(
   baseFilter,
   filter,
   resultKey,
-  chunkKey
+  recordsIds
 ) {
   // initiate filters
   const filters = [];
 
   // check if we need to filter for specific records
-  const recordsIds = _.get(filter, `where.${chunkKey}`);
   if (recordsIds) {
     // split into chunks since we can't send as many ids as we want
     _.chunk(
@@ -211,7 +210,7 @@ function addPersonMongoFilter(collectionName, baseFilter, filter) {
     baseFilter,
     filter,
     '_id',
-    'personsIds'
+    _.get(filter, 'where.personsIds')
   );
 }
 
@@ -224,12 +223,36 @@ function addPersonMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addLabResultMongoFilter(collectionName, baseFilter, filter) {
+  // merge case ids with contact ids
+  const caseIds = _.get(filter, 'where.casesIds');
+  const contactIds = _.get(filter, 'where.contactsIds');
+  const caseAndContactIds = [];
+
+  // case ids
+  if (
+    caseIds &&
+    Array.isArray(caseIds)
+  ) {
+    caseAndContactIds.push(...caseIds);
+  }
+
+  // contact ids
+  if (
+    contactIds &&
+    Array.isArray(contactIds)
+  ) {
+    caseAndContactIds.push(...contactIds);
+  }
+
+  // get chunks
   return getChunkFilters(
     collectionName,
     baseFilter,
     filter,
     'personId',
-    'casesIds'
+    caseIds || contactIds ?
+      caseAndContactIds :
+      caseIds
   );
 }
 
@@ -247,7 +270,7 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
     baseFilter,
     filter,
     'personId',
-    'contactsIds'
+    _.get(filter, 'where.contactsIds')
   );
 
   // attach teams to filters
@@ -282,7 +305,7 @@ function addRelationshipMongoFilter(collectionName, baseFilter, filter) {
     baseFilter,
     filter,
     '_id',
-    'relationshipsIds'
+    _.get(filter, 'where.relationshipsIds')
   );
 }
 
