@@ -1117,12 +1117,22 @@ module.exports = function (Person) {
                         ]
                       })
                       .then(function (followUps) {
-                        // map follow-ups back to people
+                        // !!!!!!!!!!!!!!!!!!
+                        // Note: for contacts we need to return only the ones with follow-ups in the given dates
+                        // Filtering the people map here to avoid refactoring at this point
+                        // In this case we should have first retrieve the follow-ups for the given date range and then get only the related people
+                        // !!!!!!!!!!!!!!!!!!
+                        const result = {};
+
+                        // map follow-ups to people
                         followUps.forEach(function (followUp) {
-                          peopleMap[followUp.personId].followUps.push(followUp);
+                          if (!result[followUp.personId]) {
+                            result[followUp.personId] = peopleMap[followUp.personId];
+                          }
+                          result[followUp.personId].followUps.push(followUp);
                         });
                         // return the list of people
-                        resolve(Object.values(peopleMap));
+                        resolve(Object.values(result));
                       });
                   }
                 })
@@ -1275,7 +1285,7 @@ module.exports = function (Person) {
     }
 
     // last - middle name condition
-    const lastMiddleName = helpers.getDuplicateKey(targetBody,['lastName', 'middleName']);
+    const lastMiddleName = helpers.getDuplicateKey(targetBody, ['lastName', 'middleName']);
     if (lastMiddleName) {
       query.$or.push({
         'duplicateKeys.name': lastMiddleName
