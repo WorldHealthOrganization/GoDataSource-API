@@ -481,47 +481,105 @@ module.exports = function (ReferenceData) {
       return next();
     }
 
-    // check if the reference data is editable
-    if (!context.isNewInstance) {
-      // if its not editable, it will send an error to the callback
-      ReferenceData.isEntryEditable(context.currentInstance, function (error) {
-        // if the error says the instance is not editable
-        if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
-          // and if data was sent
-          if (context.data) {
-            // in case we're trying to delete this record there is no point in setting data since that won't be saved
-            if (context.data.deleted) {
+    let checkInstanceUniqueness = Promise.resolve();
+
+    // TODO on update if the label is not sent we need to get it from the language token as on the original instance we have the actual token
+
+    const data = context.isNewInstance || !context.data ? context.instance : context.data;
+    if (
+      // should check for uniqueness when
+      // not in init/migrate database
+      (
+        !context.options ||
+        !context.options._init
+      ) &&
+      // instance is not being deleted
+      data &&
+      !data.deleted &&
+      // instance contains both categoryId and value
+      data.categoryId &&
+      data.value
+    ) {
+      // check if the combination of value and category already exists
+      checkInstanceUniqueness = app.models.languageToken
+        .rawFind({
+          translation: data.value,
+          languageId: context.options.remotingContext.req.authData.user.languageId
+        }, {
+          projection: {token: 1}
+        })
+        .then(tokensWithSameLabel => {
+          if (!tokensWithSameLabel.length) {
+            // no tokens with the same translation; continue
+            return Promise.resolve({
+              count: 0
+            });
+          }
+
+          return app.models.referenceData.rawCountDocuments({
+            where: {
+              value: {
+                $in: tokensWithSameLabel.map(token => token.token)
+              },
+              categoryId: data.categoryId
+            }
+          });
+        })
+        .then(result => {
+          if (result.count) {
+            // there are tokens with the same label and categoryId
+            return Promise.reject(app.utils.apiError.getError('MODEL_CONFLICT', {
+              id: data.value
+            }));
+          }
+        });
+    }
+
+    checkInstanceUniqueness
+      .then(() => {
+        // check if the reference data is editable
+        if (!context.isNewInstance) {
+          // if its not editable, it will send an error to the callback
+          ReferenceData.isEntryEditable(context.currentInstance, function (error) {
+            // if the error says the instance is not editable
+            if (error && ['MODEL_NOT_EDITABLE', 'MODEL_IN_USE'].indexOf(error.code) !== -1) {
+              // and if data was sent
+              if (context.data) {
+                // in case we're trying to delete this record there is no point in setting data since that won't be saved
+                if (context.data.deleted) {
+                  return next(error);
+                }
+
+                // allow customizing some safe properties
+                const customizableProperties = ['iconId', 'colorCode', 'order', 'code'];
+
+                // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
+                if (error.code === 'MODEL_IN_USE') {
+                  customizableProperties.push('active', 'value', 'description');
+                }
+
+                const data = {};
+                // exclude all unsafe properties from request
+                Object.keys(context.data).forEach(function (property) {
+                  if (customizableProperties.indexOf(property) !== -1) {
+                    data[property] = context.data[property];
+                  }
+                });
+                context.data = data;
+              }
+            } else if (error) {
+              // unhandled error
               return next(error);
             }
-
-            // allow customizing some safe properties
-            const customizableProperties = ['iconId', 'colorCode', 'order', 'code'];
-
-            // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
-            if (error.code === 'MODEL_IN_USE') {
-              customizableProperties.push('active', 'value', 'description');
-            }
-
-            const data = {};
-            // exclude all unsafe properties from request
-            Object.keys(context.data).forEach(function (property) {
-              if (customizableProperties.indexOf(property) !== -1) {
-                data[property] = context.data[property];
-              }
-            });
-            context.data = data;
-          }
-        } else if (error) {
-          // unhandled error
-          return next(error);
+            // prepare language tokens for translation
+            prepareLanguageTokens(context, next);
+          });
+        } else {
+          // prepare language tokens for translation
+          prepareLanguageTokens(context, next);
         }
-        // prepare language tokens for translation
-        prepareLanguageTokens(context, next);
-      });
-    } else {
-      // prepare language tokens for translation
-      prepareLanguageTokens(context, next);
-    }
+      })
+      .catch(next);
   });
 
   // add after save hooks
