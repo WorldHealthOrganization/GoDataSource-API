@@ -597,9 +597,6 @@ module.exports = function (Outbreak) {
     _.unset(context, 'args.filter.where.noRelationships');
 
     if (noRelationship) {
-      // remove count relations custom flag
-      _.unset(context, 'args.filter.where.countRelations');
-
       // attach additional filtering for cases that have no relationships
       context.args.filter = app.utils.remote
         .mergeFilters({

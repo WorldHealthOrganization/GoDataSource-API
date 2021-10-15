@@ -72,6 +72,8 @@ const constants = {
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'numberOfExposures': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES',
+    'numberOfContacts': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'dateRanges[].typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',
     'dateRanges[].startDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_START_DATE',

@@ -38,8 +38,6 @@ module.exports = function (Outbreak) {
     filter = filter || {};
     filter.where = filter.where || {};
 
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
     filter.where = {
       and: [
         filter.where, {
@@ -47,16 +45,6 @@ module.exports = function (Outbreak) {
         }
       ]
     };
-
-    // make sure we retrieve data needed to determine contacts & exposures
-    if (
-      countRelations &&
-      filter.fields &&
-      filter.fields.length > 0 &&
-      filter.fields.indexOf('relationshipsRepresentation') < 0
-    ) {
-      filter.fields.push('relationshipsRepresentation');
-    }
 
     // add geographical restriction to filter if needed
     app.models.event
@@ -68,15 +56,7 @@ module.exports = function (Outbreak) {
           .find(filter);
       })
       .then((records) => {
-        if (countRelations) {
-          // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(records);
-
-          // finished
-          return callback(null, records);
-        } else {
-          return callback(null, records);
-        }
+        callback(null, records);
       })
       .catch(callback);
   };
@@ -87,7 +67,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountEvents', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
@@ -131,7 +111,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredEvents', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });

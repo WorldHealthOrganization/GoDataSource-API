@@ -1559,7 +1559,11 @@ function run(callback) {
                                   _id: person.id
                                 }, {
                                   '$set': {
-                                    hasRelationships: true
+                                    hasRelationships: true,
+
+                                    // #TODO - must update script to count person relationships to determine no. of exposures and contacts
+                                    numberOfContacts: 0,
+                                    numberOfExposures: 0
                                   },
                                   '$addToSet': {
                                     relationshipsRepresentation: {

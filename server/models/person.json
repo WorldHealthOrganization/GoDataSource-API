@@ -175,6 +175,14 @@
         "personRelationshipRepresentation"
       ]
     },
+    "numberOfExposures": {
+      "type": "number",
+      "default": 0
+    },
+    "numberOfContacts": {
+      "type": "number",
+      "default": 0
+    },
     "notDuplicatesIds": {
       "description": "Array containing IDs for persons that system detected as possible duplicates but they aren't duplicates",
       "type": [

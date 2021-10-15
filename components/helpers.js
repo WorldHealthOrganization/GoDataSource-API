@@ -2259,15 +2259,6 @@ const attachLocations = function (targetModel, locationModel, records, callback)
   );
 };
 
-const removeFilterOptions = function (filter, options) {
-  filter = filter || {};
-  filter.where = filter.where || {};
-  for (let opt of options) {
-    delete filter.where[opt];
-  }
-  return filter;
-};
-
 /**
  * Retrieve enabled captcha items
  * @returns {{login: boolean, forgotPassword: boolean, resetPasswordQuestions: boolean}|{}}
@@ -2694,6 +2685,27 @@ const fillGeoLocationInformation = (data, addressPath, app) => {
     });
 };
 
+// update number of contacts and exposures for a person
+const countPeopleContactsAndExposures = function (record) {
+  // initialize number of contacts / exposures
+  const result = {
+    numberOfContacts: 0,
+    numberOfExposures: 0
+  };
+
+  // go through relationship data and determine contacts / exposures count
+  (record.relationshipsRepresentation || []).forEach((relData) => {
+    if (relData.source) {
+      result.numberOfContacts++;
+    } else {
+      result.numberOfExposures++;
+    }
+  });
+
+  // finish
+  return result;
+};
+
 Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2745,7 +2757,6 @@ Object.assign(module.exports, {
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,
-  removeFilterOptions: removeFilterOptions,
   getCaptchaConfig: getCaptchaConfig,
   handleActionsInBatches: handleActionsInBatches,
   extractVariablesAndAnswerOptions: extractVariablesAndAnswerOptions,
@@ -2755,5 +2766,6 @@ Object.assign(module.exports, {
   remapPropertiesUsingProcessedMap: remapPropertiesUsingProcessedMap,
   getDuplicateKey,
   attachDuplicateKeys,
-  fillGeoLocationInformation
+  fillGeoLocationInformation,
+  countPeopleContactsAndExposures
 });
