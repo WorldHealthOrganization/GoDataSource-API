@@ -15,6 +15,8 @@ module.exports = function (Event) {
     deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
+    'numberOfExposures': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
+    'numberOfContacts': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'name': 'LNG_EVENT_FIELD_LABEL_NAME',
     'date': 'LNG_EVENT_FIELD_LABEL_DATE',
     'dateOfReporting': 'LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING',
@@ -59,7 +61,9 @@ module.exports = function (Event) {
         'dateOfReporting',
         'isDateOfReportingApproximate',
         'description',
-        'responsibleUserId'
+        'responsibleUserId',
+        'numberOfExposures',
+        'numberOfContacts'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {

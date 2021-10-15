@@ -199,6 +199,9 @@ module.exports = function (Outbreak) {
             const itemAction = function (item) {
               // get remaining relationships
               let remainingRelationships = item.relatedRelationships.filter(rel => !item.deleteRelationships.includes(rel.id));
+              const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                relationshipsRepresentation: remainingRelationships
+              });
 
               return app.models.person
                 .rawUpdateOne({
@@ -206,7 +209,9 @@ module.exports = function (Outbreak) {
                 }, {
                   // no need to update hasRelationships flag as for contacts will not change
                   // hasRelationships: !!remainingRelationships.length,
-                  relationshipsRepresentation: remainingRelationships
+                  relationshipsRepresentation: remainingRelationships,
+                  numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
+                  numberOfExposures: noOfExposuresAndContacts.numberOfExposures
                 }, options, {
                   returnUpdatedResource: false
                 });
@@ -248,13 +253,18 @@ module.exports = function (Outbreak) {
             const itemAction = function (item) {
               // get remaining relationships
               let remainingRelationships = item.relationshipsRepresentation.filter(rel => !data.otherPersons[item.id].deleteRelationships.includes(rel.id));
+              const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                relationshipsRepresentation: remainingRelationships
+              });
 
               return app.models.person
                 .rawUpdateOne({
                   _id: item.id
                 }, {
                   hasRelationships: !!remainingRelationships.length,
-                  relationshipsRepresentation: remainingRelationships
+                  relationshipsRepresentation: remainingRelationships,
+                  numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
+                  numberOfExposures: noOfExposuresAndContacts.numberOfExposures
                 }, options, {
                   returnUpdatedResource: false
                 });
@@ -345,18 +355,6 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
-
-  Outbreak.beforeRemote('prototype.exportFilteredRelationships', function (context, modelInstance, next) {
-    // remove custom filter options
-    // technical debt from front end
-    context.args = context.args || {};
-    context.args.filter = context.args.filter || {};
-    context.args.filter.where = context.args.filter.where || {};
-    context.args.filter.where.person = context.args.filter.where.person || {};
-    delete context.args.filter.where.person.countRelations;
-
-    return next();
-  });
 
   /**
    * Export filtered relationships to file

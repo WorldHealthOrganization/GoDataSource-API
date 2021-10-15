@@ -192,6 +192,12 @@ const migrationVersions = [{
       name: 'createUpdateLanguageTokens',
       buildNo: 4
     }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'updateNumberOfExposuresAndContacts',
+      buildNo: 1
+    }]
   }]
 }];
 

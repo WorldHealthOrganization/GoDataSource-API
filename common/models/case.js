@@ -145,8 +145,7 @@ module.exports = function (Case) {
         'LNG_CASE_FIELD_LABEL_RISK_REASON',
         'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
         'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-        'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
-
+        'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED'
       ]
     },
     addresses: {
@@ -246,7 +245,9 @@ module.exports = function (Case) {
         'dateOfBurial',
         'burialLocationId',
         'burialPlaceName',
-        'responsibleUserId'
+        'responsibleUserId',
+        'numberOfExposures',
+        'numberOfContacts'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {

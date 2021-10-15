@@ -44,18 +44,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContacts = function (filter, options, callback) {
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
-    // make sure we retrieve data needed to determine contacts & exposures
-    if (
-      countRelations &&
-      filter.fields &&
-      filter.fields.length > 0 &&
-      filter.fields.indexOf('relationshipsRepresentation') < 0
-    ) {
-      filter.fields.push('relationshipsRepresentation');
-    }
-
     // pre-filter using related data (case, followUps)
     app.models.contact
       .preFilterForOutbreak(this, filter, options)
@@ -64,15 +52,7 @@ module.exports = function (Outbreak) {
         return app.models.contact.find(filter);
       })
       .then(function (contacts) {
-        if (countRelations) {
-          // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(contacts);
-
-          // finished
-          return callback(null, contacts);
-        } else {
-          return callback(null, contacts);
-        }
+        callback(null, contacts);
       })
       .catch(callback);
   };
@@ -1451,7 +1431,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredContacts', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
@@ -2254,7 +2234,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountContacts', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });

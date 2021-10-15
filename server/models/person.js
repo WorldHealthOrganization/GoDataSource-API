@@ -2057,29 +2057,6 @@ module.exports = function (Person) {
 
   /**
    * Count contacts/exposures for a list of records
-   * @param records
-   */
-  Person.getPeopleContactsAndExposures = function (records) {
-    // determine records
-    records = records || [];
-    for (let record of records) {
-      // initialize number of contacts / exposures
-      record.numberOfContacts = 0;
-      record.numberOfExposures = 0;
-
-      // go through relationship data and determine contacts / exposures count
-      (record.relationshipsRepresentation || []).forEach((relData) => {
-        if (relData.source) {
-          record.numberOfContacts++;
-        } else {
-          record.numberOfExposures++;
-        }
-      });
-    }
-  };
-
-  /**
-   * Count contacts/exposures for a list of records
    * @param outbreakId
    * @param personId
    * @param filter Where if count is true, Full filter otherwise

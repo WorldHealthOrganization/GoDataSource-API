@@ -4,6 +4,7 @@ const transmissionChain = require('../../components/workerRunner').transmissionC
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
+const helpers = require('../../components/helpers');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -788,15 +789,24 @@ module.exports = function (Relationship) {
               };
 
               // when a relationship is deleted we need to check if the person has additional relationships
-              if (personRelationships.length - 1) {
+              if (personRelationships.length - 1 > 0) {
+                // determine current number of exposures and contacts
+                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                  relationshipsRepresentation: _.filter(personRelationships, (filterRelationship) => filterRelationship.id !== relationship.id)
+                });
+
                 // person will still have relationships
                 relationshipsPayload['$set'] = {
-                  hasRelationships: true
+                  hasRelationships: true,
+                  numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
+                  numberOfExposures: noOfExposuresAndContacts.numberOfExposures
                 };
               } else {
                 // no relationships remain
                 relationshipsPayload['$set'] = {
-                  hasRelationships: false
+                  hasRelationships: false,
+                  numberOfContacts: 0,
+                  numberOfExposures: 0
                 };
               }
             } else {
@@ -825,9 +835,31 @@ module.exports = function (Relationship) {
                 relationshipsPayload['$addToSet'] = {
                   relationshipsRepresentation: relationshipRepresentationPayload
                 };
+
+                // determine current number of exposures and contacts
+                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                  relationshipsRepresentation: [
+                    ...personRelationships,
+                    relationshipRepresentationPayload
+                  ]
+                });
+
+                // update no of exposures and contacts
+                relationshipsPayload['$set'].numberOfContacts = noOfExposuresAndContacts.numberOfContacts;
+                relationshipsPayload['$set'].numberOfExposures = noOfExposuresAndContacts.numberOfExposures;
               } else {
                 // relationship already exists; replace its entry from the relationships representation with the new one
                 relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
+
+                // determine current number of exposures and contacts
+                personRelationships.splice(relationshipIndex, 1, relationshipRepresentationPayload);
+                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                  relationshipsRepresentation: personRelationships
+                });
+
+                // update no of exposures and contacts
+                relationshipsPayload['$set'].numberOfContacts = noOfExposuresAndContacts.numberOfContacts;
+                relationshipsPayload['$set'].numberOfExposures = noOfExposuresAndContacts.numberOfExposures;
               }
             }
 
@@ -868,15 +900,24 @@ module.exports = function (Relationship) {
                 };
 
                 // check if the person has additional relationships
-                if (personRelationships.length - 1) {
+                if (personRelationships.length - 1 > 0) {
+                  // determine current number of exposures and contacts
+                  const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
+                    relationshipsRepresentation: _.filter(personRelationships, (filterRelationship) => filterRelationship.id !== relationship.id)
+                  });
+
                   // person will still have relationships
                   relationshipsPayload['$set'] = {
-                    hasRelationships: true
+                    hasRelationships: true,
+                    numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
+                    numberOfExposures: noOfExposuresAndContacts.numberOfExposures
                   };
                 } else {
                   // no relationships remain
                   relationshipsPayload['$set'] = {
-                    hasRelationships: false
+                    hasRelationships: false,
+                    numberOfContacts: 0,
+                    numberOfExposures: 0
                   };
                 }
 

@@ -52,7 +52,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
@@ -123,18 +123,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, options, callback) {
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
-    // make sure we retrieve data needed to determine contacts & exposures
-    if (
-      countRelations &&
-      filter.fields &&
-      filter.fields.length > 0 &&
-      filter.fields.indexOf('relationshipsRepresentation') < 0
-    ) {
-      filter.fields.push('relationshipsRepresentation');
-    }
-
     // pre-filter using related data (case)
     app.models.case
       .preFilterForOutbreak(this, filter, options)
@@ -159,15 +147,7 @@ module.exports = function (Outbreak) {
         return app.models.case.find(filter);
       })
       .then(function (cases) {
-        if (countRelations) {
-          // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(cases);
-
-          // finished
-          return callback(null, cases);
-        } else {
-          return callback(null, cases);
-        }
+        callback(null, cases);
       })
       .catch(callback);
   };
@@ -317,7 +297,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });

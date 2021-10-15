@@ -105,31 +105,11 @@ module.exports = function (Outbreak) {
    * @param options
    */
   Outbreak.prototype.findContactsOfContacts = function (filter, options, callback) {
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
-    // make sure we retrieve data needed to determine contacts & exposures
-    if (
-      countRelations &&
-      filter.fields &&
-      filter.fields.length > 0 &&
-      filter.fields.indexOf('relationshipsRepresentation') < 0
-    ) {
-      filter.fields.push('relationshipsRepresentation');
-    }
-
     app.models.contactOfContact
       .preFilterForOutbreak(this, filter, options)
       .then(app.models.contactOfContact.find)
       .then(records => {
-        if (countRelations) {
-          // determine number of contacts/exposures
-          app.models.person.getPeopleContactsAndExposures(records);
-
-          // finished
-          return callback(null, records);
-        } else {
-          return callback(null, records);
-        }
+        callback(null, records);
       })
       .catch(callback);
   };
