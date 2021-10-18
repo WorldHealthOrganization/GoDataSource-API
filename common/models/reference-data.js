@@ -483,9 +483,8 @@ module.exports = function (ReferenceData) {
 
     let checkInstanceUniqueness = Promise.resolve();
 
-    // TODO on update if the label is not sent we need to get it from the language token as on the original instance we have the actual token
-
-    const data = context.isNewInstance || !context.data ? context.instance : context.data;
+    // get data from context
+    const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     if (
       // should check for uniqueness when
       // not in init/migrate database
@@ -494,19 +493,49 @@ module.exports = function (ReferenceData) {
         !context.options._init
       ) &&
       // instance is not being deleted
-      data &&
-      !data.deleted &&
-      // instance contains both categoryId and value
-      data.categoryId &&
-      data.value
+      !data.target.deleted
     ) {
+      // on update if the label is not sent we need to get it from the language token as on the original instance we have the actual token
+      if (!context.isNewInstance && !data.target.value) {
+        checkInstanceUniqueness = app.models.languageToken
+          .rawFind({
+            token: data.source.existing.value,
+            languageId: context.options.remotingContext.req.authData.user.languageId
+          }, {
+            projection: {translation: 1}
+          })
+          .then(result => {
+            if (!result.length) {
+              // token not found; should never get here
+              return Promise.reject(app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                model: app.models.languageToken.modelName,
+                id: data.source.existing.value
+              }));
+            }
+
+            return result[0].translation;
+          });
+      }
+
       // check if the combination of value and category already exists
-      checkInstanceUniqueness = app.models.languageToken
-        .rawFind({
-          translation: data.value,
-          languageId: context.options.remotingContext.req.authData.user.languageId
-        }, {
-          projection: {token: 1}
+      checkInstanceUniqueness = checkInstanceUniqueness
+        .then(translation => {
+          // get translation; is either returned in the promise on update or is in sent data on create
+          !translation && (translation = data.target.value);
+
+          // check for tokens with the same translation; on update don't search for the updated token
+          const tokensQuery = {
+            translation: translation,
+            languageId: context.options.remotingContext.req.authData.user.languageId
+          };
+          !context.isNewInstance && (tokensQuery.token = {
+            $ne: data.source.existing.value
+          });
+
+          return app.models.languageToken
+            .rawFind(tokensQuery, {
+              projection: {token: 1}
+            });
         })
         .then(tokensWithSameLabel => {
           if (!tokensWithSameLabel.length) {
@@ -521,7 +550,8 @@ module.exports = function (ReferenceData) {
               value: {
                 $in: tokensWithSameLabel.map(token => token.token)
               },
-              categoryId: data.categoryId
+              // category is in source for both create/update
+              categoryId: data.source.existing.categoryId
             }
           });
         })
