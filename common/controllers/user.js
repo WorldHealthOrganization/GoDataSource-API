@@ -243,6 +243,11 @@ module.exports = function (User) {
   });
 
   User.afterRemoteError('login', (ctx, next) => {
+    // don't increase user login retries on invalid captcha
+    if (ctx.error && ctx.error.code === 'INVALID_CAPTCHA') {
+      return next();
+    }
+
     if (ctx.args.credentials.email) {
       User
         .findOne({
