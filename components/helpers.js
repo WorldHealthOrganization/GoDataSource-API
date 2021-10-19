@@ -751,29 +751,38 @@ const getReferencedValue = function (data, path) {
     // go through the array
     let dataFromPath = _.get(data, arrayPath, []);
     dataFromPath = dataFromPath ? dataFromPath : [];
-    dataFromPath.forEach(function (dataItem, index) {
-      // if there still is a path left
-      if (remainingPath) {
-        // process it
-        let currentResult = getReferencedValue(dataItem, remainingPath);
-        if (!Array.isArray(currentResult)) {
-          currentResult = [currentResult];
-        }
-        currentResult.forEach(function (resultItem) {
-          result.push({
-            value: resultItem.value,
-            exactPath: `${arrayPath}[${index}].${resultItem.exactPath}`
+    if (Array.isArray(dataFromPath)) {
+      dataFromPath.forEach(function (dataItem, index) {
+        // if there still is a path left
+        if (remainingPath) {
+          // process it
+          let currentResult = getReferencedValue(dataItem, remainingPath);
+          if (!Array.isArray(currentResult)) {
+            currentResult = [currentResult];
+          }
+          currentResult.forEach(function (resultItem) {
+            result.push({
+              value: resultItem.value,
+              exactPath: `${arrayPath}[${index}].${resultItem.exactPath}`
+            });
           });
-        });
 
-      } else {
-        // otherwise just push the result
-        result.push({
-          value: dataItem,
-          exactPath: `${arrayPath}[${index}]`
-        });
-      }
-    });
+        } else {
+          // otherwise just push the result
+          result.push({
+            value: dataItem,
+            exactPath: `${arrayPath}[${index}]`
+          });
+        }
+      });
+    } else {
+      // path specifies that the value should be an array but retrieved value is not
+      // might happen for anonymized fields
+      result = {
+        value: dataFromPath,
+        exactPath: arrayPath
+      };
+    }
   } else {
     // no arrays in the path, use loDash get
     result = {
@@ -1066,8 +1075,16 @@ const formatDateFields = function (model, dateFieldsList) {
   // Format date fields
   dateFieldsList.forEach((field) => {
     let reference = getReferencedValue(model, field);
-    if (Array.isArray(reference)) {
+    if (reference.value === '***') {
+      // don't format anonymized date
+      return;
+    } else if (Array.isArray(reference)) {
       reference.forEach((indicator) => {
+        if (indicator.value === '***') {
+          // don't format anonymized date
+          return;
+        }
+
         _.set(model, indicator.exactPath, formatDate(indicator.value));
       });
     } else {

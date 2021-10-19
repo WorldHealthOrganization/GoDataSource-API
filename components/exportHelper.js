@@ -569,7 +569,7 @@ function exportFilteredModelsList(
 
         // go through fields list and remove excluded properties
         // - start from the end to be able to remove data on the go, otherwise the for won't work
-        for (let checkPropertyIndex = fieldsList.length - 1; checkPropertyIndex >= 0 ; checkPropertyIndex--) {
+        for (let checkPropertyIndex = fieldsList.length - 1; checkPropertyIndex >= 0; checkPropertyIndex--) {
           // get an determine root property
           let checkProperty = fieldsList[checkPropertyIndex];
 
@@ -2028,7 +2028,7 @@ function exportFilteredModelsList(
       const formattedRelations = [];
       _.each(
         relations,
-        (relationData, relationName) =>{
+        (relationData, relationName) => {
           // create relation handler
           const relHandler = {
             name: relationName,
@@ -2047,7 +2047,7 @@ function exportFilteredModelsList(
       const formattedJoins = [];
       _.each(
         joins,
-        (joinData, joinName) =>{
+        (joinData, joinName) => {
           // create join handler
           const joinHandler = {
             name: joinName,
@@ -4712,7 +4712,7 @@ function exportFilteredModelsList(
 
                                       // normal value
                                       response = !sheetHandler.dontTranslateValues &&
-                                        typeof childValue === 'string' && childValue.startsWith('LNG_') ?
+                                      typeof childValue === 'string' && childValue.startsWith('LNG_') ?
                                         translatePipe(childValue) :
                                         childValue;
                                     }
@@ -5158,7 +5158,7 @@ function exportFilteredModelsList(
               let getOnRecordIndex = -1;
               const getOneHandlerGetNextRelation = () => {
                 // finished ?
-                if (relationNames.length < 1){
+                if (relationNames.length < 1) {
                   return Promise.resolve();
                 }
 
@@ -5612,7 +5612,7 @@ function exportFilteredModelsList(
                     // format date as string
                     cellValue = moment(cellValue).toISOString();
 
-                  // remove new lines since these might break files like csv and others
+                    // remove new lines since these might break files like csv and others
                   } else if (
                     cellValue &&
                     typeof cellValue === 'string'
@@ -5955,6 +5955,26 @@ function generateAggregateFiltersFromNormalFilter(
   return collectionFilterDefinitions;
 }
 
+/**
+ * Construct file name for an exported dossier file
+ * @param {Object} resource - Resource to be used
+ * @param {Object} resource.rawData - Resource to be used
+ * @param {Array} anonymousFields - List of fields that were anonymized
+ * @returns {string}
+ */
+function getNameForExportedDossierFile(resource, anonymousFields = []) {
+  // construct file name
+  let fileName = '';
+  // strip special characters from firstName and lastName if they were not anonymized
+  !anonymousFields.includes('lastName') &&
+  (fileName += resource.rawData.lastName ? resource.rawData.lastName.replace(/\r|\n|\s|[/\\?%*:|"<>]/g, '').toUpperCase() + ' ' : '');
+  !anonymousFields.includes('firstName') &&
+  (fileName += resource.rawData.firstName ? resource.rawData.firstName.replace(/\r|\n|\s|[/\\?%*:|"<>]/g, '') : '');
+  fileName += (fileName.length ? ' - ' : '') + `${resource.rawData.id}.pdf`;
+
+  return fileName;
+}
+
 // exported constants & methods
 module.exports = {
   // constants
@@ -5964,5 +5984,6 @@ module.exports = {
 
   // methods
   exportFilteredModelsList,
-  generateAggregateFiltersFromNormalFilter
+  generateAggregateFiltersFromNormalFilter,
+  getNameForExportedDossierFile
 };
