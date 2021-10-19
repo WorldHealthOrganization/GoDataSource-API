@@ -346,10 +346,11 @@ module.exports = function (Outbreak) {
                         let contactId;
                         let caseId;
                         // find contact and case
+                        // Note: need to also check for contact -> contact of contact relationship; will not take those relationships into account
                         Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
                           if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                             contactId = person.id;
-                          } else {
+                          } else if (person.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
                             caseId = person.id;
                           }
                         });
@@ -388,7 +389,7 @@ module.exports = function (Outbreak) {
                               const person = peopleMap[contactToCaseMap[followUp.personId]] || {};
                               // add group information
                               groups[contactToCaseMap[followUp.personId]] = {
-                                name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
+                                name: person.name ? person.name.trim() : `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
                                 records: []
                               };
                             }
