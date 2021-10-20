@@ -1294,9 +1294,9 @@ module.exports = function (Outbreak) {
                             if (err) {
                               reject(err);
                             } else {
-                              const lastName = sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                              const firstName = sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                              fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                              // construct file name
+                              const fileName = exportHelper.getNameForExportedDossierFile(sanitizedCase, anonymousFields);
+                              fs.writeFile(`${tmpDirName}/${fileName}`, buffer, (err) => {
                                 if (err) {
                                   reject(err);
                                 } else {
@@ -1326,7 +1326,8 @@ module.exports = function (Outbreak) {
                         app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
                       }
                     });
-                  });
+                  })
+                  .catch(callback);
               });
             });
         });
