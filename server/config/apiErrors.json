@@ -366,5 +366,9 @@
   "IMPORT_DATA_NOT_PROCESSED": {
     "defaultStatusCode": 422,
     "messagePattern": "Import worker stopped with error before processing data"
+  },
+  "INVALID_ADDRESS_LATITUDE_LONGITUDE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid address longitude/latitude: <%= values %>"
   }
 }

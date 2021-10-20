@@ -19,6 +19,10 @@
     "LNG_API_ERROR_CODE_MODEL_CONFLICT": {
       "translation": "An instance with the same identifier already exists",
       "section": "uiAPIErrors"
+    },
+    "LNG_API_ERROR_CODE_INVALID_ADDRESS_LATITUDE_LONGITUDE": {
+      "translation": "Invalid address longitude/latitude. Might be out of bounds",
+      "section": "uiAPIErrors"
     }
   }
 }
