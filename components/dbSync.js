@@ -8,6 +8,7 @@ const async = require('async');
 const fsExtra = require('fs-extra');
 const workerRunner = require('./workerRunner');
 const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
+const apiError = require('./apiError');
 
 // limit for each chunk
 const noElementsInFilterArrayLimit = 20000;
@@ -741,6 +742,28 @@ const syncRecord = function (logger, model, record, options, done) {
         record: dbRecord,
         flag: syncRecordFlags.UNTOUCHED
       };
+    })
+    // catch errors and handle some specific ones
+    .catch(err => {
+      if (!(typeof err === 'object')) {
+        return Promise.reject(err);
+      }
+
+      let formattedError;
+      switch (err.code) {
+        case 16755:
+          // MongoError for longitude/latitude out of bounds
+          formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE', {
+            values: err.message ?
+              err.message.substring(err.message.lastIndexOf('lng:')) :
+              ''
+          });
+          break;
+        default:
+          formattedError = err;
+      }
+
+      return Promise.reject(formattedError);
     });
 
   // allow working with callbacks
