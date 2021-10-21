@@ -125,7 +125,7 @@ module.exports = function (User) {
       req.session &&
       req.session.loginCaptcha &&
       req.body &&
-      req.session.loginCaptcha !== req.body.captcha
+      req.session.loginCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.loginCaptcha = uuid();
@@ -294,7 +294,7 @@ module.exports = function (User) {
       req.session &&
       req.session.forgotPasswordCaptcha &&
       req.body &&
-      req.session.forgotPasswordCaptcha !== req.body.captcha
+      req.session.forgotPasswordCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.forgotPasswordCaptcha = uuid();
@@ -321,7 +321,7 @@ module.exports = function (User) {
       req.session &&
       req.session.resetPasswordQuestionsCaptcha &&
       req.body &&
-      req.session.resetPasswordQuestionsCaptcha !== req.body.captcha
+      req.session.resetPasswordQuestionsCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.resetPasswordQuestionsCaptcha = uuid();

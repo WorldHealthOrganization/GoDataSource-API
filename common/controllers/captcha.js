@@ -3,6 +3,9 @@
 const svgCaptcha = require('svg-captcha');
 const app = require('../../server/server');
 
+// set alphabet for captcha; using only uppercase letters for clarity
+svgCaptcha.options.charPreset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
 module.exports = function (Captcha) {
   /**
    * Generate SVG
