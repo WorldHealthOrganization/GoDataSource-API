@@ -6,6 +6,7 @@ const async = require('async');
 const escapeRegExp = require('../../components/escapeRegExp');
 const Config = require('./../../server/config.json');
 const Helpers = require('./../../components/helpers');
+const clusterHelpers = require('./../../components/clusterHelpers');
 
 module.exports = function (Location) {
 
@@ -268,10 +269,15 @@ module.exports = function (Location) {
     },
     /**
      * Reset cache
+     * @param {boolean} broadcastedMessage - Flag specifying whether the reset command was sent from another cluster worker
      */
-    reset: function () {
+    reset: function (broadcastedMessage = false) {
       // reset all cache properties
       this.subLocationsIds = {};
+
+      if (!broadcastedMessage) {
+        clusterHelpers.broadcastMessageToClusterWorkers(clusterHelpers.messageCodes.clearLocationCache, app.logger);
+      }
     },
 
     // cache contents

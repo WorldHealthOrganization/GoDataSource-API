@@ -7,6 +7,7 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const Config = require('./../../server/config.json');
+const clusterHelpers = require('./../../components/clusterHelpers');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -287,11 +288,16 @@ module.exports = function (User) {
     },
     /**
      * Reset cache
+     * @param {boolean} broadcastedMessage - Flag specifying whether the reset command was sent from another cluster worker
      */
-    reset: function () {
+    reset: function (broadcastedMessage = false) {
       // reset all cache properties
       this.userLocationsIds = {};
       this.teamLocationsIds = {};
+
+      if (!broadcastedMessage) {
+        clusterHelpers.broadcastMessageToClusterWorkers(clusterHelpers.messageCodes.clearUserCache, app.logger);
+      }
     },
 
     // cache contents
