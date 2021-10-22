@@ -149,7 +149,19 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('count', function (context, modelInstance, next) {
     const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
     if (restrictedOutbreakIds.length) {
+      // do we have delete filter ?
       let filter = {where: _.get(context, 'args.where', {})};
+
+      let includeDeletedRecords;
+      if (
+        filter.where &&
+        filter.where.includeDeletedRecords !== undefined
+      ) {
+        includeDeletedRecords = filter.where.includeDeletedRecords;
+        delete filter.where.includeDeletedRecords;
+      }
+
+      // merge filter
       filter = app.utils.remote
         .mergeFilters({
           where: {
@@ -158,8 +170,17 @@ module.exports = function (Outbreak) {
             }
           }
         }, filter || {});
+
+      // replace with new one
       context.args.where = filter.where;
+
+      // attach the include deleted records
+      if (includeDeletedRecords !== undefined) {
+        filter.where.includeDeletedRecords = includeDeletedRecords;
+      }
     }
+
+    // finished
     next();
   });
 
