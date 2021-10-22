@@ -2080,7 +2080,7 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
       }
     }
     for (let q in record[propToIterate]) {
-      if (record[propToIterate].hasOwnProperty(q)) {
+      if (record[propToIterate][q]) {
         if (multiDateQuestionsMap[q]) {
           multiDateQuestionsMap[q].push(record[propToIterate][q].length);
         } else {
@@ -2094,13 +2094,11 @@ const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translat
   });
 
   for (let q in multiDateQuestionsMap) {
-    if (multiDateQuestionsMap.hasOwnProperty(q)) {
-      let max = 0;
-      if (multiDateQuestionsMap[q].length) {
-        max = Math.max(...multiDateQuestionsMap[q]);
-      }
-      multiDateQuestionsMap[q] = max;
+    let max = 0;
+    if (multiDateQuestionsMap[q].length) {
+      max = Math.max(...multiDateQuestionsMap[q]);
     }
+    multiDateQuestionsMap[q] = max;
   }
 
   return multiDateQuestionsMap;
