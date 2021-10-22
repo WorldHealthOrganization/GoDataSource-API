@@ -2,6 +2,7 @@
 
 const clusterConfig = require('./config.json').cluster || {};
 const accessTokensCleanup = require('./../components/accessTokensCleanup');
+const clusterHelpers = require('./../components/clusterHelpers');
 
 /**
  * Start server
@@ -135,6 +136,8 @@ const startServer = function (logger, startScheduler) {
             );
           });
       }
+
+      clusterHelpers.handleMasterMessagesInWorker(app);
     });
 
     // remove default socket timeout and set it 12 hours
@@ -250,6 +253,9 @@ if (
       worker.process.stderr.on('data', chunk => {
         logWorkerMessage(chunk, 'error');
       });
+
+      // broadcast messages received from a worker to other workers
+      clusterHelpers.handleWorkerMessagesInMaster(worker, logger);
     });
   } else {
     // start server
