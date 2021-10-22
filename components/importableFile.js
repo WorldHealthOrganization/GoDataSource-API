@@ -921,9 +921,9 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 
           // get array properties maximum length for non-flat files
           if (['.json'].includes(extension)) {
-            steps.push(callback => {
+            steps.push(function (callback) {
               results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
-              return callback(null, results[modelName]);
+              callback(null, results[modelName]);
             });
           }
 
