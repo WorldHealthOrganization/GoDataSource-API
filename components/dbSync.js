@@ -258,11 +258,12 @@ function addLabResultMongoFilter(collectionName, baseFilter, filter) {
 }
 
 /**
- * Add outbreak ID and contact ID + team ID filter if found to a mongoDB filter;
+ * Add outbreak ID and contact ID/case ID + team ID filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
+ * Note: also getting followups of cases as there might be some that were converted from contacts and they might have had followups
  * @param collectionName Collection name; Depending on collection name the filter might be different
- * @param baseFilter MongoDB Base filter on which to add the contacts ID and team ID filter
- * @param filter Filter from request in which to check for contactsIds and teamsIDs filters; Both must be present
+ * @param baseFilter MongoDB Base filter on which to add the contacts ID/cases ID and team ID filter
+ * @param filter Filter from request in which to check for contactsIds, casesIds and teamsIDs filters; Both must be present
  * @returns {*}
  */
 function addFollowupMongoFilter(collectionName, baseFilter, filter) {
@@ -271,7 +272,7 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
     baseFilter,
     filter,
     'personId',
-    _.get(filter, 'where.contactsIds')
+    _.get(filter, 'where.contactsIds', []).concat(_.get(filter, 'where.casesIds', []))
   );
 
   // attach teams to filters
