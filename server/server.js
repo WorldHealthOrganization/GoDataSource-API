@@ -270,5 +270,6 @@ if (
   accessTokensCleanup(logger);
 
   // start server
-  startServer(logger, true);
+  // start scheduler only when the actual application is starting; don't start on install scripts execution
+  startServer(logger, require.main === module);
 }

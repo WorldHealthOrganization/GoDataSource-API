@@ -428,7 +428,7 @@ module.exports = function (app) {
             } catch (remErr) {
               // we don't have rights to delete directory or something has gone wrong...
               // log data and continue as God intended to be..without any worries...
-              app.logger.error(`Failed removing tmp uploaded directories: ${remErr}`);
+              app.logger.debug(`Failed removing tmp uploaded directories: ${remErr}`);
             }
           };
 
