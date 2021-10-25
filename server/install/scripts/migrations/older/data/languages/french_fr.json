@@ -7160,9 +7160,6 @@
       "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
         "translation": "Indice"
       },
-      "LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED": {
-        "translation": "Est l'alimentation"
-      },
       "LNG_FOLLOW_UP_FIELD_LABEL_LOST_TO_FOLLOW_UP": {
         "translation": "Sans suivi"
       },
