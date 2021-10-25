@@ -2284,11 +2284,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Modify multiple contacts or contacts of contacts
-   * @param existingContacts
-   * @param isContactOfContact
+   * @param {Array} existingContacts - List of contacts payloads
+   * @param {boolean} isContactOfContact - Flag specifying whether the resources updated are contact/contactOfContact
+   * @param {Object} options - Options from request
    * @return {Promise<any>}
    */
-  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact) {
+  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact, options) {
     // reference shortcuts
     const getError = app.utils.apiError.getError;
     const contactModel = isContactOfContact ? app.models.contactOfContact : app.models.contact;
@@ -2354,7 +2355,7 @@ module.exports = function (Outbreak) {
 
               // update contact attributes through loopback model functionality
               existingContactModelMap[existingContact.id]
-                .updateAttributes(existingContact)
+                .updateAttributes(existingContact, options)
                 .then((updatedContact) => {
                   // add it to success list
                   successfulEntries.push({
