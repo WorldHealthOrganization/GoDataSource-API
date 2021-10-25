@@ -85,7 +85,6 @@ module.exports = function (FollowUp) {
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
-    'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
     'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
@@ -123,7 +122,6 @@ module.exports = function (FollowUp) {
         'index',
         'teamId',
         'statusId',
-        'isGenerated',
         'targeted',
         'comment',
         'responsibleUserId'
