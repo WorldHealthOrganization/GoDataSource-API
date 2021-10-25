@@ -2581,10 +2581,11 @@ module.exports = function (Outbreak) {
   /**
    * Bulk modify contacts
    * @param existingContacts
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkModifyContacts = function (existingContacts, callback) {
-    Outbreak.modifyMultipleContacts(existingContacts)
+  Outbreak.prototype.bulkModifyContacts = function (existingContacts, options, callback) {
+    Outbreak.modifyMultipleContacts(existingContacts, false, options)
       .then((results) => callback(null, results))
       .catch(callback);
   };
@@ -3847,10 +3848,11 @@ module.exports = function (Outbreak) {
   /**
    * Bulk modify contacts of contacts
    * @param records
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkModifyContactsOfContacts = function (records, callback) {
-    Outbreak.modifyMultipleContacts(records, true)
+  Outbreak.prototype.bulkModifyContactsOfContacts = function (records, options, callback) {
+    Outbreak.modifyMultipleContacts(records, true, options)
       .then((results) => callback(null, results))
       .catch(callback);
   };
