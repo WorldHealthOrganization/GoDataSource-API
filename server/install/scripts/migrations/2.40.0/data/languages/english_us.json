@@ -23,6 +23,14 @@
     "LNG_API_ERROR_CODE_INVALID_ADDRESS_LATITUDE_LONGITUDE": {
       "translation": "Invalid address longitude/latitude. Might be out of bounds",
       "section": "uiAPIErrors"
+    },
+    "LNG_USER_FIELD_LABEL_ALL_OUTBREAKS": {
+      "translation": "All outbreaks",
+      "section": "uiUserFields"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_ALL_OUTBREAKS": {
+      "translation": "All outbreaks",
+      "section": "uiClientApplicationFields"
     }
   }
 }
