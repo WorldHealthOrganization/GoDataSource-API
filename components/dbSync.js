@@ -81,9 +81,6 @@ collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(use
 // on sync we need get all collections except the following
 let syncExcludeList = [
   'systemSettings',
-  'team',
-  'user',
-  'role',
   'auditLog',
   'helpCategory',
   'helpItem',

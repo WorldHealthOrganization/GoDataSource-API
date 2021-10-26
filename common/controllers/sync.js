@@ -6,6 +6,7 @@ const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const moment = require('moment');
+const syncConfig = require('../../server/config.json').sync;
 
 module.exports = function (Sync) {
 
@@ -600,7 +601,9 @@ module.exports = function (Sync) {
       }
     }
 
-    const form = new formidable.IncomingForm();
+    const form = new formidable.IncomingForm({
+      maxFileSize: syncConfig.maxPackageSize ? syncConfig.maxPackageSize : 5000 * 1024 * 1024
+    });
 
     form.parse(req, function (err, fields, files) {
       if (err) {
