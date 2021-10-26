@@ -63,7 +63,8 @@
     },
     "actionCleanupInterval": 24,
     "encrypt": false,
-    "debug": false
+    "debug": false,
+    "maxPackageSize": 5242880000
   },
   "pushNotifications": {
     "serverURL": "http://whocd.clarisoft.com:1337/api",
