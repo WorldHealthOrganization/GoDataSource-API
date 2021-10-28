@@ -31,6 +31,10 @@
     "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_ALL_OUTBREAKS": {
       "translation": "All outbreaks",
       "section": "uiClientApplicationFields"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_ID": {
+      "translation": "ID",
+      "section": "uiRelationshipFields"
     }
   }
 }

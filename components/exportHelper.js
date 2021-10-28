@@ -789,7 +789,17 @@ function exportFilteredModelsList(
           anonymizeFields.reduce(
             (acc, property) => {
               // attach prop
-              acc[property.toLowerCase()] = true;
+              const ciprop = property.toLowerCase();
+              acc[ciprop] = true;
+
+              // id add it in both forms
+              if (
+                ciprop === 'id' ||
+                ciprop === '_id'
+              ) {
+                acc.id = true;
+                acc._id = true;
+              }
 
               // continue
               return acc;
@@ -797,6 +807,7 @@ function exportFilteredModelsList(
             {}
           ) : {},
         shouldAnonymize: (path) => {
+          // check all levels
           const levels = (path || '').toLowerCase().replace(/\[\]/g, '').split('.');
           let pathSoFar = '';
           for (let levelIndex = 0; levelIndex < levels.length; levelIndex++) {
@@ -810,6 +821,15 @@ function exportFilteredModelsList(
             if (sheetHandler.columns.anonymizeMap[pathSoFar]) {
               return true;
             }
+          }
+
+          // check custom case - questionnaire answers
+          const defaultQuestionnaireAnswersKeyLower = defaultQuestionnaireAnswersKey.toLowerCase();
+          if (
+            sheetHandler.columns.anonymizeMap[defaultQuestionnaireAnswersKeyLower] &&
+            (path || '').toLowerCase().startsWith(`${defaultQuestionnaireAnswersKeyLower}[`)
+          ) {
+            return true;
           }
         }
       };
