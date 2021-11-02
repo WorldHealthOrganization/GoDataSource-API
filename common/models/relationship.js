@@ -1563,8 +1563,9 @@ module.exports = function (Relationship) {
           }
 
           // determine source / target person that we need to update
+          const clonedPersons = _.cloneDeep(relationship.toJSON().persons);
           const sourceTargetPerson = _.find(
-            relationship.persons,
+            clonedPersons,
             changeSource ?
               {source: true} :
               {target: true}
@@ -1602,8 +1603,8 @@ module.exports = function (Relationship) {
           // make sure that at least one of the persons records isn't a contact
           // either sourceTargetId, or the unaltered one
           if (
-            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            clonedPersons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+            clonedPersons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           ) {
             throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
           }
@@ -1611,24 +1612,24 @@ module.exports = function (Relationship) {
           // make sure that at least one of the persons records isn't a contact of contact
           // either sourceTargetId, or the unaltered one
           if (
-            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' &&
-            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            clonedPersons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' &&
+            clonedPersons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
           ) {
             throw app.utils.apiError.getError('CONTACT_OF_CONTACT_CANT_BE_SOURCE');
           }
 
           // make sure that we don't have circular relationships, both person records pointing to the same id
-          if (relationship.persons[0].id === relationship.persons[1].id) {
+          if (clonedPersons[0].id === clonedPersons[1].id) {
             throw app.utils.apiError.getError('CIRCULAR_RELATIONSHIP');
           }
 
           // create jobs to update relationship source / target
-          updateRelationshipsJobs.push((function (relationshipModel) {
+          updateRelationshipsJobs.push((function (relationshipModel, updatedPersons) {
             return (cb) => {
               // update
               relationshipModel
                 .updateAttributes({
-                  persons: relationshipModel.persons
+                  persons: updatedPersons
                 })
                 .then(() => {
                   // finished
@@ -1636,7 +1637,7 @@ module.exports = function (Relationship) {
                 })
                 .catch(cb);
             };
-          })(relationship));
+          })(relationship, clonedPersons));
         });
 
         // finished
