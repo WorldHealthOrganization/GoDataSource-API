@@ -54,7 +54,7 @@
     "loopback-connector-mongodb": "5.5.0",
     "moment": "2.29.1",
     "moment-range": "4.0.2",
-    "mongodb": "3.7.3",
+    "mongodb": "4.1.4",
     "p-queue": "3.0.0",
     "parse": "3.3.0",
     "pdfkit": "0.12.3",
