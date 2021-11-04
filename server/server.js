@@ -64,10 +64,10 @@ const startServer = function (logger, startScheduler) {
     mustUpdateConfigFile = true;
   }
   if (_.get(datasourceContents, 'mongoDb.useNewUrlParser') !== false) {
+    _.set(datasourceContents, 'mongoDb.useNewUrlParser', false);
     mustUpdateConfigFile = true;
   }
   if (mustUpdateConfigFile) {
-    _.set(datasourceContents, 'mongoDb.useNewUrlParser', false);
     fs.writeJsonSync(datasourcePath, datasourceContents, {
       spaces: 2
     });
