@@ -54,12 +54,18 @@ const startServer = function (logger, startScheduler) {
     logger.debug('Failed to calculate heap statistics', err);
   }
 
-  // before bootstraping loopback set the prohibitHiddenPropertiesInQuery = false in datasources.json if needed
+  // before bootstraping loopback set missing required properties in datasources.json if needed
   // will throw error and process will stop on failure
   const datasourcePath = path.resolve(__dirname + '/datasources.json');
   const datasourceContents = fs.readJsonSync(datasourcePath);
   if (_.get(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery') !== false) {
     _.set(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery', false);
+    fs.writeJsonSync(datasourcePath, datasourceContents, {
+      spaces: 2
+    });
+  }
+  if (_.get(datasourceContents, 'mongoDb.useNewUrlParser') !== false) {
+    _.set(datasourceContents, 'mongoDb.useNewUrlParser', false);
     fs.writeJsonSync(datasourcePath, datasourceContents, {
       spaces: 2
     });

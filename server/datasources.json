@@ -14,7 +14,8 @@
     "maxDepthOfQuery": 24,
     "lazyConnect": true,
     "authSource": "admin",
-    "prohibitHiddenPropertiesInQuery": false
+    "prohibitHiddenPropertiesInQuery": false,
+    "useNewUrlParser": false
   },
   "email": {
     "name": "email",
