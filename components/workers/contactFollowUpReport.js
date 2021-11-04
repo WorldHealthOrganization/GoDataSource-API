@@ -33,8 +33,7 @@ const getMongoDBConnection = function () {
   let mongoOptions = {
     keepAlive: true,
     connectTimeoutMS: 1800000, // 30 minutes
-    socketTimeoutMS: 1800000, // 30 minutes
-    reconnectTries: 300 // too many
+    socketTimeoutMS: 1800000 // 30 minutes
   };
 
   // attach auth credentials
