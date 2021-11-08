@@ -381,7 +381,7 @@ module.exports = function (app) {
         // determine after how much time we should remove snapshot files
         if (fs.existsSync(tmp.tmpdir)) {
           // used to determine when can we delete snapshot files
-          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}.zip$/i;
+          const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}_[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}.zip$/i;
           const removeSyncSnapshotsAfterHours = configSettings.removeSyncSnapshotsAfter || 24;
           const deleteSnapshotBeforeDateTime = moment().subtract(removeSyncSnapshotsAfterHours, 'hours');
 
