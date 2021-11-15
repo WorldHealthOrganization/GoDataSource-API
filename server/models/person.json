@@ -209,7 +209,8 @@
     }
   },
   "removeIndexes": [
-    "outbreak_deleted_type_index"
+    "outbreak_deleted_type_index",
+    "dateOfOutcome_index"
   ],
   "indexes": {
     "outbreak_deleted_type_name_index": {
@@ -286,7 +287,7 @@
     "dateOfOnset_index": {
       "dateOfOnset": 1
     },
-    "dateOfOutcome_index": {
+    "dateOfOutcome_index_fixed": {
       "dateOfOutcome": 1
     },
     "classification_index": {
