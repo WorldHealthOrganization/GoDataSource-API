@@ -91,7 +91,8 @@ module.exports = function (SystemSettings) {
     // start the PDF builder worker
     const worker = fork(`${__dirname}../../../components/workers/createImageDoc`,
       [], {
-        execArgv: [],
+        // execArgv: [],
+        execArgv: [`--inspect-brk=${Math.floor(Math.random() * 50000) + 10000}`],
         windowsHide: true
       }
     );

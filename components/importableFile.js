@@ -8,6 +8,13 @@ const uuid = require('uuid');
 const os = require('os');
 const xlsx = require('xlsx');
 const sort = require('alphanum-sort');
+const tmp = require('tmp');
+const admZip = require('adm-zip');
+const jsonStream = require('JSONStream');
+const es = require('event-stream');
+const stream = require('stream');
+const util = require('util');
+const pipeline = util.promisify(stream.pipeline);
 const apiError = require('./apiError');
 const helpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
@@ -16,6 +23,9 @@ const baseReferenceDataModel = require('./baseModelOptions/referenceData');
 const convertLoopbackFilterToMongo = require('./convertLoopbackFilterToMongo');
 const MongoDBHelper = require('./mongoDBHelper');
 const WorkerRunner = require('./workerRunner');
+
+// Note: should be kept in sync with the extension used in exportHelper
+const zipExtension = '.zip';
 
 // define a list of supported file extensions
 const supportedFileExtensions = [
@@ -86,68 +96,130 @@ const getTemporaryFileById = function (fileId) {
 };
 
 /**
- * Get JSON content and headers
- * @param data
- * @param callback
+ * Get JSON content and headers and store file
+ * @param filePath
  */
-const getJsonHeaders = function ({data}, callback) {
-  // try and parse as a JSON
-  try {
-    const jsonObj = JSON.parse(data);
-    // this needs to be a list (in order to get its headers)
-    if (!Array.isArray(jsonObj)) {
-      // error invalid content
-      return callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
-        contentType: 'JSON',
-        details: 'it should contain an array'
-      }));
-    }
+// const getJsonHeaders = function ({data}, callback) {
+const getJsonHeaders = function (filePath) {
+  return new Promise((resolve, reject) => {
+    const readStream = fs.createReadStream(filePath);
+
+    // store file in temporary folder
+    const fileId = uuid.v4();
+    const writeStream = fs.createWriteStream(path.join(os.tmpdir(), fileId));
+    writeStream.on('error', (err) => {
+      // destroy readStream which will cause the entire pipeline to error
+      readStream.destroy();
+
+      reject(err);
+    });
+
+    /**
+     * Write to writeStream
+     */
+    const writeToStream = (data) => {
+      return new Promise(resolve => {
+        if (!writeStream.write(data)) {
+          writeStream.once('drain', resolve);
+        } else {
+          process.nextTick(resolve);
+        }
+      });
+    };
+
     // build a list of headers
     const headers = [];
     // store list of properties for each header
     const headersToPropsMap = {};
-    // build the list by looking at the properties of all elements (not all items have all properties)
-    jsonObj.forEach(function (item) {
-      // go through all properties of flatten item
-      const flatItem = helpers.getFlatObject(item);
-      Object.keys(flatItem).forEach(function (property) {
-        const sanitizedProperty = property
-          // don't replace basic types arrays ( string, number, dates etc )
-          .replace(/\[\d+]$/g, '')
-          // sanitize arrays containing objects object
-          .replace(/\[\d+]/g, '[]')
-          .replace(/^\[]\.*/, '');
-        // add the header if not already included
-        if (!headersToPropsMap[sanitizedProperty]) {
-          headers.push(sanitizedProperty);
-          headersToPropsMap[sanitizedProperty] = new Set();
+
+    const jsonObj = [];
+
+    let firstItem = true;
+    // write start of new file
+    return writeToStream('{"data":[')
+      .then(() => {
+        // run pipeline which will read contents, make required calculations on each data and write the needed entry to the new file
+        return pipeline(
+          readStream,
+          jsonStream.parse('*'),
+          es.map(function (item, callback) {
+            jsonObj.push(item);
+
+            // go through all properties of flatten item
+            const flatItem = helpers.getFlatObject(item);
+            Object.keys(flatItem).forEach(function (property) {
+              const sanitizedProperty = property
+                // don't replace basic types arrays ( string, number, dates etc )
+                .replace(/\[\d+]$/g, '')
+                // sanitize arrays containing objects object
+                .replace(/\[\d+]/g, '[]')
+                .replace(/^\[]\.*/, '');
+              // add the header if not already included
+              if (!headersToPropsMap[sanitizedProperty]) {
+                headers.push(sanitizedProperty);
+                headersToPropsMap[sanitizedProperty] = new Set();
+              }
+
+              // add prop to headers map if simple property; null values are skipped
+              // children of object properties will be added separately
+              if (typeof flatItem[property] !== 'object') {
+                headersToPropsMap[sanitizedProperty].add(property);
+              }
+            });
+
+            let dataToWrite;
+            try {
+              dataToWrite = JSON.stringify(item);
+            } catch (err) {
+              // data couldn't be stringifed
+              // error invalid content
+              return callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
+                contentType: 'JSON',
+                details: 'it should contain an array'
+              }));
+            }
+
+            // write data to file and continue processing afterwards
+            writeToStream((firstItem ? '' : ',') + dataToWrite)
+              .then(() => {
+                callback();
+              });
+            firstItem = false;
+          })
+        );
+      })
+      .then(() => {
+        const headersFormat = 'json';
+
+        // add headers to prop map in file
+        let cHeadersToPropMap;
+        if (headersToPropsMap) {
+          cHeadersToPropMap = {};
+          headers.forEach(header => {
+            cHeadersToPropMap[header] = [...headersToPropsMap[header]];
+          });
         }
 
-        // add prop to headers map if simple property; null values are skipped
-        // children of object properties will be added separately
-        if (typeof flatItem[property] !== 'object') {
-          headersToPropsMap[sanitizedProperty].add(property);
-        }
+        // all data was processed
+        // write the rest of the file
+        return writeToStream(`],"headersFormat":"${headersFormat}","headersToPropMap":${JSON.stringify(cHeadersToPropMap)}}`);
+      })
+      .then(() => {
+        writeStream.close();
+        resolve({id: fileId, headers, jsonObj});
+      })
+      .catch(err => {
+        reject(err);
       });
-    });
-
-    // send back the parsed object and its headers
-    callback(null, {obj: jsonObj, headers: headers, headersToPropsMap: headersToPropsMap});
-  } catch (error) {
-    // handle JSON.parse errors
-    callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
-      contentType: 'JSON',
-      details: error.message
-    }));
-  }
+  });
 };
 
 /**
  * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
- * @param data
- * @param callback
+ * @param filesToParse - List of paths to parse
+ * @param extension
  */
-const getSpreadSheetHeaders = function ({data, extension}, callback) {
+const getSpreadSheetHeaders = function (filesToParse, extension) {
   // parse XLS data
   const parseOptions = {
     cellText: false
@@ -227,16 +299,13 @@ const temporaryStoreFileOnDisk = function (content, callback) {
  * Store file and get its headers and file Id
  * @param file
  * @param decryptPassword
- * @param modelOptions
- * @param dictionary
- * @param questionnaire
  * @returns {Promise<never>|Promise<unknown>}
  */
-const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, dictionary, questionnaire) {
+const storeFileAndGetHeaders = function (file, decryptPassword) {
   // get file extension
-  const extension = path.extname(file.name).toLowerCase();
+  let extension = path.extname(file.name).toLowerCase();
   // if extension is invalid
-  if (!isExtensionSupported(extension)) {
+  if (extension !== zipExtension && !isExtensionSupported(extension)) {
     // send back the error
     return Promise.reject(apiError.getError('UNSUPPORTED_FILE_TYPE', {
       fileName: file.name,
@@ -244,80 +313,150 @@ const storeFileAndGetHeaders = function (file, decryptPassword, modelOptions, di
     }));
   }
 
-  // use appropriate content handler for file type
-  let getHeaders;
-  let headersFormat;
-  switch (extension) {
-    case '.json':
-      getHeaders = getJsonHeaders;
-      headersFormat = 'json';
-      break;
-    case '.csv':
-    case '.xls':
-    case '.xlsx':
-    case '.ods':
-      getHeaders = getSpreadSheetHeaders;
-      headersFormat = 'xlsx';
-      break;
+  // in case the file is a zip archive first unzip it
+  const filesToParse = [];
+  if (extension === zipExtension) {
+    let tmpDirName;
+    try {
+      const tmpDir = tmp.dirSync({unsafeCleanup: true});
+      tmpDirName = tmpDir.name;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
+    // extract zip
+    try {
+      let archive = new admZip(file.path);
+      archive.extractAllTo(tmpDirName);
+    } catch (zipError) {
+      return Promise.reject(typeof zipError === 'string' ? {message: zipError} : zipError);
+    }
+
+    // archive was unzipped; check new file extension
+    for (const fileName of fs.readdirSync(tmpDirName)) {
+      // on first file check its extension and use it further
+      if (extension === zipExtension) {
+        extension = path.extname(fileName).toLowerCase();
+        // if extension is invalid
+        if (!isExtensionSupported(extension)) {
+          // send back the error
+          return Promise.reject(apiError.getError('UNSUPPORTED_FILE_TYPE', {
+            fileName: fileName,
+            details: `unsupported extension ${extension}. Supported file extensions: ${supportedFileExtensions.join(', ')}`
+          }));
+        }
+      }
+
+      filesToParse.push(path.join(tmpDirName, fileName));
+    }
+  } else {
+    filesToParse.push(file.path);
   }
 
-  return new Promise((resolve, reject) => {
-    fs.readFile(file.path, function (error, buffer) {
-      // handle error
-      if (error) {
-        return reject(apiError.getError('FILE_NOT_FOUND'));
+  // decrypt file/files if needed
+  let decryptPromise = Promise.resolve();
+  if (decryptPassword) {
+    let tmpDirName;
+    try {
+      const tmpDir = tmp.dirSync({unsafeCleanup: true});
+      tmpDirName = tmpDir.name;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+
+    decryptPromise = Promise.all(filesToParse.map((filePath, index) => {
+      const decryptPath = path.join(tmpDirName, path.basename(filePath));
+      const encryptedFileStream = fs.createReadStream(filePath);
+      const decryptedFileStream = fs.createWriteStream(decryptPath);
+
+      return aesCrypto.decryptStream(
+        encryptedFileStream,
+        decryptedFileStream,
+        decryptPassword
+      )
+        .then(() => {
+          // from now on use decrypted files
+          filesToParse[index] = decryptPath;
+        });
+    }));
+  }
+
+  return decryptPromise
+    .then(() => {
+      // use appropriate content handler for file type
+      switch (extension) {
+        case '.json':
+          // JSON import will always consist of one file
+          return getJsonHeaders(filesToParse[0]);
+        case '.csv':
+        case '.xls':
+        case '.xlsx':
+        case '.ods':
+          return getSpreadSheetHeaders(filesToParse, extension);
       }
-
-      // decrypt file if needed
-      let decryptFile;
-      if (decryptPassword) {
-        decryptFile = aesCrypto.decrypt(decryptPassword, buffer);
-      } else {
-        decryptFile = Promise.resolve(buffer);
-      }
-
-      decryptFile
-        .then(function (buffer) {
-          // get file headers
-          getHeaders({data: buffer, modelOptions, dictionary, questionnaire, extension}, function (error, result) {
-            // handle error
-            if (error) {
-              return reject(error);
-            }
-
-            // construct file contents
-            const contents = {
-              data: result.obj,
-              headersFormat: headersFormat
-            };
-
-            // add headers to prop map in file
-            if (result.headersToPropsMap) {
-              contents.headersToPropMap = {};
-              result.headers.forEach(header => {
-                contents.headersToPropMap[header] = [...result.headersToPropsMap[header]];
-              });
-            }
-
-            // store file on disk
-            temporaryStoreFileOnDisk(JSON.stringify(contents), function (error, fileId) {
-              // handle error
-              if (error) {
-                return reject(error);
-              }
-
-              // send back file id and headers
-              resolve({
-                id: fileId,
-                headers: result.headers,
-                jsonObj: result.obj
-              });
-            });
-          });
-        })
-        .catch(reject);
+    })
+    // .then((result) => {
+    //   console.log(result);
+    //   return new Promise((resolve, reject) => {
+    //     fs.readFile(filesToParse[0], function (error, buffer) {
+    //       // handle error
+    //       if (error) {
+    //         return reject(apiError.getError('FILE_NOT_FOUND'));
+    //       }
+    //
+    //       // // decrypt file if needed
+    //       // let decryptFile;
+    //       // if (decryptPassword) {
+    //       //   decryptFile = aesCrypto.decrypt(decryptPassword, buffer);
+    //       // } else {
+    //       //   decryptFile = Promise.resolve(buffer);
+    //       // }
+    //       //
+    //       // decryptFile
+    //       //   .then(function (buffer) {
+    //       // get file headers
+    //       getHeaders({data: buffer, extension}, function (error, result) {
+    //         // handle error
+    //         if (error) {
+    //           return reject(error);
+    //         }
+    //
+    //         // construct file contents
+    //         const contents = {
+    //           data: result.obj,
+    //           headersFormat: headersFormat
+    //         };
+    //
+    //         // add headers to prop map in file
+    //         if (result.headersToPropsMap) {
+    //           contents.headersToPropMap = {};
+    //           result.headers.forEach(header => {
+    //             contents.headersToPropMap[header] = [...result.headersToPropsMap[header]];
+    //           });
+    //         }
+    //
+    //         // store file on disk
+    //         temporaryStoreFileOnDisk(JSON.stringify(contents), function (error, fileId) {
+    //           // handle error
+    //           if (error) {
+    //             return reject(error);
+    //           }
+    //
+    //           // send back file id and headers
+    //           resolve({
+    //             id: fileId,
+    //             headers: result.headers,
+    //             jsonObj: result.obj
+    //           });
+    //         });
+    //       });
+    //     });
+    //   });
+    // })
+    .catch(err => {
+      console.log(err);
+      return Promise.reject(err);
     });
-  });
 };
 
 /**
@@ -761,22 +900,21 @@ const getArrayPropertiesMaxLength = function (records) {
 const upload = function (file, decryptPassword, outbreak, languageId, options) {
   const outbreakId = outbreak.id;
 
+  let parsedFile;
   // load language dictionary for the user
   let languageDictionary;
-  return baseLanguageModel.helpers.getLanguageDictionary(languageId)
+
+  // store the file and get its headers
+  return storeFileAndGetHeaders(file, decryptPassword)
+    .then(result => {
+      parsedFile = result;
+
+      return baseLanguageModel.helpers.getLanguageDictionary(languageId);
+    })
     .then(dictionary => {
       languageDictionary = dictionary;
 
-      // store the file and get its headers
-      return storeFileAndGetHeaders(
-        file,
-        decryptPassword,
-        options,
-        dictionary,
-        // questionnaire template
-        outbreak[options.extendedForm.template]);
-    })
-    .then(result => {
+      let result = parsedFile;
       // get file extension
       const extension = path.extname(file.name);
 
