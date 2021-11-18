@@ -179,9 +179,6 @@ const getJsonHeaders = function (filePath, extension, options) {
               (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
             });
           })(modelQuestionnaire);
-
-          // create map of translation to variable from questionsTranslationMap
-          assocModelOptions.extendedForm.questionToTranslationMap.forEach()
         }
       });
     }
@@ -845,10 +842,9 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
  * @param normalizedHeaders
  * @param languageDictionary
  * @param questionnaireMaxAnswersMap
- * @param fieldsMap
  * @return {Object}
  */
-const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType, modelExtendedForm, headers, normalizedHeaders, languageDictionary, questionnaireMaxAnswersMap, fieldsMap) {
+const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType, modelExtendedForm, headers, normalizedHeaders, languageDictionary, questionnaireMaxAnswersMap) {
   // make sure we have a valid type
   importType = importType ? importType.toLowerCase() : '.json';
 
@@ -868,7 +864,7 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
   };
 
   // extract variables from template
-  const variables = helpers.extractVariablesAndAnswerOptions(outbreak[modelExtendedForm.template]);
+  const variables = modelExtendedForm.templateVariables;
 
   // if variables are present
   if (variables.length) {
@@ -905,41 +901,11 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
   }
 
   if (['.json'].includes(importType)) {
-    const multiDateQuestions = outbreak[modelExtendedForm.template].filter(q => q.multiAnswer);
-
-    // create a question variable to translation map
-    // in order to be able to calculate maximum number of answers for datasets that use translations as field names
-    const questionToTranslationMap = [];
-    (function addTranslation(questions) {
-      return questions
-        .forEach(question => {
-          question = question.toJSON ? question.toJSON() : question;
-
-          questionToTranslationMap.push({
-            variable: question.variable,
-            translation: languageDictionary.getTranslation(question.text)
-          });
-
-          (question.answers || []).forEach(answer => {
-            addTranslation(answer.additionalQuestions || []);
-          });
-        });
-    })(multiDateQuestions);
-
-    // also get extended form container property translation
-    // as the JSON file might contain actual translation of the fields and we need to match it against the variable
     const containerProp = modelExtendedForm.containerProperty;
-    const containerPropTranslation = languageDictionary.getTranslation(fieldsMap[containerProp]);
 
-    const maxAnswersMap = helpers.getQuestionnaireMaxAnswersMap(
-      multiDateQuestions,
-      dataset,
-      {containerPropTranslation, questionToTranslationMap}
-    );
-
-    for (let variable in maxAnswersMap) {
+    for (let variable in questionnaireMaxAnswersMap) {
       result.modelArrayProperties[`${containerProp}.${variable}`] = {
-        maxItems: maxAnswersMap[variable]
+        maxItems: questionnaireMaxAnswersMap[variable]
       };
     }
   }
@@ -1088,8 +1054,8 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
 
       // define main result
       let result = {
-        id: result.id,
-        fileHeaders: result.headers
+        id: parseFileResult.id,
+        fileHeaders: parseFileResult.headers
       };
 
       // store results for multiple models
@@ -1137,13 +1103,8 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
                 // split the property in sub components
                 const propertyComponents = property.split('.');
 
-                // retrieve normalized token
-                const normalizedToken = fieldLabelsMap[property] ?
-                  fieldLabelsMap[property] : (
-                    property && property.indexOf('[]') && fieldLabelsMap[property.replace(/\[]/g, '')] ?
-                      fieldLabelsMap[property.replace(/\[]/g, '')] :
-                      fieldLabelsMap[property]
-                  );
+                // retrieve normalized token already calculated above
+                const normalizedToken = assocModelOptions.importablePropertiesNormalized[property];
 
                 // if there are sub components
                 if (propertyComponents.length > 1) {
@@ -1213,7 +1174,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           if (outbreakId !== undefined && assocModelOptions.extendedForm && assocModelOptions.extendedForm.template) {
             // get mapping suggestions for extended form
             steps.push(function (callback) {
-              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, parseFileResult.questionnaireMaxAnswersMap, fieldLabelsMap);
+              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, parseFileResult.questionnaireMaxAnswersMap[modelName]);
               // update result
               results[modelName] = Object.assign(
                 {}, results[modelName],
