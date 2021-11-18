@@ -96,11 +96,15 @@ const getTemporaryFileById = function (fileId) {
 };
 
 /**
- * Get JSON content and headers and store file
+ * Get needed information from JSON content and store file
+ * Reads JSON stream and writes a JSON file with the needed structure
+ * Makes the following calculations in order to not need to traverse the entire JSON again
+ * Calculates headers, values for each header, array properties max length, questionnaire max answers map
  * @param filePath
+ * @param extension
+ * @param options - Options used for calculations
  */
-// const getJsonHeaders = function ({data}, callback) {
-const getJsonHeaders = function (filePath) {
+const getJsonHeaders = function (filePath, extension, options) {
   return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(filePath);
 
@@ -132,7 +136,81 @@ const getJsonHeaders = function (filePath) {
     // store list of properties for each header
     const headersToPropsMap = {};
 
-    const jsonObj = [];
+    // store array properties max length; will be filled in the traverseItemToGetArrayPropertiesMaxLength function
+    const fileArrayHeaders = {};
+    const traverseItemToGetArrayPropertiesMaxLength = function (obj, ref) {
+      for (let prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          const resultPropRef = `${ref ? ref + '.' : ''}${prop}`;
+          if (Array.isArray(obj[prop])) {
+            fileArrayHeaders[resultPropRef] = fileArrayHeaders[resultPropRef] || [];
+            fileArrayHeaders[resultPropRef].push(obj[prop].length);
+
+            for (let arrProp of obj[prop]) {
+              if (typeof arrProp === 'object' && arrProp !== null && !Array.isArray(obj[prop])) {
+                traverseItemToGetArrayPropertiesMaxLength(arrProp, `${resultPropRef}[]`);
+              }
+            }
+          }
+          if (typeof obj[prop] === 'object' && obj[prop] !== null && !Array.isArray(obj[prop])) {
+            traverseItemToGetArrayPropertiesMaxLength(obj[prop], resultPropRef);
+          }
+        }
+      }
+    };
+
+    // calculate questionnaire max answers map
+    // get a map of all the multi date answer questions and their nested questions
+    const questionnaireMaxAnswersMap = {};
+    if (options.modelOptions) {
+      Object.keys(options.modelOptions).forEach(modelName => {
+        const assocModelOptions = options.modelOptions[modelName];
+        const modelQuestionnaire = (
+          assocModelOptions.extendedForm && assocModelOptions.extendedForm.templateMultiDateQuestions ?
+            assocModelOptions.extendedForm.templateMultiDateQuestions :
+            []
+        ).filter(q => q.multiAnswer);
+
+        if (modelQuestionnaire.length) {
+          questionnaireMaxAnswersMap[modelName] = {};
+          (function parseQuestion(questions) {
+            (questions || []).forEach(question => {
+              questionnaireMaxAnswersMap[modelName][question.variable] = [];
+              (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
+            });
+          })(modelQuestionnaire);
+
+          // create map of translation to variable from questionsTranslationMap
+          assocModelOptions.extendedForm.questionToTranslationMap.forEach()
+        }
+      });
+    }
+    const addInQuestionnaireAnswersMap = function (record) {
+      Object.keys(questionnaireMaxAnswersMap).forEach(modelName => {
+        const assocModelOptions = options.modelOptions[modelName];
+        const multiDateQuestionsMap = questionnaireMaxAnswersMap[modelName];
+
+        let propToIterate = 'questionnaireAnswers';
+        if (!record[propToIterate]) {
+          if (record[assocModelOptions.extendedForm.templateContainerPropTranslation]) {
+            propToIterate = assocModelOptions.extendedForm.templateContainerPropTranslation;
+          } else {
+            // it doesn't have any questions, skip it
+            return;
+          }
+        }
+
+        for (let q in record[propToIterate]) {
+          if (record[propToIterate][q]) {
+            if (multiDateQuestionsMap[q]) {
+              multiDateQuestionsMap[q].push(record[propToIterate][q].length);
+            } else if (assocModelOptions.extendedForm.questionTranslationToVariableMap[q]) {
+              multiDateQuestionsMap[assocModelOptions.extendedForm.questionTranslationToVariableMap[q]].push(record[propToIterate][q].length);
+            }
+          }
+        }
+      });
+    };
 
     let firstItem = true;
     // write start of new file
@@ -143,8 +221,6 @@ const getJsonHeaders = function (filePath) {
           readStream,
           jsonStream.parse('*'),
           es.map(function (item, callback) {
-            jsonObj.push(item);
-
             // go through all properties of flatten item
             const flatItem = helpers.getFlatObject(item);
             Object.keys(flatItem).forEach(function (property) {
@@ -166,6 +242,10 @@ const getJsonHeaders = function (filePath) {
                 headersToPropsMap[sanitizedProperty].add(property);
               }
             });
+
+            traverseItemToGetArrayPropertiesMaxLength(item);
+
+            addInQuestionnaireAnswersMap(item);
 
             let dataToWrite;
             try {
@@ -206,7 +286,45 @@ const getJsonHeaders = function (filePath) {
       })
       .then(() => {
         writeStream.close();
-        resolve({id: fileId, headers, jsonObj});
+
+        // new JSON file was successfully written; construct result to be used further
+        const result = {
+          id: fileId,
+          extension,
+          headers
+        };
+
+        // finalize array properties max length calculation
+        // keep only the highest length in the map
+        for (let prop in fileArrayHeaders) {
+          if (fileArrayHeaders.hasOwnProperty(prop)) {
+            let max = 0;
+            if (fileArrayHeaders[prop].length) {
+              max = Math.max(...fileArrayHeaders[prop]);
+            }
+            fileArrayHeaders[prop] = {
+              maxItems: max
+            };
+          }
+        }
+        result.fileArrayHeaders = fileArrayHeaders;
+
+        // finalize questionnaire max answers calculation
+        // keep only the highest length in the map
+        Object.keys(questionnaireMaxAnswersMap).forEach(modelName => {
+          const multiDateQuestionsMap = questionnaireMaxAnswersMap[modelName];
+
+          for (let q in multiDateQuestionsMap) {
+            let max = 0;
+            if (multiDateQuestionsMap[q].length) {
+              max = Math.max(...multiDateQuestionsMap[q]);
+            }
+            multiDateQuestionsMap[q] = max;
+          }
+        });
+        result.questionnaireMaxAnswersMap = questionnaireMaxAnswersMap;
+
+        resolve(result);
       })
       .catch(err => {
         reject(err);
@@ -282,26 +400,13 @@ const getSpreadSheetHeaders = function (filesToParse, extension) {
 };
 
 /**
- * Store file on disk
- * @param content
- * @param callback
- */
-const temporaryStoreFileOnDisk = function (content, callback) {
-  // create a unique file name
-  const fileId = uuid.v4();
-  // store file in temporary folder
-  fs.writeFile(path.join(os.tmpdir(), fileId), content, function (error) {
-    callback(error, fileId);
-  });
-};
-
-/**
  * Store file and get its headers and file Id
  * @param file
  * @param decryptPassword
+ * @param options - Options to be used in data parsing/calculations; Currently used only for JSON files
  * @returns {Promise<never>|Promise<unknown>}
  */
-const storeFileAndGetHeaders = function (file, decryptPassword) {
+const storeFileAndGetHeaders = function (file, decryptPassword, options) {
   // get file extension
   let extension = path.extname(file.name).toLowerCase();
   // if extension is invalid
@@ -387,7 +492,7 @@ const storeFileAndGetHeaders = function (file, decryptPassword) {
       switch (extension) {
         case '.json':
           // JSON import will always consist of one file
-          return getJsonHeaders(filesToParse[0]);
+          return getJsonHeaders(filesToParse[0], extension, options);
         case '.csv':
         case '.xls':
         case '.xlsx':
@@ -739,10 +844,11 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
  * @param headers
  * @param normalizedHeaders
  * @param languageDictionary
- * @param dataset
+ * @param questionnaireMaxAnswersMap
+ * @param fieldsMap
  * @return {Object}
  */
-const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType, modelExtendedForm, headers, normalizedHeaders, languageDictionary, dataset, fieldsMap) {
+const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType, modelExtendedForm, headers, normalizedHeaders, languageDictionary, questionnaireMaxAnswersMap, fieldsMap) {
   // make sure we have a valid type
   importType = importType ? importType.toLowerCase() : '.json';
 
@@ -842,53 +948,6 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
 };
 
 /**
- * Calculate maxim number of items an array properties has across multiple records
- * @param records
- */
-const getArrayPropertiesMaxLength = function (records) {
-  const result = {};
-
-  // go through each field in each record, build a map of all array properties and nested array properties
-  // and their lengths
-  for (let record of records) {
-    (function traverse(obj, ref) {
-      for (let prop in obj) {
-        if (obj.hasOwnProperty(prop)) {
-          const resultPropRef = `${ref ? ref + '.' : ''}${prop}`;
-          if (Array.isArray(obj[prop])) {
-            result[resultPropRef] = result[resultPropRef] || [];
-            result[resultPropRef].push(obj[prop].length);
-
-            for (let arrProp of obj[prop]) {
-              if (typeof arrProp === 'object' && arrProp !== null && !Array.isArray(obj[prop])) {
-                traverse(arrProp, `${resultPropRef}[]`);
-              }
-            }
-          }
-          if (typeof obj[prop] === 'object' && obj[prop] !== null && !Array.isArray(obj[prop])) {
-            traverse(obj[prop], resultPropRef);
-          }
-        }
-      }
-    })(record);
-  }
-
-  // keep only the highest length in the map
-  for (let prop in result) {
-    if (result.hasOwnProperty(prop)) {
-      let max = 0;
-      if (result[prop].length) {
-        max = Math.max(...result[prop]);
-      }
-      result[prop] = {
-        maxItems: max
-      };
-    }
-  }
-  return result;
-};
-
-/**
  * Upload an importable file, parse it and create/return map for import action
  * @param file
  * @param decryptPassword
@@ -900,28 +959,135 @@ const getArrayPropertiesMaxLength = function (records) {
 const upload = function (file, decryptPassword, outbreak, languageId, options) {
   const outbreakId = outbreak.id;
 
-  let parsedFile;
-  // load language dictionary for the user
+  // get file extension
+  let extension = path.extname(file.name);
+
+  // go through the list of models associated with the passed model name
+  const associatedModelsOptions = options.associatedModels;
+
+  // initialize options to be sent to file parser
+  const optionsForParsingFile = {};
+  const neededLanguageTokens = new Set();
+
+  // calculate which tokens are needed in the language dictionary
+  // also gather options for file parser
+  Object.keys(associatedModelsOptions).forEach(modelName => {
+    const assocModelOptions = associatedModelsOptions[modelName];
+    // get model's field labels map
+    const fieldLabelsMap = assocModelOptions.fieldLabelsMap || {};
+
+    // if the model has importable properties, get their headers and try to suggest some mappings
+    if (assocModelOptions.importableProperties && assocModelOptions.importableProperties.length) {
+      // we need language tokens for normalized importable properties; also cache the normalized values
+      assocModelOptions.importablePropertiesNormalized = {};
+      assocModelOptions.importableProperties.forEach(function (property) {
+        // get normalized token
+        const normalizedToken = fieldLabelsMap[property] ?
+          fieldLabelsMap[property] : (
+            property && property.indexOf('[]') && fieldLabelsMap[property.replace(/\[]/g, '')] ?
+              fieldLabelsMap[property.replace(/\[]/g, '')] :
+              fieldLabelsMap[property]
+          );
+
+        // cache normalized value; will be used further in the steps
+        assocModelOptions.importablePropertiesNormalized[property] = normalizedToken;
+
+        // get the normalized token in the dictionary
+        neededLanguageTokens.add(normalizedToken);
+      });
+    }
+
+    // if outbreakId was sent (templates are stored at outbreak level) and the model uses extended form template
+    // get options for getting mapping suggestions from records
+    if (outbreakId !== undefined && assocModelOptions.extendedForm && assocModelOptions.extendedForm.template) {
+      // extract and cache variables from template
+      assocModelOptions.extendedForm.templateVariables = helpers.extractVariablesAndAnswerOptions(outbreak[assocModelOptions.extendedForm.template]);
+
+      // if variables are present get tokens for translation
+      if (assocModelOptions.extendedForm.templateVariables.length) {
+        assocModelOptions.extendedForm.templateVariables.forEach(function (variable) {
+          // get the normalized variables in the dictionary
+          neededLanguageTokens.add(variable.text);
+        });
+      }
+
+      // for JSON file we need to make some calculations when the file is parsed and also get other language tokens
+      if (extension === '.json') {
+        // need to also get translations for multidate questions
+        assocModelOptions.extendedForm.templateMultiDateQuestions = outbreak[assocModelOptions.extendedForm.template].filter(q => q.multiAnswer);
+        // create a question variable to translation map; translation will be added after the dictionary is loaded
+        // in order to be able to calculate maximum number of answers for datasets that use translations as field names
+        assocModelOptions.extendedForm.questionToTranslationMap = [];
+        (function getLanguageToken(questions) {
+          return questions
+            .forEach(question => {
+              question = question.toJSON ? question.toJSON() : question;
+
+              assocModelOptions.extendedForm.questionToTranslationMap.push({
+                variable: question.variable,
+                text: question.text
+              });
+
+              // get the normalized questions in the dictionary
+              neededLanguageTokens.add(question.text);
+
+              (question.answers || []).forEach(answer => {
+                getLanguageToken(answer.additionalQuestions || []);
+              });
+            });
+        })(assocModelOptions.extendedForm.templateMultiDateQuestions);
+
+        // also get extended form container property translation
+        // as the JSON file might contain actual translation of the fields and we need to match it against the variable
+        const containerProp = assocModelOptions.extendedForm.containerProperty;
+        assocModelOptions.extendedForm.templateContainerProp = containerProp;
+        neededLanguageTokens.add(fieldLabelsMap[containerProp]);
+
+        // set model options to be sent to file parser
+        !optionsForParsingFile.modelOptions && (optionsForParsingFile.modelOptions = {});
+        optionsForParsingFile.modelOptions[modelName] = assocModelOptions;
+      }
+    }
+  });
+
+  // cache language dictionary for the user
   let languageDictionary;
 
-  // store the file and get its headers
-  return storeFileAndGetHeaders(file, decryptPassword)
-    .then(result => {
-      parsedFile = result;
-
-      return baseLanguageModel.helpers.getLanguageDictionary(languageId);
-    })
+  return baseLanguageModel.helpers.getLanguageDictionary(languageId, {
+    token: {
+      $in: [...neededLanguageTokens]
+    }
+  })
     .then(dictionary => {
       languageDictionary = dictionary;
 
-      let result = parsedFile;
-      // get file extension
-      const extension = path.extname(file.name);
+      // for JSON file add the translation to questionToTranslationMap to be used in the file parser
+      if (extension === '.json' && optionsForParsingFile.modelOptions) {
+        Object.keys(optionsForParsingFile.modelOptions).forEach(modelName => {
+          const assocModelOptions = optionsForParsingFile.modelOptions[modelName];
+          if (assocModelOptions.extendedForm && assocModelOptions.extendedForm.questionToTranslationMap) {
+            // translation for container prop
+            assocModelOptions.extendedForm.templateContainerPropTranslation = languageDictionary.getTranslation(assocModelOptions.extendedForm.templateContainerProp);
 
-      // keep e reference to parsed content
-      const dataSet = result.jsonObj;
+            // translations for all questions
+            assocModelOptions.extendedForm.questionTranslationToVariableMap = {};
+            assocModelOptions.extendedForm.questionToTranslationMap.forEach(entry => {
+              entry.translation = languageDictionary.getTranslation(entry.text);
+              assocModelOptions.extendedForm.questionTranslationToVariableMap[entry.translation] = entry.variable;
+            });
+          }
+        });
+      }
+
+      // store the file and get its headers
+      return storeFileAndGetHeaders(file, decryptPassword, optionsForParsingFile);
+    })
+    .then(parseFileResult => {
+      // get file extension
+      extension = parseFileResult.extension;
+
       // define main result
-      result = {
+      let result = {
         id: result.id,
         fileHeaders: result.headers
       };
@@ -935,8 +1101,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
       // store main model name
       const mainModelName = options.modelName;
 
-      // go through the list of models associated with the passed model name
-      const associatedModelsOptions = options.associatedModels;
       Object.keys(associatedModelsOptions).forEach(modelName => {
         const assocModelOptions = associatedModelsOptions[modelName];
 
@@ -947,6 +1111,11 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           modelPropertyValues: {},
           modelArrayProperties: {}
         };
+
+        // get array properties maximum length for non-flat files; already calculated when JSON was parsed
+        if (['.json'].includes(extension)) {
+          results[modelName].fileArrayHeaders = parseFileResult.fileArrayHeaders;
+        }
 
         // if file headers were found
         if (result.fileHeaders.length) {
@@ -1044,7 +1213,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           if (outbreakId !== undefined && assocModelOptions.extendedForm && assocModelOptions.extendedForm.template) {
             // get mapping suggestions for extended form
             steps.push(function (callback) {
-              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, dataSet, fieldLabelsMap);
+              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, parseFileResult.questionnaireMaxAnswersMap, fieldLabelsMap);
               // update result
               results[modelName] = Object.assign(
                 {}, results[modelName],
@@ -1053,14 +1222,6 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
                 {modelPropertyValues: Object.assign(results[modelName].modelPropertyValues, extendedFormSuggestions.modelPropertyValues)},
                 {modelArrayProperties: Object.assign(results[modelName].modelArrayProperties, extendedFormSuggestions.modelArrayProperties)}
               );
-              callback(null, results[modelName]);
-            });
-          }
-
-          // get array properties maximum length for non-flat files
-          if (['.json'].includes(extension)) {
-            steps.push(function (callback) {
-              results[modelName].fileArrayHeaders = getArrayPropertiesMaxLength(dataSet);
               callback(null, results[modelName]);
             });
           }
