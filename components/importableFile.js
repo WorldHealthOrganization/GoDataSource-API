@@ -1006,7 +1006,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
         // also get extended form container property translation
         // as the JSON file might contain actual translation of the fields and we need to match it against the variable
         const containerProp = assocModelOptions.extendedForm.containerProperty;
-        assocModelOptions.extendedForm.templateContainerProp = containerProp;
+        assocModelOptions.extendedForm.templateContainerProp = fieldLabelsMap[containerProp];
         neededLanguageTokens.add(fieldLabelsMap[containerProp]);
 
         // set model options to be sent to file parser
