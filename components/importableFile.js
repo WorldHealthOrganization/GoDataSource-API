@@ -123,8 +123,13 @@ const getJsonHeaders = function (filePath, extension, options) {
      */
     const writeToStream = (data) => {
       return new Promise(resolve => {
+        console.log('write');
         if (!writeStream.write(data)) {
-          writeStream.once('drain', resolve);
+          console.log('waiting to drain');
+          writeStream.once('drain', () => {
+            console.log('drainnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn');
+            resolve();
+          });
         } else {
           process.nextTick(resolve);
         }
@@ -217,7 +222,10 @@ const getJsonHeaders = function (filePath, extension, options) {
         return pipeline(
           readStream,
           jsonStream.parse('*'),
-          es.map(function (item, callback) {
+          es.through(function (item) {
+            const that = this;
+
+            console.log('read');
             // go through all properties of flatten item
             const flatItem = helpers.getFlatObject(item);
             Object.keys(flatItem).forEach(function (property) {
@@ -249,23 +257,33 @@ const getJsonHeaders = function (filePath, extension, options) {
               dataToWrite = JSON.stringify(item);
             } catch (err) {
               // data couldn't be stringifed
-              // error invalid content
-              return callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
+              // error invalid content; destroy readstream as it will destroy entire pipeline
+              !readStream.destroyed && readStream.destroy(apiError.getError('INVALID_CONTENT_OF_TYPE', {
                 contentType: 'JSON',
                 details: 'it should contain an array'
               }));
             }
 
+            that.pause();
             // write data to file and continue processing afterwards
             writeToStream((firstItem ? '' : ',') + dataToWrite)
               .then(() => {
-                callback();
+                console.log('wrooooooooooooote');
+                that.resume();
               });
             firstItem = false;
           })
         );
       })
       .then(() => {
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
+        console.log('finished parsing');
         const headersFormat = 'json';
 
         // add headers to prop map in file
@@ -324,6 +342,7 @@ const getJsonHeaders = function (filePath, extension, options) {
         resolve(result);
       })
       .catch(err => {
+        writeStream.destroy();
         reject(err);
       });
   });
