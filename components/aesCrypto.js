@@ -248,33 +248,6 @@ const decryptStream = function (
     }),
     writableStream
   );
-
-  // promisify the result
-  // return new Promise(function (resolve, reject) {
-  //   const rejected = false;
-  //
-  //   const decryptStream = new DecryptTransform({
-  //     password
-  //   });
-  //
-  //   const errorHandler = (err) => {
-  //     !readableStream.destroyed && (readableStream.destroy());
-  //     !decryptStream.destroyed && (decryptStream.destroy());
-  //     !writableStream.destroyed && (writableStream.destroy());
-  //
-  //     !rejected && reject(new Error('Failed to decrypt payload: ' + err));
-  //   };
-  //
-  //   readableStream.on('error', errorHandler);
-  //   decryptStream.on('error', errorHandler);
-  //   writableStream.on('error', errorHandler);
-  //
-  //   writableStream.on('finish', () => {
-  //     resolve();
-  //   });
-  //
-  //   readableStream.pipe(decryptStream).pipe(writableStream);
-  // });
 };
 
 module.exports = {

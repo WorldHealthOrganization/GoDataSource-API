@@ -123,11 +123,8 @@ const getJsonHeaders = function (filePath, extension, options) {
      */
     const writeToStream = (data) => {
       return new Promise(resolve => {
-        console.log('write');
         if (!writeStream.write(data)) {
-          console.log('waiting to drain');
           writeStream.once('drain', () => {
-            console.log('drainnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn');
             resolve();
           });
         } else {
@@ -148,8 +145,13 @@ const getJsonHeaders = function (filePath, extension, options) {
         if (obj.hasOwnProperty(prop)) {
           const resultPropRef = `${ref ? ref + '.' : ''}${prop}`;
           if (Array.isArray(obj[prop])) {
-            fileArrayHeaders[resultPropRef] = fileArrayHeaders[resultPropRef] || [];
-            fileArrayHeaders[resultPropRef].push(obj[prop].length);
+            !fileArrayHeaders[resultPropRef] && (fileArrayHeaders[resultPropRef] = {
+              maxItems: 0
+            });
+            const objPropLength = obj[prop].length;
+            if (fileArrayHeaders[resultPropRef].maxItems < objPropLength) {
+              fileArrayHeaders[resultPropRef].maxItems = objPropLength;
+            }
 
             for (let arrProp of obj[prop]) {
               if (typeof arrProp === 'object' && arrProp !== null && !Array.isArray(obj[prop])) {
@@ -180,7 +182,7 @@ const getJsonHeaders = function (filePath, extension, options) {
           questionnaireMaxAnswersMap[modelName] = {};
           (function parseQuestion(questions) {
             (questions || []).forEach(question => {
-              questionnaireMaxAnswersMap[modelName][question.variable] = [];
+              questionnaireMaxAnswersMap[modelName][question.variable] = 0;
               (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
             });
           })(modelQuestionnaire);
@@ -204,10 +206,25 @@ const getJsonHeaders = function (filePath, extension, options) {
 
         for (let q in record[propToIterate]) {
           if (record[propToIterate][q]) {
+            let length;
+            let variable;
+
             if (multiDateQuestionsMap[q]) {
-              multiDateQuestionsMap[q].push(record[propToIterate][q].length);
+              length = record[propToIterate][q].length;
+              variable = q;
             } else if (assocModelOptions.extendedForm.questionTranslationToVariableMap[q]) {
-              multiDateQuestionsMap[assocModelOptions.extendedForm.questionTranslationToVariableMap[q]].push(record[propToIterate][q].length);
+              length = record[propToIterate][q].length;
+              variable = assocModelOptions.extendedForm.questionTranslationToVariableMap[q];
+            }
+
+            if (
+              length !== undefined &&
+              (
+                multiDateQuestionsMap[variable] === undefined ||
+                multiDateQuestionsMap[variable] < length
+              )
+            ) {
+              multiDateQuestionsMap[variable] = length;
             }
           }
         }
@@ -216,6 +233,10 @@ const getJsonHeaders = function (filePath, extension, options) {
 
     let firstItem = true;
     // write start of new file
+    const batchSize = 100;
+    let batchData = '';
+    let batchCount = 0;
+    const sanitizedPropertiesMap = {};
     return writeToStream('{"data":[')
       .then(() => {
         // run pipeline which will read contents, make required calculations on each data and write the needed entry to the new file
@@ -225,26 +246,25 @@ const getJsonHeaders = function (filePath, extension, options) {
           es.through(function (item) {
             const that = this;
 
-            console.log('read');
             // go through all properties of flatten item
             const flatItem = helpers.getFlatObject(item);
             Object.keys(flatItem).forEach(function (property) {
-              const sanitizedProperty = property
+              !sanitizedPropertiesMap[property] && (sanitizedPropertiesMap[property] = property
                 // don't replace basic types arrays ( string, number, dates etc )
                 .replace(/\[\d+]$/g, '')
                 // sanitize arrays containing objects object
                 .replace(/\[\d+]/g, '[]')
-                .replace(/^\[]\.*/, '');
+                .replace(/^\[]\.*/, ''));
               // add the header if not already included
-              if (!headersToPropsMap[sanitizedProperty]) {
-                headers.push(sanitizedProperty);
-                headersToPropsMap[sanitizedProperty] = new Set();
+              if (!headersToPropsMap[sanitizedPropertiesMap[property]]) {
+                headers.push(sanitizedPropertiesMap[property]);
+                headersToPropsMap[sanitizedPropertiesMap[property]] = new Set();
               }
 
               // add prop to headers map if simple property; null values are skipped
               // children of object properties will be added separately
               if (typeof flatItem[property] !== 'object') {
-                headersToPropsMap[sanitizedProperty].add(property);
+                headersToPropsMap[sanitizedPropertiesMap[property]].add(property);
               }
             });
 
@@ -264,26 +284,24 @@ const getJsonHeaders = function (filePath, extension, options) {
               }));
             }
 
-            that.pause();
-            // write data to file and continue processing afterwards
-            writeToStream((firstItem ? '' : ',') + dataToWrite)
-              .then(() => {
-                console.log('wrooooooooooooote');
-                that.resume();
-              });
+            // write batch if batchSize was reached
+            if (batchCount < batchSize) {
+              batchData += (firstItem ? '' : ',') + dataToWrite;
+              batchCount++;
+            } else {
+              that.pause();
+              writeToStream(batchData)
+                .then(() => {
+                  batchCount = 0;
+                  batchData = '';
+                  that.resume();
+                });
+            }
             firstItem = false;
           })
         );
       })
       .then(() => {
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
-        console.log('finished parsing');
         const headersFormat = 'json';
 
         // add headers to prop map in file
@@ -303,43 +321,13 @@ const getJsonHeaders = function (filePath, extension, options) {
         writeStream.close();
 
         // new JSON file was successfully written; construct result to be used further
-        const result = {
+        resolve({
           id: fileId,
           extension,
-          headers
-        };
-
-        // finalize array properties max length calculation
-        // keep only the highest length in the map
-        for (let prop in fileArrayHeaders) {
-          if (fileArrayHeaders.hasOwnProperty(prop)) {
-            let max = 0;
-            if (fileArrayHeaders[prop].length) {
-              max = Math.max(...fileArrayHeaders[prop]);
-            }
-            fileArrayHeaders[prop] = {
-              maxItems: max
-            };
-          }
-        }
-        result.fileArrayHeaders = fileArrayHeaders;
-
-        // finalize questionnaire max answers calculation
-        // keep only the highest length in the map
-        Object.keys(questionnaireMaxAnswersMap).forEach(modelName => {
-          const multiDateQuestionsMap = questionnaireMaxAnswersMap[modelName];
-
-          for (let q in multiDateQuestionsMap) {
-            let max = 0;
-            if (multiDateQuestionsMap[q].length) {
-              max = Math.max(...multiDateQuestionsMap[q]);
-            }
-            multiDateQuestionsMap[q] = max;
-          }
+          headers,
+          fileArrayHeaders,
+          questionnaireMaxAnswersMap
         });
-        result.questionnaireMaxAnswersMap = questionnaireMaxAnswersMap;
-
-        resolve(result);
       })
       .catch(err => {
         writeStream.destroy();
@@ -575,7 +563,6 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
     //   });
     // })
     .catch(err => {
-      console.log(err);
       return Promise.reject(err);
     });
 };
