@@ -2052,58 +2052,6 @@ const convertQuestionnaireAnswersToNewFormat = function (answers) {
   return result;
 };
 
-const getQuestionnaireMaxAnswersMap = function (questionnaire, records, translationOpts) {
-  translationOpts = translationOpts || {
-    questionToTranslationMap: []
-  };
-  questionnaire = (questionnaire || []).filter(q => q.multiAnswer);
-
-  // get a map of all the multi date answer questions and their nested questions
-  let multiDateQuestionsMap = {};
-
-  (function parseQuestion(questions) {
-    (questions || []).forEach(question => {
-      multiDateQuestionsMap[question.variable] = [];
-      (question.answers || []).forEach(answer => parseQuestion(answer.additionalQuestions));
-    });
-  })(questionnaire);
-
-  // get maximum number of multi date answers
-  records.forEach(record => {
-    let propToIterate = 'questionnaireAnswers';
-    if (!record[propToIterate]) {
-      if (record[translationOpts.containerPropTranslation]) {
-        propToIterate = translationOpts.containerPropTranslation;
-      } else {
-        // it doesn't have any questions, skip it
-        return;
-      }
-    }
-    for (let q in record[propToIterate]) {
-      if (record[propToIterate][q]) {
-        if (multiDateQuestionsMap[q]) {
-          multiDateQuestionsMap[q].push(record[propToIterate][q].length);
-        } else {
-          const foundMap = translationOpts.questionToTranslationMap.find(qMap => qMap.translation === q);
-          if (foundMap) {
-            multiDateQuestionsMap[foundMap.variable].push(record[propToIterate][q].length);
-          }
-        }
-      }
-    }
-  });
-
-  for (let q in multiDateQuestionsMap) {
-    let max = 0;
-    if (multiDateQuestionsMap[q].length) {
-      max = Math.max(...multiDateQuestionsMap[q]);
-    }
-    multiDateQuestionsMap[q] = max;
-  }
-
-  return multiDateQuestionsMap;
-};
-
 const convertQuestionnairePropsToDate = function (questions) {
   const parseProp = function (prop) {
     if (prop === null || prop === 'undefined') {
@@ -2768,7 +2716,6 @@ Object.assign(module.exports, {
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   getDateChunks: getDateChunks,
   getDaysSince: getDaysSince,
-  getQuestionnaireMaxAnswersMap: getQuestionnaireMaxAnswersMap,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,

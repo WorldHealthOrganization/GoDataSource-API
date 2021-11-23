@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const async = require('async');
 const fs = require('fs');
+const {writeFile} = require('fs/promises');
 const path = require('path');
 const uuid = require('uuid');
 const os = require('os');
@@ -26,6 +27,8 @@ const WorkerRunner = require('./workerRunner');
 
 // Note: should be kept in sync with the extension used in exportHelper
 const zipExtension = '.zip';
+
+const headersFileSuffix = '_headers';
 
 // define a list of supported file extensions
 const supportedFileExtensions = [
@@ -237,7 +240,7 @@ const getJsonHeaders = function (filePath, extension, options) {
     let batchData = '';
     let batchCount = 0;
     const sanitizedPropertiesMap = {};
-    return writeToStream('{"data":[')
+    return writeToStream('[')
       .then(() => {
         // run pipeline which will read contents, make required calculations on each data and write the needed entry to the new file
         return pipeline(
@@ -302,6 +305,14 @@ const getJsonHeaders = function (filePath, extension, options) {
         );
       })
       .then(() => {
+        // all data was processed
+        // write the remaining items in batchData and the rest of the file
+        return writeToStream(`${batchData}]`);
+      })
+      .then(() => {
+        writeStream.close();
+
+        // write headers file
         const headersFormat = 'json';
 
         // add headers to prop map in file
@@ -313,13 +324,9 @@ const getJsonHeaders = function (filePath, extension, options) {
           });
         }
 
-        // all data was processed
-        // write the rest of the file
-        return writeToStream(`],"headersFormat":"${headersFormat}","headersToPropMap":${JSON.stringify(cHeadersToPropMap)}}`);
+        return writeFile(path.join(os.tmpdir(), `${fileId}${headersFileSuffix}`), `{"headersFormat":"${headersFormat}","headersToPropMap":${JSON.stringify(cHeadersToPropMap)}}`);
       })
       .then(() => {
-        writeStream.close();
-
         // new JSON file was successfully written; construct result to be used further
         resolve({
           id: fileId,
@@ -569,13 +576,9 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
 
 /**
  * Get a list of distinct values for the given properties of the dataset
- * @param {Object} fileContents - Imported file contents as saved by the storeFileAndGetHeaders function
+ * @param {string} fileId - File name to be read (contains the dataset)
+ * @param {Object} fileHeaders - Imported file headers as saved by the storeFileAndGetHeaders function
  * {
- * data: [{
- *   "simple prop on first level or nested": ...
- *   "simple prop in an array of objects [1]": ...
- *   "Addresses Location [1] Location Geographical Level [1]"
- * }]
  * headersFormat: 'json/xlsx',
  * headersToPropMap: {
  *   'header': ['prop1', 'prop2']
@@ -584,87 +587,96 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
  * @param {Array} properties - List of properties for which to return the distinct values
  * @returns {{}}
  */
-const getDistinctPropertyValues = function (fileContents, properties) {
+const getDistinctPropertyValues = function (fileId, fileHeaders, properties) {
   // initialize result
   const result = {};
 
-  if (!properties || !properties.length || !fileContents || !fileContents.data || !fileContents.data.length) {
+  if (!properties || !properties.length) {
     return result;
   }
-
-  const dataset = fileContents.data;
 
   // initialize a set for each needed property
   properties.forEach(prop => {
     result[prop] = new Set();
   });
 
-  // check for the format of the headers in file
-  switch (fileContents.headersFormat) {
-    case 'json': {
-      // for JSON the properties for each header were stored when the file was imported
-      const headersToPropMap = fileContents.headersToPropMap;
-      // get each requested property values from the dataset
-      dataset.forEach(entry => {
-        properties.forEach(prop => {
-          if (!headersToPropMap[prop]) {
-            // requested prop is not valid
-            return;
-          }
+  // for JSON the properties for each header were stored when the file was imported
+  const headersToPropMap = fileHeaders.headersToPropMap;
 
-          // get the values from all paths for the prop
-          headersToPropMap[prop].forEach(pathToValue => {
-            const value = _.get(entry, pathToValue);
-            // stringify value and add it in set
-            (value !== undefined) && result[prop].add(value + '');
+  // for xlsx create a sanitized properties map
+  const sanitizedPropertiesMap = {};
+
+  // read the dataset file
+  const readStream = fs.createReadStream(path.join(os.tmpdir(), fileId));
+  // run pipeline which will read contents and make required calculations on each data
+  return pipeline(
+    readStream,
+    jsonStream.parse('*'),
+    es.through(function (entry) {
+      // check for the format of the headers in file
+      switch (fileHeaders.headersFormat) {
+        case 'json': {
+          // get each requested property values from the dataset
+          properties.forEach(prop => {
+            if (!headersToPropMap[prop]) {
+              // requested prop is not valid
+              return;
+            }
+
+            // get the values from all paths for the prop
+            headersToPropMap[prop].forEach(pathToValue => {
+              const value = _.get(entry, pathToValue);
+              // stringify value and add it in set
+              (value !== undefined) && result[prop].add(value + '');
+            });
           });
-        });
+
+          break;
+        }
+        case 'xlsx': {
+          // get each requested property values from the dataset
+          Object.keys(entry).forEach(prop => {
+            // check if the requested prop is an actual entry prop
+            if (result[prop]) {
+              result[prop].add(entry[prop]);
+              return;
+            }
+
+            // sanitize key (remove array markers)
+            !sanitizedPropertiesMap[prop] && (sanitizedPropertiesMap[prop] = prop
+              // don't replace basic types arrays ( string, number, dates etc )
+              .replace(/\[\d+]$/g, '')
+              // sanitize arrays containing objects
+              .replace(/\[\d+]/g, '[]'));
+
+            if (result[sanitizedPropertiesMap[prop]]) {
+              result[sanitizedPropertiesMap[prop]].add(entry[prop]);
+              return;
+            }
+
+            // at this point we have handled flat files
+            // requested prop is not valid
+          });
+          break;
+        }
+        default:
+          break;
+      }
+    })
+  )
+    .then(() => {
+      // all data was processed
+      // transform results to arrays
+      Object.keys(result).forEach(prop => {
+        if (!result[prop].size) {
+          // add single "null" value to be consistent with old functionality
+          result[prop] = [null + ''];
+        } else {
+          result[prop] = [...result[prop]];
+        }
       });
-
-      break;
-    }
-    case 'xlsx': {
-      // get each requested property values from the dataset
-      dataset.forEach(entry => {
-        Object.keys(entry).forEach(prop => {
-          // check if the requested prop is an actual entry prop
-          if (result[prop]) {
-            result[prop].add(entry[prop]);
-            return;
-          }
-
-          // sanitize key (remove array markers)
-          const sanitizedProperty = prop
-            // don't replace basic types arrays ( string, number, dates etc )
-            .replace(/\[\d+]$/g, '')
-            // sanitize arrays containing objects
-            .replace(/\[\d+]/g, '[]');
-
-          if (result[sanitizedProperty]) {
-            result[sanitizedProperty].add(entry[prop]);
-            return;
-          }
-
-          // at this point we have handled flat files
-          // requested prop is not valid
-        });
-      });
-      break;
-    }
-    default:
-      break;
-  }
-
-  // when done, transform results to arrays
-  Object.keys(result).forEach(prop => {
-    if (!result[prop].size) {
-      // add single "null" value to be consistent with old functionality
-      result[prop] = [null + ''];
-    } else {
-      result[prop] = [...result[prop]];
-    }
-  });
-  return result;
+      return result;
+    });
 };
 
 /**
@@ -1257,11 +1269,11 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
  * @returns {Promise<{distinctFileColumnValues: {}}>}
  */
 const getDistinctValuesForHeaders = function (fileId, headers) {
-  // get JSON
-  return getTemporaryFileById(fileId)
-    .then(fileContents => {
+  // get headers file
+  return getTemporaryFileById(`${fileId}${headersFileSuffix}`)
+    .then(fileHeaders => {
       return {
-        distinctFileColumnValues: getDistinctPropertyValues(fileContents, headers)
+        distinctFileColumnValues: getDistinctPropertyValues(fileId, fileHeaders, headers)
       };
     });
 };
