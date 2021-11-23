@@ -1272,8 +1272,11 @@ const getDistinctValuesForHeaders = function (fileId, headers) {
   // get headers file
   return getTemporaryFileById(`${fileId}${headersFileSuffix}`)
     .then(fileHeaders => {
+      return getDistinctPropertyValues(fileId, fileHeaders, headers);
+    })
+    .then(result => {
       return {
-        distinctFileColumnValues: getDistinctPropertyValues(fileId, fileHeaders, headers)
+        distinctFileColumnValues: result
       };
     });
 };
