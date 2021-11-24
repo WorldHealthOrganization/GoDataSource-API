@@ -182,6 +182,46 @@ const constants = {
   }
 };
 
+const formatItemFromImportableFile = function (item, formattedDataContainer, options) {
+  // remap properties
+  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
+
+  // process boolean values
+  const formattedData = helpers.convertBooleanPropertiesNoModel(
+    options.modelBooleanProperties || [],
+    remappedProperties)[0];
+
+  // set outbreak id
+  formattedData.outbreakId = options.outbreakId;
+
+  // filter out empty addresses
+  const addresses = helpers.sanitizePersonAddresses(formattedData);
+  if (addresses) {
+    formattedData.addresses = addresses;
+  }
+
+  // sanitize questionnaire answers
+  if (formattedData.questionnaireAnswers) {
+    // convert properties that should be date to actual date objects
+    formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+  }
+
+  // sanitize visual ID
+  if (formattedData.visualId) {
+    formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+  }
+
+  // add case entry in the processed list
+  formattedDataContainer.push({
+    raw: item,
+    save: formattedData
+  });
+};
+
+const getAdditionalFormatOptions = function (options) {
+  options.processedMap = helpers.processMapLists(options.map);
+};
+
 /**
  * Format cases imported data
  * @param {Array} rawData - List of items to process
@@ -190,7 +230,10 @@ const constants = {
  * returns {Promise<unknown>}
  */
 const formatDataFromImportableFile = function (rawData, formattedDataContainer, options) {
-  const processedMap = helpers.processMapLists(options.map);
+  // !processedMap && (processedMap = helpers.processMapLists(options.map));
+  if (!formatDataFromImportableFile.processedMap) {
+    formatDataFromImportableFile.processedMap = helpers.processMapLists(options.map);
+  }
 
   return new Promise((resolve, reject) => {
     async.eachSeries(
@@ -199,7 +242,7 @@ const formatDataFromImportableFile = function (rawData, formattedDataContainer, 
         // run the code async in order to allow sending processed items to parent while still processing other items
         setTimeout(() => {
           // remap properties
-          const remappedProperties = helpers.remapPropertiesUsingProcessedMap([rawItem], processedMap, options.valuesMap);
+          const remappedProperties = helpers.remapPropertiesUsingProcessedMap([rawItem], formatDataFromImportableFile.processedMap, options.valuesMap);
 
           // process boolean values
           const formattedData = helpers.convertBooleanPropertiesNoModel(
@@ -247,6 +290,8 @@ const formatDataFromImportableFile = function (rawData, formattedDataContainer, 
 module.exports = {
   constants: constants,
   helpers: {
-    formatDataFromImportableFile: formatDataFromImportableFile
+    formatDataFromImportableFile,
+    formatItemFromImportableFile,
+    getAdditionalFormatOptions
   }
 };

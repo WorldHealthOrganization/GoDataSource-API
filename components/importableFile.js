@@ -28,7 +28,7 @@ const WorkerRunner = require('./workerRunner');
 // Note: should be kept in sync with the extension used in exportHelper
 const zipExtension = '.zip';
 
-const headersFileSuffix = '_headers';
+const metadataFileSuffix = '_metadata';
 
 // define a list of supported file extensions
 const supportedFileExtensions = [
@@ -235,6 +235,7 @@ const getJsonHeaders = function (filePath, extension, options) {
     };
 
     let firstItem = true;
+    let totalNoItems = 0;
     // write start of new file
     const batchSize = 100;
     let batchData = '';
@@ -287,11 +288,12 @@ const getJsonHeaders = function (filePath, extension, options) {
               }));
             }
 
+            batchData += (firstItem ? '' : ',') + dataToWrite;
+            batchCount++;
+            totalNoItems++;
+
             // write batch if batchSize was reached
-            if (batchCount < batchSize) {
-              batchData += (firstItem ? '' : ',') + dataToWrite;
-              batchCount++;
-            } else {
+            if (batchCount >= batchSize) {
               that.pause();
               writeToStream(batchData)
                 .then(() => {
@@ -324,7 +326,8 @@ const getJsonHeaders = function (filePath, extension, options) {
           });
         }
 
-        return writeFile(path.join(os.tmpdir(), `${fileId}${headersFileSuffix}`), `{"headersFormat":"${headersFormat}","headersToPropMap":${JSON.stringify(cHeadersToPropMap)}}`);
+        return writeFile(path.join(os.tmpdir(), `${fileId}${metadataFileSuffix}`),
+          `{"headersFormat":"${headersFormat}","headersToPropMap":${JSON.stringify(cHeadersToPropMap)},"totalNoItems":${totalNoItems}}`);
       })
       .then(() => {
         // new JSON file was successfully written; construct result to be used further
@@ -577,7 +580,7 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
 /**
  * Get a list of distinct values for the given properties of the dataset
  * @param {string} fileId - File name to be read (contains the dataset)
- * @param {Object} fileHeaders - Imported file headers as saved by the storeFileAndGetHeaders function
+ * @param {Object} fileMetadata - Imported file metadata as saved by the storeFileAndGetHeaders function
  * {
  * headersFormat: 'json/xlsx',
  * headersToPropMap: {
@@ -587,7 +590,7 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
  * @param {Array} properties - List of properties for which to return the distinct values
  * @returns {{}}
  */
-const getDistinctPropertyValues = function (fileId, fileHeaders, properties) {
+const getDistinctPropertyValues = function (fileId, fileMetadata, properties) {
   // initialize result
   const result = {};
 
@@ -601,7 +604,7 @@ const getDistinctPropertyValues = function (fileId, fileHeaders, properties) {
   });
 
   // for JSON the properties for each header were stored when the file was imported
-  const headersToPropMap = fileHeaders.headersToPropMap;
+  const headersToPropMap = fileMetadata.headersToPropMap;
 
   // for xlsx create a sanitized properties map
   const sanitizedPropertiesMap = {};
@@ -614,7 +617,7 @@ const getDistinctPropertyValues = function (fileId, fileHeaders, properties) {
     jsonStream.parse('*'),
     es.through(function (entry) {
       // check for the format of the headers in file
-      switch (fileHeaders.headersFormat) {
+      switch (fileMetadata.headersFormat) {
         case 'json': {
           // get each requested property values from the dataset
           properties.forEach(prop => {
@@ -1270,9 +1273,9 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
  */
 const getDistinctValuesForHeaders = function (fileId, headers) {
   // get headers file
-  return getTemporaryFileById(`${fileId}${headersFileSuffix}`)
-    .then(fileHeaders => {
-      return getDistinctPropertyValues(fileId, fileHeaders, headers);
+  return getTemporaryFileById(`${fileId}${metadataFileSuffix}`)
+    .then(fileMetadata => {
+      return getDistinctPropertyValues(fileId, fileMetadata, headers);
     })
     .then(result => {
       return {
@@ -1646,5 +1649,6 @@ module.exports = {
   upload,
   getDistinctValuesForHeaders,
   getTemporaryFileById,
-  processImportableFileData
+  processImportableFileData,
+  metadataFileSuffix
 };
