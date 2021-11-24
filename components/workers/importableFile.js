@@ -132,16 +132,16 @@ const worker = {
       // depending on message we need to make different actions
       switch (message.subject) {
         case 'nextBatch': {
+          // resume dataset calculations if paused
+          if (calculateStream.paused) {
+            calculateStream.resume();
+          }
+
           sendMessageToParent({
             subject: 'nextBatch',
             // send data for this batch; max batchSize items will be send
             data: dataToSend.splice(0, batchSize)
           });
-
-          // resume dataset calculations if paused
-          if (calculateStream.paused) {
-            calculateStream.resume();
-          }
 
           if (allDataProcessed && !dataToSend.length) {
             sendMessageToParent({
