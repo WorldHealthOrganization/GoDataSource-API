@@ -472,31 +472,33 @@ const getXlsxHeaders = function (filesToParse, extension) {
           workbookReader.read();
           workbookReader.on('worksheet', worksheet => {
             worksheet.on('row', row => {
-              // check for headers row if this is first file
-              if (!headers.length && row.number === 1) {
-                // keep a list of how many times a header appears
-                const sameHeaderCounter = {};
+              // check for headers row
+              if (row.number === 1) {
+                // if this is first file parse headers
+                if (!headers.length) {
+                  // keep a list of how many times a header appears
+                  const sameHeaderCounter = {};
 
-                // go through all columns
-                row._cells.forEach(cell => {
-                  let header = cell.value;
+                  // go through all columns
+                  row._cells.forEach(cell => {
+                    let header = cell.value;
 
-                  // if this is the first time the header appears
-                  if (sameHeaderCounter[header] === undefined) {
-                    // create an entry for it in the counter
-                    sameHeaderCounter[header] = 0;
-                  } else {
-                    // increment counter
-                    sameHeaderCounter[header]++;
-                    // update header value to match those built by xlsx.utils.sheet_to_json (old functionality)
-                    header = `${header}_${sameHeaderCounter[header]}`;
-                  }
+                    // if this is the first time the header appears
+                    if (sameHeaderCounter[header] === undefined) {
+                      // create an entry for it in the counter
+                      sameHeaderCounter[header] = 0;
+                    } else {
+                      // increment counter
+                      sameHeaderCounter[header]++;
+                      // update header value to match those built by xlsx.utils.sheet_to_json (old functionality)
+                      header = `${header}_${sameHeaderCounter[header]}`;
+                    }
 
-                  // fill maps
-                  headers.push(header);
-                  headersMap[cell._column.number] = header;
-                });
-
+                    // fill maps
+                    headers.push(header);
+                    headersMap[cell._column.number] = header;
+                  });
+                }
                 return;
               }
 
