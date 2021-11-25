@@ -40,7 +40,7 @@
     "epi-week": "0.0.1",
     "es6-promise-pool": "2.5.0",
     "event-stream": "4.0.1",
-    "exceljs": "3.10.0",
+    "exceljs": "4.3.0",
     "express": "4.17.1",
     "express-session": "1.17.2",
     "form-data": "4.0.0",

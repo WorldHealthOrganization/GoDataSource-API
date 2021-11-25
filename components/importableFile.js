@@ -8,6 +8,7 @@ const path = require('path');
 const uuid = require('uuid');
 const os = require('os');
 const xlsx = require('xlsx');
+const excel = require('exceljs');
 const sort = require('alphanum-sort');
 const tmp = require('tmp');
 const admZip = require('adm-zip');
@@ -352,65 +353,278 @@ const getJsonHeaders = function (filePath, extension, options) {
  * @param extension
  */
 const getSpreadSheetHeaders = function (filesToParse, extension) {
-  // parse XLS data
-  const parseOptions = {
-    cellText: false
-  };
-  // for CSV do not parse the fields
-  // because it breaks number values like 0000008 -> 8
-  // or date values losing timestamp information
-  // this is needed because parser tries to format all the fields to date, no matter the value
-  if (extension === '.csv') {
-    parseOptions.raw = true;
-  } else {
-    parseOptions.cellDates = true;
-  }
-  const parsedData = xlsx.read(data, parseOptions);
-  // extract first sheet name (we only care about first sheet)
-  let sheetName = parsedData.SheetNames.shift();
-  // convert data to JSON
-  let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
-    dateNF: 'YYYY-MM-DD'
-  });
-  // get columns by walking through the keys and using only the first row
-  const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
-    // ignore ref property
-    if (item === '!ref') {
-      return false;
-    }
-    // get data index
-    const matches = item.match(/(\d+)/);
-    if (matches && matches[1]) {
-      // get only first row
-      return parseInt(matches[1]) === 1;
-    }
-    return false;
-  }));
-  // keep a list of headers
-  let headers = [];
-  // keep a list of how many times a header appears
-  let sameHeaderCounter = {};
-  // if columns found
-  if (columns.length) {
-    // go through all columns
-    columns.forEach(function (columnId) {
-      let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
-      // if this is the first time the header appears
-      if (sameHeaderCounter[headerValue] === undefined) {
-        // create an entry for it in the counter
-        sameHeaderCounter[headerValue] = 0;
-      } else {
-        // increment counter
-        sameHeaderCounter[headerValue]++;
-        // update header value to match those built by xlsx.utils.sheet_to_json
-        headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
-      }
-      headers.push(headerValue);
+};
+// const getSpreadSheetHeaders = function (filesToParse, extension) {
+//   // parse XLS data
+//   const parseOptions = {
+//     cellText: false
+//   };
+//   // for CSV do not parse the fields
+//   // because it breaks number values like 0000008 -> 8
+//   // or date values losing timestamp information
+//   // this is needed because parser tries to format all the fields to date, no matter the value
+//   if (extension === '.csv') {
+//     parseOptions.raw = true;
+//   } else {
+//     parseOptions.cellDates = true;
+//   }
+//   const parsedData = xlsx.read(data, parseOptions);
+//   // extract first sheet name (we only care about first sheet)
+//   let sheetName = parsedData.SheetNames.shift();
+//   // convert data to JSON
+//   let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
+//     dateNF: 'YYYY-MM-DD'
+//   });
+//   // get columns by walking through the keys and using only the first row
+//   const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
+//     // ignore ref property
+//     if (item === '!ref') {
+//       return false;
+//     }
+//     // get data index
+//     const matches = item.match(/(\d+)/);
+//     if (matches && matches[1]) {
+//       // get only first row
+//       return parseInt(matches[1]) === 1;
+//     }
+//     return false;
+//   }));
+//   // keep a list of headers
+//   let headers = [];
+//   // keep a list of how many times a header appears
+//   let sameHeaderCounter = {};
+//   // if columns found
+//   if (columns.length) {
+//     // go through all columns
+//     columns.forEach(function (columnId) {
+//       let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
+//       // if this is the first time the header appears
+//       if (sameHeaderCounter[headerValue] === undefined) {
+//         // create an entry for it in the counter
+//         sameHeaderCounter[headerValue] = 0;
+//       } else {
+//         // increment counter
+//         sameHeaderCounter[headerValue]++;
+//         // update header value to match those built by xlsx.utils.sheet_to_json
+//         headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
+//       }
+//       headers.push(headerValue);
+//     });
+//   }
+//   // should always be an array (sheets are lists)
+//   // send back the parsed object and its headers
+//   callback(null, {obj: jsonObj, headers: headers});
+// };
+
+/**
+ * Get XLSX fileContent as JSON and its headers
+ * Add data from all xlsx files into single JSON
+ * @param {Array} filesToParse - List of paths to parse
+ * @param {string} extension - file extension
+ */
+const getXlsxHeaders = function (filesToParse, extension) {
+  return new Promise((resolve, reject) => {
+    // initialize read stream variable; will be used to read all files
+    let readStream;
+
+    // store file in temporary folder
+    const fileId = uuid.v4();
+    const writeStream = fs.createWriteStream(path.join(os.tmpdir(), fileId));
+    writeStream.on('error', (err) => {
+      // destroy readStream which will cause the entire pipeline to error
+      readStream.destroy();
+
+      reject(err);
     });
-  }
-  // should always be an array (sheets are lists)
-  // send back the parsed object and its headers
-  callback(null, {obj: jsonObj, headers: headers});
+
+    /**
+     * Write to writeStream
+     */
+    const writeToStream = (data) => {
+      return new Promise(resolve => {
+        if (!writeStream.write(data)) {
+          writeStream.once('drain', () => {
+            resolve();
+          });
+        } else {
+          process.nextTick(resolve);
+        }
+      });
+    };
+
+    // build a list of headers
+    const headers = [];
+    const headersMap = {};
+
+    let firstItem = true;
+    let totalNoItems = 0;
+    // write start of new file
+    const batchSize = 100;
+    let batchData = '';
+    let batchCount = 0;
+    return writeToStream('[')
+      .then(() => {
+        return async.eachSeries(filesToParse, (filePath, callback) => {
+          readStream = fs.createReadStream(filePath);
+          const workbookReader = new excel.stream.xlsx.WorkbookReader(readStream, {
+            sharedStrings: 'cache'
+          });
+          workbookReader.read();
+          workbookReader.on('worksheet', worksheet => {
+            worksheet.on('row', row => {
+              // check for headers row if this is first file
+              if (!headers.length && row.number === 1) {
+                // keep a list of how many times a header appears
+                const sameHeaderCounter = {};
+
+                // go through all columns
+                row._cells.forEach(cell => {
+                  let header = cell.value;
+
+                  // if this is the first time the header appears
+                  if (sameHeaderCounter[header] === undefined) {
+                    // create an entry for it in the counter
+                    sameHeaderCounter[header] = 0;
+                  } else {
+                    // increment counter
+                    sameHeaderCounter[header]++;
+                    // update header value to match those built by xlsx.utils.sheet_to_json (old functionality)
+                    header = `${header}_${sameHeaderCounter[header]}`;
+                  }
+
+                  // fill maps
+                  headers.push(header);
+                  headersMap[cell._column.number] = header;
+                });
+
+                return;
+              }
+
+              // construct item directly as string to be ready to be written
+              let firstKeyInItem = true;
+              let item = row._cells.reduce((acc, cell) => {
+                const valueToWrite = typeof cell.value === 'string' ? `"${cell.value}"` : cell.value;
+
+                acc += (firstKeyInItem ? '' : ',') + `"${headersMap[cell._column.number]}":${valueToWrite}`;
+                firstKeyInItem = false;
+                return acc;
+              }, '{');
+              item += '}';
+
+              batchData += (firstItem ? '' : ',') + item;
+              batchCount++;
+              totalNoItems++;
+
+              // write batch if batchSize was reached
+              if (batchCount >= batchSize) {
+                readStream.pause();
+                writeToStream(batchData)
+                  .then(() => {
+                    readStream.resume();
+                  });
+
+                batchCount = 0;
+                batchData = '';
+              }
+              firstItem = false;
+            });
+          });
+          workbookReader.on('end', () => {
+            callback();
+          });
+          workbookReader.on('error', (err) => {
+            readStream.destroy();
+            callback(err);
+          });
+        });
+      })
+      .then(() => {
+        // all data was processed
+        // write the remaining items in batchData and the rest of the file
+        return writeToStream(`${batchData}]`);
+      })
+      .then(() => {
+        writeStream.close();
+
+        // write headers file
+        const headersFormat = 'xlsx';
+
+        return writeFile(path.join(os.tmpdir(), `${fileId}${metadataFileSuffix}`),
+          `{"headersFormat":"${headersFormat}","totalNoItems":${totalNoItems}}`);
+      })
+      .then(() => {
+        // new JSON file was successfully written; construct result to be used further
+        resolve({
+          id: fileId,
+          extension,
+          headers
+        });
+      })
+      .catch(err => {
+        writeStream.destroy();
+        reject(err);
+      });
+  });
+
+  // // parse XLS data
+  // const parseOptions = {
+  //   cellText: false
+  // };
+  // // for CSV do not parse the fields
+  // // because it breaks number values like 0000008 -> 8
+  // // or date values losing timestamp information
+  // // this is needed because parser tries to format all the fields to date, no matter the value
+  // if (extension === '.csv') {
+  //   parseOptions.raw = true;
+  // } else {
+  //   parseOptions.cellDates = true;
+  // }
+  // const parsedData = xlsx.read(data, parseOptions);
+  // // extract first sheet name (we only care about first sheet)
+  // let sheetName = parsedData.SheetNames.shift();
+  // // convert data to JSON
+  // let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
+  //   dateNF: 'YYYY-MM-DD'
+  // });
+  // // get columns by walking through the keys and using only the first row
+  // const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
+  //   // ignore ref property
+  //   if (item === '!ref') {
+  //     return false;
+  //   }
+  //   // get data index
+  //   const matches = item.match(/(\d+)/);
+  //   if (matches && matches[1]) {
+  //     // get only first row
+  //     return parseInt(matches[1]) === 1;
+  //   }
+  //   return false;
+  // }));
+  // // keep a list of headers
+  // let headers = [];
+  // // keep a list of how many times a header appears
+  // let sameHeaderCounter = {};
+  // // if columns found
+  // if (columns.length) {
+  //   // go through all columns
+  //   columns.forEach(function (columnId) {
+  //     let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
+  //     // if this is the first time the header appears
+  //     if (sameHeaderCounter[headerValue] === undefined) {
+  //       // create an entry for it in the counter
+  //       sameHeaderCounter[headerValue] = 0;
+  //     } else {
+  //       // increment counter
+  //       sameHeaderCounter[headerValue]++;
+  //       // update header value to match those built by xlsx.utils.sheet_to_json
+  //       headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
+  //     }
+  //     headers.push(headerValue);
+  //   });
+  // }
+  // // should always be an array (sheets are lists)
+  // // send back the parsed object and its headers
+  // callback(null, {obj: jsonObj, headers: headers});
 };
 
 /**
@@ -509,9 +723,10 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
           return getJsonHeaders(filesToParse[0], extension, options);
         case '.csv':
         case '.xls':
-        case '.xlsx':
         case '.ods':
           return getSpreadSheetHeaders(filesToParse, extension);
+        case '.xlsx':
+          return getXlsxHeaders(filesToParse, extension);
       }
     })
     // .then((result) => {
@@ -1195,7 +1410,14 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           if (outbreakId !== undefined && assocModelOptions.extendedForm && assocModelOptions.extendedForm.template) {
             // get mapping suggestions for extended form
             steps.push(function (callback) {
-              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(outbreak, extension, assocModelOptions.extendedForm, result.fileHeaders, normalizedHeaders, languageDictionary, parseFileResult.questionnaireMaxAnswersMap[modelName]);
+              const extendedFormSuggestions = getMappingSuggestionsForModelExtendedForm(
+                outbreak,
+                extension,
+                assocModelOptions.extendedForm,
+                result.fileHeaders,
+                normalizedHeaders,
+                languageDictionary,
+                parseFileResult.questionnaireMaxAnswersMap ? parseFileResult.questionnaireMaxAnswersMap[modelName] : null);
               // update result
               results[modelName] = Object.assign(
                 {}, results[modelName],
