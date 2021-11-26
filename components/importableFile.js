@@ -15,6 +15,7 @@ const admZip = require('adm-zip');
 const jsonStream = require('JSONStream');
 const es = require('event-stream');
 const stream = require('stream');
+const csvParse = require('csv-parse').parse;
 const util = require('util');
 const pipeline = util.promisify(stream.pipeline);
 const apiError = require('./apiError');
@@ -348,6 +349,118 @@ const getJsonHeaders = function (filePath, extension, options) {
 };
 
 /**
+ * Get needed information from CSV content and store file
+ * Reads CSV stream and writes a JSON file with the needed structure
+ * @param filePath
+ * @param extension
+ */
+const getCsvHeaders = function (filePath, extension) {
+  return new Promise((resolve, reject) => {
+    const readStream = fs.createReadStream(filePath);
+
+    // store file in temporary folder
+    const fileId = uuid.v4();
+    const writeStream = fs.createWriteStream(path.join(os.tmpdir(), fileId));
+    writeStream.on('error', (err) => {
+      // destroy readStream which will cause the entire pipeline to error
+      readStream.destroy();
+
+      reject(err);
+    });
+
+    /**
+     * Write to writeStream
+     */
+    const writeToStream = (data) => {
+      return new Promise(resolve => {
+        if (!writeStream.write(data)) {
+          writeStream.once('drain', () => {
+            resolve();
+          });
+        } else {
+          process.nextTick(resolve);
+        }
+      });
+    };
+
+    // build a list of headers
+    const headers = [];
+
+    let firstItem = true;
+    let totalNoItems = 0;
+    // write start of new file
+    const batchSize = 100;
+    let batchData = '';
+    let batchCount = 0;
+    return writeToStream('[')
+      .then(() => {
+        // run pipeline which will read contents, make required calculations on each data and write the needed entry to the new file
+        return pipeline(
+          readStream,
+          csvParse,
+          es.through(function (item) {
+            const that = this;
+
+            let dataToWrite;
+            try {
+              dataToWrite = JSON.stringify(item);
+            } catch (err) {
+              // data couldn't be stringifed
+              // error invalid content; destroy readstream as it will destroy entire pipeline
+              !readStream.destroyed && readStream.destroy(apiError.getError('INVALID_CONTENT_OF_TYPE', {
+                contentType: 'JSON',
+                details: 'it should contain an array'
+              }));
+            }
+
+            batchData += (firstItem ? '' : ',') + dataToWrite;
+            batchCount++;
+            totalNoItems++;
+
+            // write batch if batchSize was reached
+            if (batchCount >= batchSize) {
+              that.pause();
+              writeToStream(batchData)
+                .then(() => {
+                  batchCount = 0;
+                  batchData = '';
+                  that.resume();
+                });
+            }
+            firstItem = false;
+          })
+        );
+      })
+      .then(() => {
+        // all data was processed
+        // write the remaining items in batchData and the rest of the file
+        return writeToStream(`${batchData}]`);
+      })
+      .then(() => {
+        writeStream.close();
+
+        // write headers file
+        const headersFormat = 'xlsx';
+
+        return writeFile(path.join(os.tmpdir(), `${fileId}${metadataFileSuffix}`),
+          `{"headersFormat":"${headersFormat}","totalNoItems":${totalNoItems}}`);
+      })
+      .then(() => {
+        // new JSON file was successfully written; construct result to be used further
+        resolve({
+          id: fileId,
+          extension,
+          headers
+        });
+      })
+      .catch(err => {
+        writeStream.destroy();
+        reject(err);
+      });
+  });
+};
+
+/**
  * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
  * @param filesToParse - List of paths to parse
  * @param extension
@@ -567,66 +680,6 @@ const getXlsxHeaders = function (filesToParse, extension) {
         reject(err);
       });
   });
-
-  // // parse XLS data
-  // const parseOptions = {
-  //   cellText: false
-  // };
-  // // for CSV do not parse the fields
-  // // because it breaks number values like 0000008 -> 8
-  // // or date values losing timestamp information
-  // // this is needed because parser tries to format all the fields to date, no matter the value
-  // if (extension === '.csv') {
-  //   parseOptions.raw = true;
-  // } else {
-  //   parseOptions.cellDates = true;
-  // }
-  // const parsedData = xlsx.read(data, parseOptions);
-  // // extract first sheet name (we only care about first sheet)
-  // let sheetName = parsedData.SheetNames.shift();
-  // // convert data to JSON
-  // let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
-  //   dateNF: 'YYYY-MM-DD'
-  // });
-  // // get columns by walking through the keys and using only the first row
-  // const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
-  //   // ignore ref property
-  //   if (item === '!ref') {
-  //     return false;
-  //   }
-  //   // get data index
-  //   const matches = item.match(/(\d+)/);
-  //   if (matches && matches[1]) {
-  //     // get only first row
-  //     return parseInt(matches[1]) === 1;
-  //   }
-  //   return false;
-  // }));
-  // // keep a list of headers
-  // let headers = [];
-  // // keep a list of how many times a header appears
-  // let sameHeaderCounter = {};
-  // // if columns found
-  // if (columns.length) {
-  //   // go through all columns
-  //   columns.forEach(function (columnId) {
-  //     let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
-  //     // if this is the first time the header appears
-  //     if (sameHeaderCounter[headerValue] === undefined) {
-  //       // create an entry for it in the counter
-  //       sameHeaderCounter[headerValue] = 0;
-  //     } else {
-  //       // increment counter
-  //       sameHeaderCounter[headerValue]++;
-  //       // update header value to match those built by xlsx.utils.sheet_to_json
-  //       headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
-  //     }
-  //     headers.push(headerValue);
-  //   });
-  // }
-  // // should always be an array (sheets are lists)
-  // // send back the parsed object and its headers
-  // callback(null, {obj: jsonObj, headers: headers});
 };
 
 /**
@@ -724,6 +777,8 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
           // JSON import will always consist of one file
           return getJsonHeaders(filesToParse[0], extension, options);
         case '.csv':
+          // CSV import will always consist of one file
+          return getCsvHeaders(filesToParse[0], extension);
         case '.xls':
         case '.ods':
           return getSpreadSheetHeaders(filesToParse, extension);
