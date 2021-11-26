@@ -3031,6 +3031,9 @@ function exportFilteredModelsList(
 
             // attach questionnaire count to know how many columns we should attach
             if (sheetHandler.questionnaireQuestionsData.flat.length > 0) {
+              // needed as fix for Mongo 4.4 path collision since it detects wrong paths
+              project[defaultQuestionnaireAnswersKey] = `$${defaultQuestionnaireAnswersKey}`;
+
               // construct the queries that will be used to determine the number of max columns
               sheetHandler.questionnaireQuestionsData.flat.forEach((questionData) => {
                 // variable path
@@ -3430,6 +3433,18 @@ function exportFilteredModelsList(
 
           // update export log in case we need the aggregate filter
           return Promise.resolve()
+
+            // save aggregate filter
+            .then(() => {
+              return sheetHandler.saveAggregateFilter ?
+                sheetHandler.updateExportLog({
+                  aggregateFilter: JSON.stringify(aggregateFilter),
+                  updatedAt: new Date()
+                }) :
+                null;
+            })
+
+            // aggregate
             .then(() => {
               // since there is no #hint in mongo 3.2
               // little trick to force a specific index - more exactly pk index
@@ -3532,13 +3547,12 @@ function exportFilteredModelsList(
 
             // save aggregate filter
             .then(() => {
-              return sheetHandler
-                .updateExportLog({
-                  aggregateFilter: sheetHandler.saveAggregateFilter ?
-                    JSON.stringify(aggregateFilter) :
-                    null,
+              return sheetHandler.saveAggregateFilter ?
+                sheetHandler.updateExportLog({
+                  aggregateFilter: JSON.stringify(aggregateFilter),
                   updatedAt: new Date()
-                });
+                }) :
+                null;
             })
 
             // retrieve records that will be exported
