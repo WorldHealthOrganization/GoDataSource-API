@@ -16,8 +16,23 @@ const updateNumberOfExposuresAndContacts = (callback) => {
   return MongoDBHelper
     .getMongoDBConnection()
     .then(dbConn => {
+      // collections
       personCollection = dbConn.collection('person');
+    })
 
+    // force an update of all records
+    .then(() => {
+      return personCollection
+        .updateMany({}, {
+          $unset: {
+            numberOfContacts: '',
+            numberOfExposures: ''
+          }
+        });
+    })
+
+    // determine number of contacts and exposures
+    .then(() => {
       // initialize parameters for handleActionsInBatches call
       const getActionsCount = () => {
         // count persons

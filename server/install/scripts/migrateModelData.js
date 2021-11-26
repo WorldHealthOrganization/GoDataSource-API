@@ -196,7 +196,7 @@ const migrationVersions = [{
     fileName: 'person.js',
     actions: [{
       name: 'updateNumberOfExposuresAndContacts',
-      buildNo: 1
+      buildNo: 2
     }]
   }]
 }];
