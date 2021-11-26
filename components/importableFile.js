@@ -384,7 +384,7 @@ const getCsvHeaders = function (filePath, extension) {
     };
 
     // build a list of headers
-    const headers = [];
+    let headers = [];
 
     let firstItem = true;
     let totalNoItems = 0;
@@ -397,9 +397,22 @@ const getCsvHeaders = function (filePath, extension) {
         // run pipeline which will read contents, make required calculations on each data and write the needed entry to the new file
         return pipeline(
           readStream,
-          csvParse,
+          csvParse({
+            columns: true,
+            columns_duplicates_to_array: true,
+            trim: true
+          }),
           es.through(function (item) {
             const that = this;
+
+            !headers.length && (headers = Object.keys(item));
+
+            // remove empty properties
+            for (const prop in item) {
+              if (item[prop] === '') {
+                delete item[prop];
+              }
+            }
 
             let dataToWrite;
             try {
@@ -408,8 +421,8 @@ const getCsvHeaders = function (filePath, extension) {
               // data couldn't be stringifed
               // error invalid content; destroy readstream as it will destroy entire pipeline
               !readStream.destroyed && readStream.destroy(apiError.getError('INVALID_CONTENT_OF_TYPE', {
-                contentType: 'JSON',
-                details: 'it should contain an array'
+                contentType: 'CSV',
+                details: 'data couldn\'t be parsed'
               }));
             }
 
