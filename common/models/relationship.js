@@ -924,7 +924,6 @@ module.exports = function (Relationship) {
             }
           }, [{
             $set: {
-              test: 123,
               numberOfContacts: {
                 $size: {
                   $filter: {
