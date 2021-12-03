@@ -4,7 +4,6 @@ const transmissionChain = require('../../components/workerRunner').transmissionC
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
-const helpers = require('../../components/helpers');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -760,8 +759,12 @@ module.exports = function (Relationship) {
 
     // keep a list of update actions
     const updatePersonRecords = [];
+    const mustUpdateNoOfContactsAndExposuresMap = {};
     // go through the people that are part of the relationship
     relationship.persons.forEach(function (person, personIndex) {
+      // add to list of records that we need to update number of contacts and exposures
+      mustUpdateNoOfContactsAndExposuresMap[person.id] = true;
+
       // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
       updatePersonRecords.push(
         // load the record
@@ -790,23 +793,14 @@ module.exports = function (Relationship) {
 
               // when a relationship is deleted we need to check if the person has additional relationships
               if (personRelationships.length - 1 > 0) {
-                // determine current number of exposures and contacts
-                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
-                  relationshipsRepresentation: _.filter(personRelationships, (filterRelationship) => filterRelationship.id !== relationship.id)
-                });
-
                 // person will still have relationships
                 relationshipsPayload['$set'] = {
-                  hasRelationships: true,
-                  numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
-                  numberOfExposures: noOfExposuresAndContacts.numberOfExposures
+                  hasRelationships: true
                 };
               } else {
                 // no relationships remain
                 relationshipsPayload['$set'] = {
-                  hasRelationships: false,
-                  numberOfContacts: 0,
-                  numberOfExposures: 0
+                  hasRelationships: false
                 };
               }
             } else {
@@ -835,34 +829,13 @@ module.exports = function (Relationship) {
                 relationshipsPayload['$addToSet'] = {
                   relationshipsRepresentation: relationshipRepresentationPayload
                 };
-
-                // determine current number of exposures and contacts
-                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
-                  relationshipsRepresentation: [
-                    ...personRelationships,
-                    relationshipRepresentationPayload
-                  ]
-                });
-
-                // update no of exposures and contacts
-                relationshipsPayload['$set'].numberOfContacts = noOfExposuresAndContacts.numberOfContacts;
-                relationshipsPayload['$set'].numberOfExposures = noOfExposuresAndContacts.numberOfExposures;
               } else {
                 // relationship already exists; replace its entry from the relationships representation with the new one
                 relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
-
-                // determine current number of exposures and contacts
-                personRelationships.splice(relationshipIndex, 1, relationshipRepresentationPayload);
-                const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
-                  relationshipsRepresentation: personRelationships
-                });
-
-                // update no of exposures and contacts
-                relationshipsPayload['$set'].numberOfContacts = noOfExposuresAndContacts.numberOfContacts;
-                relationshipsPayload['$set'].numberOfExposures = noOfExposuresAndContacts.numberOfExposures;
               }
             }
 
+            // update
             return personRecord.updateAttributes(relationshipsPayload, context.options);
           })
       );
@@ -876,6 +849,9 @@ module.exports = function (Relationship) {
       // loop through the old participants and check if they are still in the relationship
       oldParticipants.forEach(oldPerson => {
         if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
+          // add to list of records that we need to update number of contacts and exposures
+          mustUpdateNoOfContactsAndExposuresMap[oldPerson.id] = true;
+
           // we need to update the old person
           updatePersonRecords.push(
             // load the record
@@ -901,26 +877,18 @@ module.exports = function (Relationship) {
 
                 // check if the person has additional relationships
                 if (personRelationships.length - 1 > 0) {
-                  // determine current number of exposures and contacts
-                  const noOfExposuresAndContacts = helpers.countPeopleContactsAndExposures({
-                    relationshipsRepresentation: _.filter(personRelationships, (filterRelationship) => filterRelationship.id !== relationship.id)
-                  });
-
                   // person will still have relationships
                   relationshipsPayload['$set'] = {
-                    hasRelationships: true,
-                    numberOfContacts: noOfExposuresAndContacts.numberOfContacts,
-                    numberOfExposures: noOfExposuresAndContacts.numberOfExposures
+                    hasRelationships: true
                   };
                 } else {
                   // no relationships remain
                   relationshipsPayload['$set'] = {
-                    hasRelationships: false,
-                    numberOfContacts: 0,
-                    numberOfExposures: 0
+                    hasRelationships: false
                   };
                 }
 
+                // update
                 return personRecord.updateAttributes(relationshipsPayload, context.options);
               })
           );
@@ -930,6 +898,66 @@ module.exports = function (Relationship) {
 
     // after finishing updating dates of last contact
     Promise.all(updatePersonRecords)
+      // count contacts and exposures ?
+      .then(() => {
+        // attach update number of contacts and number of exposures requests
+        const personsToUpdate = Object.keys(mustUpdateNoOfContactsAndExposuresMap);
+        if (personsToUpdate.length < 1) {
+          return;
+        }
+
+        // get collection name from settings (if defined)
+        let collectionName = _.get(app.models.person, 'definition.settings.mongodb.collection');
+
+        // if collection name was not defined in settings
+        if (!collectionName) {
+          // get it from model name
+          collectionName = app.models.person.modelName;
+        }
+
+        // get collection
+        const collection = app.dataSources.mongoDb.connector.collection(collectionName);
+        return collection.updateMany(
+          {
+            _id: {
+              $in: personsToUpdate
+            }
+          }, [{
+            $set: {
+              numberOfContacts: {
+                $size: {
+                  $filter: {
+                    input: '$relationshipsRepresentation',
+                    as: 'item',
+                    cond: {
+                      $eq: [
+                        '$$item.source',
+                        true
+                      ]
+                    }
+                  }
+                }
+              },
+              numberOfExposures: {
+                $size: {
+                  $filter: {
+                    input: '$relationshipsRepresentation',
+                    as: 'item',
+                    cond: {
+                      $eq: [
+                        '$$item.target',
+                        true
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }]
+        );
+      })
+
+      // continue
       .then(function () {
         // get contact representation in the relationship
         let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
