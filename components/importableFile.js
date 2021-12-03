@@ -474,73 +474,150 @@ const getCsvHeaders = function (filePath, extension) {
 };
 
 /**
- * Get XLS/XLSX/CSV/ODS fileContent as JSON and its headers
+ * Get XLS/ODS fileContent as JSON and its headers
  * @param filesToParse - List of paths to parse
  * @param extension
  */
 const getSpreadSheetHeaders = function (filesToParse, extension) {
+  // parse XLS data
+  const parseOptions = {
+    cellText: false
+  };
+  parseOptions.cellDates = true;
+
+  return new Promise((resolve, reject) => {
+    // store file in temporary folder
+    const fileId = uuid.v4();
+    const writeStream = fs.createWriteStream(path.join(os.tmpdir(), fileId));
+    writeStream.on('error', (err) => {
+      reject(err);
+    });
+
+    /**
+     * Write to writeStream
+     */
+    const writeToStream = (data) => {
+      return new Promise(resolve => {
+        if (!writeStream.write(data)) {
+          writeStream.once('drain', () => {
+            resolve();
+          });
+        } else {
+          process.nextTick(resolve);
+        }
+      });
+    };
+
+    // build a list of headers
+    const headers = [];
+
+    let firstItem = true;
+    let totalNoItems = 0;
+    // write start of new file
+    return writeToStream('[')
+      .then(() => {
+        return async.eachSeries(filesToParse, (filePath, callback) => {
+          fs.readFile(filePath, function (error, data) {
+            // handle error
+            if (error) {
+              return callback(apiError.getError('FILE_NOT_FOUND'));
+            }
+
+            const parsedData = xlsx.read(data, parseOptions);
+            // extract first sheet name (we only care about first sheet)
+            const sheetName = parsedData.SheetNames.shift();
+            // convert data to JSON
+            const jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
+              dateNF: 'YYYY-MM-DD'
+            });
+
+            // if this is first file parse headers
+            if (!headers.length) {
+              // get columns by walking through the keys and using only the first row
+              const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
+                // ignore ref property
+                if (item === '!ref') {
+                  return false;
+                }
+                // get data index
+                const matches = item.match(/(\d+)/);
+                if (matches && matches[1]) {
+                  // get only first row
+                  return parseInt(matches[1]) === 1;
+                }
+                return false;
+              }));
+
+              // keep a list of how many times a header appears
+              const sameHeaderCounter = {};
+              // go through all columns
+              columns.forEach(function (columnId) {
+                let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
+                // if this is the first time the header appears
+                if (sameHeaderCounter[headerValue] === undefined) {
+                  // create an entry for it in the counter
+                  sameHeaderCounter[headerValue] = 0;
+                } else {
+                  // increment counter
+                  sameHeaderCounter[headerValue]++;
+                  // update header value to match those built by xlsx.utils.sheet_to_json
+                  headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
+                }
+                headers.push(headerValue);
+              });
+            }
+
+            totalNoItems += jsonObj.length;
+
+            let dataToWrite;
+            try {
+              dataToWrite = JSON.stringify(jsonObj);
+            } catch (err) {
+              // data couldn't be stringifed
+              // error invalid content
+              callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
+                contentType: extension.substring(1)
+              }));
+            }
+
+            // write file contents to JSON
+            writeToStream((firstItem ? '' : ',') + dataToWrite.substring(1, dataToWrite.length - 1))
+              .then(() => {
+                callback();
+              });
+
+            firstItem = false;
+          });
+        });
+      })
+      .then(() => {
+        // all data was processed
+        // write the rest of the file
+        return writeToStream(']');
+      })
+      .then(() => {
+        writeStream.close();
+
+        // write headers file
+        const headersFormat = 'xlsx';
+
+        return writeFile(path.join(os.tmpdir(), `${fileId}${metadataFileSuffix}`),
+          `{"headersFormat":"${headersFormat}","totalNoItems":${totalNoItems}}`);
+      })
+      .then(() => {
+        // new JSON file was successfully written; construct result to be used further
+        resolve({
+          id: fileId,
+          extension,
+          headers
+        });
+      })
+      .catch(err => {
+        writeStream.destroy();
+        reject(err);
+      });
+  });
 };
-// const getSpreadSheetHeaders = function (filesToParse, extension) {
-//   // parse XLS data
-//   const parseOptions = {
-//     cellText: false
-//   };
-//   // for CSV do not parse the fields
-//   // because it breaks number values like 0000008 -> 8
-//   // or date values losing timestamp information
-//   // this is needed because parser tries to format all the fields to date, no matter the value
-//   if (extension === '.csv') {
-//     parseOptions.raw = true;
-//   } else {
-//     parseOptions.cellDates = true;
-//   }
-//   const parsedData = xlsx.read(data, parseOptions);
-//   // extract first sheet name (we only care about first sheet)
-//   let sheetName = parsedData.SheetNames.shift();
-//   // convert data to JSON
-//   let jsonObj = xlsx.utils.sheet_to_json(parsedData.Sheets[sheetName], {
-//     dateNF: 'YYYY-MM-DD'
-//   });
-//   // get columns by walking through the keys and using only the first row
-//   const columns = sort(Object.keys(parsedData.Sheets[sheetName]).filter(function (item) {
-//     // ignore ref property
-//     if (item === '!ref') {
-//       return false;
-//     }
-//     // get data index
-//     const matches = item.match(/(\d+)/);
-//     if (matches && matches[1]) {
-//       // get only first row
-//       return parseInt(matches[1]) === 1;
-//     }
-//     return false;
-//   }));
-//   // keep a list of headers
-//   let headers = [];
-//   // keep a list of how many times a header appears
-//   let sameHeaderCounter = {};
-//   // if columns found
-//   if (columns.length) {
-//     // go through all columns
-//     columns.forEach(function (columnId) {
-//       let headerValue = parsedData.Sheets[sheetName][`${columnId}`].v;
-//       // if this is the first time the header appears
-//       if (sameHeaderCounter[headerValue] === undefined) {
-//         // create an entry for it in the counter
-//         sameHeaderCounter[headerValue] = 0;
-//       } else {
-//         // increment counter
-//         sameHeaderCounter[headerValue]++;
-//         // update header value to match those built by xlsx.utils.sheet_to_json
-//         headerValue = `${headerValue}_${sameHeaderCounter[headerValue]}`;
-//       }
-//       headers.push(headerValue);
-//     });
-//   }
-//   // should always be an array (sheets are lists)
-//   // send back the parsed object and its headers
-//   callback(null, {obj: jsonObj, headers: headers});
-// };
 
 /**
  * Get XLSX fileContent as JSON and its headers

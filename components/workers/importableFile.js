@@ -84,13 +84,15 @@ const worker = {
     let allDataProcessed = false;
 
     // initialize calculate stream
+    let cstream;
     const calculateStream = es.through(function (item) {
+      cstream = this;
       // process data
       dataFormatter(item, dataToSend, options);
 
       if (dataToSend.length >= formatterBatchSize) {
         // we reached batch size; pause until the batch is sent to parent process
-        calculateStream.pause();
+        cstream.pause();
       }
     });
 
@@ -133,8 +135,8 @@ const worker = {
       switch (message.subject) {
         case 'nextBatch': {
           // resume dataset calculations if paused
-          if (calculateStream.paused) {
-            calculateStream.resume();
+          if (cstream && cstream.paused) {
+            cstream.resume();
           }
 
           sendMessageToParent({
