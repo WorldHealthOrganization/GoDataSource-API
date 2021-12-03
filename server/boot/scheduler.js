@@ -395,7 +395,7 @@ module.exports = function (app) {
           const deleteTmpUploadBeforeDateTime = moment().subtract(removeTmpUploadedFilesAfter, 'hours');
 
           // used to determine when can we delete uploaded files used to import data
-          const uploadedImportMatchRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+          const uploadedImportMatchRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(_metadata)?$/i;
           const removeTmpUploadedImportFilesAfter = configSettings.removeTmpUploadedImportFilesAfter || 24;
           const deleteTmpUploadImportBeforeDateTime = moment().subtract(removeTmpUploadedImportFilesAfter, 'hours');
 

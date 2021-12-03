@@ -876,64 +876,6 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
           return getXlsxHeaders(filesToParse, extension);
       }
     })
-    // .then((result) => {
-    //   console.log(result);
-    //   return new Promise((resolve, reject) => {
-    //     fs.readFile(filesToParse[0], function (error, buffer) {
-    //       // handle error
-    //       if (error) {
-    //         return reject(apiError.getError('FILE_NOT_FOUND'));
-    //       }
-    //
-    //       // // decrypt file if needed
-    //       // let decryptFile;
-    //       // if (decryptPassword) {
-    //       //   decryptFile = aesCrypto.decrypt(decryptPassword, buffer);
-    //       // } else {
-    //       //   decryptFile = Promise.resolve(buffer);
-    //       // }
-    //       //
-    //       // decryptFile
-    //       //   .then(function (buffer) {
-    //       // get file headers
-    //       getHeaders({data: buffer, extension}, function (error, result) {
-    //         // handle error
-    //         if (error) {
-    //           return reject(error);
-    //         }
-    //
-    //         // construct file contents
-    //         const contents = {
-    //           data: result.obj,
-    //           headersFormat: headersFormat
-    //         };
-    //
-    //         // add headers to prop map in file
-    //         if (result.headersToPropsMap) {
-    //           contents.headersToPropMap = {};
-    //           result.headers.forEach(header => {
-    //             contents.headersToPropMap[header] = [...result.headersToPropsMap[header]];
-    //           });
-    //         }
-    //
-    //         // store file on disk
-    //         temporaryStoreFileOnDisk(JSON.stringify(contents), function (error, fileId) {
-    //           // handle error
-    //           if (error) {
-    //             return reject(error);
-    //           }
-    //
-    //           // send back file id and headers
-    //           resolve({
-    //             id: fileId,
-    //             headers: result.headers,
-    //             jsonObj: result.obj
-    //           });
-    //         });
-    //       });
-    //     });
-    //   });
-    // })
     .catch(err => {
       return Promise.reject(err);
     });

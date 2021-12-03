@@ -4,6 +4,11 @@ const helpers = require('./helpers');
 const formidable = require('formidable');
 const apiError = require('./apiError');
 const path = require('path');
+const _ = require('lodash');
+const Config = require('../server/config.json');
+
+// get max file size for uploaded resource
+const maxFileSize = _.get(Config, 'jobSettings.importResources.maxFileSize', 400);
 
 /**
  * Offer a file to be downloaded
@@ -27,7 +32,9 @@ function offerFileToDownload(fileBuffer, mimeType, fileName, remoteCallback) {
  */
 function parseMultipartRequest(req, requiredFields, requiredFiles, Model, optionalFields, callback) {
   // use formidable to parse multi-part data
-  const form = new formidable.IncomingForm();
+  const form = new formidable.IncomingForm({
+    maxFileSize: maxFileSize * 1024 * 1024
+  });
   form.parse(req, function (error, fields, files) {
     // handle errors
     if (error) {
