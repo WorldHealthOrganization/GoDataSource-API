@@ -2416,6 +2416,7 @@ function exportFilteredModelsList(
         );
 
         // update file path to zip
+        // Note: should be kept in sync with the extension used in import
         const zipExtension = 'zip';
         const oldFilePath = sheetHandler.filePath;
         sheetHandler.filePath = path.resolve(tmp.tmpdir, `${sheetHandler.exportLogId}.${zipExtension}`);

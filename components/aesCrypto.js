@@ -4,6 +4,10 @@
  * String encryption/decryption using AES-256
  */
 
+const stream = require('stream');
+const util = require('util');
+const {Transform} = stream.Transform;
+const pipeline = util.promisify(stream.pipeline);
 const crypto = require('crypto');
 
 // encryption parameters
@@ -104,7 +108,7 @@ function decrypt(password, data) {
       try {
         // decipher text
         const decipher = crypto.createCipheriv(algorithm, key, iv);
-        buffer = Buffer.concat([decipher.update(encrypted) , decipher.final()]);
+        buffer = Buffer.concat([decipher.update(encrypted), decipher.final()]);
       } catch (decipherError) {
         error = new Error('Failed to decrypt config properties. Stack Trace: ' + decipherError.stack);
       }
@@ -168,7 +172,7 @@ const encryptStream = (
       });
 
       // finished writing
-      readableStream.on('close', function() {
+      readableStream.on('close', function () {
         // finalize encryption
         writableStream.write(cipher.final());
 
@@ -182,8 +186,73 @@ const encryptStream = (
   });
 };
 
+/**
+ * Transform stream for decrypting files
+ */
+class DecryptTransform extends Transform {
+  constructor(options) {
+    !options && (options = {});
+    super(options);
+
+    if (options.password) {
+      this.password = options.password;
+      delete options.password;
+    }
+
+    // initialize decipher
+    this.decipher = null;
+  }
+
+  _transform(chunk, encoding, callback) {
+    try {
+      if (encoding !== 'buffer') {
+        chunk = Buffer.from(chunk);
+      }
+
+      if (!this.decipher) {
+        const iv = chunk.slice(0, ivLength);
+        const salt = chunk.slice(ivLength, ivLength + saltLength);
+        const key = crypto.pbkdf2Sync(this.password, salt, iterations, keyLength, digest);
+        this.decipher = crypto.createCipheriv(algorithm, key, iv);
+
+        chunk = chunk.slice(ivLength + saltLength);
+      }
+
+      callback(null, this.decipher.update(chunk));
+    } catch (err) {
+      callback(err);
+    }
+  }
+
+  _flush(callback) {
+    callback(null, this.decipher ? this.decipher.final() : null);
+  }
+}
+
+/**
+ * Decrypt stream
+ * @param readableStream
+ * @param writableStream
+ * @param password
+ * @return {Promise<any>}
+ */
+const decryptStream = function (
+  readableStream,
+  writableStream,
+  password
+) {
+  return pipeline(
+    readableStream,
+    new DecryptTransform({
+      password
+    }),
+    writableStream
+  );
+};
+
 module.exports = {
   encrypt: encrypt,
   decrypt: decrypt,
-  encryptStream
+  encryptStream,
+  decryptStream
 };
