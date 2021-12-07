@@ -370,5 +370,13 @@
   "INVALID_ADDRESS_LATITUDE_LONGITUDE": {
     "defaultStatusCode": 422,
     "messagePattern": "Invalid address longitude/latitude: <%= values %>"
+  },
+  "INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid file contents. File contains formulae in cell <%= cell %> which is not supported"
+  },
+  "INVALID_FILE_SIZE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Uploaded file size is bigger than configured maxFileSize"
   }
 }

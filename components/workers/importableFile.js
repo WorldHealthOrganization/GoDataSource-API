@@ -49,7 +49,8 @@ const worker = {
       event: './../baseModelOptions/event',
       contact: './../baseModelOptions/contact',
       labResult: './../baseModelOptions/labResult',
-      contactOfContact: './../baseModelOptions/contactOfContact'
+      contactOfContact: './../baseModelOptions/contactOfContact',
+      relationship: './../baseModelOptions/relationship'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {
