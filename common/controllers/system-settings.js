@@ -238,4 +238,258 @@ module.exports = function (SystemSettings) {
         break;
     }
   };
+
+  /**
+   * Retrieve model definition
+   */
+  SystemSettings.getModelDefinition = function (model, callback) {
+    // retrieve list of models
+    const loopbackRegistry = app.registry ||
+      app.loopback.registry ||
+      app.loopback;
+    const modelsMap = loopbackRegistry.modelBuilder.models;
+
+    // construct model definition
+    const modelData = modelsMap[model];
+
+    // data not found ?
+    if (
+      !modelData ||
+      !modelData.definition ||
+      !modelData.definition.rawProperties
+    ) {
+      return callback(app.utils.apiError.getError(
+        'INTERNAL_ERROR', {
+          error: `Invalid model type: ${model}. Supported options: ${Object.keys(modelsMap).join(', ')}`
+        }
+      ));
+    }
+
+    // type to def
+    const typeToDefinition = (
+      rawPropertyDefType
+    ) => {
+      // array ?
+      if (
+        Array.isArray(rawPropertyDefType) &&
+        rawPropertyDefType.length > 0
+      ) {
+        // determine array item def type
+        return [
+          propertyToDefinition(
+            rawPropertyDefType[0]
+          )
+        ];
+      } else {
+        // check if type is a model
+        if (
+          typeof rawPropertyDefType === 'string' &&
+          modelsMap[rawPropertyDefType] &&
+          modelsMap[rawPropertyDefType].definition &&
+          modelsMap[rawPropertyDefType].definition.rawProperties
+        ) {
+          // go into object
+          return modelToDefinition(
+            modelsMap[rawPropertyDefType],
+            modelsMap[rawPropertyDefType].definition.rawProperties
+          );
+        } else if (
+          typeof rawPropertyDefType === 'object'
+        ) {
+          // go into object
+          return modelToDefinition(
+            rawPropertyDefType,
+            rawPropertyDefType
+          );
+        } else {
+          if (
+            rawPropertyDefType === 'string' ||
+            rawPropertyDefType === 'number' ||
+            rawPropertyDefType === 'boolean' ||
+            rawPropertyDefType === 'object' ||
+            rawPropertyDefType === 'date'
+          ) {
+            // add property
+            return rawPropertyDefType;
+          } else if (
+            rawPropertyDefType &&
+            typeof rawPropertyDefType === 'function'
+          ) {
+            if (rawPropertyDefType.name) {
+              if (rawPropertyDefType.name === 'Number') {
+                return 'number';
+              } else if (rawPropertyDefType.name === 'String') {
+                return 'string';
+              } else if (rawPropertyDefType.name === 'Date') {
+                return 'date';
+              } else if (rawPropertyDefType.name === 'Boolean') {
+                return 'boolean';
+              } else if (
+                rawPropertyDefType.name &&
+                modelsMap[rawPropertyDefType.name] &&
+                modelsMap[rawPropertyDefType.name].definition &&
+                modelsMap[rawPropertyDefType.name].definition.rawProperties
+              ) {
+                return modelToDefinition(
+                  modelsMap[rawPropertyDefType.name],
+                  modelsMap[rawPropertyDefType.name].definition.rawProperties
+                );
+              } else {
+                throw Error(`Error resolving function type with name '${rawPropertyDefType.name}' for model '${model}'`);
+              }
+            } else {
+              throw Error(`Error resolving function type '${rawPropertyDefType}' for model '${model}'`);
+            }
+          } else {
+            throw Error(`Error resolving type '${rawPropertyDefType}' for model '${model}'`);
+          }
+        }
+      }
+    };
+
+    // add property definition
+    const propertyToDefinition = (
+      rawPropertyDef
+    ) => {
+      // take action depending of property type
+      if (rawPropertyDef.type) {
+        return typeToDefinition(
+          rawPropertyDef.type
+        );
+      } else if (
+        rawPropertyDef && (
+          typeof rawPropertyDef === 'string' ||
+          typeof rawPropertyDef === 'function' ||
+          Array.isArray(rawPropertyDef)
+        )
+      ) {
+        return typeToDefinition(
+          rawPropertyDef
+        );
+      } else {
+        throw Error(`Error resolving property '${rawPropertyDef}' for model '${model}'`);
+      }
+    };
+
+    // construct definition
+    const alreadyMapped = {};
+    const modelToDefinition = (
+      modelData,
+      rawProperties
+    ) => {
+      // already mapped, then we need to return the map so we don't do a forever loop
+      if (alreadyMapped[modelData]) {
+        return alreadyMapped[modelData];
+      }
+
+      // save map
+      const acc = {};
+      alreadyMapped[modelData] = acc;
+
+      // go through properties and map them
+      Object.keys(rawProperties).forEach((rawProperty) => {
+        // hidden property, then we need to exclude it
+        if (
+          modelData &&
+          modelData.definition &&
+          modelData.definition.settings &&
+          modelData.definition.settings.hidden &&
+          modelData.definition.settings.hidden.length > 0
+        ) {
+          if (modelData.definition.settings.hidden.indexOf(rawProperty) > -1) {
+            // hide
+            return;
+          }
+        }
+
+        // map property
+        acc[rawProperty] = propertyToDefinition(
+          rawProperties[rawProperty]
+        );
+      });
+
+      // finished
+      return acc;
+    };
+
+    // start with root object
+    const definition = modelToDefinition(
+      modelData,
+      modelData.definition.rawProperties
+    );
+
+    // clean recursive parents
+    const cleanRecursive = (
+      acc,
+      paths
+    ) => {
+      Object.keys(acc).forEach((property) => {
+        // get value
+        const propValue = acc[property];
+
+        // check if already mapped
+        let objectIndex = 0;
+        let alreadyMapped = false;
+        while (objectIndex < paths.length) {
+          // mapped ?
+          if (
+            paths[objectIndex] === propValue || (
+              propValue &&
+              Array.isArray(propValue) &&
+              propValue.length > 0 &&
+              paths[objectIndex] === propValue[0]
+            )
+          ) {
+            // mapped
+            alreadyMapped = true;
+
+            // finished
+            break;
+          }
+
+          // next
+          objectIndex++;
+        }
+
+        // already mapped ?
+        if (alreadyMapped) {
+          delete acc[property];
+        } else if (
+          propValue &&
+          Array.isArray(propValue) &&
+          propValue.length > 0
+        ) {
+          if (typeof propValue[0] === 'object') {
+            cleanRecursive(
+              propValue[0], [
+                ...paths,
+                propValue[0]
+              ]
+            );
+          }
+        } else if (
+          typeof propValue === 'object'
+        ) {
+          cleanRecursive(
+            propValue, [
+              ...paths,
+              propValue
+            ]
+          );
+        } else {
+          // nothing, seems okay
+        }
+      });
+    };
+    cleanRecursive(
+      definition,
+      []
+    );
+
+    // finished
+    callback(
+      null,
+      definition
+    );
+  };
 };

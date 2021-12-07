@@ -130,6 +130,12 @@
       "principalId": "system_settings_modify",
       "permission": "ALLOW",
       "property": "updateSystemSettings"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getModelDefinition"
     }
   ],
   "methods": {
@@ -394,6 +400,30 @@
       "http": {
         "verb": "post",
         "path": "/generate-file"
+      }
+    },
+    "getModelDefinition": {
+      "accepts": [
+        {
+          "arg": "model",
+          "type": "string",
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "description": "Model definition",
+          "type": "object",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get model definition.",
+      "http": {
+        "verb": "get",
+        "path": "/model-definition"
       }
     }
   }
