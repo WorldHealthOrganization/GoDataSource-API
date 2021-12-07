@@ -163,7 +163,7 @@
     },
     "importResources": {
       "batchSize": 100,
-      "maxFileSize": 400
+      "maxFileSize": 4096
     },
     "updateMissingDuplicateKeys": {
       "batchSize": 10000,
