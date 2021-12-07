@@ -35,6 +35,14 @@
     "LNG_RELATIONSHIP_FIELD_LABEL_ID": {
       "translation": "ID",
       "section": "uiRelationshipFields"
+    },
+    "LNG_API_ERROR_CODE_INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE": {
+      "translation": "Invalid file contents. File contains formulae which is not supported",
+      "section": "uiAPIErrors"
+    },
+    "LNG_API_ERROR_CODE_INVALID_FILE_SIZE": {
+      "translation": "Uploaded file size is bigger than configured maxFileSize",
+      "section": "uiAPIErrors"
     }
   }
 }

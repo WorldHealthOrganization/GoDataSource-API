@@ -7836,11 +7836,8 @@
       ],
       "returns": [
         {
-          "arg": "relationships",
-          "type": [
-            "relationship"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],

@@ -38,6 +38,9 @@ function parseMultipartRequest(req, requiredFields, requiredFiles, Model, option
   form.parse(req, function (error, fields, files) {
     // handle errors
     if (error) {
+      if (error.message.includes('maxFileSize exceeded')) {
+        error = apiError.getError('INVALID_FILE_SIZE');
+      }
       return callback(error);
     }
     // validate required properties, loopback can't validate multi-part payloads
