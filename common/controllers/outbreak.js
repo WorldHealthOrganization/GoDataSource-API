@@ -11,7 +11,6 @@ const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const fork = require('child_process').fork;
 const Platform = require('../../components/platform');
-const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (Outbreak) {
 

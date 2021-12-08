@@ -50,7 +50,8 @@ const worker = {
       contact: './../baseModelOptions/contact',
       labResult: './../baseModelOptions/labResult',
       contactOfContact: './../baseModelOptions/contactOfContact',
-      relationship: './../baseModelOptions/relationship'
+      relationship: './../baseModelOptions/relationship',
+      referenceData: './../baseModelOptions/referenceData'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {

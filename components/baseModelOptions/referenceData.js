@@ -3,6 +3,7 @@
 const MongoDBHelper = require('./../mongoDBHelper');
 const mergeFilters = require('./../mergeFilters');
 const convertLoopbackFilterToMongo = require('./../convertLoopbackFilterToMongo');
+const helpers = require('./../helpers');
 
 /**
  * TODO: Duplicated from Outbreak model; doesn't use Loopback models. Should be used in Outbreak model
@@ -53,8 +54,41 @@ const getSystemAndOutbreakReferenceData = function (outbreakId, filter) {
     ]);
 };
 
+/**
+ * Add additional formatting options; To be done once per import process
+ * @param {Object} options - Options for formatting
+ */
+const getAdditionalFormatOptions = function (options) {
+  options.processedMap = helpers.processMapLists(options.map);
+};
+
+/**
+ * Format relationship imported data
+ * @param {Object} item - Item to process
+ * @param {Array} formattedDataContainer - Container for formatted data
+ * @param {Object} options - Options for processing
+ * returns {Promise<unknown>}
+ */
+const formatItemFromImportableFile = function (item, formattedDataContainer, options) {
+  // remap properties
+  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
+
+  // process boolean values
+  const formattedData = helpers.convertBooleanPropertiesNoModel(
+    options.modelBooleanProperties || [],
+    remappedProperties);
+
+  // add relationship entry in the processed list
+  formattedDataContainer.push({
+    raw: item,
+    save: formattedData
+  });
+};
+
 module.exports = {
   helpers: {
-    getSystemAndOutbreakReferenceData: getSystemAndOutbreakReferenceData
+    getSystemAndOutbreakReferenceData,
+    formatItemFromImportableFile,
+    getAdditionalFormatOptions
   }
 };
