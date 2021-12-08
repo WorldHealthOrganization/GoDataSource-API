@@ -1520,8 +1520,9 @@ module.exports = function (Relationship) {
    * @param changeSource True if sourceTargetId is source, false otherwise
    * @param sourceTargetId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    */
-  Relationship.bulkChangeSourceOrTarget = function (outbreakId, changeSource, sourceTargetId, where) {
+  Relationship.bulkChangeSourceOrTarget = function (outbreakId, changeSource, sourceTargetId, where, options) {
     // validate input
     // sourceTargetId & where are required
     if (
@@ -1658,7 +1659,7 @@ module.exports = function (Relationship) {
               relationshipModel
                 .updateAttributes({
                   persons: updatedPersons
-                })
+                }, options)
                 .then(() => {
                   // finished
                   cb();
