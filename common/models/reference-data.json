@@ -253,11 +253,8 @@
       ],
       "returns": [
         {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],
