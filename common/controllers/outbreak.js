@@ -3443,11 +3443,12 @@ module.exports = function (Outbreak) {
    * Change target for all relationships matching specific conditions
    * @param targetId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkChangeTargetRelationships = function (targetId, where, callback) {
+  Outbreak.prototype.bulkChangeTargetRelationships = function (targetId, where, options, callback) {
     app.models.relationship
-      .bulkChangeSourceOrTarget(this.id, false, targetId, where)
+      .bulkChangeSourceOrTarget(this.id, false, targetId, where, options)
       .then((changedCount) => {
         callback(null, changedCount);
       })
@@ -3458,11 +3459,12 @@ module.exports = function (Outbreak) {
    * Change source for all relationships matching specific conditions
    * @param sourceId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkChangeSourceRelationships = function (sourceId, where, callback) {
+  Outbreak.prototype.bulkChangeSourceRelationships = function (sourceId, where, options, callback) {
     app.models.relationship
-      .bulkChangeSourceOrTarget(this.id, true, sourceId, where)
+      .bulkChangeSourceOrTarget(this.id, true, sourceId, where, options)
       .then((changedCount) => {
         callback(null, changedCount);
       })
