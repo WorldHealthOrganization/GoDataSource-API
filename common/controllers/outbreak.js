@@ -11,7 +11,6 @@ const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const fork = require('child_process').fork;
 const Platform = require('../../components/platform');
-const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (Outbreak) {
 
@@ -3734,88 +3733,6 @@ module.exports = function (Outbreak) {
 
         // undo delete
         instance.undoDelete(options, callback);
-      })
-      .catch(callback);
-  };
-
-  /**
-   * Import an importable relationships file using file ID and a map to remap parameters & reference data values
-   * @param body
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.importImportableRelationshipsFileUsingMap = function (body, options, callback) {
-    const self = this;
-    options._sync = false;
-    // inject platform identifier
-    options.platform = Platform.IMPORT;
-    importableFileHelpers
-      .getTemporaryFileById(body.fileId)
-      .then(file => {
-        // get file content
-        const rawRelationsList = file.data;
-        // remap properties & values
-        const relations = app.utils.helpers.convertBooleanProperties(
-          app.models.relationship,
-          app.utils.helpers.remapProperties(rawRelationsList, body.map, body.valuesMap));
-        // build a list of create operations
-        const createOps = [];
-        // define a container for error results
-        const createErrors = [];
-        // define a toString function to be used by error handler
-        createErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-        // go through all entries
-        relations.forEach((relation, index) => {
-          createOps.push(callback => {
-            relation.outbreakId = self.id;
-
-            return app.utils.dbSync.syncRecord(
-              options.remotingContext.req.logger,
-              app.models.relationship,
-              relation,
-              options
-            )
-              .then(result => callback(null, result.record))
-              .catch(err => {
-                // on error, store the error, but don't stop, continue with other items
-                createErrors.push({
-                  message: `Failed to import relationship ${index + 1}`,
-                  error: err,
-                  recordNo: index + 1,
-                  data: {
-                    file: rawRelationsList[index],
-                    save: relation
-                  }
-                });
-                return callback(null, null);
-              });
-          });
-        });
-
-        async.series(createOps, (err, results) => {
-          if (err) {
-            return callback(err);
-          }
-          // if import errors were found
-          if (createErrors.length) {
-            // remove results that failed to be added
-            results = results.filter(result => result !== null);
-            // define a toString function to be used by error handler
-            results.toString = function () {
-              return JSON.stringify(this);
-            };
-            // return error with partial success
-            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-              model: app.models.relationship.modelName,
-              failed: createErrors,
-              success: results
-            }));
-          }
-          // send the result
-          return callback(null, results);
-        });
       })
       .catch(callback);
   };

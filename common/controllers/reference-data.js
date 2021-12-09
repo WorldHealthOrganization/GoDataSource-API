@@ -1,10 +1,14 @@
 'use strict';
 
 const app = require('../../server/server');
-const async = require('async');
-const importableFileHelpers = require('./../../components/importableFile');
 const WorkerRunner = require('./../../components/workerRunner');
+const Platform = require('../../components/platform');
 const _ = require('lodash');
+const importableFile = require('./../../components/importableFile');
+const Config = require('../../server/config.json');
+
+// used in import
+const referenceDataImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (ReferenceData) {
 
@@ -95,74 +99,67 @@ module.exports = function (ReferenceData) {
    * @param callback
    */
   ReferenceData.importImportableReferenceDataFileUsingMap = function (body, options, callback) {
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
-    // get importable file
-    importableFileHelpers
-      .getTemporaryFileById(body.fileId)
-      .then(file => {
-        // get file content
-        const rawReferenceDataList = file.data;
-        // remap properties & values
-        const referenceDataList = app.utils.helpers.convertBooleanProperties(
-          ReferenceData,
-          app.utils.helpers.remapProperties(rawReferenceDataList, body.map, body.valuesMap));
-        // build a list of sync operations
-        const syncReferenceData = [];
-        // define a container for error results
-        const syncErrors = [];
-        // define a toString function to be used by error handler
-        syncErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-        // go through all entries
-        referenceDataList.forEach(function (referenceDataItem, index) {
-          syncReferenceData.push(function (callback) {
-            // sync reference data
-            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.referenceData, referenceDataItem, options)
-              .then(function (syncResult) {
-                callback(null, syncResult.record);
-              })
-              .catch(function (error) {
-                // on error, store the error, but don't stop, continue with other items
-                syncErrors.push({
-                  message: `Failed to import reference data ${index + 1}`,
+
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of sync operations
+      const syncReferenceData = [];
+
+      // go through all entries
+      batchData.forEach(function (referenceDataItem) {
+        syncReferenceData.push(function (asyncCallback) {
+          // sync reference data
+          return app.utils.dbSync.syncRecord(logger, app.models.referenceData, referenceDataItem.save, options)
+            .then(function () {
+              asyncCallback();
+            })
+            .catch(function (error) {
+              // on error, store the error, but don't stop, continue with other items
+              asyncCallback(null, {
+                success: false,
+                error: {
                   error: error,
-                  recordNo: index + 1,
                   data: {
-                    file: rawReferenceDataList[index],
-                    save: referenceDataItem
+                    file: referenceDataItem.raw,
+                    save: referenceDataItem.save
                   }
-                });
-                callback(null, null);
+                }
               });
-          });
+            });
         });
-        // start importing reference data
-        async.parallelLimit(syncReferenceData, 10, function (error, results) {
-          // handle errors (should not be any)
-          if (error) {
-            return callback(error);
-          }
-          // if import errors were found
-          if (syncErrors.length) {
-            // remove results that failed to be added
-            results = results.filter(result => result !== null);
-            // define a toString function to be used by error handler
-            results.toString = function () {
-              return JSON.stringify(this);
-            };
-            // return error with partial success
-            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-              model: app.models.referenceData.modelName,
-              failed: syncErrors,
-              success: results
-            }));
-          }
-          // send the result
-          callback(null, results);
-        });
-      })
-      .catch(callback);
+      });
+
+      return syncReferenceData;
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.referenceData._booleanProperties) {
+      app.models.referenceData._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.referenceData);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'referenceData',
+      batchSize: referenceDataImportBatchSize,
+      modelBooleanProperties: app.models.referenceData._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.referenceData.modelName,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 };

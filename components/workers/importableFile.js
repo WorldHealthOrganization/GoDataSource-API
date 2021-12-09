@@ -49,7 +49,10 @@ const worker = {
       event: './../baseModelOptions/event',
       contact: './../baseModelOptions/contact',
       labResult: './../baseModelOptions/labResult',
-      contactOfContact: './../baseModelOptions/contactOfContact'
+      contactOfContact: './../baseModelOptions/contactOfContact',
+      relationship: './../baseModelOptions/relationship',
+      referenceData: './../baseModelOptions/referenceData',
+      location: './../baseModelOptions/location'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {

@@ -10,6 +10,12 @@ const _ = require('lodash');
 const helpers = require('../../components/helpers');
 const WorkerRunner = require('./../../components/workerRunner');
 const exportHelper = require('./../../components/exportHelper');
+const Platform = require('../../components/platform');
+const importableFile = require('./../../components/importableFile');
+const Config = require('../../server/config.json');
+
+// used in relationship import
+const relationshipImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Outbreak) {
   /**
@@ -593,5 +599,78 @@ module.exports = function (Outbreak) {
         );
       })
       .catch(callback);
+  };
+
+  /**
+   * Import an importable relationships file using file ID and a map to remap parameters & reference data values
+   * @param body
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.importImportableRelationshipsFileUsingMap = function (body, options, callback) {
+    const self = this;
+
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
+
+    options._sync = false;
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    /**
+     * Create array of actions that will be executed in series for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {Promise<*[]>}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of create operations
+      const createOps = [];
+      // go through all entries
+      batchData.forEach((relation) => {
+        createOps.push(callback => {
+          return app.utils.dbSync.syncRecord(
+            logger,
+            app.models.relationship,
+            relation.save,
+            options
+          )
+            .then(() => callback())
+            .catch(err => {
+              callback(null, {
+                success: false,
+                error: {
+                  error: err,
+                  data: {
+                    file: relation.raw,
+                    save: relation.save
+                  }
+                }
+              });
+            });
+        });
+      });
+
+      return createOps;
+    };
+
+    // construct options needed by the formatter worker
+    if (!app.models.relationship._booleanProperties) {
+      app.models.relationship._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.relationship);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'relationship',
+      batchSize: relationshipImportBatchSize,
+      outbreakId: self.id,
+      modelBooleanProperties: app.models.relationship._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.relationship.modelName,
+      outbreakId: self.id,
+      logger: logger
+    }, formatterOptions, createBatchActions, callback);
   };
 };

@@ -576,7 +576,8 @@ const getSpreadSheetHeaders = function (filesToParse, extension) {
               // data couldn't be stringifed
               // error invalid content
               callback(apiError.getError('INVALID_CONTENT_OF_TYPE', {
-                contentType: extension.substring(1)
+                contentType: extension.substring(1),
+                details: 'parsed data should be valid XLSX'
               }));
             }
 
@@ -668,6 +669,8 @@ const getXlsxHeaders = function (filesToParse, extension) {
     return writeToStream('[')
       .then(() => {
         return async.eachSeries(filesToParse, (filePath, callback) => {
+          let callbackCalled = false;
+
           readStream = fs.createReadStream(filePath);
           const workbookReader = new excel.stream.xlsx.WorkbookReader(readStream, {
             sharedStrings: 'cache'
@@ -684,6 +687,13 @@ const getXlsxHeaders = function (filesToParse, extension) {
 
                   // go through all columns
                   row._cells.forEach(cell => {
+                    // check for formulae; we don't support them
+                    if (typeof cell.value === 'object' && _.get(cell.value, 'formula')) {
+                      workbookReader.emit('error', apiError.getError('INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE', {
+                        cell: cell.address
+                      }));
+                    }
+
                     let header = cell.value;
 
                     // if this is the first time the header appears
@@ -708,6 +718,13 @@ const getXlsxHeaders = function (filesToParse, extension) {
               // construct item directly as string to be ready to be written
               let firstKeyInItem = true;
               let item = row._cells.reduce((acc, cell) => {
+                // check for formulae; we don't support them
+                if (typeof cell.value === 'object' && _.get(cell.value, 'formula')) {
+                  workbookReader.emit('error', apiError.getError('INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE', {
+                    cell: cell.address
+                  }));
+                }
+
                 const valueToWrite = typeof cell.value === 'string' ? `"${cell.value}"` : cell.value;
 
                 acc += (firstKeyInItem ? '' : ',') + `"${headersMap[cell._column.number]}":${valueToWrite}`;
@@ -739,7 +756,10 @@ const getXlsxHeaders = function (filesToParse, extension) {
           });
           workbookReader.on('error', (err) => {
             readStream.destroy();
-            callback(err);
+            if (!callbackCalled) {
+              callbackCalled = true;
+              callback(err);
+            }
           });
         });
       })
