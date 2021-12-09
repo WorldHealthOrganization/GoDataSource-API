@@ -5386,7 +5386,8 @@ function exportFilteredModelsList(
               // - or column can't contain language tokens
               if (
                 column.anonymize ||
-                column.doesntContainLanguageToken
+                column.doesntContainLanguageToken ||
+                column.path === '_id'
               ) {
                 continue;
               }
@@ -5616,6 +5617,7 @@ function exportFilteredModelsList(
                       // translate
                       if (
                         !column.doesntContainLanguageToken &&
+                        column.path !== '_id' &&
                         typeof cellValue === 'string' &&
                         cellValue.startsWith('LNG_')
                       ) {
