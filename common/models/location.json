@@ -284,11 +284,8 @@
       ],
       "returns": [
         {
-          "arg": "locations",
-          "type": [
-            "location"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],
