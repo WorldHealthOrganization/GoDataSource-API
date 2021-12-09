@@ -159,8 +159,7 @@ module.exports = function (ReferenceData) {
     // start import
     importableFile.processImportableFileData(app, {
       modelName: app.models.referenceData.modelName,
-      logger: logger,
-      parallelActionsLimit: 10
+      logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
 };

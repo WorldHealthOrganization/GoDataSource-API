@@ -4,8 +4,12 @@ const app = require('../../server/server');
 const fs = require('fs');
 const _ = require('lodash');
 const async = require('async');
-const importableFileHelpers = require('./../../components/importableFile');
 const apiError = require('./../../components/apiError');
+const Platform = require('../../components/platform');
+const Config = require('../../server/config.json');
+const importableFile = require('./../../components/importableFile');
+
+const locationImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (Location) {
 
@@ -158,80 +162,65 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.importImportableFileUsingMap = function (body, options, callback) {
-    // get importable file
-    importableFileHelpers
-      .getTemporaryFileById(body.fileId)
-      .then(file => {
-        // parse file content
-        const rawLocationsList = file.data;
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
 
-        // remap properties
-        const locationsList = app.utils.helpers.convertBooleanProperties(
-          Location,
-          app.utils.helpers.remapProperties(rawLocationsList, body.map, body.valuesMap));
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
 
-        // build a list of sync operations
-        const syncLocation = [];
+    /**
+     * Create array of actions that will be executed in series/parallel for each batch
+     * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+     * @param {Array} batchData - Batch data
+     * @returns {[]}
+     */
+    const createBatchActions = function (batchData) {
+      // build a list of sync operations
+      const syncLocation = [];
 
-        // define a container for error results
-        const syncErrors = [];
-
-        // define a toString function to be used by error handler
-        syncErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-
-        // go through all entries
-        locationsList.forEach(function (locationItem, index) {
-          syncLocation.push(function (callback) {
-            // sync location
-            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, locationItem, options)
-              .then(function (syncResult) {
-                callback(null, syncResult.record);
-              })
-              .catch(function (error) {
-                // on error, store the error, but don't stop, continue with other items
-                syncErrors.push({
-                  message: `Failed to import location data ${index + 1}`,
+      // go through all batch entries
+      batchData.forEach(function (locationItem) {
+        syncLocation.push(function (asyncCallback) {
+          // sync location
+          return app.utils.dbSync.syncRecord(logger, app.models.location, locationItem.save, options)
+            .then(function () {
+              asyncCallback();
+            })
+            .catch(function (error) {
+              asyncCallback(null, {
+                success: false,
+                error: {
                   error: error,
-                  recordNo: index + 1,
                   data: {
-                    file: rawLocationsList[index],
-                    save: locationItem
+                    file: locationItem.raw,
+                    save: locationItem.save
                   }
-                });
-                callback(null, null);
+                }
               });
-          });
+            });
         });
+      });
 
-        // start importing locations
-        async.parallelLimit(syncLocation, 10, function (error, results) {
-          // handle errors (should not be any)
-          if (error) {
-            return callback(error);
-          }
+      return syncLocation;
+    };
 
-          // if import errors were found
-          if (syncErrors.length) {
-            // remove results that failed to be added
-            results = results.filter(result => result !== null);
-            // define a toString function to be used by error handler
-            results.toString = function () {
-              return JSON.stringify(this);
-            };
-            // return error with partial success
-            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-              model: app.models.location.modelName,
-              failed: syncErrors,
-              success: results
-            }));
-          }
-          // send the result
-          callback(null, results);
-        });
-      })
-      .catch(callback);
+    // construct options needed by the formatter worker
+    if (!app.models.location._booleanProperties) {
+      app.models.location._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.location);
+    }
+
+    const formatterOptions = Object.assign({
+      dataType: 'location',
+      batchSize: locationImportBatchSize,
+      modelBooleanProperties: app.models.location._booleanProperties
+    }, body);
+
+    // start import
+    importableFile.processImportableFileData(app, {
+      modelName: app.models.location.modelName,
+      logger: logger,
+      parallelActionsLimit: 10
+    }, formatterOptions, createBatchActions, callback);
   };
 
   /**
