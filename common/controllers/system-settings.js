@@ -291,7 +291,16 @@ module.exports = function (SystemSettings) {
           // go into object
           return modelToDefinition(
             modelsMap[rawPropertyDefType],
-            modelsMap[rawPropertyDefType].definition.rawProperties
+            rawPropertyDefType === 'address' ?
+              Object.assign(
+                {},
+                modelsMap[rawPropertyDefType].definition.rawProperties, {
+                  geoLocation: {
+                    type: 'customGeoPoint'
+                  }
+                }
+              ) :
+              modelsMap[rawPropertyDefType].definition.rawProperties
           );
         } else if (
           typeof rawPropertyDefType === 'object'
@@ -311,6 +320,13 @@ module.exports = function (SystemSettings) {
           ) {
             // add property
             return rawPropertyDefType;
+          } else if (
+            rawPropertyDefType === 'geopoint'
+          ) {
+            return modelToDefinition(
+              modelsMap['customGeoPoint'],
+              modelsMap['customGeoPoint'].definition.rawProperties
+            );
           } else if (
             rawPropertyDefType &&
             typeof rawPropertyDefType === 'function'
@@ -332,7 +348,16 @@ module.exports = function (SystemSettings) {
               ) {
                 return modelToDefinition(
                   modelsMap[rawPropertyDefType.name],
-                  modelsMap[rawPropertyDefType.name].definition.rawProperties
+                  rawPropertyDefType.name === 'address' ?
+                    Object.assign(
+                      {},
+                      modelsMap[rawPropertyDefType.name].definition.rawProperties, {
+                        geoLocation: {
+                          type: 'customGeoPoint'
+                        }
+                      }
+                    ) :
+                    modelsMap[rawPropertyDefType.name].definition.rawProperties
                 );
               } else {
                 throw Error(`Error resolving function type with name '${rawPropertyDefType.name}' for model '${model}'`);
