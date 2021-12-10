@@ -139,6 +139,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
   },
+  "UNSUPPORTED_FILE_TYPE_IN_ZIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
+  },
   "INVALID_CONTENT_OF_TYPE": {
     "defaultStatusCode": 422,
     "messagePattern": "Invalid <%= contentType %> content: <%= details%>"
@@ -369,7 +373,7 @@
   },
   "INVALID_ADDRESS_LATITUDE_LONGITUDE": {
     "defaultStatusCode": 422,
-    "messagePattern": "Invalid address longitude/latitude: <%= values %>"
+    "messagePattern": "Invalid address longitude/latitude. Might be out of bounds"
   },
   "INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE": {
     "defaultStatusCode": 422,
