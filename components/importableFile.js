@@ -41,6 +41,13 @@ const supportedFileExtensions = [
   '.ods'
 ];
 
+// define a list of supported file extensions in zip
+const supportedFileExtensionsInZip = [
+  '.xls',
+  '.xlsx',
+  '.ods'
+];
+
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -53,10 +60,12 @@ const stripSpecialCharsToLowerCase = function (string) {
 /**
  * Validate file extension
  * @param extension
+ * @param inZip - flag specifying if the zip extensions are the ones to be checked
  * @return {boolean}
  */
-const isExtensionSupported = function (extension) {
-  return supportedFileExtensions.indexOf(extension) !== -1;
+const isExtensionSupported = function (extension, inZip = false) {
+  const extensionsToBeChecked = inZip ? supportedFileExtensionsInZip : supportedFileExtensions;
+  return extensionsToBeChecked.indexOf(extension) !== -1;
 };
 
 /**
@@ -717,6 +726,11 @@ const getXlsxHeaders = function (filesToParse, extension) {
 
               // construct item directly as string to be ready to be written
               let firstKeyInItem = true;
+
+              if (!row._cells.length) {
+                // all cells are empty; don't add the row in JSON
+                return;
+              }
               let item = row._cells.reduce((acc, cell) => {
                 // check for formulae; we don't support them
                 if (typeof cell.value === 'object' && _.get(cell.value, 'formula')) {
@@ -830,22 +844,37 @@ const storeFileAndGetHeaders = function (file, decryptPassword, options) {
       return Promise.reject(typeof zipError === 'string' ? {message: zipError} : zipError);
     }
 
-    // archive was unzipped; check new file extension
+    // cache all files extensions from zip
+    const filesExtensions = new Set();
+    // archive was unzipped; get new file extension
     for (const fileName of fs.readdirSync(tmpDirName)) {
+      const fileExtension = path.extname(fileName).toLowerCase();
+      filesExtensions.add(fileExtension);
+
       // on first file check its extension and use it further
       if (extension === zipExtension) {
         extension = path.extname(fileName).toLowerCase();
-        // if extension is invalid
-        if (!isExtensionSupported(extension)) {
-          // send back the error
-          return Promise.reject(apiError.getError('UNSUPPORTED_FILE_TYPE', {
-            fileName: fileName,
-            details: `unsupported extension ${extension}. Supported file extensions: ${supportedFileExtensions.join(', ')}`
-          }));
-        }
+      }
+
+      // if extension is invalid
+      if (!isExtensionSupported(fileExtension, true)) {
+        // send back the error
+        return Promise.reject(apiError.getError('UNSUPPORTED_FILE_TYPE_IN_ZIP', {
+          fileName: fileName,
+          details: `unsupported extension ${extension}. Supported file extensions: ${supportedFileExtensionsInZip.join(', ')}`
+        }));
       }
 
       filesToParse.push(path.join(tmpDirName, fileName));
+    }
+
+    // check if there are more than 1 file types
+    if (filesExtensions.size > 1) {
+      // send back the error
+      return Promise.reject(apiError.getError('UNSUPPORTED_FILE_TYPE_IN_ZIP', {
+        fileName: file.name,
+        details: `ZIP archive contains more than 1 file types: ${[...filesExtensions].join(', ')}`
+      }));
     }
   } else {
     filesToParse.push(file.path);

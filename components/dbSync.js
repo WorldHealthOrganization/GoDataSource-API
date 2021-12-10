@@ -749,18 +749,29 @@ const syncRecord = function (logger, model, record, options, done) {
 
       let formattedError;
       switch (err.code) {
+        // MongoError for longitude/latitude out of bounds
         case 16755:
-          // MongoError for longitude/latitude out of bounds
-          formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE', {
-            values: err.message ?
-              err.message.substring(err.message.lastIndexOf('lng:')) :
-              ''
-          });
+          formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE');
+          break;
+        // Loopback error; check for invalid lat/lng
+        case 'ERR_ASSERTION':
+          if (
+            err.message &&
+            (
+              err.message.includes('lat must be') ||
+              err.message.includes('lng must be')
+            )
+          ) {
+            // MongoError for longitude/latitude out of bounds
+            formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE');
+          }
           break;
         default:
-          formattedError = err;
+          break;
       }
 
+      // not handled error
+      !formattedError && (formattedError = err);
       return Promise.reject(formattedError);
     });
 
