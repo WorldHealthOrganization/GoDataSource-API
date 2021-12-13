@@ -49,11 +49,11 @@
       "section": "uiAPIErrors"
     },
     "LNG_CASE_FIELD_LABEL_DUPLICATE_CONTACTS": {
-      "translation": "Contacts with the same name:",
+      "translation": "A person with the same name already exists:",
       "section": "uiCaseFields"
     },
     "LNG_CONTACT_FIELD_LABEL_DUPLICATE_CASES": {
-      "translation": "Cases with the same name:",
+      "translation": "A person with the same name already exists:",
       "section": "uiContactFields"
     }
   }
