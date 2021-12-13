@@ -47,6 +47,14 @@
     "LNG_API_ERROR_CODE_UNSUPPORTED_FILE_TYPE_IN_ZIP": {
       "translation": "ZIP archive contains invalid files. The archive should contain files of only one type from xlsx/xls/ods",
       "section": "uiAPIErrors"
+    },
+    "LNG_CASE_FIELD_LABEL_DUPLICATE_CONTACTS": {
+      "translation": "Contacts with the same name:",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DUPLICATE_CASES": {
+      "translation": "Cases with the same name:",
+      "section": "uiContactFields"
     }
   }
 }
