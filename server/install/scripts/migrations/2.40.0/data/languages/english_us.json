@@ -55,6 +55,18 @@
     "LNG_CONTACT_FIELD_LABEL_DUPLICATE_CASES": {
       "translation": "A person with the same name already exists:",
       "section": "uiContactFields"
+    },
+    "LNG_LAB_RESULTS_FILTER_TITLE": {
+      "translation": "Lab results filters",
+      "section": "uiMobile"
+    },
+    "LNG_MENU_ITEM_VIEW_LAB_RESULTS": {
+      "translation": "View lab results",
+      "section": "uiMobile"
+    },
+    "LNG_LAB_RESULTS_NO_RESULTS_FOUND_LABEL": {
+      "translation": "There are no lab results to be displayed",
+      "section": "uiMobile"
     }
   }
 }
