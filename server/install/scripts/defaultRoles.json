@@ -88,6 +88,9 @@
       "follow_up_export_daily_form",
       "relationship_export",
       "lab_result_export",
+      "lab_result_list",
+      "case_list_lab_result",
+      "contact_list_lab_result",
 
       "case_view",
       "case_view_movement_map",
@@ -108,6 +111,8 @@
       "follow_up_list_range",
       "case_grouped_by_classification",
       "contact_grouped_by_risk",
+      "contact_of_contact_grouped_by_risk",
+      "follow_up_grouped_by_team",
       "team_list"
     ]
   },
