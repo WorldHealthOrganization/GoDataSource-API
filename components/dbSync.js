@@ -9,6 +9,7 @@ const fsExtra = require('fs-extra');
 const workerRunner = require('./workerRunner');
 const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
 const apiError = require('./apiError');
+const bcrypt = require('bcrypt');
 
 // limit for each chunk
 const noElementsInFilterArrayLimit = 20000;
@@ -81,6 +82,7 @@ collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(use
 // on sync we need get all collections except the following
 let syncExcludeList = [
   'systemSettings',
+  'role',
   'auditLog',
   'helpCategory',
   'helpItem',
@@ -418,6 +420,20 @@ function isImportableRecord(collectionName, record, outbreakIDs) {
   return importable;
 }
 
+/**
+ * Alter user information that is added to snapshot for upstream server
+ * User data shouldn't contain actual roles and password
+ * @param {Array} records - List of user records
+ */
+function alterUserData(records) {
+  records.forEach(record => {
+    // no roles
+    record.roleIds = [''];
+    // random password
+    record.password = bcrypt.hashSync(helpers.randomString('all', 20, 30), 10);
+  });
+}
+
 // on export some additional filters might be applied on different collections
 // map collections to filter update functions
 const collectionsFilterMap = {
@@ -441,6 +457,12 @@ const collectionsImportFilterMap = {
   relationship: isImportableRecord,
   cluster: isImportableRecord,
   fileAttachment: isImportableRecord
+};
+
+// on export for upstream servers some information needs to be altered
+// map collections to functions that alter data
+const collectionsAlterDataMap = {
+  user: alterUserData
 };
 
 const syncRecordFlags = {
@@ -665,6 +687,19 @@ const syncRecord = function (logger, model, record, options, done) {
               flag: syncRecordFlags.CREATED
             };
           });
+      }
+
+      // db record was found
+      // if we are in a sync action from another Go.Data instance and the model is user or team don't try to do any updates
+      if (
+        options.snapshotFromClient &&
+        ['team', 'user'].includes(model.name)
+      ) {
+        log('debug', `Record found (id: ${record.id}) but it is a ${model.name} in a sync from a client instance. Skipped record`);
+        return Promise.resolve({
+          record: dbRecord,
+          flag: syncRecordFlags.UNTOUCHED
+        });
       }
 
       // if record was found in DB but we cannot figure out if the changes are newer or older skip record (updatedAt is missing)
@@ -971,6 +1006,7 @@ module.exports = {
   collectionsImportFilterMap: collectionsImportFilterMap,
   collectionsToSyncInSeries: collectionsToSyncInSeries,
   collectionsExcludeDeletedRecords: collectionsExcludeDeletedRecords,
+  collectionsAlterDataMap: collectionsAlterDataMap,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,

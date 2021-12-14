@@ -253,6 +253,11 @@
           "arg": "generatePersonVisualId",
           "type": "boolean",
           "description": "Generate visualId on cases/contacts; Default: 'false'"
+        },
+        {
+          "arg": "snapshotFromClient",
+          "type": "boolean",
+          "description": "Flag specifying the snapshot is from a Go.Data client instance; Default: 'false'"
         }
       ],
       "returns": [

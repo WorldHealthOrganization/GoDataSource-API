@@ -133,6 +133,9 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
     form.append('snapshot', fs.createReadStream(DBSnapshotFileName));
     form.append('asynchronous', asynchronous);
     form.append('autoEncrypt', autoEncrypt);
+    // send flag so that the upstream server knows that this is a sync from a desktop client instance
+    form.append('snapshotFromClient', 'true');
+
     let requestOptions = Object.assign({}, this.options, {
       method: 'POST',
       body: form

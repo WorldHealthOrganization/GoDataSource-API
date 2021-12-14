@@ -200,6 +200,11 @@ function exportCollectionInBatches(
             return nextFilter(filterIndex + 1);
           }
 
+          // export for upstream server needs to obfuscate some information
+          if (options.dbForUpstreamServer && recordsCount && dbSync.collectionsAlterDataMap[collectionName]) {
+            dbSync.collectionsAlterDataMap[collectionName](records);
+          }
+
           // export related files
           // if collection is not supported, it will be skipped
           dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
