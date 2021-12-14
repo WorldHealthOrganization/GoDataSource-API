@@ -514,7 +514,20 @@ module.exports = function (app) {
   // endless loop, running every 2 minutes
   setInterval(() => {
     try {
-      routinesConfig = JSON.parse(fs.readFileSync(routinesConfigFilePath));
+      // retrieve file content
+      const fileContent = fs.readFileSync(routinesConfigFilePath);
+
+      // failed to parse JSON content ?
+      try {
+        routinesConfig = JSON.parse(fileContent);
+      } catch (err) {
+        // not ideal but must clean file, otherwise nothing will work anymore
+        routinesConfig = {};
+        fs.writeFileSync(routinesConfigFilePath, JSON.stringify(routinesConfig));
+
+        // send error further
+        throw err;
+      }
 
       // run the configured routines
       async.parallel(
@@ -525,12 +538,12 @@ module.exports = function (app) {
           try {
             fs.writeFileSync(routinesConfigFilePath, JSON.stringify(routinesConfig));
           } catch (writeErr) {
-            app.logger.warn(`Failed to write routines configuration. ${writeErr}`);
+            app.logger.warn(`Failed to write routines configuration ('${routinesConfigFilePath}'). ${writeErr}`);
           }
         }
       );
     } catch (readErr) {
-      app.logger.error(`Failed to read routines configuration. ${readErr}`);
+      app.logger.error(`Failed to read routines configuration ('${routinesConfigFilePath}'). ${readErr}`);
     }
   }, 120000);
 };
