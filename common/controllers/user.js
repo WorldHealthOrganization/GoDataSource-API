@@ -41,9 +41,43 @@ module.exports = function (User) {
   });
 
   User.observe('before save', (ctx, next) => {
-    // do not execute on sync
+    // check for sync action
     if (ctx.options && ctx.options._sync) {
-      return next();
+      // on sync from another Go.Data instance we need to import users with same email
+      // for this we will add a suffix to the email
+      // also to disallow user from being used all roles are removed and password is changed
+      if (ctx.options.snapshotFromClient && ctx.isNewInstance) {
+        const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(ctx);
+        // no roles
+        data.target.roleIds = [''];
+        // random password
+        data.target.password = bcrypt.hashSync(app.utils.helpers.randomString('all', 20, 30), 10);
+
+        // search for similar email
+        return User
+          .rawFind({
+            '$or': [{
+              email: data.target.email
+            }, {
+              email: {
+                '$regex': `^${data.target.email.replace(/[.]/g, '\\.')}`,
+                '$options': 'i'
+              }
+            }]
+          }, {projection: {'_id': 1}})
+          .then(users => {
+            if (!users.length) {
+              // no users were found with a similar email; continue create logic
+              return;
+            }
+
+            // some users were found with a similar email; add suffix to email
+            data.target.email += `-duplicate-${users.length}`;
+          });
+      } else {
+        // don't execute additional logic
+        return next();
+      }
     }
 
     let oldPassword = null;

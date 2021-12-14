@@ -19,6 +19,7 @@ const crypto = require('crypto');
 const EpiWeek = require('epi-week');
 const config = require('../server/config');
 const {performance} = require('perf_hooks');
+const randomize = require('randomatic');
 
 const arrayFields = {
   'addresses': 'address',
@@ -2669,6 +2670,55 @@ const countPeopleContactsAndExposures = function (record) {
   return result;
 };
 
+/**
+ * Generate random numbers between min & max
+ * @param {number} minValue
+ * @param {number} maxValue
+ * @param {number} precision
+ * @returns {number}
+ */
+const randomFloatBetween = (
+  minValue,
+  maxValue,
+  precision
+) => {
+  if (typeof (precision) === 'undefined') {
+    precision = 2;
+  }
+  return parseFloat(Math.min(minValue + (Math.random() * (maxValue - minValue)), maxValue).toFixed(precision));
+};
+
+/**
+ * Generate random string for given charset
+ * @param {string} charset - If not present the charset will be chose randomly
+ * @param {number} minLength - Minimum length of random string
+ * @param {number} maxLength - Maximum length of random string
+ * @return {String}
+ */
+const randomString = (charset, minLength, maxLength) => {
+  // variables for names generation
+  const charsetType = ['default', 'french', 'chinese', 'number', 'symbol', 'all'];
+  const charsetMap = {
+    default: 'abcdefghijklmnopqrstuvwxyz',
+    get french() {
+      return `${this.default}çàèîûôöïüù`;
+    },
+    chinese: '常用國字標準字體表形表',
+    number: '1234567890',
+    symbol: '`~!@#$%^&*()_+=-}{][|":;\'\\?><,./',
+    get all() {
+      return `${this.french}${this.chinese}${this.number}${this.symbol}`;
+    }
+  };
+  const charsetsNo = charsetType.length;
+
+  if (!charset) {
+    charset = charsetType[randomFloatBetween(0, charsetsNo - 1, 0)];
+  }
+
+  return randomize('?', randomFloatBetween(minLength, maxLength, 0), {chars: charsetMap[charset]});
+};
+
 Object.assign(module.exports, {
   getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
@@ -2729,5 +2779,6 @@ Object.assign(module.exports, {
   getDuplicateKey,
   attachDuplicateKeys,
   fillGeoLocationInformation,
-  countPeopleContactsAndExposures
+  countPeopleContactsAndExposures,
+  randomString
 });
