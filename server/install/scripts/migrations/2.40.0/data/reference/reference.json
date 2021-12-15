@@ -1,0 +1,40 @@
+{
+  "translations": {
+    "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_MINING": {
+      "translation": "Mining",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryOccupation"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FORESTRY": {
+      "translation": "Forestry",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryOccupation"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY": {
+      "translation": "Liver Histopathology",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryTypeOfLabTest"
+    }
+  },
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_MINING",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_MINING"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FORESTRY",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FORESTRY"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY"
+    }
+  ]
+}
