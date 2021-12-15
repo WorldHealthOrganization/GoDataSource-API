@@ -250,7 +250,20 @@ module.exports = function (SystemSettings) {
     const modelsMap = loopbackRegistry.modelBuilder.models;
 
     // construct model definition
-    const modelData = modelsMap[model];
+    let modelData = modelsMap[model];
+
+    // ignore map ?
+    const modelsMapIgnore = {
+      'Application': true,
+      'ACL': true,
+      'file': true
+    };
+    if (
+      modelsMapIgnore[model] ||
+      model.startsWith('AnonymousModel_')
+    ) {
+      modelData = undefined;
+    }
 
     // data not found ?
     if (
@@ -260,7 +273,7 @@ module.exports = function (SystemSettings) {
     ) {
       return callback(app.utils.apiError.getError(
         'INTERNAL_ERROR', {
-          error: `Invalid model type: ${model}. Supported options: ${Object.keys(modelsMap).join(', ')}`
+          error: `Invalid model type: ${model}. Supported options: ${Object.keys(modelsMap).filter((name) => !modelsMapIgnore[name] && !name.startsWith('AnonymousModel_')).join(', ')}`
         }
       ));
     }
@@ -316,7 +329,9 @@ module.exports = function (SystemSettings) {
             rawPropertyDefType === 'number' ||
             rawPropertyDefType === 'boolean' ||
             rawPropertyDefType === 'object' ||
-            rawPropertyDefType === 'date'
+            rawPropertyDefType === 'date' ||
+            rawPropertyDefType === 'any' ||
+            rawPropertyDefType === 'file'
           ) {
             // add property
             return rawPropertyDefType;
@@ -327,6 +342,14 @@ module.exports = function (SystemSettings) {
               modelsMap['customGeoPoint'],
               modelsMap['customGeoPoint'].definition.rawProperties
             );
+          } else if (
+            rawPropertyDefType === 'String'
+          ) {
+            return 'string';
+          } else if (
+            rawPropertyDefType === 'Date'
+          ) {
+            return 'date';
           } else if (
             rawPropertyDefType &&
             typeof rawPropertyDefType === 'function'
