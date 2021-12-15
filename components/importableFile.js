@@ -731,12 +731,17 @@ const getXlsxHeaders = function (filesToParse, extension) {
                 // all cells are empty; don't add the row in JSON
                 return;
               }
+              let dataInRow = false;
               let item = row._cells.reduce((acc, cell) => {
                 // check for formulae; we don't support them
                 if (typeof cell.value === 'object' && _.get(cell.value, 'formula')) {
                   workbookReader.emit('error', apiError.getError('INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE', {
                     cell: cell.address
                   }));
+                }
+
+                if (!dataInRow && cell.value !== null) {
+                  dataInRow = true;
                 }
 
                 const valueToWrite = typeof cell.value === 'string' ? `"${cell.value}"` : cell.value;
@@ -746,6 +751,10 @@ const getXlsxHeaders = function (filesToParse, extension) {
                 return acc;
               }, '{');
               item += '}';
+              if (!dataInRow) {
+                // all cells have null values; don't add the row in JSON
+                return;
+              }
 
               batchData += (firstItem ? '' : ',') + item;
               batchCount++;
