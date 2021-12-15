@@ -714,7 +714,8 @@ module.exports = function (Sync) {
               triggerBackupBeforeSync,
               {
                 password: password,
-                generatePersonVisualId: generatePersonVisualId
+                generatePersonVisualId: generatePersonVisualId,
+                snapshotFromClient: snapshotFromClient
               },
               function (err) {
                 // don't send the done function as the response was already sent
