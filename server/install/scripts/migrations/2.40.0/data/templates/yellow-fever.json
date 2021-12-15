@@ -1,0 +1,2361 @@
+{
+  "translations": {
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS": {
+      "russian_ru": "Outcome/Status",
+      "modules": [
+        "referenceData"
+      ],
+      "portuguese_pt": "Outcome/Status",
+      "french_fr": "Outcome/Status",
+      "spanish_es": "Outcome/Status",
+      "arabic": "النتيجة/الحالة",
+      "english_us": "Outcome/Status"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION": {
+      "english_us": "Patient Information",
+      "modules": [
+        "referenceData"
+      ],
+      "french_fr": "Patient Information",
+      "arabic": "Patient Information",
+      "portuguese_pt": "Patient Information",
+      "spanish_es": "Patient Information",
+      "russian_ru": "Patient Information"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE": {
+      "spanish_es": "Epidemiology and exposure",
+      "modules": [
+        "referenceData"
+      ],
+      "french_fr": "Epidemiology and exposure",
+      "russian_ru": "Epidemiology and exposure",
+      "english_us": "Epidemiology and exposure",
+      "portuguese_pt": "Epidemiology and exposure",
+      "arabic": "علم الأوبئة والتعرض"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING": {
+      "spanish_es": "Reporting",
+      "modules": [
+        "referenceData"
+      ],
+      "russian_ru": "Reporting",
+      "arabic": "Reporting",
+      "french_fr": "Reporting",
+      "english_us": "Reporting",
+      "portuguese_pt": "Reporting"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS": {
+      "portuguese_pt": "Health Care Interactions",
+      "modules": [
+        "referenceData"
+      ],
+      "french_fr": "Health Care Interactions",
+      "russian_ru": "Health Care Interactions",
+      "spanish_es": "Health Care Interactions",
+      "arabic": "تفاعلات الرعاية الصحية",
+      "english_us": "Health Care Interactions"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER": {
+      "arabic": "Yellow Fever",
+      "modules": [
+        "referenceData"
+      ],
+      "english_us": "Yellow Fever",
+      "french_fr": "Yellow Fever",
+      "portuguese_pt": "Yellow Fever",
+      "russian_ru": "Yellow Fever",
+      "spanish_es": "Yellow Fever"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_DATE_NOTIFICATION_TEXT": {
+      "arabic": "Date of notification",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Date of notification",
+      "french_fr": "Date of notification",
+      "portuguese_pt": "Date of notification",
+      "russian_ru": "Date of notification",
+      "spanish_es": "Date of notification"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_TEXT": {
+      "arabic": "Has suspect case been exposed to extraction sites during the last 14 days?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Has suspect case been exposed to extraction sites during the last 14 days?",
+      "french_fr": "Has suspect case been exposed to extraction sites during the last 14 days?",
+      "portuguese_pt": "Has suspect case been exposed to extraction sites during the last 14 days?",
+      "russian_ru": "Has suspect case been exposed to extraction sites during the last 14 days?",
+      "spanish_es": "Has suspect case been exposed to extraction sites during the last 14 days?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_TEXT": {
+      "arabic": "Has suspect case been exposed to areas with presence of non-human primates?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Has suspect case been exposed to areas with presence of non-human primates?",
+      "french_fr": "Has suspect case been exposed to areas with presence of non-human primates?",
+      "portuguese_pt": "Has suspect case been exposed to areas with presence of non-human primates?",
+      "russian_ru": "Has suspect case been exposed to areas with presence of non-human primates?",
+      "spanish_es": "Has suspect case been exposed to areas with presence of non-human primates?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_TEXT": {
+      "arabic": "Has suspect case been exposed to a crowded slum during the last 14 days?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Has suspect case been exposed to a crowded slum during the last 14 days?",
+      "french_fr": "Has suspect case been exposed to a crowded slum during the last 14 days?",
+      "portuguese_pt": "Has suspect case been exposed to a crowded slum during the last 14 days?",
+      "russian_ru": "Has suspect case been exposed to a crowded slum during the last 14 days?",
+      "spanish_es": "Has suspect case been exposed to a crowded slum during the last 14 days?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_TEXT": {
+      "arabic": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?",
+      "french_fr": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?",
+      "portuguese_pt": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?",
+      "russian_ru": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?",
+      "spanish_es": "Has suspect case been exposed to sylvatic environments during the last 14 days (agriculture, road construction site, forests)?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_YES_QUESTION_EXPO_TRAVEL_PLACES_TEXT": {
+      "arabic": "List names of places visited (separated by semi-colon)",
+      "modules": [
+        "template"
+      ],
+      "english_us": "List names of places visited (separated by semi-colon)",
+      "french_fr": "List names of places visited (separated by semi-colon)",
+      "portuguese_pt": "List names of places visited (separated by semi-colon)",
+      "russian_ru": "List names of places visited (separated by semi-colon)",
+      "spanish_es": "List names of places visited (separated by semi-colon)"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_TEXT": {
+      "arabic": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?",
+      "french_fr": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?",
+      "portuguese_pt": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?",
+      "russian_ru": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?",
+      "spanish_es": "Have cases of fever and jaundice been seen or reported in areas or districts that patient visited during the last two weeks?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_TEXT": {
+      "arabic": "Did the suspect case travel during the last 14 days of illness onset?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Did the suspect case travel during the last 14 days of illness onset?",
+      "french_fr": "Did the suspect case travel during the last 14 days of illness onset?",
+      "portuguese_pt": "Did the suspect case travel during the last 14 days of illness onset?",
+      "russian_ru": "Did the suspect case travel during the last 14 days of illness onset?",
+      "spanish_es": "Did the suspect case travel during the last 14 days of illness onset?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_TEXT": {
+      "arabic": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?",
+      "french_fr": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?",
+      "portuguese_pt": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?",
+      "russian_ru": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?",
+      "spanish_es": "Is the suspect case a member of a marginalized population, having barriers to accessing preventive and curative health care?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_C_2_E_64_D_44_B_092_4_CAF_BDD_2_03_DAD_8_DFD_6_AD_TEXT": {
+      "arabic": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module",
+      "modules": [
+        "template"
+      ],
+      "english_us": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module",
+      "french_fr": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module",
+      "portuguese_pt": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module",
+      "russian_ru": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module",
+      "spanish_es": " *NOTE: After completing questionnaire, please add hospitalization events into \"Epi\" tab within Case Module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_TEXT": {
+      "arabic": "Was suspect case hospitalized under a mosquito net?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Was suspect case hospitalized under a mosquito net?",
+      "french_fr": "Was suspect case hospitalized under a mosquito net?",
+      "portuguese_pt": "Was suspect case hospitalized under a mosquito net?",
+      "russian_ru": "Was suspect case hospitalized under a mosquito net?",
+      "spanish_es": "Was suspect case hospitalized under a mosquito net?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_TEXT": {
+      "arabic": "Was the suspect case managed with the local protocol for yellow fever treatment?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Was the suspect case managed with the local protocol for yellow fever treatment?",
+      "french_fr": "Was the suspect case managed with the local protocol for yellow fever treatment?",
+      "portuguese_pt": "Was the suspect case managed with the local protocol for yellow fever treatment?",
+      "russian_ru": "Was the suspect case managed with the local protocol for yellow fever treatment?",
+      "spanish_es": "Was the suspect case managed with the local protocol for yellow fever treatment?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_TEXT": {
+      "arabic": "Was suspect case hospitalized?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Was suspect case hospitalized?",
+      "french_fr": "Was suspect case hospitalized?",
+      "portuguese_pt": "Was suspect case hospitalized?",
+      "russian_ru": "Was suspect case hospitalized?",
+      "spanish_es": "Was suspect case hospitalized?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_IDP_LABEL": {
+      "arabic": "IDP (Internally displaced persons)",
+      "modules": [
+        "template"
+      ],
+      "english_us": "IDP (Internally displaced persons)",
+      "french_fr": "IDP (Internally displaced persons)",
+      "portuguese_pt": "IDP (Internally displaced persons)",
+      "russian_ru": "IDP (Internally displaced persons)",
+      "spanish_es": "IDP (Internally displaced persons)"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_NOMADIC_LABEL": {
+      "arabic": "Nomadic",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Nomadic",
+      "french_fr": "Nomadic",
+      "portuguese_pt": "Nomadic",
+      "russian_ru": "Nomadic",
+      "spanish_es": "Nomadic"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_OTHER_LABEL": {
+      "arabic": "Other",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Other",
+      "french_fr": "Other",
+      "portuguese_pt": "Other",
+      "russian_ru": "Other",
+      "spanish_es": "Other"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_OTHER_QUESTION_MOBILE_OTHER_SPECIFY_TEXT": {
+      "arabic": "Specify",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Specify",
+      "french_fr": "Specify",
+      "portuguese_pt": "Specify",
+      "russian_ru": "Specify",
+      "spanish_es": "Specify"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_PASTORALIST_LABEL": {
+      "arabic": "Pastoralist",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Pastoralist",
+      "french_fr": "Pastoralist",
+      "portuguese_pt": "Pastoralist",
+      "russian_ru": "Pastoralist",
+      "spanish_es": "Pastoralist"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_REFUGEE_LABEL": {
+      "arabic": "Refugee",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Refugee",
+      "french_fr": "Refugee",
+      "portuguese_pt": "Refugee",
+      "russian_ru": "Refugee",
+      "spanish_es": "Refugee"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_TEXT": {
+      "arabic": " Specify category",
+      "modules": [
+        "template"
+      ],
+      "english_us": " Specify category",
+      "french_fr": " Specify category",
+      "portuguese_pt": " Specify category",
+      "russian_ru": " Specify category",
+      "spanish_es": " Specify category"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_TEXT": {
+      "arabic": " Is the suspect case a member of a mobile population?",
+      "modules": [
+        "template"
+      ],
+      "english_us": " Is the suspect case a member of a mobile population?",
+      "french_fr": " Is the suspect case a member of a mobile population?",
+      "portuguese_pt": " Is the suspect case a member of a mobile population?",
+      "russian_ru": " Is the suspect case a member of a mobile population?",
+      "spanish_es": " Is the suspect case a member of a mobile population?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_PERSON_NOTIFIED_TEXT": {
+      "arabic": "Who notified the case to the local health authorities?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Who notified the case to the local health authorities?",
+      "french_fr": "Who notified the case to the local health authorities?",
+      "portuguese_pt": "Who notified the case to the local health authorities?",
+      "russian_ru": "Who notified the case to the local health authorities?",
+      "spanish_es": "Who notified the case to the local health authorities?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_QUESTION_5443_F_168_F_4_D_4_4472_896_C_6_C_42_F_8_E_9_F_880_TEXT": {
+      "arabic": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "modules": [
+        "template"
+      ],
+      "english_us": "*NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "french_fr": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "portuguese_pt": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "russian_ru": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "spanish_es": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_TEXT": {
+      "arabic": "Was an initial sample collected for laboratory examination?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Was an initial sample collected for laboratory examination?",
+      "french_fr": "Was an initial sample collected for laboratory examination?",
+      "portuguese_pt": "Was an initial sample collected for laboratory examination?",
+      "russian_ru": "Was an initial sample collected for laboratory examination?",
+      "spanish_es": "Was an initial sample collected for laboratory examination?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_HEALTH_CENTER_LABEL": {
+      "arabic": "Health center",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Health center",
+      "french_fr": "Health center",
+      "portuguese_pt": "Health center",
+      "russian_ru": "Health center",
+      "spanish_es": "Health center"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_HOSPITAL_LABEL": {
+      "arabic": "Hospital",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Hospital",
+      "french_fr": "Hospital",
+      "portuguese_pt": "Hospital",
+      "russian_ru": "Hospital",
+      "spanish_es": "Hospital"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_PHARMACY_LABEL": {
+      "arabic": "Pharmacy",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Pharmacy",
+      "french_fr": "Pharmacy",
+      "portuguese_pt": "Pharmacy",
+      "russian_ru": "Pharmacy",
+      "spanish_es": "Pharmacy"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_TRADITIONAL_MEDICINE_LABEL": {
+      "arabic": "Traditional medicine",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Traditional medicine",
+      "french_fr": "Traditional medicine",
+      "portuguese_pt": "Traditional medicine",
+      "russian_ru": "Traditional medicine",
+      "spanish_es": "Traditional medicine"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_TEXT": {
+      "arabic": "Select the places the suspect case sought care",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Select the places the suspect case sought care",
+      "french_fr": "Select the places the suspect case sought care",
+      "portuguese_pt": "Select the places the suspect case sought care",
+      "russian_ru": "Select the places the suspect case sought care",
+      "spanish_es": "Select the places the suspect case sought care"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_TEXT": {
+      "arabic": "Did suspect case go to seek care?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Did suspect case go to seek care?",
+      "french_fr": "Did suspect case go to seek care?",
+      "portuguese_pt": "Did suspect case go to seek care?",
+      "russian_ru": "Did suspect case go to seek care?",
+      "spanish_es": "Did suspect case go to seek care?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_YES_QUESTION_BLEEDING_DATE_ONSET_TEXT": {
+      "arabic": "Date of onset",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Date of onset",
+      "french_fr": "Date of onset",
+      "portuguese_pt": "Date of onset",
+      "russian_ru": "Date of onset",
+      "spanish_es": "Date of onset"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_TEXT": {
+      "arabic": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?",
+      "french_fr": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?",
+      "portuguese_pt": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?",
+      "russian_ru": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?",
+      "spanish_es": "Does suspect case have bleeding from the nose, gums, skin or gastrointestinal tract?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_TEXT": {
+      "arabic": "Did the fever respond to antimalarial medications?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Did the fever respond to antimalarial medications?",
+      "french_fr": "Did the fever respond to antimalarial medications?",
+      "portuguese_pt": "Did the fever respond to antimalarial medications?",
+      "russian_ru": "Did the fever respond to antimalarial medications?",
+      "spanish_es": "Did the fever respond to antimalarial medications?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_DATE_ONSET_TEXT": {
+      "arabic": "Date of onset",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Date of onset",
+      "french_fr": "Date of onset",
+      "portuguese_pt": "Date of onset",
+      "russian_ru": "Date of onset",
+      "spanish_es": "Date of onset"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_TEXT": {
+      "arabic": "Does suspect case have fever (>38°C)?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Does suspect case have fever (>38°C)?",
+      "french_fr": "Does suspect case have fever (>38°C)?",
+      "portuguese_pt": "Does suspect case have fever (>38°C)?",
+      "russian_ru": "Does suspect case have fever (>38°C)?",
+      "spanish_es": "Does suspect case have fever (>38°C)?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_YES_QUESTION_JAUNDICE_DATE_ONSET_TEXT": {
+      "arabic": "Date of onset",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Date of onset",
+      "french_fr": "Date of onset",
+      "portuguese_pt": "Date of onset",
+      "russian_ru": "Date of onset",
+      "spanish_es": "Date of onset"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_TEXT": {
+      "arabic": "Does suspect case have jaundice?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Does suspect case have jaundice?",
+      "french_fr": "Does suspect case have jaundice?",
+      "portuguese_pt": "Does suspect case have jaundice?",
+      "russian_ru": "Does suspect case have jaundice?",
+      "spanish_es": "Does suspect case have jaundice?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_LABEL": {
+      "arabic": "No",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_HF_INACCESSIBLE_LABEL": {
+      "arabic": "Inaccessibility to health center",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Inaccessibility to health center",
+      "french_fr": "Inaccessibility to health center",
+      "portuguese_pt": "Inaccessibility to health center",
+      "russian_ru": "Inaccessibility to health center",
+      "spanish_es": "Inaccessibility to health center"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_IGNORANCE_LABEL": {
+      "arabic": "Ignorance",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Ignorance",
+      "french_fr": "Ignorance",
+      "portuguese_pt": "Ignorance",
+      "russian_ru": "Ignorance",
+      "spanish_es": "Ignorance"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_OTHER_LABEL": {
+      "arabic": "Other",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Other",
+      "french_fr": "Other",
+      "portuguese_pt": "Other",
+      "russian_ru": "Other",
+      "spanish_es": "Other"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_OTHER_QUESTION_OTHER_SPECIFY_TEXT": {
+      "arabic": "Specify",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Specify",
+      "french_fr": "Specify",
+      "portuguese_pt": "Specify",
+      "russian_ru": "Specify",
+      "spanish_es": "Specify"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_REFUSAL_LABEL": {
+      "arabic": "Refusal",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Refusal",
+      "french_fr": "Refusal",
+      "portuguese_pt": "Refusal",
+      "russian_ru": "Refusal",
+      "spanish_es": "Refusal"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_REFUSAL_QUESTION_REFUSAL_SPECIFY_TEXT": {
+      "arabic": " Specify why refused",
+      "modules": [
+        "template"
+      ],
+      "english_us": " Specify why refused",
+      "french_fr": " Specify why refused",
+      "portuguese_pt": " Specify why refused",
+      "russian_ru": " Specify why refused",
+      "spanish_es": " Specify why refused"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_UNAVAILABLE_LABEL": {
+      "arabic": "Vaccines not available",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Vaccines not available",
+      "french_fr": "Vaccines not available",
+      "portuguese_pt": "Vaccines not available",
+      "russian_ru": "Vaccines not available",
+      "spanish_es": "Vaccines not available"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_TEXT": {
+      "arabic": "Select primary reason why dose was not received",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Select primary reason why dose was not received",
+      "french_fr": "Select primary reason why dose was not received",
+      "portuguese_pt": "Select primary reason why dose was not received",
+      "russian_ru": "Select primary reason why dose was not received",
+      "spanish_es": "Select primary reason why dose was not received"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_YES_LABEL": {
+      "arabic": "Yes",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_YES_QUESTION_CF_871261_4_F_23_4_DC_8_838_E_6065_E_43_ABA_63_TEXT": {
+      "arabic": " **NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module",
+      "modules": [
+        "template"
+      ],
+      "english_us": " *NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module",
+      "french_fr": " **NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module",
+      "portuguese_pt": " **NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module",
+      "russian_ru": " **NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module",
+      "spanish_es": " **NOTE: After completing questionnaire, please add vaccination details into \"Personal\" tab within Case Module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_TEXT": {
+      "arabic": "Has suspect case ever received a dose of yellow fever vaccine?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Has suspect case ever received a dose of yellow fever vaccine?",
+      "french_fr": "Has suspect case ever received a dose of yellow fever vaccine?",
+      "portuguese_pt": "Has suspect case ever received a dose of yellow fever vaccine?",
+      "russian_ru": "Has suspect case ever received a dose of yellow fever vaccine?",
+      "spanish_es": "Has suspect case ever received a dose of yellow fever vaccine?"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_INTERMEDIATE_LABEL": {
+      "arabic": "Intermediate",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Intermediate",
+      "french_fr": "Intermediate",
+      "portuguese_pt": "Intermediate",
+      "russian_ru": "Intermediate",
+      "spanish_es": "Intermediate"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_INTERMEDIATE_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_CLONE_998_C_71_A_4_34_CD_4_F_8_E_84_DF_3_A_3_C_0_D_312_CD_4_TEXT": {
+      "arabic": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "modules": [
+        "template"
+      ],
+      "english_us": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "french_fr": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "portuguese_pt": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "russian_ru": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "spanish_es": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_JUNGLE_LABEL": {
+      "arabic": "Jungle/sylvatic",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Jungle/sylvatic",
+      "french_fr": "Jungle/sylvatic",
+      "portuguese_pt": "Jungle/sylvatic",
+      "russian_ru": "Jungle/sylvatic",
+      "spanish_es": "Jungle/sylvatic"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_JUNGLE_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_TEXT": {
+      "arabic": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "modules": [
+        "template"
+      ],
+      "english_us": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "french_fr": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "portuguese_pt": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "russian_ru": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "spanish_es": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_RULED_OUT_LABEL": {
+      "arabic": "Ruled-out",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Ruled-out",
+      "french_fr": "Ruled-out",
+      "portuguese_pt": "Ruled-out",
+      "russian_ru": "Ruled-out",
+      "spanish_es": "Ruled-out"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_RULED_OUT_QUESTION_RULED_OUT_SPECIFY_TEXT": {
+      "arabic": "Specify why ruled out",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Specify why ruled out",
+      "french_fr": "Specify why ruled out",
+      "portuguese_pt": "Specify why ruled out",
+      "russian_ru": "Specify why ruled out",
+      "spanish_es": "Specify why ruled out"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_UNK_LABEL": {
+      "arabic": "Unknown",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_URBAN_LABEL": {
+      "arabic": "Urban",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Urban",
+      "french_fr": "Urban",
+      "portuguese_pt": "Urban",
+      "russian_ru": "Urban",
+      "spanish_es": "Urban"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_URBAN_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_CLONE_998_C_71_A_4_34_CD_4_F_8_E_84_DF_3_A_3_C_0_D_312_CD_4_CLONE_1_BE_328_C_5_D_991_435_C_9_BCE_970_BE_5_FBD_623_TEXT": {
+      "arabic": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "modules": [
+        "template"
+      ],
+      "english_us": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "french_fr": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "portuguese_pt": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "russian_ru": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module",
+      "spanish_es": "*NOTE: After completing questionnaire, please update case classification in \"Epi\" tab within Case Module"
+    },
+    "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_TEXT": {
+      "arabic": "What is the final classification / transmission pattern?",
+      "modules": [
+        "template"
+      ],
+      "english_us": "What is the final classification / transmission pattern?",
+      "french_fr": "What is the final classification / transmission pattern?",
+      "portuguese_pt": "What is the final classification / transmission pattern?",
+      "russian_ru": "What is the final classification / transmission pattern?",
+      "spanish_es": "What is the final classification / transmission pattern?"
+    }
+  },
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER",
+      "colorCode": "#e8e323"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+      "order": 13
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+      "order": 14
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING"
+    }
+  ],
+  "outbreakTemplates": [
+    {
+      "id": "b4558d99-39f1-4407-adee-1c1c287df0be",
+      "name": "Yellow Fever",
+      "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER",
+      "periodOfFollowup": 6,
+      "frequencyOfFollowUpPerDay": 0,
+      "generateFollowUpsOverwriteExisting": false,
+      "generateFollowUpsKeepTeamAssignment": true,
+      "generateFollowUpsTeamAssignmentAlgorithm": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+      "generateFollowUpsDateOfLastContact": false,
+      "intervalOfFollowUp": "",
+      "noDaysAmongContacts": 6,
+      "noDaysInChains": 6,
+      "noDaysNotSeen": 0,
+      "noLessContacts": 0,
+      "longPeriodsBetweenCaseOnset": 0,
+      "noDaysNewContacts": 1,
+      "caseInvestigationTemplate": [
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_DATE_NOTIFICATION_TEXT",
+          "variable": "date_notification",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING",
+          "required": false,
+          "order": 1,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": []
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_PERSON_NOTIFIED_TEXT",
+          "variable": "person_notified",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING",
+          "required": false,
+          "order": 2,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": []
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_TEXT",
+          "variable": "high_risk_pop",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+          "required": false,
+          "order": 3,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HIGH_RISK_POP_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_TEXT",
+          "variable": "mobile_pop",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+          "required": false,
+          "order": 4,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_TEXT",
+                  "variable": "mobile_pop_type",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_NOMADIC_LABEL",
+                      "value": "nomadic",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_PASTORALIST_LABEL",
+                      "value": "pastoralist",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_IDP_LABEL",
+                      "value": "idp",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_REFUGEE_LABEL",
+                      "value": "refugee",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 4
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_OTHER_LABEL",
+                      "value": "other",
+                      "alert": false,
+                      "additionalQuestions": [
+                        {
+                          "multiAnswer": false,
+                          "inactive": false,
+                          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_YES_QUESTION_MOBILE_POP_TYPE_ANSWER_OTHER_QUESTION_MOBILE_OTHER_SPECIFY_TEXT",
+                          "variable": "mobile_other_specify",
+                          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+                          "required": false,
+                          "order": 1,
+                          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+                          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                          "answers": []
+                        }
+                      ],
+                      "order": 5
+                    }
+                  ]
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_MOBILE_POP_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_TEXT",
+          "variable": "symp_fever",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+          "required": false,
+          "order": 5,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_DATE_ONSET_TEXT",
+                  "variable": "fever_date_onset",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                },
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_TEXT",
+                  "variable": "fever_antimalarial",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+                  "required": false,
+                  "order": 2,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_YES_LABEL",
+                      "value": "yes",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_NO_LABEL",
+                      "value": "no",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_YES_QUESTION_FEVER_ANTIMALARIAL_ANSWER_UNK_LABEL",
+                      "value": "unk",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    }
+                  ]
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_FEVER_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_TEXT",
+          "variable": "symp_jaundice",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+          "required": false,
+          "order": 6,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_YES_QUESTION_JAUNDICE_DATE_ONSET_TEXT",
+                  "variable": "jaundice_date_onset",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_JAUNDICE_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_TEXT",
+          "variable": "symp_bleeding",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+          "required": false,
+          "order": 7,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_YES_QUESTION_BLEEDING_DATE_ONSET_TEXT",
+                  "variable": "bleeding_date_onset",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMP_BLEEDING_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_TEXT",
+          "variable": "seek_care",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+          "required": false,
+          "order": 8,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_TEXT",
+                  "variable": "place_seek_care",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_PHARMACY_LABEL",
+                      "value": "pharmacy",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_TRADITIONAL_MEDICINE_LABEL",
+                      "value": "traditional_medicine",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_HEALTH_CENTER_LABEL",
+                      "value": "health_center",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_YES_QUESTION_PLACE_SEEK_CARE_ANSWER_HOSPITAL_LABEL",
+                      "value": "hospital",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 4
+                    }
+                  ]
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SEEK_CARE_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_TEXT",
+          "variable": "hospitalization",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+          "required": false,
+          "order": 9,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_C_2_E_64_D_44_B_092_4_CAF_BDD_2_03_DAD_8_DFD_6_AD_TEXT",
+                  "variable": "c2e64d44-b092-4caf-bdd2-03dad8dfd6ad",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                },
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_TEXT",
+                  "variable": "hosp_mosq_net",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+                  "required": false,
+                  "order": 2,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_YES_LABEL",
+                      "value": "yes",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_NO_LABEL",
+                      "value": "no",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_MOSQ_NET_ANSWER_UNK_LABEL",
+                      "value": "unk",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    }
+                  ]
+                },
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_TEXT",
+                  "variable": "hosp_yf_protocol",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+                  "required": false,
+                  "order": 3,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_YES_LABEL",
+                      "value": "yes",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_NO_LABEL",
+                      "value": "no",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_YES_QUESTION_HOSP_YF_PROTOCOL_ANSWER_UNK_LABEL",
+                      "value": "unk",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    }
+                  ]
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_HOSPITALIZATION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_TEXT",
+          "variable": "sample_collection",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+          "required": false,
+          "order": 10,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_QUESTION_5443_F_168_F_4_D_4_4472_896_C_6_C_42_F_8_E_9_F_880_TEXT",
+                  "variable": "5443f168-f4d4-4472-896c-6c42f8e9f880",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_TEXT",
+          "variable": "vaccination",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 11,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_YES_QUESTION_CF_871261_4_F_23_4_DC_8_838_E_6065_E_43_ABA_63_TEXT",
+                  "variable": "cf871261-4f23-4dc8-838e-6065e43aba63",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_TEXT",
+                  "variable": "unvacc_reason",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": [
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_REFUSAL_LABEL",
+                      "value": "refusal",
+                      "alert": false,
+                      "additionalQuestions": [
+                        {
+                          "multiAnswer": false,
+                          "inactive": false,
+                          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_REFUSAL_QUESTION_REFUSAL_SPECIFY_TEXT",
+                          "variable": "refusal_specify",
+                          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+                          "required": false,
+                          "order": 1,
+                          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+                          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                          "answers": []
+                        }
+                      ],
+                      "order": 1
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_UNAVAILABLE_LABEL",
+                      "value": "unavailable",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 2
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_HF_INACCESSIBLE_LABEL",
+                      "value": "hf_inaccessible",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 3
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_IGNORANCE_LABEL",
+                      "value": "ignorance",
+                      "alert": false,
+                      "additionalQuestions": null,
+                      "order": 4
+                    },
+                    {
+                      "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_OTHER_LABEL",
+                      "value": "other",
+                      "alert": false,
+                      "additionalQuestions": [
+                        {
+                          "multiAnswer": false,
+                          "inactive": false,
+                          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_NO_QUESTION_UNVACC_REASON_ANSWER_OTHER_QUESTION_OTHER_SPECIFY_TEXT",
+                          "variable": "other_specify",
+                          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+                          "required": false,
+                          "order": 1,
+                          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+                          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                          "answers": []
+                        }
+                      ],
+                      "order": 5
+                    }
+                  ]
+                }
+              ],
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_VACCINATION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_TEXT",
+          "variable": "expo_travel",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 12,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_YES_QUESTION_EXPO_TRAVEL_PLACES_TEXT",
+                  "variable": "expo_travel_places",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_TEXT",
+          "variable": "expo_travel_cluster",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 13,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_TRAVEL_CLUSTER_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_TEXT",
+          "variable": "expo_extraction",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 14,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_EXTRACTION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_TEXT",
+          "variable": "expo_sylvatic",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 15,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SYLVATIC_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_TEXT",
+          "variable": "expo_slum",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 16,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SLUM_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_TEXT",
+          "variable": "expo_primate",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+          "required": false,
+          "order": 17,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_PRIMATE_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_TEXT",
+          "variable": "yf_classification",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+          "required": false,
+          "order": 18,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_JUNGLE_LABEL",
+              "value": "jungle",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_JUNGLE_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_TEXT",
+                  "variable": "ec65c753-4712-4851-85f2-f4d368c6e3b4",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_INTERMEDIATE_LABEL",
+              "value": "intermediate",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_INTERMEDIATE_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_CLONE_998_C_71_A_4_34_CD_4_F_8_E_84_DF_3_A_3_C_0_D_312_CD_4_TEXT",
+                  "variable": "ec65c753-4712-4851-85f2-f4d368c6e3b4_clone_998c71a4-34cd-4f8e-84df-3a3c0d312cd4",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_URBAN_LABEL",
+              "value": "urban",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_URBAN_QUESTION_EC_65_C_753_4712_4851_85_F_2_F_4_D_368_C_6_E_3_B_4_CLONE_998_C_71_A_4_34_CD_4_F_8_E_84_DF_3_A_3_C_0_D_312_CD_4_CLONE_1_BE_328_C_5_D_991_435_C_9_BCE_970_BE_5_FBD_623_TEXT",
+                  "variable": "ec65c753-4712-4851-85f2-f4d368c6e3b4_clone_998c71a4-34cd-4f8e-84df-3a3c0d312cd4_clone_1be328c5-d991-435c-9bce-970be5fbd623",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 3
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_RULED_OUT_LABEL",
+              "value": "ruled_out",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_RULED_OUT_QUESTION_RULED_OUT_SPECIFY_TEXT",
+                  "variable": "ruled_out_specify",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FREE_TEXT",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 4
+            },
+            {
+              "label": "LNG_TEMPLATE_B4558D99-39F1-4407-ADEE-1C1C287DF0BE_CASEINVESTIGATIONTEMPLATE_QUESTION_YF_CLASSIFICATION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 5
+            }
+          ]
+        }
+      ],
+      "contactInvestigationTemplate": [],
+      "contactFollowUpTemplate": [],
+      "labResultsTemplate": [],
+      "isContactLabResultsActive": false,
+      "isContactsOfContactsActive": false,
+      "isDateOfOnsetRequired": true,
+      "applyGeographicRestrictions": false
+    }
+  ]
+}
