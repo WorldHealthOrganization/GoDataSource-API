@@ -76,6 +76,7 @@ function run(callback) {
           generateFollowUpsOverwriteExisting: item.generateFollowUpsOverwriteExisting,
           generateFollowUpsKeepTeamAssignment: item.generateFollowUpsKeepTeamAssignment,
           generateFollowUpsTeamAssignmentAlgorithm: item.generateFollowUpsTeamAssignmentAlgorithm,
+          generateFollowUpsDateOfLastContact: item.generateFollowUpsDateOfLastContact,
           intervalOfFollowUp: item.intervalOfFollowUp ? item.intervalOfFollowUp : '',
           noDaysAmongContacts: item.noDaysAmongContacts,
           noDaysInChains: item.noDaysInChains,
@@ -88,6 +89,7 @@ function run(callback) {
           contactFollowUpTemplate: item.contactFollowUpTemplate,
           labResultsTemplate: item.labResultsTemplate,
           isContactLabResultsActive: item.isContactLabResultsActive,
+          isContactsOfContactsActive: item.isContactsOfContactsActive,
           isDateOfOnsetRequired: item.isDateOfOnsetRequired,
           applyGeographicRestrictions: item.applyGeographicRestrictions
         });
