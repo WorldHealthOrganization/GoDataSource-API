@@ -1329,7 +1329,7 @@
       "name": "Yellow Fever",
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER",
       "periodOfFollowup": 6,
-      "frequencyOfFollowUpPerDay": 0,
+      "frequencyOfFollowUpPerDay": 1,
       "generateFollowUpsOverwriteExisting": false,
       "generateFollowUpsKeepTeamAssignment": true,
       "generateFollowUpsTeamAssignmentAlgorithm": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
@@ -1337,9 +1337,9 @@
       "intervalOfFollowUp": "",
       "noDaysAmongContacts": 6,
       "noDaysInChains": 6,
-      "noDaysNotSeen": 0,
-      "noLessContacts": 0,
-      "longPeriodsBetweenCaseOnset": 0,
+      "noDaysNotSeen": 6,
+      "noLessContacts": 6,
+      "longPeriodsBetweenCaseOnset": 6,
       "noDaysNewContacts": 1,
       "caseInvestigationTemplate": [
         {
