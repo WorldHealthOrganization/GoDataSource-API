@@ -1285,11 +1285,11 @@
       "generateFollowUpsTeamAssignmentAlgorithm": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
       "generateFollowUpsDateOfLastContact": false,
       "intervalOfFollowUp": "",
-      "noDaysAmongContacts": 0,
-      "noDaysInChains": 0,
-      "noDaysNotSeen": 0,
-      "noLessContacts": 0,
-      "longPeriodsBetweenCaseOnset": 0,
+      "noDaysAmongContacts": 7,
+      "noDaysInChains": 7,
+      "noDaysNotSeen": 7,
+      "noLessContacts": 7,
+      "longPeriodsBetweenCaseOnset": 7,
       "noDaysNewContacts": 1,
       "caseInvestigationTemplate": [
         {
