@@ -32,7 +32,7 @@ function run(callback) {
         id: language.id,
         name: language.name,
         readOnly: true,
-        sections: {}
+        tokens: {}
       };
 
       // retrieve tokens
@@ -40,7 +40,9 @@ function run(callback) {
         .find({
           where: {
             languageId: language.id,
-            isDefaultLanguageToken: true
+
+            // do we want only default language tokens to be exported ?
+            // isDefaultLanguageToken: true
           },
           fields: {
             id: true,
@@ -59,15 +61,22 @@ function run(callback) {
         // translation
         _.set(
           languageJSON,
-          `sections[${langTokenModel.section}][${langTokenModel.token}].translation`,
+          `tokens[${langTokenModel.token}].translation`,
           langTokenModel.translation
         );
 
         // modules
         _.set(
           languageJSON,
-          `sections[${langTokenModel.section}][${langTokenModel.token}].modules`,
+          `tokens[${langTokenModel.token}].modules`,
           langTokenModel.modules
+        );
+
+        // section
+        _.set(
+          languageJSON,
+          `tokens[${langTokenModel.token}].section`,
+          langTokenModel.section
         );
       });
     })

@@ -8,9 +8,13 @@ const uuid = require('uuid');
 
 /**
  * Create / Update language tokens
+ * @param updateOnlyTheseLanguages [Optional - Array of strings - if not provided system updates all languages]
  * @returns Promise
  */
-const createUpdateLanguageTokens = (languagesDirPath) => {
+const createUpdateLanguageTokens = (
+  languagesDirPath,
+  updateOnlyTheseLanguages
+) => {
   // create Mongo DB connection
   let language, languageToken;
   const languageFilePaths = [];
@@ -22,10 +26,24 @@ const createUpdateLanguageTokens = (languagesDirPath) => {
       languageToken = dbConn.collection('languageToken');
     })
     .then(() => {
+      // create languages filter
+      const languagesFilter = {
+        deleted: false
+      };
+
+      // attach restrictions to languages
+      if (
+        updateOnlyTheseLanguages &&
+        updateOnlyTheseLanguages.length > 0
+      ) {
+        languagesFilter._id = {
+          $in: updateOnlyTheseLanguages
+        };
+      }
+
+      // retrieve languages
       return language
-        .find({
-          deleted: false
-        }, {
+        .find(languagesFilter, {
           projection: {
             _id: 1,
             name: 1
