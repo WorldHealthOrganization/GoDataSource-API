@@ -14,8 +14,8 @@
       ],
       "section": "referenceDataCategoryOccupation"
     },
-    "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY": {
-      "translation": "Liver Histopathology",
+    "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_HISTOPATHOLOGY": {
+      "translation": "Histopathology",
       "modules": [
         "referenceData"
       ],
@@ -32,9 +32,9 @@
       "categoryId": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
       "value": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FORESTRY"
     }, {
-      "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY",
+      "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_HISTOPATHOLOGY",
       "categoryId": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
-      "value": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_LIVER_HISTOPATHOLOGY"
+      "value": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_HISTOPATHOLOGY"
     }
   ]
 }
