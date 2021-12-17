@@ -1,6 +1,7 @@
 'use strict';
 
 const app = require('../server');
+const Config = require('../config.json');
 const readReadOnlyProperties = {};
 
 /**
@@ -132,10 +133,24 @@ module.exports = function (Model) {
   /**
    * Remove readonly properties from an object
    * @param instanceData
+   * @param {Array} allowedReadOnlyProperties - List of properties to be allowed when Config.allowCustomIDsOnCreate is true
    */
-  Model.removeReadOnlyProperties = function (instanceData) {
+  Model.removeReadOnlyProperties = function (instanceData, allowedReadOnlyProperties = []) {
     Object.keys(instanceData).forEach(function (propertyName) {
       if (readReadOnlyProperties[Model.modelName].indexOf(propertyName) !== -1) {
+        if (
+          // configuration allows property on create
+          Config.allowCustomIDsOnCreate &&
+          // property is allowed
+          allowedReadOnlyProperties.includes(propertyName) &&
+          // property is not empty
+          instanceData[propertyName] !== null &&
+          instanceData[propertyName] !== ''
+        ) {
+          // keep property in payload
+          return;
+        }
+
         delete instanceData[propertyName];
       }
     });
@@ -145,7 +160,7 @@ module.exports = function (Model) {
    * Remove readonly properties on create
    */
   Model.beforeRemote('create', function (context, modelInstance, next) {
-    Model.removeReadOnlyProperties(context.args.data);
+    Model.removeReadOnlyProperties(context.args.data, ['id']);
     next();
   });
 
@@ -170,7 +185,7 @@ module.exports = function (Model) {
       // handle create
       Model.beforeRemote(`prototype.__create__${relationName}`, function (context, modelInstance, next) {
         if (typeof app.models[modelName].removeReadOnlyProperties === 'function') {
-          app.models[modelName].removeReadOnlyProperties(context.args.data);
+          app.models[modelName].removeReadOnlyProperties(context.args.data, ['id']);
         }
         return next();
       });
