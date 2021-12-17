@@ -320,7 +320,7 @@ module.exports = function (Outbreak) {
       if (error) {
         return callback(error);
       }
-      app.models.relationship.removeReadOnlyProperties(data);
+      app.models.relationship.removeReadOnlyProperties(data, ['id']);
       app.models.relationship
         .create(Object.assign(data, {outbreakId: outbreakId}), options)
         .then(function (createdRelation) {

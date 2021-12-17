@@ -230,5 +230,6 @@
     "contact": false,
     "contactOfContact": false,
     "labResult": false
-  }
+  },
+  "allowCustomIDsOnCreate": false
 }
