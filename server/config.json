@@ -224,5 +224,11 @@
       "maxColumnsPerSheet": 250,
       "maxRowsPerFile": 12000
     }
+  },
+  "alternateUniqueIdentifierQueryOnImport": {
+    "case": false,
+    "contact": false,
+    "contactOfContact": false,
+    "labResult": false
   }
 }

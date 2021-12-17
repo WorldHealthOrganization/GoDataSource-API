@@ -126,4 +126,13 @@ module.exports = function (Event) {
   };
 
   Event.referenceDataFields = Object.keys(Event.referenceDataFieldsToCategoryMap);
+
+  /**
+   * Get alternate unique identifier query for sync/import actions
+   * Note: Event records don't have an alternate unique identifier. Overwriting Person model function
+   * @returns {null}
+   */
+  Event.getAlternateUniqueIdentifierQueryForSync = () => {
+    return null;
+  };
 };

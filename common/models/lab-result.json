@@ -77,6 +77,10 @@
       "outbreakId": 1,
       "deleted": 1,
       "personType": 1
+    },
+    "outbreak_sampleIdentifier_index": {
+      "outbreakId": 1,
+      "sampleIdentifier": 1
     }
   },
   "validations": [],

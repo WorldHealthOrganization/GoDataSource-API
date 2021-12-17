@@ -649,4 +649,29 @@ module.exports = function (LabResult) {
       parallelActionsLimit: 10
     }, formatterOptions, createBatchActions, callback);
   };
+
+  /**
+   * Get alternate unique identifier query for sync/import actions
+   * @param {Object} record
+   * @returns {{outbreakId, sampleIdentifier}|null}
+   */
+  LabResult.getAlternateUniqueIdentifierQueryForSync = (record) => {
+    if (
+      // alternate unique identifier key is outbreakId and sampleIdentifier
+      record.outbreakId !== undefined &&
+      record.outbreakId !== null &&
+      record.outbreakId !== '' &&
+      record.sampleIdentifier !== undefined &&
+      record.sampleIdentifier !== null &&
+      record.sampleIdentifier !== ''
+    ) {
+      return {
+        outbreakId: record.outbreakId,
+        sampleIdentifier: record.sampleIdentifier
+      };
+    }
+
+    // record doesn't have an alternate unique identifier set
+    return null;
+  };
 };

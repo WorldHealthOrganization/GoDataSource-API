@@ -2419,4 +2419,29 @@ module.exports = function (Person) {
           });
       });
   };
+
+  /**
+   * Get alternate unique identifier query for sync/import actions
+   * @param {Object} record
+   * @returns {{outbreakId, visualId}|null}
+   */
+  Person.getAlternateUniqueIdentifierQueryForSync = (record) => {
+    if (
+      // alternate unique identifier key is outbreakId and visualId
+      record.outbreakId !== undefined &&
+      record.outbreakId !== null &&
+      record.outbreakId !== '' &&
+      record.visualId !== undefined &&
+      record.visualId !== null &&
+      record.visualId !== ''
+    ) {
+      return {
+        outbreakId: record.outbreakId,
+        visualId: record.visualId
+      };
+    }
+
+    // record doesn't have an alternate unique identifier set
+    return null;
+  };
 };

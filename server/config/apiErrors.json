@@ -382,5 +382,9 @@
   "INVALID_FILE_SIZE": {
     "defaultStatusCode": 422,
     "messagePattern": "Uploaded file size is bigger than configured maxFileSize"
+  },
+  "DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The alternate unique identifier corresponds to more than one existing records. Alternate unique identifier query: <%= alternateIdQuery %>"
   }
 }
