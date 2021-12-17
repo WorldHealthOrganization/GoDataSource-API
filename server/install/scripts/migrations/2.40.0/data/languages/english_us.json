@@ -67,6 +67,30 @@
     "LNG_LAB_RESULTS_NO_RESULTS_FOUND_LABEL": {
       "translation": "There are no lab results to be displayed",
       "section": "uiMobile"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_INTERVAL_TYPE": {
+      "translation": "Interval type",
+      "section": "uiAutomaticBackupFields"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_INTERVAL_TYPE_DESCRIPTION": {
+      "translation": "Backup interval type - every n hours, daily at specific time",
+      "section": "uiAutomaticBackupFields"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_INTERVAL_TYPE_N_HOURS": {
+      "translation": "N hours",
+      "section": "uiAutomaticBackupFields"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_INTERVAL_TYPE_DAILY_AT_TIME": {
+      "translation": "Daily at time",
+      "section": "uiAutomaticBackupFields"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_DAILY_AT_TIME": {
+      "translation": "Time of day",
+      "section": "uiAutomaticBackupFields"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_DAILY_AT_TIME_DESCRIPTION": {
+      "translation": "Approximation of time when the backup should start. The backup will be done daily and it will start at a short time after the configured time depending if the API is running when it should do the backup",
+      "section": "uiAutomaticBackupFields"
     }
   }
 }
