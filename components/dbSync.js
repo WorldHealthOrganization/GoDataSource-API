@@ -10,6 +10,9 @@ const workerRunner = require('./workerRunner');
 const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
 const apiError = require('./apiError');
 const bcrypt = require('bcrypt');
+const Config = require('./../server/config.json');
+
+const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
 
 // limit for each chunk
 const noElementsInFilterArrayLimit = 20000;
@@ -655,8 +658,14 @@ const syncRecord = function (logger, model, record, options, done) {
   }
 
   let findRecord;
+  let alternateQueryForRecord;
+
   // check if a record with the given id exists if record.id exists
-  if (record.id !== undefined) {
+  if (
+    record.id !== undefined &&
+    record.id !== null &&
+    record.id !== ''
+  ) {
     log('debug', `Trying to find record with id ${record.id}.`);
     findRecord = model
       .findOne({
@@ -664,6 +673,35 @@ const syncRecord = function (logger, model, record, options, done) {
           id: record.id
         },
         deleted: true
+      });
+  }
+  // some models might query for different unique identifiers when id is not present
+  else if (
+    alternateUniqueIdentifierQueryOptions[model.modelName] &&
+    model.getAlternateUniqueIdentifierQueryForSync &&
+    (alternateQueryForRecord = model.getAlternateUniqueIdentifierQueryForSync(record)) !== null
+  ) {
+    const stringifiedAlternateQuery = JSON.stringify(alternateQueryForRecord);
+    log('debug', `Trying to find record with alternate unique identifier ${stringifiedAlternateQuery}.`);
+    findRecord = model
+      .find({
+        where: alternateQueryForRecord,
+        limit: 2,
+        deleted: true
+      })
+      .then(results => {
+        if (!results || !results.length) {
+          // no db record was found; continue with creating the record
+          return null;
+        } else if (results.length > 1) {
+          // more than one result found; we cannot know which one we should update
+          return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+            alternateIdQuery: stringifiedAlternateQuery
+          }));
+        }
+
+        // single record found; continue with it and try to update it
+        return results[0];
       });
   } else {
     log('debug', 'Record id not present');
