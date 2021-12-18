@@ -141,6 +141,7 @@
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
   "removeTmpUploadedImportFilesAfter": 24,
+  "removeAuditLogsOlderThanNDays": false,
   "skipOldPasswordForUserModify": true,
   "jobSettings": {
     "generateFollowups": {

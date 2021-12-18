@@ -173,6 +173,39 @@ module.exports = function (Backup) {
       .then(function (info) {
         app.logger.debug(`Startup: ${info.count} sync/export actions that were 'in progress' after application restart. Changed status to failed`);
       })
+      .then(() => {
+        // not our main thread ?
+        if (!app.startScheduler) {
+          return;
+        }
+
+        // check if we need to reset scheduler.json
+        return Backup
+          .find({
+            where: {
+              automatic: true
+            },
+            fields: {
+              id: true,
+              status: true
+            },
+            limit: 1,
+            order: 'createdAt DESC'
+          })
+          .then((backups) => {
+            // check if we have a failed backup
+            if (
+              !backups ||
+              backups.length < 1 ||
+              backups[0].status !== 'LNG_BACKUP_STATUS_FAILED'
+            ) {
+              return;
+            }
+
+            // if we do, we need to reset scheduler.json so it start a new backup
+            app.clearLastExecutedTime = true;
+          });
+      })
       .catch(function (err) {
         app.logger.debug(`Startup: Update of 'in progress' sync/export actions status failed. Error: ${err}`);
       });
