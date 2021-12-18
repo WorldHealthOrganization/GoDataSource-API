@@ -8,7 +8,7 @@ const _ = require('lodash');
 const Config = require('../server/config.json');
 
 // get max file size for uploaded resource
-const maxFileSize = _.get(Config, 'jobSettings.importResources.maxFileSize', 400);
+const maxFileSize = _.get(Config, 'jobSettings.importResources.maxFileSize', 4096);
 
 /**
  * Offer a file to be downloaded
