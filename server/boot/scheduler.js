@@ -9,6 +9,7 @@ const configSettings = require('../../server/config.json');
 const syncActionsSettings = configSettings.sync;
 const SyncClient = require('../../components/syncClient');
 const tmp = require('tmp');
+const _ = require('lodash');
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -73,6 +74,7 @@ module.exports = function (app) {
 
   // routines config
   let routinesConfig;
+  let deleteAuditLogInProgress = false;
 
   // load the backup module
   let backup = require('../../components/backup');
@@ -97,41 +99,120 @@ module.exports = function (app) {
           return done();
         }
 
-        // backup interval is in hours
-        const interval = backupSettings.backupInterval;
+        // determine if we need to execute backup creation
+        let executeBackupCreation = false;
+        if (
+          !backupSettings.backupType ||
+          backupSettings.backupType === 'n_hours'
+        ) {
+          // backup interval is in hours
+          const interval = backupSettings.backupInterval;
 
-        // if intervals are 0, then don't schedule
-        if (interval < 1) {
+          // if intervals are 0, then don't schedule
+          if (interval < 1) {
+            // remove the old backup routine configuration
+            if (routinesConfig.backup) {
+              delete routinesConfig.backup;
+            }
+            app.logger.warn('Backup interval is less than configured threshold.');
+            return done();
+          }
+
+          // if routines configuration doesn't exist, create it
+          if (!routinesConfig.backup) {
+            routinesConfig.backup = {
+              startTime: moment(),
+              lastExecutedTime: null,
+              timeUnit: 'h',
+              interval: interval,
+              backupTime: null
+            };
+          } else {
+            // make sure the interval didn't change in the meantime
+            routinesConfig.backup.interval = interval;
+            routinesConfig.backup.backupTime = null;
+          }
+
+          // clear last executed time ?
+          if (app.clearLastExecutedTime) {
+            // clear
+            routinesConfig.backup.lastExecutedTime = null;
+
+            // reset
+            app.clearLastExecutedTime = false;
+          }
+
+          // cache routines backup config
+          let backupRoutineConfig = routinesConfig.backup;
+
+          // if routine was executed at least once, used that date as base date for checks
+          let baseTime = backupRoutineConfig.lastExecutedTime ? backupRoutineConfig.lastExecutedTime : backupRoutineConfig.startTime;
+
+          // determine if we need to execute
+          executeBackupCreation = shouldExecute(baseTime, backupRoutineConfig.interval, backupRoutineConfig.timeUnit);
+        } else if (
+          backupSettings.backupType === 'daily_at_time' &&
+          backupSettings.backupDailyAtTime
+        ) {
+          // time when backup should be done
+          const backupTime = backupSettings.backupDailyAtTime;
+
+          // if routines configuration doesn't exist, create it
+          if (!routinesConfig.backup) {
+            routinesConfig.backup = {
+              startTime: moment(),
+              lastExecutedTime: null,
+              timeUnit: 'h',
+              interval: null,
+              backupTime: backupTime
+            };
+          } else {
+            // make sure the interval didn't change in the meantime
+            routinesConfig.backup.interval = null;
+            routinesConfig.backup.backupTime = backupTime;
+          }
+
+          // clear last executed time ?
+          if (app.clearLastExecutedTime) {
+            // clear
+            routinesConfig.backup.lastExecutedTime = null;
+
+            // reset
+            app.clearLastExecutedTime = false;
+          }
+
+          // determine time when we should execute today
+          const whenBackupShouldBeDoneToday = moment(
+            `${moment().format('YYYY-MM-DD')} ${routinesConfig.backup.backupTime}:00`,
+            'YYYY-MM-DD HH:mm:ss'
+          );
+
+          // check if we already executed today
+          if (
+            routinesConfig.backup.lastExecutedTime &&
+            moment(routinesConfig.backup.lastExecutedTime).isSameOrAfter(whenBackupShouldBeDoneToday)
+          ) {
+            // already created backup for today
+            return done();
+          }
+
+          // need to create backup
+          executeBackupCreation = moment().isSameOrAfter(whenBackupShouldBeDoneToday);
+        } else {
+          // can't do backup
+          // - method not supported
           // remove the old backup routine configuration
           if (routinesConfig.backup) {
             delete routinesConfig.backup;
           }
-          app.logger.warn('Backup interval is less than configured threshold.');
+          app.logger.warn('Automatic backup not configured properly, can\'t execute neither by n hours or at a specific time.');
           return done();
         }
 
-        // if routines configuration doesn't exist, create it
-        if (!routinesConfig.backup) {
-          routinesConfig.backup = {
-            startTime: moment(),
-            lastExecutedTime: null,
-            timeUnit: 'h',
-            interval: interval
-          };
-        } else {
-          // make sure the interval didn't change in the meantime
-          routinesConfig.backup.interval = interval;
-        }
-
-        // cache routines backup config
-        let backupRoutineConfig = routinesConfig.backup;
-
-        // if routine was executed at least once, used that date as base date for checks
-        let baseTime = backupRoutineConfig.lastExecutedTime ? backupRoutineConfig.lastExecutedTime : backupRoutineConfig.startTime;
-
-        if (shouldExecute(baseTime, backupRoutineConfig.interval, backupRoutineConfig.timeUnit)) {
+        // create backup ?
+        if (executeBackupCreation) {
           // save the last execution time to now
-          backupRoutineConfig.lastExecutedTime = moment();
+          routinesConfig.backup.lastExecutedTime = moment();
 
           // cache backup model, used in many places below
           const backupModel = app.models.backup;
@@ -155,14 +236,26 @@ module.exports = function (app) {
               // when done update backup status and file location
               backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
                 let newStatus = backupModel.status.SUCCESS;
+                let errorMsg = undefined;
                 if (err) {
+                  // try again later
+                  app.clearLastExecutedTime = true;
+
+                  // failed
+                  errorMsg = err.message ?
+                    err.message :
+                    'An error occurred while creating backup';
                   newStatus = backupModel.status.FAILED;
                 }
+
+                // update status
+                // & attach error information in case it failed and if we have any
                 record.updateAttributes({
                   status: newStatus,
                   location: backupFilePath,
                   startedAt: startedAt,
-                  endedAt: moment()
+                  endedAt: moment(),
+                  error: errorMsg
                 });
               });
             });
@@ -508,10 +601,68 @@ module.exports = function (app) {
 
       // finished
       done();
+    },
+
+    // delete audit logs older than n days
+    (done) => {
+      try {
+        // check if we need to delete
+        const removeAuditLogsOlderThanNDays = _.get(configSettings, 'removeAuditLogsOlderThanNDays', false);
+
+        // check if we need to remove older audit logs
+        if (
+          deleteAuditLogInProgress ||
+          !removeAuditLogsOlderThanNDays ||
+          typeof removeAuditLogsOlderThanNDays !== 'number' ||
+          removeAuditLogsOlderThanNDays < 1
+        ) {
+          return done();
+        }
+
+        // start delete audit logs
+        deleteAuditLogInProgress = true;
+
+        // must remove older audit logs
+        const beforeDate = moment().subtract(removeAuditLogsOlderThanNDays, 'days');
+        app.models.auditLog
+          .rawBulkHardDelete({
+            createdAt: {
+              $lte: beforeDate.toISOString()
+            }
+          })
+          .then((deleteResult) => {
+            // log
+            if (
+              deleteResult.result &&
+              deleteResult.result.n > 0
+            ) {
+              app.logger.info(`Removed ${deleteResult.result.n} audit logs older than '${beforeDate.toISOString()}'`);
+            }
+
+            // finished delete audit logs
+            deleteAuditLogInProgress = false;
+          })
+          .catch((deleteErr) => {
+            // something went wrong...
+            app.logger.error(`Failed executing audit logs deletion older than '${configSettings.removeAuditLogsOlderThanNDays}' days: ${deleteErr}`);
+
+            // finished delete audit logs
+            deleteAuditLogInProgress = false;
+          });
+      } catch (cleanErr) {
+        // finished delete audit logs
+        deleteAuditLogInProgress = false;
+
+        // something went wrong...
+        app.logger.error(`Failed removing audit logs older than '${configSettings.removeAuditLogsOlderThanNDays}' days: ${cleanErr}`);
+      }
+
+      // finished
+      done();
     }
   ];
 
-  // endless loop, running every 2 minutes
+  // endless loop, running every 5 minutes
   setInterval(() => {
     try {
       // retrieve file content
@@ -545,5 +696,5 @@ module.exports = function (app) {
     } catch (readErr) {
       app.logger.error(`Failed to read routines configuration ('${routinesConfigFilePath}'). ${readErr}`);
     }
-  }, 120000);
+  }, 300000);
 };

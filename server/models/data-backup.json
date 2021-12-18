@@ -19,6 +19,12 @@
       "type": "boolean",
       "default": false
     },
+    "backupType": {
+      "type": "string"
+    },
+    "backupDailyAtTime": {
+      "type": "string"
+    },
     "backupInterval": {
       "type": "number",
       "required": true
