@@ -607,7 +607,7 @@ module.exports = function (app) {
     (done) => {
       try {
         // check if we need to delete
-        const removeAuditLogsOlderThanNDays = _.get(configSettings, 'removeAuditLogsOlderThanNDays', false);
+        const removeAuditLogsOlderThanNDays = _.get(configSettings, 'removeAuditLogsOlderThanNDays', 180);
 
         // check if we need to remove older audit logs
         if (
