@@ -19,7 +19,7 @@ module.exports = function (app) {
   }
 
   const session = require('express-session');
-  const MongoStore = require('connect-mongo')(session);
+  const MongoStore = require('connect-mongo');
   const uuid = require('uuid').v4;
   const MongoDBHelper = require('./../../components/mongoDBHelper');
 
@@ -34,7 +34,7 @@ module.exports = function (app) {
     resave: true,
     saveUninitialized: true,
     cookie: {secure: false},
-    store: new MongoStore({
+    store: MongoStore.create({
       clientPromise: MongoDBHelper.getMongoDBClient(),
       dbName: dbName,
       ttl: 60 * 15 // 15 minutes
