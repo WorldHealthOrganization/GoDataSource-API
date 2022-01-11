@@ -1,0 +1,47 @@
+{
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_MINING",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION_FORESTRY",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_HISTOPATHOLOGY",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_YELLOW_FEVER",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_REPORTING",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MONKEYPOX",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS",
+      "active": true
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION",
+      "active": true
+    }
+  ]
+}

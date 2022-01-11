@@ -214,6 +214,15 @@ const migrationVersions = [{
       buildNo: 2
     }]
   }]
+}, {
+  version: '2.40.2',
+  scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 4
+    }]
+  }]
 }];
 
 /**

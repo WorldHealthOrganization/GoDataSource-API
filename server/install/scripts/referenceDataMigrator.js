@@ -84,7 +84,7 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                     .find({
                       languageId: languageId,
                       token: {
-                        $in: Object.keys(refData.translations)
+                        $in: Object.keys(refData.translations ? refData.translations : {})
                       }
                     }, {
                       projection: {
@@ -131,7 +131,7 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                     })
                     .then(() => {
                       // create tokens that weren't updated
-                      Object.keys(refData.translations).forEach((token) => {
+                      Object.keys(refData.translations ? refData.translations : {}).forEach((token) => {
                         // handled ?
                         if (tokensAlreadyHandled[token]) {
                           return;
@@ -208,7 +208,8 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                     value: 1,
                     colorCode: 1,
                     description: 1,
-                    order: 1
+                    order: 1,
+                    active: 1
                   }
                 })
                 .toArray()
@@ -221,11 +222,25 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                     // no change ?
                     const refItem = referenceItemsMap[referenceDataModel._id];
                     if (
-                      referenceDataModel.categoryId === refItem.categoryId &&
-                      referenceDataModel.value === refItem.value &&
-                      referenceDataModel.colorCode === refItem.colorCode &&
-                      referenceDataModel.description === refItem.description &&
-                      referenceDataModel.order === refItem.order
+                      (
+                        refItem.categoryId === undefined ||
+                        referenceDataModel.categoryId === refItem.categoryId
+                      ) && (
+                        refItem.value === undefined ||
+                        referenceDataModel.value === refItem.value
+                      ) && (
+                        refItem.colorCode === undefined ||
+                        referenceDataModel.colorCode === refItem.colorCode
+                      ) && (
+                        refItem.description === undefined ||
+                        referenceDataModel.description === refItem.description
+                      ) && (
+                        refItem.order === undefined ||
+                        referenceDataModel.order === refItem.order
+                      ) && (
+                        refItem.active === undefined ||
+                        referenceDataModel.active === refItem.active
+                      )
                     ) {
                       return;
                     }
@@ -240,11 +255,24 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                           _id: referenceDataModel._id
                         }, {
                           $set: {
-                            categoryId: refItem.categoryId,
-                            value: refItem.value,
-                            colorCode: refItem.colorCode,
-                            description: refItem.description,
-                            order: refItem.order,
+                            categoryId: refItem.categoryId !== undefined ?
+                              refItem.categoryId :
+                              referenceDataModel.categoryId,
+                            value: refItem.value !== undefined ?
+                              refItem.value :
+                              referenceDataModel.value,
+                            colorCode: refItem.colorCode !== undefined ?
+                              refItem.colorCode :
+                              referenceDataModel.colorCode,
+                            description: refItem.description !== undefined ?
+                              refItem.description :
+                              referenceDataModel.description,
+                            order: refItem.order !== undefined ?
+                              refItem.order :
+                              referenceDataModel.order,
+                            active: refItem.active !== undefined ?
+                              refItem.active :
+                              true,
                             isDefaultReferenceData: true,
                             deleted: false,
                             deletedAt: null
@@ -275,6 +303,7 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                           description: refItem.description,
                           colorCode: refItem.colorCode,
                           order: refItem.order,
+                          active: refItem.active !== undefined ? refItem.active : true,
                           isDefaultReferenceData: true,
                           deleted: false,
                           createdAt: common.install.timestamps.createdAt,
