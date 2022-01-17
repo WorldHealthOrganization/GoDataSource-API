@@ -1,0 +1,9 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_COMMON_LABEL_SAVING": {
+      "translation": "Saving...",
+      "section": "uiCommonLabels"
+    }
+  }
+}

@@ -84,11 +84,14 @@ function saveLanguageTokens(context, next) {
         })
         .then(function (token) {
           if (token) {
-            // token exists update translation
-            context.options.remotingContext.req.logger.debug(`Language token "${questions[qindex].text}" exists in DB. Updating it for the user language.`);
-            tokens.updated.push(token.updateAttributes({
-              translation: originalValues[qindex].text
-            }, context.options));
+            // add it to the list only if translation is different
+            if (token.translation !== originalValues[qindex].text) {
+              // token exists update translation
+              context.options.remotingContext.req.logger.debug(`Language token "${questions[qindex].text}" exists in DB. Updating it for the user language.`);
+              tokens.updated.push(token.updateAttributes({
+                translation: originalValues[qindex].text
+              }, context.options));
+            }
           } else {
             context.options.remotingContext.req.logger.debug(`Language token "${questions[qindex].text}" doesn't exist in DB. Creating it for all installed languages.`);
             // save question text language token
@@ -114,11 +117,14 @@ function saveLanguageTokens(context, next) {
             .then(function (token) {
               // checking for the token; should always exist in this case
               if (token) {
-                // token exists update translation
-                context.options.remotingContext.req.logger.debug(`Language token "${answers[aindex].label}" exists in DB. Updating it for the user language.`);
-                tokens.updated.push(token.updateAttributes({
-                  translation: originalValues[qindex].answers[aindex].label
-                }, context.options));
+                // add it to the list only if translation is different
+                if (token.translation !== originalValues[qindex].answers[aindex].label) {
+                  // token exists update translation
+                  context.options.remotingContext.req.logger.debug(`Language token "${answers[aindex].label}" exists in DB. Updating it for the user language.`);
+                  tokens.updated.push(token.updateAttributes({
+                    translation: originalValues[qindex].answers[aindex].label
+                  }, context.options));
+                }
               } else {
                 context.options.remotingContext.req.logger.debug(`Language token "${answers[aindex].label}" doesn't exist in DB. Creating it for all installed languages.`);
                 // save answer label language token

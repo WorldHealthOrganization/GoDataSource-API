@@ -67,6 +67,10 @@ const startServer = function (logger, startScheduler) {
     _.set(datasourceContents, 'mongoDb.useNewUrlParser', false);
     mustUpdateConfigFile = true;
   }
+  if (_.get(datasourceContents, 'mongoDb.maxDepthOfData') === undefined) {
+    _.set(datasourceContents, 'mongoDb.maxDepthOfData', 64);
+    mustUpdateConfigFile = true;
+  }
   if (mustUpdateConfigFile) {
     fs.writeJsonSync(datasourcePath, datasourceContents, {
       spaces: 2
