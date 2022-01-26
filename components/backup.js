@@ -342,7 +342,13 @@ const restoreBackupFromFile = function (filePath, done) {
             return Promise.reject(apiError.getError('MIGRATE_DATABASE_FAILED'));
           });
       })
-      .then(() => done())
+      .then(() => {
+        // invalidate caches
+        app.models.location.cache.reset();
+        app.models.user.cache.reset();
+
+        done();
+      })
       .catch(done);
   });
 };
