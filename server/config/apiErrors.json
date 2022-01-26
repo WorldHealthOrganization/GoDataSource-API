@@ -386,5 +386,13 @@
   "DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER": {
     "defaultStatusCode": 422,
     "messagePattern": "The alternate unique identifier corresponds to more than one existing records. Alternate unique identifier query: <%= alternateIdQuery %>"
+  },
+  "RESTORE_BACKUP_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Failed to restore backup"
+  },
+  "MIGRATE_DATABASE_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Failed to migrate database"
   }
 }

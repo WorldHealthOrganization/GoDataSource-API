@@ -4,6 +4,14 @@
     "LNG_COMMON_LABEL_SAVING": {
       "translation": "Saving...",
       "section": "uiCommonLabels"
+    },
+    "LNG_API_ERROR_CODE_RESTORE_BACKUP_FAILED": {
+      "translation": "Failed to restore backup",
+      "section": "uiAPIErrors"
+    },
+    "LNG_API_ERROR_CODE_MIGRATE_DATABASE_FAILED": {
+      "translation": "Failed to migrate database",
+      "section": "uiAPIErrors"
     }
   }
 }

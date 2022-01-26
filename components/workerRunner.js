@@ -481,6 +481,22 @@ module.exports = {
       );
     }
   },
+  installScripts: {
+    /**
+     * Migrate database
+     * @returns {Promise<any>}
+     */
+    migrateDatabase: function () {
+      return new Promise(function (resolve, reject) {
+        invokeWorkerMethod('installScripts', 'migrateDatabase', [], false, function (error, result) {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        });
+      });
+    },
+  },
   getContactFollowUpReport: function (
     outbreakId,
     startDate,

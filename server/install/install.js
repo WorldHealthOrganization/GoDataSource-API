@@ -100,9 +100,8 @@ const routines = {
   migrateDatabase: function () {
     console.log('Setting Up Database Migration...');
     [
-      require('./scripts/migrateDatabaseCollections'),
-      require('./scripts/migrateModelData'),
-      require('./scripts/updateAdminEmail')
+      // Note: Other scripts that need to be added in the migrate database flow should be added in the migrateDatabase module
+      require('./scripts/migrateDatabase')
     ].forEach(function (installScript) {
       runFunctions.push(installScript);
     });
