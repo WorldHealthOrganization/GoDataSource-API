@@ -331,6 +331,7 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                         }, {
                           $set: {
                             name: refItem.name,
+                            description: refItem.description,
                             disease: refItem.disease,
                             periodOfFollowup: refItem.periodOfFollowup,
                             frequencyOfFollowUp: refItem.frequencyOfFollowUp,
@@ -379,6 +380,7 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                         .insert({
                           _id: tempItemId,
                           name: refItem.name,
+                          description: refItem.description,
                           disease: refItem.disease,
                           periodOfFollowup: refItem.periodOfFollowup,
                           frequencyOfFollowUp: refItem.frequencyOfFollowUp,

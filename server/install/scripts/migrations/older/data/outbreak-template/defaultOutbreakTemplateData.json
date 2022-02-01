@@ -24518,6 +24518,7 @@
     {
       "id": "0ed35c12-e1ff-40a3-9ce7-188562abefc7",
       "name": "Covid-19 Household transmission",
+      "description": "Based on: Household transmission investigation protocol for coronavirus disease 2019 (COVID-19), WHO",
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_2019_N_CO_V",
       "periodOfFollowup": 28,
       "frequencyOfFollowUpPerDay": 1,
@@ -33596,6 +33597,7 @@
     {
       "id": "09df8424-03bc-45ea-b341-a03bb2a72e9f",
       "name": "SARS-CoV-2",
+      "description": "Based on: Contact tracing in the context of COVID-19, WHO Interim Guidance and Revised case report form (COVID-19), WHO",
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_2019_N_CO_V",
       "periodOfFollowup": 14,
       "frequencyOfFollowUpPerDay": 1,
@@ -34632,6 +34634,7 @@
     {
       "id": "7a212d81-896b-4301-95b6-e726e1300696",
       "name": "SARS-CoV-2 FFX",
+      "description": "Based on: First few X cases and contacts (FFX) investigation protocol for coronavirus disease 2019 (COVID-19), WHO",
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_2019_N_CO_V",
       "periodOfFollowup": 21,
       "frequencyOfFollowUpPerDay": 1,

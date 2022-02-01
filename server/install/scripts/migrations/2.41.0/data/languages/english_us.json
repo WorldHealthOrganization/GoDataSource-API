@@ -8,6 +8,14 @@
     "LNG_API_ERROR_CODE_MIGRATE_DATABASE_FAILED": {
       "translation": "Failed to migrate database",
       "section": "uiAPIErrors"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DESCRIPTION": {
+      "translation": "Description",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
+      "translation": "",
+      "section": "uiOutbreakTemplateFields"
     }
   }
 }
