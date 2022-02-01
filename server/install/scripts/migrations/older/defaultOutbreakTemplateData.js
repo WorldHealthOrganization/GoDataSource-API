@@ -315,6 +315,7 @@ function run(callback) {
                   updateTemplateModel
                     .updateAttributes({
                       name: data.name,
+                      description: data.description,
                       disease: data.disease,
                       periodOfFollowup: data.periodOfFollowup,
                       frequencyOfFollowUp: data.frequencyOfFollowUp,
@@ -367,6 +368,7 @@ function run(callback) {
                     .create(Object.assign({
                       id: newTemplateItem.id,
                       name: newTemplateItem.name,
+                      description: newTemplateItem.description,
                       disease: newTemplateItem.disease,
                       periodOfFollowup: newTemplateItem.periodOfFollowup,
                       frequencyOfFollowUp: newTemplateItem.frequencyOfFollowUp,

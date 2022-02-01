@@ -69,6 +69,7 @@ function run(callback) {
         exportData.outbreakTemplates.push({
           id: item.id,
           name: item.name,
+          description: item.description,
           disease: item.disease,
           periodOfFollowup: item.periodOfFollowup,
           frequencyOfFollowUp: item.frequencyOfFollowUp,
