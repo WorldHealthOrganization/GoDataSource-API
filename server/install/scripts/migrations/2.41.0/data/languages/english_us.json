@@ -16,6 +16,9 @@
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
       "translation": "",
       "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": {
+      "translation": "Population Count"
     }
   }
 }
