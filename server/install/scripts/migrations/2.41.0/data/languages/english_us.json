@@ -19,6 +19,34 @@
     },
     "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": {
       "translation": "Population Count"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
+      "translation": "Hello {{userName}}!",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": {
+      "translation": "Forgot your password?",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3": {
+      "translation": "To reset your password please follow the link below:",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5": {
+      "translation": "If you suspect someone may have unauthorised access to your account, we suggest you change your password as a precaution by visiting {{changePassURL}}.",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6": {
+      "translation": "Thanks,",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7": {
+      "translation": "GoData Team",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": {
+      "translation": "Instructions for changing your GoData password",
+      "section": "passwordReset"
     }
   }
 }
