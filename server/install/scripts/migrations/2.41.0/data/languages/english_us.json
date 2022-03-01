@@ -48,8 +48,47 @@
       "translation": "Instructions for changing your Go.Data password",
       "section": "passwordReset"
     },
-    "LNG_OUTBREAK_FIELD_LABEL_START_DATE": {
-      "translation": "Start date"
+    "LNG_PAGE_SET_SECURITY_QUESTIONS_TAB_SECURITY_QUESTIONS_TITLE": {
+      "translation": "Security questions"
+    },
+    "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
+      "translation": "Filter by"
+    },
+    "LNG_PAGE_CLOUD_BACKUP_TITLE": {
+      "translation": "Cloud backup"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORT_LABEL": {
+      "translation": "Epi curve"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": {
+      "translation": "Epi curve"
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
+    },
+    "LNG_CASE_FIELD_LABEL_NOT_A_CASE": {
+      "translation": "Not a Case"
+    },
+    "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
+      "translation": "Lab results"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_QUESTIONNAIRE_LAB_RESULT_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_LAYOUT_MENU_ITEM_GANTT_CHART": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_DASHBOARD_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_TITLE": {
+      "translation": "Gantt chart"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
       "translation": "Phone number"
@@ -57,140 +96,26 @@
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
       "translation": "Create snapshot"
     },
-    "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_CHECK_ALL": {
-      "translation": "Check all"
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
+      "translation": "Create snapshot"
     },
-    "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_TOOLTIP": {
-      "translation": "Bulk actions"
+    "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID": {
+      "translation": "Geographical level"
     },
-    "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_UNCHECK_ALL": {
-      "translation": "Uncheck all"
-    },
-    "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE_ALL": {
-      "translation": "Collapse all"
-    },
-    "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND_ALL": {
-      "translation": "Expand all"
-    },
-    "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
-      "translation": "Lab results"
-    },
-    "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CASE_LAB_RESULTS_QUESTIONNAIRE": {
-      "translation": "Lab results form"
-    },
-    "LNG_LAYOUT_MENU_ITEM_GANTT_CHART": {
-      "translation": "Gantt chart"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG": {
+    "LNG_LAYOUT_MENU_ITEM_AUDIT_LOG_LABEL": {
       "translation": "Audit logs"
     },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG_DESCRIPTION": {
-      "translation": "Audit logs permissions"
+    "LNG_PAGE_LIST_AUDIT_LOGS_TITLE": {
+      "translation": "Audit logs"
     },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER": {
-      "translation": "Upstream servers"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER_DESCRIPTION": {
-      "translation": "Upstream servers permissions"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS": {
-      "translation": "System settings"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS_DESCRIPTION": {
-      "translation": "System settings permissions"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS": {
-      "translation": "System settings - view"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS": {
-      "translation": "System settings - modify"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA": {
-      "translation": "Reference data"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA_DESCRIPTION": {
-      "translation": "Reference data permissions ( No permissions are required to access reference item information through the website. These permissions are required only if you want to manage reference data records )"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY": {
-      "translation": "Reference data - list categories"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY_ITEM": {
-      "translation": "Reference data - list category items"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_REFERENCE_DATA_CATEGORY_ITEM": {
-      "translation": "Reference data - create category item"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_REFERENCE_DATA_CATEGORY_ITEM": {
-      "translation": "Reference data - modify category item"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_REFERENCE_DATA_CATEGORY_ITEM": {
-      "translation": "Reference data - delete category item"
-    },
-    "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
-      "translation": "Filter by"
-    },
-    "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
-      "translation": "Contact daily follow-up status"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {
-      "translation": "Institution name"
-    },
-    "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_TYPE": {
-      "translation": "Map type"
-    },
-    "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE": {
-      "translation": "Map type"
-    },
-    "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
-      "translation": "Pregnancy status"
-    },
-    "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
-      "translation": "Vaccines received"
-    },
-    "LNG_CONTACT_FIELD_LABEL_VACCINE": {
-      "translation": "Vaccine"
-    },
-    "LNG_CONTACT_FIELD_LABEL_VACCINE_DATE": {
-      "translation": "Vaccine date"
-    },
-    "LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
-      "translation": "Vaccine status"
-    },
-    "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
-      "translation": "Pregnancy status"
-    },
-    "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
-      "translation": "Exposure date ({{exposureName}})"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {
-      "translation": "Vaccine status"
-    },
-    "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
-      "translation": "Pregnancy status"
-    },
-    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_DATE": {
-      "translation": "Vaccine date"
-    },
-    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
-      "translation": "Vaccine status"
-    },
-    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
-      "translation": "Pregnancy status"
-    },
-    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
-      "translation": "Exposure date ( {{exposureName}} )"
-    },
-    "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL": {
-      "translation": "Location geographical Level"
-    },
-    "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL": {
-      "translation": "Geographical level"
+    "LNG_AUDIT_LOG_FIELD_LABEL_MODEL_NAME": {
+      "translation": "Record name"
     },
     "LNG_AUDIT_LOG_FIELD_LABEL_IP_ADDRESS": {
       "translation": "IP address"
     },
-    "LNG_AUDIT_LOG_FIELD_LABEL_MODEL_NAME": {
-      "translation": "Record name"
+    "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": {
+      "translation": "Upstream servers"
     },
     "LNG_SYSTEM_DEVICE_FIELD_LABEL_PHYSICAL_DEVICE_ID": {
       "translation": "Physical device ID"
@@ -201,14 +126,8 @@
     "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_COMPLETION_DATE": {
       "translation": "Action completion date"
     },
-    "LNG_PAGE_LIST_SYSTEM_SYNC_LOGS_TITLE": {
-      "translation": "Sync logs"
-    },
     "LNG_BACKUP_FIELD_LABEL_DATE": {
-      "translation": "Start Time (UTC)"
-    },
-    "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": {
-      "translation": "Upstream servers"
+      "translation": "Start time (UTC)"
     }
   }
 }
