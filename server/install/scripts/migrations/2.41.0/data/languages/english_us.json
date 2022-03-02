@@ -67,7 +67,7 @@
       "translation": "Assigned user"
     },
     "LNG_CASE_FIELD_LABEL_NOT_A_CASE": {
-      "translation": "Not a Case"
+      "translation": "Not a case"
     },
     "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
       "translation": "Lab results"
@@ -128,6 +128,66 @@
     },
     "LNG_BACKUP_FIELD_LABEL_DATE": {
       "translation": "Start time (UTC)"
+    },
+    "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": {
+      "translation": "Burial place name"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_RELATION": {
+      "translation": "Context of exposure"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+      "translation": "Snapshot filters"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_OF_CONTACTS": {
+      "translation": "Show contacts of contacts"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab variant / Strain colour"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact daily follow-up status"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact final follow-up status"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL": {
+      "translation": "Location geographical level"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_BACKUP_MODULE_LABEL_SYSTEM_CONFIGURATION": {
+      "translation": "System configuration"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+      "translation": "Turn on/off automatic backups"
     }
   }
 }
