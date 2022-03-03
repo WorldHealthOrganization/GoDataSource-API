@@ -188,6 +188,9 @@
     },
     "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
       "translation": "Turn on/off automatic backups"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_NAME_COLOR_TITLE": {
+      "translation": "Label colour"
     }
   }
 }
