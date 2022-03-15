@@ -3030,10 +3030,15 @@
         }
       ],
       "description": "Export filtered list of cases",
-      "http": {
-        "verb": "get",
-        "path": "/cases/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/export"
+        }, {
+          "verb": "post",
+          "path": "/cases/export"
+        }
+      ]
     },
     "prototype.exportFilteredEvents": {
       "accepts": [
