@@ -229,10 +229,15 @@
         }
       ],
       "description": "Export filtered list of reference data",
-      "http": {
-        "verb": "get",
-        "path": "/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
     },
     "importImportableReferenceDataFileUsingMap": {
       "accepts": [

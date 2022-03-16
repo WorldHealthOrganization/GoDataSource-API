@@ -315,10 +315,15 @@
         }
       ],
       "description": "Export filtered list of users",
-      "http": {
-        "verb": "get",
-        "path": "/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
     },
     "import": {
       "accepts": [

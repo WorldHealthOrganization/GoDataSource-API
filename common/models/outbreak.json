@@ -3093,10 +3093,15 @@
         }
       ],
       "description": "Export filtered list of events",
-      "http": {
-        "verb": "get",
-        "path": "/events/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/events/export"
+        }, {
+          "verb": "post",
+          "path": "/events/export"
+        }
+      ]
     },
     "prototype.getBarsTransmissionChains": {
       "accepts": [
@@ -3305,10 +3310,15 @@
         }
       ],
       "description": "Export filtered list of relationships",
-      "http": {
-        "verb": "get",
-        "path": "/relationships/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/relationships/export"
+        }, {
+          "verb": "post",
+          "path": "/relationships/export"
+        }
+      ]
     },
     "prototype.restoreContactFollowUp": {
       "accepts": [
@@ -4820,10 +4830,15 @@
         }
       ],
       "description": "Export filtered list of contacts",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts/export"
+        }
+      ]
     },
     "prototype.findPeopleInCluster": {
       "accepts": [
@@ -5084,10 +5099,15 @@
         }
       ],
       "description": "Export filtered list of follow ups",
-      "http": {
-        "verb": "get",
-        "path": "/follow-ups/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/follow-ups/export"
+        }, {
+          "verb": "post",
+          "path": "/follow-ups/export"
+        }
+      ]
     },
     "prototype.exportExistingEmptyCaseInvestigation": {
       "accepts": [
@@ -6843,10 +6863,15 @@
         }
       ],
       "description": "Export a pdf file with the daily contact follow-up form, for every relevant contact (or case follow-ups registered as a contact), from a specific day",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/daily-followup-form/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts/daily-followup-form/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts/daily-followup-form/export"
+        }
+      ]
     },
     "prototype.restoreCaseLabResult": {
       "accepts": [
@@ -6928,10 +6953,15 @@
         }
       ],
       "description": "Export pdf containing contacts to be seen by place/case",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/daily-list/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts/daily-list/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts/daily-list/export"
+        }
+      ]
     },
     "prototype.exportRangeListOfContacts": {
       "accepts": [
@@ -7827,10 +7857,15 @@
         }
       ],
       "description": "Export filtered list of lab results",
-      "http": {
-        "verb": "get",
-        "path": "/lab-results/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/lab-results/export"
+        }, {
+          "verb": "post",
+          "path": "/lab-results/export"
+        }
+      ]
     },
     "prototype.importImportableRelationshipsFileUsingMap": {
       "accepts": [
@@ -8312,10 +8347,15 @@
         }
       ],
       "description": "Export filtered list of contacts of contacts",
-      "http": {
-        "verb": "get",
-        "path": "/contacts-of-contacts/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts-of-contacts/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts-of-contacts/export"
+        }
+      ]
     },
     "prototype.importImportableContactsOfContactsFileUsingMap": {
       "accepts": [
@@ -8598,10 +8638,15 @@
         }
       ],
       "description": "Export filtered list of lab results",
-      "http": {
-        "verb": "get",
-        "path": "/cases/:nk/lab-results/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/:nk/lab-results/export"
+        }, {
+          "verb": "post",
+          "path": "/cases/:nk/lab-results/export"
+        }
+      ]
     },
     "prototype.exportFilteredContactLabResults": {
       "accepts": [
@@ -8661,10 +8706,15 @@
         }
       ],
       "description": "Export filtered list of lab results",
-      "http": {
-        "verb": "get",
-        "path": "/contacts/:nk/lab-results/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts/:nk/lab-results/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts/:nk/lab-results/export"
+        }
+      ]
     },
     "prototype.contactOfContactDossier": {
       "accepts": [
