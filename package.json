@@ -51,7 +51,7 @@
     "loopback-component-explorer": "6.3.0",
     "loopback-connector-mongodb": "3.8.0",
     "mkdirp": "0.5.1",
-    "moment": "2.22.2",
+    "moment": "2.29.2",
     "moment-range": "^4.0.2",
     "mongodb": "^3.1.10",
     "p-queue": "^3.0.0",
