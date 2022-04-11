@@ -191,6 +191,15 @@
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_NAME_COLOR_TITLE": {
       "translation": "Label colour"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS_ALL": {
+      "translation": "All fields groups"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS": {
+      "translation": "Fields groups"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
     }
   }
 }
