@@ -19,6 +19,14 @@
     },
     "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": {
       "translation": "Population Count"
+    },
+    "LNG_APP_PAGE_OUTBREAKS": {
+      "translation": "Outbreaks",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_OUTBREAK_TEMPLATES": {
+      "translation": "Outbreak templates",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
