@@ -27,6 +27,10 @@
     "LNG_APP_PAGE_OUTBREAK_TEMPLATES": {
       "translation": "Outbreak templates",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_CLUSTERS": {
+      "translation": "Clusters",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
