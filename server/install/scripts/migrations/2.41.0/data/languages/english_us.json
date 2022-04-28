@@ -39,6 +39,10 @@
     "LNG_APP_PAGE_ENTITY_NOT_DUPLICATES": {
       "translation": "Records marked as not duplicates",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_ROLES": {
+      "translation": "Roles",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
