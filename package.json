@@ -29,7 +29,7 @@
     "ajv": "6.5.4",
     "alphanum-sort": "1.0.2",
     "archiver": "^3.0.0",
-    "async": "2.6.1",
+    "async": "2.6.4",
     "bcrypt": "3.0.8",
     "compression": "1.7.3",
     "connect-mongo": "^3.2.0",
