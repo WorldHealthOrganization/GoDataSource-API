@@ -47,6 +47,10 @@
     "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_DELETE_SUCCESS_MESSAGE": {
       "translation": "Item removed",
       "section": "uiMarkedAsNotDuplicatesListPage"
+    },
+    "LNG_APP_PAGE_RELATIONSHIPS": {
+      "translation": "Relationships",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
