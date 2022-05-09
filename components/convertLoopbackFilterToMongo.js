@@ -72,6 +72,8 @@ function convert(loopbackFilter) {
       .replace(/"gt"/g, '"$gt"')
       .replace(/"gte"/g, '"$gte"')
       .replace(/"regexp"/g, '"$regex"')
+      .replace(/"like"/g, '"$regex"')
+      .replace(/"options"/g, '"$options"')
       .replace(/"eq"/g, '"$eq"')
       .replace(/"neq"/g, '"$ne"')
       .replace(/"ne"/g, '"$ne"')
