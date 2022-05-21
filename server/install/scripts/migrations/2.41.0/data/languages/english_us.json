@@ -52,6 +52,10 @@
       "translation": "Relationships",
       "section": "uiSavedFiltersForPagesLabels"
     },
+    "LNG_APP_PAGE_COT_BAR_CHART": {
+      "translation": "COT Bar Chart",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
     "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
       "translation": "Hello {{userName}}!",
       "section": "passwordReset"
