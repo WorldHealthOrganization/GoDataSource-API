@@ -51,6 +51,187 @@
     "LNG_APP_PAGE_RELATIONSHIPS": {
       "translation": "Relationships",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
+      "translation": "Hello {{userName}}!",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": {
+      "translation": "Forgot your password?",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3": {
+      "translation": "To reset your password please follow the link below:",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5": {
+      "translation": "If you suspect someone may have unauthorised access to your account, we suggest you change your password as a precaution by visiting {{changePassURL}}.",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6": {
+      "translation": "Thanks,",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7": {
+      "translation": "Go.Data Team",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": {
+      "translation": "Instructions for changing your Go.Data password",
+      "section": "passwordReset"
+    },
+    "LNG_PAGE_SET_SECURITY_QUESTIONS_TAB_SECURITY_QUESTIONS_TITLE": {
+      "translation": "Security questions"
+    },
+    "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
+      "translation": "Filter by"
+    },
+    "LNG_PAGE_CLOUD_BACKUP_TITLE": {
+      "translation": "Cloud backup"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORT_LABEL": {
+      "translation": "Epi curve"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": {
+      "translation": "Epi curve"
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
+    },
+    "LNG_CASE_FIELD_LABEL_NOT_A_CASE": {
+      "translation": "Not a case"
+    },
+    "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
+      "translation": "Lab results"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_QUESTIONNAIRE_LAB_RESULT_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_LAYOUT_MENU_ITEM_GANTT_CHART": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_DASHBOARD_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_TITLE": {
+      "translation": "Gantt chart"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
+      "translation": "Phone number"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
+      "translation": "Create snapshot"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
+      "translation": "Create snapshot"
+    },
+    "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID": {
+      "translation": "Geographical level"
+    },
+    "LNG_LAYOUT_MENU_ITEM_AUDIT_LOG_LABEL": {
+      "translation": "Audit logs"
+    },
+    "LNG_PAGE_LIST_AUDIT_LOGS_TITLE": {
+      "translation": "Audit logs"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_MODEL_NAME": {
+      "translation": "Record name"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_IP_ADDRESS": {
+      "translation": "IP address"
+    },
+    "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": {
+      "translation": "Upstream servers"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_PHYSICAL_DEVICE_ID": {
+      "translation": "Physical device ID"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_START_DATE": {
+      "translation": "Action start date"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_COMPLETION_DATE": {
+      "translation": "Action completion date"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DATE": {
+      "translation": "Start time (UTC)"
+    },
+    "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": {
+      "translation": "Burial place name"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_RELATION": {
+      "translation": "Context of exposure"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+      "translation": "Snapshot filters"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_OF_CONTACTS": {
+      "translation": "Show contacts of contacts"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab variant / Strain colour"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact daily follow-up status"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact final follow-up status"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL": {
+      "translation": "Location geographical level"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_BACKUP_MODULE_LABEL_SYSTEM_CONFIGURATION": {
+      "translation": "System configuration"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+      "translation": "Turn on/off automatic backups"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_NAME_COLOR_TITLE": {
+      "translation": "Label colour"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS_ALL": {
+      "translation": "All fields groups"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS": {
+      "translation": "Fields groups"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
     }
   }
 }
