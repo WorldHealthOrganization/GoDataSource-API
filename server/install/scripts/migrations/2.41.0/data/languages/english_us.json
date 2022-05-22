@@ -53,7 +53,11 @@
       "section": "uiSavedFiltersForPagesLabels"
     },
     "LNG_APP_PAGE_COT_BAR_CHART": {
-      "translation": "COT Bar Chart",
+      "translation": "COT bar chart",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_GANTT_CHART": {
+      "translation": "Gantt chart",
       "section": "uiSavedFiltersForPagesLabels"
     },
     "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
