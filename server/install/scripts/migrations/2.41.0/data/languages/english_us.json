@@ -60,6 +60,10 @@
       "translation": "Gantt chart",
       "section": "uiSavedFiltersForPagesLabels"
     },
+    "LNG_APP_PAGE_DASHBOARD": {
+      "translation": "Dashboard",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
     "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
       "translation": "Hello {{userName}}!",
       "section": "passwordReset"
