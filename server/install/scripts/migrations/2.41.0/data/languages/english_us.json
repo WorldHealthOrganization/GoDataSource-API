@@ -60,6 +60,10 @@
       "translation": "Gantt chart",
       "section": "uiSavedFiltersForPagesLabels"
     },
+    "LNG_APP_PAGE_COT_GRAPH": {
+      "translation": "COT graph",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
     "LNG_APP_PAGE_DASHBOARD": {
       "translation": "Dashboard",
       "section": "uiSavedFiltersForPagesLabels"
