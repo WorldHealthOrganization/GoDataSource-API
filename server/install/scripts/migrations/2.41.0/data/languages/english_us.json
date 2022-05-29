@@ -64,6 +64,10 @@
       "translation": "COT graph",
       "section": "uiSavedFiltersForPagesLabels"
     },
+    "LNG_APP_PAGE_CASE_COUNT_MAP": {
+      "translation": "Case count map",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
     "LNG_APP_PAGE_DASHBOARD": {
       "translation": "Dashboard",
       "section": "uiSavedFiltersForPagesLabels"
