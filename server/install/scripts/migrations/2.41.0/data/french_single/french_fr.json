@@ -1,0 +1,38 @@
+{
+  "id": "french_fr",
+  "tokens": {
+    "LNG_CASE_FIELD_LABEL_DATE_BECOME_CASE": {
+      "translation": "Date de déclaration du cas"
+    },
+    "LNG_CONTACT_FIELD_LABEL_WAS_CASE": {
+      "translation": "Était un cas"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_OUTBREAK": {
+      "translation": "Epidémies"
+    },
+    "LNG_SYNC_PACKAGE_EXPORT_TYPE_FIELD_LABEL_OUTBREAK": {
+      "translation": "Epidémies"
+    },
+    "LNG_MODULE_LABEL_OUTBREAK": {
+      "translation": "Epidémies"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_IMPORT_FILE": {
+      "translation": "Importer le fichier"
+    },
+    "LNG_PAGE_LIST_LOCATIONS_IMPORT_HIERARCHICAL_BUTTON": {
+      "translation": "Importer des emplacements hiérarchiques"
+    },
+    "LNG_PAGE_LIST_OUTBREAKS_IMPORT_BUTTON": {
+      "translation": "Importer de données d'épidémie"
+    },
+    "LNG_PAGE_IMPORT_HIERARCHICAL_LOCATIONS_TITLE": {
+      "translation": "Importer des emplacements hiérarchiques"
+    },
+    "LNG_PAGE_IMPORT_OUTBREAK_DATA_TITLE": {
+      "translation": "Importer de données d'épidémie"
+    },
+    "LNG_CASE_FIELD_LABEL_OUTCOME_ID": {
+      "translation": "Identifiant du résultat"
+    }
+  }
+}
