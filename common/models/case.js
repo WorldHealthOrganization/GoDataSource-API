@@ -1200,6 +1200,9 @@ module.exports = function (Case) {
             data = data && data.length > 0 ?
               data[0] : {};
 
+            // cleanup
+            delete data._id;
+
             // add missing keys
             refItems.forEach((item) => {
               if (data[item.key] === undefined) {
