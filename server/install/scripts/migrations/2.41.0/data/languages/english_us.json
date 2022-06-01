@@ -262,6 +262,22 @@
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT": {
       "translation": "Event - export"
+    },
+    "LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS": {
+      "translation": "Case investigation status",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED": {
+      "translation": "Date of investigation completed",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
     }
   }
 }

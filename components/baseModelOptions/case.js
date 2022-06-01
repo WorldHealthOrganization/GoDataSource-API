@@ -104,6 +104,8 @@ const constants = {
     'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL',
     'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
     'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME',
+    'investigationStatus': 'LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS',
+    'dateInvestigationCompleted': 'LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED',
     'vaccinesReceived': 'LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED',
     'vaccinesReceived[].vaccine': 'LNG_CASE_FIELD_LABEL_VACCINE',
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
