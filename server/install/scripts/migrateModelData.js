@@ -236,6 +236,9 @@ const migrationVersions = [{
     actions: [{
       name: 'createUpdateLanguageTokens',
       buildNo: 23
+    }, {
+      name: 'createUpdateSingleFrenchLanguageTokens',
+      buildNo: 1
     }]
   }]
 }];
