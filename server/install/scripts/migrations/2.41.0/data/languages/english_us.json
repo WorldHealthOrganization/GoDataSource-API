@@ -256,6 +256,12 @@
     },
     "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
       "translation": "Assigned user"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT": {
+      "translation": "Event - import"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT": {
+      "translation": "Event - export"
     }
   }
 }
