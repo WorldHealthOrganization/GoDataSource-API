@@ -232,6 +232,12 @@ const migrationVersions = [{
 }, {
   version: '2.41.0',
   scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }]
+  }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',

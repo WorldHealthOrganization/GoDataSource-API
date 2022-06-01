@@ -1,0 +1,51 @@
+{
+  "translations": {
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_IN_PROGRESS": {
+      "translation": "In progress",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryInvestigationStatus"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_REACHED": {
+      "translation": "Reached but not complying",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryInvestigationStatus"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_NOT_REACHED": {
+      "translation": "Couldn't reach case",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryInvestigationStatus"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_COMPLETE": {
+      "translation": "Case investigation complete",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryInvestigationStatus"
+    }
+  },
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_IN_PROGRESS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_IN_PROGRESS"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_REACHED",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_REACHED"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_NOT_REACHED",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_NOT_REACHED"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_COMPLETE",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_COMPLETE"
+    }
+  ]
+}
