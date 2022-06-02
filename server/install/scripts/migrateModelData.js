@@ -235,16 +235,16 @@ const migrationVersions = [{
     fileName: 'referenceData.js',
     actions: [{
       name: 'createUpdateDefaultReferenceData',
-      buildNo: 2
+      buildNo: 3
     }]
   }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 26
+      buildNo: 27
     }, {
       name: 'createUpdateSingleFrenchLanguageTokens',
-      buildNo: 4
+      buildNo: 5
     }]
   }]
 }];
