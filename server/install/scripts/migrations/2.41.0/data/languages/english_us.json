@@ -293,7 +293,10 @@
     },
     "LNG_LAYOUT_MENU_VERSION_LABEL": {
       "translation": "Go.Data version: {{version}} - build {{build}}",
-      "section": "uiGenericLayout"
+      "section": "uiGenericLayout",
+      "modules": [
+        "unauthenticated"
+      ]
     },
     "LNG_LAYOUT_MENU_DATA_LABEL": {
       "translation": "DATA",
@@ -639,6 +642,10 @@
     },
     "LNG_PAGE_LIST_LOCATIONS_ACTION_FIND_LOCATION": {
       "translation": "Search for a location"
+    },
+    "LNG_PAGE_MODIFY_CLUSTER_TAB_DETAILS_TITLE": {
+      "translation": "Details",
+      "section": "uiViewModifyClusterPage"
     }
   }
 }
