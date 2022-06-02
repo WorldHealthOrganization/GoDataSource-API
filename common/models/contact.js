@@ -347,6 +347,7 @@ module.exports = function (Contact) {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    investigationStatus: 'LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
@@ -400,6 +401,15 @@ module.exports = function (Contact) {
       modelName: 'team',
       collectionName: 'team',
       labelProperty: 'name'
+    },
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
     }
   };
 

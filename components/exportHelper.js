@@ -3445,124 +3445,24 @@ function exportFilteredModelsList(
                 null;
             })
 
-            // aggregate
-            .then(() => {
-              // since there is no #hint in mongo 3.2
-              // little trick to force a specific index - more exactly pk index
-              // #TODO - replace with $hint after mongodb upgraded
-              // prepare records that will be exported
-              return exportDataCollection
-                .aggregate(aggregateFilter, {
-                  explain: true,
-                  allowDiskUse: true
-                })
-                .toArray()
-                .then((data) => {
-                  // if we have an id condition, then alter request to force our index to be used
-                  if (
-                    data &&
-                    data.length > 0 &&
-                    data[0].stages &&
-                    data[0].stages.length > 0 &&
-                    data[0].stages[0].$cursor &&
-                    data[0].stages[0].$cursor.queryPlanner &&
-                    data[0].stages[0].$cursor.queryPlanner.parsedQuery
-                  ) {
-                    // get parsed query
-                    const parsedQuery = data[0].stages[0].$cursor.queryPlanner.parsedQuery;
-
-                    // check if we have an id query, only if we have at least 2 conditions we should do this
-                    if (
-                      parsedQuery.$and &&
-                      parsedQuery.$and.length > 1
-                    ) {
-                      // search for id condition
-                      for (let andIndex = 0; andIndex < parsedQuery.$and.length; andIndex++) {
-                        const condition = parsedQuery.$and[andIndex];
-                        if (condition._id) {
-                          // remove first match by id, since the next ones will be done afterwards
-                          // - this way it will still work to do an AND between prefilters
-                          const removeFirstIdThatMatches = (items) => {
-                            if (Array.isArray(items)) {
-                              items.forEach((item) => {
-                                // stop on first find
-                                if (removeFirstIdThatMatches(item) === false) {
-                                  return false;
-                                }
-                              });
-                            } else if (
-                              items &&
-                              typeof items === 'object'
-                            ) {
-                              _.each(items, (item, key) => {
-                                if (
-                                  key === '_id' &&
-                                  _.isEqual(
-                                    item,
-                                    condition._id
-                                  )
-                                ) {
-                                  // remove _id
-                                  delete items[key];
-
-                                  // found - you can stop
-                                  return false;
-                                } else if (
-                                  Array.isArray(item) || (
-                                    item &&
-                                    typeof item === 'object'
-                                  )
-                                ) {
-                                  // stop on first find
-                                  if (removeFirstIdThatMatches(item) === false) {
-                                    return false;
-                                  }
-                                }
-                              });
-                            }
-                          };
-
-                          // remove first match by id, since the next ones will be done afterwards
-                          removeFirstIdThatMatches(aggregateFilter);
-
-                          // force id index use since we will have less records by filtering by pk instead of any other filter index
-                          // - skip needed, otherwise the 2 consecutive matches are merged and ....
-                          aggregateFilter.splice(
-                            0,
-                            0,
-                            {
-                              $match: condition
-                            }, {
-                              $skip: 0
-                            }
-                          );
-
-                          // no need to continue
-                          break;
-                        }
-                      }
-                    }
-                  }
-                });
-            })
-
-            // save aggregate filter
-            .then(() => {
-              return sheetHandler.saveAggregateFilter ?
-                sheetHandler.updateExportLog({
-                  aggregateFilter: JSON.stringify(aggregateFilter),
-                  updatedAt: new Date()
-                }) :
-                null;
-            })
-
             // retrieve records that will be exported
             .then(() => {
+              // add hint to _id index ?
+              const addIDHint = dataFilter && dataFilter.where && JSON.stringify(dataFilter.where).indexOf('"_id"') > -1;
+
               // prepare records that will be exported
               return exportDataCollection
-                .aggregate(aggregateFilter, {
-                  allowDiskUse: true
-                })
+                .aggregate(aggregateFilter,
+                  addIDHint ?
+                    {
+                      allowDiskUse: true,
+                      hint: {
+                        _id: 1
+                      }
+                    } : {
+                      allowDiskUse: true,
+                    }
+                )
                 .toArray()
                 .then(() => {
                   temporaryCollection = dbConn.collection(sheetHandler.temporaryCollectionName);

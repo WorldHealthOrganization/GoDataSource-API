@@ -39,6 +39,19 @@ module.exports = function (Event) {
     'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID'
   };
 
+  // used on importable file logic
+  Event.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
   // map language token labels for export fields group
   Event.exportFieldsGroup = {
     'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {

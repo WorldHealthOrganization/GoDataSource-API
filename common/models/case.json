@@ -103,6 +103,12 @@
       "type": "string",
       "required": true
     },
+    "investigationStatus": {
+      "type": "string"
+    },
+    "dateInvestigationCompleted": {
+      "type": "date"
+    },
     "riskLevel": {
       "type": "string"
     },

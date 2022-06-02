@@ -202,7 +202,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 19
+      buildNo: 18
     }, {
       name: 'createUpdateSingleFrenchLanguageTokens',
       buildNo: 1
@@ -232,10 +232,19 @@ const migrationVersions = [{
 }, {
   version: '2.41.0',
   scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 2
+    }]
+  }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 14
+      buildNo: 26
+    }, {
+      name: 'createUpdateSingleFrenchLanguageTokens',
+      buildNo: 4
     }]
   }]
 }];

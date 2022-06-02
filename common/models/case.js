@@ -238,6 +238,8 @@ module.exports = function (Case) {
         'riskReason',
         'dateBecomeContact',
         'dateBecomeCase',
+        'investigationStatus',
+        'dateInvestigationCompleted',
         'outcomeId',
         'dateOfOutcome',
         'transferRefused',
@@ -339,6 +341,8 @@ module.exports = function (Case) {
     'dateBecomeCase',
     'dateOfInfection',
     'dateOfOnset',
+    'investigationStatus',
+    'dateInvestigationCompleted',
     'outcomeId',
     'dateOfOutcome',
     'dateRanges',
@@ -354,6 +358,19 @@ module.exports = function (Case) {
   Case.locationFields = caseConstants.locationFields;
 
   Case.foreignKeyResolverMap = caseConstants.foreignKeyResolverMap;
+
+  // used on importable file logic
+  Case.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Case.nestedGeoPoints = [
@@ -1047,11 +1064,35 @@ module.exports = function (Case) {
     const dateLimitStartOfDay = app.utils.helpers.getDate(filter.flags ? filter.flags.date : undefined).toDate();
 
     // update filter for geographical restriction if needed
+    const refItems = [];
     return Case
       .addGeographicalRestrictions(
         options.remotingContext,
         filter.where
       )
+      .then((updatedFilter) => {
+        // retrieve reference data
+        return app.models.referenceData
+          .rawFind({
+            categoryId: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE'
+          }, {
+            projection: {
+              value: 1
+            }
+          })
+          .then((referenceEntries) => {
+            // map ref items
+            (referenceEntries || []).forEach((item) => {
+              refItems.push({
+                type: item.value,
+                key: item.value
+              });
+            });
+
+            // return updated filter
+            return updatedFilter;
+          });
+      })
       .then((updatedFilter) => {
         // update casesQuery if needed
         updatedFilter && (filter.where = updatedFilter);
@@ -1085,15 +1126,7 @@ module.exports = function (Case) {
         aggregateFilters.push(groupQuery);
 
         // count hospitalized & isolated
-        [
-          {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_HOSPITALIZATION',
-            key: 'hospitalized'
-          }, {
-            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_ISOLATION',
-            key: 'isolated'
-          }
-        ].forEach((dateRangeData) => {
+        refItems.forEach((dateRangeData) => {
           groupQuery.$group[dateRangeData.key] = {
             $sum: {
               $cond: {
@@ -1182,14 +1215,17 @@ module.exports = function (Case) {
           .then((data) => {
             // determine not hospitalized
             data = data && data.length > 0 ?
-              data[0] : {
-                hospitalized: 0,
-                isolated: 0,
-                total: 0
-              };
+              data[0] : {};
 
-            // determine not hospitalized
-            data.notHospitalized = data.total - data.hospitalized;
+            // cleanup
+            delete data._id;
+
+            // add missing keys
+            refItems.forEach((item) => {
+              if (data[item.key] === undefined) {
+                data[item.key] = 0;
+              }
+            });
 
             // finished
             return data;
