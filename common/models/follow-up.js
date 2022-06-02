@@ -223,6 +223,19 @@ module.exports = function (FollowUp) {
     }
   };
 
+  // used on importable file logic
+  FollowUp.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
   FollowUp.extendedForm = {
     template: 'contactFollowUpTemplate',
     containerProperty: 'questionnaireAnswers',
