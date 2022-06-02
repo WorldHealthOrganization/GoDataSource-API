@@ -359,6 +359,19 @@ module.exports = function (Case) {
 
   Case.foreignKeyResolverMap = caseConstants.foreignKeyResolverMap;
 
+  // used on importable file logic
+  Case.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Case.nestedGeoPoints = [
     'addresses[].geoLocation'

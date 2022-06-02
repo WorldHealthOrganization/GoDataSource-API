@@ -223,6 +223,19 @@ module.exports = function (ContactOfContact) {
     }
   };
 
+  // used on importable file logic
+  ContactOfContact.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
   ContactOfContact.exportFieldsOrder = [
     'id',
     'visualId',

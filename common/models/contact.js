@@ -401,6 +401,15 @@ module.exports = function (Contact) {
       modelName: 'team',
       collectionName: 'team',
       labelProperty: 'name'
+    },
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
     }
   };
 

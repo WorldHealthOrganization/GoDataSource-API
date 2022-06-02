@@ -1120,6 +1120,19 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
         });
       }
 
+      // construct projection
+      const lProjection = {};
+      if (typeof foreignKeyInfo.labelProperty === 'string') {
+        lProjection[foreignKeyInfo.labelProperty] = 1;
+      } else if (
+        Array.isArray(foreignKeyInfo.labelProperty)
+      ) {
+        foreignKeyInfo.labelProperty.forEach((lProperty) => {
+          lProjection[lProperty] = 1;
+        });
+      }
+
+
       // Note: This query will retrieve all data from the related model
       // depending on data quantity might cause javascript heap out of memory error
       // should be used only for models with limited number of instances
@@ -1129,16 +1142,16 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
         [
           query,
           {
-            projection: {
-              [foreignKeyInfo.labelProperty]: 1
-            }
+            projection: lProjection
           }
         ])
         .then(items => {
           return callback(null, items.map(item => {
             return {
               id: item.id,
-              label: item[foreignKeyInfo.labelProperty],
+              label: Array.isArray(foreignKeyInfo.labelProperty) ?
+                foreignKeyInfo.labelProperty.map((lProperty) => item[lProperty]).join(' ') :
+                item[foreignKeyInfo.labelProperty],
               value: item.id
             };
           }));
