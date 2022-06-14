@@ -1,0 +1,19 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY": {
+      "translation": "Category",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY_DESCRIPTION": {
+      "translation": "",
+      "section": "uiEventFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY": {
+      "translation": "Event category"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY_DESCRIPTION": {
+      "translation": ""
+    }
+  }
+}

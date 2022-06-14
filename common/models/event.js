@@ -36,7 +36,8 @@ module.exports = function (Event) {
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
-    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID'
+    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY'
   };
 
   // used on importable file logic
@@ -73,6 +74,7 @@ module.exports = function (Event) {
         'date',
         'dateOfReporting',
         'isDateOfReportingApproximate',
+        'eventCategory',
         'description',
         'responsibleUserId',
         'numberOfExposures',
@@ -129,6 +131,7 @@ module.exports = function (Event) {
     'date',
     'dateOfReporting',
     'isDateOfReportingApproximate',
+    'eventCategory',
     'description',
     'address'
   ];
@@ -136,6 +139,7 @@ module.exports = function (Event) {
   Event.referenceDataFieldsToCategoryMap = {
     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
+    eventCategory: 'LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY'
   };
 
   Event.referenceDataFields = Object.keys(Event.referenceDataFieldsToCategoryMap);

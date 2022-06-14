@@ -56,6 +56,9 @@
     "dateApproximate": {
       "type": "boolean"
     },
+    "eventCategory": {
+      "type": "string"
+    },
     "description": {
       "type": "string"
     },
