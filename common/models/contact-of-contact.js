@@ -223,6 +223,19 @@ module.exports = function (ContactOfContact) {
     }
   };
 
+  // used on importable file logic
+  ContactOfContact.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
   ContactOfContact.exportFieldsOrder = [
     'id',
     'visualId',
@@ -262,6 +275,7 @@ module.exports = function (ContactOfContact) {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    investigationStatus: 'LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
