@@ -40,6 +40,9 @@
     "path": "/auth/reset-password",
     "from": "no-reply@who.int"
   },
+  "passwordChange": {
+    "path": "/account/change-password"
+  },
   "captcha": {
     "login": false,
     "forgotPassword": false,

@@ -351,12 +351,24 @@ module.exports = function (User) {
       let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT');
       let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1');
       let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2');
+      let paragraph3 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3');
+      let paragraph4;
+      let paragraph5 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5');
+      let paragraph6 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6');
+      let paragraph7 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7');
 
-      // second parameter should also be resolved as a template
       // it contains the reset password url
       const config = JSON.parse(fs.readFileSync(path.resolve(`${__dirname}/../../server/config.json`)));
-      const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
-      paragraph2 = _.template(paragraph2, {interpolate: /{{([\s\S]+?)}}/g})({resetHref: `${url}?token=${info.accessToken.id}`});
+
+      const passwordChangePath = config.passwordChange && config.passwordChange.path ?
+        config.passwordChange.path :
+        '/account/change-password';
+      let userName = `${info.user.firstName} ${info.user.lastName}`;
+      let changePassURL = `${config.public.protocol}://${config.public.host}:${config.public.port}${passwordChangePath}`;
+
+      paragraph1 = _.template(paragraph1, {interpolate: /{{([\s\S]+?)}}/g})({userName: `${userName}`});
+      paragraph4 = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
+      paragraph5 = _.template(paragraph5, {interpolate: /{{([\s\S]+?)}}/g})({changePassURL: `${changePassURL}`});
 
       // load the html email template
       const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
@@ -365,7 +377,12 @@ module.exports = function (User) {
       let resolvedTemplate = template({
         heading: heading,
         paragraph1: paragraph1,
-        paragraph2: paragraph2
+        paragraph2: paragraph2,
+        paragraph3: paragraph3,
+        paragraph4: paragraph4,
+        paragraph5: paragraph5,
+        paragraph6: paragraph6,
+        paragraph7: paragraph7,
       });
 
       app.models.Email.send({
