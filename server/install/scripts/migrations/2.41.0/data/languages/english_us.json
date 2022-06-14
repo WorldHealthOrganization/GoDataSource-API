@@ -104,6 +104,9 @@
       "translation": "Instructions for changing your Go.Data password",
       "section": "passwordReset"
     },
+    "LNG_PAGE_SET_SECURITY_QUESTIONS_TAB_SECURITY_QUESTIONS_TITLE": {
+      "translation": "Security questions"
+    },
     "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
       "translation": "Filter by"
     },

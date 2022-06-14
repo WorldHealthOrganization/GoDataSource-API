@@ -360,8 +360,11 @@ module.exports = function (User) {
       // it contains the reset password url
       const config = JSON.parse(fs.readFileSync(path.resolve(`${__dirname}/../../server/config.json`)));
 
+      const passwordChangePath = config.passwordChange && config.passwordChange.path ?
+        config.passwordChange.path :
+        '/account/change-password';
       let userName = `${info.user.firstName} ${info.user.lastName}`;
-      let changePassURL = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordChange.path}`;
+      let changePassURL = `${config.public.protocol}://${config.public.host}:${config.public.port}${passwordChangePath}`;
 
       paragraph1 = _.template(paragraph1, {interpolate: /{{([\s\S]+?)}}/g})({userName: `${userName}`});
       paragraph4 = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
