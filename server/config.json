@@ -40,16 +40,13 @@
     "path": "/auth/reset-password",
     "from": "no-reply@who.int"
   },
-  "passwordChange": {
-    "path": "/account/change-password"
-  },
   "captcha": {
     "login": false,
     "forgotPassword": false,
     "resetPasswordQuestions": false
   },
   "logging": {
-    "level": "debug",
+    "level": "info",
     "maxSize": 10000000,
     "maxFiles": 10,
     "requestResponse": {
@@ -106,9 +103,9 @@
     "enabled": false,
     "whitelist": []
   },
-  "enableConfigRewrite": false,
+  "enableConfigRewrite": true,
   "authToken": {
-    "ttl": 60000
+    "ttl": 600
   },
   "session": {
     "appSId": "GoData",
@@ -186,7 +183,7 @@
     "containerPath": "./storage/files"
   },
   "cluster": {
-    "enabled": false,
+    "enabled": true,
     "processesNo": "max"
   },
   "demoInstance": {
