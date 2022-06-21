@@ -37,7 +37,8 @@ module.exports = function (Event) {
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
     'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
-    'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY'
+    'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY',
+    'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE'
   };
 
   // used on importable file logic
@@ -75,6 +76,7 @@ module.exports = function (Event) {
         'dateOfReporting',
         'isDateOfReportingApproximate',
         'eventCategory',
+        'endDate',
         'description',
         'responsibleUserId',
         'numberOfExposures',
@@ -132,6 +134,7 @@ module.exports = function (Event) {
     'dateOfReporting',
     'isDateOfReportingApproximate',
     'eventCategory',
+    'endDate',
     'description',
     'address'
   ];
