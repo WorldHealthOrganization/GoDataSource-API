@@ -59,6 +59,9 @@
     "eventCategory": {
       "type": "string"
     },
+    "endDate": {
+      "type": "date"
+    },
     "description": {
       "type": "string"
     },
