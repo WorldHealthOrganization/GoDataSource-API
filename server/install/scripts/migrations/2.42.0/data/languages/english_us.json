@@ -46,6 +46,10 @@
     "LNG_EVENT_FIELD_LABEL_END_DATE_DESCRIPTION": {
       "translation": "",
       "section": "uiEventFields"
+    },
+    "LNG_APP_PAGE_FOLLOW_UP_DASHBOARD": {
+      "translation": "Follow-up dashboard",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
