@@ -50,6 +50,69 @@
     "LNG_APP_PAGE_FOLLOW_UP_DASHBOARD": {
       "translation": "Follow-up dashboard",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_WHAT_TO_DO": {
+      "translation": "Do you want to create a new chain of transmission, replace the most recent snapshot or display the most recent one?",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_NOT_ACTIVE_OUTBREAK": {
+      "translation": "Can't create snapshot because selected outbreak is not the active one",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_PAGE_LABEL_FORMAT": {
+      "translation": "{{no}} of {{total}}",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_CHAIN_OPTIONS": {
+      "translation": "Chain options",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_LEGEND": {
+      "translation": "Legend",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_REFRESH_TITLE": {
+      "translation": "Refresh snapshot",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CREATE_NEW": {
+      "translation": "Create new",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_REPLACE_MOST_RECENT": {
+      "translation": "Update most recent",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD_MOST_RECENT": {
+      "translation": "Load most recent",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD": {
+      "translation": "Load",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_REFRESH": {
+      "translation": "Refresh",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_FILTER": {
+      "translation": "Filter",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_OPTION_CREATE_NEW": {
+      "translation": "Create new",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
+      "translation": "Nothing to display"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_START_DATE": {
+      "translation": "Start date",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_END_DATE": {
+      "translation": "End date",
+      "section": "uiRangeFollowUpsListPage"
     }
   }
 }
