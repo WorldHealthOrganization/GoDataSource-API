@@ -209,7 +209,15 @@ module.exports = function (ReferenceData) {
     'order': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER',
     'colorCode': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_COLOR',
     'active': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ACTIVE',
+    'geoLocation': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION',
+    'geoLocation.lat': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LAT',
+    'geoLocation.lng': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG'
   });
+
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  ReferenceData.nestedGeoPoints = [
+    'geoLocation'
+  ];
 
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
   ReferenceData.availableCategoriesMap = {};
@@ -493,6 +501,9 @@ module.exports = function (ReferenceData) {
 
     let checkInstanceUniqueness = Promise.resolve();
 
+    // normalize geo-points
+    normalizeGeolocationCoordinates(context);
+
     // get data from context
     const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(context);
     if (
@@ -591,7 +602,7 @@ module.exports = function (ReferenceData) {
                 }
 
                 // allow customizing some safe properties
-                const customizableProperties = ['iconId', 'colorCode', 'order', 'code'];
+                const customizableProperties = ['iconId', 'colorCode', 'order', 'code', 'geoLocation'];
 
                 // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
                 if (error.code === 'MODEL_IN_USE') {
@@ -621,6 +632,36 @@ module.exports = function (ReferenceData) {
       })
       .catch(next);
   });
+
+  /**
+   * Normalize GeoLocation Coordinates (make sure they are numbers)
+   * @param context
+   */
+  function normalizeGeolocationCoordinates(context) {
+    // if this is a new record
+    let entryInstance;
+    if (context.isNewInstance) {
+      // get instance data from the instance
+      entryInstance = context.instance;
+    } else {
+      // existing instance, we're interested only in what is modified
+      entryInstance = context.data;
+    }
+
+    // check if both coordinates are available and not numbers; make sure they are numbers
+    if (
+      entryInstance.geoLocation &&
+      entryInstance.geoLocation.lat &&
+      entryInstance.geoLocation.lng &&
+      (
+        isNaN(entryInstance.geoLocation.lat) ||
+        isNaN(entryInstance.geoLocation.lng)
+      )
+    ) {
+      entryInstance.geoLocation.lat = parseFloat(entryInstance.geoLocation.lat);
+      entryInstance.geoLocation.lng = parseFloat(entryInstance.geoLocation.lng);
+    }
+  }
 
   // add after save hooks
   ReferenceData.observe('after save', function (context, next) {

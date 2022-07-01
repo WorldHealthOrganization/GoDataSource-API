@@ -1835,6 +1835,7 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
     !modelInstance.address &&
     !modelInstance.addresses &&
     !modelInstance.fillLocation &&
+    !modelInstance.geoLocation &&
     (
       !customModelAddressField ||
       !_.get(modelInstance, customModelAddressField)
@@ -1848,7 +1849,9 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
   if (modelInstance.address) {
     addressesToUpdate = [modelInstance.address];
   } else {
-    addressesToUpdate = modelInstance.addresses;
+    addressesToUpdate = modelInstance.addresses ?
+      modelInstance.addresses :
+      [];
   }
 
   // do we need to convert fill location two ?
@@ -1857,6 +1860,14 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
     addressesToUpdate = [
       ...addressesToUpdate,
       modelInstance.fillLocation
+    ];
+  }
+
+  // do we need to convert geoLocation ?
+  if (!_.isEmpty(modelInstance.geoLocation)) {
+    addressesToUpdate = [
+      ...addressesToUpdate,
+      modelInstance
     ];
   }
 
