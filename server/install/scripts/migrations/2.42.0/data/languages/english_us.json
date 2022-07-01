@@ -115,7 +115,7 @@
       "section": "uiRangeFollowUpsListPage"
     },
     "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION": {
-      "translation": "Lat / Lng",
+      "translation": "Geo Location",
       "section": "uiReferenceDataEntryFields"
     },
     "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LAT": {
