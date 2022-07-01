@@ -1866,9 +1866,8 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
   // do we need to convert geoLocation ?
   if (!_.isEmpty(modelInstance.geoLocation)) {
     addressesToUpdate = [
-      ...addressesToUpdate, {
-        geoLocation: modelInstance.geoLocation
-      }
+      ...addressesToUpdate,
+      modelInstance
     ];
   }
 
