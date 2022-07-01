@@ -209,6 +209,9 @@ module.exports = function (ReferenceData) {
     'order': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ORDER',
     'colorCode': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_COLOR',
     'active': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ACTIVE',
+    'geoLocation': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION',
+    'geoLocation.lat': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LAT',
+    'geoLocation.lng': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG'
   });
 
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
