@@ -1849,7 +1849,9 @@ function covertAddressesGeoPointToLoopbackFormat(modelInstance = {}, customModel
   if (modelInstance.address) {
     addressesToUpdate = [modelInstance.address];
   } else {
-    addressesToUpdate = modelInstance.addresses;
+    addressesToUpdate = modelInstance.addresses ?
+      modelInstance.addresses :
+      [];
   }
 
   // do we need to convert fill location two ?
