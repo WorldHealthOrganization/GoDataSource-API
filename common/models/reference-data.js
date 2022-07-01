@@ -214,6 +214,11 @@ module.exports = function (ReferenceData) {
     'geoLocation.lng': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG'
   });
 
+  // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
+  ReferenceData.nestedGeoPoints = [
+    'geoLocation'
+  ];
+
   // keep a map of reference data available categories mapped by category id (for easy reference in relations)
   ReferenceData.availableCategoriesMap = {};
   ReferenceData.availableCategories.forEach(function (category) {
