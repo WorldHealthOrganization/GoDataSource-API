@@ -104,7 +104,8 @@
       "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
-      "translation": "Nothing to display"
+      "translation": "Nothing to display",
+      "section": "uiChainsOfTransmissionGraph"
     },
     "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_START_DATE": {
       "translation": "Start date",
@@ -125,6 +126,38 @@
     "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG": {
       "translation": "Longitude",
       "section": "uiReferenceDataEntryFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DATE": {
+      "translation": "Print date",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_SNAPSHOT_DATETIME": {
+      "translation": "Snapshot date / time",
+      "section": "uiAsyncCotFields"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_FILTER_DATE": {
+      "translation": "Situation as of",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_NAME_DESCRIPTION": {
+      "translation": "Date / time will be added to the snapshot name at the time of saving",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_CLONING": {
+      "translation": "Cloning {{type}} '{{item}}'",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_VARIABLES": {
+      "translation": "Question variables",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_TYPE_QUESTION": {
+      "translation": "question",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_TYPE_ANSWER": {
+      "translation": "answer",
+      "section": "uiOutbreakQuestionnaireTemplates"
     }
   }
 }
