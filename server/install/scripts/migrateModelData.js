@@ -250,10 +250,16 @@ const migrationVersions = [{
 }, {
   version: '2.42.0',
   scripts: [{
+    fileName: 'template.js',
+    actions: [{
+      name: 'createUpdateDefaultOutbreakTemplates',
+      buildNo: 1
+    }]
+  }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 7
+      buildNo: 8
     }]
   }]
 }];
