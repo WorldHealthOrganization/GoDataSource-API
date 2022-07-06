@@ -82,7 +82,7 @@
       "modules": [
         "template"
       ],
-      "english_us": "TRAVEL HISTORY (up to 3 weeks prior to onset of symptoms or diagnosis)\r\n",
+      "english_us": "TRAVEL HISTORY (up to 3 weeks prior to onset of symptoms or diagnosis)",
       "french_fr": "IF RELEVANT - TRAVEL HISTORY",
       "portuguese_pt": "IF RELEVANT - TRAVEL HISTORY",
       "russian_ru": "IF RELEVANT - TRAVEL HISTORY",
@@ -441,15 +441,15 @@
       "spanish_es": "Yes"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_OTHER_STI_ANSWER_YES_QUESTION_OTHER_STI_SPECIFY_TEXT": {
-      "arabic": "If Other STI Yes, specify:\n",
+      "arabic": "If Other STI Yes, specify:",
       "modules": [
         "template"
       ],
-      "english_us": "Specify\r\r\n\r\r\n\r\r\n\r\r\n",
-      "french_fr": "If Other STI Yes, specify:\n",
-      "portuguese_pt": "If Other STI Yes, specify:\n",
-      "russian_ru": "If Other STI Yes, specify:\n",
-      "spanish_es": "If Other STI Yes, specify:\n"
+      "english_us": "Specify",
+      "french_fr": "If Other STI Yes, specify:",
+      "portuguese_pt": "If Other STI Yes, specify:",
+      "russian_ru": "If Other STI Yes, specify:",
+      "spanish_es": "If Other STI Yes, specify:"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_OTHER_STI_TEXT": {
       "arabic": "Other STIs",
@@ -1541,15 +1541,15 @@
       "spanish_es": "Yes"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_718_D_5_BD_2_8_C_02_4_F_91_BEEC_AD_5132035763_TEXT": {
-      "arabic": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency \n",
+      "arabic": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency",
       "modules": [
         "template"
       ],
       "english_us": "Please remember to link to an existing Go.Data source CASE or EVENT (if exact source case not known) to record Exposure details.",
-      "french_fr": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency \n",
-      "portuguese_pt": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency \n",
-      "russian_ru": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency \n",
-      "spanish_es": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency \n"
+      "french_fr": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency",
+      "portuguese_pt": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency",
+      "russian_ru": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency",
+      "spanish_es": "Please remember to link to an existing source CASE or EVENT (if exact source case not known) to record exposure duration/frequency"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_EXPO_HCW_FREQ_ANSWER_MULTIPLE_LABEL": {
       "arabic": "Multiple times",
@@ -2058,15 +2058,15 @@
       "spanish_es": "Cidofovir"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_MONKEYPOX_TREATMENT_ANSWER_NONE_LABEL": {
-      "arabic": "No antiviral treatment\r\r\r\r\n",
+      "arabic": "No antiviral treatment",
       "modules": [
         "template"
       ],
-      "english_us": "No antiviral treatment\r\r\r\r\r\n",
-      "french_fr": "No antiviral treatment\r\r\r\r\n",
-      "portuguese_pt": "No antiviral treatment\r\r\r\r\n",
-      "russian_ru": "No antiviral treatment\r\r\r\r\n",
-      "spanish_es": "No antiviral treatment\r\r\r\r\n"
+      "english_us": "No antiviral treatment",
+      "french_fr": "No antiviral treatment",
+      "portuguese_pt": "No antiviral treatment",
+      "russian_ru": "No antiviral treatment",
+      "spanish_es": "No antiviral treatment"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_MONKEYPOX_TREATMENT_ANSWER_TEC_LABEL": {
       "arabic": "Tecovirimat",
@@ -3092,26 +3092,26 @@
       "spanish_es": "Animal to human transmission"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_FOMITE_LABEL": {
-      "arabic": " Contact with contaminated material (e.g. bedding, clothing, objects)  \n",
+      "arabic": " Contact with contaminated material (e.g. bedding, clothing, objects)",
       "modules": [
         "template"
       ],
-      "english_us": " Contact with contaminated material (e.g. bedding, clothing, objects)  \r\r\n",
-      "french_fr": " Contact with contaminated material (e.g. bedding, clothing, objects)  \n",
-      "portuguese_pt": " Contact with contaminated material (e.g. bedding, clothing, objects)  \n",
-      "russian_ru": " Contact with contaminated material (e.g. bedding, clothing, objects)  \n",
-      "spanish_es": " Contact with contaminated material (e.g. bedding, clothing, objects)  \n"
+      "english_us": " Contact with contaminated material (e.g. bedding, clothing, objects)",
+      "french_fr": " Contact with contaminated material (e.g. bedding, clothing, objects)",
+      "portuguese_pt": " Contact with contaminated material (e.g. bedding, clothing, objects)",
+      "russian_ru": " Contact with contaminated material (e.g. bedding, clothing, objects)",
+      "spanish_es": " Contact with contaminated material (e.g. bedding, clothing, objects)"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_HAI_LABEL": {
-      "arabic": "Healthcare-associated (health care setting or facility or when delivering healthcare)\n",
+      "arabic": "Healthcare-associated (health care setting or facility or when delivering healthcare)",
       "modules": [
         "template"
       ],
-      "english_us": "Healthcare-associated (health care setting or facility or when delivering healthcare)\r\r\n",
-      "french_fr": "Healthcare-associated (health care setting or facility or when delivering healthcare)\n",
-      "portuguese_pt": "Healthcare-associated (health care setting or facility or when delivering healthcare)\n",
-      "russian_ru": "Healthcare-associated (health care setting or facility or when delivering healthcare)\n",
-      "spanish_es": "Healthcare-associated (health care setting or facility or when delivering healthcare)\n"
+      "english_us": "Healthcare-associated (health care setting or facility or when delivering healthcare)",
+      "french_fr": "Healthcare-associated (health care setting or facility or when delivering healthcare)",
+      "portuguese_pt": "Healthcare-associated (health care setting or facility or when delivering healthcare)",
+      "russian_ru": "Healthcare-associated (health care setting or facility or when delivering healthcare)",
+      "spanish_es": "Healthcare-associated (health care setting or facility or when delivering healthcare)"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_LAB_LABEL": {
       "arabic": "Transmission in a laboratory due to occupational exposure  ",
@@ -3180,15 +3180,15 @@
       "spanish_es": "Sexual transmission"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_TRANSFU_LABEL": {
-      "arabic": "Transfusion recipient  \n",
+      "arabic": "Transfusion recipient",
       "modules": [
         "template"
       ],
-      "english_us": "Transfusion recipient  \r\r\n",
-      "french_fr": "Transfusion recipient  \n",
-      "portuguese_pt": "Transfusion recipient  \n",
-      "russian_ru": "Transfusion recipient  \n",
-      "spanish_es": "Transfusion recipient  \n"
+      "english_us": "Transfusion recipient",
+      "french_fr": "Transfusion recipient",
+      "portuguese_pt": "Transfusion recipient",
+      "russian_ru": "Transfusion recipient",
+      "spanish_es": "Transfusion recipient"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_UNK_LABEL": {
       "arabic": "Unknown",
@@ -3246,15 +3246,15 @@
       "spanish_es": "Yes"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRAVEL_HISTORY_ANSWER_YES_QUESTION_BB_66033_D_84_E_3_42_F_9_9_D_41_0_CE_267672_D_78_TEXT": {
-      "arabic": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\n",
+      "arabic": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.",
       "modules": [
         "template"
       ],
-      "english_us": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\r\n",
-      "french_fr": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\n",
-      "portuguese_pt": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\n",
-      "russian_ru": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\n",
-      "spanish_es": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.\n"
+      "english_us": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.",
+      "french_fr": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.",
+      "portuguese_pt": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.",
+      "russian_ru": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed.",
+      "spanish_es": "If yes, please add travel to each country below by first entering \"Entry Date\", select \"Add Travel History\" and then fill subsequent fields (Country, Region, Departure Date). You can add as many as needed."
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRAVEL_HISTORY_SPECIFY_ANSWER_TRAVEL_HISTORY_ADD_LABEL": {
       "arabic": "Add Travel History",
@@ -3433,15 +3433,15 @@
       "spanish_es": "In addition to checking all symptoms present below, change status of today's follow-up to \"Seen Not Ok\""
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_BACK_LABEL": {
-      "arabic": "Back pain\n",
+      "arabic": "Back pain",
       "modules": [
         "template"
       ],
-      "english_us": "Back pain\r\r\n",
-      "french_fr": "Back pain\n",
-      "portuguese_pt": "Back pain\n",
-      "russian_ru": "Back pain\n",
-      "spanish_es": "Back pain\n"
+      "english_us": "Back pain",
+      "french_fr": "Back pain",
+      "portuguese_pt": "Back pain",
+      "russian_ru": "Back pain",
+      "spanish_es": "Back pain"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_CHILLS_LABEL": {
       "arabic": "Chills or sweats",
@@ -3455,26 +3455,26 @@
       "spanish_es": "Chills or sweats"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_CONJ_LABEL": {
-      "arabic": "Conjunctivitis\n",
+      "arabic": "Conjunctivitis",
       "modules": [
         "template"
       ],
-      "english_us": "Conjunctivitis\r\r\n",
-      "french_fr": "Conjunctivitis\n",
-      "portuguese_pt": "Conjunctivitis\n",
-      "russian_ru": "Conjunctivitis\n",
-      "spanish_es": "Conjunctivitis\n"
+      "english_us": "Conjunctivitis",
+      "french_fr": "Conjunctivitis",
+      "portuguese_pt": "Conjunctivitis",
+      "russian_ru": "Conjunctivitis",
+      "spanish_es": "Conjunctivitis"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_COUGH_LABEL": {
-      "arabic": "Cough/respiratory symptoms\n",
+      "arabic": "Cough/respiratory symptoms",
       "modules": [
         "template"
       ],
-      "english_us": "Cough/respiratory symptoms\r\r\n",
-      "french_fr": "Cough/respiratory symptoms\n",
-      "portuguese_pt": "Cough/respiratory symptoms\n",
-      "russian_ru": "Cough/respiratory symptoms\n",
-      "spanish_es": "Cough/respiratory symptoms\n"
+      "english_us": "Cough/respiratory symptoms",
+      "french_fr": "Cough/respiratory symptoms",
+      "portuguese_pt": "Cough/respiratory symptoms",
+      "russian_ru": "Cough/respiratory symptoms",
+      "spanish_es": "Cough/respiratory symptoms"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_DIARRHEA_LABEL": {
       "arabic": "Diarrhea",
@@ -3488,92 +3488,92 @@
       "spanish_es": "Diarrhea"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_FATIGUE_LABEL": {
-      "arabic": "Fatigue\n",
+      "arabic": "Fatigue",
       "modules": [
         "template"
       ],
-      "english_us": "Fatigue\r\r\n",
-      "french_fr": "Fatigue\n",
-      "portuguese_pt": "Fatigue\n",
-      "russian_ru": "Fatigue\n",
-      "spanish_es": "Fatigue\n"
+      "english_us": "Fatigue",
+      "french_fr": "Fatigue",
+      "portuguese_pt": "Fatigue",
+      "russian_ru": "Fatigue",
+      "spanish_es": "Fatigue"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_FEVER_LABEL": {
-      "arabic": "Fever >38.5C\n",
+      "arabic": "Fever >38.5C",
       "modules": [
         "template"
       ],
-      "english_us": "Fever >38.5C\r\r\n",
-      "french_fr": "Fever >38.5C\n",
-      "portuguese_pt": "Fever >38.5C\n",
-      "russian_ru": "Fever >38.5C\n",
-      "spanish_es": "Fever >38.5C\n"
+      "english_us": "Fever >38.5C",
+      "french_fr": "Fever >38.5C",
+      "portuguese_pt": "Fever >38.5C",
+      "russian_ru": "Fever >38.5C",
+      "spanish_es": "Fever >38.5C"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_GENITAL_LABEL": {
-      "arabic": "Anogenital skin/mucosal lesions\n\n",
+      "arabic": "Anogenital skin/mucosal lesions",
       "modules": [
         "template"
       ],
-      "english_us": "Anogenital skin/mucosal lesions\r\r\n\r\r\n",
-      "french_fr": "Anogenital skin/mucosal lesions\n\n",
-      "portuguese_pt": "Anogenital skin/mucosal lesions\n\n",
-      "russian_ru": "Anogenital skin/mucosal lesions\n\n",
-      "spanish_es": "Anogenital skin/mucosal lesions\n\n"
+      "english_us": "Anogenital skin/mucosal lesions",
+      "french_fr": "Anogenital skin/mucosal lesions",
+      "portuguese_pt": "Anogenital skin/mucosal lesions",
+      "russian_ru": "Anogenital skin/mucosal lesions",
+      "spanish_es": "Anogenital skin/mucosal lesions"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_HEADACHE_LABEL": {
-      "arabic": "Headache\n",
+      "arabic": "Headache",
       "modules": [
         "template"
       ],
-      "english_us": "Headache\r\r\n",
-      "french_fr": "Headache\n",
-      "portuguese_pt": "Headache\n",
-      "russian_ru": "Headache\n",
-      "spanish_es": "Headache\n"
+      "english_us": "Headache",
+      "french_fr": "Headache",
+      "portuguese_pt": "Headache",
+      "russian_ru": "Headache",
+      "spanish_es": "Headache"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_LOCALLYMPH_LABEL": {
-      "arabic": "Localised lymphadenopathy\n",
+      "arabic": "Localised lymphadenopathy",
       "modules": [
         "template"
       ],
-      "english_us": "Localised lymphadenopathy\r\r\n",
-      "french_fr": "Localised lymphadenopathy\n",
-      "portuguese_pt": "Localised lymphadenopathy\n",
-      "russian_ru": "Localised lymphadenopathy\n",
-      "spanish_es": "Localised lymphadenopathy\n"
+      "english_us": "Localised lymphadenopathy",
+      "french_fr": "Localised lymphadenopathy",
+      "portuguese_pt": "Localised lymphadenopathy",
+      "russian_ru": "Localised lymphadenopathy",
+      "spanish_es": "Localised lymphadenopathy"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_LYMPH_LABEL": {
-      "arabic": "Generalised lymphadenopathy\n",
+      "arabic": "Generalised lymphadenopathy",
       "modules": [
         "template"
       ],
-      "english_us": "Generalised lymphadenopathy\r\r\n",
-      "french_fr": "Generalised lymphadenopathy\n",
-      "portuguese_pt": "Generalised lymphadenopathy\n",
-      "russian_ru": "Generalised lymphadenopathy\n",
-      "spanish_es": "Generalised lymphadenopathy\n"
+      "english_us": "Generalised lymphadenopathy",
+      "french_fr": "Generalised lymphadenopathy",
+      "portuguese_pt": "Generalised lymphadenopathy",
+      "russian_ru": "Generalised lymphadenopathy",
+      "spanish_es": "Generalised lymphadenopathy"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_MUSC_LABEL": {
-      "arabic": "Muscle pain (myalgia)\n",
+      "arabic": "Muscle pain (myalgia)",
       "modules": [
         "template"
       ],
-      "english_us": "Muscle pain (myalgia)\r\r\n",
-      "french_fr": "Muscle pain (myalgia)\n",
-      "portuguese_pt": "Muscle pain (myalgia)\n",
-      "russian_ru": "Muscle pain (myalgia)\n",
-      "spanish_es": "Muscle pain (myalgia)\n"
+      "english_us": "Muscle pain (myalgia)",
+      "french_fr": "Muscle pain (myalgia)",
+      "portuguese_pt": "Muscle pain (myalgia)",
+      "russian_ru": "Muscle pain (myalgia)",
+      "spanish_es": "Muscle pain (myalgia)"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_ORAL_LABEL": {
-      "arabic": "Oral skin/mucosal lesions\n",
+      "arabic": "Oral skin/mucosal lesions",
       "modules": [
         "template"
       ],
-      "english_us": "Oral skin/mucosal lesions\r\r\n",
-      "french_fr": "Oral skin/mucosal lesions\n",
-      "portuguese_pt": "Oral skin/mucosal lesions\n",
-      "russian_ru": "Oral skin/mucosal lesions\n",
-      "spanish_es": "Oral skin/mucosal lesions\n"
+      "english_us": "Oral skin/mucosal lesions",
+      "french_fr": "Oral skin/mucosal lesions",
+      "portuguese_pt": "Oral skin/mucosal lesions",
+      "russian_ru": "Oral skin/mucosal lesions",
+      "spanish_es": "Oral skin/mucosal lesions"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_OTHER_LABEL": {
       "arabic": "Other",
@@ -3587,48 +3587,48 @@
       "spanish_es": "Other"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_RASH_LABEL": {
-      "arabic": "Skin/mucosal lesions (excluding oral or anogenital areas)\n",
+      "arabic": "Skin/mucosal lesions (excluding oral or anogenital areas)",
       "modules": [
         "template"
       ],
-      "english_us": "Skin/mucosal lesions (excluding oral or anogenital areas)\r\r\n",
-      "french_fr": "Skin/mucosal lesions (excluding oral or anogenital areas)\n",
-      "portuguese_pt": "Skin/mucosal lesions (excluding oral or anogenital areas)\n",
-      "russian_ru": "Skin/mucosal lesions (excluding oral or anogenital areas)\n",
-      "spanish_es": "Skin/mucosal lesions (excluding oral or anogenital areas)\n"
+      "english_us": "Skin/mucosal lesions (excluding oral or anogenital areas)",
+      "french_fr": "Skin/mucosal lesions (excluding oral or anogenital areas)",
+      "portuguese_pt": "Skin/mucosal lesions (excluding oral or anogenital areas)",
+      "russian_ru": "Skin/mucosal lesions (excluding oral or anogenital areas)",
+      "spanish_es": "Skin/mucosal lesions (excluding oral or anogenital areas)"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_THROAT_LABEL": {
-      "arabic": "Sore throat\n",
+      "arabic": "Sore throat",
       "modules": [
         "template"
       ],
-      "english_us": "Sore throat\r\r\n",
-      "french_fr": "Sore throat\n",
-      "portuguese_pt": "Sore throat\n",
-      "russian_ru": "Sore throat\n",
-      "spanish_es": "Sore throat\n"
+      "english_us": "Sore throat",
+      "french_fr": "Sore throat",
+      "portuguese_pt": "Sore throat",
+      "russian_ru": "Sore throat",
+      "spanish_es": "Sore throat"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_VOMIT_LABEL": {
-      "arabic": "Vomiting/nausea\n",
+      "arabic": "Vomiting/nausea",
       "modules": [
         "template"
       ],
-      "english_us": "Vomiting/nausea\r\r\n",
-      "french_fr": "Vomiting/nausea\n",
-      "portuguese_pt": "Vomiting/nausea\n",
-      "russian_ru": "Vomiting/nausea\n",
-      "spanish_es": "Vomiting/nausea\n"
+      "english_us": "Vomiting/nausea",
+      "french_fr": "Vomiting/nausea",
+      "portuguese_pt": "Vomiting/nausea",
+      "russian_ru": "Vomiting/nausea",
+      "spanish_es": "Vomiting/nausea"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_ANSWER_WEAK_LABEL": {
-      "arabic": "Asthenia (profound weakness)\n",
+      "arabic": "Asthenia (profound weakness)",
       "modules": [
         "template"
       ],
-      "english_us": "Asthenia (profound weakness)\r\r\n",
-      "french_fr": "Asthenia (profound weakness)\n",
-      "portuguese_pt": "Asthenia (profound weakness)\n",
-      "russian_ru": "Asthenia (profound weakness)\n",
-      "spanish_es": "Asthenia (profound weakness)\n"
+      "english_us": "Asthenia (profound weakness)",
+      "french_fr": "Asthenia (profound weakness)",
+      "portuguese_pt": "Asthenia (profound weakness)",
+      "russian_ru": "Asthenia (profound weakness)",
+      "spanish_es": "Asthenia (profound weakness)"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTFOLLOWUPTEMPLATE_QUESTION_SYMP_ANSWER_YES_QUESTION_SYMP_SPECIFY_TEXT": {
       "arabic": "Please list all symptoms",
@@ -3653,15 +3653,15 @@
       "spanish_es": "Does the contact have any symptoms today?"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTINVESTIGATIONTEMPLATE_QUESTION_6_EC_6_E_601_846_C_41_E_8_8_A_5_B_CAD_9_F_62_E_3192_TEXT": {
-      "arabic": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\n",
+      "arabic": "ADDITIONAL CONTACT IDENTIFIER INFORMATION",
       "modules": [
         "template"
       ],
-      "english_us": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\r\r\n",
-      "french_fr": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\n",
-      "portuguese_pt": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\n",
-      "russian_ru": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\n",
-      "spanish_es": "ADDITIONAL CONTACT IDENTIFIER INFORMATION\n"
+      "english_us": "ADDITIONAL CONTACT IDENTIFIER INFORMATION",
+      "french_fr": "ADDITIONAL CONTACT IDENTIFIER INFORMATION",
+      "portuguese_pt": "ADDITIONAL CONTACT IDENTIFIER INFORMATION",
+      "russian_ru": "ADDITIONAL CONTACT IDENTIFIER INFORMATION",
+      "spanish_es": "ADDITIONAL CONTACT IDENTIFIER INFORMATION"
     },
     "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTINVESTIGATIONTEMPLATE_QUESTION_GENDER_ANSWER_MAN_LABEL": {
       "arabic": "Man",
@@ -3943,7 +3943,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_GENDER_ANSWER_OTHER_QUESTION_OTHER_SPECIFY_TEXT",
-                  "variable": "other_specify",
+                  "variable": "gender_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_OUCOME_S_TATUS",
                   "required": false,
                   "order": 0,
@@ -3960,7 +3960,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_SEXUAL_ORIENTATION_TEXT",
-          "variable": "SexualOrientation",
+          "variable": "sexual_orientation",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_OUCOME_S_TATUS",
           "required": false,
           "order": 2,
@@ -4011,7 +4011,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_SEXUAL_ORIENTATION_ANSWER_OTHER_QUESTION_O_SPECIFY_TEXT",
-                  "variable": "O_SPECIFY",
+                  "variable": "sexual_orientation_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_OUCOME_S_TATUS",
                   "required": false,
                   "order": 0,
@@ -4047,7 +4047,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_TEXT",
-          "variable": "CONCURRENT_STI",
+          "variable": "sti",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
           "required": false,
           "order": 4,
@@ -4063,7 +4063,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_CHLAM_TEXT",
-                  "variable": "CHLAM",
+                  "variable": "chlam",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 0,
@@ -4097,7 +4097,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_GONO_TEXT",
-                  "variable": "GONO",
+                  "variable": "gono",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 1,
@@ -4131,7 +4131,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_HERP_TEXT",
-                  "variable": "HERP",
+                  "variable": "herp",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 2,
@@ -4165,7 +4165,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_LGV_TEXT",
-                  "variable": "LGV",
+                  "variable": "lgv",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 3,
@@ -4199,7 +4199,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_MYCO_TEXT",
-                  "variable": "MYCO",
+                  "variable": "myco",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 4,
@@ -4233,7 +4233,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_SYPH_TEXT",
-                  "variable": "SYPH",
+                  "variable": "syph",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 5,
@@ -4267,7 +4267,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_TRICH_TEXT",
-                  "variable": "TRICH",
+                  "variable": "trich",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 6,
@@ -4301,7 +4301,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_WARTS_TEXT",
-                  "variable": "WARTS",
+                  "variable": "warts",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 7,
@@ -4335,7 +4335,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_OTHER_STI_TEXT",
-                  "variable": "OTHER_STI",
+                  "variable": "sti_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 8,
@@ -4351,7 +4351,7 @@
                           "multiAnswer": false,
                           "inactive": false,
                           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONCURRENT_STI_ANSWER_YES_QUESTION_OTHER_STI_ANSWER_YES_QUESTION_OTHER_STI_SPECIFY_TEXT",
-                          "variable": "OTHER_STI_SPECIFY",
+                          "variable": "sti_other_specify",
                           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                           "required": false,
                           "order": 0,
@@ -4401,7 +4401,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_MONKEYPOX_TREATMENT_TEXT",
-          "variable": "MONKEYPOX_TREATMENT",
+          "variable": "antiviral_treatment",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CLINICAL",
           "required": false,
           "order": 5,
@@ -4492,7 +4492,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_HIV_STATUS_ANSWER_POS_QUESTION_CD_4_CELLS_TEXT",
-                  "variable": "CD4Cells",
+                  "variable": "hiv_cd4",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HISTORY_OF_PRESENT_ILNESS",
                   "required": false,
                   "order": 0,
@@ -4591,7 +4591,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_SYMPTOMS_TEXT",
-          "variable": "Symptoms",
+          "variable": "symptoms",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS",
           "required": false,
           "order": 8,
@@ -5288,7 +5288,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRAVEL_HISTORY_TEXT",
-          "variable": "travel_history",
+          "variable": "travel",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_RECENT_TRAVEL",
           "required": false,
           "order": 10,
@@ -5451,7 +5451,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_TEXT",
-          "variable": "expo_sexual",
+          "variable": "sex_recent_partners",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
           "required": false,
           "order": 14,
@@ -5467,7 +5467,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_N_SEX_PARTNERS_TEXT",
-                  "variable": "n_sex_partners",
+                  "variable": "sex_n_partners",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 0,
@@ -5522,7 +5522,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_TYPE_SEX_PRACTICED_TEXT",
-                  "variable": "type_sex_practiced",
+                  "variable": "sex_type",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 1,
@@ -5584,7 +5584,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_PROTECTED_SEX_TEXT",
-                  "variable": "protected_sex",
+                  "variable": "sex_protection",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 2,
@@ -5625,7 +5625,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_TYPE_SEX_PARTNER_TEXT",
-                  "variable": "type_sex_partner",
+                  "variable": "sex_partner_type",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 3,
@@ -5662,7 +5662,7 @@
                           "multiAnswer": false,
                           "inactive": false,
                           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_TYPE_SEX_PARTNER_ANSWER_OTHER_QUESTION_PLEASE_SPECIFY_TEXT",
-                          "variable": "please_specify",
+                          "variable": "sex_partner_type_other",
                           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                           "required": false,
                           "order": 0,
@@ -5679,7 +5679,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_OCC_SEX_PARTNER_TEXT",
-                  "variable": "occ_sex_partner",
+                  "variable": "sex_partner_how_met",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 4,
@@ -5737,7 +5737,7 @@
                           "multiAnswer": false,
                           "inactive": false,
                           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_SEXUAL_ANSWER_YES_QUESTION_OCC_SEX_PARTNER_ANSWER_OTHER_QUESTION_MEET_OCC_PARTNER_SPECIFY_TEXT",
-                          "variable": "meet_occ_partner_specify",
+                          "variable": "sex_partner_how_met_other",
                           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                           "required": false,
                           "order": 0,
@@ -5780,7 +5780,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_ANIMALS_TEXT",
-          "variable": "expo_animals",
+          "variable": "animal_contact",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
           "required": false,
           "order": 15,
@@ -5831,7 +5831,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_ANIMALS_ANSWER_OTHER_QUESTION_EXPO_ANIMAL_OTHER_SPECIFY_TEXT",
-                  "variable": "expo_animal_other_specify",
+                  "variable": "animal_contact_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 0,
@@ -5848,7 +5848,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_BUSH_MEAT_TEXT",
-          "variable": "expo_bush_meat",
+          "variable": "meat_contact",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
           "required": false,
           "order": 16,
@@ -5864,7 +5864,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXPO_BUSH_MEAT_ANSWER_YES_QUESTION_BUSH_MEET_LOC_SPECIFY_TEXT",
-                  "variable": "bush_meet_loc_specify",
+                  "variable": "meat_contact_location",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 0,
@@ -5907,7 +5907,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_TEXT",
-          "variable": "exp_hcw",
+          "variable": "hcw_expo",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
           "required": false,
           "order": 18,
@@ -5935,7 +5935,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_HCW_SPECIFY_TEXT",
-                  "variable": "hcw_specify",
+                  "variable": "hcw_type",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 1,
@@ -5959,7 +5959,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_EXPO_HCW_FREQ_TEXT",
-                  "variable": "expo_hcw_freq",
+                  "variable": "hcw_expo_freq",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 3,
@@ -5993,7 +5993,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_EXPO_HCW_PPE_TEXT",
-                  "variable": "expo_hcw_ppe",
+                  "variable": "ppe",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 4,
@@ -6009,7 +6009,7 @@
                           "multiAnswer": false,
                           "inactive": false,
                           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_EXP_HCW_ANSWER_YES_QUESTION_EXPO_HCW_PPE_ANSWER_YES_QUESTION_PPE_SPECIFY_TEXT",
-                          "variable": "ppe_specify",
+                          "variable": "ppe_type",
                           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                           "required": false,
                           "order": 0,
@@ -6232,7 +6232,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_TRANSMISSION_ANSWER_OTHER_QUESTION_TRANSMISSION_OTHER_SPECIFY_TEXT",
-                  "variable": "transmission_other_specify",
+                  "variable": "transmission_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 0,
@@ -6268,7 +6268,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONTACT_DURING_ILLNESS_TEXT",
-          "variable": "contact_during_illness",
+          "variable": "contacts_during_illness",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
           "required": false,
           "order": 23,
@@ -6320,7 +6320,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONTACT_DURING_ILLNESS_ANSWER_YES_QUESTION_CONTACTS_PLACE_TEXT",
-                  "variable": "contacts_place",
+                  "variable": "contacts_setting",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                   "required": false,
                   "order": 3,
@@ -6434,7 +6434,7 @@
                           "multiAnswer": false,
                           "inactive": false,
                           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CASEINVESTIGATIONTEMPLATE_QUESTION_CONTACT_DURING_ILLNESS_ANSWER_YES_QUESTION_CONTACTS_PLACE_ANSWER_OTHER_QUESTION_CONTACT_PLACE_OTHER_SPECIFY_TEXT",
-                          "variable": "contact_place_other_specify",
+                          "variable": "contacts_setting_other",
                           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE",
                           "required": false,
                           "order": 0,
@@ -6521,7 +6521,7 @@
                   "multiAnswer": false,
                   "inactive": false,
                   "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTINVESTIGATIONTEMPLATE_QUESTION_GENDER_ANSWER_OTHER_QUESTION_OTHER_SPECIFY_TEXT",
-                  "variable": "other_specify",
+                  "variable": "gender_other",
                   "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_DETAILS",
                   "required": false,
                   "order": 0,
@@ -6538,7 +6538,7 @@
           "multiAnswer": false,
           "inactive": false,
           "text": "LNG_OUTBREAK_698D69B9-AC77-4DD2-A444-E7C1D3C57F44_CONTACTINVESTIGATIONTEMPLATE_QUESTION_SEXUAL_ORIENTATION_TEXT",
-          "variable": "SexualOrientation",
+          "variable": "sexual_orientation",
           "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_CONTACT_DETAILS",
           "required": false,
           "order": 2,
