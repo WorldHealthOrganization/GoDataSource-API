@@ -158,6 +158,21 @@
     "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_TYPE_ANSWER": {
       "translation": "answer",
       "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOTS": {
+      "translation": "Snapshots"
+    },
+    "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_CHANGE_SOURCE_TITLE": {
+      "translation": "Change source",
+      "section": "uiAvailableEntitiesForRelationshipPage"
+    },
+    "LNG_PAGE_REFERENCE_DATA_CATEGORY_ENTRIES_LIST_ORDER_ENTRIES": {
+      "translation": "Order entries",
+      "section": "uiReferenceDataCategoryEntriesListPage"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_FIELD_LABEL_ENTRIES_COUNT": {
+      "translation": "Count",
+      "section": "uiReferenceDataCategoryFields"
     }
   }
 }
