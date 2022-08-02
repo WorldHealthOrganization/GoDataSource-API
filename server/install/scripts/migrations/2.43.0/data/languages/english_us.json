@@ -1,0 +1,9 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_APP_PAGE_TEAM_WORKLOAD": {
+      "translation": "Teams workload",
+      "section": "uiSavedFiltersForPagesLabels"
+    }
+  }
+}
