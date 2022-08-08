@@ -2008,10 +2008,11 @@ module.exports = function (Outbreak) {
 
     // include follow-up/lab results, based on the person type
     let includes = [];
-    if (modelType === appModels.case.modelName) {
+    if (
+      modelType === appModels.case.modelName ||
+      modelType === appModels.contact.modelName
+    ) {
       includes.push('labResults');
-    }
-    if (modelType === appModels.contact.modelName) {
       includes.push('followUps');
     }
 
@@ -2109,7 +2110,10 @@ module.exports = function (Outbreak) {
         let followUpsToAdd = [];
         // store today date references, needed when checking for future follow ups
         let today = genericHelpers.getDate();
-        if (modelType === appModels.contact.modelName) {
+        if (
+          modelType === appModels.contact.modelName ||
+          modelType === appModels.case.modelName
+        ) {
           let allFollowUps = [];
           models.forEach((model) => {
             let modelFollowUs = model.followUps();
@@ -2161,7 +2165,10 @@ module.exports = function (Outbreak) {
 
         // for cases update each lab result person id reference to the winning model
         let labResultsToAdd = [];
-        if (modelType === appModels.case.modelName) {
+        if (
+          modelType === appModels.case.modelName ||
+          modelType === appModels.contact.modelName
+        ) {
           models.forEach((model) => {
             if (model.labResults().length) {
               labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {

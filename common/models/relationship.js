@@ -769,7 +769,12 @@ module.exports = function (Relationship) {
       updatePersonRecords.push(
         // load the record
         app.models.person
-          .findById(person.id)
+          .findOne({
+            where: {
+              id: person.id
+            },
+            deleted: true
+          })
           .then(function (personRecord) {
             // if the record is not found, stop with err
             if (!personRecord) {
@@ -856,7 +861,12 @@ module.exports = function (Relationship) {
           updatePersonRecords.push(
             // load the record
             app.models.person
-              .findById(oldPerson.id)
+              .findOne({
+                where: {
+                  id: oldPerson.id
+                },
+                deleted: true
+              })
               .then(function (personRecord) {
                 // if the record is not found, stop with err
                 if (!personRecord) {
@@ -966,7 +976,12 @@ module.exports = function (Relationship) {
         if (contactInPersons) {
           // trigger update operations on it (might have before/after save listeners that need to be triggered on relationship updates)
           return app.models.contact
-            .findById(contactInPersons.id)
+            .findOne({
+              where: {
+                id: contactInPersons.id
+              },
+              deleted: true
+            })
             .then(function (contactRecord) {
               // if the record is not found, stop with err
               if (!contactRecord) {
