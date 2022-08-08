@@ -148,6 +148,11 @@
       "type": "hasMany",
       "model": "labResult",
       "foreignKey": "personId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "personId"
     }
   },
   "acls": [],
