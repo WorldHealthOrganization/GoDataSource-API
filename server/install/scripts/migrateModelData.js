@@ -263,7 +263,7 @@ const migrationVersions = [{
     }]
   }]
 }, {
-  version: '2.42.2',
+  version: '2.43.0',
   scripts: [{
     fileName: 'languageToken.js',
     actions: [{
