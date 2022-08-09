@@ -4,6 +4,35 @@
     "LNG_APP_PAGE_TEAM_WORKLOAD": {
       "translation": "Teams workload",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab variant / strain colour"
+    },
+    "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL": {
+      "translation": "Geographical level"
+    },
+    "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": {
+      "translation": "Population count"
+    },
+    "LNG_PAGE_LIST_DUPLICATE_RECORDS_WARNING_NO_ACTIVE_OUTBREAK": {
+      "translation": "To merge duplicates selected outbreak must be active",
+      "section": "uiDuplicateRecordsListPage"
+    },
+    "LNG_PAGE_TEAMS_WORKLOAD_NO_DATA_LABEL": {
+      "translation": "* If a date is missing from header columns, it means that there is no data for that date",
+      "section": "uiTeamsWorkload"
+    },
+    "LNG_PAGE_TEAMS_WORKLOAD_DATE_LABEL": {
+      "translation": "Date",
+      "section": "uiTeamsWorkload"
+    },
+    "LNG_EVENT_FIELD_LABEL_CHOOSE_ADDRESS": {
+      "translation": "Choose address",
+      "section": "uiEventFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_VIEW_PERSON_FOLLOW_UPS_FORM_BUTTON": {
+      "translation": "View \"{{name}}\" follow-ups",
+      "section": "uiFollowUpsListPage"
     }
   }
 }
