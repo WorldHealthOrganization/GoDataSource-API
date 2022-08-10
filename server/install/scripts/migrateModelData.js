@@ -270,6 +270,12 @@ const migrationVersions = [{
       name: 'createUpdateLanguageTokens',
       buildNo: 1
     }]
+  }, {
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'cleanUnnecessaryData',
+      buildNo: 1
+    }]
   }]
 }];
 
