@@ -40,7 +40,7 @@ const getMongoDBConnection = function () {
   if (DbConfig.password) {
     mongoOptions = Object.assign(mongoOptions, {
       auth: {
-        user: DbConfig.user,
+        username: DbConfig.user,
         password: DbConfig.password
       },
       authSource: DbConfig.authSource
