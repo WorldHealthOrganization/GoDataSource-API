@@ -33,6 +33,18 @@
     "LNG_PAGE_LIST_FOLLOW_UPS_VIEW_PERSON_FOLLOW_UPS_FORM_BUTTON": {
       "translation": "View \"{{name}}\" follow-ups",
       "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_USERS_WORKLOAD_NO_DATA_LABEL": {
+      "translation": "* If a date is missing from header columns, it means that there is no data for that date",
+      "section": "uiUsersWorkload"
+    },
+    "LNG_PAGE_USERS_WORKLOAD_DATE_LABEL": {
+      "translation": "Date",
+      "section": "uiUsersWorkload"
+    },
+    "LNG_APP_PAGE_USER_WORKLOAD": {
+      "translation": "User workload",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
