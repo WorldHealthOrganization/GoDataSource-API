@@ -31,7 +31,7 @@ function getMongoDBClient(mongoOptions = {}) {
   if (dbConfig.password) {
     mongoOptions = Object.assign(mongoOptions, {
       auth: {
-        user: dbConfig.user,
+        username: dbConfig.user,
         password: dbConfig.password
       },
       authSource: dbConfig.authSource
