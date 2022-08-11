@@ -776,7 +776,10 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.followUp.modelName,
+            id: followUpId
+          });
         }
         instance.undoDelete(options, callback);
       })
@@ -4097,5 +4100,69 @@ module.exports = function (Outbreak) {
         {};
 
     return callback(null, items);
+  };
+
+  /**
+   * Mockup request to be used for checking connection in Pandem2
+   * Count cases and contacts reached for follow-up
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.countCasesContactsReached = function (data = {}, options, callback) {
+    // for real data we should get the outbreaks for the given disease
+    // and count cases/contacts that were followed-up in those outbreaks
+    const missingProps = ['startDate', 'endDate', 'pathogen', 'locationCode'].filter(prop => !data[prop]);
+    if (missingProps.length) {
+      return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+        errorMessages: `Missing required properties: ${missingProps.join(', ')}`
+      }));
+    }
+    const { startDate, endDate, pathogen, locationCode } = data;
+
+    const momentLib = require('moment');
+    const momentRange = require('moment-range');
+    const moment = momentRange.extendMoment(momentLib);
+    const range = moment.range(moment.utc(startDate).startOf('day'), moment.utc(endDate).startOf('day'));
+
+    // props to be filled
+    const indicators = {
+      case: [
+        'noIdentified',
+        'noIdentifiedAndReached',
+        'noIdentifiedAndReached1day',
+        'noFromContacts',
+      ],
+      contact: [
+        'noIdentified',
+        'noIdentifiedAndReached',
+        'noIdentifiedAndReached1day'
+      ]
+    };
+
+    // generate random data
+    const result = {
+      pathogen,
+      locationCode,
+      caseData: {},
+      contactData: {}
+    };
+
+    for (const currentDate of range.by('day')) {
+      const dateFormated = currentDate.toISOString();
+
+      ['case', 'contact'].forEach(prop => {
+        const resourceResult = {};
+        indicators[prop].forEach((indicator, index) => {
+          resourceResult[indicator] = index === 0 ?
+            Math.floor(Math.random() * (100 + 1)) :
+            Math.floor(Math.random() * (resourceResult[indicators[prop][index - 1]] + 1));
+        });
+
+        result[prop + 'Data'][dateFormated] = resourceResult;
+      });
+    }
+
+    return callback(null, result);
   };
 };
