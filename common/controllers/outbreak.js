@@ -4103,7 +4103,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Mockup request to be used for checking connection in Pandem2
+   * [MOCKUP] Request to be used for checking connection in Pandem2
    * Count cases and contacts reached for follow-up
    * @param data
    * @param options
