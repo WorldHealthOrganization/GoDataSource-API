@@ -5111,6 +5111,7 @@
           "path": "/follow-ups/export"
         }, {
           "verb": "post",
+          "ignoreActiveOutbreak": true,
           "path": "/follow-ups/export"
         }
       ]

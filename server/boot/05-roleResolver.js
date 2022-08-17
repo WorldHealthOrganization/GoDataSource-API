@@ -113,9 +113,37 @@ module.exports = function (app) {
         accessErrors.push('access denied to the given outbreak; the outbreak is not set as one of the user\'s accessible outbreaks');
       }
 
+      // if post we need to see if we should ignore active outbreak check
+      let ignoreActiveOutbreak = false;
+      if (
+        context.remotingContext.req.method &&
+        context.remotingContext.req.method.toLowerCase() === 'post'
+      ) {
+        const allowedMethods = _.get(context, 'remotingContext.method.http');
+        if (
+          allowedMethods &&
+          Array.isArray(allowedMethods)
+        ) {
+          allowedMethods.forEach((allowedMethod) => {
+            if (
+              allowedMethod &&
+              allowedMethod.verb &&
+              allowedMethod.verb.toLowerCase() === 'post' &&
+              allowedMethod.ignoreActiveOutbreak
+            ) {
+              ignoreActiveOutbreak = true;
+            }
+          });
+        } else {
+          ignoreActiveOutbreak = allowedMethods ?
+            !!allowedMethods.ignoreActiveOutbreak :
+            false;
+        }
+      }
+
       // check if the user tries to do POST/PUT/DELETE on another outbreak related data than the active one (you can modify & delete inactive outbreaks)
       if (
-        !_.get(context, 'remotingContext.method.http.ignoreActiveOutbreak') &&
+        !ignoreActiveOutbreak &&
         outbreakIdMatch[2] && outbreakIdMatch[2] !== '/restore' &&
         context.remotingContext.req.method !== 'GET' &&
         outbreakIdMatch[1] !== userAuthData.activeOutbreakId
