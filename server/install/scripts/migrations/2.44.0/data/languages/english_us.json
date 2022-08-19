@@ -1,0 +1,13 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_APP_PAGE_HELP_SEARCH": {
+      "translation": "Help search",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_SYSTEM_DEVICES": {
+      "translation": "System devices",
+      "section": "uiSavedFiltersForPagesLabels"
+    }
+  }
+}
