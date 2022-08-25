@@ -114,6 +114,7 @@ module.exports = function (AuditLog) {
               auditLog.userId :
               undefined;
           }`,
+          // #TODO: User properties not translated, please investigate
           replace: {
             'userId': {
               value: 'user'
