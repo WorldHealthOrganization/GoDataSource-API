@@ -20,9 +20,7 @@ module.exports = function (AuditLog) {
    * Export filtered cases to file
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
    * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
-   * @param encryptPassword
    * @param anonymizeFields
-   * @param fieldsGroupList
    * @param options
    * @param callback
    */
