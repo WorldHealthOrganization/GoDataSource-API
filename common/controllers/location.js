@@ -229,14 +229,15 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.prototype.getUsage = function (filter, callback) {
-    return new Promise((resolve, reject) => {
-      Location.getSubLocations([this.id], [], (err, locations) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(locations);
-      });
-    })
+    new Promise(
+      (resolve, reject) => {
+        Location.getSubLocations([this.id], [], (err, locations) => {
+          if (err) {
+            return reject(err);
+          }
+          return resolve(locations);
+        });
+      })
       .then((locationIds) => {
         return Location.findModelUsage(locationIds, filter, false);
       })
