@@ -8,6 +8,14 @@
     "LNG_APP_PAGE_SYSTEM_DEVICES": {
       "translation": "System devices",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG": {
+      "translation": "Audit Log - export",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG_DESCRIPTION": {
+      "translation": "This permission allows export of audit log data",
+      "section": "availablePermissions"
     }
   }
 }

@@ -308,20 +308,26 @@
         "description": "Record usage locations",
         "arg": "data",
         "type": {
-          "followUp": [],
-          "case": [],
-          "contact": [],
-          "event": []
+          "followUp": [
+            "followUp"
+          ],
+          "case": [
+            "case"
+          ],
+          "contact": [
+            "contact"
+          ],
+          "event": [
+            "event"
+          ]
         },
         "root": true,
         "required": true
       },
-      "http": [
-        {
-          "verb": "get",
-          "path": "/usage"
-        }
-      ]
+      "http": {
+        "verb": "get",
+        "path": "/usage"
+      }
     },
     "prototype.countUsage": {
       "description": "Count usage for a record.",

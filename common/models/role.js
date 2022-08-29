@@ -103,7 +103,13 @@ module.exports = function (Role) {
           requires: [
             'user_list_for_filters'
           ]
-        }
+        },
+        {
+          id: 'audit_log_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG_DESCRIPTION',
+          requires: []
+        },
       ]
     },
 

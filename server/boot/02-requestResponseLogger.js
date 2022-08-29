@@ -28,7 +28,7 @@ function logResponse(data, req, res) {
     }
 
     // log outgoing response
-    req.logger.debug(`Sent Response: Response time: ${req.timer.getElapsedMilliseconds()} msec. ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res._headers)}${responseBody}`);
+    req.logger.debug(`Sent Response: Response time: ${req.timer.getElapsedMilliseconds()} msec. ${res.statusCode} ${req.method} ${req.originalUrl} Headers: ${JSON.stringify(res.getHeaders ? res.getHeaders() : {})}${responseBody}`);
   }
 }
 
