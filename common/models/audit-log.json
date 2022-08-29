@@ -103,11 +103,6 @@
           "description": "Export type; can be: json. Default: json"
         },
         {
-          "arg": "encryptPassword",
-          "type": "string",
-          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
-        },
-        {
           "arg": "anonymizeFields",
           "type": [
             "string"
@@ -128,12 +123,10 @@
         }
       ],
       "description": "Export filtered list of audit-logs",
-      "http": [
-        {
-          "verb": "post",
-          "path": "/export"
-        }
-      ]
+      "http": {
+        "verb": "post",
+        "path": "/export"
+      }
     }
   }
 }

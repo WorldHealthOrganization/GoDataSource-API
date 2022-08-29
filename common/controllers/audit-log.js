@@ -15,7 +15,7 @@ module.exports = function (AuditLog) {
     'deleteById',
     'prototype.__get__user'
   ] );
-  
+
   /**
    * Export filtered cases to file
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
@@ -29,7 +29,6 @@ module.exports = function (AuditLog) {
   AuditLog.exportFilteredAuditLogs = function (
     filter,
     exportType,
-    encryptPassword,
     anonymizeFields,
     options,
     callback
@@ -63,12 +62,6 @@ module.exports = function (AuditLog) {
       delete filter.where.jsonReplaceUndefinedWithNull;
     }
 
-    // if encrypt password is not valid, remove it
-    if ( typeof encryptPassword !== 'string' || !encryptPassword.length )
-    {
-      encryptPassword = null;
-    }
-
     // make sure anonymizeFields is valid
     if ( !Array.isArray( anonymizeFields ) )
     {
@@ -87,7 +80,7 @@ module.exports = function (AuditLog) {
       },
       filter,
       exportType,
-      encryptPassword,
+      undefined,
       anonymizeFields,
       undefined,
       {
