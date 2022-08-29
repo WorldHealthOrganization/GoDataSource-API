@@ -76,7 +76,12 @@ module.exports = function (AuditLog) {
         scopeQuery: app.models.auditLog.definition.settings.scope,
         excludeBaseProperties: app.models.auditLog.definition.settings.excludeBaseProperties,
         arrayProps: app.models.auditLog.arrayProps,
-        fieldLabelsMap: app.models.auditLog.fieldLabelsMap
+        fieldLabelsMap: app.models.auditLog.fieldLabelsMap,
+
+        // fields that we need to bring from db, but we don't want to include in the export
+        projection: [
+          'userId'
+        ]
       },
       filter,
       exportType,
@@ -106,13 +111,7 @@ module.exports = function (AuditLog) {
             return auditLog && auditLog.userId ?
               auditLog.userId :
               undefined;
-          }`,
-          // #TODO: User properties not translated, please investigate
-          replace: {
-            'userId': {
-              value: 'user'
-            }
-          }
+          }`
         },
       }
     )
