@@ -1250,11 +1250,25 @@ const includeSubLocationsInLocationFilter = function (
               }
 
               // replace original filter with actual location filter and use found location ids
-              if (propertyName === 'usualPlaceOfResidenceLocationId.parentLocationIdFilter') {
-                filter.usualPlaceOfResidenceLocationId = {
-                  [inqKey]: locationIds
-                };
-              } else {
+              const customLocationFilters = [
+                'usualPlaceOfResidenceLocationId',
+                'burialLocationId'
+              ];
+              let propertyReplaced = false;
+              customLocationFilters.forEach((customLocationField) => {
+                if (propertyName === `${customLocationField}.parentLocationIdFilter`) {
+                  // replace
+                  filter[customLocationField] = {
+                    [inqKey]: locationIds
+                  };
+
+                  // handled
+                  propertyReplaced = true;
+                }
+              });
+
+              // already handled ?
+              if (!propertyReplaced) {
                 filter[propertyName.replace('parentLocationIdFilter', locationKey)] = {
                   [inqKey]: locationIds
                 };
