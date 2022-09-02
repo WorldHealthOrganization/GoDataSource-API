@@ -25,7 +25,7 @@
     "description": {
       "type": "string"
     },
-    "operatingSystem": {
+    "os": {
       "type": "string"
     },
     "manufacturer": {
