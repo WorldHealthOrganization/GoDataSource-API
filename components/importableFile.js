@@ -705,6 +705,15 @@ const getXlsxHeaders = function (filesToParse, extension) {
 
                     let header = cell.value;
 
+                    // add extra information when column header is invalid so end user knows which column is invalid
+                    if (
+                      header === null ||
+                      header === undefined ||
+                      (header + '').toLowerCase().startsWith('null')
+                    ) {
+                      header = (header === undefined ? null : header) + ' - cell ' + (cell.model.address ? cell.model.address : '');
+                    }
+
                     // if this is the first time the header appears
                     if (sameHeaderCounter[header] === undefined) {
                       // create an entry for it in the counter
