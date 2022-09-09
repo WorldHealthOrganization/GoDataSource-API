@@ -75,6 +75,7 @@ module.exports = function (AuditLog) {
         excludeBaseProperties: app.models.auditLog.definition.settings.excludeBaseProperties,
         arrayProps: app.models.auditLog.arrayProps,
         fieldLabelsMap: app.models.auditLog.fieldLabelsMap,
+        dontProcessValue: ['changedData'],
 
         // fields that we need to bring from db, but we don't want to include in the export
         projection: [

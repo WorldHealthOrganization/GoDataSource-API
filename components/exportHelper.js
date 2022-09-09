@@ -766,6 +766,19 @@ function exportFilteredModelsList(
         arrayColumnMaxValues: {},
         labels: fieldLabelsMap,
 
+        // don't process data fields
+        dontProcessValue: modelOptions.dontProcessValue && modelOptions.dontProcessValue.length > 0 ?
+          modelOptions.dontProcessValue.reduce(
+            (acc, property) => {
+              // attach prop
+              acc[property] = true;
+
+              // continue
+              return acc;
+            },
+            {}
+          ) : {},
+
         // location fields
         includeParentLocationData: fieldsGroupList && fieldsGroupList.length > 0 && modelOptions.exportFieldsGroup ?
           fieldsGroupList.includes('LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA') :
@@ -4544,7 +4557,9 @@ function exportFilteredModelsList(
                                   let response;
 
                                   // array ?
-                                  if (Array.isArray(childValue)) {
+                                  if (sheetHandler.columns.dontProcessValue[prefix]) {
+                                    response = childValue;
+                                  } else if (Array.isArray(childValue)) {
                                     // initialize response
                                     response = [];
 
