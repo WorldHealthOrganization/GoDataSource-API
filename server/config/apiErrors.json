@@ -33,6 +33,10 @@
     "defaultStatusCode": 404,
     "messagePattern": "Unknown `<%= model %>` id / visualId `<%= id %>`"
   },
+  "MASK_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "Mask not found for `<%= type %>` Model `<%= model %>` id / visualId `<%= id %>`"
+  },
   "MODEL_VISUAL_ID_MATCHES_MORE_THAN_2_RECORDS": {
     "defaultStatusCode": 409,
     "messagePattern": "Model `<%= model %>` with visualId `<%= visualId %>` => ( there are multiple records with this visual id )"
@@ -119,10 +123,6 @@
     "defaultStatusCode": 400,
     "messagePattern": "The `<%= model %>` is invalid. Details: <%= details %>"
   },
-  "DELETE_PARENT_MODEL": {
-    "defaultStatusCode": 400,
-    "messagePattern": "This `<%= model %>` still has sub models linked to it. Please make sure to delete all child models before deleting a parent model."
-  },
   "DEACTIVATE_PARENT_MODEL": {
     "defaultStatusCode": 400,
     "messagePattern": "This `<%= model %>` still has sub models that are active. Please make sure to deactivate all child models before deactivating a parent model."
@@ -136,6 +136,10 @@
     "messagePattern": "The provided language file `<%= fileName %>` is invalid: <%= details %>"
   },
   "UNSUPPORTED_FILE_TYPE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
+  },
+  "UNSUPPORTED_FILE_TYPE_IN_ZIP": {
     "defaultStatusCode": 422,
     "messagePattern": "The provided file `<%= fileName %>` is invalid: <%= details%>"
   },
@@ -223,6 +227,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Record not found"
   },
+  "FILE_NOT_FOUND": {
+    "defaultStatusCode": 404,
+    "messagePattern": "File not found"
+  },
   "INVALID_VISUAL_ID_MASK": {
     "defaultStatusCode": 422,
     "messagePattern": "Provided Visual ID template `<%= visualIdTemplate %>` does not match Visual ID mask set on outbreak level `<%= outbreakVisualIdMask %>`"
@@ -282,6 +290,10 @@
   "SAVE_DEVICE_INFORMATION_FAILURE": {
     "defaultStatusCode": 422,
     "messagePattern": "Unable to save device information."
+  },
+  "ADMIN_ACCOUNT_CONFLICT": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Admin account conflict"
   },
   "INVALID_DATES": {
     "defaultStatusCode": 400,
@@ -344,8 +356,8 @@
     "messagePattern": "This action has been blocked temporarily"
   },
   "LOGIN_FAILED": {
-    "defaultStatusCode": 422,
-    "messagePattern": "Login failed"
+    "defaultStatusCode": 401,
+    "messagePattern": "login failed"
   },
   "CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED": {
     "defaultStatusCode": 422,
@@ -358,5 +370,29 @@
   "IMPORT_DATA_NOT_PROCESSED": {
     "defaultStatusCode": 422,
     "messagePattern": "Import worker stopped with error before processing data"
+  },
+  "INVALID_ADDRESS_LATITUDE_LONGITUDE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid address longitude/latitude. Might be out of bounds"
+  },
+  "INVALID_FILE_CONTENTS_SPREADSHEET_FORMULAE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Invalid file contents. File contains formulae in cell <%= cell %> which is not supported"
+  },
+  "INVALID_FILE_SIZE": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Uploaded file size is bigger than configured maxFileSize"
+  },
+  "DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER": {
+    "defaultStatusCode": 422,
+    "messagePattern": "The alternate unique identifier corresponds to more than one existing records. Alternate unique identifier query: <%= alternateIdQuery %>"
+  },
+  "RESTORE_BACKUP_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Failed to restore backup"
+  },
+  "MIGRATE_DATABASE_FAILED": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Failed to migrate database"
   }
 }

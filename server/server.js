@@ -2,6 +2,7 @@
 
 const clusterConfig = require('./config.json').cluster || {};
 const accessTokensCleanup = require('./../components/accessTokensCleanup');
+const clusterHelpers = require('./../components/clusterHelpers');
 
 /**
  * Start server
@@ -12,10 +13,10 @@ const startServer = function (logger, startScheduler) {
   // load dependencies
   const ip = require('ip');
   const _ = require('lodash');
-  const request = require('request');
+  const got = require('got');
   const config = require('./config');
   const path = require('path');
-  const fs = require('fs');
+  const fs = require('fs-extra');
   const url = require('url');
   const v8 = require('v8');
 
@@ -30,7 +31,7 @@ const startServer = function (logger, startScheduler) {
       app.logger.exitProcessAfterFlush(1);
     } else {
       /* eslint-disable no-console */
-      console.error(e);
+      console.error(e && typeof e === 'object' && e.message ? e.message : e);
       /* eslint-enable no-console*/
       process.exit(1);
     }
@@ -51,6 +52,29 @@ const startServer = function (logger, startScheduler) {
     });
   } catch (err) {
     logger.debug('Failed to calculate heap statistics', err);
+  }
+
+  // before bootstraping loopback set missing required properties in datasources.json if needed
+  // will throw error and process will stop on failure
+  let mustUpdateConfigFile = false;
+  const datasourcePath = path.resolve(__dirname + '/datasources.json');
+  const datasourceContents = fs.readJsonSync(datasourcePath);
+  if (_.get(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery') !== false) {
+    _.set(datasourceContents, 'mongoDb.prohibitHiddenPropertiesInQuery', false);
+    mustUpdateConfigFile = true;
+  }
+  if (_.get(datasourceContents, 'mongoDb.useNewUrlParser') !== false) {
+    _.set(datasourceContents, 'mongoDb.useNewUrlParser', false);
+    mustUpdateConfigFile = true;
+  }
+  if (_.get(datasourceContents, 'mongoDb.maxDepthOfData') === undefined) {
+    _.set(datasourceContents, 'mongoDb.maxDepthOfData', 64);
+    mustUpdateConfigFile = true;
+  }
+  if (mustUpdateConfigFile) {
+    fs.writeJsonSync(datasourcePath, datasourceContents, {
+      spaces: 2
+    });
   }
 
   const loopback = require('loopback');
@@ -74,54 +98,58 @@ const startServer = function (logger, startScheduler) {
         app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
 
         // test if that IP address is actually the correct one by making a status request
-        request({
-          uri: `${baseUrl}/status`,
-          json: true,
+        got(`${baseUrl}/status`, {
+          responseType: 'json',
+          resolveBodyOnly: true,
           // do not wait a lot of time for the server to respond
-          timeout: 3000
-        }, function (error, response, body) {
-          // if an error occurred
-          if (error) {
+          timeout: 3000,
+          retry: 0
+        })
+          .then(body => {
+            // no error, but unexpected response
+            if (!body || !body.started) {
+              // log unexpected response
+              app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
+              // fallback to standard loopback address
+              baseUrl = app.get('url').replace(/\/$/, '');
+            }
+          })
+          .catch(error => {
             // log it
             app.logger.error(error);
             // fallback to standard loopback address
             baseUrl = app.get('url').replace(/\/$/, '');
-          }
-          // no error, but unexpected response
-          if (!body || !body.started) {
-            // log unexpected response
-            app.logger.debug('Unexpected response from /status endpoint. Falling back to default address');
-            // fallback to standard loopback address
-            baseUrl = app.get('url').replace(/\/$/, '');
-          }
+          })
+          .then(() => {
+            app.logger.info('Web server listening at: %s', baseUrl);
+            if (app.get('loopback-component-explorer')) {
+              const explorerPath = app.get('loopback-component-explorer').mountPath;
+              app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
+            }
 
-          app.logger.info('Web server listening at: %s', baseUrl);
-          if (app.get('loopback-component-explorer')) {
-            const explorerPath = app.get('loopback-component-explorer').mountPath;
-            app.logger.info('Browse your REST API at %s%s', baseUrl, explorerPath);
-          }
+            // make sure we update the public data
+            const urlData = url.parse(baseUrl);
+            _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
+            _.set(config, 'public.host', urlData.hostname);
+            _.set(config, 'public.port', urlData.port);
 
-          // make sure we update the public data
-          const urlData = url.parse(baseUrl);
-          _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
-          _.set(config, 'public.host', urlData.hostname);
-          _.set(config, 'public.port', urlData.port);
+            // update configuration
+            const configPath = path.resolve(__dirname + '/config.json');
+            fs.writeFileSync(
+              configPath,
+              JSON.stringify(config, null, 2)
+            );
 
-          // update configuration
-          const configPath = path.resolve(__dirname + '/config.json');
-          fs.writeFileSync(
-            configPath,
-            JSON.stringify(config, null, 2)
-          );
-
-          // config saved
-          app.logger.info(
-            'Config file ( %s ) public data updated to: %s',
-            configPath,
-            JSON.stringify(config.public)
-          );
-        });
+            // config saved
+            app.logger.info(
+              'Config file ( %s ) public data updated to: %s',
+              configPath,
+              JSON.stringify(config.public)
+            );
+          });
       }
+
+      clusterHelpers.handleMasterMessagesInWorker(app);
     });
 
     // remove default socket timeout and set it 12 hours
@@ -170,11 +198,7 @@ if (
     });
 
     // get logger; will get stdout and stderr from child processes so no need for formatting
-    const logger = require('../components/logger')(true, {
-      json: false,
-      timestamp: false,
-      showLevel: false
-    });
+    const logger = require('../components/logger')(true, true);
     logger.debug(`Master ${process.pid} is running. Forking ${processesNo} processes`);
 
     // remove access tokens if needed
@@ -241,6 +265,9 @@ if (
       worker.process.stderr.on('data', chunk => {
         logWorkerMessage(chunk, 'error');
       });
+
+      // broadcast messages received from a worker to other workers
+      clusterHelpers.handleWorkerMessagesInMaster(worker, logger);
     });
   } else {
     // start server
@@ -255,5 +282,6 @@ if (
   accessTokensCleanup(logger);
 
   // start server
-  startServer(logger, true);
+  // start scheduler only when the actual application is starting; don't start on install scripts execution
+  startServer(logger, require.main === module);
 }

@@ -11,6 +11,9 @@ const PromisePool = require('es6-promise-pool');
 const _ = require('lodash');
 const Config = require('./../../server/config.json');
 const genericHelpers = require('../../components/helpers');
+const Platform = require('../../components/platform');
+const WorkerRunner = require('./../../components/workerRunner');
+const exportHelper = require('./../../components/exportHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -20,6 +23,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    // inject platform identifier
+    options.platform = Platform.BULK;
+
     let errorMessage = '';
 
     // outbreak follow up generate params sanity checks
@@ -81,6 +87,14 @@ module.exports = function (Outbreak) {
     let keepTeamAssignment = typeof data.keepTeamAssignment === 'boolean' ?
       data.keepTeamAssignment :
       this.generateFollowUpsKeepTeamAssignment;
+
+    // get other generate follow-ups options
+    let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
+      data.intervalOfFollowUp :
+      this.intervalOfFollowUp;
+
+    // check if contact tracing should start on the date of the last contact
+    const generateFollowUpsDateOfLastContact = this.generateFollowUpsDateOfLastContact;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
@@ -169,7 +183,9 @@ module.exports = function (Outbreak) {
                             outbreakFollowUpPerDay,
                             targeted,
                             overwriteExistingFollowUps,
-                            teamAssignmentPerDay
+                            teamAssignmentPerDay,
+                            intervalOfFollowUp,
+                            generateFollowUpsDateOfLastContact
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);
@@ -361,91 +377,206 @@ module.exports = function (Outbreak) {
    * @param exportType
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    * @returns {*}
    */
-  Outbreak.prototype.exportFilteredFollowups = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    let self = this;
+  Outbreak.prototype.exportFilteredFollowups = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
-        }
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
 
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then((dictionary) => {
-        return app.models.followUp.preFilterForOutbreak(this, filter)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(function (data) {
-        // add geographical restriction to filter if needed
-        return app.models.followUp
-          .addGeographicalRestrictions(options.remotingContext, data.filter.where)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (data.filter.where = updatedFilter);
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
 
-            // finished
-            return data;
-          });
-      })
-      .then(function (data) {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
-        }
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
-        }
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
 
-        options.questionnaire = self.contactFollowUpTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        contact: {
+          collection: 'person',
+          queryPath: 'where.contact',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          localKey: 'personId',
+          foreignKey: '_id'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: 'personId',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2,
+          //     prefilters: {
+          //         contact: {
+          //           collection: 'person...',
+          //           queryPath: 'where.relationship',
+          //           localKey: '_id',
+          //           foreignKey: 'persons[].id',
+          //           foreignKeyArraySize: 2
+          //         }
+          //       }
+          //   }
+          // }
+        },
 
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.followUp,
-          {},
+        // #TODO - implement
+        // where.timeLastSeen
+        // where.weekNumber
+      }
+    );
+
+    // attach geo restrictions if necessary
+    app.models.followUp
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'followUp',
+            modelName: app.models.followUp.modelName,
+            scopeQuery: app.models.followUp.definition.settings.scope,
+            excludeBaseProperties: app.models.followUp.definition.settings.excludeBaseProperties,
+            arrayProps: undefined,
+            fieldLabelsMap: app.models.followUp.fieldLabelsMap,
+            exportFieldsGroup: app.models.followUp.exportFieldsGroup,
+            exportFieldsOrder: app.models.followUp.exportFieldsOrder,
+            locationFields: app.models.followUp.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'personId'
+            ]
+          },
           filter,
           exportType,
-          'Follow-Up List',
           encryptPassword,
           anonymizeFields,
-          options,
-          function (results) {
-            return Promise.resolve(results);
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.contactFollowUpTemplate ?
+              this.contactFollowUpTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            jsonReplaceUndefinedWithNull,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          callback
+          prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.teamId ?
+                  followUp.teamId :
+                  undefined;
+              }`,
+              replace: {
+                'teamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
+            contact: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'person',
+              project: [
+                '_id',
+                'visualId',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(followUp) => {
+                return followUp && followUp.personId ?
+                  followUp.personId :
+                  undefined;
+              }`
+            }
+          }
         );
-      });
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
   };
 
   /**
@@ -485,9 +616,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -504,9 +633,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -623,9 +750,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -642,9 +767,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -843,9 +966,7 @@ module.exports = function (Outbreak) {
               and: [
                 caseQuery, {
                   outbreakId: outbreakId,
-                  deleted: {
-                    $ne: true
-                  }
+                  deleted: false
                 }
               ]
             }, {projection: {'_id': 1}});
@@ -863,9 +984,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -1255,6 +1374,166 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Count the followups per user per day
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countFollowUpsPerUserPerDay = function (filter, options, callback) {
+    // initialize result
+    let result = {
+      totalFollowupsCount: 0,
+      successfulFollowupsCount: 0,
+      users: []
+    };
+
+    // get outbreakId
+    let outbreakId = this.id;
+
+    // initialize default filter
+    let defaultFilter = {
+      where: {
+        outbreakId: outbreakId
+      },
+      order: 'date ASC'
+    };
+
+    // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
+    if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
+      // to get the entire day today, filter between today 00:00 and tomorrow 00:00
+      let today = genericHelpers.getDate().toString();
+      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+
+      defaultFilter.where.date = {
+        between: [today, todayEndOfDay]
+      };
+    }
+
+    // retrieve all users to make sure that follow-ups users still exist
+    // - there is no need right now to restrict users by locations to which I have access since there will be just a small number of users and they will be filter out further
+    let existingUsersMap = {};
+    app.models.user
+      .find({
+        fields: {
+          id: true
+        }
+      })
+      .then(function (users) {
+        // map users
+        users.forEach((user) => {
+          existingUsersMap[user.id] = true;
+        });
+
+        // construct follow-up filter
+        const followUpFilter = app.utils.remote.mergeFilters(
+          defaultFilter,
+          filter || {}
+        );
+
+        // define fields that we always need to retrieve
+        // there is no point why frontend will request other fields since we don't return follow-ups
+        followUpFilter.fields = {
+          personId: true,
+          responsibleUserId: true,
+          date: true,
+          statusId: true
+        };
+
+        // get all the followups for the filtered period
+        // add geographical restriction to filter if needed
+        return app.models.followUp
+          .addGeographicalRestrictions(options.remotingContext, followUpFilter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (followUpFilter.where = updatedFilter);
+
+            // retrieve follow-ups
+            return app.models.followUp
+              .find(followUpFilter);
+          });
+      })
+      .then(function (followups) {
+        // filter by relation properties
+        followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+        // initialize users map
+        let usersMap = {};
+        // initialize helper user to date to contacts map
+        let userDateContactsMap = {};
+
+        followups.forEach(function (followup) {
+          // get contactId
+          const contactId = followup.personId;
+
+          // get responsibleUserId; there might be no user id, set null
+          let responsibleUserId;
+          if (
+            followup.responsibleUserId &&
+            existingUsersMap[followup.responsibleUserId]
+          ) {
+            responsibleUserId = followup.responsibleUserId;
+          } else {
+            responsibleUserId = null;
+          }
+
+          // get date; format it to UTC 00:00:00
+          const date = genericHelpers.getDate(followup.date).toString();
+
+          // initialize user entry if not already initialized
+          if (!usersMap[responsibleUserId]) {
+            usersMap[responsibleUserId] = {
+              id: responsibleUserId,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              dates: {}
+            };
+
+            userDateContactsMap[responsibleUserId] = {};
+          }
+
+          // initialize date entry for the user if not already initialized
+          if (!usersMap[responsibleUserId].dates[date]) {
+            usersMap[responsibleUserId].dates[date] = {
+              date: date,
+              totalFollowupsCount: 0,
+              successfulFollowupsCount: 0,
+              contactIDs: []
+            };
+
+            userDateContactsMap[responsibleUserId][date] = {};
+          }
+
+          // increase counters
+          usersMap[responsibleUserId].dates[date].totalFollowupsCount++;
+          usersMap[responsibleUserId].totalFollowupsCount++;
+
+          if (app.models.followUp.isPerformed(followup)) {
+            usersMap[responsibleUserId].dates[date].successfulFollowupsCount++;
+            usersMap[responsibleUserId].successfulFollowupsCount++;
+            result.successfulFollowupsCount++;
+          }
+
+          // add contactId to the user/date container if not already added
+          if (!userDateContactsMap[responsibleUserId][date][contactId]) {
+            // keep flag to not add contact twice for user
+            userDateContactsMap[responsibleUserId][date][contactId] = true;
+            usersMap[responsibleUserId].dates[date].contactIDs.push(contactId);
+          }
+        });
+
+        // update results; sending array with users and contacts information
+        result.totalFollowupsCount = followups.length;
+        result.users = _.map(usersMap, (value) => {
+          value.dates = Object.values(value.dates);
+          return value;
+        });
+
+        // send response
+        callback(null, result);
+      })
+      .catch(callback);
+  };
+
 
   Outbreak.beforeRemote('prototype.countFollowUpsByTeam', function (context, modelInstance, next) {
     Outbreak.helpers.findAndFilteredCountFollowUpsBackCompat(context, modelInstance, next);

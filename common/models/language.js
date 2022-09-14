@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const async = require('async');
 const _ = require('lodash');
+const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
 
 module.exports = function (Language) {
 
@@ -43,25 +44,57 @@ module.exports = function (Language) {
               const createUpdateToken = (outbreakId, modules) => {
                 // create / update token
                 if (foundToken) {
-                  // if found, update translation
-                  return foundToken.updateAttributes({
+                  // token update data
+                  const tokenUpdateData = {
                     translation: languageToken.translation,
                     outbreakId: outbreakId,
                     modules: modules
-                  }, options);
+                  };
+
+                  // add is default language token ?
+                  if (languageToken.isDefaultLanguageToken !== undefined) {
+                    tokenUpdateData.isDefaultLanguageToken = languageToken.isDefaultLanguageToken;
+                  }
+
+                  // add section
+                  if (languageToken.section !== undefined) {
+                    tokenUpdateData.section = languageToken.section;
+                  }
+
+                  // if found, update translation
+                  return foundToken.updateAttributes(
+                    tokenUpdateData,
+                    options
+                  );
+                }
+
+                // token create data
+                const tokenCreateData = {
+                  token: languageToken.token,
+                  languageId: self.id,
+                  translation: languageToken.translation,
+                  outbreakId: outbreakId,
+                  modules: modules,
+                  createdAt: languageToken.createdAt,
+                  updatedAt: languageToken.updatedAt
+                };
+
+                // add is default language token ?
+                if (languageToken.isDefaultLanguageToken !== undefined) {
+                  tokenCreateData.isDefaultLanguageToken = languageToken.isDefaultLanguageToken;
+                }
+
+                // add section
+                if (languageToken.section !== undefined) {
+                  tokenCreateData.section = languageToken.section;
                 }
 
                 // if not found, create it
                 return app.models.languageToken
-                  .create({
-                    token: languageToken.token,
-                    languageId: self.id,
-                    translation: languageToken.translation,
-                    outbreakId: outbreakId,
-                    modules: modules,
-                    createdAt: languageToken.createdAt,
-                    updatedAt: languageToken.updatedAt
-                  }, options);
+                  .create(
+                    tokenCreateData,
+                    options
+                  );
               };
 
               // determine outbreak
@@ -96,12 +129,16 @@ module.exports = function (Language) {
 
               // determine if there is a different language that has modules and maybe outbreakId for this token
               return app.models.languageToken
-                .find({
-                  where: {
-                    token: languageToken.token,
-                    modules: {
-                      exists: true
-                    }
+                .rawFind({
+                  token: languageToken.token,
+                  modules: {
+                    exists: true
+                  }
+                }, {
+                  projection: {
+                    _id: 1,
+                    outbreakId: 1,
+                    modules: 1
                   }
                 })
                 .then(function (tokens) {
@@ -273,4 +310,25 @@ module.exports = function (Language) {
   Language.getFieldTranslationFromDictionary = function (field, languageId, dictionary) {
     return dictionary.getTranslation(field);
   };
+
+  /**
+   * Clone english tokens if this is a new language
+   */
+  Language.observe('after save', (ctx, next) => {
+    // clone tokens from another language - preferably english
+    if (
+      ctx.isNewInstance && (
+        !ctx.options ||
+        !ctx.options._init
+      )
+    ) {
+      // clone tokens for this language and fix other languages in case they have missing language tokens
+      addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
+        next,
+        ctx.instance.id
+      );
+    } else {
+      next();
+    }
+  });
 };

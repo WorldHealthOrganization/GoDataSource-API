@@ -3,8 +3,6 @@
 const app = require('../../server/server');
 const uuid = require('uuid');
 const moment = require('moment');
-const request = require('request');
-const packageJson = require('../../package');
 const config = require('../../server/config');
 const _ = require('lodash');
 const path = require('path');
@@ -169,57 +167,6 @@ module.exports = function (SystemSettings) {
   };
 
   /**
-   * Check if the application has available updates
-   * @param callback
-   */
-  SystemSettings.checkForUpdates = function (callback) {
-    // build a base bath for the requests
-    const basePath = `${config.updatesServer.protocol}://${config.updatesServer.host}:${config.updatesServer.port}/api/applications`;
-    // query updates server for updates
-    request({
-      uri: `${basePath}/check-for-updates`,
-      qs: {
-        platform: packageJson.build.platform,
-        version: packageJson.version
-      },
-      json: true
-    }, function (error, response, body) {
-      // handle communication errors
-      if (error) {
-        return callback(app.utils.apiError.getError('EXTERNAL_API_CONNECTION_ERROR', {
-          serviceName: 'Go.Data Version Manager',
-          error: error
-        }));
-      }
-      // handle invalid response errors
-      if (response.statusCode !== 200) {
-        return callback(app.utils.apiError.getError('UNEXPECTED_EXTERNAL_API_RESPONSE', {
-          serviceName: 'Go.Data Version Manager',
-          statusCode: response.statusCode,
-          response: body
-        }));
-      }
-      // assume no update available
-      let application = {
-        update: false
-      };
-      // if the response contains an update
-      if (body && body.id) {
-        // add update information to the response
-        application = {
-          update: true,
-          name: body.name,
-          description: body.description,
-          version: body.version,
-          platform: body.platform,
-          download: `${basePath}/${body.id}/download`
-        };
-      }
-      callback(null, application);
-    });
-  };
-
-  /**
    * Expose build information via API
    * @param callback
    */
@@ -233,7 +180,18 @@ module.exports = function (SystemSettings) {
             config.authToken.ttl :
             app.models.user.settings.ttl,
           skipOldPasswordForUserModify: config.skipOldPasswordForUserModify,
-          captcha: app.utils.helpers.getCaptchaConfig()
+          captcha: app.utils.helpers.getCaptchaConfig(),
+          demoInstance: config.demoInstance ?
+            config.demoInstance : {
+              enabled: false
+            },
+          duplicate: config.duplicate ?
+            config.duplicate : {
+              disableCaseDuplicateCheck: false,
+              disableContactDuplicateCheck: false,
+              disableContactOfContactDuplicateCheck: false,
+              executeCheckOnlyOnDuplicateDataChange: false
+            }
         }
       )
     );
@@ -245,7 +203,7 @@ module.exports = function (SystemSettings) {
    */
   SystemSettings.getBackupLocation = function (callback) {
     SystemSettings
-      .getCache()
+      .findOne()
       .then(function (systemSettings) {
         callback(null, {
           install: app.ROOT_PATH,
@@ -279,5 +237,307 @@ module.exports = function (SystemSettings) {
         callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid File Type: ${type}. Supported options: json, qr`}));
         break;
     }
+  };
+
+  /**
+   * Retrieve model definition
+   */
+  SystemSettings.getModelDefinition = function (model, callback) {
+    // retrieve list of models
+    const loopbackRegistry = app.registry ||
+      app.loopback.registry ||
+      app.loopback;
+    const modelsMap = loopbackRegistry.modelBuilder.models;
+
+    // construct model definition
+    let modelData = modelsMap[model];
+
+    // ignore map ?
+    const modelsMapIgnore = {
+      'Application': true,
+      'ACL': true,
+      'file': true
+    };
+    if (
+      modelsMapIgnore[model] ||
+      model.startsWith('AnonymousModel_')
+    ) {
+      modelData = undefined;
+    }
+
+    // data not found ?
+    if (
+      !modelData ||
+      !modelData.definition ||
+      !modelData.definition.rawProperties
+    ) {
+      return callback(app.utils.apiError.getError(
+        'INTERNAL_ERROR', {
+          error: `Invalid model type: ${model}. Supported options: ${Object.keys(modelsMap).filter((name) => !modelsMapIgnore[name] && !name.startsWith('AnonymousModel_')).join(', ')}`
+        }
+      ));
+    }
+
+    // type to def
+    const typeToDefinition = (
+      rawPropertyDefType
+    ) => {
+      // array ?
+      if (
+        Array.isArray(rawPropertyDefType) &&
+        rawPropertyDefType.length > 0
+      ) {
+        // determine array item def type
+        return [
+          propertyToDefinition(
+            rawPropertyDefType[0]
+          )
+        ];
+      } else {
+        // check if type is a model
+        if (
+          typeof rawPropertyDefType === 'string' &&
+          modelsMap[rawPropertyDefType] &&
+          modelsMap[rawPropertyDefType].definition &&
+          modelsMap[rawPropertyDefType].definition.rawProperties
+        ) {
+          // go into object
+          return modelToDefinition(
+            modelsMap[rawPropertyDefType],
+            rawPropertyDefType === 'address' ?
+              Object.assign(
+                {},
+                modelsMap[rawPropertyDefType].definition.rawProperties, {
+                  geoLocation: {
+                    type: 'customGeoPoint'
+                  }
+                }
+              ) :
+              modelsMap[rawPropertyDefType].definition.rawProperties
+          );
+        } else if (
+          typeof rawPropertyDefType === 'object'
+        ) {
+          // go into object
+          return modelToDefinition(
+            rawPropertyDefType,
+            rawPropertyDefType
+          );
+        } else {
+          if (
+            rawPropertyDefType === 'string' ||
+            rawPropertyDefType === 'number' ||
+            rawPropertyDefType === 'boolean' ||
+            rawPropertyDefType === 'object' ||
+            rawPropertyDefType === 'date' ||
+            rawPropertyDefType === 'any' ||
+            rawPropertyDefType === 'file'
+          ) {
+            // add property
+            return rawPropertyDefType;
+          } else if (
+            rawPropertyDefType === 'geopoint'
+          ) {
+            return modelToDefinition(
+              modelsMap['customGeoPoint'],
+              modelsMap['customGeoPoint'].definition.rawProperties
+            );
+          } else if (
+            rawPropertyDefType === 'String'
+          ) {
+            return 'string';
+          } else if (
+            rawPropertyDefType === 'Date'
+          ) {
+            return 'date';
+          } else if (
+            rawPropertyDefType &&
+            typeof rawPropertyDefType === 'function'
+          ) {
+            if (rawPropertyDefType.name) {
+              if (rawPropertyDefType.name === 'Number') {
+                return 'number';
+              } else if (rawPropertyDefType.name === 'String') {
+                return 'string';
+              } else if (rawPropertyDefType.name === 'Date') {
+                return 'date';
+              } else if (rawPropertyDefType.name === 'Boolean') {
+                return 'boolean';
+              } else if (
+                rawPropertyDefType.name &&
+                modelsMap[rawPropertyDefType.name] &&
+                modelsMap[rawPropertyDefType.name].definition &&
+                modelsMap[rawPropertyDefType.name].definition.rawProperties
+              ) {
+                return modelToDefinition(
+                  modelsMap[rawPropertyDefType.name],
+                  rawPropertyDefType.name === 'address' ?
+                    Object.assign(
+                      {},
+                      modelsMap[rawPropertyDefType.name].definition.rawProperties, {
+                        geoLocation: {
+                          type: 'customGeoPoint'
+                        }
+                      }
+                    ) :
+                    modelsMap[rawPropertyDefType.name].definition.rawProperties
+                );
+              } else {
+                throw Error(`Error resolving function type with name '${rawPropertyDefType.name}' for model '${model}'`);
+              }
+            } else {
+              throw Error(`Error resolving function type '${rawPropertyDefType}' for model '${model}'`);
+            }
+          } else {
+            throw Error(`Error resolving type '${rawPropertyDefType}' for model '${model}'`);
+          }
+        }
+      }
+    };
+
+    // add property definition
+    const propertyToDefinition = (
+      rawPropertyDef
+    ) => {
+      // take action depending of property type
+      if (rawPropertyDef.type) {
+        return typeToDefinition(
+          rawPropertyDef.type
+        );
+      } else if (
+        rawPropertyDef && (
+          typeof rawPropertyDef === 'string' ||
+          typeof rawPropertyDef === 'function' ||
+          Array.isArray(rawPropertyDef)
+        )
+      ) {
+        return typeToDefinition(
+          rawPropertyDef
+        );
+      } else {
+        throw Error(`Error resolving property '${rawPropertyDef}' for model '${model}'`);
+      }
+    };
+
+    // construct definition
+    const alreadyMapped = {};
+    const modelToDefinition = (
+      modelData,
+      rawProperties
+    ) => {
+      // already mapped, then we need to return the map so we don't do a forever loop
+      if (alreadyMapped[modelData]) {
+        return alreadyMapped[modelData];
+      }
+
+      // save map
+      const acc = {};
+      alreadyMapped[modelData] = acc;
+
+      // go through properties and map them
+      Object.keys(rawProperties).forEach((rawProperty) => {
+        // hidden property, then we need to exclude it
+        if (
+          modelData &&
+          modelData.definition &&
+          modelData.definition.settings &&
+          modelData.definition.settings.hidden &&
+          modelData.definition.settings.hidden.length > 0
+        ) {
+          if (modelData.definition.settings.hidden.indexOf(rawProperty) > -1) {
+            // hide
+            return;
+          }
+        }
+
+        // map property
+        acc[rawProperty] = propertyToDefinition(
+          rawProperties[rawProperty]
+        );
+      });
+
+      // finished
+      return acc;
+    };
+
+    // start with root object
+    const definition = modelToDefinition(
+      modelData,
+      modelData.definition.rawProperties
+    );
+
+    // clean recursive parents
+    const cleanRecursive = (
+      acc,
+      paths
+    ) => {
+      Object.keys(acc).forEach((property) => {
+        // get value
+        const propValue = acc[property];
+
+        // check if already mapped
+        let objectIndex = 0;
+        let alreadyMapped = false;
+        while (objectIndex < paths.length) {
+          // mapped ?
+          if (
+            paths[objectIndex] === propValue || (
+              propValue &&
+              Array.isArray(propValue) &&
+              propValue.length > 0 &&
+              paths[objectIndex] === propValue[0]
+            )
+          ) {
+            // mapped
+            alreadyMapped = true;
+
+            // finished
+            break;
+          }
+
+          // next
+          objectIndex++;
+        }
+
+        // already mapped ?
+        if (alreadyMapped) {
+          delete acc[property];
+        } else if (
+          propValue &&
+          Array.isArray(propValue) &&
+          propValue.length > 0
+        ) {
+          if (typeof propValue[0] === 'object') {
+            cleanRecursive(
+              propValue[0], [
+                ...paths,
+                propValue[0]
+              ]
+            );
+          }
+        } else if (
+          typeof propValue === 'object'
+        ) {
+          cleanRecursive(
+            propValue, [
+              ...paths,
+              propValue
+            ]
+          );
+        } else {
+          // nothing, seems okay
+        }
+      });
+    };
+    cleanRecursive(
+      definition,
+      []
+    );
+
+    // finished
+    callback(
+      null,
+      definition
+    );
   };
 };

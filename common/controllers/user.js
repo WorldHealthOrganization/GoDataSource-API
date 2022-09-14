@@ -7,9 +7,8 @@ const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
 const Moment = require('moment');
-const uuid = require('uuid');
+const uuid = require('uuid').v4;
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
-const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (User) {
 
@@ -34,15 +33,51 @@ module.exports = function (User) {
         }
         return user.updateAttributes({
           loginRetriesCount: 0,
-          lastLoginDate: null
+          lastLoginDate: null,
+          resetPasswordRetriesCount: 0,
+          lastResetPasswordDate: null
         }).then(() => next());
       });
   });
 
   User.observe('before save', (ctx, next) => {
-    // do not execute on sync
+    // check for sync action
     if (ctx.options && ctx.options._sync) {
-      return next();
+      // on sync from another Go.Data instance we need to import users with same email
+      // for this we will add a suffix to the email
+      // also to disallow user from being used all roles are removed and password is changed
+      if (ctx.options.snapshotFromClient && ctx.isNewInstance) {
+        const data = app.utils.helpers.getSourceAndTargetFromModelHookContext(ctx);
+        // no roles
+        data.target.roleIds = [''];
+        // random password
+        data.target.password = bcrypt.hashSync(app.utils.helpers.randomString('all', 20, 30), 10);
+
+        // search for similar email
+        return User
+          .rawFind({
+            '$or': [{
+              email: data.target.email
+            }, {
+              email: {
+                '$regex': `^${data.target.email.replace(/[.]/g, '\\.')}`,
+                '$options': 'i'
+              }
+            }]
+          }, {projection: {'_id': 1}})
+          .then(users => {
+            if (!users.length) {
+              // no users were found with a similar email; continue create logic
+              return;
+            }
+
+            // some users were found with a similar email; add suffix to email
+            data.target.email += `-duplicate-${users.length}`;
+          });
+      } else {
+        // don't execute additional logic
+        return next();
+      }
     }
 
     let oldPassword = null;
@@ -124,7 +159,7 @@ module.exports = function (User) {
       req.session &&
       req.session.loginCaptcha &&
       req.body &&
-      req.session.loginCaptcha !== req.body.captcha
+      req.session.loginCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.loginCaptcha = uuid();
@@ -209,12 +244,44 @@ module.exports = function (User) {
 
             return Promise.resolve();
           })
+          .then(() => {
+            // no language ?
+            if (!user.languageId) {
+              return;
+            }
+
+            // check if language exits
+            return app.models.language
+              .findOne({
+                where: {
+                  id: user.languageId
+                }
+              })
+              .then((language) => {
+                // language found ?
+                if (language) {
+                  return;
+                }
+
+                // no language, then reset to english
+                user.languageId = 'english_us';
+                return user
+                  .updateAttributes({
+                    languageId: user.languageId
+                  });
+              });
+          })
           .then(() => next());
       })
       .catch(next);
   });
 
   User.afterRemoteError('login', (ctx, next) => {
+    // don't increase user login retries on invalid captcha
+    if (ctx.error && ctx.error.code === 'INVALID_CAPTCHA') {
+      return next();
+    }
+
     if (ctx.args.credentials.email) {
       User
         .findOne({
@@ -261,7 +328,7 @@ module.exports = function (User) {
       req.session &&
       req.session.forgotPasswordCaptcha &&
       req.body &&
-      req.session.forgotPasswordCaptcha !== req.body.captcha
+      req.session.forgotPasswordCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.forgotPasswordCaptcha = uuid();
@@ -288,7 +355,7 @@ module.exports = function (User) {
       req.session &&
       req.session.resetPasswordQuestionsCaptcha &&
       req.body &&
-      req.session.resetPasswordQuestionsCaptcha !== req.body.captcha
+      req.session.resetPasswordQuestionsCaptcha.toLowerCase() !== req.body.captcha.toLowerCase()
     ) {
       // invalidate captcha - just one time we can use it, otherwise it becomes invalid
       req.session.resetPasswordQuestionsCaptcha = uuid();
@@ -489,61 +556,117 @@ module.exports = function (User) {
         }
 
         // verify if user has any security questions set, if not stop at once
-        if (user.securityQuestions && user.securityQuestions.length) {
-          // flag that indicates that each question name is a match on the user data and the answers are correct
-          let isValid = false;
-
-          // check user questions against the ones from request body
-          for (let i = 0; i < user.securityQuestions.length; i++) {
-            let userQuestion = user.securityQuestions[i];
-
-            // position of the user question in the request body
-            let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
-
-            // if any of the question are not matching, stop
-            if (questionPos === -1) {
-              isValid = false;
-              break;
-            }
-
-            // check the answers
-            // backwards compatible (case sensitive check)
-            isValid = bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
-              bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer);
-            if (!isValid) {
-              break;
-            }
-          }
-
-          // generate a password reset token
-          if (isValid) {
-            return user.createAccessToken(
-              {
-                email: user.email,
-                password: user.password
-              },
-              {
-                ttl: config.passwordReset.ttl,
-                scopes: ['reset-password']
-              })
-              .then((token) => {
-                return {
-                  token: token.id,
-                  ttl: token.ttl
-                };
-              })
-              .catch((err) => {
-                app.logger.warn('Failed to generate reset password token', err);
-                return buildError('PASSWORD_RECOVERY_FAILED');
-              });
-          }
-
-          app.logger.warn('Invalid security questions');
+        if (
+          !user.securityQuestions ||
+          !user.securityQuestions.length
+        ) {
+          app.logger.warn('Security questions recovery is disabled');
           throw buildError('PASSWORD_RECOVERY_FAILED');
         }
 
-        app.logger.warn('Security questions recovery is disabled');
-        throw buildError('PASSWORD_RECOVERY_FAILED');
+        // flag that indicates that each question name is a match on the user data and the answers are correct
+        let isValid = false;
+
+        // verify the number of user failed attempts at reset password
+        const resetPasswordSettings = config.bruteForce && config.bruteForce.resetPassword ?
+          config.bruteForce.resetPassword :
+          undefined;
+
+        // define a promise
+        let promise = Promise.resolve();
+        if (
+          resetPasswordSettings &&
+          resetPasswordSettings.enabled &&
+          user.resetPasswordRetriesCount >= 0 &&
+          user.lastResetPasswordDate
+        ) {
+          // check if then number of failed attempts has been reached
+          const lastResetPasswordDate = Moment(user.lastResetPasswordDate);
+          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(Moment());
+          if (
+            user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries &&
+            !isValidForReset
+          ) {
+            app.logger.warn('The number of failed attempts at security questions checking has been reached');
+            throw buildError('ACTION_TEMPORARILY_BLOCKED');
+          }
+
+          // reset the number of failed attempts
+          if (isValidForReset) {
+            promise = promise
+              .then(() => {
+                return user.updateAttributes({
+                  resetPasswordRetriesCount: 0,
+                  lastResetPasswordDate: null
+                });
+              });
+          }
+        }
+
+        // return the promise
+        return promise
+          .then(() => {
+            // check user questions against the ones from request body
+            for (let i = 0; i < user.securityQuestions.length; i++) {
+              let userQuestion = user.securityQuestions[i];
+
+              // position of the user question in the request body
+              let questionPos = data.questions.findIndex((q) => q.question === userQuestion.question);
+
+              // if any of the question are not matching, stop
+              // check the answers, backwards compatible (case sensitive check)
+              isValid = questionPos !== -1 &&
+                (
+                  bcrypt.compareSync(data.questions[questionPos].answer.toLowerCase(), userQuestion.answer) ||
+                  bcrypt.compareSync(data.questions[questionPos].answer, userQuestion.answer)
+                );
+
+              // do not continue if at least one answer is invalid
+              if (!isValid) {
+                break;
+              }
+            }
+          })
+          .then(() => {
+            // increase the number of failed attempts
+            if (
+              !isValid &&
+              resetPasswordSettings &&
+              resetPasswordSettings.enabled
+            ) {
+              return user.updateAttributes({
+                resetPasswordRetriesCount: user.resetPasswordRetriesCount ? ++user.resetPasswordRetriesCount : 1,
+                lastResetPasswordDate: Moment().toDate()
+              });
+            }
+          })
+          .then(() => {
+            // generate a password reset token
+            if (isValid) {
+              return user.createAccessToken(
+                {
+                  email: user.email,
+                  password: user.password
+                },
+                {
+                  ttl: config.passwordReset.ttl,
+                  scopes: ['reset-password']
+                })
+                .then((token) => {
+                  return {
+                    token: token.id,
+                    ttl: token.ttl
+                  };
+                })
+                .catch((err) => {
+                  app.logger.warn('Failed to generate reset password token', err);
+                  return buildError('PASSWORD_RECOVERY_FAILED');
+                });
+            }
+
+            app.logger.warn('Invalid security questions');
+            throw buildError('PASSWORD_RECOVERY_FAILED');
+          });
       });
   };
 
@@ -572,172 +695,190 @@ module.exports = function (User) {
   /**
    * Export filtered cases to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  User.export = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    // defensive checks
-    filter = filter || {};
-    filter.where = filter.where || {};
+  User.export = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
+    // disabled until implemented properly - ticket was de-prioritized a long time ago
+    callback();
 
-    new Promise((resolve, reject) => {
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(dictionary);
-      });
-    }).then(dictionary => {
-      if (!Array.isArray(anonymizeFields)) {
-        anonymizeFields = [];
-      }
-      if (anonymizeFields.indexOf('password') === -1) {
-        anonymizeFields.push('password');
-      }
-      options.dictionary = dictionary;
-      return app.utils.remote.helpers.exportFilteredModelsList(
-        app,
-        app.models.user,
-        {},
-        filter,
-        exportType,
-        'Users List',
-        (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
-        anonymizeFields,
-        options,
-        results => Promise.resolve(results),
-        callback
-      );
-    }).catch(callback);
+    // // defensive checks
+    // filter = filter || {};
+    // filter.where = filter.where || {};
+    //
+    // new Promise((resolve, reject) => {
+    //   const contextUser = app.utils.remote.getUserFromOptions(options);
+    //   app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
+    //     if (err) {
+    //       return reject(err);
+    //     }
+    //     return resolve(dictionary);
+    //   });
+    // }).then(dictionary => {
+    //   if (!Array.isArray(anonymizeFields)) {
+    //     anonymizeFields = [];
+    //   }
+    //   if (anonymizeFields.indexOf('password') === -1) {
+    //     anonymizeFields.push('password');
+    //   }
+    //
+    //   options.dictionary = dictionary;
+    //   // #TODO - must replace with exportHelper - see other exports (cases, contact, ...)
+    //   return app.utils.remote.helpers.exportFilteredModelsList(
+    //     app,
+    //     app.models.user,
+    //     {},
+    //     filter,
+    //     exportType,
+    //     'Users List',
+    //     (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
+    //     anonymizeFields,
+    //     fieldsGroupList,
+    //     options,
+    //     results => Promise.resolve(results),
+    //     callback
+    //   );
+    // }).catch(callback);
   };
 
   User.import = function (data, options, callback) {
-    options._sync = false;
+    // disabled until implemented properly - ticket was de-prioritized a long time ago
+    callback();
 
-    importableFileHelpers
-      .getTemporaryFileById(data.fileId)
-      .then(file => {
-        const rawUsersList = file.data;
-        const usersList = app.utils.helpers.convertBooleanProperties(
-          app.models.user,
-          app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
-
-        const asyncOps = [];
-        const asyncOpsErrors = [];
-
-        asyncOpsErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-
-        // role, outbreak name <-> id mappings
-        const resourceMaps = {};
-
-        let roleNames = [];
-        let outbreakNames = [];
-        usersList.forEach(user => {
-          roleNames.push(...user.roleIds);
-          outbreakNames.push(...user.outbreakIds.concat([user.activeOutbreakId]));
-        });
-        roleNames = [...new Set(roleNames)];
-        outbreakNames = [...new Set(outbreakNames)];
-
-        return Promise.all([
-          new Promise((resolve, reject) => {
-            const rolesMap = {};
-            app.models.role
-              .rawFind({
-                name: {
-                  inq: roleNames
-                }
-              })
-              .then(roles => {
-                roles.forEach(role => {
-                  rolesMap[role.name] = role.id;
-                });
-                resourceMaps.roles = rolesMap;
-                return resolve();
-              })
-              .catch(reject);
-          }),
-          new Promise((resolve, reject) => {
-            const outbreaksMap = {};
-            app.models.outbreak
-              .rawFind({
-                name: {
-                  inq: outbreakNames
-                }
-              })
-              .then(outbreaks => {
-                outbreaks.forEach(outbreak => {
-                  outbreaksMap[outbreak.name] = outbreak.id;
-                });
-                resourceMaps.outbreaks = outbreaksMap;
-                return resolve();
-              })
-              .catch(reject);
-          })
-        ]).then(() => {
-          usersList.forEach((user, index) => {
-            asyncOps.push(cb => {
-              user.roleIds = user.roleIds.map(roleName => {
-                return resourceMaps.roles[roleName] || roleName;
-              });
-              user.outbreakIds = user.outbreakIds.map(outbreakName => {
-                return resourceMaps.outbreaks[outbreakName] || outbreakName;
-              });
-              user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
-
-              return app.utils.dbSync.syncRecord(
-                options.remotingContext.req.logger,
-                app.models.user,
-                user,
-                options)
-                .then(result => cb(null, result.record))
-                .catch(err => {
-                  // on error, store the error, but don't stop, continue with other items
-                  asyncOpsErrors.push({
-                    message: `Failed to import user ${index + 1}`,
-                    error: err,
-                    recordNo: index + 1,
-                    data: {
-                      file: rawUsersList[index],
-                      save: user
-                    }
-                  });
-                  return cb(null, null);
-                });
-            });
-          });
-
-          async.parallelLimit(asyncOps, 10, (err, results) => {
-            if (err) {
-              return callback(err);
-            }
-            // if import errors were found
-            if (asyncOpsErrors.length) {
-              // remove results that failed to be added
-              results = results.filter(result => result !== null);
-              // overload toString function to be used by error handler
-              results.toString = function () {
-                return JSON.stringify(this);
-              };
-              // return error with partial success
-              return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-                model: app.models.user.modelName,
-                failed: asyncOpsErrors,
-                success: results
-              }));
-            }
-            // send the result
-            return callback(null, results);
-          });
-        });
-      })
-      .catch(callback);
+    // options._sync = false;
+    //
+    // importableFileHelpers
+    //   .getTemporaryFileById(data.fileId)
+    //   .then(file => {
+    //     const rawUsersList = file.data;
+    //     const usersList = app.utils.helpers.convertBooleanProperties(
+    //       app.models.user,
+    //       app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
+    //
+    //     const asyncOps = [];
+    //     const asyncOpsErrors = [];
+    //
+    //     asyncOpsErrors.toString = function () {
+    //       return JSON.stringify(this);
+    //     };
+    //
+    //     // role, outbreak name <-> id mappings
+    //     const resourceMaps = {};
+    //
+    //     let roleNames = [];
+    //     let outbreakNames = [];
+    //     usersList.forEach(user => {
+    //       roleNames.push(...user.roleIds);
+    //       outbreakNames.push(...user.outbreakIds.concat([user.activeOutbreakId]));
+    //     });
+    //     roleNames = [...new Set(roleNames)];
+    //     outbreakNames = [...new Set(outbreakNames)];
+    //
+    //     return Promise.all([
+    //       new Promise((resolve, reject) => {
+    //         const rolesMap = {};
+    //         app.models.role
+    //           .rawFind({
+    //             name: {
+    //               inq: roleNames
+    //             }
+    //           })
+    //           .then(roles => {
+    //             roles.forEach(role => {
+    //               rolesMap[role.name] = role.id;
+    //             });
+    //             resourceMaps.roles = rolesMap;
+    //             return resolve();
+    //           })
+    //           .catch(reject);
+    //       }),
+    //       new Promise((resolve, reject) => {
+    //         const outbreaksMap = {};
+    //         app.models.outbreak
+    //           .rawFind({
+    //             name: {
+    //               inq: outbreakNames
+    //             }
+    //           })
+    //           .then(outbreaks => {
+    //             outbreaks.forEach(outbreak => {
+    //               outbreaksMap[outbreak.name] = outbreak.id;
+    //             });
+    //             resourceMaps.outbreaks = outbreaksMap;
+    //             return resolve();
+    //           })
+    //           .catch(reject);
+    //       })
+    //     ]).then(() => {
+    //       usersList.forEach((user, index) => {
+    //         asyncOps.push(cb => {
+    //           user.roleIds = user.roleIds.map(roleName => {
+    //             return resourceMaps.roles[roleName] || roleName;
+    //           });
+    //           user.outbreakIds = user.outbreakIds.map(outbreakName => {
+    //             return resourceMaps.outbreaks[outbreakName] || outbreakName;
+    //           });
+    //           user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
+    //
+    //           return app.utils.dbSync.syncRecord(
+    //             options.remotingContext.req.logger,
+    //             app.models.user,
+    //             user,
+    //             options)
+    //             .then(result => cb(null, result.record))
+    //             .catch(err => {
+    //               // on error, store the error, but don't stop, continue with other items
+    //               asyncOpsErrors.push({
+    //                 message: `Failed to import user ${index + 1}`,
+    //                 error: err,
+    //                 recordNo: index + 1,
+    //                 data: {
+    //                   file: rawUsersList[index],
+    //                   save: user
+    //                 }
+    //               });
+    //               return cb(null, null);
+    //             });
+    //         });
+    //       });
+    //
+    //       async.parallelLimit(asyncOps, 10, (err, results) => {
+    //         if (err) {
+    //           return callback(err);
+    //         }
+    //         // if import errors were found
+    //         if (asyncOpsErrors.length) {
+    //           // remove results that failed to be added
+    //           results = results.filter(result => result !== null);
+    //           // overload toString function to be used by error handler
+    //           results.toString = function () {
+    //             return JSON.stringify(this);
+    //           };
+    //           // return error with partial success
+    //           return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
+    //             model: app.models.user.modelName,
+    //             failed: asyncOpsErrors,
+    //             success: results
+    //           }));
+    //         }
+    //         // send the result
+    //         return callback(null, results);
+    //       });
+    //     });
+    //   })
+    //   .catch(callback);
   };
 
   /**

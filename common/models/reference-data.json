@@ -22,6 +22,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
         "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT",
         "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT_STATUS",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY",
+        "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT",
         "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
@@ -33,6 +35,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION",
         "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+        "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS",
+        "LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY",
         "LNG_REFERENCE_DATA_CATEGORY_OUTCOME",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
@@ -49,7 +53,8 @@
         "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS",
         "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME",
         "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME",
-        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM"
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM",
+        "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE"
       ]
     },
     "value": {
@@ -84,6 +89,15 @@
     },
     "order": {
       "type": "number"
+    },
+    "isDefaultReferenceData": {
+      "type": "boolean"
+    },
+    "isOutbreakTemplateReferenceData": {
+      "type": "boolean"
+    },
+    "geoLocation": {
+      "type": "customGeoPoint"
     }
   },
   "indexes": {
@@ -191,21 +205,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+          "description": "Filter defining fields, where, include, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "options",
@@ -215,31 +228,21 @@
       ],
       "returns": [
         {
-          "arg": "body",
-          "type": "file",
-          "root": true,
+          "arg": "exportLogId",
+          "type": "string",
           "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
         }
       ],
       "description": "Export filtered list of reference data",
-      "http": {
-        "verb": "get",
-        "path": "/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
     },
     "importImportableReferenceDataFileUsingMap": {
       "accepts": [
@@ -260,11 +263,8 @@
       ],
       "returns": [
         {
-          "arg": "referenceData",
-          "type": [
-            "referenceData"
-          ],
-          "root": true,
+          "arg": "importLogId",
+          "type": "string",
           "required": true
         }
       ],

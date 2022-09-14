@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const apiError = require('../../components/apiError');
 
 const relativePath = '/../../server/storage';
 const containers = {
@@ -51,7 +52,7 @@ module.exports = function (Storage) {
       const fullPath = path.resolve(`${__dirname}/${filePath}`);
       fs.readFile(fullPath, function (error, buffer) {
         if (error) {
-          return reject(error);
+          return reject(apiError.getError('FILE_NOT_FOUND'));
         }
         resolve(buffer);
       });
@@ -68,7 +69,7 @@ module.exports = function (Storage) {
       const fullPath = path.resolve(`${__dirname}/${filePath}`);
       fs.unlink(fullPath, function (error) {
         if (error) {
-          return reject(error);
+          return reject(apiError.getError('FILE_NOT_FOUND'));
         }
         resolve();
       });

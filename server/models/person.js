@@ -5,7 +5,6 @@ const app = require('../server');
 const personDuplicate = require('../../components/workerRunner').personDuplicate;
 const helpers = require('../../components/helpers');
 const _ = require('lodash');
-const escapeStringRegexp = require('escape-string-regexp');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
 
@@ -387,6 +386,44 @@ module.exports = function (Person) {
       }
     }
 
+    // set duplicate easy find index keys
+    if (
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ||
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
+      data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+    ) {
+      // first, last, middle names
+      helpers.attachDuplicateKeys(
+        data.target,
+        data.source.all,
+        'name',
+        [
+          ['firstName', 'lastName'],
+          ['firstName', 'middleName'],
+          ['lastName', 'middleName']
+        ]
+      );
+
+      // attach documents
+      helpers.attachDuplicateKeys(
+        data.target,
+        data.source.all,
+        'document',
+        [
+          ['type', 'number']
+        ],
+        'documents'
+      );
+
+      // if duplicate values are the same - delete from update
+      if (_.isEqual(
+        data.target.duplicateKeys,
+        data.source.all.duplicateKeys
+      )) {
+        delete data.target.duplicateKeys;
+      }
+    }
+
     // make sure we update data in order so we don't break anything
     Promise
       .resolve()
@@ -566,7 +603,29 @@ module.exports = function (Person) {
               }
 
               // get mask property
-              let maskProperty = data.source.existingRaw.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' ? 'caseIdMask' : 'contactIdMask';
+              let maskProperty;
+              switch (data.source.existingRaw.type) {
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                  maskProperty = 'caseIdMask';
+
+                  break;
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                  maskProperty = 'contactIdMask';
+
+                  break;
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+                  maskProperty = 'contactOfContactIdMask';
+
+                  break;
+              }
+
+              if (!maskProperty) {
+                throw app.utils.apiError.getError('MASK_NOT_FOUND', {
+                  model: app.models.outbreak.modelName,
+                  id: data.source.existing.outbreakId,
+                  type: data.source.existingRaw.type
+                });
+              }
 
               // resolve visual ID; send the mask as the visualId to not break logic
               return app.models.outbreak.helpers
@@ -717,9 +776,7 @@ module.exports = function (Person) {
       where = {
         $and: [
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           },
           where || {}
         ]
@@ -803,6 +860,11 @@ module.exports = function (Person) {
         order: 'contactDate DESC',
         where: {
           'persons.id': personRecord.id,
+          'persons.type': {
+            inq: personRecord.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          },
           active: true
         }
       })
@@ -1055,12 +1117,22 @@ module.exports = function (Person) {
                         ]
                       })
                       .then(function (followUps) {
-                        // map follow-ups back to people
+                        // !!!!!!!!!!!!!!!!!!
+                        // Note: for contacts we need to return only the ones with follow-ups in the given dates
+                        // Filtering the people map here to avoid refactoring at this point
+                        // In this case we should have first retrieve the follow-ups for the given date range and then get only the related people
+                        // !!!!!!!!!!!!!!!!!!
+                        const result = {};
+
+                        // map follow-ups to people
                         followUps.forEach(function (followUp) {
-                          peopleMap[followUp.personId].followUps.push(followUp);
+                          if (!result[followUp.personId]) {
+                            result[followUp.personId] = peopleMap[followUp.personId];
+                          }
+                          result[followUp.personId].followUps.push(followUp);
                         });
                         // return the list of people
-                        resolve(Object.values(peopleMap));
+                        resolve(Object.values(result));
                       });
                   }
                 })
@@ -1180,36 +1252,14 @@ module.exports = function (Person) {
 
   /**
    * Find duplicates entries in database based on hardcoded rules
-   * @param filter Pagination props (skip, limit)
    * @param outbreakId Outbreak id, used to narrow the searches
    * @param type Contact/Case
    * @param targetBody Target body properties (this is used for checking duplicates)
    * @param options Options from request
    */
-  Person.findDuplicatesByType = function (filter, outbreakId, type, targetBody, options) {
-    filter = filter || {};
-    const buildRuleFilterPart = function (opts) {
-      // construct regex condition for case insensitive match
-      // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
-      // #TODO must replace logic with a key generated when you update a case contact so we don't have to check many conditions like we have now ( combinations between first / last / middle name )
-      // #TODO we should have something in person like: uniqueKey array.sort([firstName.toLoweCase(), lastName.toLoweCase(), middleName.toLoweCase()]).join('') ..this isn't enough, but it is a start
-      const props = Object.keys(opts);
-      const condition = {};
-      props.forEach((prop) => {
-        condition[prop] = {
-          $regex: `^${escapeStringRegexp(opts[prop])}$`,
-          $options: 'i'
-        };
-      });
-
-      // finished
-      return condition;
-    };
-
-    // remove end of line
-    const removeEOL = (value) => {
-      return value ? value.trim().replace(/(\n|\r)/gm, '') : value;
-    };
+  Person.findDuplicatesByType = function (outbreakId, type, targetBody, options) {
+    // #TODO once we update mongo to min 3.4 we need to change this logic to use a case insensitive index instead of using ci regex which doesn't use indexes...
+    // #TODO instead of having these "duplicateKeys"
 
     // init base query
     let query = {
@@ -1218,64 +1268,42 @@ module.exports = function (Person) {
       $or: []
     };
 
-    // make sure we trim values
-    targetBody.firstName = removeEOL(targetBody.firstName);
-    targetBody.lastName = removeEOL(targetBody.lastName);
-    targetBody.middleName = removeEOL(targetBody.middleName);
-
-    // duplicate rules
-    if (targetBody.firstName && targetBody.lastName) {
-      query.$or.push(
-        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.lastName}),
-        buildRuleFilterPart({firstName: targetBody.lastName, lastName: targetBody.firstName}),
-        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.lastName}),
-        buildRuleFilterPart({firstName: targetBody.lastName, middleName: targetBody.firstName}),
-        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.lastName}),
-        buildRuleFilterPart({lastName: targetBody.lastName, middleName: targetBody.firstName})
-      );
-    }
-
-    if (targetBody.firstName && targetBody.middleName) {
-      query.$or.push(
-        buildRuleFilterPart({firstName: targetBody.firstName, middleName: targetBody.middleName}),
-        buildRuleFilterPart({firstName: targetBody.middleName, middleName: targetBody.firstName}),
-        buildRuleFilterPart({firstName: targetBody.firstName, lastName: targetBody.middleName}),
-        buildRuleFilterPart({firstName: targetBody.middleName, lastName: targetBody.firstName}),
-        buildRuleFilterPart({lastName: targetBody.firstName, middleName: targetBody.middleName}),
-        buildRuleFilterPart({lastName: targetBody.middleName, middleName: targetBody.firstName})
-      );
-    }
-
-    if (targetBody.middleName && targetBody.lastName) {
-      query.$or.push(
-        buildRuleFilterPart({middleName: targetBody.middleName, lastName: targetBody.lastName}),
-        buildRuleFilterPart({middleName: targetBody.lastName, lastName: targetBody.middleName}),
-        buildRuleFilterPart({middleName: targetBody.middleName, firstName: targetBody.lastName}),
-        buildRuleFilterPart({middleName: targetBody.lastName, firstName: targetBody.middleName}),
-        buildRuleFilterPart({lastName: targetBody.middleName, firstName: targetBody.lastName}),
-        buildRuleFilterPart({lastName: targetBody.lastName, firstName: targetBody.middleName})
-      );
-    }
-
-    // check against each document in the target body
-    if (targetBody.documents) {
-      targetBody.documents.forEach((doc) => {
-        // we only search the documents that have both target properties with values
-        if (doc.type && doc.number) {
-          query.$or.push({
-            documents: {
-              $elemMatch: {
-                type: doc.type,
-                number: {
-                  $regex: `^${escapeStringRegexp(doc.number)}$`,
-                  $options: 'i'
-                }
-              }
-            }
-          });
-        }
+    // first - last name condition
+    const firstLastName = helpers.getDuplicateKey(targetBody, ['firstName', 'lastName']);
+    if (firstLastName) {
+      query.$or.push({
+        'duplicateKeys.name': firstLastName
       });
     }
+
+    // first - middle name condition
+    const firstMiddleName = helpers.getDuplicateKey(targetBody, ['firstName', 'middleName']);
+    if (firstMiddleName) {
+      query.$or.push({
+        'duplicateKeys.name': firstMiddleName
+      });
+    }
+
+    // last - middle name condition
+    const lastMiddleName = helpers.getDuplicateKey(targetBody, ['lastName', 'middleName']);
+    if (lastMiddleName) {
+      query.$or.push({
+        'duplicateKeys.name': lastMiddleName
+      });
+    }
+
+    // documents conditions
+    (targetBody.documents || []).forEach((doc) => {
+      const docKey = helpers.getDuplicateKey(
+        doc,
+        ['type', 'number']
+      );
+      if (docKey) {
+        query.$or.push({
+          'duplicateKeys.document': docKey
+        });
+      }
+    });
 
     // exclude target instance from the checks
     if (targetBody.id) {
@@ -1331,7 +1359,7 @@ module.exports = function (Person) {
       // finished
       return promise
         .then(() => {
-          return app.models.person.rawFind(query, {skip: filter.skip, limit: filter.limit});
+          return app.models.person.rawFind(query);
         });
     } else {
       // otherwise return empty list
@@ -1370,6 +1398,15 @@ module.exports = function (Person) {
       ]
     };
 
+    // make sure we retrieve data needed to determine contacts & exposures
+    if (
+      filter.fields &&
+      filter.fields.length > 0 &&
+      filter.fields.indexOf('relationshipsRepresentation') < 0
+    ) {
+      filter.fields.push('relationshipsRepresentation');
+    }
+
     // update filter for geographical restriction if needed
     return Person
       .addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -1382,11 +1419,14 @@ module.exports = function (Person) {
           .find(filter);
       })
       .then((records) => {
-        return Person.determineIfRelationshipsExist(
-          outbreakId,
+        // attach possible duplicates
+        Person.determineIfRelationshipsExist(
           personId,
           records
         );
+
+        // finished
+        return records;
       });
   };
 
@@ -1394,18 +1434,20 @@ module.exports = function (Person) {
    * retrieve available people for a specific case / contact / event
    * @param outbreakId
    * @param personId
-   * @param where
+   * @param filter
    * @param options Options from request
    * @returns {Promise<any>}
    */
   Person.getAvailablePeopleCount = function (
     outbreakId,
     personId,
-    where,
+    filter,
     options
   ) {
     // attach our conditions
-    where = {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where = {
       and: [
         {
           outbreakId: outbreakId
@@ -1414,87 +1456,70 @@ module.exports = function (Person) {
             neq: personId
           }
         },
-        where ? where : {}
+        filter.where ? filter.where : {}
       ]
     };
 
     // update filter for geographical restriction if needed
     return Person
-      .addGeographicalRestrictions(options.remotingContext, where)
+      .addGeographicalRestrictions(options.remotingContext, filter.where)
       .then(updatedFilter => {
         // update filter if needed
-        updatedFilter && (where = updatedFilter);
+        updatedFilter && (filter.where = updatedFilter);
 
         // retrieve data
-        return Person.count(where);
+        return Person.rawCountDocuments(filter);
       });
   };
 
   /**
    * Determine which relationships could be a duplicate ( add property to each record from the relatedPeopleDara array )
-   * @param outbreakId
    * @param personId
    * @param relatedPeopleData
    * @returns {Promise<any>}
    */
   Person.determineIfRelationshipsExist = function (
-    outbreakId,
     personId,
     relatedPeopleData
   ) {
-    return new Promise((resolve, reject) => {
-      // determine people ids which we need to check if they are duplicates
-      const peopleIds = (relatedPeopleData || []).map((r) => r.id);
+    // go through our records and determine possible duplicates
+    (relatedPeopleData || []).forEach((record) => {
+      // initialize matches ?
+      record.matchedDuplicateRelationships = [];
 
-      // retrieve all relationships of interest
-      app.models.relationship
-        .rawFind({
-          or: [{
-            'persons.0.id': personId,
-            'persons.1.id': {
-              inq: peopleIds
-            }
-          }, {
-            'persons.1.id': personId,
-            'persons.0.id': {
-              inq: peopleIds
-            }
-          }]
-        }, {
-          projection: {
-            _id: 1,
-            persons: 1
-          }
-        })
-        .then((relationshipsData) => {
-          // match relationship data to people
-          (relationshipsData || []).forEach((relData) => {
-            // first person is the main person ?
-            let indexOfRelatedPerson = 0;
-            if (relData.persons[0].id === personId) {
-              indexOfRelatedPerson = 1;
-            }
+      // go through relationship data and determine contacts / exposures count
+      (record.relationshipsRepresentation || []).forEach((relData) => {
+        // is our record already in relationships ?
+        if (relData.otherParticipantId !== personId) {
+          return;
+        }
 
-            // add person match
-            const relatedRecord = _.find(relatedPeopleData, (r) => r.id === relData.persons[indexOfRelatedPerson].id);
-            if (relatedRecord) {
-              // initialize matches ?
-              if (!relatedRecord.matchedDuplicateRelationships) {
-                relatedRecord.matchedDuplicateRelationships = [];
-              }
-
-              // add our match
-              relatedRecord.matchedDuplicateRelationships.push({
-                relationshipId: relData.id,
-                relatedPerson: relData.persons[indexOfRelatedPerson]
-              });
+        // add our match
+        record.matchedDuplicateRelationships.push({
+          relationshipId: relData.id,
+          relatedPerson: relData.source ? [
+            {
+              id: record.id,
+              type: record.type,
+              source: true
+            }, {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              target: true
             }
-          });
-
-          // finished
-          resolve(relatedPeopleData);
-        })
-        .catch(reject);
+          ] : [
+            {
+              id: relData.otherParticipantId,
+              type: relData.otherParticipantType,
+              source: true
+            }, {
+              id: record.id,
+              type: record.type,
+              target: true
+            }
+          ]
+        });
+      });
     });
   };
 
@@ -1534,13 +1559,13 @@ module.exports = function (Person) {
         // update where to only query for allowed locations
         return Promise.resolve(
           where && Object.keys(where).length ?
-          {
-            and: [
-              allowedLocationsQuery,
-              where
-            ]
-          } :
-          allowedLocationsQuery
+            {
+              and: [
+                allowedLocationsQuery,
+                where
+              ]
+            } :
+            allowedLocationsQuery
         );
       });
   };
@@ -1572,9 +1597,7 @@ module.exports = function (Person) {
               {
                 outbreakId: outbreakId,
                 // retrieve only non-deleted records
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 // retrieve cases & events
                 type: {
                   $in: [
@@ -2035,46 +2058,6 @@ module.exports = function (Person) {
   /**
    * Count contacts/exposures for a list of records
    * @param outbreakId
-   * @param peopleIds
-   */
-  Person.getPeopleContactsAndExposures = function (outbreakId, peopleIds) {
-    const peopleMap = {};
-    for (let id of peopleIds) {
-      peopleMap[id] = {
-        numberOfContacts: 0,
-        numberOfExposures: 0
-      };
-    }
-
-    return app.models.relationship
-      .find({
-        where: {
-          outbreakId: outbreakId,
-          'persons.id': {
-            inq: peopleIds
-          }
-        }
-      })
-      .then((relations) => {
-        for (let relation of relations) {
-          const relationParticipants = relation.persons;
-          for (let participant of relationParticipants) {
-            if (peopleMap[participant.id]) {
-              if (participant.source) {
-                peopleMap[participant.id].numberOfContacts++;
-              } else {
-                peopleMap[participant.id].numberOfExposures++;
-              }
-            }
-          }
-        }
-      })
-      .then(() => peopleMap);
-  };
-
-  /**
-   * Count contacts/exposures for a list of records
-   * @param outbreakId
    * @param personId
    * @param filter Where if count is true, Full filter otherwise
    * @param count
@@ -2262,5 +2245,203 @@ module.exports = function (Person) {
       .then((person) => {
         return person.notDuplicatesIds;
       });
+  };
+
+  /**
+   * Group count
+   */
+  Person.groupCount = (
+    options,
+    outbreakId,
+    personType,
+    filter,
+    groupByProperty,
+    nullGroupKey
+  ) => {
+    // initialization
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // update filter for geographical restriction if needed
+    return Person
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // attach prefilters
+        filter.where.outbreakId = outbreakId;
+        filter.where.type = personType;
+        if (!filter.deleted) {
+          filter.where.deleted = false;
+        }
+
+        // convert to mongo filter
+        const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
+
+        // construct aggregate filter
+        const aggregateFilters = [];
+
+        // filter by relationship ?
+        // - case, contact ...
+        let relationshipQuery;
+        if (!_.isEmpty(mongoFilter.where.relationship)) {
+          // get conditions
+          relationshipQuery = mongoFilter.where.relationship;
+          delete mongoFilter.where.relationship;
+        }
+
+        // filter by lab result ?
+        // - case
+        // #TODO - not needed for now since UI doesn't use it, but API find supports it, if someone uses it..then too bad
+
+        // filter by follow-up ?
+        // - case, contact ...
+        let followUpQuery;
+        if (!_.isEmpty(mongoFilter.where.followUp)) {
+          // get conditions
+          followUpQuery = mongoFilter.where.followUp;
+          delete mongoFilter.where.followUp;
+        }
+
+        // filter by case ?
+        // - contact
+        // #TODO - kinda complicated to implement at this point, contact - relationship - case (implement after mongo upgrade)
+
+        // filter by contact ?
+        // - contact of contact
+        // #TODO - kinda complicated to implement at this point, contact of contact - relationship - contact (implement after mongo upgrade)
+
+        // query
+        aggregateFilters.push({
+          $match: mongoFilter.where
+        });
+
+        // filter by relationship ?
+        if (relationshipQuery) {
+          // lookup
+          aggregateFilters.push({
+            $lookup: {
+              from: 'relationship',
+              localField: '_id',
+              foreignField: 'persons.id',
+              as: 'relationships'
+            }
+          });
+
+          // search
+          aggregateFilters.push({
+            $match: {
+              relationships: {
+                $elemMatch: Object.assign({
+                  deleted: false,
+
+                }, relationshipQuery)
+              }
+            }
+          });
+        }
+
+        // filter by follow-up ?
+        if (followUpQuery) {
+          // lookup
+          aggregateFilters.push({
+            $lookup: {
+              from: 'followUp',
+              localField: '_id',
+              foreignField: 'personId',
+              as: 'followUps'
+            }
+          });
+
+          // search
+          aggregateFilters.push({
+            $match: {
+              followUps: {
+                $elemMatch: Object.assign({
+                  deleted: false,
+
+                }, followUpQuery)
+              }
+            }
+          });
+        }
+
+        // group by classification
+        aggregateFilters.push({
+          $group: {
+            _id: `$${groupByProperty}`,
+            count: {
+              $sum: 1
+            }
+          }
+        });
+
+        // sort by group size
+        aggregateFilters.push({
+          $sort: {
+            count: 1
+          }
+        });
+
+        // retrieve data
+        return app.dataSources.mongoDb.connector
+          .collection('person')
+          .aggregate(
+            aggregateFilters, {
+              allowDiskUse: true
+            }
+          )
+          .toArray()
+          .then((data) => {
+            // result
+            const result = {
+              [groupByProperty]: {},
+              count: 0
+            };
+
+            // format
+            (data || []).forEach((record) => {
+              // count
+              result[groupByProperty][record._id ? record._id : nullGroupKey] = {
+                count: record.count
+              };
+
+              // count cases
+              result.count += record.count;
+            });
+
+            // finished
+            return result;
+          });
+      });
+  };
+
+  /**
+   * Get alternate unique identifier query for sync/import actions
+   * @param {Object} record
+   * @returns {{outbreakId, visualId}|null}
+   */
+  Person.getAlternateUniqueIdentifierQueryForSync = (record) => {
+    if (
+      // alternate unique identifier key is outbreakId and visualId
+      record.outbreakId !== undefined &&
+      record.outbreakId !== null &&
+      record.outbreakId !== '' &&
+      record.visualId !== undefined &&
+      record.visualId !== null &&
+      record.visualId !== ''
+    ) {
+      return {
+        outbreakId: record.outbreakId,
+        visualId: record.visualId
+      };
+    }
+
+    // record doesn't have an alternate unique identifier set
+    return null;
   };
 };

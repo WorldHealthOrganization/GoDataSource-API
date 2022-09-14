@@ -26,10 +26,15 @@ module.exports = function (FilterMapping) {
    */
   FilterMapping.beforeRemote('find', function (context, modelInstance, next) {
     // filter out records that you don't have access to
-    context.args.filter = FilterMapping.helpers.retrieveOnlyAllowedRecords(
-      context.req.authData.user.id,
-      context.args.filter
-    );
+    if (
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_filters') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_filters'].groupAllId) < 0
+    ) {
+      context.args.filter = FilterMapping.helpers.retrieveOnlyAllowedRecords(
+        context.req.authData.user.id,
+        context.args.filter
+      );
+    }
 
     // finished - continue
     next();
@@ -40,10 +45,15 @@ module.exports = function (FilterMapping) {
    */
   FilterMapping.beforeRemote('count', function (context, modelInstance, next) {
     // filter out records that you don't have access to
-    context.args.where = FilterMapping.helpers.retrieveOnlyAllowedRecords(
-      context.req.authData.user.id,
-      {where: _.get(context, 'args.where', {})}
-    ).where;
+    if (
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_filters') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_filters'].groupAllId) < 0
+    ) {
+      context.args.where = FilterMapping.helpers.retrieveOnlyAllowedRecords(
+        context.req.authData.user.id,
+        {where: _.get(context, 'args.where', {})}
+      ).where;
+    }
 
     // finished - continue
     next();
@@ -112,7 +122,11 @@ module.exports = function (FilterMapping) {
    */
   FilterMapping.beforeRemote('prototype.patchAttributes', function (context, modelInstance, next) {
     // are we allowed to change this one ?
-    if (FilterMapping.helpers.isReadOnly(context.req.authData.user.id, context.instance)) {
+    if (
+      FilterMapping.helpers.isReadOnly(context.req.authData.user.id, context.instance) &&
+      context.req.authData.user.permissionsList.indexOf('system_settings_modify_saved_filters') < 0 &&
+      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_modify_saved_filters'].groupAllId) < 0
+    ) {
       // throw error
       next(app.utils.apiError.getError('ACCESS_DENIED', {
         accessErrors: 'Client is not allowed to change this record'
@@ -132,7 +146,11 @@ module.exports = function (FilterMapping) {
       .findById(context.args.id)
       .then((filterMapping) => {
         // are we allowed to delete this one ?
-        if (FilterMapping.helpers.isReadOnly(context.req.authData.user.id, filterMapping)) {
+        if (
+          FilterMapping.helpers.isReadOnly(context.req.authData.user.id, filterMapping) &&
+          context.req.authData.user.permissionsList.indexOf('system_settings_delete_saved_filters') < 0 &&
+          context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['system_settings_delete_saved_filters'].groupAllId) < 0
+        ) {
           // throw error
           next(app.utils.apiError.getError('ACCESS_DENIED', {
             accessErrors: 'Client is not allowed to delete this record'

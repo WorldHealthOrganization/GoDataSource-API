@@ -39,32 +39,34 @@ module.exports = function (Relationship) {
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap,
+      {
+        'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
+        'sourcePerson.source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
+      },
       _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`sourcePerson.${property}`] = token;
         },
         {}
-      ), {
-        'sourcePerson.source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE',
-        'sourcePerson': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
-      }
+      )
     );
 
     // append target export fields
     Object.assign(
       fieldLabelsMap,
       Relationship.fieldLabelsMap,
+      {
+        'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+        'targetPerson.target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
+      },
       _.transform(
         personFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`targetPerson.${property}`] = token;
         },
         {}
-      ), {
-        'targetPerson.target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
-        'targetPerson': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET'
-      }
+      )
     );
 
     // sanitize
@@ -96,6 +98,78 @@ module.exports = function (Relationship) {
     clusterId: 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
     comment: 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT'
   });
+
+  // map language token labels for export fields group
+  Relationship.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'sourcePerson',
+        'sourcePerson.id',
+        'sourcePerson.visualId',
+        'sourcePerson.type',
+        'sourcePerson.name',
+        'sourcePerson.lastName',
+        'sourcePerson.firstName',
+        'sourcePerson.middleName',
+        'sourcePerson.gender',
+        'sourcePerson.dob',
+        'sourcePerson.age',
+        'sourcePerson.age.years',
+        'sourcePerson.age.months',
+        'sourcePerson.source',
+        'targetPerson',
+        'targetPerson.id',
+        'targetPerson.visualId',
+        'targetPerson.type',
+        'targetPerson.name',
+        'targetPerson.lastName',
+        'targetPerson.firstName',
+        'targetPerson.middleName',
+        'targetPerson.gender',
+        'targetPerson.dob',
+        'targetPerson.age',
+        'targetPerson.age.years',
+        'targetPerson.age.months',
+        'targetPerson.target'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'dateOfFirstContact',
+        'contactDate',
+        'contactDateEstimated',
+        'certaintyLevelId',
+        'exposureTypeId',
+        'exposureFrequencyId',
+        'exposureDurationId',
+        'socialRelationshipTypeId',
+        'socialRelationshipDetail',
+        'clusterId',
+        'comment'
+      ]
+    }
+  };
+
+  Relationship.arrayProps = {
+    persons: {
+      'id': 'LNG_RELATIONSHIP_FIELD_LABEL_RELATED_PERSON',
+      'type': 'LNG_RELATIONSHIP_FIELD_LABEL_TYPE',
+      'target': 'LNG_RELATIONSHIP_FIELD_LABEL_TARGET',
+      'source': 'LNG_RELATIONSHIP_FIELD_LABEL_SOURCE'
+    }
+  };
 
   Relationship.referenceDataFieldsToCategoryMap = {
     certaintyLevelId: 'LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL',
@@ -685,13 +759,22 @@ module.exports = function (Relationship) {
 
     // keep a list of update actions
     const updatePersonRecords = [];
+    const mustUpdateNoOfContactsAndExposuresMap = {};
     // go through the people that are part of the relationship
     relationship.persons.forEach(function (person, personIndex) {
+      // add to list of records that we need to update number of contacts and exposures
+      mustUpdateNoOfContactsAndExposuresMap[person.id] = true;
+
       // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
       updatePersonRecords.push(
         // load the record
         app.models.person
-          .findById(person.id)
+          .findOne({
+            where: {
+              id: person.id
+            },
+            deleted: true
+          })
           .then(function (personRecord) {
             // if the record is not found, stop with err
             if (!personRecord) {
@@ -714,7 +797,7 @@ module.exports = function (Relationship) {
               };
 
               // when a relationship is deleted we need to check if the person has additional relationships
-              if (personRelationships.length - 1) {
+              if (personRelationships.length - 1 > 0) {
                 // person will still have relationships
                 relationshipsPayload['$set'] = {
                   hasRelationships: true
@@ -757,6 +840,7 @@ module.exports = function (Relationship) {
               }
             }
 
+            // update
             return personRecord.updateAttributes(relationshipsPayload, context.options);
           })
       );
@@ -770,11 +854,19 @@ module.exports = function (Relationship) {
       // loop through the old participants and check if they are still in the relationship
       oldParticipants.forEach(oldPerson => {
         if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
+          // add to list of records that we need to update number of contacts and exposures
+          mustUpdateNoOfContactsAndExposuresMap[oldPerson.id] = true;
+
           // we need to update the old person
           updatePersonRecords.push(
             // load the record
             app.models.person
-              .findById(oldPerson.id)
+              .findOne({
+                where: {
+                  id: oldPerson.id
+                },
+                deleted: true
+              })
               .then(function (personRecord) {
                 // if the record is not found, stop with err
                 if (!personRecord) {
@@ -794,7 +886,7 @@ module.exports = function (Relationship) {
                 };
 
                 // check if the person has additional relationships
-                if (personRelationships.length - 1) {
+                if (personRelationships.length - 1 > 0) {
                   // person will still have relationships
                   relationshipsPayload['$set'] = {
                     hasRelationships: true
@@ -806,6 +898,7 @@ module.exports = function (Relationship) {
                   };
                 }
 
+                // update
                 return personRecord.updateAttributes(relationshipsPayload, context.options);
               })
           );
@@ -815,6 +908,66 @@ module.exports = function (Relationship) {
 
     // after finishing updating dates of last contact
     Promise.all(updatePersonRecords)
+      // count contacts and exposures ?
+      .then(() => {
+        // attach update number of contacts and number of exposures requests
+        const personsToUpdate = Object.keys(mustUpdateNoOfContactsAndExposuresMap);
+        if (personsToUpdate.length < 1) {
+          return;
+        }
+
+        // get collection name from settings (if defined)
+        let collectionName = _.get(app.models.person, 'definition.settings.mongodb.collection');
+
+        // if collection name was not defined in settings
+        if (!collectionName) {
+          // get it from model name
+          collectionName = app.models.person.modelName;
+        }
+
+        // get collection
+        const collection = app.dataSources.mongoDb.connector.collection(collectionName);
+        return collection.updateMany(
+          {
+            _id: {
+              $in: personsToUpdate
+            }
+          }, [{
+            $set: {
+              numberOfContacts: {
+                $size: {
+                  $filter: {
+                    input: '$relationshipsRepresentation',
+                    as: 'item',
+                    cond: {
+                      $eq: [
+                        '$$item.source',
+                        true
+                      ]
+                    }
+                  }
+                }
+              },
+              numberOfExposures: {
+                $size: {
+                  $filter: {
+                    input: '$relationshipsRepresentation',
+                    as: 'item',
+                    cond: {
+                      $eq: [
+                        '$$item.target',
+                        true
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }]
+        );
+      })
+
+      // continue
       .then(function () {
         // get contact representation in the relationship
         let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
@@ -823,7 +976,12 @@ module.exports = function (Relationship) {
         if (contactInPersons) {
           // trigger update operations on it (might have before/after save listeners that need to be triggered on relationship updates)
           return app.models.contact
-            .findById(contactInPersons.id)
+            .findOne({
+              where: {
+                id: contactInPersons.id
+              },
+              deleted: true
+            })
             .then(function (contactRecord) {
               // if the record is not found, stop with err
               if (!contactRecord) {
@@ -1377,8 +1535,9 @@ module.exports = function (Relationship) {
    * @param changeSource True if sourceTargetId is source, false otherwise
    * @param sourceTargetId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    */
-  Relationship.bulkChangeSourceOrTarget = function (outbreakId, changeSource, sourceTargetId, where) {
+  Relationship.bulkChangeSourceOrTarget = function (outbreakId, changeSource, sourceTargetId, where, options) {
     // validate input
     // sourceTargetId & where are required
     if (
@@ -1448,8 +1607,9 @@ module.exports = function (Relationship) {
           }
 
           // determine source / target person that we need to update
+          const clonedPersons = _.cloneDeep(relationship.toJSON().persons);
           const sourceTargetPerson = _.find(
-            relationship.persons,
+            clonedPersons,
             changeSource ?
               {source: true} :
               {target: true}
@@ -1487,8 +1647,8 @@ module.exports = function (Relationship) {
           // make sure that at least one of the persons records isn't a contact
           // either sourceTargetId, or the unaltered one
           if (
-            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            clonedPersons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+            clonedPersons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           ) {
             throw app.utils.apiError.getError('CONTACT_CANT_BE_SOURCE');
           }
@@ -1496,32 +1656,32 @@ module.exports = function (Relationship) {
           // make sure that at least one of the persons records isn't a contact of contact
           // either sourceTargetId, or the unaltered one
           if (
-            relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' &&
-            relationship.persons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            clonedPersons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' &&
+            clonedPersons[1].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
           ) {
             throw app.utils.apiError.getError('CONTACT_OF_CONTACT_CANT_BE_SOURCE');
           }
 
           // make sure that we don't have circular relationships, both person records pointing to the same id
-          if (relationship.persons[0].id === relationship.persons[1].id) {
+          if (clonedPersons[0].id === clonedPersons[1].id) {
             throw app.utils.apiError.getError('CIRCULAR_RELATIONSHIP');
           }
 
           // create jobs to update relationship source / target
-          updateRelationshipsJobs.push((function (relationshipModel) {
+          updateRelationshipsJobs.push((function (relationshipModel, updatedPersons) {
             return (cb) => {
               // update
               relationshipModel
                 .updateAttributes({
-                  persons: relationshipModel.persons
-                })
+                  persons: updatedPersons
+                }, options)
                 .then(() => {
                   // finished
                   cb();
                 })
                 .catch(cb);
             };
-          })(relationship));
+          })(relationship, clonedPersons));
         });
 
         // finished
@@ -1540,9 +1700,7 @@ module.exports = function (Relationship) {
         // check for isolated cases
         return app.models.relationship
           .rawFind({
-            deleted: {
-              $ne: true
-            },
+            deleted: false,
             'persons.id': {
               $in: Object.keys(isolatedContactsData)
             }

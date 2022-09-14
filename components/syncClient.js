@@ -1,6 +1,7 @@
 'use strict';
 
-const request = require('request');
+const got = require('got');
+const FormData = require('form-data');
 const fs = require('fs');
 const app = require('../server/server');
 
@@ -25,12 +26,10 @@ function normalizeURL(url) {
 const SyncClient = function (upstreamServer, syncLogEntry) {
   // initialize request options
   this.options = {
-    baseUrl: normalizeURL(upstreamServer.url),
-    auth: {
-      user: upstreamServer.credentials.clientId,
-      pass: upstreamServer.credentials.clientSecret
-    },
-    timeout: upstreamServer.timeout
+    prefixUrl: normalizeURL(upstreamServer.url),
+    username: upstreamServer.credentials.clientId,
+    password: upstreamServer.credentials.clientSecret,
+    timeout: upstreamServer.timeout != 0 ? upstreamServer.timeout : undefined
   };
 
   // keep upstream server information for future use
@@ -40,15 +39,21 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
 
   /**
    * Send request to server
+   * @param url
    * @param requestOptions
    * @param callback
    */
-  this.sendRequest = function (requestOptions, callback) {
+  this.sendRequest = function (url, requestOptions, callback) {
     // log request
-    app.logger.debug(`Sync ${this.syncLogEntry.id}: Sent request to upstream server: ${requestOptions.method} /${requestOptions.uri}${requestOptions.qs ? '?' + JSON.stringify(requestOptions.qs) : ''}`);
+    app.logger.debug(`Sync ${this.syncLogEntry.id}: Sent request to upstream server: ${requestOptions.method} /${url}${requestOptions.qs ? '?' + JSON.stringify(requestOptions.qs) : ''}`);
 
     // send request
-    return request(requestOptions, callback);
+    // return request(requestOptions, callback);
+    got(url, requestOptions)
+      .then(response => {
+        callback(null, response, response.body);
+      })
+      .catch(callback);
   };
 
   /**
@@ -95,15 +100,14 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   this.getAvailableOutbreaks = function () {
     let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'sync/available-outbreaks',
-      json: true
+      responseType: 'json'
     });
 
     let that = this;
 
     return new Promise(function (resolve, reject) {
       // get the available outbreaks IDs
-      that.sendRequest(requestOptions, function (error, response, body) {
+      that.sendRequest('sync/available-outbreaks', requestOptions, function (error, response, body) {
         // get error response depending on error and response status code
         error = that.getErrorResponse(error, response);
 
@@ -125,20 +129,22 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
    * @returns {Promise}
    */
   this.sendDBSnapshotForImport = function (DBSnapshotFileName, asynchronous, autoEncrypt) {
+    const form = new FormData();
+    form.append('snapshot', fs.createReadStream(DBSnapshotFileName));
+    form.append('asynchronous', asynchronous);
+    form.append('autoEncrypt', autoEncrypt);
+    // send flag so that the upstream server knows that this is a sync from a desktop client instance
+    form.append('snapshotFromClient', 'true');
+
     let requestOptions = Object.assign({}, this.options, {
       method: 'POST',
-      uri: 'sync/import-database-snapshot',
-      formData: {
-        snapshot: fs.createReadStream(DBSnapshotFileName),
-        asynchronous: asynchronous,
-        autoEncrypt: autoEncrypt
-      }
+      body: form
     });
 
     let that = this;
 
     return new Promise(function (resolve, reject) {
-      that.sendRequest(requestOptions, function (error, response, body) {
+      that.sendRequest('sync/import-database-snapshot', requestOptions, function (error, response, body) {
         // get error response depending on error and response status code
         error = that.getErrorResponse(error, response);
 
@@ -169,14 +175,13 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   this.getSyncLogEntry = function (syncLogId) {
     let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'sync-logs/' + syncLogId,
-      json: true
+      responseType: 'json'
     });
 
     let that = this;
 
     return new Promise(function (resolve, reject) {
-      that.sendRequest(requestOptions, function (error, response, body) {
+      that.sendRequest('sync-logs/' + syncLogId, requestOptions, function (error, response, body) {
         // get error response depending on error and response status code
         error = that.getErrorResponse(error, response);
 
@@ -196,15 +201,14 @@ const SyncClient = function (upstreamServer, syncLogEntry) {
   this.getServerVersion = function () {
     let requestOptions = Object.assign({}, this.options, {
       method: 'GET',
-      uri: 'system-settings/version',
-      json: true
+      responseType: 'json'
     });
 
     let that = this;
 
     return new Promise(function (resolve, reject) {
       // get system version
-      that.sendRequest(requestOptions, function (error, response, body) {
+      that.sendRequest('system-settings/version', requestOptions, function (error, response, body) {
         // get error response depending on error and response status code
         error = that.getErrorResponse(error, response);
 

@@ -9,12 +9,15 @@ const Moment = require('moment');
 const path = require('path');
 const AdmZip = require('adm-zip');
 const _ = require('lodash');
+const uuid = require('uuid');
 
 const logger = require('./../logger')(true);
 const dbSync = require('./../dbSync');
 const workerRunner = require('./../workerRunner');
 const dbConfig = require('./../../server/datasources').mongoDb;
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
+
+const noElementsInFilterArrayLimit = 20000;
 
 /**
  * Create ZIP archive of a file/dir
@@ -70,16 +73,25 @@ function createZipArchive(fileName, archiveName, logger) {
  * @returns {Promise<Db | never>}
  */
 function getMongoDBConnection() {
-  let mongoOptions = {};
+  // make sure it doesn't timeout
+  let mongoOptions = {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000 // 30 minutes
+  };
+
+  // attach auth credentials
   if (dbConfig.password) {
-    mongoOptions = {
+    mongoOptions = Object.assign(mongoOptions, {
       auth: {
-        user: dbConfig.user,
+        username: dbConfig.user,
         password: dbConfig.password
       },
       authSource: dbConfig.authSource
-    };
+    });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${dbConfig.host}:${dbConfig.port}`, mongoOptions)
     .then(function (client) {
@@ -101,118 +113,159 @@ function getMongoDBConnection() {
  * @param callback
  * @returns {Promise<any>}
  */
-function exportCollectionInBatches(dbConnection, mongoCollectionName, collectionName, filter, batchSize, tmpDirName, archivesDirName, options, callback) {
-  // should we exclude deleted records ?
-  if (
-    options.applyExcludeDeletedRecordsRules &&
-    dbSync.collectionsExcludeDeletedRecords &&
-    dbSync.collectionsExcludeDeletedRecords[collectionName]
-  ) {
-    // query
-    const notDeletedQuery = {
-      deleted: {
-        $ne: true
+function exportCollectionInBatches(
+  dbConnection,
+  mongoCollectionName,
+  collectionName,
+  filterOrArrayOfFilters,
+  batchSize,
+  tmpDirName,
+  archivesDirName,
+  options,
+  callback
+) {
+  // go through filters
+  filterOrArrayOfFilters = Array.isArray(filterOrArrayOfFilters) ?
+    filterOrArrayOfFilters :
+    [filterOrArrayOfFilters];
+
+  // next filter from list
+  let batchNumber = -1;
+  const nextFilter = (filterIndex = 0) => {
+    // finished ?
+    if (filterIndex >= filterOrArrayOfFilters.length) {
+      // finish
+      logger.debug(`Collection '${collectionName}' export success.`);
+      return callback();
+    }
+
+    // retrieve current filter
+    let filter = filterOrArrayOfFilters[filterIndex];
+
+    // should we exclude deleted records ?
+    if (
+      !options.noDataFiltering &&
+      options.applyExcludeDeletedRecordsRules &&
+      dbSync.collectionsExcludeDeletedRecords &&
+      dbSync.collectionsExcludeDeletedRecords[collectionName]
+    ) {
+      // query
+      const notDeletedQuery = {
+        deleted: false
+      };
+
+      // add to filter
+      if (_.isEmpty(filter)) {
+        filter = notDeletedQuery;
+      } else {
+        filter = {
+          $and: [
+            notDeletedQuery,
+            filter
+          ]
+        };
       }
+    }
+
+    /**
+     * Get next batch from collection
+     * @param skip
+     */
+    const getNextBatch = (skip = 0) => {
+      // batch number
+      batchNumber++;
+
+      // retrieve data
+      let cursor = dbConnection
+        .collection(mongoCollectionName)
+        .find(filter, {
+          skip: skip,
+          limit: batchSize
+        });
+
+      // retrieve
+      cursor
+        .toArray()
+        .then(function (records) {
+          // if it was not requested to export empty collections
+          const recordsCount = records && records.length ? records.length : 0;
+          if (
+            !options.exportEmptyCollections &&
+            recordsCount < 1
+          ) {
+            // batch not written, can revert to previous
+            batchNumber--;
+
+            // next filter
+            return nextFilter(filterIndex + 1);
+          }
+
+          // export for upstream server needs to obfuscate some information
+          if (options.dbForUpstreamServer && recordsCount && dbSync.collectionsAlterDataMap[collectionName]) {
+            dbSync.collectionsAlterDataMap[collectionName](records);
+          }
+
+          // export related files
+          // if collection is not supported, it will be skipped
+          dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
+            if (err) {
+              logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
+              return callback(err);
+            }
+
+            // at least one collection has data to pack in an archive
+            options.hasDataToExport = true;
+
+            let fileName = `${collectionName}.${batchNumber}.json`;
+            let filePath = `${tmpDirName}/${fileName}`;
+
+            // create a file with collection name as file name, containing results
+            fs.writeFile(filePath, JSON.stringify(records, null, 2), function () {
+              // archive file
+              let archiveFileName = `${archivesDirName}/${fileName}.zip`;
+              createZipArchive(filePath, archiveFileName, logger)
+                .then(function () {
+                  // encrypt archived file if needed
+                  if (options.password) {
+                    // password provided, encrypt archive
+                    logger.debug(`Encrypting '${archiveFileName}'.`);
+                    return workerRunner
+                      .helpers
+                      .encryptFile(options.password, {}, archiveFileName);
+                  } else {
+                    // no password provided, return file path as is
+                    return Promise.resolve();
+                  }
+                })
+                .then(function () {
+                  if (records.length < batchSize) {
+                    // finish
+                    return nextFilter(filterIndex + 1);
+                  } else {
+                    // continue with next batch
+                    logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
+                    return getNextBatch(skip + batchSize);
+                  }
+                })
+                .catch(function (err) {
+                  logger.debug(`Failed to export batch ${batchNumber} of collection '${collectionName}': ${err}`);
+                  return callback(err);
+                });
+            });
+          });
+        })
+        .catch(function (err) {
+          logger.debug(`Collection '${collectionName}' export failed. Error: ${err}`);
+          return callback(err);
+        });
     };
 
-    // add to filter
-    if (_.isEmpty(filter)) {
-      filter = notDeletedQuery;
-    } else {
-      filter = {
-        $and: [
-          notDeletedQuery,
-          filter
-        ]
-      };
-    }
-  }
+    // start collection export
+    getNextBatch();
+  };
 
-  /**
-   * Get next batch from collection
-   * @param skip
-   */
-  function getNextBatch(skip = 0) {
-    let batchNumber = skip ? skip / batchSize : 0;
-
-    // retrieve data
-    let cursor = dbConnection
-      .collection(mongoCollectionName)
-      .find(filter, {
-        skip: skip,
-        limit: batchSize
-      });
-
-    // retrieve
-    cursor
-      .toArray()
-      .then(function (records) {
-        // if it was not requested to export empty collections
-        if (!options.exportEmptyCollections) {
-          // check if records were returned; consider collection finished if no records
-          if (!records || !records.length) {
-            logger.debug(`Collection '${collectionName}' export success.`);
-            return callback();
-          }
-        }
-        // export related files
-        // if collection is not supported, it will be skipped
-        dbSync.exportCollectionRelatedFiles(collectionName, records, archivesDirName, logger, options.password, (err) => {
-          if (err) {
-            logger.debug(`Collection '${collectionName}' related files export failed. Error: ${err}`);
-            return callback(err);
-          }
-
-          // at least one collection has data to pack in an archive
-          options.hasDataToExport = true;
-
-          let fileName = `${collectionName}.${batchNumber}.json`;
-          let filePath = `${tmpDirName}/${fileName}`;
-
-          // create a file with collection name as file name, containing results
-          fs.writeFile(filePath, JSON.stringify(records, null, 2), function () {
-            // archive file
-            let archiveFileName = `${archivesDirName}/${fileName}.zip`;
-            createZipArchive(filePath, archiveFileName, logger)
-              .then(function () {
-                // encrypt archived file if needed
-                if (options.password) {
-                  // password provided, encrypt archive
-                  logger.debug(`Encrypting '${archiveFileName}'.`);
-                  return workerRunner
-                    .helpers
-                    .encryptFile(options.password, {}, archiveFileName);
-                } else {
-                  // no password provided, return file path as is
-                  return Promise.resolve();
-                }
-              })
-              .then(function () {
-                if (records.length < batchSize) {
-                  // finish
-                  logger.debug(`Collection '${collectionName}' export success.`);
-                  return callback();
-                } else {
-                  // continue with next batch
-                  logger.debug(`Exported batch ${batchNumber} of collection '${collectionName}'.`);
-                  return getNextBatch(skip + batchSize);
-                }
-              })
-              .catch(function (err) {
-                logger.debug(`Failed to export batch ${batchNumber} of collection '${collectionName}': ${err}`);
-                return callback(err);
-              });
-          });
-        });
-      })
-      .catch(function (err) {
-        logger.debug(`Collection '${collectionName}' export failed. Error: ${err}`);
-        return callback(err);
-      });
-  }
-
-  // start collection export
-  getNextBatch();
+  // start filtering
+  nextFilter();
 }
 
 const worker = {
@@ -238,416 +291,458 @@ const worker = {
             archivesDirName = `${tmpDirName}/archives`;
             fs.mkdirSync(archivesDirName);
           } catch (err) {
-            logger.debug(`Failed creating tmp directories; ${err}`);
+            logger.error(`Failed creating tmp directories; ${err}`);
             return reject(err);
-          }
-
-          // parse from date filter
-          let filter = options.filter;
-          let customFilter = null;
-          if (filter.where.hasOwnProperty('fromDate')) {
-            // doing this because createdAt and updatedAt are equal when a record is created
-            customFilter = {
-              updatedAt: {
-                $gte: new Date(filter.where.fromDate)
-              }
-            };
           }
 
           // flag that indicates if there is at least one collection with records
           // if this is not true, do not pack the main archive
           options.hasDataToExport = false;
 
-          // define general records not deleted filter
-          const notDeletedFilter = {
-            deleted: {
-              $ne: true
-            }
-          };
+          let filter = options.filter;
+          let customFilter = null;
 
-          // retrieve active cases and all their related contacts
-          // Contacts: We transfer to mobile app all contacts belonging to the team that user us assigned to where the final follow-up status is “Under follow-up”,
-          //    irrespective of the follow-up dates. Once we sync contacts and they end their follow-up, they will remain on the mobile device and clearly marked with
-          //    “Follow-up complete” or “Lost to follow-up” should latter happen. From the point when their status is not any longer “Under follow-up” they are not
-          //    included on the follow-up lists, but their historical follow-up data remain.
-          // Cases: All cases to whom contacts as described above are exposed. In addition any cases who reside in the location which is responsibility of the team
-          //    that user is assigned to.
-          // Events: All events to which contacts as described above are exposed OR where the event occurred in a location which is responsibility of the team that
-          //    the user is assigned to.
-          // Contact of Contacts: All contact of contacts related to retrieved contacts
+          // check for no data filtering option; is currently sent only on backups
           let filterDataGathering = Promise.resolve();
-          filterDataGathering = filterDataGathering
-            // retrieve outbreaks
-            .then(() => {
-              // retrieve all outbreaks that aren't deleted
-              let outbreakFilter = notDeletedFilter;
-
-              // should we retrieve information about all outbreaks or just some of them
-              const outbreakIds = _.get(options, 'filter.where.outbreakId');
-              if (!_.isEmpty(outbreakIds)) {
-                outbreakFilter = {
-                  $and: [
-                    {
-                      _id: convertLoopbackFilterToMongo(outbreakIds)
-                    },
-                    outbreakFilter
-                  ]
-                };
-              }
-
-              // retrieve outbreaks
-              // make sure outbreak exists
-              return dbConnection
-                .collection(dbSync.collectionsMap.outbreak)
-                .find(
-                  outbreakFilter, {
-                    projection: {
-                      _id: 1
-                    }
-                  }
-                )
-                .toArray()
-                .then((outbreaks) => {
-                  // define object to perpetuate data to other promises
-                  return {
-                    outbreaks: _.transform(
-                      outbreaks,
-                      (acc, outbreak) => {
-                        acc[outbreak._id] = outbreak;
-                      },
-                      {}
-                    )
-                  };
-                });
-            })
-
-            // retrieve outbreak cases
-            .then((response) => {
-              // retrieve all persons that aren't deleted
-              let personFilter = notDeletedFilter;
-
-              // retrieve only persons that belong to one of our outbreaks
-              // if no outbreaks are provided, then it means that we have access to all outbreaks, so we need to retrieve all persons
-              const outbreakIds = Object.keys(response.outbreaks);
-              personFilter = {
-                $and: [
-                  {
-                    outbreakId: {
-                      $in: outbreakIds
-                    }
-                  },
-                  personFilter
-                ]
+          if (!options.noDataFiltering) {
+            // parse from date filter
+            if (filter.where.hasOwnProperty('fromDate')) {
+              // doing this because createdAt and updatedAt are equal when a record is created
+              customFilter = {
+                updatedAt: {
+                  $gte: new Date(filter.where.fromDate)
+                }
               };
+            }
 
-              // check for filter locationsIds and filter teamIds; both or none will be present
-              // when present we need to filter persons and all person related data based on location
-              // initialize filter data gathering promise
-              // IMPORTANT:
-              // - filters out contacts that aren't from these locations
-              // - it won't mark a case as being active even if one of its contacts is still under follow-up if that contact isn't from these locations
-              if (
-                filter.where.locationsIds &&
-                filter.where.teamsIds
-              ) {
-                personFilter = {
-                  $and: [
-                    {
-                      $or: [
+            // retrieve active cases and all their related contacts
+            // Contacts: We transfer to mobile app all contacts belonging to the team that user us assigned to where the final follow-up status is “Under follow-up”,
+            //    irrespective of the follow-up dates. Once we sync contacts and they end their follow-up, they will remain on the mobile device and clearly marked with
+            //    “Follow-up complete” or “Lost to follow-up” should latter happen. From the point when their status is not any longer “Under follow-up” they are not
+            //    included on the follow-up lists, but their historical follow-up data remain.
+            // Cases: All cases to whom contacts as described above are exposed. In addition any cases who reside in the location which is responsibility of the team
+            //    that user is assigned to.
+            // Events: All events to which contacts as described above are exposed OR where the event occurred in a location which is responsibility of the team that
+            //    the user is assigned to.
+            // Contact of Contacts: All contact of contacts related to retrieved contacts
+            filterDataGathering = filterDataGathering
+              // retrieve outbreaks
+              .then(() => {
+                // should we retrieve information about all outbreaks or just some of them
+                let outbreakFilter;
+                const outbreakIds = _.get(options, 'filter.where.outbreakId');
+                if (!_.isEmpty(outbreakIds)) {
+                  outbreakFilter = {
+                    _id: typeof outbreakIds === 'string' ?
+                      outbreakIds :
+                      convertLoopbackFilterToMongo(outbreakIds),
+                    deleted: false
+                  };
+                } else {
+                  outbreakFilter = {
+                    deleted: false
+                  };
+                }
+
+                // retrieve outbreaks
+                // make sure outbreak exists
+                return dbConnection
+                  .collection(dbSync.collectionsMap.outbreak)
+                  .find(
+                    outbreakFilter, {
+                      projection: {
+                        _id: 1
+                      }
+                    }
+                  )
+                  .toArray()
+                  .then((outbreaks) => {
+                    // define object to perpetuate data to other promises
+                    return {
+                      outbreaks: _.transform(
+                        outbreaks,
+                        (acc, outbreak) => {
+                          acc[outbreak._id] = outbreak;
+                        },
+                        {}
+                      )
+                    };
+                  });
+              })
+
+              // retrieve outbreak cases
+              .then((response) => {
+                // retrieve only persons that belong to one of our outbreaks
+                // if no outbreaks are provided, then it means that we have access to all outbreaks, so we need to retrieve all persons
+                // retrieve deleted records too since we need to tell mobile that records were deleted
+                const outbreakIds = Object.keys(response.outbreaks);
+                let personFilter = {
+                  outbreakId: {
+                    $in: outbreakIds
+                  }
+                };
+
+                // to avoid issues with filter size because of the locationsIds length make multiple requests to mongo
+                let personFiltersChunks = [];
+
+                // initialize response
+                response.cases = {};
+                response.contacts = {};
+                response.events = {};
+                response.contactsOfContacts = {};
+                response.relationships = {};
+
+                // check for filter locationsIds and filter teamIds; both or none will be present
+                // when present we need to filter persons and all person related data based on location
+                // initialize filter data gathering promise
+                // IMPORTANT:
+                // - filters out contacts that aren't from these locations
+                // - it won't mark a case as being active even if one of its contacts is still under follow-up if that contact isn't from these locations
+                if (
+                  filter.where.locationsIds &&
+                  filter.where.teamsIds
+                ) {
+                  // split locationsIds list in chunks
+                  const locationsChunks = _.chunk(filter.where.locationsIds, noElementsInFilterArrayLimit);
+                  locationsChunks.forEach(locationsIds => {
+                    personFiltersChunks.push({
+                      $and: [
                         {
-                          type: {
-                            $ne: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-                          }
-                        }, {
-                          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
-                        }
-                      ]
-                    }, {
-                      $or: [
-                        {
-                          type: {
-                            $in: [
-                              'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                              'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-                            ]
-                          },
                           $or: [
                             {
-                              addresses: {
-                                $elemMatch: {
-                                  typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                              type: {
+                                $ne: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                              }
+                            }, {
+                              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                              'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+                            }
+                          ]
+                        }, {
+                          $or: [
+                            {
+                              type: {
+                                $in: [
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+                                ]
+                              },
+                              $or: [
+                                {
+                                  addresses: {
+                                    $elemMatch: {
+                                      typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
+                                      $or: [
+                                        {
+                                          locationId: null
+                                        }, {
+                                          locationId: {
+                                            $in: locationsIds
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }, {
+                                  'addresses.typeId': {
+                                    $ne: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                                  }
+                                }
+                              ]
+                            }, {
+                              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
+                              $or: [
+                                {
+                                  'address.typeId': {
+                                    $ne: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
+                                  }
+                                }, {
+                                  'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
                                   $or: [
                                     {
-                                      locationId: null
+                                      'address.locationId': null
                                     }, {
-                                      locationId: {
-                                        $in: filter.where.locationsIds
+                                      'address.locationId': {
+                                        $in: locationsIds
                                       }
                                     }
                                   ]
                                 }
-                              }
-                            }, {
-                              'addresses.typeId': {
-                                $ne: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                              }
-                            }
-                          ]
-                        }, {
-                          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
-                          $or: [
-                            {
-                              'address.typeId': {
-                                $ne: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE'
-                              }
-                            }, {
-                              'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
-                              $or: [
-                                {
-                                  'address.locationId': null
-                                }, {
-                                  'address.locationId': {
-                                    $in: filter.where.locationsIds
-                                  }
-                                }
                               ]
                             }
                           ]
-                        }
+                        },
+                        personFilter
                       ]
-                    },
-                    personFilter
-                  ]
-                };
-              }
-
-              // retrieve outbreak persons
-              // no need to retrieve them in bulk by bulk since we use projection which should reduce significantly the quantity of information retrieved from mongodb
-              return dbConnection
-                .collection(dbSync.collectionsMap.person)
-                .find(
-                  personFilter, {
-                    projection: {
-                      // common fields ( case / contact / event )
-                      _id: 1,
-                      type: 1
-                    }
-                  }
-                )
-                .toArray()
-                .then((personsRecords) => {
-                  // loop through the personsIds to get contactIds / caseIds / eventIds
-                  // & cache IDs on filter for future usage
-                  // - contacts is an object because we need to easily find later a contact by id ( dictionary )
-                  // - events is an object, because even if now we don't have duplicates, later we will add other event ids that could already be in the list of ids
-                  //    - so this is an easy way to remove duplicates
-                  response.cases = {};
-                  response.contacts = {};
-                  response.events = {};
-                  personsRecords.forEach((person) => {
-                    switch (person.type) {
-                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
-                        response.contacts[person._id] = true;
-                        break;
-                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
-                        response.cases[person._id] = true;
-                        break;
-                      case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
-                        response.events[person._id] = true;
-                        break;
-                    }
+                    });
                   });
-
-                  // finished
-                  return response;
-                });
-            })
-
-            // retrieve contacts relationships
-            .then((response) => {
-              // define object to perpetuate data to other promises
-              response.retrievedRelationships = [];
-
-              // there is nothing to retrieve ?
-              if (_.isEmpty(response.contacts)) {
-                return response;
-              }
-
-              // retrieve relationships to our contacts
-              // since _ids are unique, there is no need to add outbreaks filter since we do that already for contacts, and here we retrieve only relationships for these contacts
-              const contactRecordsIds = Object.keys(response.contacts);
-              const relationshipFilters = {
-                $and: [
-                  {
-                    'persons.id': {
-                      $in: contactRecordsIds
-                    }
-                  },
-                  notDeletedFilter
-                ]
-              };
-
-              // retrieve case contacts relationships that aren't deleted
-              return dbConnection
-                .collection(dbSync.collectionsMap.relationship)
-                .find(
-                  relationshipFilters, {
-                    projection: {
-                      _id: 1,
-                      persons: 1
-                    }
-                  }
-                )
-                .toArray()
-                .then((relationships) => {
-                  response.retrievedRelationships = relationships;
-                  return response;
-                });
-            })
-
-            // map relationships
-            .then((response) => {
-              // retrieve contact of contacts
-              response.contactsOfContacts = {};
-
-              // get relationships
-              response.relationships = {};
-              response.retrievedRelationships.forEach((relationship) => {
-                // something went wrong, we have invalid data
-                // jump over this record
-                if (
-                  !relationship.persons ||
-                  relationship.persons.length !== 2
-                ) {
-                  return;
-                }
-
-                // determine id for which we might need to retrieve person data
-                let relatedId;
-                let relatedType;
-                if (
-                  relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-                  response.contacts[relationship.persons[0].id]
-                ) {
-                  relatedId = relationship.persons[1].id;
-                  relatedType = relationship.persons[1].type;
                 } else {
-                  relatedId = relationship.persons[0].id;
-                  relatedType = relationship.persons[0].type;
+                  personFiltersChunks.push(personFilter);
                 }
 
-                // determine persons for which we need to retrieve data
-                // add relationship to list of relationships to sync
-                switch (relatedType) {
-                  case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
-                    response.contacts[relatedId] = true;
-                    response.relationships[relationship._id] = true;
-                    break;
-                  case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
-                    response.cases[relatedId] = true;
-                    response.relationships[relationship._id] = true;
-                    break;
-                  case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
-                    response.events[relatedId] = true;
-                    response.relationships[relationship._id] = true;
-                    break;
-                  case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
-                    response.contactsOfContacts[relatedId] = true;
-                    response.relationships[relationship._id] = true;
-                    break;
-                }
-              });
+                // retrieve outbreak persons; making multiple requests if multiple filters were constructed
+                return new Promise((resolve, reject) => {
+                  async
+                    .eachLimit(personFiltersChunks, 5, (filterChunk, asyncCallback) => {
+                      return dbConnection
+                        .collection(dbSync.collectionsMap.person)
+                        .find(
+                          filterChunk, {
+                            projection: {
+                              // common fields ( case / contact / event )
+                              _id: 1,
+                              type: 1
+                            }
+                          }
+                        )
+                        .toArray()
+                        .then((chunkRecords) => {
+                          // loop through the personsIds to get contactIds / caseIds / eventIds
+                          // & cache IDs on filter for future usage
+                          // - contacts is an object because we need to easily find later a contact by id ( dictionary )
+                          // - events is an object, because even if now we don't have duplicates, later we will add other event ids that could already be in the list of ids
+                          //    - so this is an easy way to remove duplicates
+                          chunkRecords.forEach((person) => {
+                            switch (person.type) {
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                                response.contacts[person._id] = true;
+                                break;
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                                response.cases[person._id] = true;
+                                break;
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                                response.events[person._id] = true;
+                                break;
+                            }
+                          });
 
-              // finished
-              return response;
-            })
+                          // finished
+                          asyncCallback();
+                        })
+                        .catch(asyncCallback);
+                    }, (err) => {
+                      // error ?
+                      if (err) {
+                        return reject(err);
+                      }
 
-            // determine relationships between cases & events
-            .then((response) => {
-              // define object to perpetuate data to other promises
-              response.retrievedRelationships = [];
-
-              // there is nothing to retrieve ?
-              if (
-                _.isEmpty(response.cases) &&
-                _.isEmpty(response.events)
-              ) {
-                return response;
-              }
-
-              // retrieve relationships between cases & events
-              const alreadyRetrievedRelationships = Object.keys(response.relationships);
-              const caseAndEventsRecordsIds = [
-                ...Object.keys(response.cases),
-                ...Object.keys(response.events)
-              ];
-              const relationshipFilters = {
-                $and: [
-                  {
-                    _id: {
-                      $nin: alreadyRetrievedRelationships
-                    },
-                    'persons.0.id': {
-                      $in: caseAndEventsRecordsIds
-                    },
-                    'persons.1.id': {
-                      $in: caseAndEventsRecordsIds
-                    }
-                  },
-                  notDeletedFilter
-                ]
-              };
-
-              // retrieve case contacts relationships that aren't deleted
-              return dbConnection
-                .collection(dbSync.collectionsMap.relationship)
-                .find(
-                  relationshipFilters, {
-                    projection: {
-                      _id: 1
-                    }
-                  }
-                )
-                .toArray()
-                .then((relationships) => {
-                  response.retrievedRelationships = relationships;
-                  return response;
+                      // finished
+                      return resolve(response);
+                    });
                 });
-            })
+              })
 
-            // map relationship between cases & events
-            .then((response) => {
-              // map relationship between cases & events
-              response.retrievedRelationships.forEach((relationship) => {
-                response.relationships[relationship._id] = true;
-              });
+              // retrieve contacts relationships
+              .then((response) => {
+                // there is nothing to retrieve ?
+                if (_.isEmpty(response.contacts)) {
+                  return response;
+                }
 
-              // finished
-              return response;
-            })
+                // retrieve relationships to our contacts
+                // since _ids are unique, there is no need to add outbreaks filter since we do that already for contacts, and here we retrieve only relationships for these contacts
+                const contactRecordsIds = Object.keys(response.contacts);
 
-            // prepare person & relationship arrays of ids to be used later by filters
-            .then((response) => {
-              // make sure where is initialized
-              filter.where = filter.where || {};
+                // to avoid issues with filter size because of the contactRecordsIds length make multiple requests to mongo
+                // retrieve deleted records too since we need to tell mobile that records were deleted
+                return new Promise((resolve, reject) => {
+                  async
+                    .eachLimit(_.chunk(contactRecordsIds, noElementsInFilterArrayLimit), 5, (contactIdsChunk, asyncCallback) => {
+                      // retrieve case contacts relationships
+                      return dbConnection
+                        .collection(dbSync.collectionsMap.relationship)
+                        .find({
+                          'persons.id': {
+                            $in: contactIdsChunk
+                          }
+                        }, {
+                          projection: {
+                            _id: 1,
+                            persons: 1
+                          }
+                        })
+                        .toArray()
+                        .then((chunkRecords) => {
+                          // get relationships
+                          chunkRecords.forEach((relationship) => {
+                            // something went wrong, we have invalid data
+                            // jump over this record
+                            if (
+                              !relationship.persons ||
+                              relationship.persons.length !== 2
+                            ) {
+                              return;
+                            }
 
-              // cases / contacts / events & relationships that we need to sync
-              filter.where.contactsIds = Object.keys(response.contacts);
-              filter.where.casesIds = Object.keys(response.cases);
-              filter.where.eventsIds = Object.keys(response.events);
-              filter.where.contactsOfContactsIds = Object.keys(response.contactsOfContacts);
-              filter.where.relationshipsIds = Object.keys(response.relationships);
+                            // determine id for which we might need to retrieve person data
+                            let relatedId;
+                            let relatedType;
+                            if (
+                              relationship.persons[0].type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                              response.contacts[relationship.persons[0].id]
+                            ) {
+                              relatedId = relationship.persons[1].id;
+                              relatedType = relationship.persons[1].type;
+                            } else {
+                              relatedId = relationship.persons[0].id;
+                              relatedType = relationship.persons[0].type;
+                            }
 
-              // determine all persons that we need to retrieve
-              filter.where.personsIds = [
-                ...filter.where.casesIds,
-                ...filter.where.contactsIds,
-                ...filter.where.eventsIds,
-                ...filter.where.contactsOfContactsIds
-              ];
-            })
-            .catch(reject);
+                            // determine persons for which we need to retrieve data
+                            // add relationship to list of relationships to sync
+                            switch (relatedType) {
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                                response.contacts[relatedId] = true;
+                                response.relationships[relationship._id] = true;
+                                break;
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                                response.cases[relatedId] = true;
+                                response.relationships[relationship._id] = true;
+                                break;
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                                response.events[relatedId] = true;
+                                response.relationships[relationship._id] = true;
+                                break;
+                              case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+                                response.contactsOfContacts[relatedId] = true;
+                                response.relationships[relationship._id] = true;
+                                break;
+                            }
+                          });
+
+                          // finished with this chunk
+                          asyncCallback();
+                        })
+                        .catch(asyncCallback);
+                    }, (err) => {
+                      // error ?
+                      if (err) {
+                        return reject(err);
+                      }
+
+                      // finished
+                      return resolve(response);
+                    });
+                });
+              })
+
+              // determine relationships between cases & events
+              .then((response) => {
+                // there is nothing to retrieve ?
+                if (
+                  _.isEmpty(response.cases) &&
+                  _.isEmpty(response.events)
+                ) {
+                  return response;
+                }
+
+                // all records for which we need to retrieve relationships
+                const caseAndEventsRecordsIds = [
+                  ...Object.keys(response.cases),
+                  ...Object.keys(response.events)
+                ];
+
+                // to avoid issues with filter size because of the contactRecordsIds length make multiple requests to mongo
+                // - retrieve deleted records too since we need to tell mobile that records were deleted
+                // - also, 'persons.id' in is much faster than
+                // $or: [{
+                //   'persons.0.id': {
+                //     $in: personsChunks[0]
+                //   },
+                //   'persons.1.id': {
+                //     $in: personsChunks[1]
+                //   }
+                // }, {
+                //   'persons.0.id': {
+                //     $in: personsChunks[1]
+                //   },
+                //   'persons.1.id': {
+                //     $in: personsChunks[0]
+                //   }
+                // }]
+                // - so it is better to do an in and filter them here
+                return new Promise((resolve, reject) => {
+                  async.eachLimit(
+                    _.chunk(
+                      caseAndEventsRecordsIds,
+                      noElementsInFilterArrayLimit
+                    ),
+                    5,
+                    (personsChunks, asyncCallback) => {
+                      dbConnection
+                        .collection(dbSync.collectionsMap.relationship)
+                        .find({
+                          'persons.id': {
+                            $in: personsChunks
+                          }
+                        }, {
+                          projection: {
+                            _id: 1,
+                            persons: 1
+                          }
+                        })
+                        .toArray()
+                        .then((relationships) => {
+                          // map relationship between cases & events
+                          relationships.forEach((relationship) => {
+                            // exclude relationships that aren't connected to persons included in our response
+                            if (
+                              !relationship.persons ||
+                              relationship.persons.length !== 2 || (
+                                !response.cases[relationship.persons[0].id] &&
+                                !response.events[relationship.persons[0].id]
+                              ) || (
+                                !response.cases[relationship.persons[1].id] &&
+                                !response.events[relationship.persons[1].id]
+                              )
+                            ) {
+                              return;
+                            }
+
+                            // add to list
+                            response.relationships[relationship._id] = true;
+                          });
+
+                          // finished
+                          asyncCallback();
+                        })
+                        .catch(asyncCallback);
+                    },
+                    (err) => {
+                      // an error occurred
+                      if (err) {
+                        return reject(err);
+                      }
+
+                      // finish with success
+                      return resolve(response);
+                    }
+                  );
+                });
+              })
+
+              // prepare person & relationship arrays of ids to be used later by filters
+              .then((response) => {
+                // make sure where is initialized
+                filter.where = filter.where || {};
+
+                // cases / contacts / events & relationships that we need to sync
+                filter.where.contactsIds = Object.keys(response.contacts);
+                filter.where.casesIds = Object.keys(response.cases);
+                filter.where.eventsIds = Object.keys(response.events);
+                filter.where.contactsOfContactsIds = Object.keys(response.contactsOfContacts);
+                filter.where.relationshipsIds = Object.keys(response.relationships);
+
+                // determine all persons that we need to retrieve
+                filter.where.personsIds = [
+                  ...filter.where.casesIds,
+                  ...filter.where.contactsIds,
+                  ...filter.where.eventsIds,
+                  ...filter.where.contactsOfContactsIds
+                ];
+              })
+              .catch(reject);
+          }
 
           // run data gathering at first
           filterDataGathering
@@ -657,9 +752,17 @@ const worker = {
                 .series(
                   Object.keys(collections).map((collectionName) => {
                     return (callback) => {
-                      // get mongoDB filter that will be sent; for some collections we might send additional filters
-                      let mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ? dbSync.collectionsFilterMap[collectionName](collectionName, customFilter, filter) : customFilter;
-
+                      let mongoDBFilter = {};
+                      if (!options.noDataFiltering) {
+                        // get mongoDB filter that will be sent; for some collections we might send additional filters
+                        mongoDBFilter = dbSync.collectionsFilterMap[collectionName] ?
+                          dbSync.collectionsFilterMap[collectionName](
+                            collectionName,
+                            customFilter,
+                            filter
+                          ) :
+                          customFilter;
+                      }
                       logger.debug(`Exporting collection: ${collectionName}`);
 
                       // export collection
@@ -727,7 +830,7 @@ const worker = {
                     }
 
                     // archive file name
-                    let archiveName = `${tmp.tmpdir}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archiveName = `${tmp.tmpdir}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}_${uuid.v4()}.zip`;
 
                     // archive directory
                     createZipArchive(archivesDirName, archiveName, logger)
@@ -862,7 +965,10 @@ process.on('message', function (message) {
       process.send([null, result]);
     })
     .catch(function (error) {
-      process.send([error]);
+      process.send([error instanceof Error ? {
+        message: error.message,
+        stack: error.stack
+      } : error]);
     });
 });
 

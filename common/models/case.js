@@ -124,6 +124,12 @@ module.exports = function (Case) {
   // list of case classifications that are discarded
   Case.discardedCaseClassifications = caseConstants.discardedCaseClassifications;
 
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  Case.mergeFieldsOnUpdate = [
+    'questionnaireAnswers'
+  ];
+
   Case.sectionsFieldLabels = {
     personalInformation: {
       title: 'LNG_FORM_CASE_QUICK_LABEL_PERSONAL',
@@ -139,8 +145,7 @@ module.exports = function (Case) {
         'LNG_CASE_FIELD_LABEL_RISK_REASON',
         'LNG_CASE_FIELD_LABEL_DATE_OF_REPORTING',
         'LNG_CASE_FIELD_LABEL_IS_DATE_OF_REPORTING_APPROXIMATE',
-        'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
-
+        'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED'
       ]
     },
     addresses: {
@@ -186,6 +191,119 @@ module.exports = function (Case) {
   // map language token labels for model properties
   Case.fieldLabelsMap = caseConstants.fieldLabelsMap;
 
+  // map language token labels for export fields group
+  Case.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'firstName',
+        'middleName',
+        'lastName',
+        'gender',
+        'occupation',
+        'age',
+        'age.years',
+        'age.months',
+        'dob',
+        'visualId',
+        'documents',
+        'documents[].type',
+        'documents[].number',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'pregnancyStatus'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'type',
+        'wasContact',
+        'wasCase',
+        'classification',
+        'dateOfInfection',
+        'dateOfOnset',
+        'isDateOfOnsetApproximate',
+        'riskLevel',
+        'riskReason',
+        'dateBecomeContact',
+        'dateBecomeCase',
+        'investigationStatus',
+        'dateInvestigationCompleted',
+        'outcomeId',
+        'dateOfOutcome',
+        'transferRefused',
+        'safeBurial',
+        'dateOfBurial',
+        'burialLocationId',
+        'burialPlaceName',
+        'responsibleUserId',
+        'numberOfExposures',
+        'numberOfContacts'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {
+      properties: [
+        'vaccinesReceived',
+        'vaccinesReceived[].vaccine',
+        'vaccinesReceived[].date',
+        'vaccinesReceived[].status'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA': {
+      properties: [
+        'dateRanges',
+        'dateRanges[].typeId',
+        'dateRanges[].startDate',
+        'dateRanges[].endDate',
+        'dateRanges[].centerName',
+        'dateRanges[].locationId',
+        'dateRanges[].comments'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'addresses',
+        'addresses[].typeId',
+        'addresses[].country',
+        'addresses[].city',
+        'addresses[].addressLine1',
+        'addresses[].postalCode',
+        'addresses[].locationId',
+        'addresses[].geoLocation',
+        'addresses[].geoLocation.lat',
+        'addresses[].geoLocation.lng',
+        'addresses[].geoLocationAccurate',
+        'addresses[].date',
+        'addresses[].phoneNumber',
+        'addresses[].emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    }
+  };
+
   Case.exportFieldsOrder = caseConstants.exportFieldsOrder;
 
   Case.arrayProps = caseConstants.arrayProps;
@@ -223,6 +341,8 @@ module.exports = function (Case) {
     'dateBecomeCase',
     'dateOfInfection',
     'dateOfOnset',
+    'investigationStatus',
+    'dateInvestigationCompleted',
     'outcomeId',
     'dateOfOutcome',
     'dateRanges',
@@ -238,6 +358,19 @@ module.exports = function (Case) {
   Case.locationFields = caseConstants.locationFields;
 
   Case.foreignKeyResolverMap = caseConstants.foreignKeyResolverMap;
+
+  // used on importable file logic
+  Case.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Case.nestedGeoPoints = [
@@ -386,59 +519,54 @@ module.exports = function (Case) {
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
-      endDate = app.utils.helpers.getDateEndOfDay(endDate);
+      endDate = app.utils.helpers.getDateEndOfDay(endDate).toISOString();
     } else {
       // nothing sent, use current day's end of day
-      endDate = app.utils.helpers.getDateEndOfDay();
+      endDate = app.utils.helpers.getDateEndOfDay().toISOString();
     }
 
-    // make sure end date is after start date
-    const startDate = app.utils.helpers.getDate(outbreak.startDate);
-    if (endDate.isBefore(startDate)) {
-      endDate = app.utils.helpers.getDateEndOfDay(startDate);
-    }
-
-    // define period interval
-    const periodInterval = [
-      startDate,
-      endDate
-    ];
-
-    // build period map
-    const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
-
-    // get available case categories
-    const categoryList = {};
-    return app.models.referenceData
-      .find({
-        where: {
-          categoryId: referenceDataCategoryId
-        },
-        fields: {
-          id: true
-        }
-      })
-      .then(function (categoryItems) {
-        // add default entries for all categoryItems
-        categoryItems.forEach(function (categoryItem) {
-          categoryList[categoryItem.id] = 0;
-        });
-        // add case categoryItems to periodMap
-        Object.keys(periodMap)
-          .forEach(function (periodMapIndex) {
-            Object.assign(periodMap[periodMapIndex], {
-              [exportedPropertyName]: Object.assign({}, categoryList),
-              total: 0
-            });
-          });
-      })
-      .then(function () {
-        // add geographical restrictions if needed
-        return Case.addGeographicalRestrictions(options.remotingContext, filter.where);
-      })
+    // add geographical restrictions if needed
+    return Case.addGeographicalRestrictions(options.remotingContext, filter.where)
       .then(updatedFilter => {
         // update filter.where if needed
         updatedFilter && (filter.where = updatedFilter);
+
+        // determine projection so we don't retrieve what isn't necessary
+        let caseProjection = {
+          _id: 1
+        };
+        const caseSort = {
+          [timePropertyName]: 1
+        };
+        switch (timePropertyName) {
+          case 'dateOfOnset':
+            // fields
+            caseProjection = {
+              dateOfOnset: 1,
+              classification: 1
+            };
+
+            // finished
+            break;
+          case 'dateOfOutcome':
+            // fields
+            caseProjection = {
+              dateOfOutcome: 1,
+              outcomeId: 1
+            };
+
+            // finished
+            break;
+          case 'dateOfReporting':
+            // fields
+            caseProjection = {
+              dateOfReporting: 1,
+              classification: 1
+            };
+
+            // finished
+            break;
+        }
 
         // find cases that have <timePropertyName> earlier then end of the period interval
         return app.models.case
@@ -448,41 +576,84 @@ module.exports = function (Case) {
                 where: {
                   outbreakId: outbreak.id,
                   [timePropertyName]: {
-                    gte: new Date(periodInterval[0]),
-                    lte: new Date(periodInterval[1])
+                    lte: endDate,
+                    ne: null
+                  },
+                  dateOfReporting: {
+                    lte: endDate
                   }
                 }
               }, filter || {}).where
             ), {
-              projection: {
-                dateOfOnset: 1,
-                classification: 1,
-                dateOfOutcome: 1,
-                outcomeId: 1,
-                dateOfReporting: 1
-              }
+              projection: caseProjection,
+              sort: caseSort
             }
           )
           .then(function (cases) {
-            return new Promise(function (resolve, reject) {
-              // count categories over time
-              counterFn(
-                cases,
-                periodInterval,
-                periodType,
-                weekType,
-                periodMap,
-                categoryList,
-                function (error, periodMap) {
-                  // handle errors
-                  if (error) {
-                    return reject(error);
-                  }
-                  // send back the result
-                  return resolve(periodMap);
+            // if there are not cases, use end date
+            const startDate = cases.length > 0 ?
+              app.utils.helpers.getDateEndOfDay(cases[0][timePropertyName]).toISOString() :
+              endDate;
+
+            // define period interval
+            const periodInterval = [
+              startDate,
+              endDate
+            ];
+
+            // build period map
+            const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
+
+            // get available case categories
+            return app.models.referenceData
+              .find({
+                where: {
+                  categoryId: referenceDataCategoryId
+                },
+                fields: {
+                  id: true
                 }
-              );
-            });
+              })
+              .then(function (categoryItems) {
+                // get available case categories
+                const categoryList = {};
+
+                // add default entries for all categoryItems
+                categoryItems.forEach(function (categoryItem) {
+                  categoryList[categoryItem.id] = 0;
+                });
+                // add case categoryItems to periodMap
+                Object.keys(periodMap)
+                  .forEach(function (periodMapIndex) {
+                    Object.assign(periodMap[periodMapIndex], {
+                      [exportedPropertyName]: Object.assign({}, categoryList),
+                      total: 0
+                    });
+                  });
+
+                return categoryList;
+              })
+              .then(function (categoryList) {
+                return new Promise(function (resolve, reject) {
+                  // count categories over time
+                  counterFn(
+                    cases,
+                    periodInterval,
+                    periodType,
+                    weekType,
+                    periodMap,
+                    categoryList,
+                    function (error, periodMap) {
+                      // handle errors
+                      if (error) {
+                        return reject(error);
+                      }
+                      // send back the result
+                      return resolve(periodMap);
+                    }
+                  );
+                });
+              });
           });
       });
   };
@@ -577,6 +748,12 @@ module.exports = function (Case) {
             ).where, {
               order: {
                 dateOfOnset: 1
+              },
+              projection: {
+                _id: 1,
+                dateOfOnset: 1,
+                firstName: 1,
+                lastName: 1
               }
             }
           );
@@ -684,6 +861,13 @@ module.exports = function (Case) {
             ).where, {
               order: {
                 dateOfOnset: 1
+              },
+              projection: {
+                _id: 1,
+                dateOfOnset: 1,
+                dateRanges: 1,
+                firstName: 1,
+                lastName: 1
               }
             }
           );
@@ -860,6 +1044,192 @@ module.exports = function (Case) {
         };
         // return updated filter
         return Object.assign(filter, {where: casesQuery});
+      });
+  };
+
+  /**
+   * Count hospitalized cases
+   */
+  Case.countCasesHospitalized = (
+    options,
+    outbreakId,
+    filter
+  ) => {
+    // initialization
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // date limit
+    const dateLimitEndOfDay = app.utils.helpers.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
+    const dateLimitStartOfDay = app.utils.helpers.getDate(filter.flags ? filter.flags.date : undefined).toDate();
+
+    // update filter for geographical restriction if needed
+    const refItems = [];
+    return Case
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // retrieve reference data
+        return app.models.referenceData
+          .rawFind({
+            categoryId: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE'
+          }, {
+            projection: {
+              value: 1
+            }
+          })
+          .then((referenceEntries) => {
+            // map ref items
+            (referenceEntries || []).forEach((item) => {
+              refItems.push({
+                type: item.value,
+                key: item.value
+              });
+            });
+
+            // return updated filter
+            return updatedFilter;
+          });
+      })
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // attach prefilters
+        filter.where.outbreakId = outbreakId;
+        filter.where.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+        if (!filter.deleted) {
+          filter.where.deleted = false;
+        }
+
+        // convert to mongo filter
+        const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
+
+        // construct aggregate filter
+        const aggregateFilters = [];
+
+        // query
+        aggregateFilters.push({
+          $match: mongoFilter.where
+        });
+
+        // count hospitalized, isolated records
+        const groupQuery = {
+          $group: {
+            _id: null
+          }
+        };
+
+        // group
+        aggregateFilters.push(groupQuery);
+
+        // count hospitalized & isolated
+        refItems.forEach((dateRangeData) => {
+          groupQuery.$group[dateRangeData.key] = {
+            $sum: {
+              $cond: {
+                if: {
+                  $gt: [
+                    {
+                      $let: {
+                        vars: {
+                          dateRangesMatch: {
+                            $ifNull: [
+                              {
+                                $filter: {
+                                  input: '$dateRanges',
+                                  as: 'item',
+                                  cond: {
+                                    $and: [
+                                      {
+                                        $eq: [
+                                          '$$item.typeId',
+                                          dateRangeData.type
+                                        ]
+                                      }, {
+                                        $or: [
+                                          {
+                                            $not: [
+                                              '$$item.startDate'
+                                            ]
+                                          }, {
+                                            $lte: [
+                                              '$$item.startDate',
+                                              dateLimitEndOfDay
+                                            ]
+                                          }
+                                        ]
+                                      }, {
+                                        $or: [
+                                          {
+                                            $not: [
+                                              '$$item.endDate'
+                                            ]
+                                          }, {
+                                            $gte: [
+                                              '$$item.endDate',
+                                              dateLimitStartOfDay
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              []
+                            ]
+                          }
+                        },
+                        in: {
+                          $size: '$$dateRangesMatch'
+                        }
+                      }
+                    },
+                    0
+                  ]
+                },
+                then: 1,
+                else: 0
+              }
+            }
+          };
+        });
+
+        // determine total too
+        groupQuery.$group.total = {
+          $sum: 1
+        };
+
+        // retrieve data
+        return app.dataSources.mongoDb.connector
+          .collection('person')
+          .aggregate(
+            aggregateFilters, {
+              allowDiskUse: true
+            }
+          )
+          .toArray()
+          .then((data) => {
+            // determine not hospitalized
+            data = data && data.length > 0 ?
+              data[0] : {};
+
+            // cleanup
+            delete data._id;
+
+            // add missing keys
+            refItems.forEach((item) => {
+              if (data[item.key] === undefined) {
+                data[item.key] = 0;
+              }
+            });
+
+            // finished
+            return data;
+          });
       });
   };
 };

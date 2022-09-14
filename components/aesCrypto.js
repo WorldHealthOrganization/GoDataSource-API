@@ -4,6 +4,10 @@
  * String encryption/decryption using AES-256
  */
 
+const stream = require('stream');
+const util = require('util');
+const {Transform} = stream.Transform;
+const pipeline = util.promisify(stream.pipeline);
 const crypto = require('crypto');
 
 // encryption parameters
@@ -104,7 +108,7 @@ function decrypt(password, data) {
       try {
         // decipher text
         const decipher = crypto.createCipheriv(algorithm, key, iv);
-        buffer = Buffer.concat([decipher.update(encrypted) , decipher.final()]);
+        buffer = Buffer.concat([decipher.update(encrypted), decipher.final()]);
       } catch (decipherError) {
         error = new Error('Failed to decrypt config properties. Stack Trace: ' + decipherError.stack);
       }
@@ -116,7 +120,139 @@ function decrypt(password, data) {
   });
 }
 
+/**
+ * Encrypt stream
+ */
+const encryptStream = (
+  readableStream,
+  writableStream,
+  password
+) => {
+  return new Promise(function (resolve, reject) {
+    // prepare encryption key & IV
+    createKeyIv(password, function (err, key) {
+      // an error occurred ?
+      if (err) {
+        return reject(err);
+      }
+
+      // encipher data
+      const cipher = crypto.createCipheriv(algorithm, key.key, key.iv);
+
+      // write key data
+      writableStream.write(key.iv);
+      writableStream.write(key.salt);
+
+      // start encrypting
+      readableStream.on('data', (data) => {
+        // pause read until write finishes so we write doesn't miss writing data
+        readableStream.pause();
+
+        // encrypt data
+        const encrypted = cipher.update(data);
+
+        // write to file
+        if (encrypted) {
+          // write data
+          writableStream.write(
+            encrypted,
+            (err) => {
+              // an error occurred...
+              if (err) {
+                throw err;
+              }
+
+              // resume read
+              readableStream.resume();
+            }
+          );
+        } else {
+          readableStream.resume();
+        }
+      });
+
+      // finished writing
+      readableStream.on('close', function () {
+        // finalize encryption
+        writableStream.write(cipher.final());
+
+        // finished with temporary file used for encryption
+        writableStream.close();
+
+        // finished
+        resolve();
+      });
+    });
+  });
+};
+
+/**
+ * Transform stream for decrypting files
+ */
+class DecryptTransform extends Transform {
+  constructor(options) {
+    !options && (options = {});
+    super(options);
+
+    if (options.password) {
+      this.password = options.password;
+      delete options.password;
+    }
+
+    // initialize decipher
+    this.decipher = null;
+  }
+
+  _transform(chunk, encoding, callback) {
+    try {
+      if (encoding !== 'buffer') {
+        chunk = Buffer.from(chunk);
+      }
+
+      if (!this.decipher) {
+        const iv = chunk.slice(0, ivLength);
+        const salt = chunk.slice(ivLength, ivLength + saltLength);
+        const key = crypto.pbkdf2Sync(this.password, salt, iterations, keyLength, digest);
+        this.decipher = crypto.createCipheriv(algorithm, key, iv);
+
+        chunk = chunk.slice(ivLength + saltLength);
+      }
+
+      callback(null, this.decipher.update(chunk));
+    } catch (err) {
+      callback(err);
+    }
+  }
+
+  _flush(callback) {
+    callback(null, this.decipher ? this.decipher.final() : null);
+  }
+}
+
+/**
+ * Decrypt stream
+ * @param readableStream
+ * @param writableStream
+ * @param password
+ * @return {Promise<any>}
+ */
+const decryptStream = function (
+  readableStream,
+  writableStream,
+  password
+) {
+  return pipeline(
+    readableStream,
+    new DecryptTransform({
+      password
+    }),
+    writableStream
+  );
+};
+
 module.exports = {
   encrypt: encrypt,
-  decrypt: decrypt
+  decrypt: decrypt,
+  encryptStream,
+  decryptStream
 };

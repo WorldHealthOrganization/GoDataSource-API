@@ -19,6 +19,30 @@ const migrationLogStatusMap = {
 const migrationVersions = [{
   version: 'older',
   scripts: [{
+    fileName: 'defaultLanguages.js',
+    actions: [{
+      name: 'run',
+      buildNo: 30
+    }]
+  }, {
+    fileName: 'defaultReferenceData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 3
+    }]
+  }, {
+    fileName: 'defaultHelpData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'defaultOutbreakTemplateData.js',
+    actions: [{
+      name: 'run',
+      buildNo: 3
+    }]
+  }, {
     fileName: 'case.js',
     actions: [{
       name: 'migrateCases',
@@ -103,6 +127,168 @@ const migrationVersions = [{
     fileName: 'followUp.js',
     actions: [{
       name: 'setUsualPlaceOfResidenceLocationIdOnFollowUp',
+      buildNo: 1
+    }]
+  }]
+}, {
+  version: '2.36.4',
+  scripts: [{
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'updateMapServers',
+      buildNo: 1
+    }]
+  }]
+}, {
+  version: '2.38.0',
+  scripts: [{
+    fileName: 'person.js',
+    actions: [{
+      name: 'updateMissingDuplicateKeys',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'labResults.js',
+    actions: [{
+      name: 'updatePersonType',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'missing-property-deleted.js',
+    actions: [{
+      name: 'addMissingDeletedProperty',
+      buildNo: 1
+    }]
+  }]
+}, {
+  version: '2.38.1',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 9
+    }]
+  }]
+}, {
+  version: '2.39.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 19
+    }, {
+      name: 'checkAndRemoveLanguageTokens',
+      buildNo: 3
+    }, {
+      name: 'checkAndAddMissingLanguageTokens',
+      buildNo: 2
+    }]
+  }]
+}, {
+  version: '2.40.0',
+  scripts: [{
+    fileName: 'template.js',
+    actions: [{
+      name: 'createUpdateDefaultOutbreakTemplates',
+      buildNo: 18
+    }]
+  }, {
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 4
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 18
+    }, {
+      name: 'createUpdateSingleFrenchLanguageTokens',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'updateNumberOfExposuresAndContacts',
+      buildNo: 2
+    }]
+  }]
+}, {
+  version: '2.40.2',
+  scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 4
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 1
+    }]
+  }]
+}, {
+  version: '2.41.0',
+  scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 3
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 27
+    }, {
+      name: 'createUpdateSingleFrenchLanguageTokens',
+      buildNo: 5
+    }]
+  }]
+}, {
+  version: '2.42.0',
+  scripts: [{
+    fileName: 'template.js',
+    actions: [{
+      name: 'createUpdateDefaultOutbreakTemplates',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 9
+    }]
+  }]
+}, {
+  version: '2.43.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'cleanUnnecessaryData',
+      buildNo: 1
+    }]
+  }]
+}, {
+  version: '2.44.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'cleanUnnecessaryData',
       buildNo: 1
     }]
   }]

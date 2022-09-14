@@ -40,8 +40,7 @@
   "scope": {
     "where": {
       "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT"
-    },
-    "order": ["name ASC"]
+    }
   },
   "properties": {
     "type": {
@@ -56,6 +55,12 @@
     },
     "dateApproximate": {
       "type": "boolean"
+    },
+    "eventCategory": {
+      "type": "string"
+    },
+    "endDate": {
+      "type": "date"
     },
     "description": {
       "type": "string"
@@ -89,7 +94,8 @@
     "dateOfOutcome",
     "dateOfBurial",
     "dateBecomeContact",
-    "followUp"
+    "followUp",
+    "duplicateKeys"
   ],
   "validations": [],
   "relations": {},

@@ -1,0 +1,651 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_API_ERROR_CODE_RESTORE_BACKUP_FAILED": {
+      "translation": "Failed to restore backup",
+      "section": "uiAPIErrors"
+    },
+    "LNG_API_ERROR_CODE_MIGRATE_DATABASE_FAILED": {
+      "translation": "Failed to migrate database",
+      "section": "uiAPIErrors"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DESCRIPTION": {
+      "translation": "Description",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DESCRIPTION_DESCRIPTION": {
+      "translation": "",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_LOCATION_FIELD_LABEL_POPULATION_DENSITY": {
+      "translation": "Population Count"
+    },
+    "LNG_APP_PAGE_OUTBREAKS": {
+      "translation": "Outbreaks",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_OUTBREAK_TEMPLATES": {
+      "translation": "Outbreak templates",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_CLUSTERS": {
+      "translation": "Clusters",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_USERS": {
+      "translation": "Users",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_ENTITY_NOT_DUPLICATES": {
+      "translation": "Records marked as not duplicates",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_ROLES": {
+      "translation": "Roles",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_LIST_MARKED_AS_NOT_DUPLICATES_ACTION_DELETE_SUCCESS_MESSAGE": {
+      "translation": "Item removed",
+      "section": "uiMarkedAsNotDuplicatesListPage"
+    },
+    "LNG_APP_PAGE_RELATIONSHIPS": {
+      "translation": "Relationships",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_COT_BAR_CHART": {
+      "translation": "COT bar chart",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_GANTT_CHART": {
+      "translation": "Gantt chart",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_TEAMS": {
+      "translation": "Teams",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_COT_GRAPH": {
+      "translation": "COT graph",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_CASE_COUNT_MAP": {
+      "translation": "Case count map",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_APP_PAGE_DASHBOARD": {
+      "translation": "Dashboard",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1": {
+      "translation": "Hello {{userName}}!",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2": {
+      "translation": "Forgot your password?",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3": {
+      "translation": "To reset your password please follow the link below:",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5": {
+      "translation": "If you suspect someone may have unauthorised access to your account, we suggest you change your password as a precaution by visiting {{changePassURL}}.",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6": {
+      "translation": "Thanks,",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7": {
+      "translation": "Go.Data Team",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING": {
+      "translation": "Instructions for changing your Go.Data password",
+      "section": "passwordReset"
+    },
+    "LNG_PAGE_SET_SECURITY_QUESTIONS_TAB_SECURITY_QUESTIONS_TITLE": {
+      "translation": "Security questions"
+    },
+    "LNG_LAYOUT_LIST_DEFAULT_FILTER_PLACEHOLDER": {
+      "translation": "Filter by"
+    },
+    "LNG_PAGE_CLOUD_BACKUP_TITLE": {
+      "translation": "Cloud backup"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORT_LABEL": {
+      "translation": "Epi curve"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_TITLE": {
+      "translation": "Epi curve"
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
+    },
+    "LNG_CASE_FIELD_LABEL_NOT_A_CASE": {
+      "translation": "Not a case"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_QUESTIONNAIRE_LAB_RESULT_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_TITLE": {
+      "translation": "Lab results"
+    },
+    "LNG_LAYOUT_MENU_ITEM_GANTT_CHART": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_DASHBOARD_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_REPORT_LABEL": {
+      "translation": "Gantt chart"
+    },
+    "LNG_PAGE_GANTT_CHART_TITLE": {
+      "translation": "Gantt chart"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
+      "translation": "Phone number"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
+      "translation": "Create snapshot"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
+      "translation": "Create snapshot"
+    },
+    "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL_ID": {
+      "translation": "Geographical level"
+    },
+    "LNG_LAYOUT_MENU_ITEM_AUDIT_LOG_LABEL": {
+      "translation": "Audit logs"
+    },
+    "LNG_PAGE_LIST_AUDIT_LOGS_TITLE": {
+      "translation": "Audit logs"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_MODEL_NAME": {
+      "translation": "Record name"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_IP_ADDRESS": {
+      "translation": "IP address"
+    },
+    "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": {
+      "translation": "Upstream servers"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_PHYSICAL_DEVICE_ID": {
+      "translation": "Physical device ID"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_START_DATE": {
+      "translation": "Action start date"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_COMPLETION_DATE": {
+      "translation": "Action completion date"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DATE": {
+      "translation": "Start time (UTC)"
+    },
+    "LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+      "translation": "Pregnancy status"
+    },
+    "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": {
+      "translation": "Burial place name"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Variant / Strain lab name"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_RELATION": {
+      "translation": "Context of exposure"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+      "translation": "Snapshot filters"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_OF_CONTACTS": {
+      "translation": "Show contacts of contacts"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab variant / Strain colour"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact daily follow-up status"
+    },
+    "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
+      "translation": "Contact final follow-up status"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL": {
+      "translation": "Location geographical level"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_ID": {
+      "translation": "Credentials client ID"
+    },
+    "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_SECRET": {
+      "translation": "Credentials client secret"
+    },
+    "LNG_BACKUP_MODULE_LABEL_SYSTEM_CONFIGURATION": {
+      "translation": "System configuration"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+      "translation": "Turn on/off automatic backups"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_NAME_COLOR_TITLE": {
+      "translation": "Label colour"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS_ALL": {
+      "translation": "All fields groups"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS": {
+      "translation": "Fields groups"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Assigned user"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT": {
+      "translation": "Event - import"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT": {
+      "translation": "Event - export"
+    },
+    "LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS": {
+      "translation": "Case investigation status",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED": {
+      "translation": "Date of investigation completed",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS": {
+      "translation": "Investigation status"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS_DESCRIPTION": {
+      "translation": ""
+    },
+    "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
+      "translation": "Lab"
+    },
+    "LNG_LAYOUT_MENU_ITEM_DATA_VISUALISATION": {
+      "translation": "Visualisation"
+    },
+    "LNG_LAYOUT_MENU_ITEM_SYSTEM_CONFIG_LABEL": {
+      "translation": "System"
+    },
+    "LNG_LAYOUT_MENU_VERSION_LABEL": {
+      "translation": "Go.Data version: {{version}} - build {{build}}",
+      "section": "uiGenericLayout",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_LAYOUT_MENU_DATA_LABEL": {
+      "translation": "DATA",
+      "section": "uiGenericLayout"
+    },
+    "LNG_LAYOUT_MENU_SYSTEM_ADMINISTRATION_LABEL": {
+      "translation": "SYSTEM ADMINISTRATION",
+      "section": "uiGenericLayout"
+    },
+    "LNG_QUESTIONNAIRE_LABEL_FILE_UPLOAD": {
+      "translation": "Please upload a file",
+      "section": "uiQuestionnaire"
+    },
+    "LNG_QUESTIONNAIRE_LABEL_FILL_NO_QUESTIONS": {
+      "translation": "There are no questions to be filled",
+      "section": "uiQuestionnaire"
+    },
+    "LNG_QUESTIONNAIRE_LABEL_EDIT_NO_QUESTIONS": {
+      "translation": "There are no questions to be displayed",
+      "section": "uiQuestionnaire"
+    },
+    "LNG_COMMON_LABEL_ROW": {
+      "translation": "Question",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_DETAILS": {
+      "translation": "Details",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_ATTENTION_REQUIRED": {
+      "translation": "Attention required",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_ACTIONS": {
+      "translation": "Actions",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_HAS_DUPLICATES_TITLE": {
+      "translation": "Possible duplicates",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_HOME": {
+      "translation": "Home",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_LEGEND": {
+      "translation": "Legend",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_OPTIONS": {
+      "translation": "Options",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_NOTHING_FOUND": {
+      "translation": "Nothing found",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_DELETE": {
+      "translation": "Delete '{{name}}'",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_CONVERT": {
+      "translation": "Convert '{{name}}' to '{{type}}'",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_RESTORE": {
+      "translation": "Restore '{{name}}'",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_INVALID_TAB": {
+      "translation": "Invalid data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_NOTIFICATION_HISTORY": {
+      "translation": "There are {{length}} error(s). Click here to see details",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_HISTORY_TITLE": {
+      "translation": "Errors",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_STATUSES": {
+      "translation": "Status",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_STATUSES_ALERTED": {
+      "translation": "Alerted",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_HEADER_FILTER_SHOW": {
+      "translation": "Show header filters",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_HEADER_FILTER_HIDE": {
+      "translation": "Hide header filters",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_HIDE": {
+      "translation": "Hide",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_VIEW_DATA": {
+      "translation": "View data",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_DELETE_FILTERS": {
+      "translation": "Remove filter",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_DELETE_FILTERS_MSG": {
+      "translation": "Are you sure you want to remove this filter?",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_DELETE_SORTS": {
+      "translation": "Remove sort",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_DELETE_SORTS_MSG": {
+      "translation": "Are you sure you want to remove this sort?",
+      "section": "uiCommonButtons"
+    },
+    "LNG_COMMON_BUTTON_APPLY": {
+      "translation": "Apply",
+      "section": "uiCommonButtons"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_HIDDEN_NO": {
+      "translation": "{{count}} items are hidden",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_CLASSIFICATION_TITLE_DESCRIPTION": {
+      "translation": "Shows the number of cases over time stratified by classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_OUTCOME_TITLE_DESCRIPTION": {
+      "translation": "Shows the number of cases over time stratified by outcome",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORTING_TITLE_DESCRIPTION": {
+      "translation": "Shows the number of cases over reporting time stratified by classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TARGETED_FORM_BUTTON": {
+      "translation": "Change targeted",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TARGETED_DIALOG_TITLE": {
+      "translation": "Change entity targeted",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TARGETED_SUCCESS_MESSAGE": {
+      "translation": "Entity targeted modified!",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TEAM_FORM_BUTTON": {
+      "translation": "Change team",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TEAM_DIALOG_TITLE": {
+      "translation": "Change team",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CHANGE_TEAM_SUCCESS_MESSAGE": {
+      "translation": "Entity team modified!",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_TITLE": {
+      "translation": "As per current date",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_NOT_STARTED": {
+      "translation": "Follow Up Period Not Started Yet",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_UNDER_FOLLOW_UP": {
+      "translation": "Under Follow Up",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_ENDED_FOLLOW_UP": {
+      "translation": "Ended Follow Up Period",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_SAVED_FILTERS_ACTION_CHANGE_PUBLIC": {
+      "translation": "Change visibility",
+      "section": "uiSavedFiltersListPage"
+    },
+    "LNG_PAGE_LIST_SAVED_FILTERS_CHANGE_PUBLIC_TITLE": {
+      "translation": "Filter visibility",
+      "section": "uiSavedFiltersListPage"
+    },
+    "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_ACTION_CHANGE_PUBLIC": {
+      "translation": "Change visibility",
+      "section": "uiSavedImportMappingsListPage"
+    },
+    "LNG_PAGE_LIST_SAVED_IMPORT_MAPPING_CHANGE_PUBLIC_TITLE": {
+      "translation": "Import mapping visibility",
+      "section": "uiSavedImportMappingsListPage"
+    },
+    "LNG_SIDE_FILTERS_LOAD_FILTER_READONLY_LABEL": {
+      "translation": "Readonly ({{name}})",
+      "section": "uiSideFilter"
+    },
+    "LNG_SIDE_FILTERS_LOAD_FILTER_UPDATED_AT_LABEL": {
+      "translation": "Updated on {{datetime}}",
+      "section": "uiSideFilter"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_DETAILS": {
+      "translation": "You are going to add a new question to: <div class=\"gd-form-edit-questionnaire-v2-details-label\">{{details}}</div>",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_FIELD_LABEL_DETAILS": {
+      "translation": "You are going to add a new answer to: <div class=\"gd-form-edit-questionnaire-v2-details-label\">{{details}}</div>",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_BUTTON_MODIFY": {
+      "translation": "Modify question",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_MODIFY": {
+      "translation": "Modify answer",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Follow-ups",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_REPORT": {
+      "translation": "Reports",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Follow-ups",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_REPORT": {
+      "translation": "Reports",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_DIALOG_CONFIRM_UNSAVED_DATA_TITLE": {
+      "translation": "Unsaved data",
+      "section": "uiDialogs"
+    },
+    "LNG_MULTIPLE_SNACKBAR_BUTTON_CLOSE_ALL": {
+      "translation": "Clear all"
+    },
+    "LNG_DIALOG_SAVE_FILTERS_UPDATE_OR_CREATE_DIALOG_TITLE": {
+      "translation": "Update / Create"
+    },
+    "LNG_SIDE_FILTERS_SECTION_FILTER_TITLE": {
+      "translation": "Filter"
+    },
+    "LNG_CASE_FIELD_LABEL_DETAILS": {
+      "translation": "Details"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DETAILS": {
+      "translation": "Details"
+    },
+    "LNG_COMMON_LABEL_ACTIVE": {
+      "translation": "Activate {{name}}"
+    },
+    "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CLONE_SUCCESS_MESSAGE": {
+      "translation": "Outbreak template successfully cloned"
+    },
+    "LNG_STEPPER_FINAL_STEP_TEXT": {
+      "translation": "If you want to change something you can go back to any step and change it.</br> If all data is correct, click '<span class=\"gd-message-button-label\">{{buttonLabel}}</span>' to complete the process."
+    },
+    "LNG_STEPPER_FINAL_STEP_TEXT_GENERAL": {
+      "translation": "Data entry for '<span class=\"gd-message-name\">{{name}}</span>' has been successfully completed!"
+    },
+    "LNG_PAGE_LIST_ENTITY_LAB_RESULTS_CHANGE_CASE_CLASSIFICATION": {
+      "translation": "Change case classification"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_LEGEND_LABEL": {
+      "translation": "Legend"
+    },
+    "LNG_DIALOG_LOCAL_HELP_DIALOG_TITLE": {
+      "translation": "Help"
+    },
+    "LNG_ENTITY_FIELD_LABEL_NUMBER_OF_CONTACTS": {
+      "translation": "Number of contacts"
+    },
+    "LNG_ENTITY_FIELD_LABEL_NUMBER_OF_EXPOSURES": {
+      "translation": "Number of exposures"
+    },
+    "LNG_PAGE_LIST_SYSTEM_DEVICES_ACTION_WIPE_SUCCESS_MESSAGE": {
+      "translation": "Device wiped"
+    },
+    "LNG_PAGE_LIST_TRANSMISSION_CHAINS_TITLE": {
+      "translation": "Transmission chains"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_AUTOMATIC_BACKUP_SETTINGS_DIALOG_EXISTING_CONFIGURATION_INFO": {
+      "translation": "Existing configuration"
+    },
+    "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_TAB_INFECTION_TITLE": {
+      "translation": "Epidemiology"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_INFECTION_TITLE": {
+      "translation": "Epidemiology"
+    },
+    "LNG_PAGE_CREATE_CONTACT_TAB_INFECTION_TITLE": {
+      "translation": "Epidemiology"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_TAB_INFECTION_TITLE": {
+      "translation": "Epidemiology"
+    },
+    "LNG_FORM_VALIDATION_ERROR_FIELD_NO_SPACES": {
+      "translation": "Spaces not allowed"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_CREATE_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
+      "translation": "Contact of contact created"
+    },
+    "LNG_COMMON_LABEL_DELETE_WITHOUT_NAME": {
+      "translation": "Delete"
+    },
+    "LNG_COMMON_LABEL_SYNC": {
+      "translation": "Start sync"
+    },
+    "LNG_PAGE_MODIFY_USER_TAB_DETAILS_SECTION_PASSWORD_TITLE": {
+      "translation": "Password"
+    },
+    "LNG_DIALOG_CONFIRM_ADD_USER_TEAM": {
+      "translation": "Users are already assigned to other teams:{{assigned}}"
+    },
+    "LNG_COMMON_LABEL_APPROVE": {
+      "translation": "Approve '{{name}}'"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "You need 'User - list for dropdowns' permission to change follow-up assigned user"
+    },
+    "LNG_PAGE_CREATE_CASE_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "You need 'User - list for dropdowns' permission to change case assigned user"
+    },
+    "LNG_PAGE_CREATE_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "You need 'User - list for dropdowns' permission to set contact assigned user"
+    },
+    "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "You need 'User - list for dropdowns' permission to set contact of contact assigned user"
+    },
+    "LNG_PAGE_CREATE_EVENT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "You need 'User - list for dropdowns' permission to set event assigned user"
+    },
+    "LNG_DIALOG_LIST_LOCATIONS_IN_USE_LOCATION_DIALOG_TITLE": {
+      "translation": "Location '{{name}}' in use"
+    },
+    "LNG_PAGE_LIST_LOCATIONS_ACTION_FIND_LOCATION": {
+      "translation": "Search for a location"
+    },
+    "LNG_PAGE_MODIFY_CLUSTER_TAB_DETAILS_TITLE": {
+      "translation": "Details",
+      "section": "uiViewModifyClusterPage"
+    }
+  }
+}

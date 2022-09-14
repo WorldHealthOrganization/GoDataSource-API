@@ -9,6 +9,10 @@ const Async = require('async');
 let Sharp = null;
 try {
   // load lib
+  // !!!!!!!!!!!!!!!!!!
+  // Note: Updating sharp library over version 0.28.3 will break current functionality in case of error as sharp will close the process and no longer throw error
+  // See /lib/sharp.js in 0.29+ versions of sharp
+  // !!!!!!!!!!!!!!!!!!
   Sharp = require('sharp');
 
   // do not allow concurrent executions
@@ -105,13 +109,12 @@ const worker = {
           })
           .then(({ data, info }) => {
             // decode the resized image
-            const resizedImage = Sharp(data);
-
-            // remove pixels limit
-            resizedImage.limitInputPixels(false);
-
-            // it reduces the memory footprint and increases performance on some systems
-            resizedImage.sequentialRead(true);
+            const resizedImage = Sharp(data, {
+              // remove pixels limit
+              limitInputPixels: false,
+              // it reduces the memory footprint and increases performance on some systems
+              sequentialRead: true
+            });
 
             // cache its sizes
             const imageWidth = info.width;
@@ -185,15 +188,15 @@ const worker = {
             }, 1 /* do not change!!!, otherwise we encounter race conditions */);
 
             // notify parent process that intensive task is done
-            asyncQ.drain = function () {
+            asyncQ.drain(function () {
               process.send([null, { done: true }]);
-            };
+            });
 
             // if a image fails to be processed, kill the queue and notify the master process
-            asyncQ.error = function (err) {
+            asyncQ.error(function (err) {
               asyncQ.kill();
               process.send([{ error: err.message }]);
-            };
+            });
 
             // build a matrix of images, each cropped to its own position in the matrix
             for (let row = 0; row < rows; row++) {

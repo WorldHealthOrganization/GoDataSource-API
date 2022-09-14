@@ -14,9 +14,7 @@ function getLanguageDictionary(languageId, tokenQuery) {
       {languageId: languageId},
       {languageId: 'english_us'}
     ],
-    deleted: {
-      $ne: true
-    }
+    deleted: false
   };
 
   if (tokenQuery) {

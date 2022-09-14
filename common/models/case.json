@@ -63,11 +63,7 @@
   "scope": {
     "where": {
       "type": "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE"
-    },
-    "order": [
-      "lastName ASC",
-      "firstName ASC"
-    ]
+    }
   },
   "properties": {
     "type": {
@@ -107,6 +103,12 @@
       "type": "string",
       "required": true
     },
+    "investigationStatus": {
+      "type": "string"
+    },
+    "dateInvestigationCompleted": {
+      "type": "date"
+    },
     "riskLevel": {
       "type": "string"
     },
@@ -118,6 +120,9 @@
       "default": false
     },
     "questionnaireAnswers": {
+      "type": "object"
+    },
+    "questionnaireAnswersContact": {
       "type": "object"
     },
     "vaccinesReceived": {
@@ -142,6 +147,11 @@
     "labResults": {
       "type": "hasMany",
       "model": "labResult",
+      "foreignKey": "personId"
+    },
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
       "foreignKey": "personId"
     }
   },

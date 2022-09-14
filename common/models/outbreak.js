@@ -12,6 +12,7 @@ const fs = require('fs');
 const Platform = require('./../../components/platform');
 // used to manipulate dates
 const moment = require('moment');
+const apiError = require('./../../components/apiError');
 
 module.exports = function (Outbreak) {
 
@@ -30,6 +31,8 @@ module.exports = function (Outbreak) {
     generateFollowUpsOverwriteExisting: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING',
     generateFollowUpsKeepTeamAssignment: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT',
     generateFollowUpsTeamAssignmentAlgorithm: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
+    generateFollowUpsDateOfLastContact: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT',
+    intervalOfFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS',
     noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
     noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
     noDaysNotSeen: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN',
@@ -46,6 +49,7 @@ module.exports = function (Outbreak) {
     'arcGisServers': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVERS',
     'arcGisServers[].name': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_NAME',
     'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL',
+    'arcGisServers[].type': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_TYPE',
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
     isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
     applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS'
@@ -96,18 +100,12 @@ module.exports = function (Outbreak) {
     'type'
   ];
 
-  /**
-   * Checks whether the given follow up model is generated
-   * Checks that update/create dates are on the same
-   * Checks that it is not performed or lost
-   * @param model
-   * @returns {boolean}
-   */
-  Outbreak.helpers.isNewGeneratedFollowup = function (model) {
-    return moment(model.createdAt).isSame(moment(model.updatedAt))
-      && model.isGenerated
-      && !model.performed
-      && !model.lostToFollowUp;
+  // map person read permissions
+  Outbreak.personReadPermissionMap = {
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
+    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
   };
 
   /**
@@ -322,7 +320,7 @@ module.exports = function (Outbreak) {
       if (error) {
         return callback(error);
       }
-      app.models.relationship.removeReadOnlyProperties(data);
+      app.models.relationship.removeReadOnlyProperties(data, ['id']);
       app.models.relationship
         .create(Object.assign(data, {outbreakId: outbreakId}), options)
         .then(function (createdRelation) {
@@ -573,22 +571,18 @@ module.exports = function (Outbreak) {
 
   /**
    * Attach filter people without relation behavior (before remote hook)
-   * @param type
    * @param context
    * @param modelInstance
    * @param next
    * @return {*}
    */
-  Outbreak.helpers.attachFilterPeopleWithoutRelation = function (type, context, modelInstance, next) {
+  Outbreak.helpers.attachFilterPeopleWithoutRelation = function (context, modelInstance, next) {
     // get custom noRelationships filter
     const noRelationship = _.get(context, 'args.filter.where.noRelationships', false);
     // remove custom filter before it reaches the model
     _.unset(context, 'args.filter.where.noRelationships');
 
     if (noRelationship) {
-      // remove count relations custom flag
-      _.unset(context, 'args.filter.where.countRelations');
-
       // attach additional filtering for cases that have no relationships
       context.args.filter = app.utils.remote
         .mergeFilters({
@@ -905,9 +899,7 @@ module.exports = function (Outbreak) {
               and: [
                 caseQuery, {
                   outbreakId: data.outbreakId,
-                  deleted: {
-                    $ne: true
-                  }
+                  deleted: false
                 }
               ]
             }, {projection: {'_id': 1}});
@@ -925,9 +917,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: data.outbreakId,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -1323,8 +1313,8 @@ module.exports = function (Outbreak) {
     if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
       caseArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
-        baseProps[arrayProp] = baseProps[arrayProp].concat(...
-          people
+        baseProps[arrayProp] = baseProps[arrayProp].concat(
+          ...people
             .filter((item) => item[arrayProp])
             .map((item) => item[arrayProp])
         );
@@ -1335,8 +1325,8 @@ module.exports = function (Outbreak) {
     if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
       contactArrayProps.forEach((arrayProp) => {
         baseProps[arrayProp] = baseProps[arrayProp] || [];
-        baseProps[arrayProp] = baseProps[arrayProp].concat(...
-          people
+        baseProps[arrayProp] = baseProps[arrayProp].concat(
+          ...people
             .filter((item) => item[arrayProp])
             .map((item) => item[arrayProp])
         );
@@ -1476,25 +1466,41 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Checks if a person type is a disallowed type
+   * @param permissions
+   * @param type
+   */
+  Outbreak.helpers.isDisallowedPersonType = function (permissions, type) {
+    return permissions.indexOf(Outbreak.personReadPermissionMap[type]) === -1 && (
+      !app.models.role.permissionGroupMap ||
+      !app.models.role.permissionGroupMap[Outbreak.personReadPermissionMap[type]] ||
+      permissions.indexOf(app.models.role.permissionGroupMap[Outbreak.personReadPermissionMap[type]].groupAllId) === -1
+    );
+  };
+
+  /**
+   * Returns the disallowed person types
+   * @param permissions
+   */
+  Outbreak.helpers.getDisallowedPersonTypes = function (permissions) {
+    let disallowedPersonTypes = [];
+    Object.keys(Outbreak.personReadPermissionMap).forEach((personType) => {
+      if (Outbreak.helpers.isDisallowedPersonType(permissions, personType)) {
+        disallowedPersonTypes.push(personType);
+      }
+    });
+
+    // return the disallowed types
+    return disallowedPersonTypes;
+  };
+
+  /**
    * Hide fields that the user does not have permission to see on a person model (case/contact/event/contactOfContact)
    * @param model
    * @param permissions
    */
   Outbreak.helpers.limitPersonInformation = function (model, permissions) {
-    const personReadPermissionMap = {
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT': 'contact_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE': 'case_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT': 'event_list',
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT': 'contact_of_contact_list'
-    };
-
-    if (
-      permissions.indexOf(personReadPermissionMap[model.type]) === -1 && (
-        !app.models.role.permissionGroupMap ||
-        !app.models.role.permissionGroupMap[personReadPermissionMap[model.type]] ||
-        permissions.indexOf(app.models.role.permissionGroupMap[personReadPermissionMap[model.type]].groupAllId) === -1
-      )
-    ) {
+    if (Outbreak.helpers.isDisallowedPersonType(permissions, model.type)) {
       for (let key in model) {
         if (Outbreak.noPersonReadPermissionFields.indexOf(key) === -1) {
           delete model[key];
@@ -1951,7 +1957,7 @@ module.exports = function (Outbreak) {
 
           fs.readFile(archivePath, (err, data) => {
             if (err) {
-              callback(err);
+              callback(apiError.getError('FILE_NOT_FOUND'));
             } else {
               tmpDir.removeCallback();
               app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
@@ -2264,11 +2270,12 @@ module.exports = function (Outbreak) {
 
   /**
    * Modify multiple contacts or contacts of contacts
-   * @param existingContacts
-   * @param isContactOfContact
+   * @param {Array} existingContacts - List of contacts payloads
+   * @param {boolean} isContactOfContact - Flag specifying whether the resources updated are contact/contactOfContact
+   * @param {Object} options - Options from request
    * @return {Promise<any>}
    */
-  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact) {
+  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact, options) {
     // reference shortcuts
     const getError = app.utils.apiError.getError;
     const contactModel = isContactOfContact ? app.models.contactOfContact : app.models.contact;
@@ -2334,7 +2341,7 @@ module.exports = function (Outbreak) {
 
               // update contact attributes through loopback model functionality
               existingContactModelMap[existingContact.id]
-                .updateAttributes(existingContact)
+                .updateAttributes(existingContact, options)
                 .then((updatedContact) => {
                   // add it to success list
                   successfulEntries.push({

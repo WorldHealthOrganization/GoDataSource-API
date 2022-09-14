@@ -29,16 +29,25 @@ const isFollowUpPerformed = function (obj) {
 
 // create MongoDB connection and return it
 const getMongoDBConnection = function () {
-  let mongoOptions = {};
+  // make sure it doesn't timeout
+  let mongoOptions = {
+    keepAlive: true,
+    connectTimeoutMS: 1800000, // 30 minutes
+    socketTimeoutMS: 1800000 // 30 minutes
+  };
+
+  // attach auth credentials
   if (DbConfig.password) {
-    mongoOptions = {
+    mongoOptions = Object.assign(mongoOptions, {
       auth: {
-        user: DbConfig.user,
+        username: DbConfig.user,
         password: DbConfig.password
       },
       authSource: DbConfig.authSource
-    };
+    });
   }
+
+  // retrieve mongodb connection
   return MongoClient
     .connect(`mongodb://${DbConfig.host}:${DbConfig.port}`, mongoOptions)
     .then(client => client.db(DbConfig.database));
@@ -61,8 +70,13 @@ const worker = {
     whereFilter
   ) {
     // parse dates for mongodb conditions
-    startDate = Helpers.getDate(startDate).toDate();
-    endDate = Helpers.getDateEndOfDay(endDate).toDate();
+    if (startDate) {
+      startDate = Helpers.getDate(startDate).toDate();
+    }
+
+    endDate = endDate ?
+      Helpers.getDateEndOfDay(endDate).toDate() :
+      Helpers.getDateEndOfDay().toDate();
 
     // filter by classification ?
     const classification = _.get(whereFilter, 'classification');
@@ -70,26 +84,26 @@ const worker = {
       delete whereFilter.classification;
     }
 
+    // create filter date
+    let filterDate = {};
+    if (startDate && endDate) {
+      filterDate = {
+        '$gte': startDate,
+        '$lte': endDate
+      };
+    } else {
+      filterDate = {
+        '$lte': endDate
+      };
+    }
+
     // mongodb date between filter
     const filter = {
       $and: [
         {
           outbreakId: outbreakId,
-          date: {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }, {
-          $or: [
-            {
-              deleted: false
-            },
-            {
-              deleted: {
-                $eq: null
-              }
-            }
-          ]
+          date: filterDate,
+          deleted: false
         }
       ]
     };
@@ -100,21 +114,13 @@ const worker = {
     }
 
     // get range of days
-    const range = Moment.range(startDate, endDate);
-    const days = Array.from(range.by('days')).map((m => m.toString()));
+    let days = [];
 
     // result props
     const result = {
       days: {},
       totalContacts: 0
     };
-    days.forEach((day) => {
-      result.days[day] = {
-        followedUp: 0,
-        notFollowedUp: 0,
-        percentage: 0
-      };
-    });
 
     // map of contacts and days in which it has follow ups
     // this is needed as follow ups come in batches and not always in right order
@@ -131,9 +137,7 @@ const worker = {
               .find({
                 outbreakId: outbreakId,
                 type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                deleted: {
-                  $ne: true
-                },
+                deleted: false,
                 classification: convertLoopbackFilterToMongo(classification)
               }, {
                 projection: {
@@ -161,9 +165,7 @@ const worker = {
                     .collection('relationship')
                     .find({
                       outbreakId: outbreakId,
-                      deleted: {
-                        $ne: true
-                      },
+                      deleted: false,
                       $or: [
                         {
                           'persons.0.source': true,
@@ -216,23 +218,50 @@ const worker = {
         })
         .then((dbConnection) => {
           // process records in batches
+          // order records to find the start date
           (function getNextBatch(skip = 0) {
             const cursor = dbConnection
               .collection(collectionName)
-              .find(filter, {
-                skip: skip,
-                limit: batchSize,
-                projection: {
-                  date: 1,
-                  personId: 1,
-                  statusId: 1
-                }
-              });
+              .find(
+                filter,
+                Object.assign(
+                  {
+                    skip: skip,
+                    limit: batchSize,
+                    projection: {
+                      date: 1,
+                      personId: 1,
+                      statusId: 1
+                    }
+                  },
+                  !startDate ? {sort: {date: 1}} : {}
+                )
+              );
 
             cursor
               .toArray()
               .then((records) => {
-                if (!records.length) {
+                // set start date to the older date if it's not set
+                if (!startDate) {
+                  startDate = records.length > 0 ? records[0].date : endDate;
+                }
+
+                // get range of days
+                if (days.length < 1) {
+                  const range = Moment.range(startDate, endDate);
+                  days = Array.from(range.by('days')).map((m => m.toString()));
+
+                  // result props
+                  days.forEach((day) => {
+                    result.days[day] = {
+                      followedUp: 0,
+                      notFollowedUp: 0,
+                      percentage: 0
+                    };
+                  });
+                }
+
+                if (records.length < 1) {
                   // get the total count of contacts into the result
                   result.totalContacts = contactFollowUpsMap.size;
 

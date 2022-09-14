@@ -72,6 +72,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "exportLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "databaseActionLog": {
     "dataSource": "mongoDb",
     "public": false
@@ -280,10 +284,6 @@
     "dataSource": null,
     "public": false
   },
-  "maps": {
-    "dataSource": "memory",
-    "public": true
-  },
   "contactAndRelationship": {
     "dataSource": null,
     "public": false
@@ -405,6 +405,10 @@
     "public": false
   },
   "transmissionChainCalculate": {
+    "dataSource": null,
+    "public": false
+  },
+  "labResultSequence": {
     "dataSource": null,
     "public": false
   }

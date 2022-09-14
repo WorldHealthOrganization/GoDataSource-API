@@ -11,6 +11,9 @@
       "required": true,
       "unique": true
     },
+    "description": {
+      "type": "string"
+    },
     "disease": {
       "type": "string"
     },
@@ -42,6 +45,15 @@
         "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
       ],
       "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
+    "generateFollowUpsDateOfLastContact": {
+      "description": "Flag specifying if contact tracing should start on the date of the last contact",
+      "type": "boolean",
+      "default": false
+    },
+    "intervalOfFollowUp": {
+      "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
+      "type": "string"
     },
     "noDaysAmongContacts": {
       "type": "number",

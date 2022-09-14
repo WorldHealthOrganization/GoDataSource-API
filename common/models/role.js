@@ -54,6 +54,38 @@ module.exports = function (Role) {
           requires: [
             'system_settings_view'
           ]
+        },
+        {
+          id: 'system_settings_modify_saved_filters',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'system_settings_delete_saved_filters',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION',
+          requires: [
+            'system_settings_modify_saved_filters'
+          ]
+        },
+        {
+          id: 'system_settings_modify_saved_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION',
+          requires: [
+            'user_list_for_filters'
+          ]
+        },
+        {
+          id: 'system_settings_delete_saved_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION',
+          requires: [
+            'system_settings_modify_saved_import'
+          ]
         }
       ]
     },
@@ -71,7 +103,13 @@ module.exports = function (Role) {
           requires: [
             'user_list_for_filters'
           ]
-        }
+        },
+        {
+          id: 'audit_log_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG_DESCRIPTION',
+          requires: []
+        },
       ]
     },
 
@@ -359,6 +397,15 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_DESCRIPTION',
           requires: []
+        },
+        {
+          id: 'user_list_workload',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'user_list'
+          ]
         }
       ]
     },
@@ -1149,6 +1196,20 @@ module.exports = function (Role) {
           id: 'event_restore',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'event_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_EVENT_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'event_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]

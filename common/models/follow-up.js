@@ -85,13 +85,97 @@ module.exports = function (FollowUp) {
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
-    'isGenerated': 'LNG_FOLLOW_UP_FIELD_LABEL_IS_GENERATED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
+    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
+
+  // map language token labels for export fields group
+  FollowUp.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'contact',
+        'contact.id',
+        'contact.visualId',
+        'contact.firstName',
+        'contact.lastName'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'date',
+        'index',
+        'teamId',
+        'statusId',
+        'targeted',
+        'comment',
+        'responsibleUserId'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'address',
+        'address.typeId',
+        'address.country',
+        'address.city',
+        'address.addressLine1',
+        'address.postalCode',
+        'address.locationId',
+        'address.geoLocation',
+        'address.geoLocation.lat',
+        'address.geoLocation.lng',
+        'address.geoLocationAccurate',
+        'address.date',
+        'address.phoneNumber',
+        'address.emailAddress',
+        'fillLocation',
+        'fillLocation.geoLocation',
+        'fillLocation.geoLocation.lat',
+        'fillLocation.geoLocation.lng'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    }
+  };
+
+  // default export order
+  FollowUp.exportFieldsOrder = [
+    'id',
+    'date',
+    'index'
+  ];
+
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  FollowUp.mergeFieldsOnUpdate = [
+    'questionnaireAnswers'
+  ];
 
   FollowUp.referenceDataFieldsToCategoryMap = {
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPE',
@@ -136,6 +220,19 @@ module.exports = function (FollowUp) {
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
+    }
+  };
+
+  // used on importable file logic
+  FollowUp.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
     }
   };
 
@@ -443,9 +540,7 @@ module.exports = function (FollowUp) {
         $and: [
           parsedFilter,
           {
-            deleted: {
-              $ne: true
-            }
+            deleted: false
           }
         ]
       };
@@ -755,7 +850,7 @@ module.exports = function (FollowUp) {
       // retrieve contacts
       buildQuery = buildQuery
         .then(() => {
-          return app.models.contact.rawFind(
+          return app.models.person.rawFind(
             app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
             {projection: {_id: 1}});
         });
@@ -786,21 +881,10 @@ module.exports = function (FollowUp) {
           {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
-              {
-                outbreakId: outbreakId
-              },
               // retrieve only non-deleted records
               {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                outbreakId: outbreakId,
+                deleted: false
               },
               // filter by contact
               ...(contactIds === undefined ? [] : [{

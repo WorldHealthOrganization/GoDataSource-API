@@ -6,6 +6,7 @@ const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const moment = require('moment');
+const syncConfig = require('../../server/config.json').sync;
 
 module.exports = function (Sync) {
 
@@ -530,7 +531,7 @@ module.exports = function (Sync) {
    * @param generatePersonVisualId Generate visualId on cases/contacts. Default: false
    * @param done
    */
-  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, generatePersonVisualId, done) {
+  Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, generatePersonVisualId, snapshotFromClient, done) {
     const buildError = app.utils.apiError.getError;
 
     /**
@@ -600,7 +601,9 @@ module.exports = function (Sync) {
       }
     }
 
-    const form = new formidable.IncomingForm();
+    const form = new formidable.IncomingForm({
+      maxFileSize: syncConfig.maxPackageSize ? syncConfig.maxPackageSize : 5000 * 1024 * 1024
+    });
 
     form.parse(req, function (err, fields, files) {
       if (err) {
@@ -656,6 +659,18 @@ module.exports = function (Sync) {
         generatePersonVisualId = true;
       }
 
+      // get snapshotFromClient value
+      let snapshotFromClient = false;
+      // check if the flag was sent and if is true
+      if (fields.snapshotFromClient != null && (
+        fields.snapshotFromClient === 'true' ||
+        fields.snapshotFromClient === '1' ||
+        fields.snapshotFromClient === true ||
+        fields.snapshotFromClient === 1
+      )) {
+        snapshotFromClient = true;
+      }
+
       // get password
       const password = getSyncEncryptPassword(fields.password, _.get(requestOptions, 'remotingContext.req.authData.credentials'), autoEncrypt);
 
@@ -678,7 +693,8 @@ module.exports = function (Sync) {
               triggerBackupBeforeSync,
               {
                 password: password,
-                generatePersonVisualId: generatePersonVisualId
+                generatePersonVisualId: generatePersonVisualId,
+                snapshotFromClient: snapshotFromClient
               },
               function (err) {
                 // send done function to return the response
@@ -698,7 +714,8 @@ module.exports = function (Sync) {
               triggerBackupBeforeSync,
               {
                 password: password,
-                generatePersonVisualId: generatePersonVisualId
+                generatePersonVisualId: generatePersonVisualId,
+                snapshotFromClient: snapshotFromClient
               },
               function (err) {
                 // don't send the done function as the response was already sent
@@ -751,7 +768,7 @@ module.exports = function (Sync) {
 
     // check if the received upstream server URL matches one from the configured upstream servers
     app.models.systemSettings
-      .getCache()
+      .findOne()
       .then(function (record) {
         // initialize error
         if (!record) {
@@ -880,7 +897,9 @@ module.exports = function (Sync) {
             collections,
             {
               password: password,
-              chunkSize: 10000
+              chunkSize: 10000,
+              // set flag to know the export is for upstream server as we need to filter some information out of the export
+              dbForUpstreamServer: true
             },
             (err, fileName) => {
               if (err) {

@@ -47,24 +47,27 @@ gulp.task('prepare-build', function (callback) {
 /**
  * Clean up build directory
  */
-gulp.task('clean', ['prepare-build'], function (callback) {
+gulp.task('clean', gulp.series('prepare-build', function (callback) {
   pump(
     [
       gulp.src(
         [
           'build'
-        ]
+        ],
+        {
+          allowEmpty: true
+        }
       ),
       clean()
     ],
     callback
   );
-});
+}));
 
 /**
  * Copy source files to build directory
  */
-gulp.task('copy', ['clean'], function (callback) {
+gulp.task('copy', gulp.series('clean', function (callback) {
   pump(
     [
       gulp.src(
@@ -82,12 +85,12 @@ gulp.task('copy', ['clean'], function (callback) {
     ],
     callback
   );
-});
+}));
 
 /**
  * Compress source
  */
-gulp.task('compress', ['copy'], function (callback) {
+gulp.task('compress', gulp.series('copy', function (callback) {
   pump(
     [
       gulp.src(['build/**/*.js']),
@@ -96,19 +99,19 @@ gulp.task('compress', ['copy'], function (callback) {
     ],
     callback
   );
-});
+}));
 
 /**
  * Install dependencies
  */
-gulp.task('install-dependencies', ['compress'], run('npm install --production', {
+gulp.task('install-dependencies', gulp.series('compress', async () => run('npm install --production', {
   cwd: `${__dirname}/build`
-}));
+})()));
 
 /**
  * Update build information
  */
-gulp.task('update-build-info', ['install-dependencies'], function (callback) {
+gulp.task('update-build-info', gulp.series('install-dependencies', function (callback) {
   const packageJson = require('./build/package');
   if (!packageJson.build) {
     packageJson.build = {};
@@ -121,7 +124,7 @@ gulp.task('update-build-info', ['install-dependencies'], function (callback) {
   // remove unneeded information
   delete packageJson.devDependencies;
   fs.writeFile(`${__dirname}/build/package.json`, JSON.stringify(packageJson, null, 2), callback);
-});
+}));
 
 // run build process (task)
-gulp.task('build', ['update-build-info']);
+gulp.task('build', gulp.series('update-build-info'));

@@ -2,7 +2,7 @@
 
 const app = require('../../../../server');
 const Async = require('async');
-
+const adminEmailConfig = require('../../../../config.json').adminEmail;
 /**
  * Migrate users
  * @param next
@@ -12,7 +12,7 @@ const migrateUsers = function (next) {
   return db.connect(() => {
     // sys admin constants
     const ADMIN_ID = 'sys_admin';
-    const ADMIN_EMAIL = 'admin@who.int';
+    const ADMIN_EMAIL = adminEmailConfig || 'admin@who.int';
 
     // db collections
     const collections = [
@@ -48,78 +48,105 @@ const migrateUsers = function (next) {
     // make sure we have a sys admin on the system that doesn't have the hardcoded _id
     // we find it by the hardcoded email address admin@who.int
     const userCollection = db.collection('user');
-    return userCollection.findOne({
-      email: ADMIN_EMAIL,
-      _id: {
-        $ne: ADMIN_ID
-      }
-    }, (err, result) => {
-      if (err) {
-        return next(err);
-      }
-
-      // everything is alright, just stop the script
-      if (!result) {
-        return next();
-      }
-
-      // async jobs ran against database
-      const updateJobs = [];
-
-      // used to update createdBy, updateBy fields
-      const updateAuthorField = function (collectionName, field, callback) {
-        return db.collection(collectionName).updateMany(
+    return userCollection
+      .find({
+        $or: [
           {
-            [field]: result._id
-          },
-          {
-            $set: {
-              [field]: ADMIN_ID
+            email: {
+              $in: [
+                ADMIN_EMAIL,
+                'admin@who.int'
+              ]
             }
-          },
-          err => callback(err)
-        );
-      };
+          }, {
+            _id: ADMIN_ID
+          }
+        ]
+      })
+      .toArray()
+      .then((results) => {
+        // error - found multiple matching users with same admin credentials ?
+        if (results.length > 1) {
+          app.logger.error(`Multiple admin accounts found (id: "${ADMIN_ID}", email1: "${ADMIN_EMAIL}", email2: "admin@who.int"). Probably config.json isn't configured properly`);
+          return next(app.utils.apiError.getError('ADMIN_ACCOUNT_CONFLICT'));
+        }
 
-      // update user's id
-      updateJobs.push(
-        callback => Async.series([
-          callback => userCollection.deleteOne({_id: result._id}, err => callback(err)),
-          callback => userCollection.insertOne(
-            Object.assign({}, result, {_id: ADMIN_ID, oldId: result._id}),
+        // everything is alright, just stop the script
+        if (results.length < 1) {
+          return next();
+        }
+
+        // check if we need to update anything
+        const result = results[0];
+        if (result._id === ADMIN_ID) {
+          return next();
+        }
+
+        // async jobs ran against database
+        const updateJobs = [];
+
+        // used to update createdBy, updateBy fields
+        const updateAuthorField = function (collectionName, field, callback) {
+          return db.collection(collectionName).updateMany(
+            {
+              [field]: result._id
+            },
+            {
+              $set: {
+                [field]: ADMIN_ID
+              }
+            },
             err => callback(err)
-          )
-        ], err => callback(err))
-      );
+          );
+        };
 
-      // go through each collection and update author information
-      for (let collectionName of collections) {
-        updateJobs.push((callback) => {
-          return Async.series([
-            callback => updateAuthorField(collectionName, 'createdBy', callback),
-            callback => updateAuthorField(collectionName, 'updatedBy', callback)
-          ], callback);
-        });
-      }
-
-      // also find all teams where sys admin is a participant
-      // update those as well
-      updateJobs.push((callback) => {
-        return db.collection('team').updateMany(
-          {
-            userIds: result._id
-          },
-          {
-            $set: {
-              'userIds.$': ADMIN_ID
-            }
-          },
-          err => callback(err)
+        // update user's id
+        updateJobs.push(
+          callback => Async.series([
+            callback => userCollection.deleteOne({_id: result._id}, err => callback(err)),
+            callback => userCollection.insertOne(
+              Object.assign(
+                {},
+                result, {
+                  _id: ADMIN_ID,
+                  oldId: result._id
+                }),
+              err => callback(err)
+            )
+          ], err => callback(err))
         );
-      });
 
-      return Async.series(updateJobs, err => next(err));
-    });
+        // go through each collection and update author information
+        for (let collectionName of collections) {
+          updateJobs.push((callback) => {
+            return Async.series([
+              callback => updateAuthorField(collectionName, 'createdBy', callback),
+              callback => updateAuthorField(collectionName, 'updatedBy', callback)
+            ], callback);
+          });
+        }
+
+        // also find all teams where sys admin is a participant
+        // update those as well
+        updateJobs.push((callback) => {
+          return db.collection('team').updateMany(
+            {
+              userIds: result._id
+            },
+            {
+              $set: {
+                'userIds.$': ADMIN_ID
+              }
+            },
+            err => callback(err)
+          );
+        });
+
+        return Async.series(updateJobs, err => next(err));
+      })
+      .catch((err) => {
+        return next(err);
+      });
   });
 };
 

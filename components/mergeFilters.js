@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 /**
  * Merge include filters
  * @param includeFilters
@@ -71,12 +73,23 @@ function merge(filter, requestFilter = {}) {
   const _filter = {};
 
   if (filterExists('where')) {
-    _filter.where = {
-      and: [
-        requestFilter.where || {},
-        filter.where || {}
-      ]
-    };
+    const isRequestFilterEmpty = _.isEmpty(requestFilter.where);
+    const isFilterWhereEmpty = _.isEmpty(filter.where);
+    if (
+      !isRequestFilterEmpty &&
+      !isFilterWhereEmpty
+    ) {
+      _filter.where = {
+        and: [
+          requestFilter.where,
+          filter.where
+        ]
+      };
+    } else if (!isRequestFilterEmpty) {
+      _filter.where = requestFilter.where;
+    } else if (!isFilterWhereEmpty) {
+      _filter.where = filter.where;
+    }
   }
 
   if (filterExists('include')) {

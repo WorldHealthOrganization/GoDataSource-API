@@ -1,0 +1,178 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY": {
+      "translation": "Category",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY_DESCRIPTION": {
+      "translation": "",
+      "section": "uiEventFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY": {
+      "translation": "Event category"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY_DESCRIPTION": {
+      "translation": ""
+    },
+    "LNG_USER_FIELD_LABEL_CANT_SET_ALL_OUTBREAKS": {
+      "translation": "You need 'Outbreak - list' permission to set all outbreaks",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_CANT_SET_ACTIVE_OUTBREAK": {
+      "translation": "You need 'Outbreak - list' permission to set active outbreak",
+      "section": "uiUserFields"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_BUTTON_VIEW": {
+      "translation": "View question",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_ANSWER_BUTTON_VIEW": {
+      "translation": "View answer",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_EVENT_FIELD_LABEL_END_DATE": {
+      "translation": "End date",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_END_DATE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiEventFields"
+    },
+    "LNG_APP_PAGE_FOLLOW_UP_DASHBOARD": {
+      "translation": "Follow-up dashboard",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_WHAT_TO_DO": {
+      "translation": "Do you want to create a new chain of transmission, replace the most recent snapshot or display the most recent one?",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_NOT_ACTIVE_OUTBREAK": {
+      "translation": "Can't create snapshot because selected outbreak is not the active one",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_PAGE_LABEL_FORMAT": {
+      "translation": "{{no}} of {{total}}",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_CHAIN_OPTIONS": {
+      "translation": "Chain options",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_LEGEND": {
+      "translation": "Legend",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_REFRESH_TITLE": {
+      "translation": "Refresh snapshot",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CREATE_NEW": {
+      "translation": "Create new",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_REPLACE_MOST_RECENT": {
+      "translation": "Update most recent",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD_MOST_RECENT": {
+      "translation": "Load most recent",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD": {
+      "translation": "Load",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_REFRESH": {
+      "translation": "Refresh",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_FILTER": {
+      "translation": "Filter",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_OPTION_CREATE_NEW": {
+      "translation": "Create new",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
+      "translation": "Nothing to display",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_START_DATE": {
+      "translation": "Start date",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_END_DATE": {
+      "translation": "End date",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION": {
+      "translation": "Geo Location",
+      "section": "uiReferenceDataEntryFields"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LAT": {
+      "translation": "Latitude",
+      "section": "uiReferenceDataEntryFields"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG": {
+      "translation": "Longitude",
+      "section": "uiReferenceDataEntryFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_PRINT_DATE": {
+      "translation": "Print date",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_SNAPSHOT_DATETIME": {
+      "translation": "Snapshot date / time",
+      "section": "uiAsyncCotFields"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_FILTER_DATE": {
+      "translation": "Situation as of",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_NAME_DESCRIPTION": {
+      "translation": "Date / time will be added to the snapshot name at the time of saving",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_CLONING": {
+      "translation": "Cloning {{type}} '{{item}}'",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_VARIABLES": {
+      "translation": "Question variables",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_TYPE_QUESTION": {
+      "translation": "question",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_QUESTIONNAIRE_TEMPLATE_QUESTION_FIELD_LABEL_TYPE_ANSWER": {
+      "translation": "answer",
+      "section": "uiOutbreakQuestionnaireTemplates"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOTS": {
+      "translation": "Snapshots"
+    },
+    "LNG_PAGE_LIST_AVAILABLE_ENTITIES_FOR_SWITCH_RELATIONSHIP_CHANGE_SOURCE_TITLE": {
+      "translation": "Change source",
+      "section": "uiAvailableEntitiesForRelationshipPage"
+    },
+    "LNG_PAGE_REFERENCE_DATA_CATEGORY_ENTRIES_LIST_ORDER_ENTRIES": {
+      "translation": "Order entries",
+      "section": "uiReferenceDataCategoryEntriesListPage"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_FIELD_LABEL_ENTRIES_COUNT": {
+      "translation": "Count",
+      "section": "uiReferenceDataCategoryFields"
+    }
+  }
+}

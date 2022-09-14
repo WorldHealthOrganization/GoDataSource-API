@@ -116,11 +116,15 @@
           "description": "Criteria to match model instances"
         }
       ],
-      "returns": {
-        "arg": "count",
-        "type": "integer",
-        "required": true
-      },
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "root": true,
+          "required": true
+        }
+      ],
       "description": "Count help items",
       "http": {
         "verb": "get",

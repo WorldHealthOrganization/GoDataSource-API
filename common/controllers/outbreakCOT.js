@@ -8,6 +8,8 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const baseTransmissionChainModel = require('../../components/baseModelOptions/transmissionChain');
+const apiError = require('../../components/apiError');
+const Helpers = require('../../components/helpers');
 
 module.exports = function (Outbreak) {
   /**
@@ -38,6 +40,14 @@ module.exports = function (Outbreak) {
 
     filter = filter || {};
     const where = filter.where || {};
+
+    // check if the lab results are needed for the related people
+    let labResultsRequired = false;
+    if (filter.fields && filter.fields.includes('nodes.labResults')) {
+      labResultsRequired = true;
+      filter.fields.splice(filter.fields.indexOf('nodes.labResults'), 1);
+    }
+
     let cotDBEntry;
     // create cot DB entry
     app.models.transmissionChain
@@ -59,6 +69,80 @@ module.exports = function (Outbreak) {
         return Outbreak
           .helpers
           .getIndependentTransmissionChains(self, filter, options);
+      })
+      .then(cot => {
+        // check if we need to get lab results information
+        if (!labResultsRequired) {
+          return cot;
+        }
+
+        // will get the lab results in batches
+        const personIds = Object.keys(cot.nodes);
+
+        // initialize parameters for handleActionsInBatches call
+        const getActionsCount = () => {
+          // count records that we need to update
+          return Promise.resolve(personIds.length);
+        };
+
+        // get records in batches
+        const getBatchData = (batchNo, batchSize) => {
+          // get lab results for a batch of persons
+          const batchPersonIds = personIds.splice(0, batchSize);
+
+          // Note: currently we only need some fields for the ones that have sequence
+          return app.models.labResult
+            .rawFind({
+              personId: {
+                $in: batchPersonIds
+              },
+              'sequence.hasSequence': true,
+              $and: [{
+                'sequence.resultId': {
+                  $ne: null
+                }
+              }, {
+                'sequence.resultId': {
+                  $ne: ''
+                }
+              }]
+            }, {
+              projection: {
+                personId: 1,
+                dateSampleTaken: 1,
+                'sequence.dateResult': 1,
+                'sequence.resultId': 1
+              }
+            });
+        };
+
+        // add lab results information in cot nodes
+        const batchItemsAction = (labResults) => {
+          labResults.forEach(labResult => {
+            const personId = labResult.personId;
+            delete labResult.personId;
+            if (!cot.nodes[personId].labResults) {
+              cot.nodes[personId].labResults = [];
+            }
+
+            cot.nodes[personId].labResults.push(labResult);
+          });
+
+          return Promise.resolve();
+        };
+
+        // execute jobs in batches
+        return Helpers.handleActionsInBatches(
+          getActionsCount,
+          getBatchData,
+          batchItemsAction,
+          null,
+          100,
+          null,
+          options.remotingContext.req.logger
+        ).then(() => {
+          return cot;
+        });
       })
       .then(cot => {
         // save to file
@@ -127,8 +211,8 @@ module.exports = function (Outbreak) {
         });
 
         // This catches any errors that happen while creating the readable stream (usually invalid names)
-        readStream.on('error', function (err) {
-          callback(err);
+        readStream.on('error', function () {
+          callback(apiError.getError('FILE_NOT_FOUND'));
         });
 
         readStream.on('end', function () {

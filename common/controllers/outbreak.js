@@ -11,7 +11,6 @@ const Uuid = require('uuid');
 const templateParser = require('./../../components/templateParser');
 const fork = require('child_process').fork;
 const Platform = require('../../components/platform');
-const importableFileHelpers = require('./../../components/importableFile');
 
 module.exports = function (Outbreak) {
 
@@ -50,6 +49,7 @@ module.exports = function (Outbreak) {
     'prototype.__destroyById__followUps',
     'prototype.__create__people',
     'prototype.__delete__people',
+    'prototype.__count__people',
     'prototype.__findById__people',
     'prototype.__updateById__people',
     'prototype.__destroyById__people',
@@ -148,7 +148,19 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('count', function (context, modelInstance, next) {
     const restrictedOutbreakIds = _.get(context, 'req.authData.user.outbreakIds', []);
     if (restrictedOutbreakIds.length) {
+      // do we have delete filter ?
       let filter = {where: _.get(context, 'args.where', {})};
+
+      let includeDeletedRecords;
+      if (
+        filter.where &&
+        filter.where.includeDeletedRecords !== undefined
+      ) {
+        includeDeletedRecords = filter.where.includeDeletedRecords;
+        delete filter.where.includeDeletedRecords;
+      }
+
+      // merge filter
       filter = app.utils.remote
         .mergeFilters({
           where: {
@@ -157,8 +169,17 @@ module.exports = function (Outbreak) {
             }
           }
         }, filter || {});
+
+      // replace with new one
       context.args.where = filter.where;
+
+      // attach the include deleted records
+      if (includeDeletedRecords !== undefined) {
+        filter.where.includeDeletedRecords = includeDeletedRecords;
+      }
     }
+
+    // finished
     next();
   });
 
@@ -552,6 +573,19 @@ module.exports = function (Outbreak) {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(contact.questionnaireAnswers)) {
+          params.questionnaireAnswersContact = Object.assign({}, contact.questionnaireAnswers);
+          params.questionnaireAnswers = {};
+        }
+
+        // restore data from custom forms before conversion
+        if (!_.isEmpty(contact.questionnaireAnswersCase)) {
+          params.questionnaireAnswers = Object.assign({}, contact.questionnaireAnswersCase);
+          params.questionnaireAnswersCase = {};
+        }
+
         return contact.updateAttributes(params, options);
       })
       .then(function (_case) {
@@ -579,6 +613,19 @@ module.exports = function (Outbreak) {
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: contactId
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedCase);
@@ -729,7 +776,10 @@ module.exports = function (Outbreak) {
       })
       .then(function (instance) {
         if (!instance) {
-          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.followUp.modelName, id: followUpId});
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.followUp.modelName,
+            id: followUpId
+          });
         }
         instance.undoDelete(options, callback);
       })
@@ -1961,10 +2011,11 @@ module.exports = function (Outbreak) {
 
     // include follow-up/lab results, based on the person type
     let includes = [];
-    if (modelType === appModels.case.modelName) {
+    if (
+      modelType === appModels.case.modelName ||
+      modelType === appModels.contact.modelName
+    ) {
       includes.push('labResults');
-    }
-    if (modelType === appModels.contact.modelName) {
       includes.push('followUps');
     }
 
@@ -2062,7 +2113,10 @@ module.exports = function (Outbreak) {
         let followUpsToAdd = [];
         // store today date references, needed when checking for future follow ups
         let today = genericHelpers.getDate();
-        if (modelType === appModels.contact.modelName) {
+        if (
+          modelType === appModels.contact.modelName ||
+          modelType === appModels.case.modelName
+        ) {
           let allFollowUps = [];
           models.forEach((model) => {
             let modelFollowUs = model.followUps();
@@ -2114,7 +2168,10 @@ module.exports = function (Outbreak) {
 
         // for cases update each lab result person id reference to the winning model
         let labResultsToAdd = [];
-        if (modelType === appModels.case.modelName) {
+        if (
+          modelType === appModels.case.modelName ||
+          modelType === appModels.contact.modelName
+        ) {
           models.forEach((model) => {
             if (model.labResults().length) {
               labResultsToAdd = labResultsToAdd.concat(model.labResults().map((labResult) => {
@@ -2262,6 +2319,7 @@ module.exports = function (Outbreak) {
       genericHelpers.includeSubLocationsInLocationFilter(
         app,
         context.args.filter,
+        'locationId',
         next
       );
     } else if (context.args.where) {
@@ -2270,6 +2328,7 @@ module.exports = function (Outbreak) {
         app, {
           where: context.args.where
         },
+        'locationId',
         next
       );
     } else {
@@ -2485,314 +2544,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Export filtered contacts follow-ups to PDF
-   * PDF Information: List of contacts with follow-ups table
-   * @param filter This request also accepts 'includeContactAddress': boolean, 'includeContactPhoneNumber': boolean, 'groupResultsBy': enum ['case', 'location', 'riskLevel'] on the first level in 'where'
-   * @param encryptPassword
-   * @param anonymizeFields Array containing properties that need to be anonymized
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.exportFilteredContactFollowUps = function (filter, encryptPassword, anonymizeFields, options, callback) {
-    // if encrypt password is not valid, remove it
-    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-      encryptPassword = null;
-    }
-
-    // make sure anonymizeFields is valid
-    if (!Array.isArray(anonymizeFields)) {
-      anonymizeFields = [];
-    }
-
-    // initialize includeContactAddress and includeContactPhoneNumber filters
-    let includeContactAddress, includeContactPhoneNumber;
-    // check if the includeContactAddress filter was sent; accepting it only on the first level
-    includeContactAddress = _.get(filter, 'where.includeContactAddress', null);
-    if (includeContactAddress !== null) {
-      // includeContactAddress was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.includeContactAddress;
-    } else {
-      // use false as default filter
-      includeContactAddress = false;
-    }
-
-    // check if the includeContactPhoneNumber filter was sent; accepting it only on the first level
-    includeContactPhoneNumber = _.get(filter, 'where.includeContactPhoneNumber', null);
-    if (includeContactPhoneNumber !== null) {
-      // includeContactPhoneNumber was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.includeContactPhoneNumber;
-    } else {
-      // use false as default filter
-      includeContactPhoneNumber = false;
-    }
-
-    // initialize groupResultsBy filter
-    let groupResultsBy;
-    // initialize available options for group by
-    let groupByOptions = {
-      case: 'case',
-      location: 'location',
-      riskLevel: 'riskLevel'
-    };
-    let groupByOptionsLNGTokens = {
-      case: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-      location: 'LNG_ADDRESS_FIELD_LABEL_LOCATION',
-      riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL'
-    };
-
-    groupResultsBy = _.get(filter, 'where.groupResultsBy', null);
-    if (groupResultsBy !== null) {
-      // groupResultsBy was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.groupResultsBy;
-      // check if the group value is accepted else do not group
-      groupResultsBy = Object.values(groupByOptions).indexOf(groupResultsBy) !== -1 ? groupResultsBy : null;
-    }
-
-    // include follow-ups information for each contact
-    filter = app.utils.remote
-      .mergeFilters({
-        include: [{
-          relation: 'followUps',
-          scope: {
-            filterParent: true,
-            order: 'date ASC'
-          }
-        }]
-      }, filter || {});
-
-    // if we need to group by case include also the relationships
-    if (groupResultsBy === groupByOptions.case) {
-      filter = app.utils.remote
-        .mergeFilters({
-          include: [{
-            relation: 'relationships',
-            scope: {
-              where: {
-                'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-              },
-              order: 'contactDate DESC',
-              limit: 1,
-              // remove the contacts that don't have relationships to cases
-              filterParent: true,
-              // include the case model
-              include: [{
-                relation: 'people',
-                scope: {
-                  where: {
-                    type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-                  }
-                }
-              }]
-            }
-          }]
-        }, filter || {});
-    }
-
-    let mimeType = 'application/pdf';
-
-    // use get contacts functionality
-    this.__get__contacts(filter, function (error, result) {
-      if (error) {
-        return callback(error);
-      }
-
-      // add support for filter parent
-      const results = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(result, filter);
-
-      // get logged user information
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      // load user language dictionary
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return callback(error);
-        }
-
-        // get contact properties to be printed
-        let contactProperties = app.models.contact.printFieldsinOrder;
-        // check for sent flags
-        if (!includeContactAddress) {
-          contactProperties.splice(contactProperties.indexOf('addresses'), 1);
-        }
-
-        // resolve models foreign keys (locationId in addresses)
-        // resolve reference data fields
-        genericHelpers.resolveModelForeignKeys(app, app.models.contact, results, dictionary, true)
-          .then(function (contactsList) {
-            // group results if needed; Doing this after getting the dictionary as some group identifiers require translations
-            // initialize map of group identifiers values
-            let groupIdentifiersValues = {};
-            // initialize grouped results
-            let groupedResults = {};
-
-            // get usual place of residence translation as we will use it further
-            let usualPlaceOfResidence = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-
-            // anonymize fields
-            if (anonymizeFields.length) {
-              // anonymize them
-              app.utils.anonymizeDatasetFields.anonymize(contactsList, anonymizeFields);
-            }
-
-            // loop through the results and get the properties that will be exported;
-            // also group the contacts if needed
-            contactsList.forEach(function (contact) {
-              genericHelpers.parseModelFieldValues(contact, app.models.contact);
-
-              // create contact representation to be printed
-              contact.toPrint = {};
-              // set empty string for null/undefined values
-              contactProperties.forEach(prop => contact.toPrint[prop] = typeof contact[prop] !== 'undefined' && contact[prop] !== null ? contact[prop] : '');
-
-              // if we should include phone number, just take it from the current address
-              if (includeContactPhoneNumber) {
-                const currentAddress = contact.addresses.find(addr => addr.typeId === usualPlaceOfResidence);
-                if (currentAddress) {
-                  contact.phoneNumber = typeof currentAddress.phoneNumber !== 'undefined'
-                  && currentAddress.phoneNumber !== null ? currentAddress.phoneNumber : '';
-                }
-              }
-
-              // if addresses need to be added keep only the residence
-              // Note: the typeId was already translated so need to check against the translated value
-              if (includeContactAddress) {
-                contact.toPrint.addresses = [contact.toPrint.addresses.find(address => address.typeId === usualPlaceOfResidence)];
-              }
-
-              // translate labels
-              contact.toPrint = genericHelpers.translateFieldLabels(app, contact.toPrint, app.models.contact.modelName, dictionary);
-
-              if (includeContactPhoneNumber) {
-                // phone number should be translated from addresses
-                contact.toPrint[dictionary.getTranslation(app.models.address.fieldLabelsMap.phoneNumber)] = contact.phoneNumber;
-              }
-
-              // check if the results need to be grouped
-              if (groupResultsBy) {
-                // get identifier for grouping
-                let groupIdentifier, caseItem, residenceLocation;
-                switch (groupResultsBy) {
-                  case groupByOptions.case:
-                    // get case entry in the contact relationship
-                    caseItem = contact.relationships[0].persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
-                    groupIdentifier = caseItem.id;
-
-                    // get identifier value only if the value was not previously calculated for another contact
-                    if (!groupIdentifiersValues[groupIdentifier]) {
-                      let caseModel = contact.relationships[0].people[0];
-                      groupIdentifiersValues[groupIdentifier] = app.models.person.getDisplayName(caseModel);
-                    }
-                    break;
-                  case groupByOptions.location:
-                    // get contact residence location
-                    contact.addresses = contact.addresses || [];
-                    residenceLocation = contact.addresses.find(address => address.typeId === usualPlaceOfResidence);
-                    groupIdentifier = residenceLocation ? residenceLocation.locationId : null;
-
-                    // get identifier value only if the value was not previously calculated for another contact
-                    if (!groupIdentifiersValues[groupIdentifier]) {
-                      // for locationId the location name was already retrieved
-                      groupIdentifiersValues[groupIdentifier] = groupIdentifier;
-                    }
-                    break;
-                  case groupByOptions.riskLevel:
-                    groupIdentifier = contact.riskLevel;
-
-                    // get identifier value only if the value was not previously calculated for another contact
-                    if (!groupIdentifiersValues[groupIdentifier]) {
-                      // for risk level get reference data translation
-                      groupIdentifiersValues[groupIdentifier] = dictionary.getTranslation(groupIdentifier);
-                    }
-                    break;
-                }
-
-                // intialize group entry in results if not already initialized
-                if (!groupedResults[groupIdentifier]) {
-                  groupedResults[groupIdentifier] = [];
-                }
-
-                // add contact in group
-                groupedResults[groupIdentifier].push(contact);
-              }
-            });
-
-            // initialize list of follow-up properties to be shown in table
-            let followUpProperties = ['date', 'performed'];
-            // define a list of follow-up table headers
-            let followUpsHeaders = [];
-            // headers come from follow-up models;
-            followUpProperties.forEach(function (propertyName) {
-              followUpsHeaders.push({
-                id: propertyName,
-                // use correct label translation for user language
-                header: dictionary.getTranslation(app.models.followUp.fieldLabelsMap[propertyName])
-              });
-            });
-
-            // generate pdf document
-            let doc = pdfUtils.createPdfDoc();
-            pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_TITLE_CONTACT_WITH_FOLLOWUPS_DETAILS'));
-
-            // add information to the doc
-            if (groupResultsBy) {
-              // add title for the group
-              Object.keys(groupedResults).forEach(function (groupIdentifier) {
-                pdfUtils.addTitle(doc, `${dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_GROUP_TITLE')} ${dictionary.getTranslation(groupByOptionsLNGTokens[groupResultsBy])}: ${groupIdentifiersValues[groupIdentifier]}`, 18);
-
-                // print contacts
-                groupedResults[groupIdentifier].forEach(function (contact, index) {
-                  // print profile
-                  pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
-
-                  // print follow-ups table
-                  pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
-                  pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
-                });
-              });
-            } else {
-              // print contacts
-              contactsList.forEach(function (contact, index) {
-                // print profile
-                pdfUtils.displayModelDetails(doc, contact.toPrint, true, `${index + 1}. ${app.models.person.getDisplayName(contact)}`);
-
-                // print follow-ups table
-                pdfUtils.addTitle(doc, dictionary.getTranslation('LNG_PAGE_CONTACT_WITH_FOLLOWUPS_FOLLOWUPS_TITLE'), 16);
-                pdfUtils.createTableInPDFDocument(followUpsHeaders, contact.followUps, doc);
-              });
-            }
-
-            return new Promise(function (resolve, reject) {
-              // convert document stream to buffer
-              genericHelpers.streamToBuffer(doc, function (error, file) {
-                if (error) {
-                  reject(error);
-                } else {
-                  // encrypt the file if needed
-                  if (encryptPassword) {
-                    app.utils.aesCrypto.encrypt(encryptPassword, file)
-                      .then(function (data) {
-                        resolve(data);
-                      });
-                  } else {
-                    resolve(file);
-                  }
-                }
-              });
-
-              // finalize document
-              doc.end();
-            });
-          })
-          .then(function (file) {
-            // and offer it for download
-            app.utils.remote.helpers.offerFileToDownload(file, mimeType, 'Contact Line List.pdf', callback);
-          })
-          .catch(callback);
-      });
-    });
-  };
-
-  /**
    * Export an empty case investigation for an existing case (has qrCode)
    * @param caseId
    * @param options
@@ -2839,10 +2590,11 @@ module.exports = function (Outbreak) {
   /**
    * Bulk modify contacts
    * @param existingContacts
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkModifyContacts = function (existingContacts, callback) {
-    Outbreak.modifyMultipleContacts(existingContacts)
+  Outbreak.prototype.bulkModifyContacts = function (existingContacts, options, callback) {
+    Outbreak.modifyMultipleContacts(existingContacts, false, options)
       .then((results) => callback(null, results))
       .catch(callback);
   };
@@ -3700,11 +3452,12 @@ module.exports = function (Outbreak) {
    * Change target for all relationships matching specific conditions
    * @param targetId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkChangeTargetRelationships = function (targetId, where, callback) {
+  Outbreak.prototype.bulkChangeTargetRelationships = function (targetId, where, options, callback) {
     app.models.relationship
-      .bulkChangeSourceOrTarget(this.id, false, targetId, where)
+      .bulkChangeSourceOrTarget(this.id, false, targetId, where, options)
       .then((changedCount) => {
         callback(null, changedCount);
       })
@@ -3715,11 +3468,12 @@ module.exports = function (Outbreak) {
    * Change source for all relationships matching specific conditions
    * @param sourceId Case / Contact / Event
    * @param where Mongo Query
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkChangeSourceRelationships = function (sourceId, where, callback) {
+  Outbreak.prototype.bulkChangeSourceRelationships = function (sourceId, where, options, callback) {
     app.models.relationship
-      .bulkChangeSourceOrTarget(this.id, true, sourceId, where)
+      .bulkChangeSourceOrTarget(this.id, true, sourceId, where, options)
       .then((changedCount) => {
         callback(null, changedCount);
       })
@@ -3951,149 +3705,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Import an importable contacts of contacts file using file ID and a map to remap parameters & reference data values
-   * @param body
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.importImportableContactsOfContactsFileUsingMap = function (body, options, callback) {
-    const self = this;
-    // treat the sync as a regular operation, not really a sync
-    options._sync = false;
-    // inject platform identifier
-    options.platform = Platform.IMPORT;
-    // get importable file
-    importableFileHelpers
-      .getTemporaryFileById(body.fileId)
-      .then(file => {
-        // get file content
-        const rawRecordsList = file.data;
-        // remap properties & values
-        const recordsList = app.utils.helpers.remapProperties(rawRecordsList, body.map, body.valuesMap);
-        // build a list of create operations
-        const createOps = [];
-        // define a container for error results
-        const createErrors = [];
-        // define a toString function to be used by error handler
-        createErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-        // go through all entries
-        recordsList.forEach(function (recordItem, index) {
-          createOps.push(function (callback) {
-            // extract relationship data
-            const relationshipData = app.utils.helpers.convertBooleanProperties(
-              app.models.relationship,
-              app.utils.helpers.extractImportableFields(app.models.relationship, recordItem.relationship));
-
-            // extract record's data
-            const recordData = app.utils.helpers.convertBooleanProperties(
-              app.models.contactOfContact,
-              app.utils.helpers.extractImportableFields(app.models.contactOfContact, recordItem));
-
-            // set outbreak ids
-            recordData.outbreakId = self.id;
-            relationshipData.outbreakId = self.id;
-
-            // filter out empty addresses
-            const addresses = app.models.person.sanitizeAddresses(recordData);
-            if (addresses) {
-              recordData.addresses = addresses;
-            }
-
-            // sanitize visual ID
-            if (recordData.visualId) {
-              recordData.visualId = app.models.person.sanitizeVisualId(recordData.visualId);
-            }
-
-            // sync the record
-            return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.contactOfContact, recordData, options)
-              .then(function (syncResult) {
-                const syncedRecord = syncResult.record;
-                // promisify next step
-                return new Promise(function (resolve, reject) {
-                  // normalize people
-                  Outbreak.helpers.validateAndNormalizePeople(
-                    self.id,
-                    syncedRecord.id,
-                    'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT',
-                    relationshipData,
-                    true,
-                    function (error) {
-                      if (error) {
-                        // delete record since it was created without an error while relationship failed
-                        return app.models.contactOfContact.destroyById(
-                          syncedRecord.id,
-                          () => {
-                            // return error
-                            return reject(error);
-                          }
-                        );
-                      }
-
-                      // sync relationship
-                      return app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.relationship, relationshipData, options)
-                        .then(function (syncedRelationship) {
-                          // relationship successfully created, move to tne next one
-                          callback(null, Object.assign({}, syncedRecord.toJSON(), {relationships: [syncedRelationship.record.toJSON()]}));
-                        })
-                        .catch(function (error) {
-                          // failed to create relationship, remove the record if it was created during sync
-                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                            syncedRecord.destroy(options);
-                          }
-                          reject(error);
-                        });
-                    });
-                });
-              })
-              .catch(function (error) {
-                // on error, store the error, but don't stop, continue with other items
-                createErrors.push({
-                  message: `Failed to import contact of contact ${index + 1}`,
-                  error: error,
-                  recordNo: index + 1,
-                  data: {
-                    file: rawRecordsList[index],
-                    save: {
-                      record: recordData,
-                      relationship: relationshipData
-                    }
-                  }
-                });
-                callback(null, null);
-              });
-          });
-        });
-        // start importing
-        async.series(createOps, function (error, results) {
-          // handle errors (should not be any)
-          if (error) {
-            return callback(error);
-          }
-          // if import errors were found
-          if (createErrors.length) {
-            // remove results that failed to be added
-            results = results.filter(result => result !== null);
-            // define a toString function to be used by error handler
-            results.toString = function () {
-              return JSON.stringify(this);
-            };
-            // return error with partial success
-            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-              model: app.models.contactOfContact.modelName,
-              failed: createErrors,
-              success: results
-            }));
-          }
-          // send the result
-          callback(null, results);
-        });
-      })
-      .catch(callback);
-  };
-
-  /**
    * Generate (next available) contact of contact visual id
    * @param visualIdMask
    * @param personId
@@ -4137,88 +3748,6 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Import an importable relationships file using file ID and a map to remap parameters & reference data values
-   * @param body
-   * @param options
-   * @param callback
-   */
-  Outbreak.prototype.importImportableRelationshipsFileUsingMap = function (body, options, callback) {
-    const self = this;
-    options._sync = false;
-    // inject platform identifier
-    options.platform = Platform.IMPORT;
-    importableFileHelpers
-      .getTemporaryFileById(body.fileId)
-      .then(file => {
-        // get file content
-        const rawRelationsList = file.data;
-        // remap properties & values
-        const relations = app.utils.helpers.convertBooleanProperties(
-          app.models.relationship,
-          app.utils.helpers.remapProperties(rawRelationsList, body.map, body.valuesMap));
-        // build a list of create operations
-        const createOps = [];
-        // define a container for error results
-        const createErrors = [];
-        // define a toString function to be used by error handler
-        createErrors.toString = function () {
-          return JSON.stringify(this);
-        };
-        // go through all entries
-        relations.forEach((relation, index) => {
-          createOps.push(callback => {
-            relation.outbreakId = self.id;
-
-            return app.utils.dbSync.syncRecord(
-              options.remotingContext.req.logger,
-              app.models.relationship,
-              relation,
-              options
-            )
-              .then(result => callback(null, result.record))
-              .catch(err => {
-                // on error, store the error, but don't stop, continue with other items
-                createErrors.push({
-                  message: `Failed to import relationship ${index + 1}`,
-                  error: err,
-                  recordNo: index + 1,
-                  data: {
-                    file: rawRelationsList[index],
-                    save: relation
-                  }
-                });
-                return callback(null, null);
-              });
-          });
-        });
-
-        async.series(createOps, (err, results) => {
-          if (err) {
-            return callback(err);
-          }
-          // if import errors were found
-          if (createErrors.length) {
-            // remove results that failed to be added
-            results = results.filter(result => result !== null);
-            // define a toString function to be used by error handler
-            results.toString = function () {
-              return JSON.stringify(this);
-            };
-            // return error with partial success
-            return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-              model: app.models.relationship.modelName,
-              failed: createErrors,
-              success: results
-            }));
-          }
-          // send the result
-          return callback(null, results);
-        });
-      })
-      .catch(callback);
-  };
-
-  /**
    * Get movement for a contact of contact
    * Movement: list of addresses that contain geoLocation information, sorted from the oldest to newest based on date.
    * Empty date is treated as the most recent
@@ -4248,10 +3777,11 @@ module.exports = function (Outbreak) {
   /**
    * Bulk modify contacts of contacts
    * @param records
+   * @param options
    * @param callback
    */
-  Outbreak.prototype.bulkModifyContactsOfContacts = function (records, callback) {
-    Outbreak.modifyMultipleContacts(records, true)
+  Outbreak.prototype.bulkModifyContactsOfContacts = function (records, options, callback) {
+    Outbreak.modifyMultipleContacts(records, true, options)
       .then((results) => callback(null, results))
       .catch(callback);
   };
@@ -4553,5 +4083,86 @@ module.exports = function (Outbreak) {
         callback(null, finalNotDuplicates);
       })
       .catch(callback);
+  };
+
+  /**
+   * Returns export fields groups for a model
+   * @param modelName
+   * @param callback
+   */
+  Outbreak.exportFieldsGroup = function (modelName, callback) {
+    // return the export fields groups of the model
+    const items =
+      app.models &&
+      app.models[modelName] &&
+      app.models[modelName].exportFieldsGroup ?
+        app.models[modelName].exportFieldsGroup :
+        {};
+
+    return callback(null, items);
+  };
+
+  /**
+   * [MOCKUP] Request to be used for checking connection in Pandem2
+   * Count cases and contacts reached for follow-up
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.countCasesContactsReached = function (data = {}, options, callback) {
+    // for real data we should get the outbreaks for the given disease
+    // and count cases/contacts that were followed-up in those outbreaks
+    const missingProps = ['startDate', 'endDate', 'pathogen', 'locationCode'].filter(prop => !data[prop]);
+    if (missingProps.length) {
+      return callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {
+        errorMessages: `Missing required properties: ${missingProps.join(', ')}`
+      }));
+    }
+    const { startDate, endDate, pathogen, locationCode } = data;
+
+    const momentLib = require('moment');
+    const momentRange = require('moment-range');
+    const moment = momentRange.extendMoment(momentLib);
+    const range = moment.range(moment.utc(startDate).startOf('day'), moment.utc(endDate).startOf('day'));
+
+    // props to be filled
+    const indicators = {
+      case: [
+        'noIdentified',
+        'noIdentifiedAndReached',
+        'noIdentifiedAndReached1day',
+        'noFromContacts',
+      ],
+      contact: [
+        'noIdentified',
+        'noIdentifiedAndReached',
+        'noIdentifiedAndReached1day'
+      ]
+    };
+
+    // generate random data
+    const result = {
+      pathogen,
+      locationCode,
+      caseData: {},
+      contactData: {}
+    };
+
+    for (const currentDate of range.by('day')) {
+      const dateFormated = currentDate.toISOString();
+
+      ['case', 'contact'].forEach(prop => {
+        const resourceResult = {};
+        indicators[prop].forEach((indicator, index) => {
+          resourceResult[indicator] = index === 0 ?
+            Math.floor(Math.random() * (100 + 1)) :
+            Math.floor(Math.random() * (resourceResult[indicators[prop][index - 1]] + 1));
+        });
+
+        result[prop + 'Data'][dateFormated] = resourceResult;
+      });
+    }
+
+    return callback(null, result);
   };
 };

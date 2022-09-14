@@ -17,6 +17,8 @@ const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
+const apiError = require('../../components/apiError');
+const exportHelper = require('./../../components/exportHelper');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -45,12 +47,12 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/filtered-count) hooks
    */
   Outbreak.beforeRemote('prototype.filteredCountCases', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.filteredCountCases', (context, modelInstance, next) => {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
   });
@@ -84,11 +86,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.case.count(filter.where);
+        return app.models.case.rawCountDocuments(filter);
       })
       .then(function (cases) {
         callback(null, cases);
@@ -104,7 +103,6 @@ module.exports = function (Outbreak) {
     Outbreak.helpers.filterPersonInformationBasedOnAccessPermissions('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context);
     // enhance events list request to support optional filtering of events that don't have any relations
     Outbreak.helpers.attachFilterPeopleWithoutRelation(
-      'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
       context,
       modelInstance,
       next
@@ -125,9 +123,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findCases = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
     // pre-filter using related data (case)
     app.models.case
       .preFilterForOutbreak(this, filter, options)
@@ -152,26 +147,7 @@ module.exports = function (Outbreak) {
         return app.models.case.find(filter);
       })
       .then(function (cases) {
-        if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const casesMap = {};
-          for (let record of cases) {
-            casesMap[record.id] = record;
-          }
-          // determine number of contacts/exposures for each case
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(casesMap))
-            .then(relationsCountMap => {
-              for (let recordId in relationsCountMap) {
-                const caseRecord = casesMap[recordId];
-                caseRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                caseRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, cases);
-            });
-        } else {
-          return callback(null, cases);
-        }
+        callback(null, cases);
       })
       .catch(callback);
   };
@@ -262,7 +238,7 @@ module.exports = function (Outbreak) {
    * Attach before remote (GET outbreaks/{id}/cases/per-classification/count) hooks
    */
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
   Outbreak.beforeRemote('prototype.countCasesPerClassification', function (context, modelInstance, next) {
     Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
@@ -275,35 +251,42 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countCasesPerClassification = function (filter, options, callback) {
-    app.models.case
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // count using query
-        return app.models.case.rawFind(filter.where, {
-          projection: {classification: 1},
-          includeDeletedRecords: filter.deleted
-        });
+    app.models.person
+      .groupCount(
+        options,
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+        filter,
+        'classification',
+        'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
-      .then(function (cases) {
-        // build a result
-        const result = {
-          classification: {},
-          count: cases.length
-        };
-        // go through all case records
-        cases.forEach(function (caseRecord) {
-          // init case classification group if needed
-          if (!result.classification[caseRecord.classification]) {
-            result.classification[caseRecord.classification] = {
-              count: 0
-            };
-          }
+      .catch(callback);
+  };
 
-          // classify records by their classification
-          result.classification[caseRecord.classification].count++;
-        });
-        // send back the result
-        callback(null, result);
+  /**
+   * Count cases by case classification
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesHospitalized = function (filter, options, callback) {
+    app.models.case
+      .countCasesHospitalized(
+        options,
+        this.id,
+        filter
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
@@ -314,9 +297,9 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
-    Outbreak.helpers.attachFilterPeopleWithoutRelation('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', context, modelInstance, next);
+    Outbreak.helpers.attachFilterPeopleWithoutRelation(context, modelInstance, next);
   });
 
   Outbreak.beforeRemote('prototype.exportFilteredCases', function (context, modelInstance, next) {
@@ -326,68 +309,237 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered cases to file
    * @param filter Supports 'where.relationship', 'where.labResult' MongoDB compatible queries
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredCases = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const self = this;
+  Outbreak.prototype.exportFilteredCases = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
+    // parse includeContactFields query param
+    let includeContactFields = false;
+    if (filter.where.hasOwnProperty('includeContactFields')) {
+      includeContactFields = filter.where.includeContactFields;
+      delete filter.where.includeContactFields;
+    }
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    app.models.case.preFilterForOutbreak(this, filter, options)
-      .then((filter) => {
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        relationship: {
+          collection: 'relationship',
+          queryPath: 'where.relationship',
+          localKey: '_id',
+          foreignKey: 'persons[].id',
+          foreignKeyArraySize: 2
+        },
+        labResult: {
+          collection: 'labResult',
+          queryPath: 'where.labResult',
+          localKey: '_id',
+          foreignKey: 'personId'
         }
+      }
+    );
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
+    // do we need to include contact data in case exported data if case was a contact ?
+    let additionalFieldsToExport;
+    if (includeContactFields) {
+      // initialize additional fields to export
+      additionalFieldsToExport = {
+        fields: {},
+        arrayProps: {},
+        locationFields: []
+      };
+
+      // determine case fields
+      const caseFields = {};
+      _.each(
+        app.models.case.fieldLabelsMap,
+        (caseFieldToken, caseField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.case.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
+              if (
+                caseField === excludedField ||
+                caseField.startsWith(`${excludedField}.`) ||
+                caseField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            caseFields[caseField] = caseFieldToken;
+          }
         }
+      );
 
-        let exportOptions = {
-          questionnaire: self.caseInvestigationTemplate.toJSON(),
-          useQuestionVariable: useQuestionVariable,
-          contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-        };
+      // determine contact fields
+      const contactFields = {};
+      _.each(
+        app.models.contact.fieldLabelsMap,
+        (contactFieldToken, contactField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.contact.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
+              if (
+                contactField === excludedField ||
+                contactField.startsWith(`${excludedField}.`) ||
+                contactField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
 
-        const CaseModel = app.models.case;
-        let modelOptions = {
-          collectionName: 'person',
-          scopeQuery: CaseModel.definition.settings.scope,
-          arrayProps: CaseModel.arrayProps,
-          fieldLabelsMap: CaseModel.fieldLabelsMap,
-          exportFieldsOrder: CaseModel.exportFieldsOrder,
-          locationFields: CaseModel.locationFields,
-          foreignKeyResolverMap: CaseModel.foreignKeyResolverMap,
-          referenceDataFields: CaseModel.referenceDataFields,
-          referenceDataFieldsToCategoryMap: CaseModel.referenceDataFieldsToCategoryMap
-        };
+                // no need to check further
+                break;
+              }
+            }
+          }
 
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            contactFields[contactField] = contactFieldToken;
+          }
+        }
+      );
+
+      // determine what fields from contact are missing from case
+      _.each(
+        contactFields,
+        (contactFieldToken, contactField) => {
+          if (!caseFields[contactField]) {
+            // add field
+            additionalFieldsToExport.fields[contactField] = contactFieldToken;
+
+            // is array property ?
+            if (app.models.contact.arrayProps[contactField]) {
+              additionalFieldsToExport.arrayProps[contactField] = app.models.contact.arrayProps[contactField];
+            }
+
+            // is location property ?
+            if (app.models.contact.locationFields.indexOf(contactField) > -1) {
+              additionalFieldsToExport.locationFields.push(contactField);
+            }
+          }
+        }
+      );
+    }
+
+    // prefilter
+    app.models.case
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then(updatedFilter => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // export
         return WorkerRunner.helpers.exportFilteredModelsList(
-          modelOptions,
-          {},
+          {
+            collectionName: 'person',
+            modelName: app.models.case.modelName,
+            scopeQuery: app.models.case.definition.settings.scope,
+            excludeBaseProperties: app.models.case.definition.settings.excludeBaseProperties,
+            arrayProps: app.models.case.arrayProps,
+            fieldLabelsMap: app.models.case.fieldLabelsMap,
+            exportFieldsGroup: app.models.case.exportFieldsGroup,
+            exportFieldsOrder: app.models.case.exportFieldsOrder,
+            locationFields: app.models.case.locationFields,
+            additionalFieldsToExport
+          },
           filter,
           exportType,
           encryptPassword,
           anonymizeFields,
-          exportOptions
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.caseInvestigationTemplate ?
+              this.caseInvestigationTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            jsonReplaceUndefinedWithNull,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          prefilters
         );
       })
-      .then((file) => {
-        return app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case List.${file.extension}`, callback);
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
       })
       .catch(callback);
   };
@@ -438,11 +590,12 @@ module.exports = function (Outbreak) {
               where: {
                 outbreakId: outbreakId,
                 or: [{
-                  dateOfReporting: {
+                  wasContact: true,
+                  dateBecomeCase: {
                     gte: xDaysAgo
                   }
                 }, {
-                  dateBecomeCase: {
+                  dateOfReporting: {
                     gte: xDaysAgo
                   }
                 }]
@@ -459,7 +612,7 @@ module.exports = function (Outbreak) {
         };
 
         // get the newCasesAmongKnownContactsIDs
-        result.newCasesAmongKnownContactsIDs = cases.filter(item => new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
 
         // send response
@@ -633,12 +786,38 @@ module.exports = function (Outbreak) {
     if (typeof periodInterval !== 'undefined') {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
+
       // normalize periodInterval dates
-      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
-      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
+      // let empty if start date is not provided
+      if (periodInterval[0]) {
+        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toISOString();
+      }
+
+      // and current date if end date is not provided
+      periodInterval[1] = periodInterval[1] ?
+        genericHelpers.getDateEndOfDay(periodInterval[1]).toISOString() :
+        genericHelpers.getDateEndOfDay().toISOString();
     } else {
       // set default periodInterval depending on periodType
       periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+    }
+
+    // create date condition
+    let filterDate = {};
+
+    // set the date condition
+    if (
+      periodInterval[0] &&
+      periodInterval[1]
+    ) {
+      filterDate = {
+        'gte': periodInterval[0],
+        'lte': periodInterval[1]
+      };
+    } else {
+      filterDate = {
+        'lte': periodInterval[1]
+      };
     }
 
     // get outbreakId
@@ -670,20 +849,16 @@ module.exports = function (Outbreak) {
         },
 
         // get only the cases reported in the periodInterval
-        or: [{
-          dateOfReporting: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          },
-          dateBecomeCase: {
-            eq: null
+        or: [
+          {
+            dateOfReporting: filterDate,
+            dateBecomeCase: {
+              eq: null
+            }
+          }, {
+            dateBecomeCase: filterDate
           }
-        }, {
-          dateBecomeCase: {
-            // clone the periodInterval as it seems that Loopback changes the values in it when it sends the filter to MongoDB
-            between: periodInterval.slice()
-          }
-        }]
+        ]
       },
       order: 'dateOfReporting ASC'
     };
@@ -721,6 +896,14 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function (cases) {
+        // set start date to first date of reporting if it's not set
+        if (!periodInterval[0]) {
+          periodInterval[0] = cases.length > 0 &&
+          cases[0].dateOfReporting ?
+            genericHelpers.getDate(cases[0].dateOfReporting).toISOString() :
+            genericHelpers.getDateEndOfDay().toISOString();
+        }
+
         // get periodMap for interval
         let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
@@ -877,7 +1060,7 @@ module.exports = function (Outbreak) {
 
           const sanitizedCases = [];
 
-          genericHelpers.attachParentLocations(
+          genericHelpers.attachLocations(
             app.models.case,
             app.models.location,
             results,
@@ -1111,9 +1294,9 @@ module.exports = function (Outbreak) {
                             if (err) {
                               reject(err);
                             } else {
-                              const lastName = sanitizedCase.rawData.lastName ? sanitizedCase.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                              const firstName = sanitizedCase.rawData.firstName ? sanitizedCase.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                              fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedCase.rawData.id}.pdf`, buffer, (err) => {
+                              // construct file name
+                              const fileName = exportHelper.getNameForExportedDossierFile(sanitizedCase, anonymousFields);
+                              fs.writeFile(`${tmpDirName}/${fileName}`, buffer, (err) => {
                                 if (err) {
                                   reject(err);
                                 } else {
@@ -1137,13 +1320,14 @@ module.exports = function (Outbreak) {
 
                     fs.readFile(archivePath, (err, data) => {
                       if (err) {
-                        callback(err);
+                        callback(apiError.getError('FILE_NOT_FOUND'));
                       } else {
                         tmpDir.removeCallback();
                         app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
                       }
                     });
-                  });
+                  })
+                  .catch(callback);
               });
             });
         });
@@ -1345,17 +1529,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a case
    * @param caseId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, where, options, callback) {
+  Outbreak.prototype.countCaseRelationshipsAvailablePeople = function (caseId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         caseId,
-        where,
+        filter,
         options
       )
       .then((counted) => {
@@ -1366,16 +1550,22 @@ module.exports = function (Outbreak) {
 
   /**
    * Get all duplicates based on hardcoded rules against a model props
-   * @param filter pagination props (skip, limit)
    * @param model
    * @param options
    * @param callback
    */
-  Outbreak.prototype.getCasePossibleDuplicates = function (filter = {}, model = {}, options, callback) {
-    app.models.person
-      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model, options)
-      .then(duplicates => callback(null, duplicates))
-      .catch(callback);
+  Outbreak.prototype.getCasePossibleDuplicates = function (model = {}, options, callback) {
+    if (
+      Config.duplicate &&
+      Config.duplicate.disableCaseDuplicateCheck
+    ) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 
   /**
@@ -1427,12 +1617,30 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }
 
-        // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttributes({
+        // define the attributes for update
+        const attributes = {
           dateBecomeContact: app.utils.helpers.getDate().toDate(),
           wasCase: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-        }, options);
+        };
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(caseInstance.questionnaireAnswers)) {
+          attributes.questionnaireAnswersCase = Object.assign({}, caseInstance.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
+        }
+
+        // restore data from custom forms before conversion
+        if (!_.isEmpty(caseInstance.questionnaireAnswersContact)) {
+          attributes.questionnaireAnswers = Object.assign({}, caseInstance.questionnaireAnswersContact);
+          attributes.questionnaireAnswersContact = {};
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return caseInstance.updateAttributes(
+          attributes,
+          options
+        );
       })
       .then(function (contact) {
         convertedContact = contact;
@@ -1459,6 +1667,19 @@ module.exports = function (Outbreak) {
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: caseId
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedContact);
@@ -1491,36 +1712,39 @@ module.exports = function (Outbreak) {
      * Create array of actions that will be executed in series for each batch
      * Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
      * @param {Array} batchData - Batch data
-     * @returns {[]}
+     * @returns {Promise<*[]>}
      */
     const createBatchActions = function (batchData) {
-      // build a list of create operations for this batch
-      const createCases = [];
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.addresses', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createCases = [];
 
-      // go through all batch entries
-      batchData.forEach(function (caseData) {
-        createCases.push(function (asyncCallback) {
-          // sync the case
-          return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
-            .then(function () {
-              asyncCallback();
-            })
-            .catch(function (error) {
-              asyncCallback(null, {
-                success: false,
-                error: {
-                  error: error,
-                  data: {
-                    file: caseData.raw,
-                    save: caseData.save
-                  }
-                }
-              });
+          // go through all batch entries
+          batchData.forEach(function (caseData) {
+            createCases.push(function (asyncCallback) {
+              // sync the case
+              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: caseData.raw,
+                        save: caseData.save
+                      }
+                    }
+                  });
+                });
             });
-        });
-      });
+          });
 
-      return createCases;
+          return createCases;
+        });
     };
 
     // construct options needed by the formatter worker

@@ -7,6 +7,7 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const Config = require('./../../server/config.json');
+const clusterHelpers = require('./../../components/clusterHelpers');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -287,11 +288,16 @@ module.exports = function (User) {
     },
     /**
      * Reset cache
+     * @param {boolean} broadcastedMessage - Flag specifying whether the reset command was sent from another cluster worker
      */
-    reset: function () {
+    reset: function (broadcastedMessage = false) {
       // reset all cache properties
       this.userLocationsIds = {};
       this.teamLocationsIds = {};
+
+      if (!broadcastedMessage) {
+        clusterHelpers.broadcastMessageToClusterWorkers(clusterHelpers.messageCodes.clearUserCache, app.logger);
+      }
     },
 
     // cache contents
@@ -345,12 +351,24 @@ module.exports = function (User) {
       let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT');
       let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1');
       let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2');
+      let paragraph3 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3');
+      let paragraph4;
+      let paragraph5 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5');
+      let paragraph6 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6');
+      let paragraph7 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7');
 
-      // second parameter should also be resolved as a template
       // it contains the reset password url
       const config = JSON.parse(fs.readFileSync(path.resolve(`${__dirname}/../../server/config.json`)));
-      const url = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}`;
-      paragraph2 = _.template(paragraph2, {interpolate: /{{([\s\S]+?)}}/g})({resetHref: `${url}?token=${info.accessToken.id}`});
+
+      const passwordChangePath = config.passwordChange && config.passwordChange.path ?
+        config.passwordChange.path :
+        '/account/change-password';
+      let userName = `${info.user.firstName} ${info.user.lastName}`;
+      let changePassURL = `${config.public.protocol}://${config.public.host}:${config.public.port}${passwordChangePath}`;
+
+      paragraph1 = _.template(paragraph1, {interpolate: /{{([\s\S]+?)}}/g})({userName: `${userName}`});
+      paragraph4 = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}?token=${info.accessToken.id}`;
+      paragraph5 = _.template(paragraph5, {interpolate: /{{([\s\S]+?)}}/g})({changePassURL: `<a href="${changePassURL}">${changePassURL}</a>`});
 
       // load the html email template
       const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
@@ -359,7 +377,12 @@ module.exports = function (User) {
       let resolvedTemplate = template({
         heading: heading,
         paragraph1: paragraph1,
-        paragraph2: paragraph2
+        paragraph2: paragraph2,
+        paragraph3: paragraph3,
+        paragraph4: paragraph4,
+        paragraph5: paragraph5,
+        paragraph6: paragraph6,
+        paragraph7: paragraph7,
       });
 
       app.models.Email.send({
@@ -406,7 +429,7 @@ module.exports = function (User) {
     }
   };
 
-  User.fieldLabelsMap = {
+  User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
@@ -427,5 +450,5 @@ module.exports = function (User) {
     'roleIds[]': 'LNG_USER_FIELD_LABEL_ROLES',
     'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
     disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS'
-  };
+  });
 };

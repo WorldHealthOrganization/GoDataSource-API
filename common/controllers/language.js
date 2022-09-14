@@ -5,6 +5,8 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const _ = require('lodash');
 const moment = require('moment');
+const apiError = require('../../components/apiError');
+const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
 
 module.exports = function (Language) {
 
@@ -44,7 +46,7 @@ module.exports = function (Language) {
       // read language file
       fs.readFile(files.languageFile.path, function (error, buffer) {
         if (error) {
-          return callback(error);
+          return callback(apiError.getError('FILE_NOT_FOUND'));
         }
         // read XLS file
         // we don't need to worry about other file formats, XLSX tries to read anything (does not do validations)
@@ -95,7 +97,14 @@ module.exports = function (Language) {
         // start updating translations
         self.updateLanguageTranslations(languageTokens, options, true)
           .then(function (languageTokens) {
-            callback(null, languageTokens);
+            // add missing language tokens from other languages
+            // - this shouldn't be necessary but it is a way to fix translation issue until a fix is delivered in next build after issue was reported
+            addMissingLanguageTokens.checkAndAddMissingLanguageTokens(
+              (err) => {
+                callback(err, languageTokens);
+              },
+              self.id
+            );
           })
           .catch(function (error) {
             // make error response readable
@@ -136,7 +145,7 @@ module.exports = function (Language) {
     };
 
     // translate file headers
-    return app.models.languageToken
+    app.models.languageToken
       .rawFind(Object.assign({
         token: {
           $in: [
@@ -314,9 +323,7 @@ module.exports = function (Language) {
     // & retrieve only non-deleted records
     let where = {
       languageId: this.id,
-      deleted: {
-        $ne: true
-      }
+      deleted: false
     };
     if (!_.isEmpty(whereFilter)) {
       where.$and = [

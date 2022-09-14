@@ -76,8 +76,18 @@
     "lastLoginDate": {
       "type": "date"
     },
+    "resetPasswordRetriesCount": {
+      "type": "number"
+    },
+    "lastResetPasswordDate": {
+      "type": "date"
+    },
     "disregardGeographicRestrictions": {
       "description": "Flag specifying whether the outbreak setting for geographical restriction of data will be disregarded for the user",
+      "type": "boolean",
+      "default": false
+    },
+    "dontCacheFilters": {
       "type": "boolean",
       "default": false
     }
@@ -242,21 +252,20 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, limit and where.useQuestionVariable - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers."
+          "description": "Filter defining fields, where, include, order, offset, limit - must be a JSON-encoded string ({\"something\":\"value\"})."
         },
         {
           "arg": "type",
           "type": "string",
           "enum": [
             "json",
-            "xml",
             "csv",
             "xls",
             "xlsx",
             "ods",
             "pdf"
           ],
-          "description": "Export type; can be: json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json"
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
         },
         {
           "arg": "encryptPassword",
@@ -269,6 +278,13 @@
             "string"
           ],
           "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
         },
         {
           "arg": "options",
@@ -299,10 +315,15 @@
         }
       ],
       "description": "Export filtered list of users",
-      "http": {
-        "verb": "get",
-        "path": "/export"
-      }
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
     },
     "import": {
       "accepts": [

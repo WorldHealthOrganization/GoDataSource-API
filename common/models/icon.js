@@ -1,6 +1,5 @@
 'use strict';
 
-const Jimp = require('jimp');
 const uuid = require('uuid');
 const app = require('../../server/server');
 const helpers = require('../../components/helpers');
@@ -14,25 +13,40 @@ module.exports = function (Icon) {
    */
   Icon.saveOnDisk = function (filePath) {
     return new Promise(function (resolve, reject) {
+      let Sharp;
+
+      try {
+        // !!!!!!!!!!!!!!!!!!
+        // Note: Updating sharp library over version 0.28.3 will break current functionality in case of error as sharp will close the process and no longer throw error
+        // See /lib/sharp.js in 0.29+ versions of sharp
+        // !!!!!!!!!!!!!!!!!!
+        Sharp = require('sharp');
+
+        // do not allow concurrent executions
+        // it uses too much memory on bigger scales (10+)
+        Sharp.concurrency(1);
+      } catch (err) {
+        app.logger.error('Sharp library is not correctly installed or installed version is not compatible with the operating system', err);
+        return reject(new Error('Sharp library is not correctly installed or installed version is not compatible with the operating system'));
+      }
+
       // the icon should be at most 50px on the biggest side
-      Jimp.read(filePath)
-        .then(function (image) {
-          // resize width to 50px, preserve ratio
-          let resizeParams = [50, Jimp.AUTO];
-          // if the height is bigger than the width
-          if (image.bitmap.width < image.bitmap.height) {
-            // change the height to 50px, preserve ratio
-            resizeParams = resizeParams.reverse();
-          }
-          return image.resize(...resizeParams)
-            .getBuffer(Jimp.AUTO, function (error, buffer) {
-              if (error) {
-                return reject(error);
-              }
-              return app.models.storage
-                .save(app.models.storage.containers.icons, `${uuid.v4()}.${image.getExtension()}`, buffer)
-                .then(resolve);
-            });
+      Sharp(filePath, {
+        // remove pixels limit
+        limitInputPixels: false,
+        // it reduces the memory footprint and increases performance on some systems
+        sequentialRead: true
+      })
+        .resize({
+          width: 50,
+          height: 50,
+          fit: 'inside'
+        })
+        .toBuffer({resolveWithObject: true})
+        .then(({data, info}) => {
+          return app.models.storage
+            .save(app.models.storage.containers.icons, `${uuid.v4()}.${info.format}`, data)
+            .then(resolve);
         })
         .catch(reject);
     });

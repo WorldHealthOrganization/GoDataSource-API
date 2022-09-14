@@ -4,8 +4,19 @@ module.exports = function (Event) {
   // set flag to not get controller
   Event.hasController = false;
 
+  // important => DON'T use "Event.fieldLabelsMap = Object.assign({}, Event.fieldLabelsMap, {" since it gets all fields from person and we don't want that
   Event.fieldLabelsMap = {
+    id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
+    'numberOfExposures': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
+    'numberOfContacts': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'name': 'LNG_EVENT_FIELD_LABEL_NAME',
     'date': 'LNG_EVENT_FIELD_LABEL_DATE',
     'dateOfReporting': 'LNG_EVENT_FIELD_LABEL_DATE_OF_REPORTING',
@@ -24,8 +35,88 @@ module.exports = function (Event) {
     'address.geoLocationAccurate': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_GEO_LOCATION_ACCURATE',
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
-    'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS'
+    'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
+    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY',
+    'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE'
   };
+
+  // used on importable file logic
+  Event.foreignKeyFields = {
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
+    }
+  };
+
+  // map language token labels for export fields group
+  Event.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'name',
+        'type',
+        'date',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'eventCategory',
+        'endDate',
+        'description',
+        'responsibleUserId',
+        'numberOfExposures',
+        'numberOfContacts'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'address',
+        'address.typeId',
+        'address.country',
+        'address.city',
+        'address.addressLine1',
+        'address.postalCode',
+        'address.locationId',
+        'address.geoLocation',
+        'address.geoLocation.lat',
+        'address.geoLocation.lng',
+        'address.geoLocationAccurate',
+        'address.date',
+        'address.phoneNumber',
+        'address.emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    }
+  };
+
+  // default export order
+  Event.exportFieldsOrder = [
+    'id',
+    'dateOfReporting',
+    'isDateOfReportingApproximate'
+  ];
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)
   Event.nestedGeoPoints = [
@@ -42,6 +133,8 @@ module.exports = function (Event) {
     'date',
     'dateOfReporting',
     'isDateOfReportingApproximate',
+    'eventCategory',
+    'endDate',
     'description',
     'address'
   ];
@@ -49,7 +142,17 @@ module.exports = function (Event) {
   Event.referenceDataFieldsToCategoryMap = {
     type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE',
     'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
+    eventCategory: 'LNG_REFERENCE_DATA_CATEGORY_EVENT_CATEGORY'
   };
 
   Event.referenceDataFields = Object.keys(Event.referenceDataFieldsToCategoryMap);
+
+  /**
+   * Get alternate unique identifier query for sync/import actions
+   * Note: Event records don't have an alternate unique identifier. Overwriting Person model function
+   * @returns {null}
+   */
+  Event.getAlternateUniqueIdentifierQueryForSync = () => {
+    return null;
+  };
 };

@@ -1,0 +1,997 @@
+{
+  "id": "french_fr",
+  "name": "Français",
+  "readOnly": true,
+  "tokens": {
+    "LNG_ADDRESS_FIELD_LABEL_ADDRESS_LINE_1_DESCRIPTION": {
+      "translation": "Première ligne de l'adresse"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_CITY_DESCRIPTION": {
+      "translation": "Ville ou village de l'adresse"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_IS_THE_PERSON_NEXT_TO_YOU": {
+      "translation": "Obtenir les coordonnées GPS"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_LOCATION_DESCRIPTION": {
+      "translation": "Si vous ne voyez qu'une liste de lieux de premier niveau, choisissez le lieu approprié et appuyez sur la touche fleche du bas pour revoir la liste et afficher les lieux enfants."
+    },
+    "LNG_ADDRESS_FIELD_LABEL_MANUAL_COORDINATES_DESCRIPTION": {
+      "translation": "La latitude et la longitude fournies pour cette adresse doivent être considérées comme précises."
+    },
+    "LNG_ADDRESS_FIELD_LABEL_POSTAL_CODE_DESCRIPTION": {
+      "translation": "Tout code postal spécifique cette adresse"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_TYPE_DESCRIPTION": {
+      "translation": "La classification de cette adresse (domicile, travail, etc.) Au moins un enregistrement doit être défini comme Adresse actuelle."
+    },
+    "LNG_AGE_FIELD_LABEL_TYPE": {
+      "translation": "Années / Mois"
+    },
+    "LNG_API_ERROR_CODE_AUTHORIZATION_REQUIRED": {
+      "translation": "Identification incorrecte"
+    },
+    "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_SWITCH": {
+      "translation": "Entités disponibles pour changer"
+    },
+    "LNG_APP_PAGE_IMPORT_LOCATION_DATA": {
+      "translation": "Localisations"
+    },
+    "LNG_APP_PAGE_IMPORT_RELATIONSHIP_DATA": {
+      "translation": "Relation"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_END_DATE": {
+      "translation": "Date de fin"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_ERROR": {
+      "translation": "Erreur"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_FILE_SIZE": {
+      "translation": "Taille du fichier"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_NAME": {
+      "translation": "Nom"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_START_DATE": {
+      "translation": "Date de début"
+    },
+    "LNG_ASYNC_COT_FIELD_LABEL_STATUS": {
+      "translation": "Statut"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_ACTION": {
+      "translation": "Action"
+    },
+    "LNG_AUDIT_LOG_FIELD_LABEL_CHANGE_DATA": {
+      "translation": "Changements"
+    },
+    "LNG_AUTHENTICATION_TOKEN_EXPIRE_DIALOG_CONTINUE_BUTTON": {
+      "translation": "Je suis toujours là..."
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_BACKUP_INTERVAL_DESCRIPTION": {
+      "translation": "Spécifiez l'intervalle de temps, en heures, pour que Go.Data sauvegarde automatiquement les données dans un fichier."
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_DISABLED": {
+      "translation": "Désactivé"
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_MODULES_DESCRIPTION": {
+      "translation": "Choisissez les parties de Go.Data qui seront sauvegardées."
+    },
+    "LNG_AUTOMATIC_BACKUP_FIELD_LABEL_RETENTION_INTERVAL_DESCRIPTION": {
+      "translation": "Spécifiez pendant combien de temps (en jours) les sauvegardes de fichiers de Go.Data doivent être conservées."
+    },
+    "LNG_BACKUP_FIELD_LABEL_DATE": {
+      "translation": "Heure de départ (UTC)"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+      "translation": "Activer/désactiver les sauvegardes automatiques"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DISABLED": {
+      "translation": "Désactivé"
+    },
+    "LNG_BACKUP_FIELD_LABEL_MODULES_DESCRIPTION": {
+      "translation": "Activer/désactiver les sauvegardes automatiques"
+    },
+    "LNG_CASE_FIELD_LABEL_AGE_DESCRIPTION": {
+      "translation": "L'âge de l'individu, vous pouvez le spécifier en années ou en mois.  Vous devez utiliser les mois uniquement pour les enfants de moins d'un an."
+    },
+    "LNG_CASE_FIELD_LABEL_AGE_MONTHS": {
+      "translation": "Mois"
+    },
+    "LNG_CASE_FIELD_LABEL_AGE_YEARS": {
+      "translation": "Années"
+    },
+    "LNG_CASE_FIELD_LABEL_CASE_UID_DESCRIPTION": {
+      "translation": "Le code d'identification unique pour ce cas"
+    },
+    "LNG_CASE_FIELD_LABEL_CASE_UID": {
+      "translation": "UID de Cas"
+    },
+    "LNG_CASE_FIELD_LABEL_CENTER_DATES_LOCATION": {
+      "translation": "Localisation"
+    },
+    "LNG_CASE_FIELD_LABEL_CLASSIFICATION_DESCRIPTION": {
+      "translation": "La classification du cas.  Elle doit être établie en tenant compte des définitions formelles de l'épidémie"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_RANGE_LOCATION": {
+      "translation": "Localisation"
+    },
+    "LNG_CASE_FIELD_LABEL_DOB_DESCRIPTION": {
+      "translation": "Si la date de naissance exacte n'est pas connue, indiquez l'âge du cas."
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Utilisateur assigné"
+    },
+    "LNG_CASE_FIELD_LABEL_RISK_LEVEL_DESCRIPTION": {
+      "translation": "Champ configurable pour classer le niveau de risque pour cette configuration d'épidémie"
+    },
+    "LNG_CASE_FIELD_LABEL_SAFETY_BURIAL_DESCRIPTION": {
+      "translation": "Déterminer si l'enterrement a été effectué de manière digne et sécurisé, conformément aux directives relatives à l'épidémie."
+    },
+    "LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED_DESCRIPTION": {
+      "translation": "Enregistrer si le cas a refusé de se rendre dans un centre de traitement."
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS_ALL": {
+      "translation": "Tous les groupes de champs"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS": {
+      "translation": "Groupes de champs"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA": {
+      "translation": "Données d'adresse et de localisation"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA": {
+      "translation": "Données démographiques de base"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA": {
+      "translation": "Données épidémiologiques"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_HOSPITALIZATION_DATA": {
+      "translation": "Données d'hospitalisation"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA": {
+      "translation": "Données d'identification du lieu"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA": {
+      "translation": "Données du questionnaire"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA": {
+      "translation": "Données de création et de mise à jour des enregistrements"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_RELATIONSHIPS_DATA": {
+      "translation": "Données sur les relations"
+    },
+    "LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA": {
+      "translation": "Données relatives à la vaccination"
+    },
+    "LNG_COMMON_LABEL_EXPORT_JSON_REPLACE_UNDEFINED_WITH_NULL_DESCRIPTION": {
+      "translation": "Remplacer les valeurs non définies par des valeurs nulles (uniquement pour json)"
+    },
+    "LNG_COMMON_LABEL_EXPORT_JSON_REPLACE_UNDEFINED_WITH_NULL": {
+      "translation": "Remplacer les valeurs indéfinies par des valeurs nulles"
+    },
+    "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_DESCRIPTION": {
+      "translation": "Utilisez les propriétés de la base de données comme en-têtes de colonne (utile pour les scripts)."
+    },
+    "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS": {
+      "translation": "Utiliser les en-têtes de colonne de la base de données"
+    },
+    "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES_DESCRIPTION": {
+      "translation": "Recevoir les valeurs de la même manière qu'elles sont dans la base de données (utile pour les scripts)"
+    },
+    "LNG_COMMON_LABEL_EXPORT_USE_DB_COLUMNS_NO_TRANSLATED_VALUES": {
+      "translation": "Ne pas traduire les valeurs"
+    },
+    "LNG_COMMON_LABEL_FILTERS_USED": {
+      "translation": "**Les filtres sont appliqués sur cette liste (peut inclure des champs cachés)"
+    },
+    "LNG_COMMON_LABEL_INVALID_URL_FILTERS": {
+      "translation": "Filtres d'URL invalides ignorés"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_COUNT_AFTER_LENGTH": {
+      "translation": "résultats"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_COUNT_BEFORE_LENGTH": {
+      "translation": "plus que"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_FIRST_PAGE": {
+      "translation": "Première page"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_ITEMS_PER_PAGE": {
+      "translation": "Éléments par page :"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_LAST_PAGE": {
+      "translation": "Dernière page"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_NEXT_PAGE": {
+      "translation": "Page suivante"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_PREVIOUS_PAGE": {
+      "translation": "Page précédente"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_RANGE": {
+      "translation": "{{pageLabel}} de {{beforeLength}} {{length}} {{afterLength}}"
+    },
+    "LNG_COMMON_LABEL_PAGINATOR_SHOW_EXACT_COUNT": {
+      "translation": "afficher le nombre exact"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Localisation"
+    },
+    "LNG_CONTACT_FIELD_LABEL_AGE_DESCRIPTION": {
+      "translation": "L'âge de l'individu, vous pouvez le spécifier en années ou en mois.  Vous devez utiliser les mois uniquement pour les enfants de moins d'un an."
+    },
+    "LNG_CONTACT_FIELD_LABEL_AGE_MONTHS": {
+      "translation": "Mois"
+    },
+    "LNG_CONTACT_FIELD_LABEL_AGE_YEARS": {
+      "translation": "Années"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
+      "translation": "Date d'exposition ({{exposureName}})"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING_APPROXIMATE_DESCRIPTION": {
+      "translation": "Précisez si la date de notification de ce cas n'est pas connue avec exactitude."
+    },
+    "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
+      "translation": "L'équipe de suivi doit être définie uniquement si vous souhaitez que tous les suivis générés soient affectés à une équipe spécifique (au lieu d'utiliser le système d'affectation automatique de la localisation la plus proche)."
+    },
+    "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+      "translation": "Sélectionnez l'utilisateur qui assurera le suivi de cette personne. Les utilisateurs affectés aux contacts seront également automatiquement affectés aux suivis des contacts spécifiés."
+    },
+    "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Utilisateur assigné"
+    },
+    "LNG_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "L'ID doit correspondre au modèle défini pour cette Épidémie : {{mask}}"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Localization"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_MONTHS": {
+      "translation": "Mois"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_AGE_YEARS": {
+      "translation": "Années"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID_DESCRIPTION": {
+      "translation": "Sélectionnez l'utilisateur qui assurera le suivi de cette personne. "
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Utilisateur assigné"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_LEVEL_DESCRIPTION": {
+      "translation": "Champ configurable pour classer le niveau de risque de cette configuration d'épidémie"
+    },
+    "LNG_CONTACT_OF_CONTACT_LIST_SCREEN_NO_CONTACTS": {
+      "translation": "Il n'y a pas de contacts de contacts à afficher"
+    },
+    "LNG_CONTACT_OF_CONTACT_LIST_SCREEN_TITLE": {
+      "translation": "Contacts des contacts"
+    },
+    "LNG_COT_STATUS_IN_PROGRESS": {
+      "translation": "En cours"
+    },
+    "LNG_COT_STATUS_SUCCESS": {
+      "translation": "Succès"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_APRIL": {
+      "translation": "Avril"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_AUGUST": {
+      "translation": "Août"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_DECEMBER": {
+      "translation": "Décembre"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_FEBRUARY": {
+      "translation": "Février"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JANUARY": {
+      "translation": "Janvier"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JULY": {
+      "translation": "Juillet"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_JUNE": {
+      "translation": "Juin"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_MARCH": {
+      "translation": "Mars"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_MAY": {
+      "translation": "Mai"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_NOVEMBER": {
+      "translation": "Novembre"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_OCTOBER": {
+      "translation": "Octobre"
+    },
+    "LNG_DATEPICKER_CALENDAR_LABEL_MONTH_NAMES_LONG_SEPTEMBER": {
+      "translation": "Septembre"
+    },
+    "LNG_DIALOG_CONFIRM_LOCATION_USED": {
+      "translation": "Localisation '{{name}}' et ses sous-localisations ne peuvent être supprimées car elles sont utilisées, voulez-vous voir le détail ?"
+    },
+    "LNG_DIALOG_EXPORT_CHAIN_OF_TRANSMISSION_SCALE_INFO": {
+      "translation": "Plus l'échelle est élevée, plus l'exportation des chaînes de transmission peut prendre du temps."
+    },
+    "LNG_ENTITY_FIELD_LABEL_AGE_MONTHS": {
+      "translation": "Mois"
+    },
+    "LNG_ENTITY_FIELD_LABEL_AGE_YEARS": {
+      "translation": "Années"
+    },
+    "LNG_ENTITY_FIELD_LABEL_VISUAL_ID": {
+      "translation": "ID de Cas / Contact"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Utilisateur assigné"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CASE": {
+      "translation": "Cas :"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+      "translation": "Utilisateur assigné"
+    },
+    "LNG_FORM_HOT_TABLE_WRAPPER_LOADING_LOCATIONS_TITLE": {
+      "translation": "Chargement des emplacements géographiques"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_DESCRIPTION": {
+      "translation": "Comment administrer votre installation de Go.Data."
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION": {
+      "translation": "Administration de Go.Data"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_AUDIT_LOGS": {
+      "translation": "Journaux d'audit"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADMINISTRATION_HELP_ITEM_LAMGUAGES": {
+      "translation": "Languages"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_DESCRIPTION": {
+      "translation": "Configuration avancée de Go.Data pour créer un réseau de plusieurs copies de l'outil échangeant toutes des données."
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION": {
+      "translation": "Configuration avancée de Go.Data"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_CLIENT_APPLICATIONS": {
+      "translation": "Applications client"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_DEVICES": {
+      "translation": "Appareils"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_SYNCHRONISATION": {
+      "translation": "Synchronisation"
+    },
+    "LNG_HELP_CATEGORY_GO_DATA_ADVANCED_CONFIGURATION_HELP_ITEM_UPSTREAM_SERVERS": {
+      "translation": "Serveurs en amont"
+    },
+    "LNG_HUB_CONFIGURATION_SCREEN_DELETE_HUB": {
+      "translation": "Supprimer le Hub"
+    },
+    "LNG_HUB_CONFIGURATION_SCREEN_DELETE_HUB_SYNC_DATA": {
+      "translation": "Il y a des données qui n'ont pas été envoyées au serveur et qui seront perdues. Veuillez d'abord synchroniser vos données, puis essayez à nouveau de supprimer le hub."
+    },
+    "LNG_HUB_CONFIGURATION_SCREEN_REPLACEMENT_HUBS_LABEL": {
+      "translation": "Veuillez sélectionner le hub vers lequel vous souhaitez basculer."
+    },
+    "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_DATA": {
+      "translation": "Enregistrement des données"
+    },
+    "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_DETAILS": {
+      "translation": "Détails de l'erreur"
+    },
+    "LNG_IMPORT_RESULT_FIELD_LABEL_ERROR_MESSAGE": {
+      "translation": "Message d'erreur"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_CASE_CLASSIFICATION_INFO": {
+      "translation": "Classification actuelle du cas :"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT": {
+      "translation": "Date du résultat de la recherche du variant / souche"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE": {
+      "translation": "Variant / Souche"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Variant / Souche Nom du laboratoire"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT": {
+      "translation": "Variant / Souche Résultat"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS_DESCRIPTION": {
+      "translation": "La valeur par défaut de l'indicateur de performance du tableau de bord qui montre le nombre de nouveaux cas de ces X derniers jours provenant de contacts connus."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui permet d'afficher le nombre de nouveaux cas de ces X derniers jours ayant pu etre ratacché à une chaine de transmission connue"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DAYS_LONG_PERIODS_DESCRIPTION": {
+      "translation": "Le nombre de jour entre les dates d'apparition de symptomes de deux cas liés.  Nous pouvons utiliser cet intervale pour identifier les cas qui pourraient avoir un cas intermédiaire non identifié. "
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DAYS_NEW_CONTACT_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui permet de compter le nombre de nouveaux contacts sur les X derniers jours."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DAYS_NOT_SEEN_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui permet de montrer le nombre de contacts n'ayant pas été vus sur les X derniers jours."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_DESCRIPTION": {
+      "translation": "Depuis la date de leur exposition, pendant combien de jours les contacts doivent ils être suivis ?"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_DESCRIPTION": {
+      "translation": "Combien de jours doivent s'écouler entre les suivis ?  Définissez cette valeur sur 1 pour un suivi quotidien, 2 pour un suivi tous les deux jours, etc."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY_DESCRIPTION": {
+      "translation": "Combien de fois le suivi doit-il être effectué par jour ?  Donnez la valeur 1 pour un suivi unique par jour."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si le suivi des contacts doit commencer à la date du dernier contact."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT": {
+      "translation": "Commencer le suivi des contacts à la date du dernier contact"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si les nouveaux suivis générés seront assignés à la même équipe que le dernier suivi pour un contact ou si l'assignation de l'équipe sera faite par round-robin."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si les suivis existants dans la période spécifiée seront écrasés ou non. S'applique uniquement aux suivis non effectués"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
+      "translation": "<div style='color: #FFF; padding-bottom: 10px'><span style='font-weight: bold;'>[Option 1]</span> - Si l'équipe 1 est affectée à l'Argentine et l'équipe 2 à Buenos Aires (sous-localisation de l'Argentine). Le contact a \"Buenos Aires\" comme lieu de résidence habituel. Seule l'équipe 2 sera ajoutée au pool d'affectation à partir duquel le choix sera effectué. </div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Option 2]</span> - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Contact has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done.</div>"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION": {
+      "translation": "Option spécifiant l'intervalle auquel les suivis doivent être générés. Si elle est vide, aucune restriction ne sera appliquée, sinon, les suivis seront générés uniquement à des jours spécifiques (exemple d'intervalle : '1, 3, 5'). Laissez vide si vous souhaitez utiliser l'ancien fonctionnement."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS": {
+      "translation": "Intervalle de suivi"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LESS_THAN_X_CONTACTS_DESCRIPTION": {
+      "translation": "Parametre permettant d'obtenir dans le tableau de bord le nombre de cas ayant moins de X contacts"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LOCATIONS": {
+      "translation": "Localisations"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL_DESCRIPTION": {
+      "translation": "Lors de l'affichage des graphiques sur le tableau de bord, quel niveau géographique doit être utilisé pour agréger les données ?"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_NAME_DESCRIPTION": {
+      "translation": "Indiquez un nom pour cette couche d'informations cartographiques.  Si vous laissez ce champ vide lors de la création d'une épidémie, le système utilisera par défaut le fond de carte de l'OMS."
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_STYLE_SOURCE": {
+      "translation": "Source du style"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_TYPE": {
+      "translation": "Type de carte"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_MAP_SERVER_URL_DESCRIPTION": {
+      "translation": "Indiquez l'adresse Web du service REST pour cette couche d'informations cartographiques.  Si vous laissez ce champ vide lors de la création d'une épidémie, le système utilisera par défaut le fond de carte de l'OMS."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui compte le nombre de nouveaux cas des X derniers jours provenant de contacts connus."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui permet d'afficher le nombre de nouveaux cas de ces X derniers jours ayant pu etre ratacché à une chaine de transmission connue. "
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DAYS_LONG_PERIODS_DESCRIPTION": {
+      "translation": "Le nombre de jour entre les dates d'apparition de symptomes de deux cas liés.  Nous pouvons utiliser cet intervale pour identifier les cas qui pourraient avoir un cas intermédiaire non identifié. "
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DAYS_NEW_CONTACT_DESCRIPTION": {
+      "translation": "Parametre du tableau de bord qui permet d'afficher le nombre de nouveaux contacts au cours des X derniers jours."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_DESCRIPTION": {
+      "translation": "Depuis la date de leur exposition, pendant combien de jours les contacts doivent ils être suivis ?"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_FRECQUENCY_PER_DAY_DESCRIPTION": {
+      "translation": "Combien de jours doivent s'écouler entre les suivis ?  Définissez cette valeur sur 1 pour un suivi quotidien, 2 pour un suivi tous les deux jours, etc."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_FREQUENCY_DESCRIPTION": {
+      "translation": "Combien de fois le suivi doit-il être effectué par jour ?  Donnez la valeur 1 pour un suivi unique par jour."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si le suivi des contacts doit commencer à la date du dernier contact."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT": {
+      "translation": "Commencer le suivi des contacts à la date du dernier contact"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si les nouveaux suivis générés seront assignés à la même équipe que le dernier suivi pour un contact ou si l'assignation de l'équipe sera faite par round-robin."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION": {
+      "translation": "Indicateur spécifiant si les suivis existants dans la période spécifiée seront écrasés ou non. S'applique uniquement aux suivis non effectués"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION": {
+      "translation": "[Option 1] - Si l'équipe 1 est affectée à l'\"Argentine\" et l'équipe 2 à \"Buenos Aires\" (sous-localisation de l'Argentine). Le contact a \"Buenos Aires\" comme lieu de résidence habituel. Seule l'équipe 2 sera ajoutée au pool d'affectation à partir duquel le choix sera effectué. [Option 2] - Si l'équipe 1 est affectée à l'Argentine et l'équipe 2 à Buenos Aires (sous-localisation de l'Argentine). Le contact a \"Buenos Aires\" comme lieu de résidence habituel. L'équipe 1 et l'équipe 2 seront ajoutées à la réserve d'affectation à partir de laquelle le choix sera effectué."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION": {
+      "translation": "Option spécifiant l'intervalle auquel les suivis doivent être générés. Si elle est vide, aucune restriction ne sera appliquée, sinon, les suivis seront générés uniquement à des jours spécifiques (exemple d'intervalle : '1, 3, 5'). Laissez vide si vous souhaitez utiliser l'ancien comportement."
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS": {
+      "translation": "Intervalle de suivi"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_LESS_THAN_X_CONTACTS_DESCRIPTION": {
+      "translation": "Parametre permettant d'obtenir dans le tableau de bord le nombre de cas ayant moins de X contacts"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_ACTION_CREATE_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contact de contact créé"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_ERRORS": {
+      "translation": "Erreurs de validation"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
+      "translation": "- les enregistrements qui ont été créés avec succès ont été supprimés de la feuille de calcul afin d'éviter les doublons."
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_TITLE": {
+      "translation": "Ajout groupé de contacts de contacts"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_VISUAL_ID_INFO_LABEL": {
+      "translation": "La cellule 'Contact ID' doit suivre ce modèle : {{mask}}"
+    },
+    "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_LABEL_ERRORS": {
+      "translation": "Erreurs de validation :"
+    },
+    "LNG_PAGE_CREATE_CASE_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs pour changer l'utilisateur assigné au cas."
+    },
+    "LNG_PAGE_CREATE_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs pour définir le contact de l'utilisateur attribué."
+    },
+    "LNG_PAGE_CREATE_CONTACT_OF_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs pour définir le contact du contact attribué à l'utilisateur."
+    },
+    "LNG_PAGE_CREATE_CONTACT_WARNING_CASE_OR_EVENT_REQUIRED": {
+      "translation": "Vous pouvez ajouter un contact à un cas ou à un événement."
+    },
+    "LNG_PAGE_CREATE_EVENT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous avez besoin de l'autorisation comme utilisateur - autorisation de liste pour définir l'événement attribué à l'utilisateur."
+    },
+    "LNG_PAGE_DASHBOARD_CASES_CONTACT_STATUS_REPORT_TITLE_DESCRIPTION": {
+      "translation": "Affiche le nombre de cas en fonction de leur statut comme contact."
+    },
+    "LNG_PAGE_DASHBOARD_CASE_BY_GEOGRAPHIC_LOCATION_TITLE_DESCRIPTION": {
+      "translation": "Indique le nombre de cas de l'épidémie sélectionnée par localisation géographique."
+    },
+    "LNG_PAGE_DASHBOARD_CASE_BY_LOCATION": {
+      "translation": "Cas par localisation géographique"
+    },
+    "LNG_PAGE_DASHBOARD_CASE_HOSPITALIZATION_TITLE_DESCRIPTION": {
+      "translation": "Indique le nombre de cas actuellement hospitalisés, actuellement isolés, etc."
+    },
+    "LNG_PAGE_DASHBOARD_CASE_SUMMARY": {
+      "translation": "Résumé du cas"
+    },
+    "LNG_PAGE_DASHBOARD_CASE_SUMMARY_TITLE_DESCRIPTION": {
+      "translation": "Affiche le nombre de cas pour l'épidémie sélectionnée en fonction de la classification des cas et en ignorant les cas clasifiés comme \"pas un cas\"."
+    },
+    "LNG_PAGE_DASHBOARD_CASE_SUMMARY_TITLE": {
+      "translation": "Résumé du cas"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_ISO": {
+      "translation": "Semaine mondiale"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
+      "translation": "Veuillez vous assurer que le graphique EPI est visible"
+    },
+    "LNG_PAGE_DASHBOARD_KPIS_ELEMENTS_NOT_VISIBLE_ERROR_MSG": {
+      "translation": "Veuillez vous assurer qu'au moins un cadre d'indicateur est visible."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_ACTIVE_CHAINS_DESCRIPTION": {
+      "translation": "Indique le nombre de chaînes de transmission actives."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_DECEASED_TITLE_DESCRIPTION": {
+      "translation": "Montre le nombre de cas qui sont décédés."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_HOSPITALISED_TITLE_DESCRIPTION": {
+      "translation": "Montre le nombre de cas actuellement hospitalisés."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_LESS_CONTACTS_TITLE_BEFORE_VALUE_DESCRIPTION": {
+      "translation": "Montre le nombre de cas ayant moins de X contacts."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_NEW_PREVIOUS_DAYS_CONTACTS_BEFORE_VALUE_DESCRIPTION": {
+      "translation": "Montre la proportion de nouveaux cas dans les X derniers jours ayant été listés comme contact"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_REFUSING_TREATMENT_TITLE_DESCRIPTION": {
+      "translation": "Montre le nombre de cas suspects refusant d'être transféré dans une unité de traitement."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEAN_TITLE_DESCRIPTION": {
+      "translation": "Montre le nombre moyen de contacts par cas."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CONTACTS_PER_CASE_MEDIAN_TITLE_DESCRIPTION": {
+      "translation": "Montre le nombre médian de contacts par cas."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CONTACTS_SEEN_EACH_DAY_DESCRIPTION": {
+      "translation": "Montre le nombre de contacts vus chaque jour."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CONTACTS_WITH_SUCCESSFUL_FOLLOW_UP_DESCRIPTION": {
+      "translation": "Montre la proportion de contacts suivis avec succès chaque jour."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_INDEPENDENT_TRANSMISSION_CHAINS_DESCRIPTION": {
+      "translation": "Montre le nombre de chaînes de transmission indépendantes."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_NEW_CASES_PREVIOUS_DAYS_TRANSMISSION_CHAINS_BEFORE_VALUE_DESCRIPTION": {
+      "translation": "Montre, au cours des X derniers jours, la proportion de nouveaux cas ayant pu être rattaché à une chaine de transmission connue"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_NEW_CHAINS_OF_TRANSMISSION_FROM_REGISTERED_CONTACTS_WHO_BECAME_CASES_DESCRIPTION": {
+      "translation": "Montre le nombre de nouvelles chaînes de transmission provenant de contacts enregistrés qui sont devenus des cas."
+    },
+    "LNG_PAGE_DASHBOARD_KPI_NEW_CHAINS_OF_TRANSMISSION_FROM_REGISTERED_CONTACTS_WHO_BECAME_CASES": {
+      "translation": "Chaîne de transmission de contacts listés qui sont devenus des cas"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_ARCHIVING": {
+      "translation": "Exportation des fichiers finis, archivage"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_CONFIGURE_HEADERS": {
+      "translation": "Déterminer et enregistrer les colonnes d'en-tête"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_DOWNLOADING": {
+      "translation": "Exportation terminée, téléchargement du fichier ({{downloaded}} / {{total}})"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_ENCRYPTING": {
+      "translation": "Exportation terminée, cryptage du fichier ({{downloaded}} / {{total}})"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_FINISHING": {
+      "translation": "Presque terminé..."
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING": {
+      "translation": "Préparation des données. Cette étape peut prendre quelques minutes"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_LOCATIONS": {
+      "translation": "Déterminer et récupérer les emplacements géographiques"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_PREPARING_PREFILTERS": {
+      "translation": "Préparer les filtres. Cette étape peut prendre quelques minutes"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_RETRIEVING_LANGUAGE_TOKENS": {
+      "translation": "Récupération de la langue"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_BUTTON": {
+      "translation": "Créer un contact de contact"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_TITLE": {
+      "translation": "Créer un contact du contact"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
+      "translation": "Créer une image de la chaîne de transmission "
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_GRAPH": {
+      "translation": "Configurer l'image de la chaîne de transmission "
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
+      "translation": "Créer l'image de lachaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_LOAD_SNAPSHOT": {
+      "translation": "Voir l'image de la chaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+      "translation": "Filtres de l'image de la chaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_PERSON": {
+      "translation": "Vous devez générer une nouvelle image pour voir les chaînes pour la personne :"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_CHAINS_FILTERED_BY_SIZE": {
+      "translation": "Vous devez générer une nouvelle image pour voir les chaînes de taille :"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EDGE_TITLE": {
+      "translation": "Relation"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_EXPORT_NOTHING_TO_EXPORT": {
+      "translation": "Veuillez vous assurer que le graphique est visible"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_GENERATE_SNAPSHOT_IN_PROGRESS": {
+      "translation": "Chargement de l'image de la chaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_PAGE_SIZE": {
+      "translation": "Nombre de relations par page"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_RENDER_METHOD_FAST": {
+      "translation": "Rendu rapide"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_RENDER_METHOD_PRECISE": {
+      "translation": "Rendu précis"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOTS": {
+      "translation": "Image de la chaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_DOWNLOAD_FINISHED": {
+      "translation": "Rendu"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_LABEL_SNAPSHOT_NAME": {
+      "translation": "Nom de l'image de la chaîne de transmission"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE_DESCRIPTION": {
+      "translation": "Les nœuds correspondant aux filtres de l'image de la chaîne de transmission seront entourés d'une double bordure de cette couleur."
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE": {
+      "translation": "filtre des correspondances"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Couleur du variant / souche du laboratoire "
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE_DESCRIPTION": {
+      "translation": "Le noeud a plus d'un résultat de laboratoire avec des informations sur le variant ou la souche. Seul le résultat le plus récent est affiché"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE": {
+      "translation": "A plus de variants / souches"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
+      "translation": "Il n'y a pas de données qui correspondent aux critères de recherche"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_FIRST_NAME_LABEL": {
+      "translation": "Prénom"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAB_SEQ_RESULT_LABEL": {
+      "translation": "Résultat de laboratoire variant / souche"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAST_NAME_LABEL": {
+      "translation": "Nom de famille"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_CLONE": {
+      "translation": "Clone"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_CLOSE_MODIFY": {
+      "translation": "Masquer la modification"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_COLLAPSE_OPTIONS": {
+      "translation": "Masquer les sous-options"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_ERR_RECORD_DETAILS_FILE_TITLE": {
+      "translation": "insertion du fichier"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_ERR_RECORD_DETAILS_MODEL_TITLE": {
+      "translation": "Données à enregistrer dans la base de données"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_EXPAND_OPTIONS": {
+      "translation": "Afficher les sous-options"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_HIDE_ERR_RECORD_DETAILS": {
+      "translation": "Masquer les détails"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_IMPORT_FILE": {
+      "translation": "Importer un fichier"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_MAP_SUB_OPTIONS": {
+      "translation": "Faire correspondre les sous-options"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_MODIFY": {
+      "translation": "Modifier"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_REMOVE": {
+      "translation": "Supprimer"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_SEE_ERROR_DETAILS": {
+      "translation": "Voir les détails"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_SEE_RECORD_DATA": {
+      "translation": "Voir les données"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_SHOW_ERR_RECORD_DETAILS": {
+      "translation": "Afficher les détails"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_SHOW_NOT_MAPPED_COLUMNS": {
+      "translation": "Afficher les colonnes non mappées"
+    },
+    "LNG_PAGE_IMPORT_DATA_BUTTON_UPLOAD_FILE": {
+      "translation": "Charger un fichier"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_DETAILS_DIALOG_TITLE": {
+      "translation": "Détails des erreurs"
+    },
+    "LNG_PAGE_IMPORT_DATA_IMPORTING_VALIDATING": {
+      "translation": "Valider les données"
+    },
+    "LNG_PAGE_IMPORT_DATA_LABEL_ARRAY_INDEX_DESCRIPTION": {
+      "translation": "Lorsque Go.Data a plusieurs enregistrements pour le même type de données - par exemple un cas qui a trois adresses, vous pouvez choisir le 'niveau' ici.  Par exemple, si vous avez deux adresses dans votre fichier source pour le même cas, vous pouvez en importer une comme Niveau 1 et la seconde comme Niveau 2 pour créer les deux adresses dans le système."
+    },
+    "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_WAITING_DESCRIPTION": {
+      "translation": "Vous devez faire correspondre les sous-options"
+    },
+    "LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_VALUE": {
+      "translation": "Valeur"
+    },
+    "LNG_PAGE_IMPORT_DATA_MAPPING_FINISHED": {
+      "translation": "La correspondance des sous-options est terminée. Veuillez vérifier que toutes les sous-options correspondent correctement."
+    },
+    "LNG_PAGE_IMPORT_DATA_RECORD_DATA_DIALOG_TITLE": {
+      "translation": "Données de l'enregistrement"
+    },
+    "LNG_PAGE_IMPORT_DATA_REQUIRED": {
+      "translation": "Champ requis"
+    },
+    "LNG_PAGE_IMPORT_DATA_RETRIEVING_LOCATIONS": {
+      "translation": "Récupération des emplacements géographiques"
+    },
+    "LNG_PAGE_IMPORT_DATA_RETRIEVING_UNIQUE_VALUES": {
+      "translation": "Récupération des valeurs uniques"
+    },
+    "LNG_PAGE_IMPORT_EVENT_DATA_TITLE": {
+      "translation": "Importer les données d'événement"
+    },
+    "LNG_PAGE_LIST_ASYNC_COT_ACTION_DELETE_SNAPSHOT": {
+      "translation": "Supprimer une image de chaîne de transmission"
+    },
+    "LNG_PAGE_LIST_ASYNC_COT_ACTION_DELETE_SUCCESS_MESSAGE": {
+      "translation": "Image de chaîne de transmission supprimée"
+    },
+    "LNG_PAGE_LIST_ASYNC_COT_TITLE": {
+      "translation": "Image de chaînes de transmission"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+      "translation": "Voir les enregistrements marqués comme n'étant pas des doublons"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "Si le cas a été converti à partir d'un contact, il peut contenir des données de contact supplémentaires."
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_INFORMATION": {
+      "translation": "Inclure les données de contact"
+    },
+    "LNG_PAGE_LIST_CLUSTERS_LABEL_NO_COLOR": {
+      "translation": "Pas de couleur"
+    },
+    "LNG_PAGE_LIST_CLUSTERS_LABEL_NO_ICON": {
+      "translation": "Pas d'icône"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_BULK_ADD_CONTACTS": {
+      "translation": "Ajout groupé de contacts de contacts"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CHANGE_CONTACT_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": {
+      "translation": "Mise à jour du statut final pour {{count}} contact(s)"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_LAB_RESULTS": {
+      "translation": "Voir les résultats de laboratoire"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_SEE_RECORDS_NOT_DUPLICATES": {
+      "translation": "Voir les enregistrements marqués comme n'étant pas des doublons"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_SHOW_GROUP_BY_RISK_PILLS": {
+      "translation": "Afficher les contacts groupés par nombre de risques"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CASE_INFORMATION_DESCRIPTION": {
+      "translation": "Si le contact a été converti à partir d'un cas, il peut contenir des données supplémentaires sur le cas."
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CASE_INFORMATION": {
+      "translation": "Inclure les données de cas"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_REGISTERED_AS_CONTACT_MESSAGE": {
+      "translation": "Vous ne pouvez pas modifier les suivis car cette personne est maintenant un cas et les suivis ont été effectués au moment où \"{{nom de la personne}}\" était enregistré comme contact."
+    },
+    "LNG_PAGE_LIST_USERS_ACTION_VIEW_USERS_WORKLOAD": {
+      "translation": "Charge de travail"
+    },
+    "LNG_PAGE_MODIFY_CASE_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs pour modifier l'utilisateur affecté à un cas."
+    },
+    "LNG_PAGE_MODIFY_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs  pour changer l'utilisateur assigné au contact."
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs  pour changer le contact d'un utilisateur attribué à un contact"
+    },
+    "LNG_PAGE_MODIFY_EVENT_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs  pour changer l'utilisateur assigné à un événement"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_CANT_SET_RESPONSIBLE_ID_TITLE": {
+      "translation": "Vous devez disposer d'un droit d'accès à la liste des utilisateurs  pour changer l'utilisateur de suivi."
+    },
+    "LNG_PAGE_USERS_WORKLOAD_TITLE": {
+      "translation": "Charge de travail des utilisateurs"
+    },
+    "LNG_PAGE_USERS_WORKLOAD_USER_LABEL": {
+      "translation": "Utilisateur"
+    },
+    "LNG_QUESTIONNAIRE_REGISTERED_AS_CONTACT_MESSAGE": {
+      "translation": "Vous ne pouvez pas modifier les questionnaires parce que cette personne est maintenant un cas et que les questionnaires ont été remplis au moment où \"{{nom de la personne}}\" était enregistré comme contact."
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Variant / Souche Nom du laboratoire"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_UNDERLYING_MEDICAL_CONDITIONS": {
+      "translation": "Conditions médicales sous-jacentes"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING": {
+      "translation": "Authentification à deux facteurs"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT": {
+      "translation": "Authentification à deux facteurs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_UPSTREAM_SERVER": {
+      "translation": "Serveur en amont - créer"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER": {
+      "translation": "Utilisateur - créer"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE": {
+      "translation": "Rôle de l'utilisateur - créer un clone"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE": {
+      "translation": "Rôle de l'utilisateur - création"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_UPSTREAM_SERVER": {
+      "translation": "Serveur amont - supprimer"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER": {
+      "translation": "Utilisateur - supprimer"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE": {
+      "translation": "Rôle de l'utilisateur - supprimer"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC": {
+      "translation": "Serveur amont - désactiver la synchronisation"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_UPSTREAM_SERVER_SYNC": {
+      "translation": "Serveur en amont - activer la synchronisation"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER": {
+      "translation": "Utilisateur - exporter"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER_DESCRIPTION": {
+      "translation": "Autorisations pour les serveurs en amont"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER": {
+      "translation": "Serveurs en amont"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_DESCRIPTION": {
+      "translation": "Permissions de l'utilisateur"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER": {
+      "translation": "Utilisateurs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE_DESCRIPTION": {
+      "translation": "Permissions du rôle de l'utilisateur"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER": {
+      "translation": "Utilisateur - importation"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_UPSTREAM_SERVER": {
+      "translation": "Serveur en amont - liste"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS": {
+      "translation": "Utilisateur - liste pour les listes déroulantes"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER": {
+      "translation": "Utilisateur - liste"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_ROLE": {
+      "translation": "Rôle de l'utilisateur - liste"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD": {
+      "translation": "Utilisateur - liste charge de travail"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER": {
+      "translation": "Utilisateur - modifier"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_OWN_ACCOUNT": {
+      "translation": "Utilisateur - modifier son propre compte"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_ROLE": {
+      "translation": "Rôle de l'utilisateur - modifier"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_UPSTREAM_SERVER": {
+      "translation": "Serveur en amont - synchronisation"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER": {
+      "translation": "Utilisateur - voir"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_ROLE": {
+      "translation": "Rôle de l'utilisateur - visualiser"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Mis à jour à (UTC)"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Mis à jour par"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Mis à jour à (UTC)"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Mis à jour par"
+    },
+    "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER": {
+      "translation": "Quelle réponse"
+    },
+    "LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS_DESCRIPTION": {
+      "translation": "Lorsque cette option est vraie, le système ne met pas les filtres en cache. Ainsi, chaque fois que vous accédez à une page de liste, celle-ci s'affichera sans les filtres qui ont été appliqués la dernière fois que vous avez accédé à la page."
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_USERS": {
+      "translation": "Utilisateurs"
+    }
+  }
+}

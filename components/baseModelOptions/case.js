@@ -1,6 +1,5 @@
 'use strict';
 
-const async = require('async');
 const personConstants = require('./person');
 const helpers = require('./../helpers');
 
@@ -72,6 +71,8 @@ const constants = {
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'numberOfExposures': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES',
+    'numberOfContacts': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
     'dateRanges[].typeId': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_TYPE_ID',
     'dateRanges[].startDate': 'LNG_CASE_FIELD_LABEL_DATE_RANGE_START_DATE',
@@ -103,11 +104,14 @@ const constants = {
     'dateOfBurial': 'LNG_CASE_FIELD_LABEL_DATE_OF_BURIAL',
     'burialLocationId': 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID',
     'burialPlaceName': 'LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME',
+    'investigationStatus': 'LNG_CASE_FIELD_LABEL_INVESTIGATION_STATUS',
+    'dateInvestigationCompleted': 'LNG_CASE_FIELD_LABEL_DATE_INVESTIGATION_COMPLETED',
     'vaccinesReceived': 'LNG_CASE_FIELD_LABEL_VACCINES_RECEIVED',
     'vaccinesReceived[].vaccine': 'LNG_CASE_FIELD_LABEL_VACCINE',
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS',
+    'responsibleUserId': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -165,6 +169,7 @@ const constants = {
     riskLevel: 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL',
     gender: 'LNG_REFERENCE_DATA_CATEGORY_GENDER',
     occupation: 'LNG_REFERENCE_DATA_CATEGORY_OCCUPATION',
+    investigationStatus: 'LNG_REFERENCE_DATA_CATEGORY_INVESTIGATION_STATUS',
     outcomeId: 'LNG_REFERENCE_DATA_CATEGORY_OUTCOME',
     'documents[].type': 'LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE',
     'addresses[].typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE',
@@ -180,70 +185,60 @@ const constants = {
 };
 
 /**
- * Format cases imported data
- * @param {Array} rawData - List of items to process
+ * Add additional formatting options; To be done once per import process
+ * @param {Object} options - Options for formatting
+ */
+const getAdditionalFormatOptions = function (options) {
+  options.processedMap = helpers.processMapLists(options.map);
+};
+
+/**
+ * Format case imported data
+ * @param {Object} item - Item to process
  * @param {Array} formattedDataContainer - Container for formatted data
  * @param {Object} options - Options for processing
  * returns {Promise<unknown>}
  */
-const formatDataFromImportableFile = function (rawData, formattedDataContainer, options) {
-  const processedMap = helpers.processMapLists(options.map);
+const formatItemFromImportableFile = function (item, formattedDataContainer, options) {
+  // remap properties
+  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
 
-  return new Promise((resolve, reject) => {
-    async.eachSeries(
-      rawData,
-      (rawItem, callback) => {
-        // run the code async in order to allow sending processed items to parent while still processing other items
-        setTimeout(() => {
-          // remap properties
-          const remappedProperties = helpers.remapPropertiesUsingProcessedMap([rawItem], processedMap, options.valuesMap);
+  // process boolean values
+  const formattedData = helpers.convertBooleanPropertiesNoModel(
+    options.modelBooleanProperties || [],
+    remappedProperties)[0];
 
-          // process boolean values
-          const formattedData = helpers.convertBooleanPropertiesNoModel(
-            options.modelBooleanProperties || [],
-            remappedProperties)[0];
+  // set outbreak id
+  formattedData.outbreakId = options.outbreakId;
 
-          // set outbreak id
-          formattedData.outbreakId = options.outbreakId;
+  // filter out empty addresses
+  const addresses = helpers.sanitizePersonAddresses(formattedData);
+  if (addresses) {
+    formattedData.addresses = addresses;
+  }
 
-          // filter out empty addresses
-          const addresses = helpers.sanitizePersonAddresses(formattedData);
-          if (addresses) {
-            formattedData.addresses = addresses;
-          }
+  // sanitize questionnaire answers
+  if (formattedData.questionnaireAnswers) {
+    // convert properties that should be date to actual date objects
+    formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+  }
 
-          // sanitize questionnaire answers
-          if (formattedData.questionnaireAnswers) {
-            // convert properties that should be date to actual date objects
-            formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
-          }
+  // sanitize visual ID
+  if (formattedData.visualId) {
+    formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+  }
 
-          // sanitize visual ID
-          if (formattedData.visualId) {
-            formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
-          }
-
-          // add case entry in the processed list
-          formattedDataContainer.push({
-            raw: rawItem,
-            save: formattedData
-          });
-
-          callback();
-        }, 0);
-      }, err => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve();
-      });
+  // add case entry in the processed list
+  formattedDataContainer.push({
+    raw: item,
+    save: formattedData
   });
 };
 
 module.exports = {
   constants: constants,
   helpers: {
-    formatDataFromImportableFile: formatDataFromImportableFile
+    formatItemFromImportableFile,
+    getAdditionalFormatOptions
   }
 };

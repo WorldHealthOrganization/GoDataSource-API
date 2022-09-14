@@ -22,9 +22,7 @@ function getLanguages(data) {
       _id: {
         $ne: mainLanguageId
       },
-      deleted: {
-        $ne: true
-      }
+      deleted: false
     }, {
       _id: 1,
       name: 1
@@ -64,9 +62,7 @@ function getMainLanguageTokens(
       .collection('languageToken')
       .find({
         languageId: mainLanguageId,
-        deleted: {
-          $ne: true
-        }
+        deleted: false
       }, {
         _id: 1,
         token: 1,
@@ -194,7 +190,7 @@ function determineMissingLanguageTokens(
                 // generate id
                 const tokenID = localMainLanguageTokenData._id.startsWith('LNG_') ?
                   generateTokenID(localMainLanguageTokenData.token, localLanguageToCheckId) :
-                  uuid();
+                  uuid.v4();
 
                 // prepare object to save
                 const newTokenData = Object.assign({

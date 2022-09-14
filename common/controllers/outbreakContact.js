@@ -18,6 +18,8 @@ const fork = require('child_process').fork;
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
+const apiError = require('../../components/apiError');
+const exportHelper = require('./../../components/exportHelper');
 
 // used in contact import
 const contactImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -42,9 +44,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findContacts = function (filter, options, callback) {
-    const outbreakId = this.outbreakId;
-    const countRelations = genericHelpers.getFilterCustomOption(filter, 'countRelations');
-
     // pre-filter using related data (case, followUps)
     app.models.contact
       .preFilterForOutbreak(this, filter, options)
@@ -53,26 +52,7 @@ module.exports = function (Outbreak) {
         return app.models.contact.find(filter);
       })
       .then(function (contacts) {
-        if (countRelations) {
-          // create a map of ids and their corresponding record
-          // to easily manipulate the records below
-          const contactsMap = {};
-          for (let contact of contacts) {
-            contactsMap[contact.id] = contact;
-          }
-          // determine number of contacts/exposures for each case
-          app.models.person.getPeopleContactsAndExposures(outbreakId, Object.keys(contactsMap))
-            .then(relationsCountMap => {
-              for (let recordId in relationsCountMap) {
-                const contactRecord = contactsMap[recordId];
-                contactRecord.numberOfContacts = relationsCountMap[recordId].numberOfContacts;
-                contactRecord.numberOfExposures = relationsCountMap[recordId].numberOfExposures;
-              }
-              return callback(null, contacts);
-            });
-        } else {
-          return callback(null, contacts);
-        }
+        callback(null, contacts);
       })
       .catch(callback);
   };
@@ -85,7 +65,7 @@ module.exports = function (Outbreak) {
   });
 
   /**
-   * Export contact follow-up list for one day
+   * Export contact follow-up list for one day or case follow-up list registered as a contact
    * @param res
    * @param date
    * @param contactId
@@ -256,7 +236,7 @@ module.exports = function (Outbreak) {
         })
         .then(function (followUps) {
           // find contacts for the found follow-ups
-          return app.models.contact
+          return app.models.person
             .rawFind({
               _id: contactId ? contactId : {
                 inq: [...new Set(followUps.map(followUp => followUp.personId))]
@@ -366,10 +346,11 @@ module.exports = function (Outbreak) {
                         let contactId;
                         let caseId;
                         // find contact and case
+                        // Note: need to also check for contact -> contact of contact relationship; will not take those relationships into account
                         Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
                           if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
                             contactId = person.id;
-                          } else {
+                          } else if (person.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
                             caseId = person.id;
                           }
                         });
@@ -408,7 +389,7 @@ module.exports = function (Outbreak) {
                               const person = peopleMap[contactToCaseMap[followUp.personId]] || {};
                               // add group information
                               groups[contactToCaseMap[followUp.personId]] = {
-                                name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
+                                name: person.name ? person.name.trim() : `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
                                 records: []
                               };
                             }
@@ -1194,7 +1175,7 @@ module.exports = function (Outbreak) {
         const languageId = options.remotingContext.req.authData.user.languageId;
         let sanitizedContacts = [];
 
-        genericHelpers.attachParentLocations(
+        genericHelpers.attachLocations(
           app.models.case,
           app.models.location,
           results,
@@ -1406,9 +1387,9 @@ module.exports = function (Outbreak) {
                           if (err) {
                             callback(err);
                           } else {
-                            const lastName = sanitizedContact.rawData.lastName ? sanitizedContact.rawData.lastName.replace(/\r|\n|\s/g, '').toUpperCase() + ' ' : '';
-                            const firstName = sanitizedContact.rawData.firstName ? sanitizedContact.rawData.firstName.replace(/\r|\n|\s/g, '') : '';
-                            fs.writeFile(`${tmpDirName}/${lastName}${firstName} - ${sanitizedContact.rawData.id}.pdf`, buffer, (err) => {
+                            const fileName = exportHelper.getNameForExportedDossierFile(sanitizedContact, anonymousFields);
+
+                            fs.writeFile(`${tmpDirName}/${fileName}`, buffer, (err) => {
                               if (err) {
                                 reject(err);
                               } else {
@@ -1432,13 +1413,14 @@ module.exports = function (Outbreak) {
 
                   fs.readFile(archivePath, (err, data) => {
                     if (err) {
-                      callback(err);
+                      callback(apiError.getError('FILE_NOT_FOUND'));
                     } else {
                       tmpDir.removeCallback();
                       app.utils.remote.helpers.offerFileToDownload(data, 'application/zip', archiveName, callback);
                     }
                   });
-                });
+                })
+                .catch(callback);
             });
           });
       })
@@ -1451,7 +1433,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.exportFilteredContacts', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
@@ -1459,156 +1441,333 @@ module.exports = function (Outbreak) {
   /**
    * Export filtered contacts to file
    * @param filter
-   * @param exportType json, xml, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
    * @param anonymizeFields
+   * @param fieldsGroupList
    * @param options
    * @param callback
    */
-  Outbreak.prototype.exportFilteredContacts = function (filter, exportType, encryptPassword, anonymizeFields, options, callback) {
-    const self = this;
+  Outbreak.prototype.exportFilteredContacts = function (
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
     // set a default filter
     filter = filter || {};
     filter.where = filter.where || {};
+    filter.where.outbreakId = this.id;
+
+    // parse includeCaseFields query param
+    let includeCaseFields = false;
+    if (filter.where.hasOwnProperty('includeCaseFields')) {
+      includeCaseFields = filter.where.includeCaseFields;
+      delete filter.where.includeCaseFields;
+    }
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
-    // if found, remove it form main query
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
       useQuestionVariable = filter.where.useQuestionVariable;
       delete filter.where.useQuestionVariable;
     }
 
-    new Promise((resolve, reject) => {
-      // load user language dictionary
-      const contextUser = app.utils.remote.getUserFromOptions(options);
-      app.models.language.getLanguageDictionary(contextUser.languageId, function (error, dictionary) {
-        // handle errors
-        if (error) {
-          return reject(error);
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // prefilters
+    const prefilters = exportHelper.generateAggregateFiltersFromNormalFilter(
+      filter, {
+        outbreakId: this.id
+      }, {
+        followUp: {
+          collection: 'followUp',
+          queryPath: 'where.followUp',
+          localKey: '_id',
+          foreignKey: 'personId'
+        },
+        case: {
+          collection: 'person',
+          queryPath: 'where.case',
+          queryAppend: {
+            type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
+          },
+          localKey: '_id',
+          // #TODO
+          // - must implement later
+          ignore: true
+          // foreignKey: '....ce vine din relationship'
+          // prefilters: {
+          //   relationship: {
+          //     collection: 'relationship',
+          //     queryPath: 'where.relationship',
+          //     localKey: '_id',
+          //     foreignKey: 'persons[].id',
+          //     foreignKeyArraySize: 2
+          //   }
+          // }
         }
+      }
+    );
 
-        // resolved
-        resolve(dictionary);
-      });
-    })
-      .then(dictionary => {
-        return app.models.contact.preFilterForOutbreak(this, filter, options)
-          .then((filter) => {
-            return {
-              dictionary: dictionary,
-              filter: filter
-            };
-          });
-      })
-      .then(data => {
-        const dictionary = data.dictionary;
-        const filter = data.filter;
+    // do we need to include case data in contact exported data if contact was a case ?
+    let additionalFieldsToExport;
+    if (includeCaseFields) {
+      // initialize additional fields to export
+      additionalFieldsToExport = {
+        fields: {},
+        arrayProps: {},
+        locationFields: []
+      };
 
-        // if encrypt password is not valid, remove it
-        if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
-          encryptPassword = null;
+      // determine contact fields
+      const contactFields = {};
+      _.each(
+        app.models.contact.fieldLabelsMap,
+        (contactFieldToken, contactField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.contact.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
+              if (
+                contactField === excludedField ||
+                contactField.startsWith(`${excludedField}.`) ||
+                contactField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            contactFields[contactField] = contactFieldToken;
+          }
         }
+      );
 
-        // make sure anonymizeFields is valid
-        if (!Array.isArray(anonymizeFields)) {
-          anonymizeFields = [];
+      // determine case fields
+      const caseFields = {};
+      _.each(
+        app.models.case.fieldLabelsMap,
+        (caseFieldToken, caseField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.case.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
+              if (
+                caseField === excludedField ||
+                caseField.startsWith(`${excludedField}.`) ||
+                caseField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            caseFields[caseField] = caseFieldToken;
+          }
         }
+      );
 
-        options.questionnaire = self.contactInvestigationTemplate;
-        options.dictionary = dictionary;
-        options.useQuestionVariable = useQuestionVariable;
+      // determine what fields from case are missing from contact
+      _.each(
+        caseFields,
+        (caseFieldToken, caseField) => {
+          if (!contactFields[caseField]) {
+            // add field
+            additionalFieldsToExport.fields[caseField] = caseFieldToken;
 
-        app.utils.remote.helpers.exportFilteredModelsList(
-          app,
-          app.models.contact,
-          {},
+            // is array property ?
+            if (app.models.case.arrayProps[caseField]) {
+              additionalFieldsToExport.arrayProps[caseField] = app.models.case.arrayProps[caseField];
+            }
+
+            // is location property ?
+            if (app.models.case.locationFields.indexOf(caseField) > -1) {
+              additionalFieldsToExport.locationFields.push(caseField);
+            }
+          }
+        }
+      );
+    }
+
+    // prefilter
+    app.models.contact
+      .addGeographicalRestrictions(
+        options.remotingContext,
+        filter.where
+      )
+      .then((updatedFilter) => {
+        // update casesQuery if needed
+        updatedFilter && (filter.where = updatedFilter);
+
+        // export
+        return WorkerRunner.helpers.exportFilteredModelsList(
+          {
+            collectionName: 'person',
+            modelName: app.models.contact.modelName,
+            scopeQuery: app.models.contact.definition.settings.scope,
+            excludeBaseProperties: app.models.contact.definition.settings.excludeBaseProperties,
+            arrayProps: app.models.contact.arrayProps,
+            fieldLabelsMap: app.models.contact.helpers.sanitizeFieldLabelsMapForExport(),
+            exportFieldsGroup: app.models.contact.exportFieldsGroup,
+            exportFieldsOrder: app.models.contact.exportFieldsOrder,
+            locationFields: app.models.contact.locationFields,
+            additionalFieldsToExport
+          },
           filter,
           exportType,
-          'Contacts List',
           encryptPassword,
           anonymizeFields,
-          options,
-          (results, dictionary) => {
-            return new Promise(function (resolve, reject) {
-              // determine contacts for which we need to retrieve the first relationship
-              const contactsMap = _.transform(
-                results,
-                (r, v) => {
-                  r[v.id] = v;
-                },
-                {}
-              );
-
-              // retrieve contacts relationships ( sorted by creation date )
-              // only those for which source is a case / event ( at this point it shouldn't be possible to be a contact, but we should handle this case since date & source flags should be enough... )
-              // in case we don't have any contact Ids there is no point in searching for relationships
-              const contactIds = Object.keys(contactsMap);
-              const promise = contactIds.length < 1 ?
-                Promise.resolve([]) :
-                app.models.relationship.find({
-                  order: 'createdAt ASC',
-                  where: {
-                    'persons.id': {
-                      inq: contactIds
-                    }
-                  }
-                });
-
-              // handle exceptions
-              promise.catch(reject);
-
-              // retrieve contacts relationships ( sorted by creation date )
-              const relationshipsPromises = [];
-              promise.then((relationshipResults) => {
-                // keep only the first relationship
-                // assign relationships to contacts
-                _.each(relationshipResults, (relationship) => {
-                  // incomplete relationship ?
-                  if (relationship.persons.length < 2) {
-                    return;
-                  }
-
-                  // determine contact & related ids
-                  let contactId, relatedId;
-                  if (relationship.persons[0].target) {
-                    contactId = relationship.persons[0].id;
-                    relatedId = relationship.persons[1].id;
-                  } else {
-                    contactId = relationship.persons[1].id;
-                    relatedId = relationship.persons[0].id;
-                  }
-
-                  // check if this is the first relationship for this contact
-                  // if it is, then we need to map information
-                  if (
-                    contactsMap[contactId] &&
-                    !contactsMap[contactId].relationship
-                  ) {
-                    // get relationship data
-                    contactsMap[contactId].relationship = relationship.toJSON();
-
-                    // set related ID
-                    contactsMap[contactId].relationship.relatedId = relatedId;
-
-                    // resolve relationship foreign keys here
-                    relationshipsPromises.push(genericHelpers.resolveModelForeignKeys(
-                      app,
-                      app.models.relationship,
-                      [contactsMap[contactId].relationship],
-                      dictionary
-                    ).then(relationship => {
-                      contactsMap[contactId].relationship = relationship[0];
-                    }));
-                  }
-                });
-
-                // finished
-                return Promise.all(relationshipsPromises).then(() => resolve(results));
-              });
-
-            });
+          fieldsGroupList,
+          {
+            userId: _.get(options, 'accessToken.userId'),
+            outbreakId: this.id,
+            questionnaire: this.contactInvestigationTemplate ?
+              this.contactInvestigationTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
+            useDbColumns,
+            dontTranslateValues,
+            jsonReplaceUndefinedWithNull,
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          callback
+          prefilters, {
+            followUpTeam: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'team',
+              project: [
+                '_id',
+                'name'
+              ],
+              key: '_id',
+              keyValue: `(contact) => {
+                return contact && contact.followUpTeamId ?
+                  contact.followUpTeamId :
+                  undefined;
+              }`,
+              replace: {
+                'followUpTeamId': {
+                  value: 'followUpTeam.name'
+                }
+              }
+            },
+            relationship: {
+              type: exportHelper.RELATION_TYPE.GET_ONE,
+              collection: 'relationship',
+              project: [
+                '_id',
+                'contactDate',
+                'contactDateEstimated',
+                'certaintyLevelId',
+                'exposureTypeId',
+                'exposureFrequencyId',
+                'exposureDurationId',
+                'socialRelationshipTypeId',
+                'socialRelationshipDetail',
+                'clusterId',
+                'comment',
+                'createdAt',
+                'createdBy',
+                'updatedAt',
+                'updatedBy',
+                'deleted',
+                'deletedAt',
+                'createdOn',
+                'persons'
+              ],
+              query: `(person) => {
+                return person ?
+                  {
+                    outbreakId: '${this.id}',
+                    deleted: false,
+                    'persons.id': person._id,
+                    'persons.type': {
+                      $in: [
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                      ]
+                    }
+                  } :
+                  undefined;
+              }`,
+              sort: {
+                createdAt: 1
+              },
+              after: `(person) => {
+                // nothing to do ?
+                if (
+                  !person.relationship ||
+                  !person.relationship.persons ||
+                  person.relationship.persons.length !== 2
+                ) {
+                  return;
+                }
+
+                // determine related person
+                person.relationship.relatedId = person.relationship.persons[0].id === person._id ?
+                  person.relationship.persons[1].id :
+                  person.relationship.persons[0].id;
+
+                // cleanup
+                delete person.relationship.persons;
+                person.relationship.id = person.relationship._id;
+                delete person.relationship._id;
+              }`
+            }
+          }
+        );
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
         );
       })
       .catch(callback);
@@ -1683,9 +1842,11 @@ module.exports = function (Outbreak) {
         const matchFilter = app.utils.remote.convertLoopbackFilterToMongo({
           $and: [
             // make sure we're only retrieving relationships from the current outbreak
+            // retrieve only non-deleted records
             {
               outbreakId: outbreak.id,
-              active: true
+              active: true,
+              deleted: false
             },
             // and for the contacts desired
             {
@@ -1693,19 +1854,6 @@ module.exports = function (Outbreak) {
                 $in: Object.keys(contactsMap)
               },
               'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-            },
-            // retrieve only non-deleted records
-            {
-              $or: [
-                {
-                  deleted: false
-                },
-                {
-                  deleted: {
-                    $eq: null
-                  }
-                }
-              ]
             }
           ]
         });
@@ -1757,24 +1905,13 @@ module.exports = function (Outbreak) {
             $and: [
               // make sure we're only retrieving follow ups from the current outbreak
               // and for the contacts desired
+              // retrieve only non-deleted records
               {
                 outbreakId: this.id,
                 personId: {
                   $in: Object.keys(contactsMap)
-                }
-              },
-              // retrieve only non-deleted records
-              {
-                $or: [
-                  {
-                    deleted: false
-                  },
-                  {
-                    deleted: {
-                      $eq: null
-                    }
-                  }
-                ]
+                },
+                deleted: false
               }
             ]
           });
@@ -2099,7 +2236,7 @@ module.exports = function (Outbreak) {
   Outbreak.beforeRemote('prototype.filteredCountContacts', function (context, modelInstance, next) {
     // remove custom filter options
     context.args = context.args || {};
-    context.args.filter = genericHelpers.removeFilterOptions(context.args.filter, ['countRelations']);
+    context.args.filter = context.args.filter || {};
 
     Outbreak.helpers.findAndFilteredCountContactsBackCompat(context, modelInstance, next);
   });
@@ -2125,11 +2262,8 @@ module.exports = function (Outbreak) {
           true
         );
 
-        // handle custom filter options
-        filter = genericHelpers.attachCustomDeleteFilterOption(filter);
-
         // count using query
-        return app.models.contact.count(filter.where);
+        return app.models.contact.rawCountDocuments(filter);
       })
       .then(function (contacts) {
         callback(null, contacts);
@@ -2312,9 +2446,7 @@ module.exports = function (Outbreak) {
           return app.models.case
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
             }, {projection: {'_id': 1}});
         })
@@ -2331,9 +2463,7 @@ module.exports = function (Outbreak) {
           return app.models.relationship
             .rawFind({
               outbreakId: this.id,
-              deleted: {
-                $ne: true
-              },
+              deleted: false,
               $or: [
                 {
                   'persons.0.source': true,
@@ -2524,39 +2654,20 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsPerRiskLevel = function (filter, options, callback) {
-    // pre-filter using related data (case, followUps)
-    app.models.contact
-      .preFilterForOutbreak(this, filter, options)
-      .then(function (filter) {
-        // find follow-ups using filter
-        return app.models.contact.rawFind(filter.where, {
-          projection: {riskLevel: 1},
-          includeDeletedRecords: filter.deleted
-        });
-      })
-      .then(function (contacts) {
-        // build a result
-        const result = {
-          riskLevel: {},
-          count: contacts.length
-        };
-        // go through all contact records
-        contacts.forEach(function (contactRecord) {
-          // risk level is optional
-          if (contactRecord.riskLevel == null) {
-            contactRecord.riskLevel = 'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED';
-          }
-          // init contact riskLevel group if needed
-          if (!result.riskLevel[contactRecord.riskLevel]) {
-            result.riskLevel[contactRecord.riskLevel] = {
-              count: 0
-            };
-          }
-          // classify records by their risk level
-          result.riskLevel[contactRecord.riskLevel].count++;
-        });
-        // send back the result
-        callback(null, result);
+    app.models.person
+      .groupCount(
+        options,
+        this.id,
+        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+        filter,
+        'riskLevel',
+        'LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL_UNCLASSIFIED'
+      )
+      .then((result) => {
+        callback(
+          null,
+          result
+        );
       })
       .catch(callback);
   };
@@ -2990,17 +3101,17 @@ module.exports = function (Outbreak) {
   /**
    * Count available people for a contact
    * @param contactId
-   * @param where
+   * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, where, options, callback) {
+  Outbreak.prototype.countContactRelationshipsAvailablePeople = function (contactId, filter, options, callback) {
     // count available people
     app.models.person
       .getAvailablePeopleCount(
         this.id,
         contactId,
-        where,
+        filter,
         options
       )
       .then((counted) => {
@@ -3011,16 +3122,22 @@ module.exports = function (Outbreak) {
 
   /**
    * Get all duplicates based on hardcoded rules against a model props
-   * @param filter pagination props (skip, limit)
    * @param model
    * @param options
    * @param callback
    */
-  Outbreak.prototype.getContactPossibleDuplicates = function (filter = {}, model = {}, options, callback) {
-    app.models.person
-      .findDuplicatesByType(filter, this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
-      .then(duplicates => callback(null, duplicates))
-      .catch(callback);
+  Outbreak.prototype.getContactPossibleDuplicates = function (model = {}, options, callback) {
+    if (
+      Config.duplicate &&
+      Config.duplicate.disableContactDuplicateCheck
+    ) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 
   /**
@@ -3047,67 +3164,70 @@ module.exports = function (Outbreak) {
      * @returns {[]}
      */
     const createBatchActions = function (batchData) {
-      // build a list of create operations for this batch
-      const createContacts = [];
-      // go through all entries
-      batchData.forEach(function (recordData) {
-        const dataToSave = recordData.save;
-        createContacts.push(function (asyncCallback) {
-          // sync the contact
-          return app.utils.dbSync.syncRecord(logger, app.models.contact, dataToSave.contact, options)
-            .then(function (syncResult) {
-              const contactRecord = syncResult.record;
-              // promisify next step
-              return new Promise(function (resolve, reject) {
-                // normalize people
-                Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', dataToSave.relationship, true, function (error) {
-                  if (error) {
-                    // delete contact since contact was created without an error while relationship failed
-                    return app.models.contact.destroyById(
-                      contactRecord.id,
-                      () => {
-                        // return error
-                        return reject(error);
+      return genericHelpers.fillGeoLocationInformation(batchData, 'save.contact.addresses', app)
+        .then(() => {
+          // build a list of create operations for this batch
+          const createContacts = [];
+          // go through all entries
+          batchData.forEach(function (recordData) {
+            const dataToSave = recordData.save;
+            createContacts.push(function (asyncCallback) {
+              // sync the contact
+              return app.utils.dbSync.syncRecord(logger, app.models.contact, dataToSave.contact, options)
+                .then(function (syncResult) {
+                  const contactRecord = syncResult.record;
+                  // promisify next step
+                  return new Promise(function (resolve, reject) {
+                    // normalize people
+                    Outbreak.helpers.validateAndNormalizePeople(self.id, contactRecord.id, 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', dataToSave.relationship, true, function (error) {
+                      if (error) {
+                        // delete contact since contact was created without an error while relationship failed
+                        return app.models.contact.destroyById(
+                          contactRecord.id,
+                          () => {
+                            // return error
+                            return reject(error);
+                          }
+                        );
                       }
-                    );
-                  }
 
-                  // sync relationship
-                  return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
-                    .then(function () {
-                      // relationship successfully created, move to tne next one
-                      resolve();
-                    })
-                    .catch(function (error) {
-                      // failed to create relationship, remove the contact if it was created during sync
-                      if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
-                        contactRecord.destroy(options);
-                      }
-                      reject(error);
+                      // sync relationship
+                      return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                        .then(function () {
+                          // relationship successfully created, move to tne next one
+                          resolve();
+                        })
+                        .catch(function (error) {
+                          // failed to create relationship, remove the contact if it was created during sync
+                          if (syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED) {
+                            contactRecord.destroy(options);
+                          }
+                          reject(error);
+                        });
                     });
+                  });
+                })
+                .then(function () {
+                  asyncCallback();
+                })
+                .catch(function (error) {
+                  // on error, store the error, but don't stop, continue with other items
+                  asyncCallback(null, {
+                    success: false,
+                    error: {
+                      error: error,
+                      data: {
+                        file: recordData.raw,
+                        save: recordData.save
+                      }
+                    }
+                  });
                 });
-              });
-            })
-            .then(function () {
-              asyncCallback();
-            })
-            .catch(function (error) {
-              // on error, store the error, but don't stop, continue with other items
-              asyncCallback(null, {
-                success: false,
-                error: {
-                  error: error,
-                  data: {
-                    file: recordData.raw,
-                    save: recordData.save
-                  }
-                }
-              });
             });
-        });
-      });
+          });
 
-      return createContacts;
+          return createContacts;
+        });
     };
 
     // construct options needed by the formatter worker

@@ -140,9 +140,12 @@ module.exports = function (Sync) {
     // add generatePersonVisualId flag in reqOptions; default false
     reqOptions.generatePersonVisualId = options.generatePersonVisualId !== undefined ? options.generatePersonVisualId : false;
 
+    // add snapshotFromClient flag in reqOptions; default false
+    reqOptions.snapshotFromClient = options.snapshotFromClient !== undefined ? options.snapshotFromClient : false;
+
     // check if backup should be triggered
     app.models.systemSettings
-      .getCache()
+      .findOne()
       .then(function (systemSettings) {
         // backup if needed
         if (triggerBackupBeforeSync || (typeof triggerBackupBeforeSync === 'undefined' && _.get(systemSettings, 'sync.triggerBackupBeforeSync'))) {

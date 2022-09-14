@@ -40,6 +40,9 @@
     "path": "/auth/reset-password",
     "from": "no-reply@who.int"
   },
+  "passwordChange": {
+    "path": "/account/change-password"
+  },
   "captcha": {
     "login": false,
     "forgotPassword": false,
@@ -56,19 +59,6 @@
     "trim": true,
     "maxLength": 1024
   },
-  "updatesServer": {
-    "host": "localhost",
-    "protocol": "http",
-    "port": 3001
-  },
-  "mapsApi": {
-    "enabled": true,
-    "clientId": "xyphXQJjQwLVB8rY",
-    "clientSecret": "8dea73811df04e4e9709f15b2177b1f9",
-    "tokenExpirationInMinutes": "20160",
-    "tokenUrl": "https://www.arcgis.com/sharing/oauth2/token",
-    "geocodeServerUrl": "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
-  },
   "sync": {
     "asyncActionsSettings": {
       "intervalTimeout": 10000,
@@ -76,7 +66,8 @@
     },
     "actionCleanupInterval": 24,
     "encrypt": false,
-    "debug": false
+    "debug": false,
+    "maxPackageSize": 5242880000
   },
   "pushNotifications": {
     "serverURL": "http://whocd.clarisoft.com:1337/api",
@@ -84,16 +75,30 @@
     "masterKey": "KlYddh2OdVycHuVBhXv2"
   },
   "backUp": {
-    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd"
+    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd",
+    "disabled": false
   },
   "defaultArcGisServers": [
     {
-      "name": "WHO Background",
-      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_West_Africa_background_7/MapServer"
+      "name": "WHO Polygon Basemap",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_no_labels/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_no_labels/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
     },
     {
-      "name": "WHO Reference",
-      "url": "http://maps.who.int/arcgis/rest/services/Basemap/WHO_Reference_layer/MapServer"
+      "name": "Disputed Areas and Borders for Polygon Basemap",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_Disputed_Areas_and_Borders_VTP/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_Disputed_Areas_and_Borders_VTP/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
+    },
+    {
+      "name": "Labels",
+      "url": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_labels/VectorTileServer",
+      "type": "LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_VECTOR_TILE_VECTOR_TILE_LAYER",
+      "styleUrl": "https://tiles.arcgis.com/tiles/5T5nSi527N4F7luB/arcgis/rest/services/WHO_Polygon_Basemap_labels/VectorTileServer/resources/styles/",
+      "styleUrlSource": "esri"
     }
   ],
   "signoutUsersOnRestart": false,
@@ -128,9 +133,18 @@
       "emailFrom": "no-reply@who.int"
     }
   },
+  "bruteForce": {
+    "resetPassword": {
+      "enabled": false,
+      "maxRetries": 10,
+      "resetTime": 30,
+      "resetTimeUnit": "minutes"
+    }
+  },
   "removeSyncSnapshotsAfter": 24,
   "removeTmpUploadedFilesAfter": 24,
   "removeTmpUploadedImportFilesAfter": 24,
+  "removeAuditLogsOlderThanNDays": 180,
   "skipOldPasswordForUserModify": true,
   "jobSettings": {
     "generateFollowups": {
@@ -152,7 +166,12 @@
       "batchSize": 10000
     },
     "importResources": {
-      "batchSize": 100
+      "batchSize": 100,
+      "maxFileSize": 4096
+    },
+    "updateMissingDuplicateKeys": {
+      "batchSize": 10000,
+      "updateBatchSize": 50
     }
   },
   "caching": {
@@ -169,5 +188,52 @@
   "cluster": {
     "enabled": true,
     "processesNo": "max"
-  }
+  },
+  "demoInstance": {
+    "enabled": false,
+    "label": "DEMO",
+    "style": {
+      "opacity": 0.5,
+      "backgroundColor": "gray",
+      "color": "black",
+      "fontWeight": "bold",
+      "fontSize": "40px"
+    }
+  },
+  "adminEmail": "admin@who.int",
+  "duplicate": {
+    "disableCaseDuplicateCheck": false,
+    "disableContactDuplicateCheck": false,
+    "disableContactOfContactDuplicateCheck": false,
+    "executeCheckOnlyOnDuplicateDataChange": false
+  },
+  "count": {
+    "limit": 10000
+  },
+  "export": {
+    "batchSize": 7000,
+    "locationFindBatchSize": 1000,
+    "noLookupIfPrefilterTotalCountLessThen": 20000,
+    "saveFilter": false,
+    "saveAggregateFilter": false,
+    "xlsx": {
+      "maxColumnsPerSheet": 16000,
+      "maxRowsPerFile": 1000000
+    },
+    "xls": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 12000
+    },
+    "ods": {
+      "maxColumnsPerSheet": 250,
+      "maxRowsPerFile": 12000
+    }
+  },
+  "alternateUniqueIdentifierQueryOnImport": {
+    "case": false,
+    "contact": false,
+    "contactOfContact": false,
+    "labResult": false
+  },
+  "allowCustomIDsOnCreate": false
 }

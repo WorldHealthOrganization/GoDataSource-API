@@ -1,0 +1,147 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_INFORMATION": {
+      "translation": "Include contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If case was converted from a contact it might contain additional contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CASE_INFORMATION": {
+      "translation": "Include case data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CASE_INFORMATION_DESCRIPTION": {
+      "translation": "If contact was converted from a case it might contain additional case data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_EXPORT_DATA_EXPORT_FINISHING": {
+      "translation": "Almost done...",
+      "section": "uiExportData"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS": {
+      "translation": "System Settings - modify saved filters",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION": {
+      "translation": "This permission allows modifying saved filters no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS": {
+      "translation": "System Settings - delete saved filters",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS_DESCRIPTION": {
+      "translation": "This permission allows deleting saved filters no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT": {
+      "translation": "System Settings - modify saved imports",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION": {
+      "translation": "This permission allows modifying saved imports no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT": {
+      "translation": "System Settings - delete saved imports",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT_DESCRIPTION": {
+      "translation": "This permission allows deleting saved imports no matter of who created them",
+      "section": "availablePermissions"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+      "translation": "Variant / Strain Lab Name",
+      "section": "uiLabResultsFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+      "translation": "Variant / Strain Lab Name",
+      "section": "referenceDataCategoryLabSeqResult"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE": {
+      "translation": "Matches filter",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_MATCH_FILTER_TITLE_DESCRIPTION": {
+      "translation": "Nodes matching snapshot filters will be surrounded by double border of this color",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+      "translation": "Lab Variant / Strain Colour",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE": {
+      "translation": "Has more variants / strains",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_HAS_MORE_COLOR_TITLE_DESCRIPTION": {
+      "translation": "Node has more than one lab results with variant / strain information. Only the most recent one is displayed",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NOTHING_TO_DISPLAY": {
+      "translation": "There is no data that matches the search criteria",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_LAB_RESULTS_SEQUENCE_DATA": {
+      "translation": "Show lab results variant / strain data",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_FIRST_NAME_LABEL": {
+      "translation": "First name",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAST_NAME_LABEL": {
+      "translation": "Last name",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_PAGE_GRAPH_SNAPSHOT_FILTER_LAB_SEQ_RESULT_LABEL": {
+      "translation": "Lab result variant / strain result",
+      "section": "uiChainsOfTransmissionSnapshotFilter"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant / strain result"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE": {
+      "translation": "Variant / Strain"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_HAS_SEQUENCE": {
+      "translation": "Has variant / strain?"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_SAMPLE_SENT": {
+      "translation": "Date sample sent for determining variant / strain"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_DATE_RESULT": {
+      "translation": "Variant / Strain result date"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_RESULT": {
+      "translation": "Variant / Strain result"
+    }
+  }
+}

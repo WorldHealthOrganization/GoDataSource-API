@@ -14,6 +14,7 @@ const defaultSettings = {
       'System Configuration',
       'Data'
     ],
+    'disabled': false,
     'backupInterval': 24,
     'dataRetentionInterval': 90,
     'location': `${__dirname}/../../../backups`

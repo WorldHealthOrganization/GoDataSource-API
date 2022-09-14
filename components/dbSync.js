@@ -2,13 +2,20 @@
 
 const _ = require('lodash');
 const helpers = require('./helpers');
-const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
 const fsExtra = require('fs-extra');
 const workerRunner = require('./workerRunner');
 const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain');
+const apiError = require('./apiError');
+const bcrypt = require('bcrypt');
+const Config = require('./../server/config.json');
+
+const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
+
+// limit for each chunk
+const noElementsInFilterArrayLimit = 20000;
 
 // map of collection names and property name that matches a file on the disk
 // also directory path (relative to the project) that holds the files should be left unchanged
@@ -78,8 +85,6 @@ collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(use
 // on sync we need get all collections except the following
 let syncExcludeList = [
   'systemSettings',
-  'team',
-  'user',
   'role',
   'auditLog',
   'helpCategory',
@@ -145,6 +150,56 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
 }
 
 /**
+ * Split in condition into multiple filters since having too many ids in a $in condition fails to retrieve data
+ */
+function getChunkFilters(
+  collectionName,
+  baseFilter,
+  filter,
+  resultKey,
+  recordsIds
+) {
+  // initiate filters
+  const filters = [];
+
+  // check if we need to filter for specific records
+  if (recordsIds) {
+    // split into chunks since we can't send as many ids as we want
+    _.chunk(
+      recordsIds,
+      noElementsInFilterArrayLimit
+    ).forEach((chunkIds) => {
+      // construct filter
+      const result = addOutbreakIdMongoFilter(
+        collectionName,
+        baseFilter,
+        filter
+      );
+
+      // add chunk condition
+      result[resultKey] = {
+        '$in': chunkIds
+      };
+
+      // push filter
+      filters.push(result);
+    });
+  } else {
+    // original filter that we don't need to alter
+    filters.push(
+      addOutbreakIdMongoFilter(
+        collectionName,
+        baseFilter,
+        filter
+      )
+    );
+  }
+
+  // array of filters since we might need to make multiple requests due to large amounts of ids
+  return filters;
+}
+
+/**
  * Add outbreak ID and person ID filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
  * @param collectionName Collection name; Depending on collection name the filter might be different
@@ -153,18 +208,13 @@ function addOutbreakIdMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addPersonMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
-
-  // check for personsIds to filter
-  let personsIds = _.get(filter, 'where.personsIds');
-  if (personsIds) {
-    result._id = {
-      '$in': personsIds
-    };
-  }
-
-  return result;
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    '_id',
+    _.get(filter, 'where.personsIds')
+  );
 }
 
 /**
@@ -176,50 +226,73 @@ function addPersonMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addLabResultMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+  // merge case ids with contact ids
+  const caseIds = _.get(filter, 'where.casesIds');
+  const contactIds = _.get(filter, 'where.contactsIds');
+  const caseAndContactIds = [];
 
-  // check for casesIds to filter
-  let casesIds = _.get(filter, 'where.casesIds');
-  if (casesIds) {
-    result.personId = {
-      '$in': casesIds
-    };
+  // case ids
+  if (
+    caseIds &&
+    Array.isArray(caseIds)
+  ) {
+    caseAndContactIds.push(...caseIds);
   }
 
-  return result;
+  // contact ids
+  if (
+    contactIds &&
+    Array.isArray(contactIds)
+  ) {
+    caseAndContactIds.push(...contactIds);
+  }
+
+  // get chunks
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    'personId',
+    caseIds || contactIds ?
+      caseAndContactIds :
+      caseIds
+  );
 }
 
 /**
- * Add outbreak ID and contact ID + team ID filter if found to a mongoDB filter;
+ * Add outbreak ID and contact ID/case ID + team ID filter if found to a mongoDB filter;
  * Note: the base mongoDB filter is not affected
+ * Note: also getting followups of cases as there might be some that were converted from contacts and they might have had followups
  * @param collectionName Collection name; Depending on collection name the filter might be different
- * @param baseFilter MongoDB Base filter on which to add the contacts ID and team ID filter
- * @param filter Filter from request in which to check for contactsIds and teamsIDs filters; Both must be present
+ * @param baseFilter MongoDB Base filter on which to add the contacts ID/cases ID and team ID filter
+ * @param filter Filter from request in which to check for contactsIds, casesIds and teamsIDs filters; Both must be present
  * @returns {*}
  */
 function addFollowupMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
+  const filters = getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    'personId',
+    _.get(filter, 'where.contactsIds', []).concat(_.get(filter, 'where.casesIds', []))
+  );
 
-  // check for contactsIds and teamsIDs to filter
-  let contactsIds = _.get(filter, 'where.contactsIds');
+  // attach teams to filters
   let teamsIDs = _.get(filter, 'where.teamsIds');
-  if (contactsIds && teamsIDs) {
-    result.personId = {
-      '$in': contactsIds
-    };
-    // get only the followups assigned to the teams or not assigned
-    result['$or'] = [{
-      teamId: {
-        '$in': teamsIDs
-      }
-    }, {
-      teamId: null
-    }];
+  if (teamsIDs) {
+    filters.forEach((filter) => {
+      filter.$or = [{
+        teamId: {
+          '$in': teamsIDs
+        }
+      }, {
+        teamId: null
+      }];
+    });
   }
 
-  return result;
+  // finished
+  return filters;
 }
 
 /**
@@ -231,18 +304,13 @@ function addFollowupMongoFilter(collectionName, baseFilter, filter) {
  * @returns {*}
  */
 function addRelationshipMongoFilter(collectionName, baseFilter, filter) {
-  // need to also add the filter for outbreakId
-  let result = addOutbreakIdMongoFilter(collectionName, baseFilter, filter);
-
-  // check for relationshipsIds to filter
-  let relationshipsIds = _.get(filter, 'where.relationshipsIds');
-  if (relationshipsIds) {
-    result._id = {
-      '$in': relationshipsIds
-    };
-  }
-
-  return result;
+  return getChunkFilters(
+    collectionName,
+    baseFilter,
+    filter,
+    '_id',
+    _.get(filter, 'where.relationshipsIds')
+  );
 }
 
 /**
@@ -355,6 +423,20 @@ function isImportableRecord(collectionName, record, outbreakIDs) {
   return importable;
 }
 
+/**
+ * Alter user information that is added to snapshot for upstream server
+ * User data shouldn't contain actual roles and password
+ * @param {Array} records - List of user records
+ */
+function alterUserData(records) {
+  records.forEach(record => {
+    // no roles
+    record.roleIds = [''];
+    // random password
+    record.password = bcrypt.hashSync(helpers.randomString('all', 20, 30), 10);
+  });
+}
+
 // on export some additional filters might be applied on different collections
 // map collections to filter update functions
 const collectionsFilterMap = {
@@ -378,6 +460,12 @@ const collectionsImportFilterMap = {
   relationship: isImportableRecord,
   cluster: isImportableRecord,
   fileAttachment: isImportableRecord
+};
+
+// on export for upstream servers some information needs to be altered
+// map collections to functions that alter data
+const collectionsAlterDataMap = {
+  user: alterUserData
 };
 
 const syncRecordFlags = {
@@ -446,6 +534,70 @@ const syncRecord = function (logger, model, record, options, done) {
     }
   }
 
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  const mergeMissingDataFromMergebleFields = (record, model, dbRecord) => {
+    // no merge fields ?
+    if (
+      !record ||
+      !model ||
+      !model.mergeFieldsOnUpdate ||
+      !dbRecord
+    ) {
+      return;
+    }
+
+    // merge data
+    model.mergeFieldsOnUpdate.forEach((mergeField) => {
+      // not a merge field ?
+      // OR not need to merge data since we don't try to update it ?
+      if (
+        !record[mergeField] ||
+        !dbRecord[mergeField]
+      ) {
+        return;
+      }
+
+      // merge properties recursively
+      const mergeRecursive = (
+        destination,
+        source,
+        property
+      ) => {
+        if (!destination.hasOwnProperty(property)) {
+          destination[property] = source[property];
+        } else {
+          // if array or object we need to look further
+          if (
+            _.isArray(source[property]) ||
+            _.isObject(source[property])
+          ) {
+            // go through array / object and merge each value
+            _.each(source[property], (value, key) => {
+              mergeRecursive(
+                destination[property],
+                source[property],
+                key
+              );
+            });
+          } else {
+            // we need to keep the destination value, so no need to do any changes here
+            // NOTHING TO DO
+          }
+        }
+      };
+
+      // if we try to update a specific property then we need to make sure all missing values are merged
+      Object.keys(dbRecord[mergeField]).forEach((mergeFieldProp) => {
+        mergeRecursive(
+          record[mergeField],
+          dbRecord[mergeField],
+          mergeFieldProp
+        );
+      });
+    });
+  };
+
   // options is optional parameter
   if (typeof options === 'function') {
     done = options;
@@ -506,8 +658,14 @@ const syncRecord = function (logger, model, record, options, done) {
   }
 
   let findRecord;
+  let alternateQueryForRecord;
+
   // check if a record with the given id exists if record.id exists
-  if (record.id !== undefined) {
+  if (
+    record.id !== undefined &&
+    record.id !== null &&
+    record.id !== ''
+  ) {
     log('debug', `Trying to find record with id ${record.id}.`);
     findRecord = model
       .findOne({
@@ -515,6 +673,35 @@ const syncRecord = function (logger, model, record, options, done) {
           id: record.id
         },
         deleted: true
+      });
+  }
+  // some models might query for different unique identifiers when id is not present
+  else if (
+    alternateUniqueIdentifierQueryOptions[model.modelName] &&
+    model.getAlternateUniqueIdentifierQueryForSync &&
+    (alternateQueryForRecord = model.getAlternateUniqueIdentifierQueryForSync(record)) !== null
+  ) {
+    const stringifiedAlternateQuery = JSON.stringify(alternateQueryForRecord);
+    log('debug', `Trying to find record with alternate unique identifier ${stringifiedAlternateQuery}.`);
+    findRecord = model
+      .find({
+        where: alternateQueryForRecord,
+        limit: 2,
+        deleted: true
+      })
+      .then(results => {
+        if (!results || !results.length) {
+          // no db record was found; continue with creating the record
+          return null;
+        } else if (results.length > 1) {
+          // more than one result found; we cannot know which one we should update
+          return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+            alternateIdQuery: stringifiedAlternateQuery
+          }));
+        }
+
+        // single record found; continue with it and try to update it
+        return results[0];
       });
   } else {
     log('debug', 'Record id not present');
@@ -540,6 +727,19 @@ const syncRecord = function (logger, model, record, options, done) {
           });
       }
 
+      // db record was found
+      // if we are in a sync action from another Go.Data instance and the model is user or team don't try to do any updates
+      if (
+        options.snapshotFromClient &&
+        ['team', 'user'].includes(model.name)
+      ) {
+        log('debug', `Record found (id: ${record.id}) but it is a ${model.name} in a sync from a client instance. Skipped record`);
+        return Promise.resolve({
+          record: dbRecord,
+          flag: syncRecordFlags.UNTOUCHED
+        });
+      }
+
       // if record was found in DB but we cannot figure out if the changes are newer or older skip record (updatedAt is missing)
       if (!record.updatedAt) {
         log('debug', `Record found (id: ${record.id}) but data received is missing updatedAt property. Skipped record`);
@@ -551,6 +751,10 @@ const syncRecord = function (logger, model, record, options, done) {
       if (new Date(dbRecord.updatedAt).getTime() < new Date(record.updatedAt).getTime()) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
+
+        // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+        // this is relevant only when we update a record since on create we don't have old data that we need to merge
+        mergeMissingDataFromMergebleFields(record, model, dbRecord);
 
         log('debug', `Record found (id: ${record.id}), updating record`);
 
@@ -591,6 +795,7 @@ const syncRecord = function (logger, model, record, options, done) {
                 });
             });
         }
+
         // record just needs to be updated
         return dbRecord
           .updateAttributes(record, options)
@@ -608,6 +813,39 @@ const syncRecord = function (logger, model, record, options, done) {
         record: dbRecord,
         flag: syncRecordFlags.UNTOUCHED
       };
+    })
+    // catch errors and handle some specific ones
+    .catch(err => {
+      if (!(typeof err === 'object')) {
+        return Promise.reject(err);
+      }
+
+      let formattedError;
+      switch (err.code) {
+        // MongoError for longitude/latitude out of bounds
+        case 16755:
+          formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE');
+          break;
+        // Loopback error; check for invalid lat/lng
+        case 'ERR_ASSERTION':
+          if (
+            err.message &&
+            (
+              err.message.includes('lat must be') ||
+              err.message.includes('lng must be')
+            )
+          ) {
+            // MongoError for longitude/latitude out of bounds
+            formattedError = apiError.getError('INVALID_ADDRESS_LATITUDE_LONGITUDE');
+          }
+          break;
+        default:
+          break;
+      }
+
+      // not handled error
+      !formattedError && (formattedError = err);
+      return Promise.reject(formattedError);
     });
 
   // allow working with callbacks
@@ -652,7 +890,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
   const collectionOpts = collectionsWithFiles[collectionName];
 
   // create the temporary directory matching the configured path
-  return mkdirp(path.join(tmpDir, collectionOpts.targetDir), (err) => {
+  return fs.mkdir(path.join(tmpDir, collectionOpts.targetDir), {recursive: true}, (err) => {
     if (err) {
       return done(err);
     }
@@ -671,7 +909,7 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
           // make sure the source file is okay
           return fs.lstat(filePath, function (err) {
             if (err) {
-              logger.warn(`Failed to export file: ${filePath}. Related record: ${record.id}.`, err);
+              logger.warn(`Failed to export file: ${filePath}. Related record: ${record._id}.`, err);
               return doneRecord();
             }
 
@@ -697,11 +935,11 @@ const exportCollectionRelatedFiles = function (collectionName, records, tmpDir, 
                   .helpers
                   .encryptFile(password, {}, tmpFilePath)
                   .then(function () {
-                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record.id}.`);
+                    logger.debug(`Encrypted file: ${tmpFilePath}. Related record: ${record._id}.`);
                     doneRecord();
                   })
                   .catch(function (err) {
-                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record.id}.`, err);
+                    logger.warn(`Failed to encrypt file: ${tmpFilePath}. Related record: ${record._id}.`, err);
                     doneRecord();
                   });
               }
@@ -806,6 +1044,7 @@ module.exports = {
   collectionsImportFilterMap: collectionsImportFilterMap,
   collectionsToSyncInSeries: collectionsToSyncInSeries,
   collectionsExcludeDeletedRecords: collectionsExcludeDeletedRecords,
+  collectionsAlterDataMap: collectionsAlterDataMap,
   syncRecord: syncRecord,
   syncRecordFlags: syncRecordFlags,
   syncCollections: syncCollections,

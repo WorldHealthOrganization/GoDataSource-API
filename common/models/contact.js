@@ -45,17 +45,25 @@ module.exports = function (Contact) {
     // append source export fields
     Object.assign(
       fieldLabelsMap,
-      Contact.fieldLabelsMap,
+      Contact.fieldLabelsMap, {
+        'relationship': 'LNG_CONTACT_FIELD_LABEL_RELATIONSHIP'
+      },
       _.transform(
         relationshipFieldLabelsMap,
         (tokens, token, property) => {
           tokens[`relationship.${property}`] = token;
         },
         {}
-      ), {
-        'relationship': 'LNG_CONTACT_FIELD_LABEL_RELATIONSHIP'
-      }
+      )
     );
+
+    // questionnaire answers should always be at the end
+    // - pb that parent is object, and order isn't guaranteed
+    if (fieldLabelsMap.questionnaireAnswers) {
+      const tmpQuestionnaireAnswers = fieldLabelsMap.questionnaireAnswers;
+      delete fieldLabelsMap.questionnaireAnswers;
+      fieldLabelsMap.questionnaireAnswers = tmpQuestionnaireAnswers;
+    }
 
     // finished
     return fieldLabelsMap;
@@ -90,6 +98,8 @@ module.exports = function (Contact) {
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
+    'numberOfExposures': 'LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
+    'numberOfContacts': 'LNG_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -112,10 +122,139 @@ module.exports = function (Contact) {
     'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
+    'responsibleUserId': 'LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   });
+
+  // map language token labels for export fields group
+  Contact.exportFieldsGroup = {
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RECORD_CREATION_AND_UPDATE_DATA': {
+      properties: [
+        'id',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy',
+        'deleted',
+        'deletedAt',
+        'createdOn'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
+      properties: [
+        'firstName',
+        'middleName',
+        'lastName',
+        'gender',
+        'occupation',
+        'age',
+        'age.years',
+        'age.months',
+        'dob',
+        'visualId',
+        'documents',
+        'documents[].type',
+        'documents[].number',
+        'dateOfReporting',
+        'isDateOfReportingApproximate',
+        'pregnancyStatus'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
+      properties: [
+        'type',
+        'wasCase',
+        'wasContact',
+        'classification',
+        'dateOfInfection',
+        'dateOfOnset',
+        'followUp',
+        'followUp.originalStartDate',
+        'followUp.startDate',
+        'followUp.endDate',
+        'followUp.status',
+        'followUpTeamId',
+        'riskLevel',
+        'riskReason',
+        'dateOfLastContact',
+        'safeBurial',
+        'dateOfBurial',
+        'transferRefused',
+        'outcomeId',
+        'dateOfOutcome',
+        'dateBecomeContact',
+        'dateBecomeCase',
+        'responsibleUserId',
+        'numberOfExposures',
+        'numberOfContacts'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_VACCINATION_DATA': {
+      properties: [
+        'vaccinesReceived',
+        'vaccinesReceived[].vaccine',
+        'vaccinesReceived[].date',
+        'vaccinesReceived[].status'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
+      properties: [
+        'addresses',
+        'addresses[].typeId',
+        'addresses[].country',
+        'addresses[].city',
+        'addresses[].addressLine1',
+        'addresses[].postalCode',
+        'addresses[].locationId',
+        'addresses[].geoLocation',
+        'addresses[].geoLocation.lat',
+        'addresses[].geoLocation.lng',
+        'addresses[].geoLocationAccurate',
+        'addresses[].date',
+        'addresses[].phoneNumber',
+        'addresses[].emailAddress'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_LOCATION_ID_DATA': {
+      properties: [
+        // the ids and identifiers fields for a location are added custom
+      ],
+      required: [
+        'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_RELATIONSHIPS_DATA': {
+      properties: [
+        'relationship',
+        'relationship.relatedId',
+        'relationship.contactDate',
+        'relationship.contactDateEstimated',
+        'relationship.certaintyLevelId',
+        'relationship.exposureTypeId',
+        'relationship.exposureFrequencyId',
+        'relationship.exposureDurationId',
+        'relationship.socialRelationshipTypeId',
+        'relationship.socialRelationshipDetail',
+        'relationship.clusterId',
+        'relationship.comment',
+        'relationship.id',
+        'relationship.createdAt',
+        'relationship.createdBy',
+        'relationship.updatedAt',
+        'relationship.updatedBy',
+        'relationship.deleted',
+        'relationship.deletedAt',
+        'relationship.createdOn'
+      ]
+    }
+  };
 
   Contact.exportFieldsOrder = [
     'id',
@@ -150,6 +289,12 @@ module.exports = function (Contact) {
       'status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     }
   };
+
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  Contact.mergeFieldsOnUpdate = [
+    'questionnaireAnswers'
+  ];
 
   Contact.sectionsFieldLabels = {
     personalInformation: {
@@ -255,6 +400,15 @@ module.exports = function (Contact) {
       modelName: 'team',
       collectionName: 'team',
       labelProperty: 'name'
+    },
+    'responsibleUserId': {
+      modelName: 'user',
+      collectionName: 'user',
+      labelProperty: [
+        'firstName',
+        'lastName',
+        'email'
+      ]
     }
   };
 
@@ -325,6 +479,11 @@ module.exports = function (Contact) {
         order: 'contactDate DESC',
         where: {
           'persons.id': contactInstance.id,
+          'persons.type': {
+            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          },
           active: true
         }
       })

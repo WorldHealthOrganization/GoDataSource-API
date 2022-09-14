@@ -1,0 +1,36 @@
+{
+  "name": "labResultSequence",
+  "base": "Model",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "hasSequence": {
+      "type": "boolean",
+      "default": false
+    },
+    "noSequenceReason": {
+      "type": "string"
+    },
+    "dateSampleSent": {
+      "type": "date"
+    },
+    "labId": {
+      "type": "string"
+    },
+    "dateResult": {
+      "type": "date"
+    },
+    "resultId": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
