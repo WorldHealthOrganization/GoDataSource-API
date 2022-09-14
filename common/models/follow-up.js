@@ -850,7 +850,7 @@ module.exports = function (FollowUp) {
       // retrieve contacts
       buildQuery = buildQuery
         .then(() => {
-          return app.models.contact.rawFind(
+          return app.models.person.rawFind(
             app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
             {projection: {_id: 1}});
         });
