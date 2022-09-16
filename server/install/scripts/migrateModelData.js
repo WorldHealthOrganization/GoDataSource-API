@@ -291,6 +291,18 @@ const migrationVersions = [{
       name: 'cleanUnnecessaryData',
       buildNo: 1
     }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'setUsualPlaceOfResidenceLocationIdOnPerson',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'followUp.js',
+    actions: [{
+      name: 'setUsualPlaceOfResidenceLocationIdOnFollowUp',
+      buildNo: 2
+    }]
   }]
 }];
 

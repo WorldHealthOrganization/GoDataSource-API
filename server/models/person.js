@@ -303,7 +303,11 @@ module.exports = function (Person) {
 
     // person address was touched; get new usualPlaceOfResidenceLocationId
     // event
-    if (personInstance.address !== undefined) {
+    let modelName = context.Model.modelName;
+    if (
+      modelName === app.models.event.modelName &&
+      personInstance.address !== undefined
+    ) {
       // event address was changed
       if (
         // address was removed entirely
