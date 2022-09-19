@@ -118,6 +118,29 @@
     },
     "LNG_HELP_ITEMS_SINGLE_SCREEN_VIEW_TITLE_LABEL": {
       "translation": "View help item"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
+      "translation": "Please make sure that \"{{fileName}}\" graph is visible"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_CLASSIFICATION_TITLE_SHORT": {
+      "translation": "EPI - classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_OUTCOME_TITLE_SHORT": {
+      "translation": "EPI - outcome",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORTING_TITLE_SHORT": {
+      "translation": "EPI - reporting classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiDashboardPage"
     }
   }
 }
