@@ -75,7 +75,7 @@
     "xlsx": "0.17.0"
   },
   "devDependencies": {
-    "eslint": "7.32.0",
+    "eslint": "8.23.1",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-run-command": "0.0.10",
