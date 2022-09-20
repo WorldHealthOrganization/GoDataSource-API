@@ -59,11 +59,11 @@ const cliArguments = {
     source: sources.config,
     paramPath: 'public.port',
     get: {
-      convertor: e => e.toString()
+      convertor: e => e ? e.toString() : ''
     },
     set: {
       allowed: false,
-      convertor: e => parseInt(e)
+      convertor: e => e ? parseInt(e) : ''
     }
   },
   logLevel: {
