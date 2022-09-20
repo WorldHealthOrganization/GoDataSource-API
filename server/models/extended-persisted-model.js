@@ -224,7 +224,7 @@ module.exports = function (ExtendedPersistedModel) {
             _.get(config, 'public.host').toLowerCase() !== urlInfo.hostname.toLowerCase();
 
           // port changed ?
-          const port = urlInfo.port === null ? '80' : urlInfo.port;
+          const port = urlInfo.port ? urlInfo.port : '';
           const portChanged = port &&
             _.get(config, 'public.port').toString().toLowerCase() !== port.toString().toLowerCase();
 

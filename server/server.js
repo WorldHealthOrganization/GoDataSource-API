@@ -131,7 +131,7 @@ const startServer = function (logger, startScheduler) {
             const urlData = url.parse(baseUrl);
             _.set(config, 'public.protocol', urlData.protocol.replace(':', ''));
             _.set(config, 'public.host', urlData.hostname);
-            _.set(config, 'public.port', urlData.port);
+            _.set(config, 'public.port', urlData.port ? urlData.port : '');
 
             // update configuration
             const configPath = path.resolve(__dirname + '/config.json');
