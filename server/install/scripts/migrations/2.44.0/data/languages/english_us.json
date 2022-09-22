@@ -141,6 +141,17 @@
     "LNG_PAGE_DASHBOARD_COLLAPSE_ALL": {
       "translation": "Collapse all",
       "section": "uiDashboardPage"
+    },
+    "LNG_USER_FIELD_LABEL_LANGUAGE": {
+      "translation": "Preferred language",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_LANGUAGE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiUserFields"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "Follow-ups"
     }
   }
 }
