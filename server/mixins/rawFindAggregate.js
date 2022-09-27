@@ -103,9 +103,7 @@ module.exports = function (Model) {
     // - this means that we won't be able to filter by related model geolocation distance ( duh...we don't have related data since it is added later )
     // - also, this will work only for AND conditions, it won't work for OR conditions
     // construct list of possible geo points filter properties for our model
-    const matchWhereBeforeAnythingElse = {
-      $and: []
-    };
+    const geoNear = [];
     if (Model.nestedGeoPoints) {
       const listOfGeoPoints = [];
       Model.nestedGeoPoints.forEach((property) => {
@@ -121,12 +119,26 @@ module.exports = function (Model) {
             listOfGeoPoints.includes(property) &&
             value.$geoNear
           ) {
+            // create geo near condition
+            const geoNearCondition = {
+              near: value.$geoNear.$geometry,
+              spherical: true,
+              key: property,
+              distanceField: `${_.camelCase(property)}_distance`
+            };
+
+            // add max distance
+            if (value.$geoNear.$maxDistance) {
+              geoNearCondition.maxDistance = value.$geoNear.$maxDistance;
+            }
+
+            // add min distance
+            if (value.$geoNear.$minDistance) {
+              geoNearCondition.minDistance = value.$geoNear.$minDistance;
+            }
+
             // add condition to list
-            matchWhereBeforeAnythingElse.$and.push({
-              [property]: {
-                $geoNear: value.$geoNear
-              }
-            });
+            geoNear.push(geoNearCondition);
 
             // remove search criteria since will be handled separately
             delete value.$geoNear;
@@ -148,9 +160,11 @@ module.exports = function (Model) {
     }
 
     // apply filter before doing anything else
-    if (!_.isEmpty(matchWhereBeforeAnythingElse.$and)) {
-      aggregatePipeline.push({
-        $match: matchWhereBeforeAnythingElse
+    if (geoNear.length > 0) {
+      geoNear.forEach((geoNearConf) => {
+        aggregatePipeline.push({
+          $geoNear: geoNearConf
+        });
       });
     }
 
