@@ -1099,8 +1099,15 @@ module.exports = function (FollowUp) {
     filter,
     countOnly
   ) => {
+    // must filter after lookup ?
+    const matchAfterLookup = filter && filter.where && JSON.stringify(filter.where).indexOf('contact.') > -1;
+
+    // include relationship ?
     let relations = [];
-    if (!countOnly) {
+    if (
+      !countOnly ||
+      matchAfterLookup
+    ) {
       relations.push({
         lookup: {
           from: 'person',
@@ -1111,11 +1118,14 @@ module.exports = function (FollowUp) {
         unwind: true
       });
     }
+
+    // filter
     return app.models.followUp
       .rawFindAggregate(
         filter, {
           countOnly: countOnly,
-          relations: relations
+          relations: relations,
+          matchAfterLookup
         }
       ).then((followUps) => {
         // nothing to do if we just want to count follow-ups
