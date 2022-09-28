@@ -644,12 +644,32 @@ module.exports = function (FollowUp) {
     let caseQuery = _.get(filter, 'where.case');
     // if found, remove it form main query
     if (caseQuery) {
+      // replace nested geo points filters
+      caseQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.case,
+        caseQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
       delete filter.where.case;
     }
     // get contact query, if any
     let contactQuery = _.get(filter, 'where.contact');
     // if found, remove it form main query
     if (contactQuery) {
+      // replace nested geo points filters
+      contactQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.contact,
+        contactQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
       delete filter.where.contact;
     }
     // get time last seen, if any
@@ -1099,8 +1119,15 @@ module.exports = function (FollowUp) {
     filter,
     countOnly
   ) => {
+    // must filter after lookup ?
+    const matchAfterLookup = filter && filter.where && JSON.stringify(filter.where).indexOf('contact.') > -1;
+
+    // include relationship ?
     let relations = [];
-    if (!countOnly) {
+    if (
+      !countOnly ||
+      matchAfterLookup
+    ) {
       relations.push({
         lookup: {
           from: 'person',
@@ -1111,11 +1138,14 @@ module.exports = function (FollowUp) {
         unwind: true
       });
     }
+
+    // filter
     return app.models.followUp
       .rawFindAggregate(
         filter, {
           countOnly: countOnly,
-          relations: relations
+          relations: relations,
+          matchAfterLookup
         }
       ).then((followUps) => {
         // nothing to do if we just want to count follow-ups
