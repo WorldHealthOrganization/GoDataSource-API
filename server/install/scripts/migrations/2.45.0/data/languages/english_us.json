@@ -1,0 +1,13 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_LAB_RESULT": {
+      "translation": "Lab result - bulk modify",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows modifying lab results in bulk",
+      "section": "availablePermissions"
+    }
+  }
+}

@@ -1357,6 +1357,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyLabResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "lab_result_list",
       "permission": "ALLOW",
       "property": "filteredCountLabResults"
@@ -9030,6 +9036,53 @@
       "http": {
         "verb": "put",
         "path": "/follow-ups/bulk"
+      }
+    },
+    "prototype.bulkModifyLabResults": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "labResult",
+          "description": "Lab result properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": {
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Number of updated lab results",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Bulk update lab results",
+      "http": {
+        "verb": "put",
+        "path": "/lab-results/bulk"
       }
     },
     "prototype.getCaseCountMap": {

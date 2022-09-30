@@ -2714,6 +2714,16 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
+        },
+        {
+          id: 'lab_result_bulk_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'lab_result_list',
+            'lab_result_modify'
+          ]
         }
       ]
     },
