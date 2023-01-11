@@ -1,59 +1,48 @@
 {
   "translations": {
-    "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MEASLES": {
-      "arabic": "Measles",
-      "modules": [
-        "referenceData"
-      ],
-      "russian_ru": "Measles",
-      "spanish_es": "Measles",
-      "portuguese_pt": "Measles",
-      "english_us": "Measles",
-      "french_fr": "Measles"
-    },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_OUTCOME_STATUS": {
       "arabic": "النتيجة/الحالة",
       "modules": [
         "referenceData"
       ],
+      "english_us": "Outcome/Status",
+      "portuguese_pt": "Outcome/Status",
       "russian_ru": "Outcome/Status",
       "spanish_es": "Outcome/Status",
-      "portuguese_pt": "Outcome/Status",
-      "english_us": "Outcome/Status",
       "french_fr": "Outcome/Status"
     },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_EPIDEMIOLOGY_AND_EXPOSURE": {
-      "spanish_es": "Epidemiology and exposure",
+      "portuguese_pt": "Epidemiology and exposure",
       "modules": [
         "referenceData"
       ],
-      "portuguese_pt": "Epidemiology and exposure",
+      "arabic": "علم الأوبئة والتعرض",
       "english_us": "Epidemiology and exposure",
       "french_fr": "Epidemiology and exposure",
-      "russian_ru": "Epidemiology and exposure",
-      "arabic": "علم الأوبئة والتعرض"
+      "spanish_es": "Epidemiology and exposure",
+      "russian_ru": "Epidemiology and exposure"
     },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_PATIENT_INFORMATION": {
-      "portuguese_pt": "Patient Information",
+      "french_fr": "Patient Information",
       "modules": [
         "referenceData"
       ],
+      "portuguese_pt": "Patient Information",
       "english_us": "Patient Information",
       "spanish_es": "Patient Information",
-      "french_fr": "Patient Information",
       "arabic": "Patient Information",
       "russian_ru": "Patient Information"
     },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_HEALTH_CARE_INTERACTIONS": {
-      "english_us": "Health Care Interactions",
+      "portuguese_pt": "Health Care Interactions",
       "modules": [
         "referenceData"
       ],
-      "spanish_es": "Health Care Interactions",
+      "english_us": "Health Care Interactions",
       "french_fr": "Health Care Interactions",
-      "russian_ru": "Health Care Interactions",
       "arabic": "تفاعلات الرعاية الصحية",
-      "portuguese_pt": "Health Care Interactions"
+      "russian_ru": "Health Care Interactions",
+      "spanish_es": "Health Care Interactions"
     },
     "LNG_OUTBREAK_98CEF186-C84D-428C-A67E-40D6C8344146_CASEINVESTIGATIONTEMPLATE_QUESTION_ACTIVE_SEARCHES_ANSWER_NO_LABEL": {
       "arabic": "No",
@@ -1814,6 +1803,17 @@
       "portuguese_pt": "Work or school address",
       "russian_ru": "Work or school address",
       "spanish_es": "Work or school address"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MEASLES": {
+      "arabic": "Measles",
+      "modules": [
+        "referenceData"
+      ],
+      "english_us": "Measles",
+      "french_fr": "Measles",
+      "portuguese_pt": "Measles",
+      "russian_ru": "Measles",
+      "spanish_es": "Measles"
     }
   },
   "referenceData": [
@@ -1852,18 +1852,18 @@
       "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_MEASLES",
       "periodOfFollowup": 21,
       "frequencyOfFollowUp": 1,
-      "frequencyOfFollowUpPerDay": 0,
+      "frequencyOfFollowUpPerDay": 1,
       "generateFollowUpsOverwriteExisting": false,
       "generateFollowUpsKeepTeamAssignment": true,
       "generateFollowUpsTeamAssignmentAlgorithm": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
       "generateFollowUpsDateOfLastContact": false,
       "intervalOfFollowUp": "",
-      "noDaysAmongContacts": 0,
-      "noDaysInChains": 0,
-      "noDaysNotSeen": 0,
-      "noLessContacts": 0,
-      "longPeriodsBetweenCaseOnset": 0,
-      "noDaysNewContacts": 0,
+      "noDaysAmongContacts": 7,
+      "noDaysInChains": 7,
+      "noDaysNotSeen": 5,
+      "noLessContacts": 5,
+      "longPeriodsBetweenCaseOnset": 21,
+      "noDaysNewContacts": 1,
       "caseInvestigationTemplate": [
         {
           "multiAnswer": false,
