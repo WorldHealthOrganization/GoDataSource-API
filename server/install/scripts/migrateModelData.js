@@ -307,6 +307,12 @@ const migrationVersions = [{
 }, {
   version: '2.45.0',
   scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }]
+  }, {
     fileName: 'template.js',
     actions: [{
       name: 'createUpdateDefaultOutbreakTemplates',

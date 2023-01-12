@@ -209,7 +209,8 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                     colorCode: 1,
                     description: 1,
                     order: 1,
-                    active: 1
+                    active: 1,
+                    code: 1
                   }
                 })
                 .toArray()
@@ -240,6 +241,9 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                       ) && (
                         refItem.active === undefined ||
                         referenceDataModel.active === refItem.active
+                      ) && (
+                        refItem.code === undefined ||
+                        referenceDataModel.code === refItem.code
                       )
                     ) {
                       return;
@@ -273,6 +277,9 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                             active: refItem.active !== undefined ?
                               refItem.active :
                               true,
+                            code: refItem.code !== undefined ?
+                              refItem.code :
+                              referenceDataModel.code,
                             isDefaultReferenceData: true,
                             deleted: false,
                             deletedAt: null
@@ -304,6 +311,7 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                           colorCode: refItem.colorCode,
                           order: refItem.order,
                           active: refItem.active !== undefined ? refItem.active : true,
+                          code: refItem.code,
                           isDefaultReferenceData: true,
                           deleted: false,
                           createdAt: common.install.timestamps.createdAt,
