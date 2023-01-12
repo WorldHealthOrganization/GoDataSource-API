@@ -310,7 +310,7 @@ const migrationVersions = [{
     fileName: 'template.js',
     actions: [{
       name: 'createUpdateDefaultOutbreakTemplates',
-      buildNo: 1
+      buildNo: 2
     }]
   }, {
     fileName: 'languageToken.js',
