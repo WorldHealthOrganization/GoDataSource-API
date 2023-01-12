@@ -13,6 +13,13 @@
         "referenceData"
       ],
       "section": "referenceDataCategoryTypeOfLabTest"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OUTPATIENT_VISIT": {
+      "translation": "Outpatient visit",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "referenceDataCategoryPersonDateType"
     }
   },
   "referenceData": [
@@ -26,6 +33,11 @@
       "categoryId": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
       "value": "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST_VIRUS_CULTURE",
       "code": "culture"
+    }, {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OUTPATIENT_VISIT",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE_OUTPATIENT_VISIT",
+      "code": "outpatient"
     }
   ]
 }
