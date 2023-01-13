@@ -8,6 +8,9 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_LAB_RESULT_DESCRIPTION": {
       "translation": "This permission allows modifying lab results in bulk",
       "section": "availablePermissions"
+    },
+    "LNG_DATE_RANGE_ADD_NEW_DATE_MESSAGE": {
+      "translation": "Add Hospitalization / Isolation"
     }
   }
 }
