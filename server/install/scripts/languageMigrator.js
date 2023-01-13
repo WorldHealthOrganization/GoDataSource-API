@@ -141,7 +141,9 @@ const createUpdateLanguageTokens = (
                                 translation: languageFileData.tokens[languageTokenModel.token].translation,
                                 section: languageFileData.tokens[languageTokenModel.token].section ?
                                   languageFileData.tokens[languageTokenModel.token].section :
-                                  languageTokenModel.section
+                                  languageTokenModel.section,
+                                updatedAt: new Date(),
+                                updatedBy: 'system'
                               }
                             })
                         );
