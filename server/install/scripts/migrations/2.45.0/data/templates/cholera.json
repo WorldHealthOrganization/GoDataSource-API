@@ -6,14 +6,12 @@
         "referenceData"
       ],
       "english_us": "Initial Sample Collection ",
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Initial Sample Collection ",
       "french_fr": "Initial Respiratory Sample Collection ",
       "spanish_es": "Initial Respiratory Sample Collection ",
       "russian_ru": "Initial Sample Collection ",
       "portuguese_pt": "Initial Respiratory Sample Collection "
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_UNK_LABEL": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Unknown",
       "modules": [
         "template"
       ],
@@ -25,7 +23,6 @@
       "spanish_es": "Unknown"
     },
     "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Patient Symptoms",
       "modules": [
         "referenceData"
       ],
@@ -37,7 +34,6 @@
       "french_fr": "A0: Patient Symptoms"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_MILD_LABEL": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Some signs of dehydration (Plan B)",
       "modules": [
         "template"
       ],
@@ -49,7 +45,6 @@
       "spanish_es": "Some signs of dehydration (Plan B)"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_TEXT": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Dehydration status/Treatment Plan",
       "modules": [
         "template"
       ],
@@ -61,7 +56,6 @@
       "spanish_es": "Level of Dehydration"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_LABEL": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Yes",
       "modules": [
         "template"
       ],
@@ -73,7 +67,6 @@
       "spanish_es": "Yes"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_TEXT": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Stool sample taken",
       "modules": [
         "template"
       ],
@@ -85,7 +78,6 @@
       "spanish_es": "Stool sample taken"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_NO_LABEL": {
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "No",
       "modules": [
         "template"
       ],
@@ -105,8 +97,7 @@
       "french_fr": "Cholera",
       "portuguese_pt": "Cholera",
       "russian_ru": "Cholera",
-      "spanish_es": "Cholera",
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Cholera"
+      "spanish_es": "Cholera"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_QUESTION_BA_2_C_944_B_8_AFA_44_C_3_A_794_C_8_E_5_B_699586_E_TEXT": {
       "arabic": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
@@ -117,8 +108,7 @@
       "french_fr": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
       "portuguese_pt": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
       "russian_ru": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
-      "spanish_es": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module"
+      "spanish_es": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_NONE_LABEL": {
       "arabic": "No signs of dehydration (Plan A)",
@@ -129,8 +119,7 @@
       "french_fr": "No signs of dehydration (Plan A)",
       "portuguese_pt": "No signs of dehydration (Plan A)",
       "russian_ru": "No signs of dehydration (Plan A)",
-      "spanish_es": "No signs of dehydration (Plan A)",
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "No signs of dehydration (Plan A)"
+      "spanish_es": "No signs of dehydration (Plan A)"
     },
     "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_SEVERE_LABEL": {
       "arabic": "Severe dehydration (Plan C)",
@@ -141,8 +130,7 @@
       "french_fr": "Severe dehydration (Plan C)",
       "portuguese_pt": "Severe dehydration (Plan C)",
       "russian_ru": "Severe dehydration (Plan C)",
-      "spanish_es": "Severe dehydration (Plan C)",
-      "5bd4ce3d-0a0a-4531-b53e-f0833ee54a7d": "Severe dehydration (Plan C)"
+      "spanish_es": "Severe dehydration (Plan C)"
     }
   },
   "referenceData": [
