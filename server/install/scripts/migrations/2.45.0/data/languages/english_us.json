@@ -20,6 +20,9 @@
     },
     "LNG_TEMPLATE_7A212D81-896B-4301-95B6-E726E1300696_CONTACTINVESTIGATIONTEMPLATE_QUESTION_FB_1_CONTACTOUTCOME_HOSPITALISATIONREQUIRED_TEXT": {
       "english_us": "Hospitalization required"
+    },
+    "LNG_DATE_RANGE_ADD_ANOTHER_DATE_MESSAGE": {
+      "translation": "Add Hospitalization / Isolation"
     }
   }
 }
