@@ -11,6 +11,15 @@
     },
     "LNG_DATE_RANGE_ADD_NEW_DATE_MESSAGE": {
       "translation": "Add Hospitalization / Isolation"
+    },
+    "LNG_COMMON_BUTTON_ADD_DATE_RANGE": {
+      "translation": "Add another hospitalization or isolation"
+    },
+    "LNG_PAGE_TRANSMISSION_CHAIN_BARS_FILTERS_HOSPITALISATION_ISOLATION": {
+      "translation": "Hospitalization / Isolation"
+    },
+    "LNG_TEMPLATE_7A212D81-896B-4301-95B6-E726E1300696_CONTACTINVESTIGATIONTEMPLATE_QUESTION_FB_1_CONTACTOUTCOME_HOSPITALISATIONREQUIRED_TEXT": {
+      "english_us": "Hospitalization required"
     }
   }
 }
