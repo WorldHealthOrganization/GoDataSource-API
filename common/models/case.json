@@ -21,9 +21,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -44,9 +52,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
