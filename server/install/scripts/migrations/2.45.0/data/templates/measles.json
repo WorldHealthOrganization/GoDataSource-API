@@ -3337,7 +3337,8 @@
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": true,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     }
   ]
 }

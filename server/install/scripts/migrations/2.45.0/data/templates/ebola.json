@@ -4163,7 +4163,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     }
   ]
 }
