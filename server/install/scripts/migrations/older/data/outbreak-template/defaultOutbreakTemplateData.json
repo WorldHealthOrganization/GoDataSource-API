@@ -29034,7 +29034,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "d6a9d08f-b452-4ecb-81ad-67888b8eba28",
@@ -30640,7 +30641,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "f7d9cf05-3c62-4a7c-bdf9-5c407e9a4c88",
@@ -32598,7 +32600,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "698d69b9-ac77-4dd2-a444-e7c1d3c57f44",
@@ -33592,7 +33595,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "09df8424-03bc-45ea-b341-a03bb2a72e9f",
@@ -34629,7 +34633,8 @@
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "7a212d81-896b-4301-95b6-e726e1300696",
@@ -45826,7 +45831,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     },
     {
       "id": "b4558d99-39f1-4407-adee-1c1c287df0be",
@@ -46859,7 +46865,8 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": true,
-      "applyGeographicRestrictions": false
+      "applyGeographicRestrictions": false,
+      "checkLastContactDateAgainstDateOnSet": false
     }
   ]
 }
