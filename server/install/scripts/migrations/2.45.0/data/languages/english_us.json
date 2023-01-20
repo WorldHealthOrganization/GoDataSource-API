@@ -41,7 +41,7 @@
       "section": "uiModifyEntityRelationshipPage"
     },
     "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
-      "translation": "Date of Last Contact is before Date of Onset the following contacts: {{entities}}",
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) the following contacts: {{entities}}",
       "section": "uiCreateEntityRelationshipPage"
     },
     "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
