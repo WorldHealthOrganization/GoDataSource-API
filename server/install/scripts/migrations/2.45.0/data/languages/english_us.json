@@ -32,6 +32,14 @@
       "translation": "",
       "section": "uiOutbreakFields"
     },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
+      "translation": "Check Last Contact Date against Date of Onset",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "",
+      "section": "uiOutbreakTemplateFields"
+    },
     "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
       "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
       "section": "uiModifyEntityRelationshipPage"
