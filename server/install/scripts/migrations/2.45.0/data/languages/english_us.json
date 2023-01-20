@@ -23,6 +23,38 @@
     },
     "LNG_DATE_RANGE_ADD_ANOTHER_DATE_MESSAGE": {
       "translation": "Add Hospitalization / Isolation"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
+      "translation": "Check Last Contact Date against Date of Onset",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
+      "section": "uiModifyEntityRelationshipPage"
+    },
+    "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case: {{entities}}",
+      "section": "uiModifyEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset the following contacts: {{entities}}",
+      "section": "uiCreateEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset the following exposures: {{entities}}",
+      "section": "uiCreateEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_CONTACT_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
+      "section": "uiCreateContactPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) for the following rows: {{rows}}",
+      "section": "uiBulkAddContactsPage"
     }
   }
 }
