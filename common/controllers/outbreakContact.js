@@ -1658,7 +1658,12 @@ module.exports = function (Outbreak) {
             exportFieldsGroup: app.models.contact.exportFieldsGroup,
             exportFieldsOrder: app.models.contact.exportFieldsOrder,
             locationFields: app.models.contact.locationFields,
-            additionalFieldsToExport
+            additionalFieldsToExport,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -1758,6 +1763,21 @@ module.exports = function (Outbreak) {
                 delete person.relationship.persons;
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
+              }`
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
               }`
             }
           }

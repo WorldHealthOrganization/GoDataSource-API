@@ -510,7 +510,8 @@ module.exports = function (Outbreak) {
 
             // fields that we need to bring from db, but we don't want to include in the export
             projection: [
-              'personId'
+              'personId',
+              'responsibleUserId'
             ]
           },
           filter,
@@ -563,6 +564,21 @@ module.exports = function (Outbreak) {
               keyValue: `(followUp) => {
                 return followUp && followUp.personId ?
                   followUp.personId :
+                  undefined;
+              }`
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
                   undefined;
               }`
             }

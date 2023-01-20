@@ -253,7 +253,12 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.contactOfContact.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.contactOfContact.exportFieldsGroup,
             exportFieldsOrder: app.models.contactOfContact.exportFieldsOrder,
-            locationFields: app.models.contactOfContact.locationFields
+            locationFields: app.models.contactOfContact.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -327,6 +332,21 @@ module.exports = function (Outbreak) {
                 delete person.relationship.persons;
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
+              }`
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
               }`
             }
           }

@@ -247,7 +247,10 @@ module.exports = function (Case) {
         'dateOfBurial',
         'burialLocationId',
         'burialPlaceName',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]
