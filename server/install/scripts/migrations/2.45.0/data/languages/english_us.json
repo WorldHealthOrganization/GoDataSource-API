@@ -25,19 +25,19 @@
       "translation": "Add Hospitalization / Isolation"
     },
     "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
-      "translation": "Check Last Contact Date against Date of Onset",
+      "translation": "Display warning if date of last contact is before date of onset",
       "section": "uiOutbreakFields"
     },
     "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
-      "translation": "",
+      "translation": "An warning will be displayed if date of last contact is before date of onset. You will still be able to save data without having to address the warning",
       "section": "uiOutbreakFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
-      "translation": "Check Last Contact Date against Date of Onset",
+      "translation": "Display warning if date of last contact is before date of onset",
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
-      "translation": "",
+      "translation": "An warning will be displayed if date of last contact is before date of onset. You will still be able to save data without having to address the warning",
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
