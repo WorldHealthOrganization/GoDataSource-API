@@ -337,7 +337,6 @@ function run(callback) {
                       isContactLabResultsActive: !!data.isContactLabResultsActive,
                       isDateOfOnsetRequired: !!data.isDateOfOnsetRequired,
                       applyGeographicRestrictions: !!data.applyGeographicRestrictions,
-                      checkLastContactDateAgainstDateOnSet: !!data.checkLastContactDateAgainstDateOnSet,
                       deleted: false,
                       deletedAt: null
                     }, options)
@@ -390,8 +389,7 @@ function run(callback) {
                       labResultsTemplate: newTemplateItem.labResultsTemplate,
                       isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive,
                       isDateOfOnsetRequired: !!newTemplateItem.isDateOfOnsetRequired,
-                      applyGeographicRestrictions: !!newTemplateItem.applyGeographicRestrictions,
-                      checkLastContactDateAgainstDateOnSet: !!newTemplateItem.checkLastContactDateAgainstDateOnSet
+                      applyGeographicRestrictions: !!newTemplateItem.applyGeographicRestrictions
                     }, common.install.timestamps), options)
                     .then(() => {
                       // finished

@@ -260,8 +260,7 @@
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": true,
       "isDateOfOnsetRequired": false,
-      "applyGeographicRestrictions": false,
-      "checkLastContactDateAgainstDateOnSet": false
+      "applyGeographicRestrictions": false
     }
   ]
 }

@@ -2511,8 +2511,7 @@
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
       "isDateOfOnsetRequired": true,
-      "applyGeographicRestrictions": false,
-      "checkLastContactDateAgainstDateOnSet": false
+      "applyGeographicRestrictions": false
     }
   ]
 }
