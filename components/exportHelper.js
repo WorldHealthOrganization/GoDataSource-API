@@ -203,7 +203,7 @@ function exportFilteredModelsList(
           );
         }
 
-        // must have project so we force retrieval of only what is necessary
+        // must have project, so we force retrieval of only what is necessary
         if (
           !relationData.project ||
           !Array.isArray(relationData.project) ||
