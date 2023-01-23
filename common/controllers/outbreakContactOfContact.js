@@ -320,7 +320,7 @@ module.exports = function (Outbreak) {
                   undefined;
               }`,
               sort: {
-                createdAt: 1
+                createdAt: -1
               },
               after: `(person) => {
                 // nothing to do ?
