@@ -166,10 +166,23 @@ function exportFilteredModelsList(
       };
 
       // go through relations and check that we have the expected data
+      // - name needs to be unique, when 1 level that shouldn't be a problem due to linter but multiple levels create problems
+      const validateRelationsUsedNames = {};
       const validateRelations = (relationsToValidate) => {
         Object.keys(relationsToValidate).forEach((relationName) => {
           // get relation data
           const relationData = relationsToValidate[relationName];
+
+          // did we initialize a relation with this name already ?
+          if (validateRelationsUsedNames[relationName]) {
+            throwError(
+              relationName,
+              'duplicate relation name'
+            );
+          }
+
+          // add relation name to unique names
+          validateRelationsUsedNames[relationName] = true;
 
           // not an object ?
           if (
@@ -365,6 +378,23 @@ function exportFilteredModelsList(
 
               // finished
               break;
+          }
+
+          // do we have children relations ?
+          if (relationData.relations) {
+            // validate base
+            if (
+              typeof relationData.relations !== 'object' ||
+              Array.isArray(relationData.relations)
+            ) {
+              throwError(
+                relationName,
+                'invalid children relations provided'
+              );
+            }
+
+            // validate children relations
+            validateRelations(relationData.relations);
           }
         });
       };
@@ -2063,22 +2093,47 @@ function exportFilteredModelsList(
 
       // format relations
       const mappedRelations = {};
-      const formattedRelations = [];
-      _.each(
-        relations,
-        (relationData, relationName) => {
-          // create relation handler
-          const relHandler = {
-            name: relationName,
-            data: relationData
-          };
-
-          // attach to map for easy access too
-          mappedRelations[relHandler.name] = relHandler;
-
-          // add to relations
-          formattedRelations.push(relHandler);
+      const formattedRelationsPerLevel = [];
+      const deepScanForRelations = (
+        relationsInQuestion,
+        level
+      ) => {
+        // must initialize list of relations for this level ?
+        if (formattedRelationsPerLevel.length < level) {
+          formattedRelationsPerLevel.push([]);
         }
+
+        // go through relations and format them
+        _.each(
+          relationsInQuestion,
+          (relationData, relationName) => {
+            // create relation handler
+            const relHandler = {
+              name: relationName,
+              data: relationData
+            };
+
+            // attach to map for easy access too
+            mappedRelations[relHandler.name] = relHandler;
+
+            // add to relations
+            formattedRelationsPerLevel[level - 1].push(relHandler);
+
+            // do we have children relations ?
+            if (relHandler.data.relations) {
+              deepScanForRelations(
+                relHandler.data.relations,
+                level + 1
+              );
+            }
+          }
+        );
+      };
+
+      // start scan from the root
+      deepScanForRelations(
+        relations,
+        1
       );
 
       // format joins
@@ -2149,19 +2204,21 @@ function exportFilteredModelsList(
       const formattedPrefilters = formatPrefilters(prefilters);
 
       // determine replacements
-      // - for now only relationships ofer the possibility of replacements
+      // - for now only relationships offer the possibility of replacements
       const replacements = {};
-      formattedRelations.forEach((relation) => {
-        // nothing to do here
-        if (!relation.data.replace) {
-          return;
-        }
+      formattedRelationsPerLevel.forEach((formattedRelations) => {
+        formattedRelations.forEach((relation) => {
+          // nothing to do here
+          if (!relation.data.replace) {
+            return;
+          }
 
-        // merge replacements
-        Object.assign(
-          replacements,
-          relation.data.replace
-        );
+          // merge replacements
+          Object.assign(
+            replacements,
+            relation.data.replace
+          );
+        });
       });
 
       // finished
@@ -2231,7 +2288,7 @@ function exportFilteredModelsList(
         },
 
         // convert relations to array for easier access
-        relations: formattedRelations,
+        relationsPerLevel: formattedRelationsPerLevel,
         relationsMap: mappedRelations,
         replacements,
 
@@ -4870,12 +4927,13 @@ function exportFilteredModelsList(
 
         // handle relation
         const writeDataToFileDetermineMissingRelationsData = (
+          relationsToRetrieve,
           relationsAccumulator,
           record
         ) => {
-          for (let relationIndex = 0; relationIndex < sheetHandler.relations.length; relationIndex++) {
+          for (let relationIndex = 0; relationIndex < relationsToRetrieve.length; relationIndex++) {
             // get relation data
-            const relation = sheetHandler.relations[relationIndex];
+            const relation = relationsToRetrieve[relationIndex];
 
             // take action accordingly
             // - relations should be ...valid at this point, at least the format
@@ -4954,9 +5012,12 @@ function exportFilteredModelsList(
 
         // process relations
         // - must return promise
-        const writeDataToFileProcessRelations = (data) => {
+        const writeDataToFileProcessRelations = (
+          relationsToRetrieve,
+          data
+        ) => {
           // no relations ?
-          if (sheetHandler.relations.length < 1) {
+          if (relationsToRetrieve.length < 1) {
             return Promise.resolve();
           }
 
@@ -4975,6 +5036,7 @@ function exportFilteredModelsList(
 
             // do we have relations ?
             writeDataToFileDetermineMissingRelationsData(
+              relationsToRetrieve,
               relationsToProcess,
               record
             );
@@ -5226,12 +5288,13 @@ function exportFilteredModelsList(
 
         // attach relations data to record
         const writeDataToFileAttachRelations = (
+          relationsToRetrieve,
           record,
           relationsData
         ) => {
-          for (let relIndex = 0; relIndex < sheetHandler.relations.length; relIndex++) {
+          for (let relIndex = 0; relIndex < relationsToRetrieve.length; relIndex++) {
             // get relation
-            const relation = sheetHandler.relations[relIndex];
+            const relation = relationsToRetrieve[relIndex];
 
             // nothing to set here ?
             if (!relationsData[relation.name]) {
@@ -5302,7 +5365,7 @@ function exportFilteredModelsList(
               // get data
               const column = sheetHandler.columns.headerColumns[columnIndex];
 
-              // if column is anonymize then there is no need to retrieve data for this cell
+              // if column is anonymized then there is no need to retrieve data for this cell
               // - or column can't contain language tokens
               if (
                 column.anonymize ||
@@ -5383,18 +5446,18 @@ function exportFilteredModelsList(
           // - promise visibility
           const recordData = data;
 
-          // retrieve necessary data & write record to file
-          return Promise.resolve()
+          // handle relations and children relations
+          const processRelations = (levelIndex) => {
             // retrieve relations data
-            .then(() => {
-              return writeDataToFileProcessRelations(recordData);
-            })
-
-            // map relation data
-            .then((relationsData) => {
+            const relationsToRetrieve = sheetHandler.relationsPerLevel[levelIndex];
+            return writeDataToFileProcessRelations(
+              relationsToRetrieve,
+              recordData
+            ).then((relationsData) => {
+              // map relation data
               // no relations ?
               if (
-                sheetHandler.relations.length < 1 ||
+                relationsToRetrieve.length < 1 ||
                 !relationsData
               ) {
                 return;
@@ -5412,10 +5475,31 @@ function exportFilteredModelsList(
 
                 // process relations
                 writeDataToFileAttachRelations(
+                  relationsToRetrieve,
                   record,
                   relationsData
                 );
               }
+            })
+              // retrieve next level relations
+              .then(() => {
+                // nothing else to retrieve ?
+                if (sheetHandler.relationsPerLevel.length <= levelIndex + 1) {
+                  return Promise.resolve();
+                }
+
+                // retrieve next level of relations
+                return processRelations(levelIndex + 1);
+              });
+          };
+
+          // retrieve necessary data & write record to file
+          return Promise.resolve()
+            // retrieve relations data
+            .then(() => {
+              return sheetHandler.relationsPerLevel.length < 1 ?
+                Promise.resolve() :
+                processRelations(0);
             })
 
             // retrieve missing language tokens & write data
