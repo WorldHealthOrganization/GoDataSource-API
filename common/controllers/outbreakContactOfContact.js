@@ -305,8 +305,17 @@ module.exports = function (Outbreak) {
                   {
                     outbreakId: '${this.id}',
                     deleted: false,
-                    'persons.id': person._id,
-                    'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                    $or: [
+                      {
+                        'persons.0.id': person._id,
+                        'persons.0.target': true,
+                        'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      }, {
+                          'persons.1.id': person._id,
+                          'persons.1.target': true,
+                          'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      }
+                    ]
                   } :
                   undefined;
               }`,

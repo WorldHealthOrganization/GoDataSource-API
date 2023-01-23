@@ -1731,13 +1731,27 @@ module.exports = function (Outbreak) {
                   {
                     outbreakId: '${this.id}',
                     deleted: false,
-                    'persons.id': person._id,
-                    'persons.type': {
-                      $in: [
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                      ]
-                    }
+                    $or: [
+                      {
+                        'persons.0.id': person._id,
+                        'persons.0.target': true,
+                        'persons.1.type': {
+                            $in: [
+                                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                            ]
+                        }
+                      }, {
+                          'persons.1.id': person._id,
+                          'persons.1.target': true,
+                          'persons.0.type': {
+                              $in: [
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                              ]
+                          }
+                      }
+                    ]
                   } :
                   undefined;
               }`,
