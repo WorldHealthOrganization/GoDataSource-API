@@ -166,206 +166,211 @@ function exportFilteredModelsList(
       };
 
       // go through relations and check that we have the expected data
-      Object.keys(relations).forEach((relationName) => {
-        // get relation data
-        const relationData = relations[relationName];
+      const validateRelations = (relationsToValidate) => {
+        Object.keys(relationsToValidate).forEach((relationName) => {
+          // get relation data
+          const relationData = relationsToValidate[relationName];
 
-        // not an object ?
-        if (
-          !relationData ||
-          !_.isObject(relationData)
-        ) {
-          throwError(
-            relationName,
-            'expecting object'
-          );
-        }
+          // not an object ?
+          if (
+            !relationData ||
+            !_.isObject(relationData)
+          ) {
+            throwError(
+              relationName,
+              'expecting object'
+            );
+          }
 
-        // no type or invalid type ?
-        if (
-          !relationData.type ||
-          RELATION_TYPE[relationData.type] === undefined
-        ) {
-          throwError(
-            relationName,
-            'invalid type'
-          );
-        }
+          // no type or invalid type ?
+          if (
+            !relationData.type ||
+            RELATION_TYPE[relationData.type] === undefined
+          ) {
+            throwError(
+              relationName,
+              'invalid type'
+            );
+          }
 
-        // must have collection name
-        if (
-          !relationData.collection ||
-          typeof relationData.collection !== 'string'
-        ) {
-          throwError(
-            relationName,
-            `invalid collection name (${typeof relationData.collection})`
-          );
-        }
+          // must have collection name
+          if (
+            !relationData.collection ||
+            typeof relationData.collection !== 'string'
+          ) {
+            throwError(
+              relationName,
+              `invalid collection name (${typeof relationData.collection})`
+            );
+          }
 
-        // must have project, so we force retrieval of only what is necessary
-        if (
-          !relationData.project ||
-          !Array.isArray(relationData.project) ||
-          relationData.project.length < 1
-        ) {
-          throwError(
-            relationName,
-            'invalid project provided'
-          );
-        }
+          // must have project, so we force retrieval of only what is necessary
+          if (
+            !relationData.project ||
+            !Array.isArray(relationData.project) ||
+            relationData.project.length < 1
+          ) {
+            throwError(
+              relationName,
+              'invalid project provided'
+            );
+          }
 
-        // validate accordingly to its type
-        switch (relationData.type) {
-          case RELATION_TYPE.HAS_ONE:
-            // must have key
-            if (
-              !relationData.key ||
-              typeof relationData.key !== 'string'
-            ) {
-              throwError(
-                relationName,
-                `invalid key name (${typeof relationData.key})`
-              );
-            }
-
-            // must have keyValue
-            if (
-              !relationData.keyValue ||
-              typeof relationData.keyValue !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid key value (${typeof relationData.keyValue})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.keyValue = eval(relationData.keyValue);
-              } catch (e) {
+          // validate accordingly to its type
+          switch (relationData.type) {
+            case RELATION_TYPE.HAS_ONE:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
                 throwError(
                   relationName,
-                  'invalid key value method content'
+                  `invalid key name (${typeof relationData.key})`
                 );
               }
-            }
 
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // must have keyValue
+              if (
+                !relationData.keyValue ||
+                typeof relationData.keyValue !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid key value (${typeof relationData.keyValue})`
                 );
-              }
-            }
-
-            // replace
-            if (
-              relationData.replace &&
-              typeof relationData.replace !== 'object'
-            ) {
-              // invalid definition
-              throwError(
-                relationName,
-                `invalid replace (${typeof relationData.replace})`
-              );
-            } else {
-              _.each(relationData.replace, (value, key) => {
-                if (
-                  !key ||
-                  typeof key !== 'string' ||
-                  !value ||
-                  typeof value !== 'object' ||
-                  !value.value ||
-                  typeof value.value !== 'string'
-                ) {
-                  // invalid definition
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValue = eval(relationData.keyValue);
+                } catch (e) {
                   throwError(
                     relationName,
-                    `invalid replace (${typeof relationData.replace})`
+                    'invalid key value method content'
                   );
                 }
-              });
-            }
+              }
 
-            // finished
-            break;
-
-          case RELATION_TYPE.GET_ONE:
-            // must have query
-            if (
-              !relationData.query ||
-              typeof relationData.query !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid query (${typeof relationData.query})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.query = eval(relationData.query);
-              } catch (e) {
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid query method content'
+                  `invalid after (${typeof relationData.after})`
                 );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
-            }
 
-            // must have sort
-            if (
-              !relationData.sort ||
-              typeof relationData.sort !== 'object'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid sort (${typeof relationData.sort})`
-              );
-            }
-
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // replace
+              if (
+                relationData.replace &&
+                typeof relationData.replace !== 'object'
+              ) {
+                // invalid definition
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid replace (${typeof relationData.replace})`
+                );
+              } else {
+                _.each(relationData.replace, (value, key) => {
+                  if (
+                    !key ||
+                    typeof key !== 'string' ||
+                    !value ||
+                    typeof value !== 'object' ||
+                    !value.value ||
+                    typeof value.value !== 'string'
+                  ) {
+                    // invalid definition
+                    throwError(
+                      relationName,
+                      `invalid replace (${typeof relationData.replace})`
+                    );
+                  }
+                });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.GET_ONE:
+              // must have query
+              if (
+                !relationData.query ||
+                typeof relationData.query !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid query (${typeof relationData.query})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.query = eval(relationData.query);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid query method content'
+                  );
+                }
+              }
+
+              // must have sort
+              if (
+                !relationData.sort ||
+                typeof relationData.sort !== 'object'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid sort (${typeof relationData.sort})`
                 );
               }
-            }
 
-            // finished
-            break;
-        }
-      });
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
+              }
+
+              // finished
+              break;
+          }
+        });
+      };
+
+      // validate the main ones
+      validateRelations(relations);
     };
 
     // validate & parse relations
