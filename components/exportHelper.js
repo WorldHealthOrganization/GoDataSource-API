@@ -5190,7 +5190,7 @@ function exportFilteredModelsList(
               // retrieve next request
               const requestData = dbRequests.splice(0, 1)[0];
 
-              // depending of relation type we need to handle things differently
+              // depending on relation type we need to handle things differently
               switch (requestData.retrieveType) {
                 case RELATION_RETRIEVAL_TYPE.KEY_IN:
                   keyInHandler(requestData)
