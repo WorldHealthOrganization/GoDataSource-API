@@ -52,7 +52,8 @@ module.exports = function (Outbreak) {
     'arcGisServers[].type': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_TYPE',
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
     isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
-    applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS'
+    applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
+    checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET'
   });
 
   Outbreak.referenceDataFieldsToCategoryMap = {
