@@ -22,6 +22,12 @@ module.exports = function (Contact) {
     // relationship person labels
     const relationshipFieldLabelsMap = {
       'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON',
+      'relatedPersonData': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA',
+      'relatedPersonData.id': 'LNG_ENTITY_FIELD_LABEL_ID',
+      'relatedPersonData.name': 'LNG_ENTITY_FIELD_LABEL_NAME',
+      'relatedPersonData.firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
+      'relatedPersonData.lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
+      'relatedPersonData.visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
       'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
       'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
       'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -240,6 +246,12 @@ module.exports = function (Contact) {
       properties: [
         'relationship',
         'relationship.relatedId',
+        'relationship.relatedPersonData',
+        'relationship.relatedPersonData.id',
+        'relationship.relatedPersonData.name',
+        'relationship.relatedPersonData.firstName',
+        'relationship.relatedPersonData.lastName',
+        'relationship.relatedPersonData.visualId',
         'relationship.contactDate',
         'relationship.contactDateEstimated',
         'relationship.certaintyLevelId',

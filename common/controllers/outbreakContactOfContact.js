@@ -341,7 +341,42 @@ module.exports = function (Outbreak) {
                 delete person.relationship.persons;
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
-              }`
+              }`,
+              relations: {
+                relatedPersonData: {
+                  type: exportHelper.RELATION_TYPE.HAS_ONE,
+                  collection: 'person',
+                  project: [
+                    '_id',
+                    // contact
+                    'firstName',
+                    'lastName',
+                    'visualId'
+                  ],
+                  key: '_id',
+                  keyValue: `(person) => {
+                    return person && person.relationship && person.relationship.relatedId ?
+                      person.relationship.relatedId :
+                      undefined;
+                  }`,
+                  after: `(person) => {
+                    // nothing to do ?
+                    if (!person.relatedPersonData) {
+                      // then we shouldn't have relationship either because probably person was deleted
+                      // - for now we shouldn't delete it because we will have no relationship to use on import
+                      // - the correct way would be to retrieve the relationship if person not deleted, but now that isn't easily possible
+                      // delete person.relationship;
+
+                      // not found
+                      return;
+                    }
+
+                    // move from root level to relationship
+                    person.relationship.relatedPersonData = person.relatedPersonData;
+                    delete person.relatedPersonData;
+                  }`
+                }
+              }
             },
             responsibleUser: {
               type: exportHelper.RELATION_TYPE.HAS_ONE,

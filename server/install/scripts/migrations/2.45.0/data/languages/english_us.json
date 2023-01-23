@@ -63,6 +63,10 @@
     "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
       "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) for the following rows: {{rows}}",
       "section": "uiBulkAddContactsPage"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA": {
+      "translation": "Persons Related Person Data",
+      "section": "uiRelationshipFields"
     }
   }
 }
