@@ -1497,6 +1497,20 @@ module.exports = function (Outbreak) {
       delete filter.where.jsonReplaceUndefinedWithNull;
     }
 
+    // parse includePersonExposureFields query param
+    let includePersonExposureFields = false;
+    if (filter.where.hasOwnProperty('includePersonExposureFields')) {
+      includePersonExposureFields = filter.where.includePersonExposureFields;
+      delete filter.where.includePersonExposureFields;
+    }
+
+    // parse retrieveOldestExposure query param
+    let retrieveOldestExposure = false;
+    if (filter.where.hasOwnProperty('retrieveOldestExposure')) {
+      retrieveOldestExposure = filter.where.retrieveOldestExposure;
+      delete filter.where.retrieveOldestExposure;
+    }
+
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
@@ -1756,7 +1770,9 @@ module.exports = function (Outbreak) {
                   undefined;
               }`,
               sort: {
-                createdAt: -1
+                createdAt: retrieveOldestExposure ?
+                  1 :
+                  -1
               },
               after: `(person) => {
                 // nothing to do ?
@@ -1778,7 +1794,7 @@ module.exports = function (Outbreak) {
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
               }`,
-              relations: {
+              relations: includePersonExposureFields ? {
                 relatedPersonData: {
                   type: exportHelper.RELATION_TYPE.HAS_ONE,
                   collection: 'person',
@@ -1814,7 +1830,7 @@ module.exports = function (Outbreak) {
                     delete person.relatedPersonData;
                   }`
                 }
-              }
+              } : undefined
             },
             responsibleUser: {
               type: exportHelper.RELATION_TYPE.HAS_ONE,
