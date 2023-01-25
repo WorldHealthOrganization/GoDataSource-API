@@ -25,7 +25,7 @@ module.exports = function (ContactOfContact) {
       'relatedPersonData.id': 'LNG_ENTITY_FIELD_LABEL_ID',
       'relatedPersonData.firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
       'relatedPersonData.lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
-      'relatedPersonData.visualId': 'LNG_ENTITY_FIELD_LABEL_VISUAL_ID',
+      'relatedPersonData.visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
       'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
       'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
       'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
