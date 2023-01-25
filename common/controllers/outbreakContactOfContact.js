@@ -193,6 +193,20 @@ module.exports = function (Outbreak) {
       delete filter.where.jsonReplaceUndefinedWithNull;
     }
 
+    // parse includePersonExposureFields query param
+    let includePersonExposureFields = false;
+    if (filter.where.hasOwnProperty('includePersonExposureFields')) {
+      includePersonExposureFields = filter.where.includePersonExposureFields;
+      delete filter.where.includePersonExposureFields;
+    }
+
+    // parse retrieveOldestExposure query param
+    let retrieveOldestExposure = false;
+    if (filter.where.hasOwnProperty('retrieveOldestExposure')) {
+      retrieveOldestExposure = filter.where.retrieveOldestExposure;
+      delete filter.where.retrieveOldestExposure;
+    }
+
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
@@ -253,7 +267,12 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.contactOfContact.helpers.sanitizeFieldLabelsMapForExport(),
             exportFieldsGroup: app.models.contactOfContact.exportFieldsGroup,
             exportFieldsOrder: app.models.contactOfContact.exportFieldsOrder,
-            locationFields: app.models.contactOfContact.locationFields
+            locationFields: app.models.contactOfContact.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -300,13 +319,24 @@ module.exports = function (Outbreak) {
                   {
                     outbreakId: '${this.id}',
                     deleted: false,
-                    'persons.id': person._id,
-                    'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                    $or: [
+                      {
+                        'persons.0.id': person._id,
+                        'persons.0.target': true,
+                        'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      }, {
+                          'persons.1.id': person._id,
+                          'persons.1.target': true,
+                          'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      }
+                    ]
                   } :
                   undefined;
               }`,
               sort: {
-                createdAt: 1
+                createdAt: retrieveOldestExposure ?
+                  1 :
+                  -1
               },
               after: `(person) => {
                 // nothing to do ?
@@ -327,6 +357,56 @@ module.exports = function (Outbreak) {
                 delete person.relationship.persons;
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
+              }`,
+              relations: includePersonExposureFields ? {
+                relatedPersonData: {
+                  type: exportHelper.RELATION_TYPE.HAS_ONE,
+                  collection: 'person',
+                  project: [
+                    '_id',
+                    // contact
+                    'firstName',
+                    'lastName',
+                    'visualId'
+                  ],
+                  key: '_id',
+                  keyValue: `(person) => {
+                    return person && person.relationship && person.relationship.relatedId ?
+                      person.relationship.relatedId :
+                      undefined;
+                  }`,
+                  after: `(person) => {
+                    // nothing to do ?
+                    if (!person.relatedPersonData) {
+                      // then we shouldn't have relationship either because probably person was deleted
+                      // - for now we shouldn't delete it because we will have no relationship to use on import
+                      // - the correct way would be to retrieve the relationship if person not deleted, but now that isn't easily possible
+                      // delete person.relationship;
+
+                      // not found
+                      return;
+                    }
+
+                    // move from root level to relationship
+                    person.relationship.relatedPersonData = person.relatedPersonData;
+                    delete person.relatedPersonData;
+                  }`
+                }
+              } : undefined
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
               }`
             }
           }

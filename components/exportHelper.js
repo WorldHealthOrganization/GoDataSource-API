@@ -166,206 +166,241 @@ function exportFilteredModelsList(
       };
 
       // go through relations and check that we have the expected data
-      Object.keys(relations).forEach((relationName) => {
-        // get relation data
-        const relationData = relations[relationName];
+      // - name needs to be unique, when 1 level that shouldn't be a problem due to linter but multiple levels create problems
+      const validateRelationsUsedNames = {};
+      const validateRelations = (relationsToValidate) => {
+        Object.keys(relationsToValidate).forEach((relationName) => {
+          // get relation data
+          const relationData = relationsToValidate[relationName];
 
-        // not an object ?
-        if (
-          !relationData ||
-          !_.isObject(relationData)
-        ) {
-          throwError(
-            relationName,
-            'expecting object'
-          );
-        }
+          // did we initialize a relation with this name already ?
+          if (validateRelationsUsedNames[relationName]) {
+            throwError(
+              relationName,
+              'duplicate relation name'
+            );
+          }
 
-        // no type or invalid type ?
-        if (
-          !relationData.type ||
-          RELATION_TYPE[relationData.type] === undefined
-        ) {
-          throwError(
-            relationName,
-            'invalid type'
-          );
-        }
+          // add relation name to unique names
+          validateRelationsUsedNames[relationName] = true;
 
-        // must have collection name
-        if (
-          !relationData.collection ||
-          typeof relationData.collection !== 'string'
-        ) {
-          throwError(
-            relationName,
-            `invalid collection name (${typeof relationData.collection})`
-          );
-        }
+          // not an object ?
+          if (
+            !relationData ||
+            !_.isObject(relationData)
+          ) {
+            throwError(
+              relationName,
+              'expecting object'
+            );
+          }
 
-        // must have project so we force retrieval of only what is necessary
-        if (
-          !relationData.project ||
-          !Array.isArray(relationData.project) ||
-          relationData.project.length < 1
-        ) {
-          throwError(
-            relationName,
-            'invalid project provided'
-          );
-        }
+          // no type or invalid type ?
+          if (
+            !relationData.type ||
+            RELATION_TYPE[relationData.type] === undefined
+          ) {
+            throwError(
+              relationName,
+              'invalid type'
+            );
+          }
 
-        // validate accordingly to its type
-        switch (relationData.type) {
-          case RELATION_TYPE.HAS_ONE:
-            // must have key
-            if (
-              !relationData.key ||
-              typeof relationData.key !== 'string'
-            ) {
-              throwError(
-                relationName,
-                `invalid key name (${typeof relationData.key})`
-              );
-            }
+          // must have collection name
+          if (
+            !relationData.collection ||
+            typeof relationData.collection !== 'string'
+          ) {
+            throwError(
+              relationName,
+              `invalid collection name (${typeof relationData.collection})`
+            );
+          }
 
-            // must have keyValue
-            if (
-              !relationData.keyValue ||
-              typeof relationData.keyValue !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid key value (${typeof relationData.keyValue})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.keyValue = eval(relationData.keyValue);
-              } catch (e) {
+          // must have project, so we force retrieval of only what is necessary
+          if (
+            !relationData.project ||
+            !Array.isArray(relationData.project) ||
+            relationData.project.length < 1
+          ) {
+            throwError(
+              relationName,
+              'invalid project provided'
+            );
+          }
+
+          // validate accordingly to its type
+          switch (relationData.type) {
+            case RELATION_TYPE.HAS_ONE:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
                 throwError(
                   relationName,
-                  'invalid key value method content'
+                  `invalid key name (${typeof relationData.key})`
                 );
               }
-            }
 
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // must have keyValue
+              if (
+                !relationData.keyValue ||
+                typeof relationData.keyValue !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid key value (${typeof relationData.keyValue})`
                 );
-              }
-            }
-
-            // replace
-            if (
-              relationData.replace &&
-              typeof relationData.replace !== 'object'
-            ) {
-              // invalid definition
-              throwError(
-                relationName,
-                `invalid replace (${typeof relationData.replace})`
-              );
-            } else {
-              _.each(relationData.replace, (value, key) => {
-                if (
-                  !key ||
-                  typeof key !== 'string' ||
-                  !value ||
-                  typeof value !== 'object' ||
-                  !value.value ||
-                  typeof value.value !== 'string'
-                ) {
-                  // invalid definition
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValue = eval(relationData.keyValue);
+                } catch (e) {
                   throwError(
                     relationName,
-                    `invalid replace (${typeof relationData.replace})`
+                    'invalid key value method content'
                   );
                 }
-              });
-            }
+              }
 
-            // finished
-            break;
-
-          case RELATION_TYPE.GET_ONE:
-            // must have query
-            if (
-              !relationData.query ||
-              typeof relationData.query !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid query (${typeof relationData.query})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.query = eval(relationData.query);
-              } catch (e) {
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid query method content'
+                  `invalid after (${typeof relationData.after})`
                 );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
-            }
 
-            // must have sort
-            if (
-              !relationData.sort ||
-              typeof relationData.sort !== 'object'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid sort (${typeof relationData.sort})`
-              );
-            }
-
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // replace
+              if (
+                relationData.replace &&
+                typeof relationData.replace !== 'object'
+              ) {
+                // invalid definition
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid replace (${typeof relationData.replace})`
+                );
+              } else {
+                _.each(relationData.replace, (value, key) => {
+                  if (
+                    !key ||
+                    typeof key !== 'string' ||
+                    !value ||
+                    typeof value !== 'object' ||
+                    !value.value ||
+                    typeof value.value !== 'string'
+                  ) {
+                    // invalid definition
+                    throwError(
+                      relationName,
+                      `invalid replace (${typeof relationData.replace})`
+                    );
+                  }
+                });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.GET_ONE:
+              // must have query
+              if (
+                !relationData.query ||
+                typeof relationData.query !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid query (${typeof relationData.query})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.query = eval(relationData.query);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid query method content'
+                  );
+                }
+              }
+
+              // must have sort
+              if (
+                !relationData.sort ||
+                typeof relationData.sort !== 'object'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid sort (${typeof relationData.sort})`
                 );
               }
+
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
+              }
+
+              // finished
+              break;
+          }
+
+          // do we have children relations ?
+          if (relationData.relations) {
+            // validate base
+            if (
+              typeof relationData.relations !== 'object' ||
+              Array.isArray(relationData.relations)
+            ) {
+              throwError(
+                relationName,
+                'invalid children relations provided'
+              );
             }
 
-            // finished
-            break;
-        }
-      });
+            // validate children relations
+            validateRelations(relationData.relations);
+          }
+        });
+      };
+
+      // validate the main ones
+      validateRelations(relations);
     };
 
     // validate & parse relations
@@ -2058,22 +2093,47 @@ function exportFilteredModelsList(
 
       // format relations
       const mappedRelations = {};
-      const formattedRelations = [];
-      _.each(
-        relations,
-        (relationData, relationName) => {
-          // create relation handler
-          const relHandler = {
-            name: relationName,
-            data: relationData
-          };
-
-          // attach to map for easy access too
-          mappedRelations[relHandler.name] = relHandler;
-
-          // add to relations
-          formattedRelations.push(relHandler);
+      const formattedRelationsPerLevel = [];
+      const deepScanForRelations = (
+        relationsInQuestion,
+        level
+      ) => {
+        // must initialize list of relations for this level ?
+        if (formattedRelationsPerLevel.length < level) {
+          formattedRelationsPerLevel.push([]);
         }
+
+        // go through relations and format them
+        _.each(
+          relationsInQuestion,
+          (relationData, relationName) => {
+            // create relation handler
+            const relHandler = {
+              name: relationName,
+              data: relationData
+            };
+
+            // attach to map for easy access too
+            mappedRelations[relHandler.name] = relHandler;
+
+            // add to relations
+            formattedRelationsPerLevel[level - 1].push(relHandler);
+
+            // do we have children relations ?
+            if (relHandler.data.relations) {
+              deepScanForRelations(
+                relHandler.data.relations,
+                level + 1
+              );
+            }
+          }
+        );
+      };
+
+      // start scan from the root
+      deepScanForRelations(
+        relations,
+        1
       );
 
       // format joins
@@ -2144,19 +2204,21 @@ function exportFilteredModelsList(
       const formattedPrefilters = formatPrefilters(prefilters);
 
       // determine replacements
-      // - for now only relationships ofer the possibility of replacements
+      // - for now only relationships offer the possibility of replacements
       const replacements = {};
-      formattedRelations.forEach((relation) => {
-        // nothing to do here
-        if (!relation.data.replace) {
-          return;
-        }
+      formattedRelationsPerLevel.forEach((formattedRelations) => {
+        formattedRelations.forEach((relation) => {
+          // nothing to do here
+          if (!relation.data.replace) {
+            return;
+          }
 
-        // merge replacements
-        Object.assign(
-          replacements,
-          relation.data.replace
-        );
+          // merge replacements
+          Object.assign(
+            replacements,
+            relation.data.replace
+          );
+        });
       });
 
       // finished
@@ -2226,7 +2288,7 @@ function exportFilteredModelsList(
         },
 
         // convert relations to array for easier access
-        relations: formattedRelations,
+        relationsPerLevel: formattedRelationsPerLevel,
         relationsMap: mappedRelations,
         replacements,
 
@@ -4865,12 +4927,13 @@ function exportFilteredModelsList(
 
         // handle relation
         const writeDataToFileDetermineMissingRelationsData = (
+          relationsToRetrieve,
           relationsAccumulator,
           record
         ) => {
-          for (let relationIndex = 0; relationIndex < sheetHandler.relations.length; relationIndex++) {
+          for (let relationIndex = 0; relationIndex < relationsToRetrieve.length; relationIndex++) {
             // get relation data
-            const relation = sheetHandler.relations[relationIndex];
+            const relation = relationsToRetrieve[relationIndex];
 
             // take action accordingly
             // - relations should be ...valid at this point, at least the format
@@ -4949,9 +5012,12 @@ function exportFilteredModelsList(
 
         // process relations
         // - must return promise
-        const writeDataToFileProcessRelations = (data) => {
+        const writeDataToFileProcessRelations = (
+          relationsToRetrieve,
+          data
+        ) => {
           // no relations ?
-          if (sheetHandler.relations.length < 1) {
+          if (relationsToRetrieve.length < 1) {
             return Promise.resolve();
           }
 
@@ -4970,6 +5036,7 @@ function exportFilteredModelsList(
 
             // do we have relations ?
             writeDataToFileDetermineMissingRelationsData(
+              relationsToRetrieve,
               relationsToProcess,
               record
             );
@@ -5190,7 +5257,7 @@ function exportFilteredModelsList(
               // retrieve next request
               const requestData = dbRequests.splice(0, 1)[0];
 
-              // depending of relation type we need to handle things differently
+              // depending on relation type we need to handle things differently
               switch (requestData.retrieveType) {
                 case RELATION_RETRIEVAL_TYPE.KEY_IN:
                   keyInHandler(requestData)
@@ -5221,12 +5288,13 @@ function exportFilteredModelsList(
 
         // attach relations data to record
         const writeDataToFileAttachRelations = (
+          relationsToRetrieve,
           record,
           relationsData
         ) => {
-          for (let relIndex = 0; relIndex < sheetHandler.relations.length; relIndex++) {
+          for (let relIndex = 0; relIndex < relationsToRetrieve.length; relIndex++) {
             // get relation
-            const relation = sheetHandler.relations[relIndex];
+            const relation = relationsToRetrieve[relIndex];
 
             // nothing to set here ?
             if (!relationsData[relation.name]) {
@@ -5297,7 +5365,7 @@ function exportFilteredModelsList(
               // get data
               const column = sheetHandler.columns.headerColumns[columnIndex];
 
-              // if column is anonymize then there is no need to retrieve data for this cell
+              // if column is anonymized then there is no need to retrieve data for this cell
               // - or column can't contain language tokens
               if (
                 column.anonymize ||
@@ -5374,22 +5442,22 @@ function exportFilteredModelsList(
 
         // handle write data to file
         const writeDataToFile = (data) => {
-          // for context sake,need to define it locally
+          // for context’s sake, need to define it locally
           // - promise visibility
           const recordData = data;
 
-          // retrieve necessary data & write record to file
-          return Promise.resolve()
+          // handle relations and children relations
+          const processRelations = (levelIndex) => {
             // retrieve relations data
-            .then(() => {
-              return writeDataToFileProcessRelations(recordData);
-            })
-
-            // map relation data
-            .then((relationsData) => {
+            const relationsToRetrieve = sheetHandler.relationsPerLevel[levelIndex];
+            return writeDataToFileProcessRelations(
+              relationsToRetrieve,
+              recordData
+            ).then((relationsData) => {
+              // map relation data
               // no relations ?
               if (
-                sheetHandler.relations.length < 1 ||
+                relationsToRetrieve.length < 1 ||
                 !relationsData
               ) {
                 return;
@@ -5407,10 +5475,31 @@ function exportFilteredModelsList(
 
                 // process relations
                 writeDataToFileAttachRelations(
+                  relationsToRetrieve,
                   record,
                   relationsData
                 );
               }
+            })
+              // retrieve next level relations
+              .then(() => {
+                // nothing else to retrieve ?
+                if (sheetHandler.relationsPerLevel.length <= levelIndex + 1) {
+                  return Promise.resolve();
+                }
+
+                // retrieve next level of relations
+                return processRelations(levelIndex + 1);
+              });
+          };
+
+          // retrieve necessary data & write record to file
+          return Promise.resolve()
+            // retrieve relations data
+            .then(() => {
+              return sheetHandler.relationsPerLevel.length < 1 ?
+                Promise.resolve() :
+                processRelations(0);
             })
 
             // retrieve missing language tokens & write data

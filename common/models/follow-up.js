@@ -87,7 +87,10 @@ module.exports = function (FollowUp) {
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
-    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -124,7 +127,10 @@ module.exports = function (FollowUp) {
         'statusId',
         'targeted',
         'comment',
-        'responsibleUserId'
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {

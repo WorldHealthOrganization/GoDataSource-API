@@ -512,7 +512,12 @@ module.exports = function (Outbreak) {
             exportFieldsGroup: app.models.case.exportFieldsGroup,
             exportFieldsOrder: app.models.case.exportFieldsOrder,
             locationFields: app.models.case.locationFields,
-            additionalFieldsToExport
+            additionalFieldsToExport,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -531,7 +536,23 @@ module.exports = function (Outbreak) {
             jsonReplaceUndefinedWithNull,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          prefilters
+          prefilters, {
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
+              }`
+            }
+          }
         );
       })
       .then((exportData) => {

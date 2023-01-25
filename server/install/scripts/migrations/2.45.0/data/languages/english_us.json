@@ -63,6 +63,42 @@
     "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
       "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) for the following rows: {{rows}}",
       "section": "uiBulkAddContactsPage"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA": {
+      "translation": "Persons Related Person Data",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_EXPOSURE_INFORMATION": {
+      "translation": "Include exposure person data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_EXPOSURE_INFORMATION_DESCRIPTION": {
+      "translation": "Include information like event name or case firstname, last name, id",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE": {
+      "translation": "Retrieve oldest exposure",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE_DESCRIPTION": {
+      "translation": "By default on export the most recent exposure is exported along with contact information, but you can request to retrieve the oldest exposure instead",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_EXPOSURE_INFORMATION": {
+      "translation": "Include exposure person data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_EXPOSURE_INFORMATION_DESCRIPTION": {
+      "translation": "Include information like contact firstname, last name, id",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE": {
+      "translation": "Retrieve oldest exposure",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE_DESCRIPTION": {
+      "translation": "By default on export the most recent exposure is exported along with contact information, but you can request to retrieve the oldest exposure instead",
+      "section": "uiContactsOfContactsListPage"
     }
   }
 }

@@ -111,7 +111,10 @@ const constants = {
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS',
-    'responsibleUserId': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
