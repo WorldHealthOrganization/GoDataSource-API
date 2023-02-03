@@ -1832,11 +1832,15 @@ module.exports = function (Person) {
 
           // determine lastGraphDate
           // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
-          recordData.lastGraphDate = helpers.getDate(recordData.date);
+          recordData.lastGraphDate = recordData.date ?
+            helpers.getDate(recordData.date) :
+            undefined;
 
           // determine firstGraphDate
           // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
-          recordData.firstGraphDate = helpers.getDate(recordData.date);
+          recordData.firstGraphDate = recordData.date ?
+            helpers.getDate(recordData.date) :
+            undefined;
 
           // determine lastGraphDate starting with lab results
           // applies only for cases, since events don't have lab results
@@ -1872,7 +1876,7 @@ module.exports = function (Person) {
                   );
 
                 // fallback to dateSampleTaken
-              } else {
+              } else if (lab.dateSampleTaken) {
                 // determine lastGraphDate
                 const dateSampleTaken = helpers.getDate(lab.dateSampleTaken);
                 recordData.lastGraphDate = !recordData.lastGraphDate ?
@@ -1990,7 +1994,7 @@ module.exports = function (Person) {
           }
 
           // determine oldest case onset date / event date
-          response.minGraphDate = !response.minGraphDate ?
+          response.minGraphDate = !response.minGraphDate || !recordData.firstGraphDate ?
             recordData.firstGraphDate : (
               recordData.firstGraphDate.isBefore(response.minGraphDate) ?
                 recordData.firstGraphDate :
@@ -1998,7 +2002,7 @@ module.exports = function (Person) {
             );
 
           // determine the most recent case graph date
-          response.maxGraphDate = !response.maxGraphDate ?
+          response.maxGraphDate = !response.maxGraphDate || !recordData.lastGraphDate ?
             recordData.lastGraphDate : (
               recordData.lastGraphDate.isAfter(response.maxGraphDate) ?
                 recordData.lastGraphDate :
