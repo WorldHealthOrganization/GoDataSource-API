@@ -1994,20 +1994,24 @@ module.exports = function (Person) {
           }
 
           // determine oldest case onset date / event date
-          response.minGraphDate = !response.minGraphDate || !recordData.firstGraphDate ?
-            recordData.firstGraphDate : (
-              recordData.firstGraphDate.isBefore(response.minGraphDate) ?
-                recordData.firstGraphDate :
-                response.minGraphDate
-            );
+          if (recordData.firstGraphDate) {
+            response.minGraphDate = !response.minGraphDate ?
+              recordData.firstGraphDate : (
+                recordData.firstGraphDate.isBefore(response.minGraphDate) ?
+                  recordData.firstGraphDate :
+                  response.minGraphDate
+              );
+          }
 
           // determine the most recent case graph date
-          response.maxGraphDate = !response.maxGraphDate || !recordData.lastGraphDate ?
-            recordData.lastGraphDate : (
-              recordData.lastGraphDate.isAfter(response.maxGraphDate) ?
-                recordData.lastGraphDate :
-                response.maxGraphDate
-            );
+          if (recordData.lastGraphDate) {
+            response.maxGraphDate = !response.maxGraphDate ?
+              recordData.lastGraphDate : (
+                recordData.lastGraphDate.isAfter(response.maxGraphDate) ?
+                  recordData.lastGraphDate :
+                  response.maxGraphDate
+              );
+          }
 
           // convert center names object to array
           // & sort them by name
