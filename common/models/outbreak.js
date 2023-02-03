@@ -53,7 +53,8 @@ module.exports = function (Outbreak) {
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
     isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
     applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
-    checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET'
+    checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET',
+    disableModifyingLegacyQuestionnaire: 'LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE'
   });
 
   Outbreak.referenceDataFieldsToCategoryMap = {

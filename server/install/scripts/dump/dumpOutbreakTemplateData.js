@@ -93,7 +93,8 @@ function run(callback) {
           isContactsOfContactsActive: item.isContactsOfContactsActive,
           isDateOfOnsetRequired: item.isDateOfOnsetRequired,
           applyGeographicRestrictions: item.applyGeographicRestrictions,
-          checkLastContactDateAgainstDateOnSet: item.checkLastContactDateAgainstDateOnSet
+          checkLastContactDateAgainstDateOnSet: item.checkLastContactDateAgainstDateOnSet,
+          disableModifyingLegacyQuestionnaire: item.disableModifyingLegacyQuestionnaire
         });
 
         // translate tokens

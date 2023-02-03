@@ -191,6 +191,11 @@
       "description": "Flag specifying whether Date of Last Contact that is BEFORE the Date of Onset of source case. Default: false",
       "type": "boolean",
       "default": false
+    },
+    "disableModifyingLegacyQuestionnaire": {
+      "description": "Flag specifying if the modifying of the legacy questionnaire is disabled. Default: false",
+      "type": "boolean",
+      "default": false
     }
   },
   "indexes": {

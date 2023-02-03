@@ -40,6 +40,22 @@
       "translation": "An warning will be displayed if date of last contact is before date of onset. You will still be able to save data without having to address the warning",
       "section": "uiOutbreakTemplateFields"
     },
+    "LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE": {
+      "translation": "Disable modifying legacy questionnaire",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "Disable the modifying of the legacy questionnaire",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE": {
+      "translation": "Disable modifying legacy questionnaire",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "Disable the modifying of the legacy questionnaire",
+      "section": "uiOutbreakTemplateFields"
+    },
     "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
       "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
       "section": "uiModifyEntityRelationshipPage"
