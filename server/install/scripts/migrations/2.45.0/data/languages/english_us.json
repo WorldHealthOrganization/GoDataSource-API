@@ -45,7 +45,7 @@
       "section": "uiOutbreakFields"
     },
     "LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
-      "translation": "Disable the modifying of the legacy questionnaire",
+      "translation": "By default when you modify a case that was converted from a contact you have the option to change both contact and case forms (the same applies for a contact converted from a case)",
       "section": "uiOutbreakFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE": {
@@ -53,7 +53,7 @@
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
-      "translation": "Disable the modifying of the legacy questionnaire",
+      "translation": "By default when you modify a case that was converted from a contact you have the option to change both contact and case forms (the same applies for a contact converted from a case)",
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
