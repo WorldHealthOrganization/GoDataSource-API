@@ -190,7 +190,7 @@ const migrationVersions = [{
     fileName: 'template.js',
     actions: [{
       name: 'createUpdateDefaultOutbreakTemplates',
-      buildNo: 18
+      buildNo: 19
     }]
   }, {
     fileName: 'referenceData.js',
