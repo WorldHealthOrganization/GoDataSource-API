@@ -167,6 +167,14 @@
     "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
       "translation": "Show form question numbers",
       "section": "uiModifyLabResultPage"
+    },
+    "LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID": {
+      "translation": "Place of death",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID_DESCRIPTION": {
+      "translation": "Place of death",
+      "section": "uiCaseFields"
     }
   }
 }
