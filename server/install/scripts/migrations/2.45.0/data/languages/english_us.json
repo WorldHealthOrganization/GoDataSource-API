@@ -179,6 +179,10 @@
     "LNG_HOSPITALISATION_ISOLATION_DATE_RANGE_WARNING_CASE_DATEOFONSET_AFTER_START_DATE": {
       "translation": "Date of onset is after start date",
       "section": "uiChainsOfTransmissionBars"
+    },
+    "LNG_OUTBREAK_FIELD_CHECK_DUPLICATE_ENTITY_MASK": {
+      "translation": "Using the same ID mask for cases, contacts and / or contacts of contacts, will maintain continuity in the sequence number increase for all groups. The counter will not reset and therefore there will be no separate sequence increase order for cases, contacts, and / or contacts of contacts.",
+      "section": "uiOutbreakFields"
     }
   }
 }
