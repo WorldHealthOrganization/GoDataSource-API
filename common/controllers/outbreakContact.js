@@ -1660,6 +1660,27 @@ module.exports = function (Outbreak) {
         // update casesQuery if needed
         updatedFilter && (filter.where = updatedFilter);
 
+        // determine fields that should be used at export
+        let fieldLabelsMapOptions = app.models.contact.helpers.sanitizeFieldLabelsMapForExport();
+        if (!includePersonExposureFields) {
+          fieldLabelsMapOptions = _.transform(
+            fieldLabelsMapOptions,
+            (acc, token, field) => {
+              // nothing to do ?
+              if (
+                field === 'relationship.relatedPersonData' ||
+                field.startsWith('relationship.relatedPersonData.')
+              ) {
+                return;
+              }
+
+              // add to list
+              acc[field] = token;
+            },
+            {}
+          );
+        }
+
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
@@ -1668,7 +1689,7 @@ module.exports = function (Outbreak) {
             scopeQuery: app.models.contact.definition.settings.scope,
             excludeBaseProperties: app.models.contact.definition.settings.excludeBaseProperties,
             arrayProps: app.models.contact.arrayProps,
-            fieldLabelsMap: app.models.contact.helpers.sanitizeFieldLabelsMapForExport(),
+            fieldLabelsMap: fieldLabelsMapOptions,
             exportFieldsGroup: app.models.contact.exportFieldsGroup,
             exportFieldsOrder: app.models.contact.exportFieldsOrder,
             locationFields: app.models.contact.locationFields,
