@@ -183,6 +183,9 @@
     "LNG_OUTBREAK_FIELD_CHECK_DUPLICATE_ENTITY_MASK": {
       "translation": "Using the same ID mask for cases, contacts and / or contacts of contacts, will maintain continuity in the sequence number increase for all groups. The counter will not reset and therefore there will be no separate sequence increase order for cases, contacts, and / or contacts of contacts.",
       "section": "uiOutbreakFields"
+    },
+    "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
+      "translation": "<div>{{rectCD}} <span>Case details: hs - Hospitalized / is - Isolated</span></div> <div>{{rectLAB}} <span>Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result</span></div> <div>{{rectOUT}} <span>Outcome: oa - Alive / od - Deceased / or - Recovered</span></div> <div>{{rectB}} <span>Burial: bn - Buried no safe / bs - Buried safe</span></div>"
     }
   }
 }
