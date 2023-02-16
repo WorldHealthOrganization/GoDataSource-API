@@ -2635,8 +2635,10 @@ module.exports = function (Outbreak) {
               }
             }, {
               '$unset': {
-                deleted: '',
                 deletedAt: ''
+              },
+              '$set': {
+                deleted: false
               }
             })
             .then(() => {
@@ -2652,7 +2654,7 @@ module.exports = function (Outbreak) {
                   options.remotingContext.req.logger.debug(`Failed to delete outbreak after the related language tokens restore failed. Error: ${err}`);
                 }
 
-                // failed to reverts the changes
+                // failed to revert changes
                 callback(err);
               });
             });
