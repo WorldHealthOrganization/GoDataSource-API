@@ -220,6 +220,33 @@
     "LNG_PAGE_MODIFY_LAB_RESULT_LIST_ACTION_MODIFY_MULTIPLE_LAB_RESULTS_SUCCESS_MESSAGE": {
       "translation": "Lab results updated",
       "section": "uiModifyLabResultPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_EVENT": {
+      "translation": "Deleting Event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
+      "translation": "Restoring Event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the event (e.g. relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT": {
+      "translation": "Deleting Contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
+      "translation": "Restoring Contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT_OF_CONTACT": {
+      "translation": "Deleting Contact of Contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
+      "translation": "Restoring Contact of Contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact of contacts (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE": {
+      "translation": "Deleting Case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": {
+      "translation": "Case '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
+      "translation": "Restoring Case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
     }
   }
 }
