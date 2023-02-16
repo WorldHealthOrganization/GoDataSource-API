@@ -38,6 +38,68 @@
               }
             }
           }
+        },
+        {
+          "relation": "followUps",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "labResults",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
         }
       ]
     }
