@@ -19,10 +19,173 @@
       "translation": "Hospitalization / Isolation"
     },
     "LNG_TEMPLATE_7A212D81-896B-4301-95B6-E726E1300696_CONTACTINVESTIGATIONTEMPLATE_QUESTION_FB_1_CONTACTOUTCOME_HOSPITALISATIONREQUIRED_TEXT": {
-      "english_us": "Hospitalization required"
+      "translation": "Hospitalization required"
     },
     "LNG_DATE_RANGE_ADD_ANOTHER_DATE_MESSAGE": {
       "translation": "Add Hospitalization / Isolation"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
+      "translation": "Display warning if date of last contact is before date of onset",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "An warning will be displayed if date of last contact is before date of onset. You will still be able to save data without having to address the warning",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET": {
+      "translation": "Display warning if date of last contact is before date of onset",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "An warning will be displayed if date of last contact is before date of onset. You will still be able to save data without having to address the warning",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE": {
+      "translation": "Disable modifying legacy questionnaire",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "By default when you modify a case that was converted from a contact you have the option to change both contact and case forms (the same applies for a contact converted from a case)",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE": {
+      "translation": "Disable modifying legacy questionnaire",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "By default when you modify a case that was converted from a contact you have the option to change both contact and case forms (the same applies for a contact converted from a case)",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
+      "section": "uiModifyEntityRelationshipPage"
+    },
+    "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case: {{entities}}",
+      "section": "uiModifyEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) for the following contacts: {{entities}}",
+      "section": "uiCreateEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset for the following exposures: {{entities}}",
+      "section": "uiCreateEntityRelationshipPage"
+    },
+    "LNG_PAGE_CREATE_CONTACT_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) of the source case",
+      "section": "uiCreateContactPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+      "translation": "Date of Last Contact is before Date of Onset ({{dateOfOnset}}) for the following rows: {{rows}}",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA": {
+      "translation": "Persons Related Person Data",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_EXPOSURE_INFORMATION": {
+      "translation": "Include exposure person data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_EXPOSURE_INFORMATION_DESCRIPTION": {
+      "translation": "Include information like event name or case firstname, last name, id",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE": {
+      "translation": "Retrieve oldest exposure",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE_DESCRIPTION": {
+      "translation": "By default on export the most recent exposure is exported along with contact information, but you can request to retrieve the oldest exposure instead",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_EXPOSURE_INFORMATION": {
+      "translation": "Include exposure person data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_EXPOSURE_INFORMATION_DESCRIPTION": {
+      "translation": "Include information like contact firstname, last name, id",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE": {
+      "translation": "Retrieve oldest exposure",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE_DESCRIPTION": {
+      "translation": "By default on export the most recent exposure is exported along with contact information, but you can request to retrieve the oldest exposure instead",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_COMMON_LABEL_TAB_OPTIONS": {
+      "translation": "Tab Options",
+      "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_CREATE_CASE_TAB_OPTION_SHOW_CASE_QUESTION_NUMBERS": {
+      "translation": "Show case form question numbers",
+      "section": "uiCreateCasePage"
+    },
+    "LNG_PAGE_CREATE_CASE_TAB_OPTION_SHOW_CONTACT_QUESTION_NUMBERS": {
+      "translation": "Show contact form question numbers",
+      "section": "uiCreateCasePage"
+    },
+    "LNG_PAGE_MODIFY_CASE_TAB_OPTION_SHOW_CASE_QUESTION_NUMBERS": {
+      "translation": "Show case form question numbers",
+      "section": "uiModifyCasePage"
+    },
+    "LNG_PAGE_MODIFY_CASE_TAB_OPTION_SHOW_CONTACT_QUESTION_NUMBERS": {
+      "translation": "Show contact form question numbers",
+      "section": "uiModifyCasePage"
+    },
+    "LNG_PAGE_CREATE_CONTACT_TAB_OPTION_SHOW_CONTACT_QUESTION_NUMBERS": {
+      "translation": "Show contact form question numbers",
+      "section": "uiCreateContactPage"
+    },
+    "LNG_PAGE_CREATE_CONTACT_TAB_OPTION_SHOW_CASE_QUESTION_NUMBERS": {
+      "translation": "Show case form question numbers",
+      "section": "uiCreateContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_TAB_OPTION_SHOW_CONTACT_QUESTION_NUMBERS": {
+      "translation": "Show contact form question numbers",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_TAB_OPTION_SHOW_CASE_QUESTION_NUMBERS": {
+      "translation": "Show case form question numbers",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_CREATE_LAB_RESULT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show form question numbers",
+      "section": "uiCreateFollowUpPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show form question numbers",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_PAGE_CREATE_FOLLOW_UP_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show form question numbers",
+      "section": "uiCreateLabResultPage"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show form question numbers",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID": {
+      "translation": "Place of death",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID_DESCRIPTION": {
+      "translation": "Place of death",
+      "section": "uiCaseFields"
+    },
+    "LNG_HOSPITALISATION_ISOLATION_DATE_RANGE_WARNING_CASE_DATEOFONSET_AFTER_START_DATE": {
+      "translation": "Date of onset is after start date",
+      "section": "uiChainsOfTransmissionBars"
+    },
+    "LNG_OUTBREAK_FIELD_CHECK_DUPLICATE_ENTITY_MASK": {
+      "translation": "Using the same ID mask for cases, contacts and / or contacts of contacts, will maintain continuity in the sequence number increase for all groups. The counter will not reset and therefore there will be no separate sequence increase order for cases, contacts, and / or contacts of contacts.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
+      "translation": "<div>{{rectCD}} <span>Case details: hs - Hospitalized / is - Isolated</span></div> <div>{{rectLAB}} <span>Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result</span></div> <div>{{rectOUT}} <span>Outcome: oa - Alive / od - Deceased / or - Recovered</span></div> <div>{{rectB}} <span>Burial: bn - Buried no safe / bs - Buried safe</span></div>"
     }
   }
 }

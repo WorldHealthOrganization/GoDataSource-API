@@ -1252,6 +1252,7 @@ const includeSubLocationsInLocationFilter = function (
               // replace original filter with actual location filter and use found location ids
               const customLocationFilters = [
                 'usualPlaceOfResidenceLocationId',
+                'deathLocationId',
                 'burialLocationId'
               ];
               let propertyReplaced = false;

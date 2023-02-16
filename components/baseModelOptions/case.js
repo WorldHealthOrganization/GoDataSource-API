@@ -84,6 +84,7 @@ const constants = {
     'documents[].type': 'LNG_CASE_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CASE_FIELD_LABEL_DOCUMENT_NUMBER',
     'transferRefused': 'LNG_CASE_FIELD_LABEL_TRANSFER_REFUSED',
+    'deathLocationId': 'LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID',
     'addresses': 'LNG_CASE_FIELD_LABEL_ADDRESSES',
     'addresses[].typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
     'addresses[].country': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_COUNTRY',
@@ -111,12 +112,20 @@ const constants = {
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS',
-    'responsibleUserId': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CASE_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   }),
   foreignKeyResolverMap: {
+    'deathLocationId': {
+      modelName: 'location',
+      collectionName: 'location',
+      useProperty: 'name'
+    },
     'burialLocationId': {
       modelName: 'location',
       collectionName: 'location',
@@ -147,6 +156,11 @@ const constants = {
       collectionName: 'location',
       useProperty: 'name'
     },
+    'relationships[].people[].deathLocationId': {
+      modelName: 'location',
+      collectionName: 'location',
+      useProperty: 'name'
+    },
     'relationships[].people[].burialLocationId': {
       modelName: 'location',
       collectionName: 'location',
@@ -161,6 +175,7 @@ const constants = {
   locationFields: [
     'addresses[].locationId',
     'dateRanges[].locationId',
+    'deathLocationId',
     'burialLocationId'
   ],
   referenceDataFieldsToCategoryMap: {

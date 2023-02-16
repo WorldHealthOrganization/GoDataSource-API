@@ -243,11 +243,15 @@ module.exports = function (Case) {
         'outcomeId',
         'dateOfOutcome',
         'transferRefused',
+        'deathLocationId',
         'safeBurial',
         'dateOfBurial',
         'burialLocationId',
         'burialPlaceName',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]
@@ -347,6 +351,7 @@ module.exports = function (Case) {
     'dateOfOutcome',
     'dateRanges',
     'transferRefused',
+    'deathLocationId',
     'safeBurial',
     'dateOfBurial',
     'burialLocationId',
@@ -384,6 +389,7 @@ module.exports = function (Case) {
   // this is solely used for attaching parent locations custom fields in prints
   // addresses and dateRanges location ids are being handled inside their own models
   Case.locationsFieldsMap = {
+    deathLocationId: 'LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID',
     burialLocationId: 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID'
   };
 

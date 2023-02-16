@@ -186,6 +186,16 @@
       "description": "Flag specifying whether the geographical restriction of data will be applied for the outbreak",
       "type": "boolean",
       "default": false
+    },
+    "checkLastContactDateAgainstDateOnSet": {
+      "description": "Flag specifying whether Date of Last Contact that is BEFORE the Date of Onset of source case. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "disableModifyingLegacyQuestionnaire": {
+      "description": "Flag specifying if the modifying of the legacy questionnaire is disabled. Default: false",
+      "type": "boolean",
+      "default": false
     }
   },
   "indexes": {
@@ -4794,7 +4804,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, offset, limit, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includePersonExposureFields, where.retrieveOldestExposure, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -8312,7 +8322,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includePersonExposureFields, where.retrieveOldestExposure, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",

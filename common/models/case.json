@@ -166,6 +166,9 @@
       "type": "boolean",
       "default": false
     },
+    "deathLocationId": {
+      "type": "string"
+    },
     "questionnaireAnswers": {
       "type": "object"
     },

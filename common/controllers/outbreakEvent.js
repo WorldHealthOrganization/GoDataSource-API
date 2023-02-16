@@ -12,6 +12,7 @@ const _ = require('lodash');
 const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
+const exportHelper = require('../../components/exportHelper');
 
 // used in event import
 const eventImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -189,7 +190,12 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.event.fieldLabelsMap,
             exportFieldsGroup: app.models.event.exportFieldsGroup,
             exportFieldsOrder: app.models.event.exportFieldsOrder,
-            locationFields: app.models.event.locationFields
+            locationFields: app.models.event.locationFields,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -205,6 +211,23 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          undefined, {
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
+              }`
+            }
           }
         );
       })

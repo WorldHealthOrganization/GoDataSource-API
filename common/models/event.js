@@ -36,7 +36,10 @@ module.exports = function (Event) {
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
-    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY',
     'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE'
   };
@@ -78,7 +81,10 @@ module.exports = function (Event) {
         'eventCategory',
         'endDate',
         'description',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]

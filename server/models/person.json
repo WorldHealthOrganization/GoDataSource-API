@@ -116,6 +116,9 @@
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
     },
+    "deathLocationId": {
+      "type": "string"
+    },
     "dateOfBurial": {
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"

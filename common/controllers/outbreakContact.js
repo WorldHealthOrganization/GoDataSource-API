@@ -1497,6 +1497,20 @@ module.exports = function (Outbreak) {
       delete filter.where.jsonReplaceUndefinedWithNull;
     }
 
+    // parse includePersonExposureFields query param
+    let includePersonExposureFields = false;
+    if (filter.where.hasOwnProperty('includePersonExposureFields')) {
+      includePersonExposureFields = filter.where.includePersonExposureFields;
+      delete filter.where.includePersonExposureFields;
+    }
+
+    // parse retrieveOldestExposure query param
+    let retrieveOldestExposure = false;
+    if (filter.where.hasOwnProperty('retrieveOldestExposure')) {
+      retrieveOldestExposure = filter.where.retrieveOldestExposure;
+      delete filter.where.retrieveOldestExposure;
+    }
+
     // if encrypt password is not valid, remove it
     if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
       encryptPassword = null;
@@ -1646,6 +1660,27 @@ module.exports = function (Outbreak) {
         // update casesQuery if needed
         updatedFilter && (filter.where = updatedFilter);
 
+        // determine fields that should be used at export
+        let fieldLabelsMapOptions = app.models.contact.helpers.sanitizeFieldLabelsMapForExport();
+        if (!includePersonExposureFields) {
+          fieldLabelsMapOptions = _.transform(
+            fieldLabelsMapOptions,
+            (acc, token, field) => {
+              // nothing to do ?
+              if (
+                field === 'relationship.relatedPersonData' ||
+                field.startsWith('relationship.relatedPersonData.')
+              ) {
+                return;
+              }
+
+              // add to list
+              acc[field] = token;
+            },
+            {}
+          );
+        }
+
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
@@ -1654,11 +1689,16 @@ module.exports = function (Outbreak) {
             scopeQuery: app.models.contact.definition.settings.scope,
             excludeBaseProperties: app.models.contact.definition.settings.excludeBaseProperties,
             arrayProps: app.models.contact.arrayProps,
-            fieldLabelsMap: app.models.contact.helpers.sanitizeFieldLabelsMapForExport(),
+            fieldLabelsMap: fieldLabelsMapOptions,
             exportFieldsGroup: app.models.contact.exportFieldsGroup,
             exportFieldsOrder: app.models.contact.exportFieldsOrder,
             locationFields: app.models.contact.locationFields,
-            additionalFieldsToExport
+            additionalFieldsToExport,
+
+            // fields that we need to bring from db, but we don't want to include in the export
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -1726,18 +1766,34 @@ module.exports = function (Outbreak) {
                   {
                     outbreakId: '${this.id}',
                     deleted: false,
-                    'persons.id': person._id,
-                    'persons.type': {
-                      $in: [
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                        'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
-                      ]
-                    }
+                    $or: [
+                      {
+                        'persons.0.id': person._id,
+                        'persons.0.target': true,
+                        'persons.1.type': {
+                            $in: [
+                                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                            ]
+                        }
+                      }, {
+                          'persons.1.id': person._id,
+                          'persons.1.target': true,
+                          'persons.0.type': {
+                              $in: [
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'
+                              ]
+                          }
+                      }
+                    ]
                   } :
                   undefined;
               }`,
               sort: {
-                createdAt: 1
+                createdAt: retrieveOldestExposure ?
+                  1 :
+                  -1
               },
               after: `(person) => {
                 // nothing to do ?
@@ -1758,6 +1814,58 @@ module.exports = function (Outbreak) {
                 delete person.relationship.persons;
                 person.relationship.id = person.relationship._id;
                 delete person.relationship._id;
+              }`,
+              relations: includePersonExposureFields ? {
+                relatedPersonData: {
+                  type: exportHelper.RELATION_TYPE.HAS_ONE,
+                  collection: 'person',
+                  project: [
+                    '_id',
+                    // event
+                    'name',
+                    // case
+                    'firstName',
+                    'lastName',
+                    'visualId'
+                  ],
+                  key: '_id',
+                  keyValue: `(person) => {
+                    return person && person.relationship && person.relationship.relatedId ?
+                      person.relationship.relatedId :
+                      undefined;
+                  }`,
+                  after: `(person) => {
+                    // nothing to do ?
+                    if (!person.relatedPersonData) {
+                      // then we shouldn't have relationship either because probably person was deleted
+                      // - for now we shouldn't delete it because we will have no relationship to use on import
+                      // - the correct way would be to retrieve the relationship if person not deleted, but now that isn't easily possible
+                      // delete person.relationship;
+
+                      // not found
+                      return;
+                    }
+
+                    // move from root level to relationship
+                    person.relationship.relatedPersonData = person.relatedPersonData;
+                    delete person.relatedPersonData;
+                  }`
+                }
+              } : undefined
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
               }`
             }
           }
