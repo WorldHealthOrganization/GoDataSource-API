@@ -186,6 +186,67 @@
     },
     "LNG_PAGE_TRANSMISSION_CHAIN_BARS_LEGEND_DETAILS": {
       "translation": "<div>{{rectCD}} <span>Case details: hs - Hospitalized / is - Isolated</span></div> <div>{{rectLAB}} <span>Lab result details: L? - unknown result / L- - negative result / L+ - positive result / (p) - waiting for result</span></div> <div>{{rectOUT}} <span>Outcome: oa - Alive / od - Deceased / or - Recovered</span></div> <div>{{rectB}} <span>Burial: bn - Buried no safe / bs - Buried safe</span></div>"
+    },
+    "LNG_CASE_FIELD_LABEL_DATE_OF_ONSET_IS_AFTER_DATE_OF_REPORTING": {
+      "translation": "Date of onset is after date of reporting",
+      "section": "uiCaseFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_CASE": {
+      "translation": "Exposed to Case"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT": {
+      "translation": "Contact / Case"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_MODIFY_SELECTED_LAB_RESULTS": {
+      "translation": "Modify the selected lab results",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_LIST_TITLE": {
+      "translation": "Modify lab results",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_LIST_MODIFY_DATA_INFO_LABEL": {
+      "translation": "*The system will replace only data that is changed. If you don't enter any data, then the system won't update the data to any of the selected lab results",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_SELECTED_CONTACTS": {
+      "translation": "Selected lab results:",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_LIST_ERROR_NO_LAB_RESULTS_SELECTED": {
+      "translation": "No lab results were selected",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_PAGE_MODIFY_LAB_RESULT_LIST_ACTION_MODIFY_MULTIPLE_LAB_RESULTS_SUCCESS_MESSAGE": {
+      "translation": "Lab results updated",
+      "section": "uiModifyLabResultPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_EVENT": {
+      "translation": "Deleting Event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
+      "translation": "Restoring Event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the event (e.g. relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT": {
+      "translation": "Deleting Contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
+      "translation": "Restoring Contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT_OF_CONTACT": {
+      "translation": "Deleting Contact of Contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
+      "translation": "Restoring Contact of Contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact of contacts (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE": {
+      "translation": "Deleting Case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": {
+      "translation": "Case '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
+      "translation": "Restoring Case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
     }
   }
 }

@@ -21,9 +21,48 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "followUps",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -44,9 +83,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -147,14 +194,14 @@
   ],
   "validations": [],
   "relations": {
-    "labResults": {
-      "type": "hasMany",
-      "model": "labResult",
-      "foreignKey": "personId"
-    },
     "followUps": {
       "type": "hasMany",
       "model": "followUp",
+      "foreignKey": "personId"
+    },
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
       "foreignKey": "personId"
     }
   },

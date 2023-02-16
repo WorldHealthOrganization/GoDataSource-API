@@ -322,7 +322,19 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 31
+      buildNo: 35
+    }]
+  }, {
+    fileName: 'missing-property-deleted.js',
+    actions: [{
+      name: 'addMissingDeletedProperty',
+      buildNo: 9
+    }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'deleteRelatedDataIfPersonDeleted',
+      buildNo: 11
     }]
   }]
 }];
@@ -456,7 +468,8 @@ const run = function (cb) {
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
           startDate: new Date(),
-          executionMap: executionMap
+          executionMap: executionMap,
+          deleted: false
         });
     })
     .then(() => {
