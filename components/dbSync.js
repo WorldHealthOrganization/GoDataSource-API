@@ -96,7 +96,7 @@ let syncCollections = Object.keys(collectionsMap).filter((collection) => syncExc
 
 // create list of models that need to be synced starting from the syncCollections list
 // add the case, contact and event models besides the existing ones
-let syncModels = syncCollections.concat(['case', 'contact', 'event']);
+let syncModels = syncCollections.concat(['case', 'contact', 'event', 'contactOfContact']);
 
 // on import sync package we need to sync in series some collections that generate values based on resources in DB
 // eg: person model - visualId
