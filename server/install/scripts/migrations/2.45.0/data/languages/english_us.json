@@ -251,6 +251,14 @@
     "LNG_MODULE_LABEL_IMPORT_MAPPING": {
       "translation": "Import Mappings",
       "section": "uiModules"
+    },
+    "LNG_COMMON_LABEL_FOOTER_SHOW": {
+      "translation": "Show legend and pagination",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_FOOTER_HIDE": {
+      "translation": "Hide legend and pagination",
+      "section": "uiCommonLabels"
     }
   }
 }
