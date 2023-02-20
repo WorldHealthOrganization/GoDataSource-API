@@ -247,6 +247,10 @@
     },
     "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
       "translation": "Restoring Case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue"
+    },
+    "LNG_MODULE_LABEL_IMPORT_MAPPING": {
+      "translation": "Import Mappings",
+      "section": "uiModules"
     }
   }
 }

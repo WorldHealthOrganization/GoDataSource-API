@@ -75,7 +75,15 @@ const collectionsForExportTypeMap = {
   system: ['template', 'icon', 'helpCategory', 'helpItem', 'language', 'languageToken', 'referenceData', 'location']
 };
 collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
-collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat(['person', 'labResult', 'followUp', 'relationship', 'cluster', 'fileAttachment']);
+collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat([
+  'person',
+  'labResult',
+  'followUp',
+  'relationship',
+  'cluster',
+  'fileAttachment',
+  'importMapping'
+]);
 collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
 // mobile export doesn't need to include template, icon, helpCategory, helpItem, fileAttachment
 ['template', 'icon', 'fileAttachment'].forEach(function (model) {
