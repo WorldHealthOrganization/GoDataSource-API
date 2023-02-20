@@ -322,7 +322,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 36
+      buildNo: 38
     }]
   }, {
     fileName: 'missing-property-deleted.js',
