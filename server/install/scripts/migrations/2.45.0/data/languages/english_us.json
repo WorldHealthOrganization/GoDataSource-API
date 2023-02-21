@@ -113,7 +113,7 @@
       "section": "uiContactsOfContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_RETRIEVE_OLDEST_EXPOSURE_DESCRIPTION": {
-      "translation": "By default on export the most recent exposure is exported along with contact information, but you can request to retrieve the oldest exposure instead",
+      "translation": "By default the most recent exposure is exported along with contact information. This flag allows you to retrieve the oldest exposure instead",
       "section": "uiContactsOfContactsListPage"
     },
     "LNG_COMMON_LABEL_TAB_OPTIONS": {
@@ -259,6 +259,90 @@
     "LNG_COMMON_LABEL_FOOTER_HIDE": {
       "translation": "Hide legend and pagination",
       "section": "uiCommonLabels"
+    },
+    "LNG_EVENT_FILTER_SCREEN_TITLE": {
+      "translation": "Events filters",
+      "section": "uiMobile"
+    },
+    "LNG_NAVIGATION_DRAWER_USERS": {
+      "translation": "Users",
+      "section": "uiMobile"
+    },
+    "LNG_MOBILE_NAVIGATION_DRAWER_COMMUNITY_LINK": {
+      "translation": "Community",
+      "section": "uiMobile"
+    },
+    "LNG_EVENT_SINGLE_SCREEN_ADD_NEW_EVENT_TITLE_LABEL": {
+      "translation": "Add event",
+      "section": "uiMobile"
+    },
+    "LNG_CASE_LIST_SCREEN_NO_EVENTS": {
+      "translation": "There are no events to display",
+      "section": "uiMobile"
+    },
+    "LNG_CASE_FIELD_LABEL_DECEASED": {
+      "translation": "Deceased",
+      "section": "uiMobile"
+    },
+    "LNG_USER_LIST_SCREEN_TITLE": {
+      "translation": "Users",
+      "section": "uiMobile"
+    },
+    "LNG_USER_LIST_SCREEN_PHONE_BUTTON": {
+      "translation": "Call",
+      "section": "uiMobile"
+    },
+    "LNG_USER_LIST_SCREEN_NO_USERS": {
+      "translation": "There are no users to display",
+      "section": "uiMobile"
+    },
+    "LNG_ALERT_MESSAGE_CHECK_FOR_DUPLICATES_REQUST_FAIL": {
+      "translation": "Something went wrong with the database request",
+      "section": "uiMobile"
+    },
+    "LNG_DIALOG_ALERT_MESSAGE_ANSWER_DATE_MISSING": {
+      "translation": "Answer date missing for question answer",
+      "section": "uiMobile"
+    },
+    "LNG_MOBILE_DIALOG_ALERT_MESSAGE_INVALID_EMAIL_ADDRESSES": {
+      "translation": "Invalid email addresses",
+      "section": "uiMobile"
+    },
+    "LNG_DIALOG_ALERT_MESSAGE_CONTACT_WITH_DUPLICATE_NAME": {
+      "translation": "A contact with this first and last name already exists",
+      "section": "uiMobile"
+    },
+    "LNG_DIALOG_ALERT_MESSAGE_CASE_WITH_DUPLICATE_NAME": {
+      "translation": "A case with this first and last name already exists",
+      "section": "uiMobile"
+    },
+    "LNG_DIALOG_ALERT_MESSAGE_ARE_YOU_SURE_YOU_WANT_TO_COPY_THIS_ANSWER_DATE": {
+      "translation": "Are you sure you want to copy this date to all empty date fields ?",
+      "section": "uiMobile"
+    },
+    "LNG_MOBILE_DIALOG_ALERT_MESSAGE_PERMISSION": {
+      "translation": "You don't have permissions for the following operation: ",
+      "section": "uiMobile"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_COPY_ADDRESS": {
+      "translation": "Copy case address",
+      "section": "uiMobile"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_COPY_ADDRESS_EVENT": {
+      "translation": "Copy event address",
+      "section": "uiMobile"
+    },
+    "LNG_ADDRESS_FIELD_LABEL_COPY_ADDRESS_CONTACT": {
+      "translation": "Copy contact address",
+      "section": "uiMobile"
+    },
+    "LNG_DROP_DOWN_SECTIONED_NONE_SELECTED": {
+      "translation": "None Selected",
+      "section": "uiMobile"
+    },
+    "LNG_DROP_DOWN_SECTIONED_SELECTED": {
+      "translation": "Items",
+      "section": "uiMobile"
     }
   }
 }
