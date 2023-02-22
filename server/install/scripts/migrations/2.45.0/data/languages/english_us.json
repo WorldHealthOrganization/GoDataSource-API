@@ -343,6 +343,10 @@
     "LNG_DROP_DOWN_SECTIONED_SELECTED": {
       "translation": "Items",
       "section": "uiMobile"
+    },
+    "LNG_COMMON_LABEL_EXPORT_ERROR_NO_DATA": {
+      "translation": "There is no data to export",
+      "section": "uiCommonLabels"
     }
   }
 }
