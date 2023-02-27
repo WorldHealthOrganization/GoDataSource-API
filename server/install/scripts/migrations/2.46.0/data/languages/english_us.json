@@ -1,0 +1,21 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_BULK_ADD_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_MODIFY_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkModifyContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkModifyContactsOfContactsPage"
+    }
+  }
+}
