@@ -1,0 +1,87 @@
+name: Run Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      REMOTE_LOCATION:
+        description: 'Specify the remote location you want to deploy to.'
+        required: true
+        default: 'common/master/code'
+
+jobs:
+  remove_old_build:
+    name: Romove Old Build
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Remove old build
+        run: rm -rf build.zip
+
+  install_dep:
+    name: Setup Node and NPM
+    runs-on: ubuntu-18.04
+    needs: [remove_old_build]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14.17.5'
+      - name: Install dependencies
+        run: |
+          echo "---=== Checking node version ===---"
+          node -v
+          npm -v
+
+          npm install
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-18.04
+    needs: [install_dep]
+    steps:
+      - name: Running Lint Validation
+        run: npm run lint
+  
+  build:
+    name: Build WEB
+    needs: [tests]
+    steps:
+      - name: Running npm build
+        run: 
+          npm run build
+
+  back_up:
+    name: Archiving production build
+    needs: [build]
+    steps:
+      - run: cd build; zip -r ../build.zip *
+
+  deploy:
+    name: Transfer build file to remote server
+    runs-on: ubuntu-18.04
+    needs: [run_tests, back_up]
+    steps: 
+      - uses: actions/checkout@v3
+      - name: Copy file via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+        source: "build.zip"
+        target: "${{ inputs.REMOTE_LOCATION }}"
+
+      - name: Running post deployment script
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /opt/go.data/${{ inputs.REMOTE_LOCATION }}
+            rm -rf node_modules
+            unzip -o build.zip
+            #rm -rf build.zip
+            cd ..
+            cp config/datasources.json code/server/datasources.json
+            cp config/config.json code/server/config.json
+            docker-compose up -d --force-recreate
