@@ -1337,11 +1337,11 @@ const isValidDate = function (date) {
 };
 
 /**
- * Check Model definition for boolean properties and get their references
+ * Check Model definition for properties by data type and get their references
  * Also checks for nested definitions
  * @param model Model definition
- * @param dataType Data Type
- * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
+ * @param dataType Data Type (boolean/date)
+ * @param prefix Prefix to be attached to properties when the model is nested; Must have the '.' suffix
  * @returns {[]}
  */
 const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
@@ -1360,9 +1360,9 @@ const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
 
   // go through all model properties, from model definition
   model.forEachProperty(function (propertyName) {
-    // check if the property is supposed to be boolean
+    // check if the property is supposed to be the input data type
     if (model.definition.properties[propertyName].type) {
-      // check for simple boolean prop
+      // check for simple prop
       if (model.definition.properties[propertyName].type.name === dataType) {
         // store property name
         result.push(prefix + propertyName);
@@ -1475,9 +1475,9 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
    * @param record
    */
   function convertModelPropertiesByDataType(record, dataType) {
-    // check each property that is supposed to be boolean
-    modelProperties.forEach(function (booleanProperty) {
-      setValueOnRecordProperty(record, booleanProperty, dataType);
+    // check each property that is supposed to be received type
+    modelProperties.forEach(function (property) {
+      setValueOnRecordProperty(record, property, dataType);
     });
   }
 
