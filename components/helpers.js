@@ -1459,7 +1459,7 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
 
             break;
           case DATA_TYPE.DATE:
-            if (Number.isInteger(refValue.value)) {
+            if (Number(refValue.value)) {
               _.set(record, refValue.exactPath, excelDateToJSDate(refValue.value));
             }
 
