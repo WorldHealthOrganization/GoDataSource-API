@@ -219,14 +219,14 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
 
   // process boolean values
-  let formattedDataMap = helpers.convertBooleanPropertiesNoModel(
+  let formattedDataMap = helpers.convertPropertiesNoModelByType(
     options.modelBooleanProperties || [],
     remappedProperties,
     helpers.DATA_TYPE.BOOLEAN
   );
 
   // process date values
-  formattedDataMap = helpers.convertBooleanPropertiesNoModel(
+  formattedDataMap = helpers.convertPropertiesNoModelByType(
     options.modelDateProperties || [],
     formattedDataMap,
     helpers.DATA_TYPE.DATE

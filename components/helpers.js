@@ -1460,11 +1460,11 @@ const convertBooleanProperties = function (Model, dataSet) {
 /**
  * TODO: copied from convertBooleanProperties and updated to not used Loopback models; Should be used everywhere instead of the old function
  * Convert boolean/date model properties to correct boolean values from strings
- * @param {Array} modelBooleanProperties
+ * @param {Array} modelProperties
  * @param dataType Data Type (boolean/date)
  * @param {Object|Array} dataSet
  */
-const convertBooleanPropertiesNoModel = function (modelBooleanProperties, dataSet, dataType) {
+const convertPropertiesNoModelByType = function (modelBooleanProperties, dataSet, dataType) {
   /**
    * Converts Excel date in integer format into JS date
    * @param serial
@@ -2841,7 +2841,7 @@ Object.assign(module.exports, {
   getBuildInformation: getBuildInformation,
   getModelPropertiesByDataType: getModelPropertiesByDataType,
   convertBooleanProperties: convertBooleanProperties,
-  convertBooleanPropertiesNoModel: convertBooleanPropertiesNoModel,
+  convertPropertiesNoModelByType: convertPropertiesNoModelByType,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,

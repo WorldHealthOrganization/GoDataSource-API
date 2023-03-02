@@ -22,7 +22,7 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  let formattedRelationshipDataMap= helpers.convertBooleanPropertiesNoModel(
+  let formattedRelationshipDataMap= helpers.convertPropertiesNoModelByType(
     options.relationshipModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(
       options.relationshipImportableTopLevelProperties,
@@ -31,7 +31,7 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
     helpers.DATA_TYPE.BOOLEAN
   );
 
-  let formattedContactOfContactDataMap = helpers.convertBooleanPropertiesNoModel(
+  let formattedContactOfContactDataMap = helpers.convertPropertiesNoModelByType(
     options.contactOfContactModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(
       options.contactOfContactImportableTopLevelProperties,
@@ -41,13 +41,13 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   );
 
   // process date values
-  formattedRelationshipDataMap = helpers.convertBooleanPropertiesNoModel(
+  formattedRelationshipDataMap = helpers.convertPropertiesNoModelByType(
     options.modelDateProperties || [],
     formattedRelationshipDataMap,
     helpers.DATA_TYPE.DATE
   );
 
-  formattedContactOfContactDataMap = helpers.convertBooleanPropertiesNoModel(
+  formattedContactOfContactDataMap = helpers.convertPropertiesNoModelByType(
     options.modelDateProperties || [],
     formattedContactOfContactDataMap,
     helpers.DATA_TYPE.DATE
