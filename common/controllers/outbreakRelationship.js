@@ -656,14 +656,14 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = helpers.getModelBooleanProperties(
+      app.models.relationship._booleanProperties = helpers.getModelPropertiesByDataType(
         app.models.relationship,
         helpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.relationship._dateProperties) {
-      app.models.relationship._dateProperties =helpers.getModelBooleanProperties(
+      app.models.relationship._dateProperties = helpers.getModelPropertiesByDataType(
         app.models.relationship,
         helpers.DATA_TYPE.DATE
       );

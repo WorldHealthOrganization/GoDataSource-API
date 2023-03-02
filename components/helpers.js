@@ -1344,7 +1344,7 @@ const isValidDate = function (date) {
  * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
  * @returns {[]}
  */
-const getModelBooleanProperties = function (model, dataType, prefix = '') {
+const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
   // used in getReferencedValue function
   const arrayIdentifier = '[].';
 
@@ -1371,7 +1371,7 @@ const getModelBooleanProperties = function (model, dataType, prefix = '') {
       // eg: address: "address"
       else if (typeof model.definition.properties[propertyName].type === 'function') {
         result = result.concat(
-          getModelBooleanProperties(
+          getModelPropertiesByDataType(
             model.definition.properties[propertyName].type,
             dataType,
             propertyName + '.')
@@ -1384,7 +1384,7 @@ const getModelBooleanProperties = function (model, dataType, prefix = '') {
         typeof model.definition.properties[propertyName].type[0] === 'function'
       ) {
         result = result.concat(
-          getModelBooleanProperties(
+          getModelPropertiesByDataType(
             model.definition.properties[propertyName].type[0],
             dataType,
             propertyName + arrayIdentifier
@@ -1427,7 +1427,7 @@ const convertBooleanProperties = function (Model, dataSet) {
   // init model boolean properties, if not already done
   if (!Model._booleanProperties) {
     // keep a list of boolean properties
-    Model._booleanProperties = getModelBooleanProperties(Model);
+    Model._booleanProperties = getModelPropertiesByDataType(Model);
   }
 
   /**
@@ -2839,7 +2839,7 @@ Object.assign(module.exports, {
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
-  getModelBooleanProperties: getModelBooleanProperties,
+  getModelPropertiesByDataType: getModelPropertiesByDataType,
   convertBooleanProperties: convertBooleanProperties,
   convertBooleanPropertiesNoModel: convertBooleanPropertiesNoModel,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,

@@ -3340,28 +3340,28 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.contact._booleanProperties) {
-      app.models.contact._booleanProperties = genericHelpers.getModelBooleanProperties(
+      app.models.contact._booleanProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.contact,
         genericHelpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = genericHelpers.getModelBooleanProperties(
+      app.models.relationship._booleanProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.relationship,
         genericHelpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.contact._dateProperties) {
-      app.models.contact._dateProperties = genericHelpers.getModelBooleanProperties(
+      app.models.contact._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.contact,
         genericHelpers.DATA_TYPE.DATE
       );
     }
 
     if (!app.models.relationship._dateProperties) {
-      app.models.relationship._dateProperties = genericHelpers.getModelBooleanProperties(
+      app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.relationship,
         genericHelpers.DATA_TYPE.DATE
       );

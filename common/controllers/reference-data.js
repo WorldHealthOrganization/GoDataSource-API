@@ -148,14 +148,14 @@ module.exports = function (ReferenceData) {
 
     // construct options needed by the formatter worker
     if (!app.models.referenceData._booleanProperties) {
-      app.models.referenceData._booleanProperties = genericHelpers.getModelBooleanProperties(
+      app.models.referenceData._booleanProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.referenceData,
         genericHelpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.referenceData._dateProperties) {
-      app.models.referenceData._dateProperties = genericHelpers.getModelBooleanProperties(
+      app.models.referenceData._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.referenceData,
         genericHelpers.DATA_TYPE.DATE
       );

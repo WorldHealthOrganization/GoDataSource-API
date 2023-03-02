@@ -299,14 +299,14 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.event._booleanProperties) {
-      app.models.event._booleanProperties = genericHelpers.getModelBooleanProperties(
+      app.models.event._booleanProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.event,
         genericHelpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.event._dateProperties) {
-      app.models.event._dateProperties = genericHelpers.getModelBooleanProperties(
+      app.models.event._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.event,
         genericHelpers.DATA_TYPE.DATE
       );

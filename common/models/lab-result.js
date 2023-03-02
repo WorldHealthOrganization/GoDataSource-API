@@ -631,14 +631,14 @@ module.exports = function (LabResult) {
 
     // construct options needed by the formatter worker
     if (!app.models.labResult._booleanProperties) {
-      app.models.labResult._booleanProperties = helpers.getModelBooleanProperties(
+      app.models.labResult._booleanProperties = helpers.getModelPropertiesByDataType(
         app.models.labResult,
         helpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.labResult._dateProperties) {
-      app.models.labResult._dateProperties = helpers.getModelBooleanProperties(
+      app.models.labResult._dateProperties = helpers.getModelPropertiesByDataType(
         app.models.labResult,
         helpers.DATA_TYPE.DATE
       );

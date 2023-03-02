@@ -207,14 +207,14 @@ module.exports = function (Location) {
 
     // construct options needed by the formatter worker
     if (!app.models.location._booleanProperties) {
-      app.models.location._booleanProperties = genericHelpers.getModelBooleanProperties(
+      app.models.location._booleanProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.location,
         genericHelpers.DATA_TYPE.BOOLEAN
       );
     }
 
     if (!app.models.location._dateProperties) {
-      app.models.location._dateProperties = genericHelpers.getModelBooleanProperties(
+      app.models.location._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.location,
         genericHelpers.DATA_TYPE.DATE
       );
