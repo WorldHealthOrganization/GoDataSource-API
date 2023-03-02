@@ -22,9 +22,21 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
 
   // process boolean values
-  const formattedData = helpers.convertBooleanPropertiesNoModel(
+  let formattedDataMap = helpers.convertBooleanPropertiesNoModel(
     options.modelBooleanProperties || [],
-    remappedProperties)[0];
+    remappedProperties,
+    helpers.DATA_TYPE.BOOLEAN
+  );
+
+  // process date values
+  formattedDataMap = helpers.convertBooleanPropertiesNoModel(
+    options.modelDateProperties || [],
+    formattedDataMap,
+    helpers.DATA_TYPE.DATE
+  );
+
+  // get the formatted record
+  const formattedData = formattedDataMap[0];
 
   // set outbreak id
   formattedData.outbreakId = options.outbreakId;

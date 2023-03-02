@@ -656,14 +656,26 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.relationship);
+      app.models.relationship._booleanProperties = helpers.getModelBooleanProperties(
+        app.models.relationship,
+        helpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.relationship._dateProperties) {
+      app.models.relationship._dateProperties =helpers.getModelBooleanProperties(
+        app.models.relationship,
+        helpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'relationship',
       batchSize: relationshipImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.relationship._booleanProperties
+      modelBooleanProperties: app.models.relationship._booleanProperties,
+      modelDateProperties: app.models.relationship._dateProperties
     }, body);
 
     // start import

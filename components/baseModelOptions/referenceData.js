@@ -74,9 +74,21 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  const formattedData = helpers.convertBooleanPropertiesNoModel(
+  let formattedDataMap = helpers.convertBooleanPropertiesNoModel(
     options.modelBooleanProperties || [],
-    remappedProperties);
+    remappedProperties,
+    helpers.DATA_TYPE.BOOLEAN
+  );
+
+  // process date values
+  formattedDataMap = helpers.convertBooleanPropertiesNoModel(
+    options.modelDateProperties || [],
+    formattedDataMap,
+    helpers.DATA_TYPE.DATE
+  );
+
+  // get the formatted record
+  const formattedData = formattedDataMap[0];
 
   // add relationship entry in the processed list
   formattedDataContainer.push({

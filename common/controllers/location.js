@@ -8,6 +8,7 @@ const apiError = require('./../../components/apiError');
 const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
+const genericHelpers = require("../../components/helpers");
 
 const locationImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
@@ -206,13 +207,25 @@ module.exports = function (Location) {
 
     // construct options needed by the formatter worker
     if (!app.models.location._booleanProperties) {
-      app.models.location._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.location);
+      app.models.location._booleanProperties = genericHelpers.getModelBooleanProperties(
+        app.models.location,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.location._dateProperties) {
+      app.models.location._dateProperties = genericHelpers.getModelBooleanProperties(
+        app.models.location,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'location',
       batchSize: locationImportBatchSize,
-      modelBooleanProperties: app.models.location._booleanProperties
+      modelBooleanProperties: app.models.location._booleanProperties,
+      modelDateProperties: app.models.location._dateProperties
     }, body);
 
     // start import

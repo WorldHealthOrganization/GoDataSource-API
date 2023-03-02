@@ -1770,14 +1770,26 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.case._booleanProperties) {
-      app.models.case._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.case);
+      app.models.case._booleanProperties = genericHelpers.getModelBooleanProperties(
+        app.models.case,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.case._dateProperties) {
+      app.models.case._dateProperties = genericHelpers.getModelBooleanProperties(
+        app.models.case,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'case',
       batchSize: caseImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.case._booleanProperties
+      modelBooleanProperties: app.models.case._booleanProperties,
+      modelDateProperties: app.models.case._dateProperties
     }, body);
 
     // start import
