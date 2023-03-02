@@ -1398,73 +1398,12 @@ const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
 };
 
 /**
- * Convert boolean model properties to correct boolean values from strings
- * @param Model
- * @param dataSet [object|array]
- */
-const convertBooleanProperties = function (Model, dataSet) {
-  /**
-   * Set property boolean value on a record given its reference
-   * Also accepts array references
-   * @param record Record to be updated
-   * @param propRef Property reference
-   */
-  const setValueOnRecordProperty = function (record, propRef) {
-    let propRefValues = getReferencedValue(record, propRef);
-    // if it's single value, convert it to array (simplify the code)
-    if (!Array.isArray(propRefValues)) {
-      propRefValues = [propRefValues];
-    }
-    // go through all the found values
-    propRefValues.forEach(refValue => {
-      // if it has a value but the value is not boolean
-      if (refValue.value != null && typeof refValue.value !== 'boolean') {
-        _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
-      }
-    });
-  };
-
-  // init model boolean properties, if not already done
-  if (!Model._booleanProperties) {
-    // keep a list of boolean properties
-    Model._booleanProperties = getModelPropertiesByDataType(Model);
-  }
-
-  /**
-   * Convert boolean model properties for a single record instance
-   * @param record
-   */
-  function convertBooleanModelProperties(record) {
-    // check each property that is supposed to be boolean
-    Model._booleanProperties.forEach(function (booleanProperty) {
-      setValueOnRecordProperty(record, booleanProperty);
-    });
-  }
-
-  // array of records
-  if (Array.isArray(dataSet)) {
-    // go through the dataSet records
-    dataSet.forEach(function (record) {
-      // convert each record
-      convertBooleanModelProperties(record);
-    });
-    // single record
-  } else {
-    // convert record
-    convertBooleanModelProperties(dataSet);
-  }
-  // records are modified by reference, but also return the dataSet
-  return dataSet;
-};
-
-/**
- * TODO: copied from convertBooleanProperties and updated to not used Loopback models; Should be used everywhere instead of the old function
- * Convert boolean/date model properties to correct boolean values from strings
+  * Convert model properties to correct type values from strings/number
  * @param {Array} modelProperties
  * @param dataType Data Type (boolean/date)
  * @param {Object|Array} dataSet
  */
-const convertPropertiesNoModelByType = function (modelBooleanProperties, dataSet, dataType) {
+const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataType) {
   /**
    * Converts Excel date in integer format into JS date
    * @param serial
@@ -1531,13 +1470,13 @@ const convertPropertiesNoModelByType = function (modelBooleanProperties, dataSet
   };
 
   /**
-   * Convert boolean model properties for a single record instance
+   * Convert model properties by data type for a single record instance
    * @param dataType Data Type (boolean/date)
    * @param record
    */
-  function convertBooleanModelProperties(record, dataType) {
+  function convertModelPropertiesByDataType(record, dataType) {
     // check each property that is supposed to be boolean
-    modelBooleanProperties.forEach(function (booleanProperty) {
+    modelProperties.forEach(function (booleanProperty) {
       setValueOnRecordProperty(record, booleanProperty, dataType);
     });
   }
@@ -1547,12 +1486,12 @@ const convertPropertiesNoModelByType = function (modelBooleanProperties, dataSet
     // go through the dataSet records
     dataSet.forEach(function (record) {
       // convert each record
-      convertBooleanModelProperties(record, dataType);
+      convertModelPropertiesByDataType(record, dataType);
     });
     // single record
   } else {
     // convert record
-    convertBooleanModelProperties(dataSet, dataType);
+    convertModelPropertiesByDataType(dataSet, dataType);
   }
   // records are modified by reference, but also return the dataSet
   return dataSet;
@@ -2840,7 +2779,6 @@ Object.assign(module.exports, {
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
   getModelPropertiesByDataType: getModelPropertiesByDataType,
-  convertBooleanProperties: convertBooleanProperties,
   convertPropertiesNoModelByType: convertPropertiesNoModelByType,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
