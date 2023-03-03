@@ -22,7 +22,7 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  let formattedRelationshipDataMap= helpers.convertPropertiesNoModelByType(
+  let formattedRelationshipData = helpers.convertPropertiesNoModelByType(
     options.relationshipModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(
       options.relationshipImportableTopLevelProperties,
@@ -31,7 +31,7 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
     helpers.DATA_TYPE.BOOLEAN
   );
 
-  let formattedContactOfContactDataMap = helpers.convertPropertiesNoModelByType(
+  let formattedContactOfContactData = helpers.convertPropertiesNoModelByType(
     options.contactOfContactModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(
       options.contactOfContactImportableTopLevelProperties,
@@ -41,21 +41,17 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   );
 
   // process date values
-  formattedRelationshipDataMap = helpers.convertPropertiesNoModelByType(
-    options.modelDateProperties || [],
-    formattedRelationshipDataMap,
+  formattedRelationshipData = helpers.convertPropertiesNoModelByType(
+    options.relationshipModelDateProperties || [],
+    formattedRelationshipData,
     helpers.DATA_TYPE.DATE
   );
 
-  formattedContactOfContactDataMap = helpers.convertPropertiesNoModelByType(
-    options.modelDateProperties || [],
-    formattedContactOfContactDataMap,
+  formattedContactOfContactData = helpers.convertPropertiesNoModelByType(
+    options.contactOfContactModelDateProperties || [],
+    formattedContactOfContactData,
     helpers.DATA_TYPE.DATE
   );
-
-  // get the formatted record
-  const formattedRelationshipData = formattedRelationshipDataMap[0];
-  const formattedContactOfContactData = formattedContactOfContactDataMap[0];
 
   // set outbreak id
   formattedRelationshipData.outbreakId = options.outbreakId;

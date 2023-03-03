@@ -22,34 +22,30 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  let formattedRelationshipDataMap = helpers.convertPropertiesNoModelByType(
+  let formattedRelationshipData = helpers.convertPropertiesNoModelByType(
     options.relationshipModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(options.relationshipImportableTopLevelProperties, remappedProperties.relationship),
     helpers.DATA_TYPE.BOOLEAN
   );
 
-  let formattedContactDataMap = helpers.convertPropertiesNoModelByType(
+  let formattedContactData = helpers.convertPropertiesNoModelByType(
     options.contactModelBooleanProperties || [],
     helpers.extractImportableFieldsNoModel(options.contactImportableTopLevelProperties, remappedProperties),
     helpers.DATA_TYPE.BOOLEAN
   );
 
   // process date values
-  formattedRelationshipDataMap = helpers.convertPropertiesNoModelByType(
-    options.modelDateProperties || [],
-    formattedRelationshipDataMap,
+  formattedRelationshipData = helpers.convertPropertiesNoModelByType(
+    options.relationshipModelDateProperties || [],
+    formattedRelationshipData,
     helpers.DATA_TYPE.DATE
   );
 
-  formattedContactDataMap = helpers.convertPropertiesNoModelByType(
-    options.modelDateProperties || [],
-    formattedContactDataMap,
+  formattedContactData = helpers.convertPropertiesNoModelByType(
+    options.contactModelDateProperties || [],
+    formattedContactData,
     helpers.DATA_TYPE.DATE
   );
-
-  // get the formatted record
-  const formattedRelationshipData = formattedRelationshipDataMap[0];
-  const formattedContactData = formattedContactDataMap[0];
 
   // set outbreak id
   formattedRelationshipData.outbreakId = options.outbreakId;

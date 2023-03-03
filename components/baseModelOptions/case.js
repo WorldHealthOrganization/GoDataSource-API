@@ -216,24 +216,21 @@ const getAdditionalFormatOptions = function (options) {
  */
 const formatItemFromImportableFile = function (item, formattedDataContainer, options) {
   // remap properties
-  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
+  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  let formattedDataMap = helpers.convertPropertiesNoModelByType(
+  let formattedData = helpers.convertPropertiesNoModelByType(
     options.modelBooleanProperties || [],
     remappedProperties,
     helpers.DATA_TYPE.BOOLEAN
   );
 
   // process date values
-  formattedDataMap = helpers.convertPropertiesNoModelByType(
+  formattedData = helpers.convertPropertiesNoModelByType(
     options.modelDateProperties || [],
-    formattedDataMap,
+    formattedData,
     helpers.DATA_TYPE.DATE
   );
-
-  // get the formatted record
-  const formattedData = formattedDataMap[0];
 
   // set outbreak id
   formattedData.outbreakId = options.outbreakId;
