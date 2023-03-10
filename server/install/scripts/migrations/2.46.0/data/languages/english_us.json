@@ -16,6 +16,50 @@
     "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
       "translation": "Address date",
       "section": "uiBulkModifyContactsOfContactsPage"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
+      "translation": "Day of follow-up",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER": {
+      "translation": "Gender",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE": {
+      "translation": "Age",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS": {
+      "translation": "Years",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS": {
+      "translation": "Months",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB": {
+      "translation": "Date of birth",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION": {
+      "translation": "Occupation",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT": {
+      "translation": "Date of last contact",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_END_OF_FOLLOWUP": {
+      "translation": "Follow-up end date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
+      "translation": "Created by",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER": {
+      "translation": "Updated by",
+      "section": "uiFollowUpFields"
     }
   }
 }

@@ -558,7 +558,14 @@ module.exports = function (Outbreak) {
                 '_id',
                 'visualId',
                 'firstName',
-                'lastName'
+                'lastName',
+                'riskLevel',
+                'gender',
+                'occupation',
+                'age',
+                'dob',
+                'dateOfLastContact',
+                'followUp'
               ],
               key: '_id',
               keyValue: `(followUp) => {
@@ -579,6 +586,36 @@ module.exports = function (Outbreak) {
               keyValue: `(item) => {
                 return item && item.responsibleUserId ?
                   item.responsibleUserId :
+                  undefined;
+              }`
+            },
+            createdByUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                // '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.createdBy ?
+                  item.createdBy :
+                  undefined;
+              }`
+            },
+            updatedByUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                // '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.updatedBy ?
+                  item.updatedBy :
                   undefined;
               }`
             }

@@ -58,11 +58,26 @@ module.exports = function (FollowUp) {
 
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
+    'createdByUser': 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER',
+    'createdByUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'createdByUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
+    'updatedByUser': 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER',
+    'updatedByUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'updatedByUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
     'contact.id': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_ID',
     'contact.visualId': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
+    'contact.riskLevel': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_RISK_LEVEL',
+    'contact.gender': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER',
+    'contact.occupation': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION',
+    'contact.age': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE',
+    'contact.age.years': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS',
+    'contact.age.months': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS',
+    'contact.dob': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB',
+    'contact.dateOfLastContact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT',
+    'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_END_OF_FOLLOWUP',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -103,8 +118,14 @@ module.exports = function (FollowUp) {
         'id',
         'createdAt',
         'createdBy',
+        'createdByUser',
+        'createdByUser.firstName',
+        'createdByUser.lastName',
         'updatedAt',
         'updatedBy',
+        'updatedByUser',
+        'updatedByUser.firstName',
+        'updatedByUser.lastName',
         'deleted',
         'deletedAt',
         'createdOn'
@@ -116,7 +137,16 @@ module.exports = function (FollowUp) {
         'contact.id',
         'contact.visualId',
         'contact.firstName',
-        'contact.lastName'
+        'contact.lastName',
+        'contact.riskLevel',
+        'contact.gender',
+        'contact.occupation',
+        'contact.age',
+        'contact.age.years',
+        'contact.age.months',
+        'contact.dob',
+        'contact.dateOfLastContact',
+        'contact.followUp.endDate'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
@@ -220,12 +250,33 @@ module.exports = function (FollowUp) {
         'id',
         'visualId',
         'firstName',
-        'lastName'
+        'lastName',
+        'riskLevel',
+        'gender',
+        'occupation',
+        'age',
+        'dob',
+        'dateOfLastContact',
+        'followUp.endDate'
       ]
     },
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
+    },
+    'createdBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
+    },
+    'updatedBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
     }
   };
 
