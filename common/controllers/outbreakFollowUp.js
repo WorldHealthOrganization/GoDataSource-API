@@ -403,6 +403,13 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
+    // parse includeAlerted query param
+    let includeAlerted = false;
+    if (filter.where.hasOwnProperty('includeAlerted')) {
+      includeAlerted = filter.where.includeAlerted;
+      delete filter.where.includeAlerted;
+    }
+
     // parse useDbColumns query param
     let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
@@ -529,7 +536,8 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
-            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId,
+            includeAlerted
           },
           prefilters, {
             followUpTeam: {

@@ -55,6 +55,11 @@ const NON_FLAT_TYPES = [
 // default export type - in case export type isn't provided
 const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 
+// export custom columns
+const CUSTOM_COLUMNS = {
+  ALERTED: 'alerted'
+}
+
 // spreadsheet limits
 const SHEET_LIMITS = {
   XLSX: {
@@ -529,12 +534,60 @@ function exportFilteredModelsList(
     };
 
     // initialize column headers
+    const alertQuestionAnswers = {};
     const initializeColumnHeaders = () => {
       // get fields that need to be exported from model options
       let fieldLabelsMap = Object.assign(
         {},
         modelOptions.fieldLabelsMap
       );
+
+      // map alert question answers to object for easy find
+      const mapQuestions = (questions) => {
+        // get alerted answers
+        if (questions) {
+          for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+            const question = questions[questionIndex];
+            // alert applies only to those questions that have option values
+            if (
+              (
+                question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
+                question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+              ) &&
+              question.answers?.length > 0
+            ) {
+              for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
+                // get data
+                const answer = question.answers[answerIndex];
+
+                // answer alert ?
+                if (answer.alert) {
+                  // init
+                  if (!alertQuestionAnswers[question.variable]) {
+                    alertQuestionAnswers[question.variable] = {};
+                  }
+
+                  // alert
+                  alertQuestionAnswers[question.variable][answer.value] = true;
+                }
+
+                // go through all sub questions
+                if (answer.additionalQuestions?.length > 0) {
+                  mapQuestions(answer.additionalQuestions);
+                }
+              }
+            }
+          }
+        }
+      };
+
+      // remove alerted ?
+      if (!options.includeAlerted) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.ALERTED];
+      } else {
+        // get alerted answers
+        mapQuestions(options.questionnaire);
+      }
 
       // filter field labels list if fields groups were provided
       let modelExportFieldsOrder = modelOptions.exportFieldsOrder;
@@ -5446,6 +5499,68 @@ function exportFilteredModelsList(
           // - promise visibility
           const recordData = data;
 
+          // check if at least one answer is alerted
+          const answersCheckAlerted = (
+            modelInstance,
+            alertQuestionAnswers
+          ) => {
+            // check if modelInstance has questionnaire answers
+            if (
+              !modelInstance ||
+              !modelInstance.questionnaireAnswers ||
+              !alertQuestionAnswers ||
+              !Object.keys(alertQuestionAnswers).length
+            ) {
+              return false;
+            }
+
+            // check if we need to mark follow-up as alerted because of questionnaire answers
+            if (modelInstance.questionnaireAnswers) {
+              const props = Object.keys(modelInstance.questionnaireAnswers);
+              for (let propIndex = 0; propIndex < props.length; propIndex++) {
+                // get answer data
+                const questionVariable = props[propIndex];
+                const answers = modelInstance.questionnaireAnswers[questionVariable];
+
+                // retrieve answer value
+                // only the newest one is of interest, the old ones shouldn't trigger an alert
+                // the first item should be the newest
+                const answerKey = answers?.length > 0 ?
+                  answers[0].value :
+                  undefined;
+
+                // there is no point in checking the value if there isn't one
+                if (
+                  !answerKey &&
+                  typeof answerKey !== 'number'
+                ) {
+                  continue;
+                }
+
+                // at least one alerted ?
+                if (Array.isArray(answerKey)) {
+                  // go through all answers
+                  for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
+                    if (
+                      alertQuestionAnswers[questionVariable] &&
+                      alertQuestionAnswers[questionVariable][answerKey[answerKeyIndex]]
+                    ) {
+                      return true;
+                    }
+                  }
+                } else if (
+                  alertQuestionAnswers[questionVariable] &&
+                  alertQuestionAnswers[questionVariable][answerKey]
+                ) {
+                  return true
+                }
+              }
+            }
+
+            // return false if no alerted found
+            return false;
+          }
+
           // handle relations and children relations
           const processRelations = (levelIndex) => {
             // retrieve relations data
@@ -5544,6 +5659,14 @@ function exportFilteredModelsList(
                 // record doesn't exist anymore - deleted ?
                 if (!record) {
                   return Promise.resolve();
+                }
+
+                // check alerted
+                if (options.includeAlerted) {
+                  record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(
+                    record,
+                    alertQuestionAnswers
+                  );
                 }
 
                 // convert geo-points (if any)
@@ -6022,6 +6145,7 @@ module.exports = {
   RELATION_TYPE,
   JOIN_TYPE,
   TEMPORARY_DATABASE_PREFIX,
+  CUSTOM_COLUMNS,
 
   // methods
   exportFilteredModelsList,

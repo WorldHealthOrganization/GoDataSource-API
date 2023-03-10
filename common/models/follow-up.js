@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const exportHelper = require('./../../components/exportHelper');
 const FollowupGeneration = require('../../components/followupGeneration');
 const RoundRobin = require('rr');
 const Timer = require('../../components/Timer');
@@ -77,7 +78,8 @@ module.exports = function (FollowUp) {
     'contact.age.months': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS',
     'contact.dob': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB',
     'contact.dateOfLastContact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT',
-    'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_END_OF_FOLLOWUP',
+    'contact.followUp': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP',
+    'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -100,6 +102,7 @@ module.exports = function (FollowUp) {
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
+    [exportHelper.CUSTOM_COLUMNS.ALERTED]: 'LNG_FOLLOW_UP_FIELD_LABEL_ALERTED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
     'responsibleUser': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
@@ -155,6 +158,7 @@ module.exports = function (FollowUp) {
         'index',
         'teamId',
         'statusId',
+        [exportHelper.CUSTOM_COLUMNS.ALERTED],
         'targeted',
         'comment',
         'responsibleUser',
