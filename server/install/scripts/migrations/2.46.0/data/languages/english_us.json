@@ -68,6 +68,14 @@
     "LNG_FOLLOW_UP_FIELD_LABEL_ALERTED": {
       "translation": "Alerted",
       "section": "uiFollowUpFields"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED": {
+      "translation": "Include Alerted column",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED_DESCRIPTION": {
+      "translation": "When checked, the \"Alerted\" column will be included in the exported file",
+      "section": "uiCommonLabels"
     }
   }
 }
