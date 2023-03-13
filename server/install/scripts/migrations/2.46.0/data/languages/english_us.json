@@ -61,8 +61,16 @@
       "translation": "Created by",
       "section": "uiFollowUpFields"
     },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID": {
+      "translation": "ID",
+      "section": "uiFollowUpFields"
+    },
     "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER": {
       "translation": "Updated by",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID": {
+      "translation": "ID",
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_ALERTED": {

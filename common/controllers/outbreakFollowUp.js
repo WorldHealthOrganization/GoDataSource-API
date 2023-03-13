@@ -518,7 +518,9 @@ module.exports = function (Outbreak) {
             // fields that we need to bring from db, but we don't want to include in the export
             projection: [
               'personId',
-              'responsibleUserId'
+              'responsibleUserId',
+              'createdBy',
+              'updatedBy'
             ]
           },
           filter,
@@ -601,7 +603,7 @@ module.exports = function (Outbreak) {
               type: exportHelper.RELATION_TYPE.HAS_ONE,
               collection: 'user',
               project: [
-                // '_id',
+                '_id',
                 'firstName',
                 'lastName'
               ],
@@ -616,7 +618,7 @@ module.exports = function (Outbreak) {
               type: exportHelper.RELATION_TYPE.HAS_ONE,
               collection: 'user',
               project: [
-                // '_id',
+                '_id',
                 'firstName',
                 'lastName'
               ],

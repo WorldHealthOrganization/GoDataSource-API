@@ -60,9 +60,11 @@ module.exports = function (FollowUp) {
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
     'createdByUser': 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER',
+    'createdByUser.id': 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID',
     'createdByUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
     'createdByUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'updatedByUser': 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER',
+    'updatedByUser.id': 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID',
     'updatedByUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
     'updatedByUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
@@ -120,13 +122,13 @@ module.exports = function (FollowUp) {
       properties: [
         'id',
         'createdAt',
-        'createdBy',
         'createdByUser',
+        'createdByUser.id',
         'createdByUser.firstName',
         'createdByUser.lastName',
         'updatedAt',
-        'updatedBy',
         'updatedByUser',
+        'updatedByUser.id',
         'updatedByUser.firstName',
         'updatedByUser.lastName',
         'deleted',

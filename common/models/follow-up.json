@@ -84,6 +84,10 @@
       "usualPlaceOfResidenceLocationId": 1
     }
   },
+  "excludeBaseProperties": [
+    "createdBy",
+    "updatedBy"
+  ],
   "validations": [],
   "relations": {
     "contact": {
