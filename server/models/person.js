@@ -1268,7 +1268,11 @@ module.exports = function (Person) {
     // init base query
     let query = {
       outbreakId: outbreakId,
-      type: type,
+      type: Array.isArray(type) ?
+        {
+          $in: type
+        } :
+        type,
       $or: []
     };
 
