@@ -3,7 +3,7 @@
 const app = require('../../server/server');
 const moment = require('moment');
 const Config = require("../../server/config.json");
-const = require('lodash');
+const _ = require('lodash');
 
 /**
  * Note: It is not exposed as an actual controller
