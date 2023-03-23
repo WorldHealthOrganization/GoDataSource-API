@@ -1423,12 +1423,28 @@ module.exports = function (Outbreak) {
 
     // merge conditions
     if (where) {
+      // keep relationship
+      let relationship;
+      if (where.relationship) {
+        relationship = where.relationship;
+        delete where.relationship;
+      }
+
+      // re-create where
       where = {
         $and: [
           whereCaseCountMap,
           where
         ]
       };
+
+      // re-add relationship
+      if (
+        relationship &&
+        Object.keys(relationship).length
+      ) {
+        where.relationship = relationship;
+      }
     } else {
       where = whereCaseCountMap;
     }
