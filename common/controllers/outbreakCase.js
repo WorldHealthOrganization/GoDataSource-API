@@ -1423,11 +1423,18 @@ module.exports = function (Outbreak) {
 
     // merge conditions
     if (where) {
-      // keep relationship
+      // check relationship
       let relationship;
       if (where.relationship) {
         relationship = where.relationship;
         delete where.relationship;
+      }
+
+      // check lab result
+      let labResult;
+      if (where.labResult) {
+        labResult = where.labResult;
+        delete where.labResult;
       }
 
       // re-create where
@@ -1444,6 +1451,14 @@ module.exports = function (Outbreak) {
         Object.keys(relationship).length
       ) {
         where.relationship = relationship;
+      }
+
+      // re-add lab result
+      if (
+        labResult &&
+        Object.keys(labResult).length
+      ) {
+        where.labResult = labResult;
       }
     } else {
       where = whereCaseCountMap;
