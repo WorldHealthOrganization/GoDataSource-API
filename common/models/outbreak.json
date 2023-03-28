@@ -148,19 +148,19 @@
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "EV-9999999999"
     },
     "caseIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CA-9999999999"
     },
     "contactIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CO-9999999999"
     },
     "arcGisServers": [
       "arcGisServer"
@@ -177,7 +177,7 @@
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CC-9999999999"
     },
     "isContactsOfContactsActive": {
       "type": "boolean",
