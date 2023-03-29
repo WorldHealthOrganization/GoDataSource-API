@@ -24,6 +24,7 @@ const addMissingPermission = (callback) => {
 
       // initialize parameters for handleActionsInBatches call
       const roleQuery = {
+        deleted: false,
         $and: [
           {
             'permissionIds': {
