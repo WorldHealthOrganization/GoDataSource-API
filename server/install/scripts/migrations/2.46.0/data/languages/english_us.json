@@ -17,6 +17,18 @@
       "translation": "Address date",
       "section": "uiBulkModifyContactsOfContactsPage"
     },
+    "LNG_ENTITY_FIELD_LABEL_CLUSTER": {
+      "translation": "Cluster",
+      "section": "uiEntityFields"
+    },
+    "LNG_PAGE_CASE_COUNT_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant/strain result",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_PAGE_CASE_COUNT_DATE": {
+      "translation": "Date",
+      "section": "uiCaseCountMap"
+    },
     "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK": {
       "translation": "Event ID mask",
       "section": "uiOutbreakFields"
@@ -26,7 +38,7 @@
       "section": "uiOutbreakFields"
     },
     "LNG_EVENT_FIELD_LABEL_VISUAL_ID": {
-        "translation": "Event ID",
+      "translation": "Event ID",
       "section": "uiEventFields"
     },
     "LNG_EVENT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
@@ -34,7 +46,7 @@
       "section": "uiEventFields"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID": {
-        "translation": "Event - generate id",
+      "translation": "Event - generate id",
       "section": "availablePermissions"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID_DESCRIPTION": {
