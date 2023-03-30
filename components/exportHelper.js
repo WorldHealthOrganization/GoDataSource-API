@@ -573,7 +573,7 @@ function exportFilteredModelsList(
                 }
 
                 // go through all sub questions
-                if (answer.additionalQuestions?.length > 0) {
+                if (answer?.additionalQuestions?.length > 0) {
                   mapQuestions(answer.additionalQuestions);
                 }
               }
