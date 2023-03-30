@@ -58,7 +58,7 @@ const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 // export custom columns
 const CUSTOM_COLUMNS = {
   ALERTED: 'alerted'
-}
+};
 
 // spreadsheet limits
 const SHEET_LIMITS = {
@@ -5556,14 +5556,14 @@ function exportFilteredModelsList(
                   alertQuestionAnswers[questionVariable] &&
                   alertQuestionAnswers[questionVariable][answerKey]
                 ) {
-                  return true
+                  return true;
                 }
               }
             }
 
             // return false if no alerted found
             return false;
-          }
+          };
 
           // handle relations and children relations
           const processRelations = (levelIndex) => {
