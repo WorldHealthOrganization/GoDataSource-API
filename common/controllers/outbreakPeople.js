@@ -2,7 +2,7 @@
 
 const app = require('../../server/server');
 const moment = require('moment');
-const Config = require("../../server/config.json");
+const Config = require('../../server/config.json');
 const _ = require('lodash');
 
 /**
