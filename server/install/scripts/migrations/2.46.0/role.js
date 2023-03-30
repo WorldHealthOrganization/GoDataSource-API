@@ -77,7 +77,6 @@ const addMissingPermission = (callback) => {
                 callback();
               })
               .catch(callback);
-            ;
           }
         })
         .catch(callback);
