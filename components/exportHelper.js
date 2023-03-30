@@ -554,7 +554,7 @@ function exportFilteredModelsList(
                 question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
                 question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
               ) &&
-              question.answers?.length > 0
+              question.answers?.length
             ) {
               for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
                 // get data
