@@ -787,6 +787,20 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Generate (next available) event visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateEventVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.validateOrGetAvailableEventVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Generate (next available) case visual id
    * @param visualIdMask
    * @param personId

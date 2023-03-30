@@ -144,17 +144,23 @@
       "default": [],
       "importTopLevelOnly": true
     },
+    "eventIdMask": {
+      "type": "string",
+      "required": true,
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
+      "default": "EV-9999999999"
+    },
     "caseIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CA-9999999999"
     },
     "contactIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CO-9999999999"
     },
     "arcGisServers": [
       "arcGisServer"
@@ -171,7 +177,7 @@
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CC-9999999999"
     },
     "isContactsOfContactsActive": {
       "type": "boolean",
@@ -818,6 +824,12 @@
       "principalId": "case_generate_visual_id",
       "permission": "ALLOW",
       "property": "generateCaseVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_generate_visual_id",
+      "permission": "ALLOW",
+      "property": "generateEventVisualId"
     },
     {
       "principalType": "ROLE",
@@ -2877,6 +2889,35 @@
       "http": {
         "verb": "post",
         "path": "/events/:nk/restore"
+      }
+    },
+    "prototype.generateEventVisualId": {
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "required": true,
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Event ID for validating existing visual ID (optional)"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/events/generate-visual-id"
       }
     },
     "prototype.generateCaseVisualId": {
@@ -9100,7 +9141,7 @@
         {
           "arg": "where",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Criteria to match model instances. Note: where supports 'relationship' and 'labResult' MongoDB compatible queries."
         },
         {
           "arg": "options",

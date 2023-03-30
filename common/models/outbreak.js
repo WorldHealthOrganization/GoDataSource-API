@@ -43,6 +43,7 @@ module.exports = function (Outbreak) {
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
+    eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
     caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
     contactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK',
     contactOfContactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK',
@@ -597,6 +598,24 @@ module.exports = function (Outbreak) {
     }
 
     return next();
+  };
+
+  /**
+   * In case an event is provided then retrieve the next available event visual id, or if a visual id is provided check if
+   * it matches the outbreak mask and it isn't a duplicate
+   * @param outbreak
+   * @param visualId
+   * @param [eventId]
+   * @return Visual ID or throws one of the following validation errors: DUPLICATE_VISUAL_ID / INVALID_VISUAL_ID_MASK
+   */
+  Outbreak.helpers.validateOrGetAvailableEventVisualId = function (outbreak, visualId, eventId) {
+    // validate visualId uniqueness
+    return Outbreak.helpers
+      .validateVisualIdUniqueness(outbreak.id, visualId, eventId)
+      .then(() => {
+        // generate visual id accordingly to visualId mask
+        return Outbreak.helpers.getAvailableVisualId(outbreak, 'eventIdMask', visualId, eventId);
+      });
   };
 
   /**
@@ -1704,6 +1723,9 @@ module.exports = function (Outbreak) {
       // decide what type of visual id should we resolve based on the person type
       let maskProperty = null;
       switch (personType) {
+        case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+          maskProperty = 'eventIdMask';
+          break;
         case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
           maskProperty = 'caseIdMask';
           break;

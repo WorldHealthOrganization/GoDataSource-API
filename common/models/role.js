@@ -1171,7 +1171,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'event_generate_visual_id'
           ]
         },
         {
@@ -1181,7 +1182,8 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'event_view',
-            'user_list_for_filters'
+            'user_list_for_filters',
+            'event_generate_visual_id'
           ]
         },
         {
@@ -1211,7 +1213,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'event_generate_visual_id'
           ]
         },
         {
@@ -1236,6 +1239,14 @@ module.exports = function (Role) {
 
             // used by create contact
             'event_view'
+          ]
+        },
+        {
+          id: 'event_generate_visual_id',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         },
         {
