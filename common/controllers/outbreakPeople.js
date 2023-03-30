@@ -517,30 +517,39 @@ module.exports = function (Outbreak) {
 
     // check cases permissions
     if (
-      !Config.duplicate ||
-      !Config.duplicate.disableCaseDuplicateCheck ||
-      context.req.authData.user.permissionsList.indexOf('case_list') >= 0 ||
-      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['case_list'].groupAllId) >= 0
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableCaseDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('case_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['case_list'].groupAllId) >= 0
+      )
     ) {
       types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
     }
 
     // check contacts permissions
     if (
-      !Config.duplicate ||
-      !Config.duplicate.disableContactDuplicateCheck ||
-      context.req.authData.user.permissionsList.indexOf('contact_list') >= 0 ||
-      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_list'].groupAllId) >= 0
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableContactDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('contact_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_list'].groupAllId) >= 0
+      )
     ) {
       types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
     }
 
     // check contacts of contacts permissions
     if (
-      !Config.duplicate ||
-      !Config.duplicate.disableContactDuplicateCheck ||
-      context.req.authData.user.permissionsList.indexOf('contact_of_contact_list') >= 0 ||
-      context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_of_contact_list'].groupAllId) >= 0
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableContactOfContactDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('contact_of_contact_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_of_contact_list'].groupAllId) >= 0
+      )
     ) {
       types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
     }
