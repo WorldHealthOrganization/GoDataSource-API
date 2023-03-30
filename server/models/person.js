@@ -609,6 +609,10 @@ module.exports = function (Person) {
               // get mask property
               let maskProperty;
               switch (data.source.existingRaw.type) {
+                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                  maskProperty = 'eventIdMask';
+
+                  break;
                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
                   maskProperty = 'caseIdMask';
 
