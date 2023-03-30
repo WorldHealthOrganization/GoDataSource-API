@@ -62,6 +62,7 @@ const addMissingPermission = (callback) => {
         // get records for batch
         return roleCollection
           .find(roleQuery, {
+            // always getting the first items as the already modified ones are filtered out
             skip: 0,
             limit: batchSize,
             projection: {
