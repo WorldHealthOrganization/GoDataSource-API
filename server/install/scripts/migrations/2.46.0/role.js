@@ -47,7 +47,7 @@ const addMissingPermission = (callback) => {
         .toArray()
         .then((results) => {
           if (results.length < 1) {
-            console.log(`No role found to update`);
+            console.log('No role found to update');
             return callback();
           } else {
             const roleIds = [];
@@ -56,7 +56,7 @@ const addMissingPermission = (callback) => {
             });
 
             // log
-            console.log(`The following roles will be updated: ` + roleIds);
+            console.log('The following roles will be updated: ' + roleIds);
 
             // add missing permission to resulted roles
             return roleCollection
@@ -71,7 +71,7 @@ const addMissingPermission = (callback) => {
               })
               .then(() => {
                 // log
-                console.log(`The roles were successfully updated`);
+                console.log('The roles were successfully updated');
 
                 // finished
                 callback();
