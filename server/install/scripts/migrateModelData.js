@@ -349,7 +349,7 @@ const migrationVersions = [{
     fileName: 'role.js',
     actions: [{
       name: 'addMissingPermission',
-      buildNo: 2
+      buildNo: 3
     }]
   }]
 }];
