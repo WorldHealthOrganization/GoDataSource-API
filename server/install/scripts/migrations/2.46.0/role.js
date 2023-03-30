@@ -1,7 +1,6 @@
 'use strict';
 
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
-const Helpers = require('../../../../../components/helpers');
 
 /**
  * Add event_generate_visual_id permission for the following permission: event_create, event_modify and event_import
@@ -13,87 +12,75 @@ const addMissingPermission = (callback) => {
   const PERMISSION_EVENT_IMPORT = 'event_import';
   const PERMISSION_EVENT_GENERATE_VISUAL_ID = 'event_generate_visual_id';
 
-  let roleCollection;
-
   // create Mongo DB connection
   return MongoDBHelper
     .getMongoDBConnection()
-    .then(dbConn => {
+    .then((dbConn) => {
       // collections
-      roleCollection = dbConn.collection('role');
+      const roleCollection = dbConn.collection('role');
 
-      // initialize parameters for handleActionsInBatches call
-      const roleQuery = {
-        deleted: false,
-        $and: [
-          {
-            'permissionIds': {
-              $in: [
-                PERMISSION_EVENT_CREATE,
-                PERMISSION_EVENT_MODIFY,
-                PERMISSION_EVENT_IMPORT
-              ]
+      // add missing permission to required roles
+      return roleCollection
+        .find({
+          $and: [
+            {
+              'permissionIds': {
+                $in: [
+                  PERMISSION_EVENT_CREATE,
+                  PERMISSION_EVENT_MODIFY,
+                  PERMISSION_EVENT_IMPORT
+                ]
+              }
+            }, {
+              'permissionIds': {
+                $nin: [
+                  PERMISSION_EVENT_GENERATE_VISUAL_ID
+                ]
+              }
             }
-          }, {
-            'permissionIds': {
-              $nin: [
-                PERMISSION_EVENT_GENERATE_VISUAL_ID
-              ]
-            }
+          ]
+        }, {
+          projection: {
+            _id: 1
           }
-        ]
-      };
+        })
+        .toArray()
+        .then((results) => {
+          if (results.length < 1) {
+            console.log(`No role found to update`);
+            return callback();
+          } else {
+            const roleIds = [];
+            results.forEach((result) => {
+              roleIds.push(result['_id']);
+            });
 
-      // initialize parameters for handleActionsInBatches call
-      const getActionsCount = () => {
-        // count roles
-        return roleCollection
-          .countDocuments(roleQuery);
-      };
+            // log
+            console.log(`The following roles will be updated: ` + roleIds);
 
-      // get records in batches
-      const getBatchData = (batchNo, batchSize) => {
-        // get records for batch
-        return roleCollection
-          .find(roleQuery, {
-            skip: (batchNo - 1) * batchSize,
-            limit: batchSize,
-            projection: {
-              _id: 1
-            }
-          })
-          .toArray();
-      };
+            // add missing permission to resulted roles
+            return roleCollection
+              .updateMany({
+                _id: {
+                  $in: roleIds
+                }
+              }, {
+                '$push': {
+                  permissionIds: PERMISSION_EVENT_GENERATE_VISUAL_ID
+                }
+              })
+              .then(() => {
+                // log
+                console.log(`The roles were successfully updated`);
 
-      // update records
-      const itemAction = (data) => {
-        // log
-        console.log(`The missing role will be added in the following role: ${data._id}`)
-
-        // add missing permission to resulted roles
-        return roleCollection
-          .updateMany({
-            _id: data._id
-          }, {
-            '$push': {
-              permissionIds: PERMISSION_EVENT_GENERATE_VISUAL_ID
-            }
-          });
-      };
-
-      // execute
-      return Helpers.handleActionsInBatches(
-        getActionsCount,
-        getBatchData,
-        null,
-        itemAction,
-        1000,
-        1,
-        console
-      );
-    })
-    .then(() => {
-      callback();
+                // finished
+                callback();
+              })
+              .catch(callback);
+            ;
+          }
+        })
+        .catch(callback);
     })
     .catch(callback);
 };
