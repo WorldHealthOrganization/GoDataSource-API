@@ -9153,7 +9153,7 @@
         {
           "arg": "where",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Criteria to match model instances. Note: where supports 'relationship' and 'labResult' MongoDB compatible queries."
         },
         {
           "arg": "options",

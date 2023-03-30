@@ -17,6 +17,18 @@
       "translation": "Address date",
       "section": "uiBulkModifyContactsOfContactsPage"
     },
+    "LNG_ENTITY_FIELD_LABEL_CLUSTER": {
+      "translation": "Cluster",
+      "section": "uiEntityFields"
+    },
+    "LNG_PAGE_CASE_COUNT_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant/strain result",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_PAGE_CASE_COUNT_DATE": {
+      "translation": "Date",
+      "section": "uiCaseCountMap"
+    },
     "LNG_CASE_FIELD_LABEL_DUPLICATE_PERSONS": {
       "translation": "A person with the same name already exists:",
       "section": "uiCaseFields"
