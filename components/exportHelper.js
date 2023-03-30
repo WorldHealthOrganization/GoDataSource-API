@@ -5529,7 +5529,7 @@ function exportFilteredModelsList(
                 // retrieve answer value
                 // only the newest one is of interest, the old ones shouldn't trigger an alert
                 // the first item should be the newest
-                const answerKey = answers?.length > 0 ?
+                const answerKey = answers && answers.length ?
                   answers[0].value :
                   undefined;
 
