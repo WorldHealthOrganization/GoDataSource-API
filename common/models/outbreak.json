@@ -923,6 +923,24 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "outbreak_see_inconsistencies",
       "permission": "ALLOW",
       "property": "listInconsistenciesInKeyDates"
@@ -6688,6 +6706,41 @@
           "path": "/people/filtered-count"
         }
       ]
+    },
+    "prototype.getPersonPossibleDuplicates": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "case",
+          "description": "Model instance data. Accepts only case, contact and contact of contact",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": [
+            "case"
+          ],
+          "description": "List of cases, contacts and contacts of contacts that are duplicates",
+          "required": true
+        }
+      ],
+      "description": "Get list of cases, contacts and contacts of contacts that are possible duplicates",
+      "http": {
+        "verb": "post",
+        "path": "/people/duplicates/find"
+      }
     },
     "prototype.findEvents": {
       "accepts": [
