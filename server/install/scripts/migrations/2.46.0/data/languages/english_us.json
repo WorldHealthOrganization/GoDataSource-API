@@ -106,7 +106,7 @@
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
-      "translation": "Created by",
+      "translation": "Created by user",
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID": {
@@ -114,7 +114,7 @@
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER": {
-      "translation": "Updated by",
+      "translation": "Updated by user",
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID": {
@@ -126,7 +126,7 @@
       "section": "uiFollowUpFields"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED": {
-      "translation": "Include Alerted data",
+      "translation": "Include \"Alerted\" data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED_DESCRIPTION": {
@@ -134,7 +134,7 @@
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER": {
-      "translation": "Include Created By data",
+      "translation": "Include \"Created By\" data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER_DESCRIPTION": {
@@ -142,7 +142,7 @@
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER": {
-      "translation": "Include Updated By data",
+      "translation": "Include \"Updated By\" data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
