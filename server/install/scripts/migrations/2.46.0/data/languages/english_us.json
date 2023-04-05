@@ -16,6 +16,54 @@
     "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
       "translation": "Address date",
       "section": "uiBulkModifyContactsOfContactsPage"
+    },
+    "LNG_ENTITY_FIELD_LABEL_CLUSTER": {
+      "translation": "Cluster",
+      "section": "uiEntityFields"
+    },
+    "LNG_PAGE_CASE_COUNT_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant/strain result",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_PAGE_CASE_COUNT_DATE": {
+      "translation": "Date",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK": {
+      "translation": "Event ID mask",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / Y – Year (Using year from the date when an event has been reported) / @ – Letter (A through Z) / & - Any character(including spaces) / * for any character with no limitations in ID length",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_VISUAL_ID": {
+      "translation": "Event ID",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The Event ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiEventFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID": {
+      "translation": "Event - generate id",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID_DESCRIPTION": {
+      "translation": "This permission allows generation of event IDs ( visual id - outbreak event mask )",
+      "section": "availablePermissions"
+    },
+    "LNG_CASE_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactOfContactFields"
     }
   }
 }

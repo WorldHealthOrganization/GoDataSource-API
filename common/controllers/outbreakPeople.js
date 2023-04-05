@@ -2,6 +2,8 @@
 
 const app = require('../../server/server');
 const moment = require('moment');
+const Config = require('../../server/config.json');
+const _ = require('lodash');
 
 /**
  * Note: It is not exposed as an actual controller
@@ -498,5 +500,68 @@ module.exports = function (Outbreak) {
         callback(null, duplicatesNo);
       })
       .catch(callback);
+  };
+
+  /**
+   * Get possible person duplicates
+   *
+   * @param model
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.getPersonPossibleDuplicates = function (model = {}, options, callback) {
+    const types = [];
+
+    // get context
+    const context = _.get(options, 'remotingContext');
+
+    // check cases permissions
+    if (
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableCaseDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('case_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['case_list'].groupAllId) >= 0
+      )
+    ) {
+      types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE');
+    }
+
+    // check contacts permissions
+    if (
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableContactDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('contact_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_list'].groupAllId) >= 0
+      )
+    ) {
+      types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+    }
+
+    // check contacts of contacts permissions
+    if (
+      (
+        !Config.duplicate ||
+        !Config.duplicate.disableContactOfContactDuplicateCheck
+      ) && (
+        context.req.authData.user.permissionsList.indexOf('contact_of_contact_list') >= 0 ||
+        context.req.authData.user.permissionsList.indexOf(app.models.role.permissionGroupMap['contact_of_contact_list'].groupAllId) >= 0
+      )
+    ) {
+      types.push('LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
+    }
+
+    // check if there are persons to retrieve
+    if (types.length === 0) {
+      callback(null, []);
+    } else {
+      app.models.person
+        .findDuplicatesByType(this.id, types, model, options)
+        .then(duplicates => callback(null, duplicates))
+        .catch(callback);
+    }
   };
 };

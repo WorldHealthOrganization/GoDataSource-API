@@ -14,6 +14,7 @@ module.exports = function (Event) {
     deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
     deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
+    'visualId': 'LNG_EVENT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
     'numberOfContacts': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS',
@@ -73,6 +74,7 @@ module.exports = function (Event) {
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
       properties: [
+        'visualId',
         'name',
         'type',
         'date',
@@ -120,6 +122,7 @@ module.exports = function (Event) {
   // default export order
   Event.exportFieldsOrder = [
     'id',
+    'visualId',
     'dateOfReporting',
     'isDateOfReportingApproximate'
   ];
@@ -134,6 +137,7 @@ module.exports = function (Event) {
   ];
 
   Event.printFieldsinOrder = [
+    'visualId',
     'type',
     'name',
     'date',

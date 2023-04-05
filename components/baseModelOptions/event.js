@@ -38,6 +38,11 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   // set outbreak id
   formattedData.outbreakId = options.outbreakId;
 
+  // sanitize visual ID
+  if (formattedData.visualId) {
+    formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+  }
+
   // add case entry in the processed list
   formattedDataContainer.push({
     raw: item,
