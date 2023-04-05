@@ -403,6 +403,20 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
+    // parse includeCreatedByUser query param
+    let includeCreatedByUser = false;
+    if (filter.where.hasOwnProperty('includeCreatedByUser')) {
+      includeCreatedByUser = filter.where.includeCreatedByUser;
+      delete filter.where.includeCreatedByUser;
+    }
+
+    // parse includeUpdatedByUser query param
+    let includeUpdatedByUser = false;
+    if (filter.where.hasOwnProperty('includeUpdatedByUser')) {
+      includeUpdatedByUser = filter.where.includeUpdatedByUser;
+      delete filter.where.includeUpdatedByUser;
+    }
+
     // parse includeAlerted query param
     let includeAlerted = false;
     if (filter.where.hasOwnProperty('includeAlerted')) {
@@ -539,6 +553,8 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId,
+            includeCreatedByUser,
+            includeUpdatedByUser,
             includeAlerted
           },
           prefilters, {

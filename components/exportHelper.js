@@ -57,7 +57,15 @@ const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 
 // export custom columns
 const CUSTOM_COLUMNS = {
-  ALERTED: 'alerted'
+  ALERTED: 'alerted',
+  CREATED_BY_USER: 'createdByUser',
+  CREATED_BY_USER_ID: 'createdByUser.id',
+  CREATED_BY_USER_FIRST_NAME: 'createdByUser.firstName',
+  CREATED_BY_USER_LAST_NAME: 'createdByUser.lastName',
+  UPDATED_BY_USER: 'updatedByUser',
+  UPDATED_BY_USER_ID: 'updatedByUser.id',
+  UPDATED_BY_USER_FIRST_NAME: 'updatedByUser.firstName',
+  UPDATED_BY_USER_LAST_NAME: 'updatedByUser.lastName'
 };
 
 // spreadsheet limits
@@ -534,7 +542,6 @@ function exportFilteredModelsList(
     };
 
     // initialize column headers
-    const alertQuestionAnswers = {};
     const initializeColumnHeaders = () => {
       // get fields that need to be exported from model options
       let fieldLabelsMap = Object.assign(
@@ -542,55 +549,25 @@ function exportFilteredModelsList(
         modelOptions.fieldLabelsMap
       );
 
-      // map alert question answers to object for easy find
-      const mapQuestions = (questions) => {
-        // get alerted answers
-        if (questions) {
-          for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
-            const question = questions[questionIndex];
-            // alert applies only to those questions that have option values
-            if (
-              (
-                question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
-                question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
-              ) &&
-              question.answers &&
-              question.answers.length
-            ) {
-              for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
-                // get data
-                const answer = question.answers[answerIndex];
+      // remove createdByUser ?
+      if (!options.includeCreatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME];
+      }
 
-                // answer alert ?
-                if (answer.alert) {
-                  // init
-                  if (!alertQuestionAnswers[question.variable]) {
-                    alertQuestionAnswers[question.variable] = {};
-                  }
-
-                  // alert
-                  alertQuestionAnswers[question.variable][answer.value] = true;
-                }
-
-                // go through all sub questions
-                if (
-                  answer.additionalQuestions &&
-                  answer.additionalQuestions.length
-                ) {
-                  mapQuestions(answer.additionalQuestions);
-                }
-              }
-            }
-          }
-        }
-      };
+      // remove updatedByUser ?
+      if (!options.includeUpdatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME];
+      }
 
       // remove alerted ?
       if (!options.includeAlerted) {
         delete fieldLabelsMap[CUSTOM_COLUMNS.ALERTED];
-      } else {
-        // get alerted answers
-        mapQuestions(options.questionnaire);
       }
 
       // filter field labels list if fields groups were provided
@@ -1051,6 +1028,52 @@ function exportFilteredModelsList(
       // finished
       return response;
     };
+
+    //  map questions with alert answers for easy find
+    const initializeQuestionsWithAlertAnswers = (questionsWithAlertAnswers, questions) => {
+      // get alerted answers
+      if (questions) {
+        for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+          const question = questions[questionIndex];
+          // alert applies only to those questions that have option values
+          if (
+            (
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+            ) &&
+            question.answers &&
+            question.answers.length
+          ) {
+            for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
+              // get data
+              const answer = question.answers[answerIndex];
+
+              // answer alert ?
+              if (answer.alert) {
+                // init
+                if (!questionsWithAlertAnswers[question.variable]) {
+                  questionsWithAlertAnswers[question.variable] = {};
+                }
+
+                // mark answer as alert
+                questionsWithAlertAnswers[question.variable][answer.value] = true;
+              }
+
+              // go through all sub questions
+              if (
+                answer.additionalQuestions &&
+                answer.additionalQuestions.length
+              ) {
+                questionsWithAlertAnswers = { ...initializeQuestionsWithAlertAnswers(questionsWithAlertAnswers, answer.additionalQuestions) };
+              }
+            }
+          }
+        }
+      }
+
+      // return
+      return questionsWithAlertAnswers;
+    }
 
     // prepare temporary workbook
     const initializeTemporaryWorkbook = () => {
@@ -2278,6 +2301,9 @@ function exportFilteredModelsList(
         });
       });
 
+      // get questions with alert answers
+      const questionsWithAlertAnswersMap = initializeQuestionsWithAlertAnswers({}, options.questionnaire);
+
       // finished
       return {
         languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
@@ -2317,6 +2343,8 @@ function exportFilteredModelsList(
         // questionnaire
         questionnaireQuestionsData: prepareQuestionnaireData(columns),
         questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
+        questionsWithAlertAnswersMap: questionsWithAlertAnswersMap,
+        hasQuestionsWithAlertAnswers: Object.keys(questionsWithAlertAnswersMap).length > 0,
 
         // no need for header translations ?
         useDbColumns: !!options.useDbColumns,
@@ -5506,14 +5534,15 @@ function exportFilteredModelsList(
           // check if at least one answer is alerted
           const answersCheckAlerted = (
             modelInstance,
-            alertQuestionAnswers
+            questionsWithAlertAnswersMap,
+            hasQuestionsWithAlertAnswers
           ) => {
             // check if modelInstance has questionnaire answers
             if (
               !modelInstance ||
               !modelInstance.questionnaireAnswers ||
-              !alertQuestionAnswers ||
-              !Object.keys(alertQuestionAnswers).length
+              !questionsWithAlertAnswersMap ||
+              !hasQuestionsWithAlertAnswers
             ) {
               return false;
             }
@@ -5546,15 +5575,15 @@ function exportFilteredModelsList(
                   // go through all answers
                   for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
                     if (
-                      alertQuestionAnswers[questionVariable] &&
-                      alertQuestionAnswers[questionVariable][answerKey[answerKeyIndex]]
+                      questionsWithAlertAnswersMap[questionVariable] &&
+                      questionsWithAlertAnswersMap[questionVariable][answerKey[answerKeyIndex]]
                     ) {
                       return true;
                     }
                   }
                 } else if (
-                  alertQuestionAnswers[questionVariable] &&
-                  alertQuestionAnswers[questionVariable][answerKey]
+                  questionsWithAlertAnswersMap[questionVariable] &&
+                  questionsWithAlertAnswersMap[questionVariable][answerKey]
                 ) {
                   return true;
                 }
@@ -5669,7 +5698,8 @@ function exportFilteredModelsList(
                 if (options.includeAlerted) {
                   record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(
                     record,
-                    alertQuestionAnswers
+                    sheetHandler.questionsWithAlertAnswersMap,
+                    sheetHandler.hasQuestionsWithAlertAnswers
                   );
                 }
 
