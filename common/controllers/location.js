@@ -8,7 +8,7 @@ const apiError = require('./../../components/apiError');
 const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
-const genericHelpers = require("../../components/helpers");
+const genericHelpers = require('../../components/helpers');
 
 const locationImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 

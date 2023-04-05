@@ -24,7 +24,8 @@ const randomize = require('randomatic');
 const DATA_TYPE = {
   BOOLEAN: 'Boolean',
   DATE: 'Date'
-}
+};
+
 const arrayFields = {
   'addresses': 'address',
   'address': 'address',
@@ -1433,7 +1434,7 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
       .minute(minutes)
       .seconds(seconds)
       .toString();
-  }
+  };
 
   /**
    * Set property boolean/date value on a record given its reference

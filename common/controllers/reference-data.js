@@ -6,7 +6,7 @@ const Platform = require('../../components/platform');
 const _ = require('lodash');
 const importableFile = require('./../../components/importableFile');
 const Config = require('../../server/config.json');
-const genericHelpers = require("../../components/helpers");
+const genericHelpers = require('../../components/helpers');
 
 // used in import
 const referenceDataImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
