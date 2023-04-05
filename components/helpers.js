@@ -1454,13 +1454,14 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
         // convert data value that doesn't match the data type
         switch (dataType) {
           case DATA_TYPE.BOOLEAN:
-            if (typeof refValue.value !== DATA_TYPE.BOOLEAN) {
+            if ((typeof refValue.value).toLowerCase() !== 'boolean') {
               _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
             }
 
             break;
           case DATA_TYPE.DATE:
-            if (Number(refValue.value)) {
+            // if value is a number convert it into JavaScript date
+            if (!isNaN(Number(refValue.value))) {
               _.set(record, refValue.exactPath, excelDateToJSDate(refValue.value));
             }
 
