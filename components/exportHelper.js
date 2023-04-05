@@ -1073,7 +1073,7 @@ function exportFilteredModelsList(
 
       // return
       return questionsWithAlertAnswers;
-    }
+    };
 
     // prepare temporary workbook
     const initializeTemporaryWorkbook = () => {
