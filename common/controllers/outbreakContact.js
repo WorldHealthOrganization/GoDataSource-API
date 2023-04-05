@@ -3340,18 +3340,42 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.contact._booleanProperties) {
-      app.models.contact._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.contact);
-    }
-    if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.relationship);
+      app.models.contact._booleanProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.contact,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.relationship._booleanProperties) {
+      app.models.relationship._booleanProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.relationship,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
+    }
+
+    if (!app.models.contact._dateProperties) {
+      app.models.contact._dateProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.contact,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    if (!app.models.relationship._dateProperties) {
+      app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.relationship,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'contact',
       batchSize: contactImportBatchSize,
       outbreakId: self.id,
       contactModelBooleanProperties: app.models.contact._booleanProperties,
       relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
+      contactModelDateProperties: app.models.contact._dateProperties,
+      relationshipModelDateProperties: app.models.relationship._dateProperties,
       contactImportableTopLevelProperties: app.models.contact._importableTopLevelProperties,
       relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties
     }, body);

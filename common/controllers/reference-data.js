@@ -6,6 +6,7 @@ const Platform = require('../../components/platform');
 const _ = require('lodash');
 const importableFile = require('./../../components/importableFile');
 const Config = require('../../server/config.json');
+const genericHelpers = require('../../components/helpers');
 
 // used in import
 const referenceDataImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -147,13 +148,25 @@ module.exports = function (ReferenceData) {
 
     // construct options needed by the formatter worker
     if (!app.models.referenceData._booleanProperties) {
-      app.models.referenceData._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.referenceData);
+      app.models.referenceData._booleanProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.referenceData,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.referenceData._dateProperties) {
+      app.models.referenceData._dateProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.referenceData,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'referenceData',
       batchSize: referenceDataImportBatchSize,
-      modelBooleanProperties: app.models.referenceData._booleanProperties
+      modelBooleanProperties: app.models.referenceData._booleanProperties,
+      modelDateProperties: app.models.referenceData._dateProperties
     }, body);
 
     // start import

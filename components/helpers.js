@@ -21,6 +21,11 @@ const config = require('../server/config');
 const {performance} = require('perf_hooks');
 const randomize = require('randomatic');
 
+const DATA_TYPE = {
+  BOOLEAN: 'Boolean',
+  DATE: 'Date'
+};
+
 const arrayFields = {
   'addresses': 'address',
   'address': 'address',
@@ -250,7 +255,13 @@ function processMapLists(flatMap, prefix) {
  * @param dontRemoveEmptyData
  * @return {Array}
  */
-function remapPropertiesUsingProcessedMap(dataSet, processedMap, valuesMap, parentPath, dontRemoveEmptyData) {
+function remapPropertiesUsingProcessedMap(
+  dataSet,
+  processedMap,
+  valuesMap,
+  parentPath = '',
+  dontRemoveEmptyData = false
+) {
   // remove empty object since these aren't relevant
   // clean array ( remove empty objects... )
   const removeEmptyObjectsAndArrays = (data) => {
@@ -1327,13 +1338,14 @@ const isValidDate = function (date) {
 };
 
 /**
- * Check Model definition for boolean properties and get their references
+ * Check Model definition for properties by data type and get their references
  * Also checks for nested definitions
  * @param model Model definition
- * @param prefix Prefix to be attached to boolean properties when the model is nested; Must have the '.' suffix
+ * @param dataType Data Type (boolean/date)
+ * @param prefix Prefix to be attached to properties when the model is nested; Must have the '.' suffix
  * @returns {[]}
  */
-const getModelBooleanProperties = function (model, prefix = '') {
+const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
   // used in getReferencedValue function
   const arrayIdentifier = '[].';
 
@@ -1349,17 +1361,22 @@ const getModelBooleanProperties = function (model, prefix = '') {
 
   // go through all model properties, from model definition
   model.forEachProperty(function (propertyName) {
-    // check if the property is supposed to be boolean
+    // check if the property is supposed to be the input data type
     if (model.definition.properties[propertyName].type) {
-      // check for simple boolean prop
-      if (model.definition.properties[propertyName].type.name === 'Boolean') {
+      // check for simple prop
+      if (model.definition.properties[propertyName].type.name === dataType) {
         // store property name
         result.push(prefix + propertyName);
       }
       // check for model definition
       // eg: address: "address"
       else if (typeof model.definition.properties[propertyName].type === 'function') {
-        result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type, propertyName + '.'));
+        result = result.concat(
+          getModelPropertiesByDataType(
+            model.definition.properties[propertyName].type,
+            dataType,
+            propertyName + '.')
+        );
       }
       // check for array of model definitions
       // eg: persons: ["relationshipParticipant"]
@@ -1367,7 +1384,13 @@ const getModelBooleanProperties = function (model, prefix = '') {
         Array.isArray(model.definition.properties[propertyName].type) &&
         typeof model.definition.properties[propertyName].type[0] === 'function'
       ) {
-        result = result.concat(getModelBooleanProperties(model.definition.properties[propertyName].type[0], propertyName + arrayIdentifier));
+        result = result.concat(
+          getModelPropertiesByDataType(
+            model.definition.properties[propertyName].type[0],
+            dataType,
+            propertyName + arrayIdentifier
+          )
+        );
       }
     }
   });
@@ -1376,79 +1399,50 @@ const getModelBooleanProperties = function (model, prefix = '') {
 };
 
 /**
- * Convert boolean model properties to correct boolean values from strings
- * @param Model
- * @param dataSet [object|array]
- */
-const convertBooleanProperties = function (Model, dataSet) {
-  /**
-   * Set property boolean value on a record given its reference
-   * Also accepts array references
-   * @param record Record to be updated
-   * @param propRef Property reference
-   */
-  const setValueOnRecordProperty = function (record, propRef) {
-    let propRefValues = getReferencedValue(record, propRef);
-    // if it's single value, convert it to array (simplify the code)
-    if (!Array.isArray(propRefValues)) {
-      propRefValues = [propRefValues];
-    }
-    // go through all the found values
-    propRefValues.forEach(refValue => {
-      // if it has a value but the value is not boolean
-      if (refValue.value != null && typeof refValue.value !== 'boolean') {
-        _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
-      }
-    });
-  };
-
-  // init model boolean properties, if not already done
-  if (!Model._booleanProperties) {
-    // keep a list of boolean properties
-    Model._booleanProperties = getModelBooleanProperties(Model);
-  }
-
-  /**
-   * Convert boolean model properties for a single record instance
-   * @param record
-   */
-  function convertBooleanModelProperties(record) {
-    // check each property that is supposed to be boolean
-    Model._booleanProperties.forEach(function (booleanProperty) {
-      setValueOnRecordProperty(record, booleanProperty);
-    });
-  }
-
-  // array of records
-  if (Array.isArray(dataSet)) {
-    // go through the dataSet records
-    dataSet.forEach(function (record) {
-      // convert each record
-      convertBooleanModelProperties(record);
-    });
-    // single record
-  } else {
-    // convert record
-    convertBooleanModelProperties(dataSet);
-  }
-  // records are modified by reference, but also return the dataSet
-  return dataSet;
-};
-
-/**
- * TODO: copied from convertBooleanProperties and updated to not used Loopback models; Should be used everywhere instead of the old function
- * Convert boolean model properties to correct boolean values from strings
- * @param {Array} modelBooleanProperties
+  * Convert model properties to correct type values from strings/number
+ * @param {Array} modelProperties
+ * @param dataType Data Type (boolean/date)
  * @param {Object|Array} dataSet
  */
-const convertBooleanPropertiesNoModel = function (modelBooleanProperties, dataSet) {
+const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataType) {
   /**
-   * Set property boolean value on a record given its reference
+   * Converts Excel date in integer format into JS date
+   * @param serial
+   * @returns {string}
+   */
+  const excelDateToJSDate = function (serial) {
+    // constants
+    const SECONDS_IN_DAY = 86400; // 24 * 60 * 60
+    const DIFF_NUMBER_OF_DAYS = 25569; // (25567 + 2) - number of days between: Jan 1, 1900 and Jan 1, 1970, plus 2 ("excel leap year bug")
+
+    // get date in utc
+    const utcDays = Math.floor(serial - DIFF_NUMBER_OF_DAYS);
+    const utcValue = utcDays * SECONDS_IN_DAY;
+    const dateInfo = moment(utcValue * 1000);
+
+    // calculate hours, minutes ans seconds
+    const fractionalDay = serial - Math.floor(serial) + 0.0000001;
+    let totalSeconds = Math.floor(SECONDS_IN_DAY * fractionalDay);
+    const seconds = totalSeconds % 60;
+    totalSeconds -= seconds;
+    const hours = Math.floor(totalSeconds / (60 * 60));
+    const minutes = Math.floor(totalSeconds / 60) % 60;
+
+    // return full date
+    return dateInfo
+      .hour(hours)
+      .minute(minutes)
+      .seconds(seconds)
+      .toString();
+  };
+
+  /**
+   * Set property boolean/date value on a record given its reference
    * Also accepts array references
    * @param record Record to be updated
    * @param propRef Property reference
    */
-  const setValueOnRecordProperty = function (record, propRef) {
+  const setValueOnRecordProperty = function (record, propRef, dataType) {
     let propRefValues = getReferencedValue(record, propRef);
     // if it's single value, convert it to array (simplify the code)
     if (!Array.isArray(propRefValues)) {
@@ -1456,21 +1450,36 @@ const convertBooleanPropertiesNoModel = function (modelBooleanProperties, dataSe
     }
     // go through all the found values
     propRefValues.forEach(refValue => {
-      // if it has a value but the value is not boolean
-      if (refValue.value != null && typeof refValue.value !== 'boolean') {
-        _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
+      if (refValue.value != null) {
+        // convert data value that doesn't match the data type
+        switch (dataType) {
+          case DATA_TYPE.BOOLEAN:
+            if ((typeof refValue.value).toLowerCase() !== 'boolean') {
+              _.set(record, refValue.exactPath, ['1', 'true'].includes(refValue.value.toString().toLowerCase()));
+            }
+
+            break;
+          case DATA_TYPE.DATE:
+            // if value is a number convert it into JavaScript date
+            if (!isNaN(Number(refValue.value))) {
+              _.set(record, refValue.exactPath, excelDateToJSDate(refValue.value));
+            }
+
+            break;
+        }
       }
     });
   };
 
   /**
-   * Convert boolean model properties for a single record instance
+   * Convert model properties by data type for a single record instance
+   * @param dataType Data Type (boolean/date)
    * @param record
    */
-  function convertBooleanModelProperties(record) {
-    // check each property that is supposed to be boolean
-    modelBooleanProperties.forEach(function (booleanProperty) {
-      setValueOnRecordProperty(record, booleanProperty);
+  function convertModelPropertiesByDataType(record, dataType) {
+    // check each property that is supposed to be received type
+    modelProperties.forEach(function (property) {
+      setValueOnRecordProperty(record, property, dataType);
     });
   }
 
@@ -1479,12 +1488,12 @@ const convertBooleanPropertiesNoModel = function (modelBooleanProperties, dataSe
     // go through the dataSet records
     dataSet.forEach(function (record) {
       // convert each record
-      convertBooleanModelProperties(record);
+      convertModelPropertiesByDataType(record, dataType);
     });
     // single record
   } else {
     // convert record
-    convertBooleanModelProperties(dataSet);
+    convertModelPropertiesByDataType(dataSet, dataType);
   }
   // records are modified by reference, but also return the dataSet
   return dataSet;
@@ -2771,9 +2780,8 @@ Object.assign(module.exports, {
   includeSubLocationsInLocationFilter: includeSubLocationsInLocationFilter,
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
-  getModelBooleanProperties: getModelBooleanProperties,
-  convertBooleanProperties: convertBooleanProperties,
-  convertBooleanPropertiesNoModel: convertBooleanPropertiesNoModel,
+  getModelPropertiesByDataType: getModelPropertiesByDataType,
+  convertPropertiesNoModelByType: convertPropertiesNoModelByType,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
@@ -2806,5 +2814,6 @@ Object.assign(module.exports, {
   attachDuplicateKeys,
   fillGeoLocationInformation,
   countPeopleContactsAndExposures,
-  randomString
+  randomString,
+  DATA_TYPE: DATA_TYPE
 });
