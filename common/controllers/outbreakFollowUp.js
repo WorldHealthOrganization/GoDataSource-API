@@ -516,6 +516,105 @@ module.exports = function (Outbreak) {
         // update casesQuery if needed
         updatedFilter && (filter.where = updatedFilter);
 
+        // configure relationships
+        const relationships = {
+          followUpTeam: {
+            type: exportHelper.RELATION_TYPE.HAS_ONE,
+            collection: 'team',
+            project: [
+              '_id',
+              'name'
+            ],
+            key: '_id',
+            keyValue: `(followUp) => {
+                return followUp && followUp.teamId ?
+                  followUp.teamId :
+                  undefined;
+              }`,
+            replace: {
+              'teamId': {
+                value: 'followUpTeam.name'
+              }
+            }
+          },
+          contact: {
+            type: exportHelper.RELATION_TYPE.HAS_ONE,
+            collection: 'person',
+            project: [
+              '_id',
+              'visualId',
+              'firstName',
+              'lastName',
+              'riskLevel',
+              'gender',
+              'occupation',
+              'age',
+              'dob',
+              'dateOfLastContact',
+              'followUp'
+            ],
+            key: '_id',
+            keyValue: `(followUp) => {
+                return followUp && followUp.personId ?
+                  followUp.personId :
+                  undefined;
+              }`
+          },
+          responsibleUser: {
+            type: exportHelper.RELATION_TYPE.HAS_ONE,
+            collection: 'user',
+            project: [
+              '_id',
+              'firstName',
+              'lastName'
+            ],
+            key: '_id',
+            keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
+              }`
+          }
+        };
+
+        // add createdByUser
+        if (includeCreatedByUser) {
+          relationships.createdByUser = {
+            type: exportHelper.RELATION_TYPE.HAS_ONE,
+            collection: 'user',
+            project: [
+              '_id',
+              'firstName',
+              'lastName'
+            ],
+            key: '_id',
+            keyValue: `(item) => {
+                return item && item.createdBy ?
+                  item.createdBy :
+                  undefined;
+              }`
+          };
+        }
+
+        // add updatedByUser
+        if (includeUpdatedByUser) {
+          relationships.updatedByUser = {
+            type: exportHelper.RELATION_TYPE.HAS_ONE,
+            collection: 'user',
+            project: [
+              '_id',
+              'firstName',
+              'lastName'
+            ],
+            key: '_id',
+            keyValue: `(item) => {
+                return item && item.updatedBy ?
+                  item.updatedBy :
+                  undefined;
+              }`
+          };
+        }
+
         // export
         return WorkerRunner.helpers.exportFilteredModelsList(
           {
@@ -557,95 +656,8 @@ module.exports = function (Outbreak) {
             includeUpdatedByUser,
             includeAlerted
           },
-          prefilters, {
-            followUpTeam: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'team',
-              project: [
-                '_id',
-                'name'
-              ],
-              key: '_id',
-              keyValue: `(followUp) => {
-                return followUp && followUp.teamId ?
-                  followUp.teamId :
-                  undefined;
-              }`,
-              replace: {
-                'teamId': {
-                  value: 'followUpTeam.name'
-                }
-              }
-            },
-            contact: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'person',
-              project: [
-                '_id',
-                'visualId',
-                'firstName',
-                'lastName',
-                'riskLevel',
-                'gender',
-                'occupation',
-                'age',
-                'dob',
-                'dateOfLastContact',
-                'followUp'
-              ],
-              key: '_id',
-              keyValue: `(followUp) => {
-                return followUp && followUp.personId ?
-                  followUp.personId :
-                  undefined;
-              }`
-            },
-            responsibleUser: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'user',
-              project: [
-                '_id',
-                'firstName',
-                'lastName'
-              ],
-              key: '_id',
-              keyValue: `(item) => {
-                return item && item.responsibleUserId ?
-                  item.responsibleUserId :
-                  undefined;
-              }`
-            },
-            createdByUser: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'user',
-              project: [
-                '_id',
-                'firstName',
-                'lastName'
-              ],
-              key: '_id',
-              keyValue: `(item) => {
-                return item && item.createdBy ?
-                  item.createdBy :
-                  undefined;
-              }`
-            },
-            updatedByUser: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'user',
-              project: [
-                '_id',
-                'firstName',
-                'lastName'
-              ],
-              key: '_id',
-              keyValue: `(item) => {
-                return item && item.updatedBy ?
-                  item.updatedBy :
-                  undefined;
-              }`
-            }
-          }
+          prefilters,
+          relationships
         );
       })
       .then((exportData) => {
