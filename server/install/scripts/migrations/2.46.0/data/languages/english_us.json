@@ -53,6 +53,18 @@
       "translation": "This permission allows generation of event IDs ( visual id - outbreak event mask )",
       "section": "availablePermissions"
     },
+    "LNG_CASE_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactOfContactFields"
+    },
     "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
       "translation": "Day of follow-up",
       "section": "uiFollowUpFields"
