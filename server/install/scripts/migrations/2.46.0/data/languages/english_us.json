@@ -126,27 +126,27 @@
       "section": "uiFollowUpFields"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED": {
-      "translation": "Include \"Alerted\" data",
+      "translation": "Include alerted data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED_DESCRIPTION": {
-      "translation": "When checked, the \"Alerted\" data will be included in the exported file",
+      "translation": "When checked, the alerted data will be included in the exported file",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER": {
-      "translation": "Include \"Created By\" data",
+      "translation": "Include created by user data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER_DESCRIPTION": {
-      "translation": "When checked, the \"Created By\" data will be included in the exported file",
+      "translation": "When checked, the created by user data will be included in the exported file",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER": {
-      "translation": "Include \"Updated By\" data",
+      "translation": "Include updated by user data",
       "section": "uiCommonLabels"
     },
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
-      "translation": "When checked, the \"Updated By\" data will be included in the exported file",
+      "translation": "When checked, the updated by user data will be included in the exported file",
       "section": "uiCommonLabels"
     }
   }
