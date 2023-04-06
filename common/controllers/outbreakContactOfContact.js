@@ -852,18 +852,42 @@ module.exports = function (Outbreak) {
 
     // construct options needed by the formatter worker
     if (!app.models.contactOfContact._booleanProperties) {
-      app.models.contactOfContact._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.contactOfContact);
-    }
-    if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.relationship);
+      app.models.contactOfContact._booleanProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.contactOfContact,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.relationship._booleanProperties) {
+      app.models.relationship._booleanProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.relationship,
+        genericHelpers.DATA_TYPE.BOOLEAN
+      );
+    }
+
+    if (!app.models.contactOfContact._dateProperties) {
+      app.models.contactOfContact._dateProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.contactOfContact,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    if (!app.models.relationship._dateProperties) {
+      app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
+        app.models.relationship,
+        genericHelpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'contactOfContact',
       batchSize: contactOfContactImportBatchSize,
       outbreakId: self.id,
       contactOfContactModelBooleanProperties: app.models.contactOfContact._booleanProperties,
       relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
+      contactOfContactModelDateProperties: app.models.contactOfContact._dateProperties,
+      relationshipModelDateProperties: app.models.relationship._dateProperties,
       contactOfContactImportableTopLevelProperties: app.models.contactOfContact._importableTopLevelProperties,
       relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties
     }, body);

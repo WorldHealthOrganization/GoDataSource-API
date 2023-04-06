@@ -631,14 +631,26 @@ module.exports = function (LabResult) {
 
     // construct options needed by the formatter worker
     if (!app.models.labResult._booleanProperties) {
-      app.models.labResult._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.labResult);
+      app.models.labResult._booleanProperties = helpers.getModelPropertiesByDataType(
+        app.models.labResult,
+        helpers.DATA_TYPE.BOOLEAN
+      );
     }
 
+    if (!app.models.labResult._dateProperties) {
+      app.models.labResult._dateProperties = helpers.getModelPropertiesByDataType(
+        app.models.labResult,
+        helpers.DATA_TYPE.DATE
+      );
+    }
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'labResult',
       batchSize: labResultImportBatchSize,
       outbreakId: outbreakId,
-      modelBooleanProperties: app.models.labResult._booleanProperties
+      modelBooleanProperties: app.models.labResult._booleanProperties,
+      modelDateProperties: app.models.labResult._dateProperties
     }, body);
 
     // start import
