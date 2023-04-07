@@ -1064,15 +1064,12 @@ function exportFilteredModelsList(
                 answer.additionalQuestions &&
                 answer.additionalQuestions.length
               ) {
-                questionsWithAlertAnswers = { ...initializeQuestionsWithAlertAnswers(questionsWithAlertAnswers, answer.additionalQuestions) };
+                initializeQuestionsWithAlertAnswers(questionsWithAlertAnswers, answer.additionalQuestions);
               }
             }
           }
         }
       }
-
-      // return
-      return questionsWithAlertAnswers;
     };
 
     // prepare temporary workbook
@@ -2302,7 +2299,11 @@ function exportFilteredModelsList(
       });
 
       // get questions with alert answers
-      const questionsWithAlertAnswersMap = initializeQuestionsWithAlertAnswers({}, options.questionnaire);
+      const questionsWithAlertAnswersMap = {};
+      initializeQuestionsWithAlertAnswers(
+        questionsWithAlertAnswersMap,
+        options.questionnaire
+      );
 
       // finished
       return {
@@ -5532,61 +5533,53 @@ function exportFilteredModelsList(
           const recordData = data;
 
           // check if at least one answer is alerted
-          const answersCheckAlerted = (
-            modelInstance,
-            questionsWithAlertAnswersMap,
-            hasQuestionsWithAlertAnswers
-          ) => {
+          const answersCheckAlerted = (modelInstance) => {
             // check if modelInstance has questionnaire answers
             if (
               !modelInstance ||
-              !modelInstance.questionnaireAnswers ||
-              !questionsWithAlertAnswersMap ||
-              !hasQuestionsWithAlertAnswers
+              !modelInstance.questionnaireAnswers
             ) {
               return false;
             }
 
             // check if we need to mark follow-up as alerted because of questionnaire answers
-            if (modelInstance.questionnaireAnswers) {
-              const props = Object.keys(modelInstance.questionnaireAnswers);
-              for (let propIndex = 0; propIndex < props.length; propIndex++) {
-                // get answer data
-                const questionVariable = props[propIndex];
-                const answers = modelInstance.questionnaireAnswers[questionVariable];
+            const props = Object.keys(modelInstance.questionnaireAnswers);
+            for (let propIndex = 0; propIndex < props.length; propIndex++) {
+              // get answer data
+              const questionVariable = props[propIndex];
+              const answers = modelInstance.questionnaireAnswers[questionVariable];
 
-                // retrieve answer value
-                // only the newest one is of interest, the old ones shouldn't trigger an alert
-                // the first item should be the newest
-                const answerKey = answers && answers.length ?
-                  answers[0].value :
-                  undefined;
+              // retrieve answer value
+              // only the newest one is of interest, the old ones shouldn't trigger an alert
+              // the first item should be the newest
+              const answerKey = answers && answers.length ?
+                answers[0].value :
+                undefined;
 
-                // there is no point in checking the value if there isn't one
-                if (
-                  !answerKey &&
-                  typeof answerKey !== 'number'
-                ) {
-                  continue;
-                }
+              // there is no point in checking the value if there isn't one
+              if (
+                !answerKey &&
+                typeof answerKey !== 'number'
+              ) {
+                continue;
+              }
 
-                // at least one alerted ?
-                if (Array.isArray(answerKey)) {
-                  // go through all answers
-                  for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
-                    if (
-                      questionsWithAlertAnswersMap[questionVariable] &&
-                      questionsWithAlertAnswersMap[questionVariable][answerKey[answerKeyIndex]]
-                    ) {
-                      return true;
-                    }
+              // at least one alerted ?
+              if (Array.isArray(answerKey)) {
+                // go through all answers
+                for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
+                  if (
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey[answerKeyIndex]]
+                  ) {
+                    return true;
                   }
-                } else if (
-                  questionsWithAlertAnswersMap[questionVariable] &&
-                  questionsWithAlertAnswersMap[questionVariable][answerKey]
-                ) {
-                  return true;
                 }
+              } else if (
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey]
+              ) {
+                return true;
               }
             }
 
@@ -5695,12 +5688,11 @@ function exportFilteredModelsList(
                 }
 
                 // check alerted
-                if (options.includeAlerted) {
-                  record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(
-                    record,
-                    sheetHandler.questionsWithAlertAnswersMap,
-                    sheetHandler.hasQuestionsWithAlertAnswers
-                  );
+                if (
+                  options.includeAlerted &&
+                  sheetHandler.hasQuestionsWithAlertAnswers
+                ) {
+                  record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(record);
                 }
 
                 // convert geo-points (if any)
