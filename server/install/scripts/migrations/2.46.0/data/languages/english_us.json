@@ -65,6 +65,86 @@
       "translation": "A person with the same name already exists:",
       "section": "uiContactOfContactFields"
     },
+    "LNG_SHEET_CONTEXT_MENU_PASTE": {
+      "translation": "Paste",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_DELETE": {
+      "translation": "Delete content",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_UNDO": {
+      "translation": "Undo",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_REDO": {
+      "translation": "Redo",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_APPEND_ROW": {
+      "translation": "Add row(s)",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_REMOVE_ROW": {
+      "translation": "Delete rows",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INTEGER": {
+      "translation": "Field must be an integer",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INVALID_COLUMNS": {
+      "translation": "Column(s) '{{fields}}' are invalid",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_EDITOR_HELP": {
+      "translation": "All cells with red backgrounds will display details on mouse hover about what is invalid and why",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INVALID_ROWS": {
+      "translation": "Row(s) '{{rows}}' are invalid",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_COMMON_NOTHING_TO_SAVE": {
+      "translation": "Nothing to save",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_INVALID_ROWS": {
+      "translation": "You have invalid rows",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_ROWS_NO": {
+      "translation": "No. of rows to append",
+      "section": "uiCommonLabels"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_SELECTED_ROWS": {
+      "translation": "Are you sure you want to delete selected rows ({{rows}})?",
+      "section": "uiDialogs"
+    },
+    "LNG_SHEET_CONTEXT_MENU_COPY": {
+      "translation": "Copy raw",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_COPY_TEXT": {
+      "translation": "Copy text",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_API_ERROR_MSG": {
+      "translation": "Row {{row}} is invalid: {{err}}",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
+      "translation": "Records that were created with success were removed from the spreadsheet so we don't create duplicates",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_API_ERROR_MSG": {
+      "translation": "Row {{row}} is invalid: {{err}}",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
+      "translation": "Records that were created with success were removed from the spreadsheet so we don't create duplicates",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
     "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
       "translation": "Day of follow-up",
       "section": "uiFollowUpFields"
