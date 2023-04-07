@@ -178,6 +178,16 @@ function exportFilteredModelsList(
         throw new Error(`Invalid relation "${relationName}" - ${details}`);
       };
 
+      // remove createdByUser relation ?
+      if (!options.includeCreatedByUser){
+        delete relations.createdByUser;
+      }
+
+      // remove updatedByUser relation ?
+      if (!options.includeUpdatedByUser){
+        delete relations.updatedByUser;
+      }
+
       // go through relations and check that we have the expected data
       // - name needs to be unique, when 1 level that shouldn't be a problem due to linter but multiple levels create problems
       const validateRelationsUsedNames = {};
