@@ -614,36 +614,6 @@ module.exports = function (Outbreak) {
                   item.responsibleUserId :
                   undefined;
               }`
-            },
-            createdByUser: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'user',
-              project: [
-                '_id',
-                'firstName',
-                'lastName'
-              ],
-              key: '_id',
-              keyValue: `(item) => {
-                return item && item.createdBy ?
-                  item.createdBy :
-                  undefined;
-              }`
-            },
-            updatedByUser: {
-              type: exportHelper.RELATION_TYPE.HAS_ONE,
-              collection: 'user',
-              project: [
-                '_id',
-                'firstName',
-                'lastName'
-              ],
-              key: '_id',
-              keyValue: `(item) => {
-                return item && item.updatedBy ?
-                  item.updatedBy :
-                  undefined;
-              }`
             }
           }
         );

@@ -163,6 +163,49 @@ function exportFilteredModelsList(
   joins
 ) {
   try {
+    // initialize custom relations
+    const initializeCustomRelations = () => {
+      // add createdByUser ?
+      if (options.includeCreatedByUser) {
+        relations = relations || {};
+        relations.createdByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.createdBy ?
+              item.createdBy :
+              undefined;
+          }`
+        }
+      }
+
+      // add updatedByUser ?
+      if (options.includeUpdatedByUser) {
+        relations = relations || {};
+        relations.updatedByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.updatedBy ?
+              item.updatedBy :
+              undefined;
+          }`
+        }
+      }
+    };
+
     // validate & parse relations
     const validateAndParseRelations = () => {
       // no relations to validate ?
@@ -177,16 +220,6 @@ function exportFilteredModelsList(
       ) => {
         throw new Error(`Invalid relation "${relationName}" - ${details}`);
       };
-
-      // remove createdByUser relation ?
-      if (!options.includeCreatedByUser){
-        delete relations.createdByUser;
-      }
-
-      // remove updatedByUser relation ?
-      if (!options.includeUpdatedByUser){
-        delete relations.updatedByUser;
-      }
 
       // go through relations and check that we have the expected data
       // - name needs to be unique, when 1 level that shouldn't be a problem due to linter but multiple levels create problems
@@ -425,6 +458,9 @@ function exportFilteredModelsList(
       // validate the main ones
       validateRelations(relations);
     };
+
+    // initialize custom relations
+    initializeCustomRelations();
 
     // validate & parse relations
     validateAndParseRelations();
