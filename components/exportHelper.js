@@ -182,7 +182,7 @@ function exportFilteredModelsList(
               item.createdBy :
               undefined;
           }`
-        }
+        };
       }
 
       // add updatedByUser ?
@@ -202,7 +202,7 @@ function exportFilteredModelsList(
               item.updatedBy :
               undefined;
           }`
-        }
+        };
       }
     };
 
