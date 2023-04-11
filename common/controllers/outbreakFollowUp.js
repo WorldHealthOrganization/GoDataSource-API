@@ -403,6 +403,27 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
+    // parse includeCreatedByUser query param
+    let includeCreatedByUser = false;
+    if (filter.where.hasOwnProperty('includeCreatedByUser')) {
+      includeCreatedByUser = filter.where.includeCreatedByUser;
+      delete filter.where.includeCreatedByUser;
+    }
+
+    // parse includeUpdatedByUser query param
+    let includeUpdatedByUser = false;
+    if (filter.where.hasOwnProperty('includeUpdatedByUser')) {
+      includeUpdatedByUser = filter.where.includeUpdatedByUser;
+      delete filter.where.includeUpdatedByUser;
+    }
+
+    // parse includeAlerted query param
+    let includeAlerted = false;
+    if (filter.where.hasOwnProperty('includeAlerted')) {
+      includeAlerted = filter.where.includeAlerted;
+      delete filter.where.includeAlerted;
+    }
+
     // parse useDbColumns query param
     let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
@@ -511,7 +532,9 @@ module.exports = function (Outbreak) {
             // fields that we need to bring from db, but we don't want to include in the export
             projection: [
               'personId',
-              'responsibleUserId'
+              'responsibleUserId',
+              'createdBy',
+              'updatedBy'
             ]
           },
           filter,
@@ -529,7 +552,10 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
-            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId,
+            includeCreatedByUser,
+            includeUpdatedByUser,
+            includeAlerted
           },
           prefilters, {
             followUpTeam: {
@@ -558,7 +584,14 @@ module.exports = function (Outbreak) {
                 '_id',
                 'visualId',
                 'firstName',
-                'lastName'
+                'lastName',
+                'riskLevel',
+                'gender',
+                'occupation',
+                'age',
+                'dob',
+                'dateOfLastContact',
+                'followUp'
               ],
               key: '_id',
               keyValue: `(followUp) => {

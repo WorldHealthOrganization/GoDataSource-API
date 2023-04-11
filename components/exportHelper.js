@@ -55,6 +55,19 @@ const NON_FLAT_TYPES = [
 // default export type - in case export type isn't provided
 const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 
+// export custom columns
+const CUSTOM_COLUMNS = {
+  ALERTED: 'alerted',
+  CREATED_BY_USER: 'createdByUser',
+  CREATED_BY_USER_ID: 'createdByUser.id',
+  CREATED_BY_USER_FIRST_NAME: 'createdByUser.firstName',
+  CREATED_BY_USER_LAST_NAME: 'createdByUser.lastName',
+  UPDATED_BY_USER: 'updatedByUser',
+  UPDATED_BY_USER_ID: 'updatedByUser.id',
+  UPDATED_BY_USER_FIRST_NAME: 'updatedByUser.firstName',
+  UPDATED_BY_USER_LAST_NAME: 'updatedByUser.lastName'
+};
+
 // spreadsheet limits
 const SHEET_LIMITS = {
   XLSX: {
@@ -150,6 +163,49 @@ function exportFilteredModelsList(
   joins
 ) {
   try {
+    // initialize custom relations
+    const initializeCustomRelations = () => {
+      // add createdByUser ?
+      if (options.includeCreatedByUser) {
+        relations = relations || {};
+        relations.createdByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.createdBy ?
+              item.createdBy :
+              undefined;
+          }`
+        };
+      }
+
+      // add updatedByUser ?
+      if (options.includeUpdatedByUser) {
+        relations = relations || {};
+        relations.updatedByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.updatedBy ?
+              item.updatedBy :
+              undefined;
+          }`
+        };
+      }
+    };
+
     // validate & parse relations
     const validateAndParseRelations = () => {
       // no relations to validate ?
@@ -403,6 +459,9 @@ function exportFilteredModelsList(
       validateRelations(relations);
     };
 
+    // initialize custom relations
+    initializeCustomRelations();
+
     // validate & parse relations
     validateAndParseRelations();
 
@@ -535,6 +594,27 @@ function exportFilteredModelsList(
         {},
         modelOptions.fieldLabelsMap
       );
+
+      // remove createdByUser ?
+      if (!options.includeCreatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME];
+      }
+
+      // remove updatedByUser ?
+      if (!options.includeUpdatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME];
+      }
+
+      // remove alerted ?
+      if (!options.includeAlerted) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.ALERTED];
+      }
 
       // filter field labels list if fields groups were provided
       let modelExportFieldsOrder = modelOptions.exportFieldsOrder;
@@ -993,6 +1073,49 @@ function exportFilteredModelsList(
 
       // finished
       return response;
+    };
+
+    //  map questions with alert answers for easy find
+    const initializeQuestionsWithAlertAnswers = (questionsWithAlertAnswers, questions) => {
+      // get alerted answers
+      if (questions) {
+        for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+          const question = questions[questionIndex];
+          // alert applies only to those questions that have option values
+          if (
+            (
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+            ) &&
+            question.answers &&
+            question.answers.length
+          ) {
+            for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
+              // get data
+              const answer = question.answers[answerIndex];
+
+              // answer alert ?
+              if (answer.alert) {
+                // init
+                if (!questionsWithAlertAnswers[question.variable]) {
+                  questionsWithAlertAnswers[question.variable] = {};
+                }
+
+                // mark answer as alert
+                questionsWithAlertAnswers[question.variable][answer.value] = true;
+              }
+
+              // go through all sub questions
+              if (
+                answer.additionalQuestions &&
+                answer.additionalQuestions.length
+              ) {
+                initializeQuestionsWithAlertAnswers(questionsWithAlertAnswers, answer.additionalQuestions);
+              }
+            }
+          }
+        }
+      }
     };
 
     // prepare temporary workbook
@@ -2221,6 +2344,13 @@ function exportFilteredModelsList(
         });
       });
 
+      // get questions with alert answers
+      const questionsWithAlertAnswersMap = {};
+      initializeQuestionsWithAlertAnswers(
+        questionsWithAlertAnswersMap,
+        options.questionnaire
+      );
+
       // finished
       return {
         languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
@@ -2260,6 +2390,8 @@ function exportFilteredModelsList(
         // questionnaire
         questionnaireQuestionsData: prepareQuestionnaireData(columns),
         questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
+        questionsWithAlertAnswersMap: questionsWithAlertAnswersMap,
+        hasQuestionsWithAlertAnswers: Object.keys(questionsWithAlertAnswersMap).length > 0,
 
         // no need for header translations ?
         useDbColumns: !!options.useDbColumns,
@@ -5446,6 +5578,61 @@ function exportFilteredModelsList(
           // - promise visibility
           const recordData = data;
 
+          // check if at least one answer is alerted
+          const answersCheckAlerted = (modelInstance) => {
+            // check if modelInstance has questionnaire answers
+            if (
+              !modelInstance ||
+              !modelInstance.questionnaireAnswers
+            ) {
+              return false;
+            }
+
+            // check if we need to mark follow-up as alerted because of questionnaire answers
+            const props = Object.keys(modelInstance.questionnaireAnswers);
+            for (let propIndex = 0; propIndex < props.length; propIndex++) {
+              // get answer data
+              const questionVariable = props[propIndex];
+              const answers = modelInstance.questionnaireAnswers[questionVariable];
+
+              // retrieve answer value
+              // only the newest one is of interest, the old ones shouldn't trigger an alert
+              // the first item should be the newest
+              const answerKey = answers && answers.length ?
+                answers[0].value :
+                undefined;
+
+              // there is no point in checking the value if there isn't one
+              if (
+                !answerKey &&
+                typeof answerKey !== 'number'
+              ) {
+                continue;
+              }
+
+              // at least one alerted ?
+              if (Array.isArray(answerKey)) {
+                // go through all answers
+                for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
+                  if (
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey[answerKeyIndex]]
+                  ) {
+                    return true;
+                  }
+                }
+              } else if (
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey]
+              ) {
+                return true;
+              }
+            }
+
+            // return false if no alerted found
+            return false;
+          };
+
           // handle relations and children relations
           const processRelations = (levelIndex) => {
             // retrieve relations data
@@ -5544,6 +5731,14 @@ function exportFilteredModelsList(
                 // record doesn't exist anymore - deleted ?
                 if (!record) {
                   return Promise.resolve();
+                }
+
+                // check alerted
+                if (
+                  options.includeAlerted &&
+                  sheetHandler.hasQuestionsWithAlertAnswers
+                ) {
+                  record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(record);
                 }
 
                 // convert geo-points (if any)
@@ -6022,6 +6217,7 @@ module.exports = {
   RELATION_TYPE,
   JOIN_TYPE,
   TEMPORARY_DATABASE_PREFIX,
+  CUSTOM_COLUMNS,
 
   // methods
   exportFilteredModelsList,

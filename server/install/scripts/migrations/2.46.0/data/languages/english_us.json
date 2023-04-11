@@ -144,6 +144,90 @@
     "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
       "translation": "Records that were created with success were removed from the spreadsheet so we don't create duplicates",
       "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
+      "translation": "Day of follow-up",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER": {
+      "translation": "Gender",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE": {
+      "translation": "Age",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS": {
+      "translation": "Years",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS": {
+      "translation": "Months",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB": {
+      "translation": "Date of birth",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION": {
+      "translation": "Occupation",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT": {
+      "translation": "Date of last contact",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP": {
+      "translation": "Follow-up",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE": {
+      "translation": "Follow-up end date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
+      "translation": "Created by user",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID": {
+      "translation": "ID",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER": {
+      "translation": "Updated by user",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID": {
+      "translation": "ID",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ALERTED": {
+      "translation": "Alerted",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED": {
+      "translation": "Include alerted data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED_DESCRIPTION": {
+      "translation": "When checked, the alerted data will be included in the exported file",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER": {
+      "translation": "Include created by user data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER_DESCRIPTION": {
+      "translation": "When checked, the created by user data will be included in the exported file",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER": {
+      "translation": "Include updated by user data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
+      "translation": "When checked, the updated by user data will be included in the exported file",
+      "section": "uiCommonLabels"
     }
   }
 }

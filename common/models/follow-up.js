@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const exportHelper = require('./../../components/exportHelper');
 const FollowupGeneration = require('../../components/followupGeneration');
 const RoundRobin = require('rr');
 const Timer = require('../../components/Timer');
@@ -58,11 +59,29 @@ module.exports = function (FollowUp) {
 
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER]: 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_ID]: 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME]: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME]: 'LNG_USER_FIELD_LABEL_LAST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER]: 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_ID]: 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME]: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME]: 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
     'contact.id': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_ID',
     'contact.visualId': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
+    'contact.riskLevel': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_RISK_LEVEL',
+    'contact.gender': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER',
+    'contact.occupation': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION',
+    'contact.age': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE',
+    'contact.age.years': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS',
+    'contact.age.months': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS',
+    'contact.dob': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB',
+    'contact.dateOfLastContact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT',
+    'contact.followUp': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP',
+    'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -85,6 +104,7 @@ module.exports = function (FollowUp) {
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
+    [exportHelper.CUSTOM_COLUMNS.ALERTED]: 'LNG_FOLLOW_UP_FIELD_LABEL_ALERTED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
     'responsibleUser': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
@@ -102,9 +122,15 @@ module.exports = function (FollowUp) {
       properties: [
         'id',
         'createdAt',
-        'createdBy',
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_ID],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME],
         'updatedAt',
-        'updatedBy',
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_ID],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME],
         'deleted',
         'deletedAt',
         'createdOn'
@@ -116,7 +142,16 @@ module.exports = function (FollowUp) {
         'contact.id',
         'contact.visualId',
         'contact.firstName',
-        'contact.lastName'
+        'contact.lastName',
+        'contact.riskLevel',
+        'contact.gender',
+        'contact.occupation',
+        'contact.age',
+        'contact.age.years',
+        'contact.age.months',
+        'contact.dob',
+        'contact.dateOfLastContact',
+        'contact.followUp.endDate'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
@@ -125,6 +160,7 @@ module.exports = function (FollowUp) {
         'index',
         'teamId',
         'statusId',
+        [exportHelper.CUSTOM_COLUMNS.ALERTED],
         'targeted',
         'comment',
         'responsibleUser',
@@ -220,12 +256,33 @@ module.exports = function (FollowUp) {
         'id',
         'visualId',
         'firstName',
-        'lastName'
+        'lastName',
+        'riskLevel',
+        'gender',
+        'occupation',
+        'age',
+        'dob',
+        'dateOfLastContact',
+        'followUp.endDate'
       ]
     },
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
+    },
+    'createdBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
+    },
+    'updatedBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
     }
   };
 
