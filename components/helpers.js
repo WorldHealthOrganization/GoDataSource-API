@@ -1474,9 +1474,6 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
     const minutes = Math.floor(totalSeconds / 60) % 60;
 
     // return full date
-    // #TODO check
-    //  console.log(moment().toString());
-    // console.log(moment().toISOString());
     return dateInfo
       .hour(hours)
       .minute(minutes)

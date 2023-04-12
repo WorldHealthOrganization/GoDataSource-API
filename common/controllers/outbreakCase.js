@@ -1814,6 +1814,16 @@ module.exports = function (Outbreak) {
       );
     }
 
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    genericHelpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      self.caseInvestigationTemplate ?
+        self.caseInvestigationTemplate.toJSON() :
+        undefined
+    );
+    app.models.case._dateProperties = app.models.case._dateProperties.concat(questionnaireDateProperties);
+
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'case',
