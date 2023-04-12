@@ -3360,6 +3360,16 @@ module.exports = function (Outbreak) {
       );
     }
 
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    genericHelpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      self.contactInvestigationTemplate ?
+        self.contactInvestigationTemplate.toJSON() :
+        undefined
+    );
+    app.models.contact._dateProperties = app.models.contact._dateProperties.concat(questionnaireDateProperties);
+
     if (!app.models.relationship._dateProperties) {
       app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
         app.models.relationship,

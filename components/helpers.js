@@ -1338,6 +1338,51 @@ const isValidDate = function (date) {
 };
 
 /**
+ * Gets the "date" properties of the questionnaire
+ *
+ * @param questionnaireDateProperties
+ * @param questions
+ */
+const getQuestionnaireDateProperties = (questionnaireDateProperties, questions) => {
+  // parse all questions
+  if (questions) {
+    for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+      // get question
+      const question = questions[questionIndex];
+
+      // is multiple answer ?
+      if (question.multiAnswer) {
+        questionnaireDateProperties.push(`questionnaireAnswers.${question.variable}[].date`);
+      }
+
+      // is "date" type ?
+      if (question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME') {
+        questionnaireDateProperties.push(`questionnaireAnswers.${question.variable}[].value`);
+      }
+
+      // check if there are additional questions
+      if (
+        question.answers &&
+        question.answers.length
+      ) {
+        for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
+          // get answer
+          const answer = question.answers[answerIndex];
+
+          // go through all sub questions
+          if (
+            answer.additionalQuestions &&
+            answer.additionalQuestions.length
+          ) {
+            getQuestionnaireDateProperties(questionnaireDateProperties, answer.additionalQuestions);
+          }
+        }
+      }
+    }
+  }
+};
+
+/**
  * Check Model definition for properties by data type and get their references
  * Also checks for nested definitions
  * @param model Model definition
@@ -1429,11 +1474,14 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
     const minutes = Math.floor(totalSeconds / 60) % 60;
 
     // return full date
+    // #TODO check
+    //  console.log(moment().toString());
+    // console.log(moment().toISOString());
     return dateInfo
       .hour(hours)
       .minute(minutes)
       .seconds(seconds)
-      .toString();
+      .toISOString();
   };
 
   /**
@@ -2781,6 +2829,7 @@ Object.assign(module.exports, {
   translateQuestionAnswers: translateQuestionAnswers,
   getBuildInformation: getBuildInformation,
   getModelPropertiesByDataType: getModelPropertiesByDataType,
+  getQuestionnaireDateProperties: getQuestionnaireDateProperties,
   convertPropertiesNoModelByType: convertPropertiesNoModelByType,
   getSourceAndTargetFromModelHookContext: getSourceAndTargetFromModelHookContext,
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
