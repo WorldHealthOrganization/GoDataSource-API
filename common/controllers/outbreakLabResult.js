@@ -478,7 +478,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableCaseLabResultsFileUsingMap = function (body, options, callback) {
-    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.case, options, callback);
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this, body, app.models.case, options, callback);
   };
 
   /**
@@ -488,6 +488,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactLabResultsFileUsingMap = function (body, options, callback) {
-    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.contact, options, callback);
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this, body, app.models.contact, options, callback);
   };
 };

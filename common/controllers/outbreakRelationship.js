@@ -669,6 +669,16 @@ module.exports = function (Outbreak) {
       );
     }
 
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    helpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      self.contactFollowUpTemplate ?
+        self.contactFollowUpTemplate.toJSON() :
+        undefined
+    );
+    app.models.relationship._dateProperties = app.models.relationship._dateProperties.concat(questionnaireDateProperties);
+
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'relationship',
