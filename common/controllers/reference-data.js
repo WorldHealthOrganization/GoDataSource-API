@@ -177,6 +177,14 @@ module.exports = function (ReferenceData) {
   };
 
   /**
+   * Expose available categories per disease via API
+   * @param callback
+   */
+  ReferenceData.getAvailableCategoriesPerDisease = function (callback) {
+    callback(null, ReferenceData.availableCategoriesPerDisease);
+  };
+
+  /**
    * Add / remove diseases from specific reference data items
    */
   ReferenceData.allowedDiseases = function (body, callback) {

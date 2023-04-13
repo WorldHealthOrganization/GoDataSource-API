@@ -187,6 +187,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getAvailableCategoriesPerDisease"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "reference_data_modify_category_item",
       "permission": "ALLOW",
       "property": "allowedDiseases"
@@ -302,6 +308,30 @@
       "http": {
         "verb": "post",
         "path": "/import-importable-file-using-map"
+      }
+    },
+    "getAvailableCategoriesPerDisease": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "categories",
+          "type": [
+            {
+              "type": {
+                "id": "string",
+                "name": "string"
+              }
+            }
+          ],
+          "description": "List of available reference data categories that can be per disease",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of available reference data categories that can be per disease.",
+      "http": {
+        "verb": "get",
+        "path": "/available-categories-per-disease"
       }
     },
     "allowedDiseases": {
