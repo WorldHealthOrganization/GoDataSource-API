@@ -228,6 +228,10 @@
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
       "translation": "When checked, the updated by user data will be included in the exported file",
       "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PROCESSING_FILE": {
+      "translation": "Error processing file: {{error}}'",
+      "section": "uiImportData"
     }
   }
 }
