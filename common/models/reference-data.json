@@ -40,12 +40,9 @@
         "LNG_REFERENCE_DATA_CATEGORY_OUTCOME",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_SOCIAL_RELATIONSHIP_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
         "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL",
-        "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
         "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE",
         "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_VACCINE",
@@ -98,6 +95,21 @@
     },
     "geoLocation": {
       "type": "customGeoPoint"
+    },
+    "allowedDiseaseIds": {
+      "type": [
+        "string"
+      ]
+    },
+    "allowedOutbreakIds": {
+      "type": [
+        "string"
+      ]
+    },
+    "restoreAllowedOutbreakIds": {
+      "type": [
+        "string"
+      ]
     }
   },
   "indexes": {
@@ -172,6 +184,24 @@
       "principalId": "reference_data_import",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "reference_data_modify_category_item",
+      "permission": "ALLOW",
+      "property": "allowedDiseases"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_create",
+      "permission": "ALLOW",
+      "property": "allowedOutbreaks"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "outbreak_modify",
+      "permission": "ALLOW",
+      "property": "allowedOutbreaks"
     }
   ],
   "methods": {
@@ -272,6 +302,50 @@
       "http": {
         "verb": "post",
         "path": "/import-importable-file-using-map"
+      }
+    },
+    "allowedDiseases": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": [
+            "referenceDataAllowedDiseases"
+          ],
+          "description": "Add / remove diseases from specific reference data items",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [],
+      "description": "Add disease to list of diseases that use a reference data item",
+      "http": {
+        "verb": "post",
+        "path": "/allowed-diseases"
+      }
+    },
+    "allowedOutbreaks": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": [
+            "referenceDataAllowedOutbreaks"
+          ],
+          "description": "Add / remove outbreaks from specific reference data items",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        }
+      ],
+      "returns": [],
+      "description": "Add outbreak to list of outbreaks that use a reference data item",
+      "http": {
+        "verb": "post",
+        "path": "/allowed-outbreaks"
       }
     }
   }

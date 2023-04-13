@@ -175,4 +175,22 @@ module.exports = function (ReferenceData) {
       logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
+
+  /**
+   * Add / remove diseases from specific reference data items
+   */
+  ReferenceData.allowedDiseases = function (body, callback) {
+    // #TODO
+    // remove from categories that weren't received as input, or just those that were received ?
+    callback();
+  };
+
+  /**
+   * Add / remove outbreaks from specific reference data items
+   */
+  ReferenceData.allowedOutbreaks = function (body, callback) {
+    // #TODO
+    // remove from categories that weren't received as input, or just those that were received ?
+    callback();
+  };
 };

@@ -1,0 +1,64 @@
+{
+  "name": "referenceDataAllowedOutbreaks",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "RemovePropertiesFromDefinition": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "outbreakId": {
+      "type": "string",
+      "required": true,
+      "description": "Outbreak ID"
+    },
+    "data": {
+      "type": [
+        {
+          "type": {
+            "categoryId": {
+              "type": "string",
+              "description": "Reference data item category; eg: LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
+              "required": true,
+              "enum": [
+                "LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION",
+                "LNG_REFERENCE_DATA_CATEGORY_OCCUPATION",
+                "LNG_REFERENCE_DATA_CATEGORY_LAB_NAME",
+                "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_SAMPLE",
+                "LNG_REFERENCE_DATA_CATEGORY_TYPE_OF_LAB_TEST",
+                "LNG_REFERENCE_DATA_CATEGORY_LAB_TEST_RESULT",
+                "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY",
+                "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_RESULT",
+                "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
+                "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY",
+                "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY",
+                "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION",
+                "LNG_REFERENCE_DATA_CATEGORY_RISK_LEVEL",
+                "LNG_REFERENCE_DATA_CATEGORY_CONTEXT_OF_TRANSMISSION",
+                "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+                "LNG_REFERENCE_DATA_CATEGORY_OUTCOME",
+                "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE",
+                "LNG_REFERENCE_DATA_CATEGORY_VACCINE",
+                "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS",
+                "LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME"
+              ]
+            },
+            "items": [
+              "string"
+            ]
+          }
+        }
+      ],
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
