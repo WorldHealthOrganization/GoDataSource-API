@@ -652,7 +652,6 @@ module.exports = function (LabResult) {
         outbreakModel.labResultsTemplate.toJSON() :
         undefined
     );
-    app.models.labResult._dateProperties = app.models.labResult._dateProperties.concat(questionnaireDateProperties);
 
     // options for the formatting method
     const formatterOptions = Object.assign({
@@ -660,7 +659,7 @@ module.exports = function (LabResult) {
       batchSize: labResultImportBatchSize,
       outbreakId: outbreakModel.id,
       modelBooleanProperties: app.models.labResult._booleanProperties,
-      modelDateProperties: app.models.labResult._dateProperties
+      modelDateProperties: app.models.labResult._dateProperties.concat(questionnaireDateProperties)
     }, body);
 
     // start import

@@ -3368,7 +3368,6 @@ module.exports = function (Outbreak) {
         self.contactInvestigationTemplate.toJSON() :
         undefined
     );
-    app.models.contact._dateProperties = app.models.contact._dateProperties.concat(questionnaireDateProperties);
 
     if (!app.models.relationship._dateProperties) {
       app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
@@ -3384,7 +3383,7 @@ module.exports = function (Outbreak) {
       outbreakId: self.id,
       contactModelBooleanProperties: app.models.contact._booleanProperties,
       relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
-      contactModelDateProperties: app.models.contact._dateProperties,
+      contactModelDateProperties: app.models.contact._dateProperties.concat(questionnaireDateProperties),
       relationshipModelDateProperties: app.models.relationship._dateProperties,
       contactImportableTopLevelProperties: app.models.contact._importableTopLevelProperties,
       relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties

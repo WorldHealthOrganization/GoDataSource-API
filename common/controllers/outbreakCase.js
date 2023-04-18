@@ -1822,7 +1822,6 @@ module.exports = function (Outbreak) {
         self.caseInvestigationTemplate.toJSON() :
         undefined
     );
-    app.models.case._dateProperties = app.models.case._dateProperties.concat(questionnaireDateProperties);
 
     // options for the formatting method
     const formatterOptions = Object.assign({
@@ -1830,7 +1829,7 @@ module.exports = function (Outbreak) {
       batchSize: caseImportBatchSize,
       outbreakId: self.id,
       modelBooleanProperties: app.models.case._booleanProperties,
-      modelDateProperties: app.models.case._dateProperties
+      modelDateProperties: app.models.case._dateProperties.concat(questionnaireDateProperties)
     }, body);
 
     // start import
