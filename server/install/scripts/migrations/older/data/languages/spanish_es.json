@@ -4969,7 +4969,7 @@
         "translation": "¿Seguro que quieres eliminar las relaciones seleccionadas?"
       },
       "LNG_DIALOG_CONFIRM_CHANGE_CASE_EPI_CLASSIFICATION": {
-        "translation": "¿Está seguro de que desea cambiar la clasificación '{{caseName}}' a '{{clasificación}}'?"
+        "translation": "¿Está seguro de que desea cambiar la clasificación '{{caseName}}' a '{{classification}}'?"
       },
       "LNG_DIALOG_CONFIRM_DELETE_VACCINE": {
         "translation": "¿Está seguro de que desea eliminar esta vacuna?"
@@ -11091,7 +11091,7 @@
     },
     "uiDateOnsetReportListPage": {
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_MODIFY": {
-        "translation": "Modificar '{{nombre}}'"
+        "translation": "Modificar '{{name}}'"
       },
       "LNG_PAGE_LIST_CASES_DATE_ONSET_ACTION_MODIFY_RELATIONSHIP": {
         "translation": "Modificar la relación"
@@ -11114,7 +11114,7 @@
     },
     "uiLongPeriodBetweenOnsetDatesReportListPage": {
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_MODIFY": {
-        "translation": "modificar'{{name}}'"
+        "translation": "Modificar '{{name}}'"
       },
       "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_MODIFY_RELATIONSHIP": {
         "translation": "Modificar la relación"
@@ -11394,7 +11394,7 @@
         "translation": "Modificar {{name}}"
       },
       "LNG_PAGE_VIEW_LOCATION_NAME": {
-        "translation": "{{nombre}}"
+        "translation": "{{name}}"
       },
       "LNG_PAGE_VIEW_LOCATION_TITLE": {
         "translation": "Ver {{name}}"
