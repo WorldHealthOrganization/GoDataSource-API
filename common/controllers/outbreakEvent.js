@@ -298,27 +298,23 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.event._booleanProperties) {
-      app.models.event._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.event,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.event,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.event._dateProperties) {
-      app.models.event._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.event,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.event,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'event',
       batchSize: eventImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.event._booleanProperties,
-      modelDateProperties: app.models.event._dateProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import
