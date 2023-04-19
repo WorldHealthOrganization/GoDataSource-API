@@ -851,21 +851,25 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
+    // model boolean properties
     const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.contactOfContact,
       genericHelpers.DATA_TYPE.BOOLEAN
     );
 
+    // relationship model boolean properties
     const relationshipModelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.relationship,
       genericHelpers.DATA_TYPE.BOOLEAN
     );
 
+    // model date properties
     const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.contactOfContact,
       genericHelpers.DATA_TYPE.DATE
     );
 
+    // relationship model date properties
     const relationshipModelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.relationship,
       genericHelpers.DATA_TYPE.DATE

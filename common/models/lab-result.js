@@ -630,11 +630,13 @@ module.exports = function (LabResult) {
     };
 
     // construct options needed by the formatter worker
+    // model boolean properties
     const modelBooleanProperties = helpers.getModelPropertiesByDataType(
       app.models.labResult,
       helpers.DATA_TYPE.BOOLEAN
     );
 
+    // model date properties
     let modelDateProperties = helpers.getModelPropertiesByDataType(
       app.models.labResult,
       helpers.DATA_TYPE.DATE

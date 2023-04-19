@@ -298,11 +298,13 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
+    // model boolean properties
     const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.event,
       genericHelpers.DATA_TYPE.BOOLEAN
     );
 
+    // model date properties
     const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.event,
       genericHelpers.DATA_TYPE.DATE

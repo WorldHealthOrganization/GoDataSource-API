@@ -3339,16 +3339,19 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
+    // model boolean properties
     const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.contact,
       genericHelpers.DATA_TYPE.BOOLEAN
     );
 
+    // relationship model boolean properties
     const relationshipModelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.relationship,
       genericHelpers.DATA_TYPE.BOOLEAN
     );
 
+    // model date properties
     let modelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.contact,
       genericHelpers.DATA_TYPE.DATE
@@ -3364,6 +3367,7 @@ module.exports = function (Outbreak) {
     );
     modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
 
+    // relationship model date properties
     const relationshipModelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.relationship,
       genericHelpers.DATA_TYPE.DATE

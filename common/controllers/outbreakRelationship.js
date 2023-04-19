@@ -655,11 +655,13 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
+    // model boolean properties
     const modelBooleanProperties = helpers.getModelPropertiesByDataType(
       app.models.relationship,
       helpers.DATA_TYPE.BOOLEAN
     );
 
+    // model date properties
     const modelDateProperties = helpers.getModelPropertiesByDataType(
       app.models.relationship,
       helpers.DATA_TYPE.DATE
