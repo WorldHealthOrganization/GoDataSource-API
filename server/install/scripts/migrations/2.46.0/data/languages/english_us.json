@@ -229,6 +229,10 @@
       "translation": "When checked, the updated by user data will be included in the exported file",
       "section": "uiCommonLabels"
     },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PROCESSING_FILE": {
+      "translation": "Error processing file: {{error}}'",
+      "section": "uiImportData"
+    },
     "LNG_MODULE_LABEL_AUDIT_LOG": {
       "translation": "Audit log",
       "section": "uiModules"
