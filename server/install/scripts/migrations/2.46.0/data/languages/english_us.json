@@ -181,8 +181,20 @@
       "translation": "Follow-up",
       "section": "uiFollowUpFields"
     },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_ORIGINAL_START_DATE": {
+      "translation": "Follow-up original start date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_START_DATE": {
+      "translation": "Follow-up start date",
+      "section": "uiFollowUpFields"
+    },
     "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE": {
       "translation": "Follow-up end date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_STATUS": {
+      "translation": "Follow-up status",
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
