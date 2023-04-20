@@ -42,7 +42,7 @@
       "section": "uiEventFields"
     },
     "LNG_EVENT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
-      "translation": "The ID should match the pattern defined for this outbreak: {{mask}}",
+      "translation": "The event ID should match the pattern defined for this outbreak: {{mask}}",
       "section": "uiEventFields"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID": {
@@ -1375,6 +1375,18 @@
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
       "translation": "Lab variant / strain colour",
       "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_CASE_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The case ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact of contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactOfContactFields"
     }
   }
 }
