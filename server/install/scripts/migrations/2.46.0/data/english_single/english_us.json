@@ -833,7 +833,7 @@
     "section": "uiSyncLogsFields"
   },
   "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_ID": {
-    "translation": "Credentials client iD",
+    "translation": "Credentials client ID",
     "section": "uiClientApplicationFields"
   },
   "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_SECRET": {
