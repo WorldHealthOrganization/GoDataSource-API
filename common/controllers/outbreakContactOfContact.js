@@ -851,43 +851,39 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.contactOfContact._booleanProperties) {
-      app.models.contactOfContact._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.contactOfContact,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.contactOfContact,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // relationship model boolean properties
+    const relationshipModelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.contactOfContact._dateProperties) {
-      app.models.contactOfContact._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.contactOfContact,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.contactOfContact,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
-    if (!app.models.relationship._dateProperties) {
-      app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // relationship model date properties
+    const relationshipModelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'contactOfContact',
       batchSize: contactOfContactImportBatchSize,
       outbreakId: self.id,
-      contactOfContactModelBooleanProperties: app.models.contactOfContact._booleanProperties,
-      relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
-      contactOfContactModelDateProperties: app.models.contactOfContact._dateProperties,
-      relationshipModelDateProperties: app.models.relationship._dateProperties,
+      contactOfContactModelBooleanProperties: modelBooleanProperties,
+      relationshipModelBooleanProperties: relationshipModelBooleanProperties,
+      contactOfContactModelDateProperties: modelDateProperties,
+      relationshipModelDateProperties: relationshipModelDateProperties,
       contactOfContactImportableTopLevelProperties: app.models.contactOfContact._importableTopLevelProperties,
       relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties
     }, body);
