@@ -1339,9 +1339,6 @@ const isValidDate = function (date) {
 
 /**
  * Gets the "date" properties of the questionnaire
- *
- * @param questionnaireDateProperties
- * @param questions
  */
 const getQuestionnaireDateProperties = (questionnaireDateProperties, questions) => {
   // parse all questions

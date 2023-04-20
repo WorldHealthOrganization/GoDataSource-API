@@ -630,19 +630,17 @@ module.exports = function (LabResult) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.labResult._booleanProperties) {
-      app.models.labResult._booleanProperties = helpers.getModelPropertiesByDataType(
-        app.models.labResult,
-        helpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = helpers.getModelPropertiesByDataType(
+      app.models.labResult,
+      helpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.labResult._dateProperties) {
-      app.models.labResult._dateProperties = helpers.getModelPropertiesByDataType(
-        app.models.labResult,
-        helpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    let modelDateProperties = helpers.getModelPropertiesByDataType(
+      app.models.labResult,
+      helpers.DATA_TYPE.DATE
+    );
 
     // add the "date" properties of the questionnaire
     const questionnaireDateProperties = [];
@@ -652,15 +650,15 @@ module.exports = function (LabResult) {
         outbreakModel.labResultsTemplate.toJSON() :
         undefined
     );
-    app.models.labResult._dateProperties = app.models.labResult._dateProperties.concat(questionnaireDateProperties);
+    modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'labResult',
       batchSize: labResultImportBatchSize,
       outbreakId: outbreakModel.id,
-      modelBooleanProperties: app.models.labResult._booleanProperties,
-      modelDateProperties: app.models.labResult._dateProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

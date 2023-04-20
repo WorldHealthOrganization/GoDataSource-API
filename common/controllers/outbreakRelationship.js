@@ -655,19 +655,17 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = helpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        helpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = helpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      helpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.relationship._dateProperties) {
-      app.models.relationship._dateProperties = helpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        helpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    const modelDateProperties = helpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      helpers.DATA_TYPE.DATE
+    );
 
     // add the "date" properties of the questionnaire
     const questionnaireDateProperties = [];
@@ -684,8 +682,8 @@ module.exports = function (Outbreak) {
       dataType: 'relationship',
       batchSize: relationshipImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.relationship._booleanProperties,
-      modelDateProperties: app.models.relationship._dateProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

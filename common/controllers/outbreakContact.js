@@ -3339,26 +3339,23 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.contact._booleanProperties) {
-      app.models.contact._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.contact,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.contact,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.relationship._booleanProperties) {
-      app.models.relationship._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // relationship model boolean properties
+    const relationshipModelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.contact._dateProperties) {
-      app.models.contact._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.contact,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    let modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.contact,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // add the "date" properties of the questionnaire
     const questionnaireDateProperties = [];
@@ -3368,24 +3365,23 @@ module.exports = function (Outbreak) {
         self.contactInvestigationTemplate.toJSON() :
         undefined
     );
-    app.models.contact._dateProperties = app.models.contact._dateProperties.concat(questionnaireDateProperties);
+    modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
 
-    if (!app.models.relationship._dateProperties) {
-      app.models.relationship._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.relationship,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // relationship model date properties
+    const relationshipModelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.relationship,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'contact',
       batchSize: contactImportBatchSize,
       outbreakId: self.id,
-      contactModelBooleanProperties: app.models.contact._booleanProperties,
-      relationshipModelBooleanProperties: app.models.relationship._booleanProperties,
-      contactModelDateProperties: app.models.contact._dateProperties,
-      relationshipModelDateProperties: app.models.relationship._dateProperties,
+      contactModelBooleanProperties: modelBooleanProperties,
+      relationshipModelBooleanProperties: relationshipModelBooleanProperties,
+      contactModelDateProperties: modelDateProperties,
+      relationshipModelDateProperties: relationshipModelDateProperties,
       contactImportableTopLevelProperties: app.models.contact._importableTopLevelProperties,
       relationshipImportableTopLevelProperties: app.models.relationship._importableTopLevelProperties
     }, body);
