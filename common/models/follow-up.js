@@ -81,7 +81,10 @@ module.exports = function (FollowUp) {
     'contact.dob': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB',
     'contact.dateOfLastContact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT',
     'contact.followUp': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP',
+    'contact.followUp.originalStartDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_ORIGINAL_START_DATE',
+    'contact.followUp.startDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_START_DATE',
     'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE',
+    'contact.followUp.status': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_STATUS',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -151,7 +154,10 @@ module.exports = function (FollowUp) {
         'contact.age.months',
         'contact.dob',
         'contact.dateOfLastContact',
-        'contact.followUp.endDate'
+        'contact.followUp.originalStartDate',
+        'contact.followUp.startDate',
+        'contact.followUp.endDate',
+        'contact.followUp.status',
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
@@ -263,7 +269,10 @@ module.exports = function (FollowUp) {
         'age',
         'dob',
         'dateOfLastContact',
-        'followUp.endDate'
+        'followUp.originalStartDate',
+        'followUp.startDate',
+        'followUp.endDate',
+        'followUp.status',
       ]
     },
     'teamId': {
