@@ -206,26 +206,24 @@ module.exports = function (Location) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.location._booleanProperties) {
-      app.models.location._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.location,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.location,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.location._dateProperties) {
-      app.models.location._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.location,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.location,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'location',
       batchSize: locationImportBatchSize,
-      modelBooleanProperties: app.models.location._booleanProperties,
-      modelDateProperties: app.models.location._dateProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

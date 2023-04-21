@@ -42,7 +42,7 @@
       "section": "uiEventFields"
     },
     "LNG_EVENT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
-      "translation": "The Event ID should match the pattern defined for this outbreak: {{mask}}",
+      "translation": "The event ID should match the pattern defined for this outbreak: {{mask}}",
       "section": "uiEventFields"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID": {
@@ -181,8 +181,20 @@
       "translation": "Follow-up",
       "section": "uiFollowUpFields"
     },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_ORIGINAL_START_DATE": {
+      "translation": "Follow-up original start date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_START_DATE": {
+      "translation": "Follow-up start date",
+      "section": "uiFollowUpFields"
+    },
     "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE": {
       "translation": "Follow-up end date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_STATUS": {
+      "translation": "Follow-up status",
       "section": "uiFollowUpFields"
     },
     "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
@@ -228,6 +240,22 @@
     "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
       "translation": "When checked, the updated by user data will be included in the exported file",
       "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PROCESSING_FILE": {
+      "translation": "Error processing file: {{error}}'",
+      "section": "uiImportData"
+    },
+    "LNG_CASE_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The case ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact of contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactOfContactFields"
     }
   }
 }

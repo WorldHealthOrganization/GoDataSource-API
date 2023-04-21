@@ -147,26 +147,24 @@ module.exports = function (ReferenceData) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.referenceData._booleanProperties) {
-      app.models.referenceData._booleanProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.referenceData,
-        genericHelpers.DATA_TYPE.BOOLEAN
-      );
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.referenceData,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
-    if (!app.models.referenceData._dateProperties) {
-      app.models.referenceData._dateProperties = genericHelpers.getModelPropertiesByDataType(
-        app.models.referenceData,
-        genericHelpers.DATA_TYPE.DATE
-      );
-    }
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.referenceData,
+      genericHelpers.DATA_TYPE.DATE
+    );
 
     // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'referenceData',
       batchSize: referenceDataImportBatchSize,
-      modelBooleanProperties: app.models.referenceData._booleanProperties,
-      modelDateProperties: app.models.referenceData._dateProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import
