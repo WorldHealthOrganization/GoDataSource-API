@@ -542,6 +542,10 @@ module.exports = function (Sync) {
      * @param callback
      */
     function importCallback(err, syncLogEntry, requestOptions, callback) {
+      // invalidate caches
+      app.models.location.cache.reset();
+      app.models.user.cache.reset();
+
       // update syncLogEntry
       syncLogEntry.actionCompletionDate = new Date();
 
