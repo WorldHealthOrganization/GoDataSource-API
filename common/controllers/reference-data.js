@@ -178,7 +178,6 @@ module.exports = function (ReferenceData) {
 
   /**
    * Expose available categories per disease via API
-   * @param callback
    */
   ReferenceData.getAvailableCategoriesPerDisease = function (callback) {
     callback(null, ReferenceData.availableCategoriesPerDisease);
@@ -187,18 +186,20 @@ module.exports = function (ReferenceData) {
   /**
    * Add / remove diseases from specific reference data items
    */
-  ReferenceData.allowedDiseases = function (body, callback) {
-    // #TODO
-    // remove from categories that weren't received as input, or just those that were received ?
+  ReferenceData.diseaseAllowedRefData = function (body, callback) {
+    // update allowed reference data items per disease
+    /// #TODO
+    // app.models.referenceData
+
+    // finished
     callback();
   };
 
   /**
    * Add / remove outbreaks from specific reference data items
    */
-  ReferenceData.allowedOutbreaks = function (body, callback) {
+  ReferenceData.outbreakAllowedRefData = function (body, callback) {
     // #TODO
-    // remove from categories that weren't received as input, or just those that were received ?
     callback();
   };
 };
