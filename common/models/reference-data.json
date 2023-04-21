@@ -96,6 +96,9 @@
     "geoLocation": {
       "type": "customGeoPoint"
     },
+    "isSystemWide": {
+      "type": "boolean"
+    },
     "allowedDiseaseIds": {
       "type": [
         "string"
@@ -195,19 +198,19 @@
       "principalType": "ROLE",
       "principalId": "reference_data_modify_category_item",
       "permission": "ALLOW",
-      "property": "allowedDiseases"
+      "property": "diseaseAllowedRefData"
     },
     {
       "principalType": "ROLE",
       "principalId": "outbreak_create",
       "permission": "ALLOW",
-      "property": "allowedOutbreaks"
+      "property": "outbreakAllowedRefData"
     },
     {
       "principalType": "ROLE",
       "principalId": "outbreak_modify",
       "permission": "ALLOW",
-      "property": "allowedOutbreaks"
+      "property": "outbreakAllowedRefData"
     }
   ],
   "methods": {
@@ -334,12 +337,12 @@
         "path": "/available-categories-per-disease"
       }
     },
-    "allowedDiseases": {
+    "diseaseAllowedRefData": {
       "accepts": [
         {
           "arg": "body",
           "type": [
-            "referenceDataAllowedDiseases"
+            "diseaseAllowedRefData"
           ],
           "description": "Add / remove diseases from specific reference data items",
           "http": {
@@ -353,15 +356,15 @@
       "description": "Add disease to list of diseases that use a reference data item",
       "http": {
         "verb": "post",
-        "path": "/allowed-diseases"
+        "path": "/disease-allowed-ref-data"
       }
     },
-    "allowedOutbreaks": {
+    "outbreakAllowedRefData": {
       "accepts": [
         {
           "arg": "body",
           "type": [
-            "referenceDataAllowedOutbreaks"
+            "outbreakAllowedRefData"
           ],
           "description": "Add / remove outbreaks from specific reference data items",
           "http": {
@@ -375,7 +378,7 @@
       "description": "Add outbreak to list of outbreaks that use a reference data item",
       "http": {
         "verb": "post",
-        "path": "/allowed-outbreaks"
+        "path": "/outbreak-allowed-ref-data"
       }
     }
   }

@@ -360,11 +360,11 @@
     "dataSource": null,
     "public": false
   },
-  "referenceDataAllowedDiseases": {
+  "diseaseAllowedRefData": {
     "dataSource": null,
     "public": false
   },
-  "referenceDataAllowedOutbreaks": {
+  "outbreakAllowedRefData": {
     "dataSource": null,
     "public": false
   },

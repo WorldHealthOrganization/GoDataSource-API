@@ -1,5 +1,5 @@
 {
-  "name": "referenceDataAllowedOutbreaks",
+  "name": "diseaseAllowedRefData",
   "base": "Model",
   "idInjection": false,
   "options": {
@@ -12,10 +12,10 @@
     "id"
   ],
   "properties": {
-    "outbreakId": {
+    "diseaseId": {
       "type": "string",
       "required": true,
-      "description": "Outbreak ID"
+      "description": "Disease ID"
     },
     "data": {
       "type": [
