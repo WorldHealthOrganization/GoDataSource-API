@@ -1,0 +1,1154 @@
+{
+  "id": "english_us",
+  "name": "English",
+  "readOnly": true,
+  "tokens": {
+  "LNG_MODULE_LABEL_AUDIT_LOG": {
+    "translation": "Audit log",
+    "section": "uiModules"
+  },
+  "LNG_MODULE_LABEL_IMPORT_MAPPING": {
+    "translation": "Import mappings",
+    "section": "uiModules"
+  },
+  "LNG_MODULE_LABEL_LANGUAGE_TOKEN": {
+    "translation": "Language token",
+    "section": "uiModules"
+  },
+  "LNG_MODULE_LABEL_SYNC_LOG": {
+    "translation": "Sync log",
+    "section": "uiModules"
+  },
+  "LNG_MODULE_LABEL_SYSTEM_SETTINGS": {
+    "translation": "System settings",
+    "section": "uiModules"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS": {
+    "translation": "System settings",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_SYSTEM_SETTINGS_DESCRIPTION": {
+    "translation": "System settings permissions",
+    "section": "availablePermissions"
+  },
+  "LNG_PAGE_LIST_HELP_ITEMS_TITLE": {
+    "translation": "Help items",
+    "section": "uiHelpItemsListPage"
+  },
+  "LNG_PAGE_VIEW_HELP_CATEGORY_TITLE": {
+    "translation": "View help category",
+    "section": "uiModifyHelpCategoryPage"
+  },
+  "LNG_BACKUP_STATUS_PENDING": {
+    "translation": "In progress",
+    "section": "backupStatus"
+  },
+  "LNG_PAGE_MODIFY_EVENT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
+    "translation": "Record details",
+    "section": "uiModifyEventPage"
+  },
+  "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_PERSONAL_SECTION_RECORD_DETAILS_TITLE": {
+    "translation": "Record details",
+    "section": "uiModifyContactOfContactPage"
+  },
+  "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiCaseFields"
+  },
+  "LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID": {
+    "translation": "Burial location",
+    "section": "uiCaseFields"
+  },
+  "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiFollowUpFields"
+  },
+  "LNG_PAGE_MODIFY_FOLLOW_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiModifyFollowUpPage"
+  },
+  "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiEventFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK": {
+    "translation": "Contact of contact ID mask",
+    "section": "uiOutbreakFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID": {
+    "translation": "Contact of contact ID",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
+    "translation": "Vaccines received",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID": {
+    "translation": "Assigned user",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_VACCINES_RECEIVED": {
+    "translation": "Vaccines received",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_LAST_NAME": {
+    "translation": "Last name",
+    "section": "uiContactFields"
+  },
+  "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_EPI": {
+    "translation": "Epi week",
+    "section": "uiDashboardPage"
+  },
+  "LNG_PAGE_DASHBOARD_EPI_CURVE_WEEK_TYPE_ISO": {
+    "translation": "Global week",
+    "section": "uiDashboardPage"
+  },
+  "LNG_DATE_RANGE_ADD_NEW_DATE_MESSAGE": {
+    "translation": "Add hospitalization / isolation",
+    "section": "uiMobile"
+  },
+  "LNG_DATE_RANGE_ADD_ANOTHER_DATE_MESSAGE": {
+    "translation": "Add hospitalization / isolation",
+    "section": "uiMobile"
+  },
+  "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset ({{dateOfOnset}}) of the source case",
+    "section": "uiModifyEntityRelationshipPage"
+  },
+  "LNG_PAGE_MODIFY_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset ({{dateOfOnset}}) of the source case: {{entities}}",
+    "section": "uiModifyEntityRelationshipPage"
+  },
+  "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_CONTACT_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset ({{dateOfOnset}}) for the following contacts: {{entities}}",
+    "section": "uiCreateEntityRelationshipPage"
+  },
+  "LNG_PAGE_CREATE_ENTITY_RELATIONSHIP_WARNING_EXPOSURE_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset for the following exposures: {{entities}}",
+    "section": "uiCreateEntityRelationshipPage"
+  },
+  "LNG_PAGE_CREATE_CONTACT_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset ({{dateOfOnset}}) of the source case",
+    "section": "uiCreateContactPage"
+  },
+  "LNG_PAGE_BULK_ADD_CONTACTS_ACTION_CREATE_CONTACTS_WARNING_LAST_CONTACT_IS_BEFORE_DATE_OF_ONSET": {
+    "translation": "Date of last contact is before date of onset ({{dateOfOnset}}) for the following rows: {{rows}}",
+    "section": "uiBulkAddContactsPage"
+  },
+  "LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA": {
+    "translation": "Persons related person data",
+    "section": "uiRelationshipFields"
+  },
+  "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_EXPOSURE_INFORMATION_DESCRIPTION": {
+    "translation": "Include information like contact first name, last name, id",
+    "section": "uiContactsOfContactsListPage"
+  },
+  "LNG_COMMON_LABEL_TAB_OPTIONS": {
+    "translation": "Tab options",
+    "section": "uiCommonLabels"
+  },
+  "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_CASE": {
+    "translation": "Exposed to case",
+    "section": "uiFollowUpsListPage"
+  },
+  "LNG_DIALOG_CONFIRM_DELETE_EVENT": {
+    "translation": "Deleting event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
+    "translation": "Restoring event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the event (e.g. relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_DELETE_CONTACT": {
+    "translation": "Deleting contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
+    "translation": "Restoring contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_DELETE_CONTACT_OF_CONTACT": {
+    "translation": "Deleting contact of contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_RESTORE_CONTACT_OF_CONTACT": {
+    "translation": "Restoring contact of contacts '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact of contacts (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_DELETE_CASE": {
+    "translation": "Deleting case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-danger);'>delete any related records (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
+    "translation": "Restoring case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+    "section": "uiDialogs"
+  },
+  "LNG_DROP_DOWN_SECTIONED_NONE_SELECTED": {
+    "translation": "None selected",
+    "section": "uiMobile"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_SYSTEM_SETTINGS": {
+    "translation": "System settings - view",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS": {
+    "translation": "System settings - modify",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG": {
+    "translation": "Audit logs",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_AUDIT_LOG_DESCRIPTION": {
+    "translation": "Audit logs permissions",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_AUDIT_LOG": {
+    "translation": "Audit log - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA": {
+    "translation": "Reference data",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_REFERENCE_DATA_DESCRIPTION": {
+    "translation": "Reference data permissions ( No permissions are required to access reference item information through the website. These permissions are required only if you want to manage reference data records )",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY": {
+    "translation": "Reference data - list categories",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - view category item",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - list category items",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - create category item",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - modify category item",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - delete category item",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - export",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_REFERENCE_DATA_CATEGORY_ITEM": {
+    "translation": "Reference data - import",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_FOR_FILTERS_DESCRIPTION": {
+    "translation": "This permission allows listing users in dropdowns used to filter other list pages ( e.g. Created by, Modified by columns... ). Used also by some create and modify pages.",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_USER_ROLE": {
+    "translation": "User roles",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_USER_ROLE": {
+    "translation": "User role - view",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_ROLE": {
+    "translation": "User role - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE": {
+    "translation": "User role - create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_USER_ROLE": {
+    "translation": "User role - modify",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_USER_ROLE": {
+    "translation": "User role - delete",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_USER_ROLE_CLONE": {
+    "translation": "User role - create clone",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_BACKUP_CLOUD_LOCATION_DESCRIPTION": {
+    "translation": "This permission allows you to see cloud backup locations. Menu - System - Cloud backup page.",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER": {
+    "translation": "Upstream servers",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_UPSTREAM_SERVER_DESCRIPTION": {
+    "translation": "Upstream servers permissions",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_UPSTREAM_SERVER": {
+    "translation": "Upstream server - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_UPSTREAM_SERVER": {
+    "translation": "Upstream server - create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_UPSTREAM_SERVER": {
+    "translation": "Upstream server - delete",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_SYNC_UPSTREAM_SERVER": {
+    "translation": "Upstream server - sync",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_UPSTREAM_SERVER_SYNC": {
+    "translation": "Upstream server - enable sync",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_UPSTREAM_SERVER_SYNC": {
+    "translation": "Upstream server - disable sync",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION": {
+    "translation": "Client applications",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION_DESCRIPTION": {
+    "translation": "Client applications permissions",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION": {
+    "translation": "Client application - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLIENT_APPLICATION": {
+    "translation": "Client application - create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLIENT_APPLICATION": {
+    "translation": "Client application - delete",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CLIENT_APPLICATION_DOWNLOAD_CONF_FILE": {
+    "translation": "Client application - download config file",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION": {
+    "translation": "Client application - enable",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION": {
+    "translation": "Client application - disable",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak templates",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak template - view",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak template - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak template - create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak template - modify",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_OUTBREAK_TEMPLATE": {
+    "translation": "Outbreak template - delete",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_QUESTIONNAIRE": {
+    "translation": "Outbreak template - modify case questionnaire",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE": {
+    "translation": "Outbreak template - modify contact questionnaire",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+    "translation": "Outbreak template - modify contact follow-up questionnaire",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_LAB_RESULT_QUESTIONNAIRE": {
+    "translation": "Outbreak template - modify case lab result questionnaire",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_OUTBREAK_TEMPLATE_GENERATE_OUTBREAK": {
+    "translation": "Outbreak template - generate outbreak",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_OUTBREAK_TEMPLATE_CLONE": {
+    "translation": "Outbreak template - create clone",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_SHARE_CONTACT_OF_CONTACT_RELATIONSHIP": {
+    "translation": "Contact of contact - share relationships",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT": {
+    "translation": "Contacts of contacts",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_DESCRIPTION": {
+    "translation": "Contact of contact permissions",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - list",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - view",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - modify",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - delete",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - restore",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - export",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - import",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID": {
+    "translation": "Contact of contact - generate id",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - list relationship exposures",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - view relationship exposure",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - create relationship exposure",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - modify relationship exposure",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - delete relationship exposure",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_DOSSIER": {
+    "translation": "Contact of contact - export dossier",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
+    "translation": "Contact of contact - view movement map",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_MOVEMENT_MAP": {
+    "translation": "Contact of contact - export movement map",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_CHRONOLOGY_CHART": {
+    "translation": "Contact of contact - view chronology chart",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CONTACT_OF_CONTACT_BY_RISK": {
+    "translation": "Contact of contact - group by risk",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_SOURCE_CONTACT_OF_CONTACT_RELATIONSHIP": {
+    "translation": "Contact of contact - change source",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_CHANGE_TARGET_CONTACT_OF_CONTACT_RELATIONSHIP": {
+    "translation": "Contact of contact - change target",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_CREATE_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - bulk create",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact - bulk modify",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_RELATIONSHIP": {
+    "translation": "Contact of contact - export relationships",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+    "translation": "Contact of contact - bulk delete exposure relationships",
+    "section": "availablePermissions"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT": {
+    "translation": "Contact of contact",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryPersonType"
+  },
+  "LNG_LAYOUT_MENU_ITEM_AUDIT_LOG_LABEL": {
+    "translation": "Audit logs",
+    "section": "uiGenericLayout"
+  },
+  "LNG_LAYOUT_MENU_ITEM_GANTT_CHART": {
+    "translation": "Gantt chart",
+    "section": "uiGenericLayout"
+  },
+  "LNG_LAYOUT_MENU_ITEM_LAB_RESULTS_LABEL": {
+    "translation": "Lab results",
+    "section": "uiGenericLayout"
+  },
+  "LNG_LAYOUT_MENU_ITEM_UPSTREAM_SERVERS_LABEL": {
+    "translation": "Upstream servers",
+    "section": "uiGenericLayout"
+  },
+  "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS_ALL": {
+    "translation": "All fields groups",
+    "section": "uiCommonLabels"
+  },
+  "LNG_COMMON_LABEL_EXPORT_FIELDS_GROUPS": {
+    "translation": "Fields groups",
+    "section": "uiCommonLabels"
+  },
+  "LNG_DIALOG_CONFIRM_DELETE_BACKUP_RESTORE": {
+    "translation": "Restore confirmation<br/><br/>Notice: Restoring system data to selected state will revert all the data to the point of the backup (removing any new data added). Are you sure you want to continue?",
+    "section": "uiDialogs"
+  },
+  "LNG_DIALOG_EXPORT_CHAIN_OF_TRANSMISSION_SCALE_INFO": {
+    "translation": "The higher the scale, the longer it can take to export chains of transmission",
+    "section": "uiDialogs"
+  },
+  "LNG_GENERIC_WARNING_EDIT_COT": {
+    "translation": "Edit mode will be saved to the database but will not show in the chain of transmission graph until you generate and load a new snapshot.",
+    "section": "uiGenericErrorsWarningsInfoMessages"
+  },
+  "LNG_API_ERROR_CODE_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
+    "translation": "Multiple addresses have been set as Current address. Only one address should be set as Current address.",
+    "modules": [
+      "unauthenticated"
+    ],
+    "section": "uiAPIErrors"
+  },
+  "LNG_API_ERROR_CODE_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
+    "translation": "One of the addresses must be set as the Current address",
+    "modules": [
+      "unauthenticated"
+    ],
+    "section": "uiAPIErrors"
+  },
+  "LNG_API_ERROR_CODE_ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
+    "translation": "The addresses set as the Previous address must have a date set",
+    "modules": [
+      "unauthenticated"
+    ],
+    "section": "uiAPIErrors"
+  },
+  "LNG_ADDRESS_FIELD_LABEL_TYPE_DESCRIPTION": {
+    "translation": "The classification of this address (home, work etc.)  At least one record should be set as Current address.",
+    "section": "uiAddressFields"
+  },
+  "LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL": {
+    "translation": "Location geographical level",
+    "section": "uiOutbreakFields"
+  },
+  "LNG_CASE_FIELD_LABEL_NOT_A_CASE": {
+    "translation": "Not a case",
+    "section": "uiCaseFields"
+  },
+  "LNG_CASE_FIELD_LABEL_BURIAL_PLACE_NAME": {
+    "translation": "Burial place name",
+    "section": "uiCaseFields"
+  },
+  "LNG_CASE_FIELD_LABEL_DATE_OF_EXPOSURE": {
+    "translation": "Exposure date ({{exposureName}})",
+    "section": "uiCaseFields"
+  },
+  "LNG_PAGE_LIST_CASES_NOT_A_CASE_INFO_LABEL": {
+    "translation": "* Note that: If you wish to filter to see discarded cases then you should add the 'Not a case' column from the menu of extra field on the left hand side and ensure that this is set to 'Yes'. You can't simply filter on the classification column for 'Not a case (discarded)' since Not a case is set, by default, to 'No' to only show you active records.",
+    "section": "uiCasesListPage"
+  },
+  "LNG_LOCATION_FIELD_LABEL_GEOGRAPHICAL_LEVEL": {
+    "translation": "Geographical level",
+    "section": "uiAvailableEntitiesForRelationshipPage"
+  },
+  "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
+    "translation": "Follow-up team should be set only if you want all generated follow-ups to be assigned to a specific team (instead of using the nearest location auto-assign system)",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_VACCINE_DATE": {
+    "translation": "Vaccine date",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
+    "translation": "Vaccine status",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+    "translation": "Pregnancy status",
+    "section": "uiContactFields"
+  },
+  "LNG_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
+    "translation": "Exposure date ({{exposureName}})",
+    "section": "uiContactFields"
+  },
+  "LNG_RELATIONSHIP_FIELD_LABEL_RELATION": {
+    "translation": "Context of exposure",
+    "section": "uiRelationshipFields"
+  },
+  "LNG_FOLLOW_UP_FIELD_LABEL_PHONE_NUMBER": {
+    "translation": "Phone number",
+    "section": "uiFollowUpFields"
+  },
+  "LNG_PAGE_LIST_FOLLOW_UPS_NO_TEAM_LABEL": {
+    "translation": "No team",
+    "section": "uiFollowUpsListPage"
+  },
+  "LNG_PAGE_MODIFY_FOLLOW_RESPONSIBLE_USER_ID_DESCRIPTION": {
+    "translation": "Assigned user should be set only if you want all generated follow-ups to be assigned to a specific user",
+    "section": "uiModifyFollowUpPage"
+  },
+  "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_SYSTEM_VALUE": {
+    "translation": "System value",
+    "section": "uiReferenceDataEntryFields"
+  },
+  "LNG_PAGE_FORGOT_PASSWORD_DESCRIPTION": {
+    "translation": "In order to reset your password, please input the email address associated with your account and press Reset password button.",
+    "modules": [
+      "unauthenticated"
+    ],
+    "section": "uiForgotPasswordPage"
+  },
+  "LNG_PAGE_CREATE_OUTBREAK_TAB_MAP_SERVERS": {
+    "translation": "Map servers",
+    "section": "uiCreateOutbreakPage"
+  },
+  "LNG_FILE_NAME_DAILY_CONTACTS_LIST": {
+    "translation": "Daily_contacts",
+    "section": "pdfExport"
+  },
+  "LNG_FILE_NAME_RANGE_CONTACTS_LIST": {
+    "translation": "Range_contacts",
+    "section": "pdfExport"
+  },
+  "LNG_FOLLOW_UP_STATUS_LEGEND": {
+    "translation": "Follow-up status legend",
+    "section": "pdfExport"
+  },
+  "LNG_CONTACT_PERSONAL_SECTION": {
+    "translation": "Personal information",
+    "section": "pdfExport"
+  },
+  "LNG_PAGE_TITLE_CONTACT_OF_CONTACT_DETAILS": {
+    "translation": "Contact of contact details",
+    "section": "pdfExport"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH1": {
+    "translation": "A temporary pin code has been generated for your authentication request.",
+    "section": "twoFactorAuthentication"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING": {
+    "translation": "Two-factor authentication",
+    "section": "twoFactorAuthentication"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT": {
+    "translation": "Two-factor authentication",
+    "section": "twoFactorAuthentication"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0": {
+    "translation": "Admin level 0",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_1": {
+    "translation": "Admin level 1",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_10": {
+    "translation": "Admin level 10",
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_2": {
+    "translation": "Admin level 2",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_3": {
+    "translation": "Admin level 3",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_4": {
+    "translation": "Admin level 4",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_5": {
+    "translation": "Admin level 5",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_6": {
+    "translation": "Admin level 6",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7": {
+    "translation": "Admin Level 7",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_8": {
+    "translation": "Admin level 8",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_9": {
+    "translation": "Admin level 9",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "locationGeographicalLevel"
+  },
+  "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_END_DATE": {
+    "translation": "Follow-up status '{{status}}' end date",
+    "section": "uiChronologyContactPage"
+  },
+  "LNG_PAGE_VIEW_CHRONOLOGY_CONTACT_LABEL_FOLLOW_UP_HISTORY_START_DATE": {
+    "translation": "Follow-up status '{{status}}' start date",
+    "section": "uiChronologyContactPage"
+  },
+  "LNG_PAGE_REFERENCE_DATA_MANAGE_ICONS_LIST_TITLE": {
+    "translation": "Manage icons",
+    "section": "uiManageIconsList"
+  },
+  "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_QUESTIONNAIRE_LAB_RESULT_TITLE": {
+    "translation": "Lab results",
+    "section": "uiModifyOutbreakTemplateQuestionnairePage"
+  },
+  "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORT_LABEL": {
+    "translation": "Epi curve",
+    "section": "uiDashboardPage"
+  },
+  "LNG_PAGE_DASHBOARD_GANTT_CHART_REPORT_LABEL": {
+    "translation": "Gantt chart",
+    "section": "uiDashboardPage"
+  },
+  "LNG_PAGE_LIST_FILTER_HELP_CONTEXT_SENSITIVE": {
+    "translation": "Help - context sensitive",
+    "section": "uiListFiltersPageTitles"
+  },
+  "LNG_SIDE_FILTERS_COMPARATOR_LABEL_QUESTION_WHICH_ANSWER_LAST": {
+    "translation": "Last answer",
+    "section": "uiSideFilter"
+  },
+  "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
+    "translation": "Failed to import record {{recordNo}} because there are multiple addresses specified as Current address",
+    "section": "uiImportData"
+  },
+  "LNG_PAGE_IMPORT_DATA_ERROR_RECORD_ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
+    "translation": "Failed to import record {{recordNo}} because address must be specified as a Current address",
+    "section": "uiImportData"
+  },
+  "LNG_PAGE_BULK_ADD_CONTACTS_TITLE": {
+    "translation": "Bulk add contacts",
+    "section": "uiBulkAddContactsPage"
+  },
+  "LNG_BACKUP_MODULE_LABEL_SYSTEM_CONFIGURATION": {
+    "translation": "System configuration",
+    "section": "uiBackupModules"
+  },
+  "LNG_BACKUP_FIELD_LABEL_DISABLED_DESCRIPTION": {
+    "translation": "Turn on/off automatic backups",
+    "section": "uiBackupFields"
+  },
+  "LNG_BACKUP_FIELD_LABEL_DATE": {
+    "translation": "Start time (UTC)",
+    "section": "uiBackupFields"
+  },
+  "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_ID": {
+    "translation": "Credentials client ID",
+    "section": "uiUpstreamServerFields"
+  },
+  "LNG_UPSTREAM_SERVER_FIELD_LABEL_CREDENTIALS_CLIENT_SECRET": {
+    "translation": "Credentials client secret",
+    "section": "uiUpstreamServerFields"
+  },
+  "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_COMPLETION_DATE": {
+    "translation": "Action completion date",
+    "section": "uiSyncLogsFields"
+  },
+  "LNG_UPSTREAM_SERVER_FIELD_LABEL_ACTION_START_DATE": {
+    "translation": "Action start date",
+    "section": "uiSyncLogsFields"
+  },
+  "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_ID": {
+    "translation": "Credentials client ID",
+    "section": "uiClientApplicationFields"
+  },
+  "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CLIENT_SECRET": {
+    "translation": "Credentials client secret",
+    "section": "uiClientApplicationFields"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_APPLY_SETTINGS": {
+    "translation": "Create snapshot",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_CONFIGURE_SETTINGS": {
+    "translation": "Create snapshot",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_NAME_COLOR_TITLE": {
+    "translation": "Label colour",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_SHOW_CONTACTS_OF_CONTACTS": {
+    "translation": "Show contacts of contacts",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_TITLE": {
+    "translation": "Create contact of contact",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_BUTTON": {
+    "translation": "Create contact of contact",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_CREATE_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
+    "translation": "Contact of contact created",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_BUTTON_SNAPSHOT_FILTERS": {
+    "translation": "Snapshot filters",
+    "section": "uiChainsOfTransmissionGraph"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE": {
+    "translation": "Contact daily follow-up status",
+    "section": "contactDailyFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK": {
+    "translation": "Seen not ok",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "contactDailyFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK": {
+    "translation": "Seen ok",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "contactDailyFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE": {
+    "translation": "Contact final follow-up status",
+    "section": "contactFinalFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED": {
+    "translation": "Follow-up completed",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "contactFinalFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP": {
+    "translation": "Lost to follow-up",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "contactFinalFollowUpStatusType"
+  },
+  "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP": {
+    "translation": "Under follow-up",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "contactFinalFollowUpStatusType"
+  },
+  "LNG_INPUT_LABEL_ADD_ITEM": {
+    "translation": "Add item",
+    "section": "uiNameUrlFields"
+  },
+  "LNG_PAGE_LIST_ENTITY_ASSIGN_RELATIONSHIPS_TITLE": {
+    "translation": "Assign to",
+    "section": "uiEntityRelationshipsListShareAssignCreatePages"
+  },
+  "LNG_SYNC_PACKAGE_FIELD_LABEL_EXPORT_TYPE_DESCRIPTION": {
+    "translation": "Note: when export type is present, 'collections' is ignored",
+    "section": "uiSyncPackage"
+  },
+  "LNG_SYNC_PACKAGE_FIELD_LABEL_INCLUDE_USERS": {
+    "translation": "Include users",
+    "section": "uiSyncPackage"
+  },
+  "LNG_AUDIT_LOG_FIELD_LABEL_IP_ADDRESS": {
+    "translation": "IP address",
+    "section": "uiAuditLogsFields"
+  },
+  "LNG_AUDIT_LOG_FIELD_LABEL_MODEL_NAME": {
+    "translation": "Record name",
+    "section": "uiAuditLogsFields"
+  },
+  "LNG_PAGE_LIST_AUDIT_LOGS_TITLE": {
+    "translation": "Audit logs",
+    "section": "uiAuditLogsFields"
+  },
+  "LNG_PAGE_CLOUD_BACKUP_TITLE": {
+    "translation": "Cloud backup",
+    "section": "uiCloudBackupPage"
+  },
+  "LNG_PAGE_VIEW_HELP_ITEM_TITLE": {
+    "translation": "View help item",
+    "section": "uiModifyHelpCategoryPage"
+  },
+  "LNG_ADD_FOLLOW_UP_MODAL_SEARCH_CONTACT": {
+    "translation": "Search contact",
+    "section": "uiMobile"
+  },
+  "LNG_DATE_FIELD_LABEL_HOSPITAL_NAME": {
+    "translation": "Hospital name",
+    "section": "uiMobile"
+  },
+  "LNG_HELP_ITEMS_SINGLE_SCREEN_VIEW_TITLE_LABEL": {
+    "translation": "View help item",
+    "section": "uiMobile"
+  },
+  "LNG_HUB_CONFIGURATION_SCREEN_SCAN_QR_CODE_BUTTON": {
+    "translation": "Scan QR code",
+    "section": "uiMobile"
+  },
+  "LNG_QUESTIONNAIRE_LABEL_ADDITIONAL_QUESTIONS": {
+    "translation": "Additional questions",
+    "section": "uiMobile"
+  },
+  "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_CHECK_ALL": {
+    "translation": "Check all",
+    "section": "uiBulkActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_TOOLTIP": {
+    "translation": "Bulk actions",
+    "section": "uiBulkActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_BULK_ACTIONS_UNCHECK_ALL": {
+    "translation": "Uncheck all",
+    "section": "uiBulkActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_COLLAPSE_ALL": {
+    "translation": "Collapse all",
+    "section": "uiColumnActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_EXPAND_ALL": {
+    "translation": "Expand all",
+    "section": "uiColumnActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_HIDE_ALL": {
+    "translation": "Hide all",
+    "section": "uiColumnActionsOnListPages"
+  },
+  "LNG_LIST_PAGES_BUTTON_COLUMN_ACTIONS_SHOW_ALL": {
+    "translation": "Show all",
+    "section": "uiColumnActionsOnListPages"
+  },
+  "LNG_PAGE_GANTT_CHART_REPORT_LABEL": {
+    "translation": "Gantt chart",
+    "section": "uiGanttChartDashlet"
+  },
+  "LNG_PAGE_GANTT_CHART_TITLE": {
+    "translation": "Gantt chart",
+    "section": "uiGanttChartDashlet"
+  },
+  "LNG_SYSTEM_DEVICE_FIELD_LABEL_PHYSICAL_DEVICE_ID": {
+    "translation": "Physical device ID",
+    "section": "uiDeviceFields"
+  },
+  "LNG_GLOBAL_ENTITY_SEARCH_DIALOG_CREATE_CASE_WITH_UID_TITLE": {
+    "translation": "Do you want to create a new case with the given UID?",
+    "section": "uiGlobalSearch"
+  },
+  "LNG_PAGE_BULK_MODIFY_CONTACTS_TITLE": {
+    "translation": "Bulk modify contacts",
+    "section": "uiBulkModifyContactsPage"
+  },
+  "LNG_NGX_WIG_CUSTOM_LIBRARY_BUTTONS_TITLE_UNORDERED_LIST": {
+    "translation": "Unordered list",
+    "section": "uiNgxWig"
+  },
+  "LNG_NGX_WIG_CUSTOM_LIBRARY_BUTTONS_TITLE_ORDERED_LIST": {
+    "translation": "Ordered list",
+    "section": "uiNgxWig"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS": {
+    "translation": "Vaccine status",
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS": {
+    "translation": "Pregnancy status",
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_NOT_PREGNANT": {
+    "translation": "No - not pregnant",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_FIRST_TRIMESTER": {
+    "translation": "Yes - first trimester",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_SECOND_TRIMESTER": {
+    "translation": "Yes - second trimester",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_THIRD_TRIMESTER": {
+    "translation": "Yes - third trimester",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS_YES_TRIMESTER_UNKNOWN": {
+    "translation": "Yes - trimester unknown",
+    "modules": [
+      "referenceData"
+    ],
+    "section": "referenceDataCategoryVaccine"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME": {
+    "translation": "Institution name",
+    "section": "referenceDataCategoryInstitution"
+  },
+  "LNG_PAGE_CREATE_LAB_RESULT_WARNING_CASE_DATEOFONSET_AFTER_SAMPLE_TAKEN": {
+    "translation": "Date of onset is after sample taken date",
+    "section": "uiCreateLabResultPage"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_DATE": {
+    "translation": "Vaccine date",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_STATUS": {
+    "translation": "Vaccine status",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS": {
+    "translation": "Pregnancy status",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_EXPOSURE": {
+    "translation": "Exposure date ( {{exposureName}} )",
+    "section": "uiContactOfContactFields"
+  },
+  "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_TITLE": {
+    "translation": "Bulk add contacts of contacts",
+    "section": "uiBulkAddContactsOfContactsPage"
+  },
+  "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_TITLE": {
+    "translation": "Bulk modify contact of contacts",
+    "section": "uiBulkModifyContactsOfContactsPage"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG": {
+    "translation": "Audit log - export",
+    "section": "availablePermissions"
+  },
+  "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION": {
+    "translation": "Geo location",
+    "section": "uiReferenceDataEntryFields"
+  },
+  "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_NOT_STARTED": {
+    "translation": "Follow up period not started yet",
+    "section": "uiContactsListPage"
+  },
+  "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_UNDER_FOLLOW_UP": {
+    "translation": "Under follow up",
+    "section": "uiContactsListPage"
+  },
+  "LNG_PAGE_LIST_CONTACTS_LABEL_STATUS_ENDED_FOLLOW_UP": {
+    "translation": "Ended follow up period",
+    "section": "uiContactsListPage"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_FILTERS": {
+    "translation": "System settings - modify saved filters",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_FILTERS": {
+    "translation": "System settings - delete saved filters",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_SYSTEM_SETTINGS_SAVED_IMPORT": {
+    "translation": "System settings - modify saved imports",
+    "section": "availablePermissions"
+  },
+  "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_SYSTEM_SETTINGS_SAVED_IMPORT": {
+    "translation": "System settings - delete saved imports",
+    "section": "availablePermissions"
+  },
+  "LNG_LAB_RESULT_FIELD_LABEL_SEQUENCE_LAB": {
+    "translation": "Variant / strain lab name",
+    "section": "uiLabResultsFields"
+  },
+  "LNG_REFERENCE_DATA_CATEGORY_LAB_SEQUENCE_LABORATORY": {
+    "translation": "Variant / strain lab name",
+    "section": "referenceDataCategoryLabSeqResult"
+  },
+  "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_NODE_LAB_SEQ_COLOR_TITLE": {
+    "translation": "Lab variant / strain colour",
+    "section": "uiChainsOfTransmissionGraph"
+  }
+}
+}
