@@ -12,9 +12,11 @@
     "id"
   ],
   "properties": {
-    "categoryId": [
-      "string"
-    ]
+    "categoryId": {
+      "type": {
+        "itemId": "boolean"
+      }
+    }
   },
   "validations": [],
   "relations": {},
