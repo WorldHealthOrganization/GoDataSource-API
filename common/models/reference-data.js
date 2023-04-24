@@ -296,11 +296,8 @@ module.exports = function (ReferenceData) {
     'geoLocation': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION',
     'geoLocation.lat': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LAT',
     'geoLocation.lng': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_GEO_LOCATION_LNG',
-    'isSystemWide': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE'
-    // #TODO
-    // allowedDiseaseIds
-    // allowedOutbreakIds
-    // restoreAllowedOutbreakIds
+    'isSystemWide': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE',
+    'allowedRefDataItems': 'LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS'
   });
 
   // define a list of nested GeoPoints (they need to be handled separately as loopback does not handle them automatically)

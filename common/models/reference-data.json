@@ -99,19 +99,9 @@
     "isSystemWide": {
       "type": "boolean"
     },
-    "allowedDiseaseIds": {
+    "allowedRefDataItems": {
       "type": [
-        "string"
-      ]
-    },
-    "allowedOutbreakIds": {
-      "type": [
-        "string"
-      ]
-    },
-    "restoreAllowedOutbreakIds": {
-      "type": [
-        "string"
+        "allowedRefData"
       ]
     }
   },
@@ -193,24 +183,6 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "getAvailableCategoriesPerDisease"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "reference_data_modify_category_item",
-      "permission": "ALLOW",
-      "property": "diseaseAllowedRefData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "outbreak_create",
-      "permission": "ALLOW",
-      "property": "outbreakAllowedRefData"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "outbreak_modify",
-      "permission": "ALLOW",
-      "property": "outbreakAllowedRefData"
     }
   ],
   "methods": {
@@ -335,50 +307,6 @@
       "http": {
         "verb": "get",
         "path": "/available-categories-per-disease"
-      }
-    },
-    "diseaseAllowedRefData": {
-      "accepts": [
-        {
-          "arg": "body",
-          "type": [
-            "diseaseAllowedRefData"
-          ],
-          "description": "Add / remove diseases from specific reference data items",
-          "http": {
-            "source": "body"
-          },
-          "root": true,
-          "required": true
-        }
-      ],
-      "returns": [],
-      "description": "Add disease to list of diseases that use a reference data item",
-      "http": {
-        "verb": "post",
-        "path": "/disease-allowed-ref-data"
-      }
-    },
-    "outbreakAllowedRefData": {
-      "accepts": [
-        {
-          "arg": "body",
-          "type": [
-            "outbreakAllowedRefData"
-          ],
-          "description": "Add / remove outbreaks from specific reference data items",
-          "http": {
-            "source": "body"
-          },
-          "root": true,
-          "required": true
-        }
-      ],
-      "returns": [],
-      "description": "Add outbreak to list of outbreaks that use a reference data item",
-      "http": {
-        "verb": "post",
-        "path": "/outbreak-allowed-ref-data"
       }
     }
   }

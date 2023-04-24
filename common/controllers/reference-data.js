@@ -180,24 +180,4 @@ module.exports = function (ReferenceData) {
   ReferenceData.getAvailableCategoriesPerDisease = function (callback) {
     callback(null, ReferenceData.availableCategoriesPerDisease);
   };
-
-  /**
-   * Add / remove diseases from specific reference data items
-   */
-  ReferenceData.diseaseAllowedRefData = function (body, callback) {
-    // update allowed reference data items per disease
-    /// #TODO
-    // app.models.referenceData
-
-    // finished
-    callback();
-  };
-
-  /**
-   * Add / remove outbreaks from specific reference data items
-   */
-  ReferenceData.outbreakAllowedRefData = function (body, callback) {
-    // #TODO
-    callback();
-  };
 };
