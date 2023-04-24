@@ -100,9 +100,7 @@
       "type": "boolean"
     },
     "allowedRefDataItems": {
-      "type": [
-        "allowedRefData"
-      ]
+      "type": "allowedRefData"
     }
   },
   "indexes": {
