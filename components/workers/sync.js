@@ -309,13 +309,13 @@ const worker = {
             if (filter.where.hasOwnProperty('fromDate')) {
               // doing this because createdAt and updatedAt are equal when a record is created
               customFilter = {
-                "$or": [
+                '$or': [
                   {
-                    "updatedAt": {
+                    'updatedAt': {
                       $gte: new Date(filter.where.fromDate)
                     }
                   }, {
-                    "dbUpdatedAt": {
+                    'dbUpdatedAt': {
                       $gte: new Date(filter.where.fromDate)
                     }
                   }

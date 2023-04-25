@@ -33,10 +33,10 @@ module.exports = function (Model) {
 
   // required to store the update (soft delete) date time of the record in the database
   Model.defineProperty(dbUpdatedAt, {
-     type: Date,
-     readOnly: true,
-     safeForImport: true
-   });
+    type: Date,
+    readOnly: true,
+    safeForImport: true
+  });
 
   /**
    * Restore a soft-deleted record
