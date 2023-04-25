@@ -110,6 +110,7 @@ module.exports = function (FollowUp) {
     [exportHelper.CUSTOM_COLUMNS.ALERTED]: 'LNG_FOLLOW_UP_FIELD_LABEL_ALERTED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
+    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
     'responsibleUser': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
     'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
