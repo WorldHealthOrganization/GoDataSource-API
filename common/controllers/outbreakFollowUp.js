@@ -530,6 +530,7 @@ module.exports = function (Outbreak) {
             locationFields: app.models.followUp.locationFields,
 
             // fields that we need to bring from db, but we don't want to include in the export
+            // - responsibleUserId might be included since it is used on import, otherwise we won't have the ability to map this field
             projection: [
               'personId',
               'responsibleUserId',

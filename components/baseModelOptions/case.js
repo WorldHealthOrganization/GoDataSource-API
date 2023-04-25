@@ -112,6 +112,7 @@ const constants = {
     'vaccinesReceived[].date': 'LNG_CASE_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CASE_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CASE_FIELD_LABEL_PREGNANCY_STATUS',
+    'responsibleUserId': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
     'responsibleUser': 'LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_ID',
     'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
