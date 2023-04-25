@@ -514,7 +514,8 @@ module.exports = function (Outbreak) {
             locationFields: app.models.case.locationFields,
             additionalFieldsToExport,
 
-            // fields that we need to bring from db, but we don't want to include in the export
+            // fields that we need to bring from db, but we might not include in the export (you can still include it since we need it on import)
+            // - responsibleUserId might be included since it is used on import, otherwise we won't have the ability to map this field
             projection: [
               'responsibleUserId'
             ]
