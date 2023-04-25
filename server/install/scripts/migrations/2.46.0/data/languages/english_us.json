@@ -256,6 +256,26 @@
     "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
       "translation": "The contact of contact ID should match the pattern defined for this outbreak: {{mask}}",
       "section": "uiContactOfContactFields"
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiContactFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiEventFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiFollowUpFields"
     }
   }
 }
