@@ -26,6 +26,7 @@ module.exports = function (Location) {
           createdAt: false,
           createdBy: false,
           updatedAt: false,
+          dbUpdatedAt: false,
           updatedBy: false,
           deleted: false
         },

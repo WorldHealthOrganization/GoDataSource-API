@@ -15,6 +15,7 @@ module.exports = function (Model) {
 
   const deletedFlag = 'deleted';
   const deletedAt = 'deletedAt';
+  const dbUpdatedAt = 'dbUpdatedAt';
 
   Model.defineProperty(deletedFlag, {
     type: Boolean,
@@ -29,6 +30,13 @@ module.exports = function (Model) {
     readOnly: true,
     safeForImport: true
   });
+
+  // required to store the update (soft delete) date time of the record in the database
+  Model.defineProperty(dbUpdatedAt, {
+     type: Date,
+     readOnly: true,
+     safeForImport: true
+   });
 
   /**
    * Restore a soft-deleted record

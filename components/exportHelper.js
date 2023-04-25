@@ -2174,7 +2174,8 @@ function exportFilteredModelsList(
         return sheetHandler
           .updateExportLog({
             processedNo: sheetHandler.processedNo,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
           .then(() => {
             switch (exportType) {
@@ -2575,7 +2576,8 @@ function exportFilteredModelsList(
       return sheetHandler
         .updateExportLog({
           statusStep: 'LNG_STATUS_STEP_ENCRYPT',
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          dbUpdatedAt: new Date()
         })
         .then(() => {
           // single file to encrypt ?
@@ -2634,7 +2636,8 @@ function exportFilteredModelsList(
             statusStep: 'LNG_STATUS_STEP_ARCHIVE',
             extension: zipExtension,
             mimeType: 'application/zip',
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
           .then(() => {
             // handle archive async
@@ -2716,6 +2719,7 @@ function exportFilteredModelsList(
               createdAt: new Date(),
               createdBy: options.userId,
               updatedAt: new Date(),
+              dbUpdatedAt: new Date(),
               updatedBy: options.userId,
               mimeType: sheetHandler.mimeType,
               extension: exportType,
@@ -3003,7 +3007,8 @@ function exportFilteredModelsList(
                     [`aggregateFilter${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
                       JSON.stringify(aggregateFilter) :
                       null,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   })
                   .then(() => {
                     // prepare records that will be exported
@@ -3647,7 +3652,8 @@ function exportFilteredModelsList(
               return sheetHandler.saveAggregateFilter ?
                 sheetHandler.updateExportLog({
                   aggregateFilter: JSON.stringify(aggregateFilter),
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 }) :
                 null;
             })
@@ -5892,7 +5898,8 @@ function exportFilteredModelsList(
                   // update export log
                   return sheetHandler.updateExportLog({
                     processedNo: sheetHandler.processedNo,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   });
                 });
             });
@@ -5910,7 +5917,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_PREFILTERS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5933,7 +5941,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_RECORDS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5945,7 +5954,8 @@ function exportFilteredModelsList(
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_LOCATIONS',
                   aggregateCompletionDate: new Date(),
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5956,7 +5966,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_CONFIGURE_HEADERS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5973,7 +5984,8 @@ function exportFilteredModelsList(
                   {
                     totalNo: counted,
                     statusStep: 'LNG_STATUS_STEP_EXPORTING_RECORDS',
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   })
                   .then(() => {
                     // start the actual exporting of data
@@ -6024,6 +6036,7 @@ function exportFilteredModelsList(
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
           updatedAt: new Date(),
+          dbUpdatedAt: new Date(),
           actionCompletionDate: new Date(),
           sizeBytes
         });
@@ -6046,7 +6059,8 @@ function exportFilteredModelsList(
             // statusStep - keep as it is because it could help to know where it failed, on what step
             error: err.message,
             errStack: err.stack,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
 
           // remove temporary collection if it was created ?

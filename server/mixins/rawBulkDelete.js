@@ -30,7 +30,8 @@ module.exports = function (Model) {
     const op = {
       $set: {
         deleted: true,
-        deletedAt: new Date()
+        deletedAt: new Date(),
+        dbUpdatedAt: new Date()
       }
     };
 

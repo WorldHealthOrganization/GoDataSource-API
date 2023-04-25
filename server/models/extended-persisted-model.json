@@ -46,6 +46,9 @@
     },
     "updatedAt_index": {
       "updatedAt": 1
+    },
+    "dbUpdatedAt_index": {
+      "dbUpdatedAt": 1
     }
   },
   "validations": [],

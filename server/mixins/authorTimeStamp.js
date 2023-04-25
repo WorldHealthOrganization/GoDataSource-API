@@ -104,6 +104,13 @@ module.exports = function (Model) {
     safeForImport: true
   });
 
+  // required to store the insert/update/restore date time of the record in the database
+  Model.defineProperty('dbUpdatedAt', {
+    type: Date,
+    readOnly: true,
+    safeForImport: true
+  });
+
   Model.observe('before save', function (context, next) {
     // initialize system author info
     const systemAuthor = 'system';
@@ -141,6 +148,12 @@ module.exports = function (Model) {
         context.instance.updatedAt = new Date();
       }
 
+      // update dbUpdatedAt property if it is missing from the update payload
+      // or it's not an init action.
+      if (!context.instance.dbUpdatedAt || !context.options._init) {
+        context.instance.dbUpdatedAt = new Date();
+      }
+
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
 
@@ -162,6 +175,12 @@ module.exports = function (Model) {
       // or it's not an init / sync action
       if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
         context.data.updatedAt = new Date();
+      }
+
+      // update dbUpdatedAt property if it is missing from the update payload
+      // or it's not an init action.
+      if (!context.data.dbUpdatedAt || !context.options._init) {
+        context.data.dbUpdatedAt = new Date();
       }
 
       // increment updatedAt if needed
