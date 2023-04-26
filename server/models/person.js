@@ -512,8 +512,7 @@ module.exports = function (Person) {
                   createdBy: 'system',
                   updatedBy: 'system',
                   createdAt: now,
-                  updatedAt: now,
-                  dbUpdatedAt: now
+                  updatedAt: now
                 };
                 const jobs = [];
                 _.each(centerNames, (centerData) => {

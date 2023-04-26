@@ -269,7 +269,7 @@ const restoreBackupFromFile = function (filePath, done) {
 
                           // insert all entries from the file in the collection
                           collectionRecords.forEach((record) => {
-                            // consider that each record was inserted today
+                            // consider that each record was inserted now
                             record.dbUpdatedAt = new Date();
 
                             // insert record
