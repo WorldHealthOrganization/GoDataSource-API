@@ -148,9 +148,8 @@ module.exports = function (Model) {
         context.instance.updatedAt = new Date();
       }
 
-      // update dbUpdatedAt property if it is missing from the update payload
-      // or it's not an init action.
-      if (!context.instance.dbUpdatedAt || !context.options._init) {
+      // set always dbUpdatedAt as current date
+      if (!context.options._init) {
         context.instance.dbUpdatedAt = new Date();
       }
 
@@ -177,9 +176,8 @@ module.exports = function (Model) {
         context.data.updatedAt = new Date();
       }
 
-      // update dbUpdatedAt property if it is missing from the update payload
-      // or it's not an init action.
-      if (!context.data.dbUpdatedAt || !context.options._init) {
+      // set always dbUpdatedAt as current date
+      if (!context.options._init) {
         context.data.dbUpdatedAt = new Date();
       }
 
