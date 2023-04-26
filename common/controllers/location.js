@@ -21,6 +21,10 @@ module.exports = function (Location) {
   Location.exportHierarchicalList = function (filter, callback) {
     Location
       .find({
+        // blacklist some fields in the export
+        fields: {
+          dbUpdatedAt: false
+        },
         deleted: filter && filter.where && filter.where.includeDeletedLocations ?
           true :
           undefined,
