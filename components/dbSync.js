@@ -804,6 +804,27 @@ const syncRecord = function (logger, model, record, options, done) {
             });
         }
 
+        // if we restore record make sure we remove deleted date too
+        if (
+          dbRecord.deleted &&
+          record.deleted !== undefined &&
+          (
+            record.deleted === false ||
+            (typeof record.deleted === 'string' && record.deleted.toLowerCase() === 'false') ||
+            record.deleted === 0
+          )
+        ) {
+          // update deletedAt
+          if (dbRecord.deletedAt) {
+            record.deletedAt = null;
+          }
+
+          // update deletedByParent
+          if (dbRecord.deletedByParent) {
+            record.deletedByParent = null;
+          }
+        }
+
         // record just needs to be updated
         return dbRecord
           .updateAttributes(record, options)

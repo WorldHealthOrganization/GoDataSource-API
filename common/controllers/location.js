@@ -18,18 +18,12 @@ module.exports = function (Location) {
    * Export hierarchical locations list
    * @param callback
    */
-  Location.exportHierarchicalList = function (callback) {
+  Location.exportHierarchicalList = function (filter, callback) {
     Location
       .find({
-        // blacklist some fields in the export
-        fields: {
-          createdAt: false,
-          createdBy: false,
-          updatedAt: false,
-          dbUpdatedAt: false,
-          updatedBy: false,
-          deleted: false
-        },
+        deleted: filter && filter.where && filter.where.includeDeletedLocations ?
+          true :
+          undefined,
         order: ['name ASC', 'parentLocationId ASC', 'id ASC']
       })
       .then(function (locations) {
