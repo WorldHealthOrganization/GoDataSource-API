@@ -6771,6 +6771,10 @@
         {
           "verb": "get",
           "path": "/events"
+        },
+        {
+          "verb": "post",
+          "path": "/events/filter"
         }
       ]
     },
@@ -8043,6 +8047,10 @@
         {
           "verb": "get",
           "path": "/contacts-of-contacts"
+        },
+        {
+          "verb": "post",
+          "path": "/contacts-of-contacts/filter"
         }
       ]
     },

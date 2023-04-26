@@ -276,6 +276,10 @@
     "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
       "translation": "Assigned user uuid",
       "section": "uiFollowUpFields"
+    },
+    "LNG_GENERIC_WARNING_BULK_CACHE_EXPIRED": {
+      "translation": "Bulk cache expired, please reselect list",
+      "section": "uiGenericErrorsWarningsInfoMessages"
     }
   }
 }
