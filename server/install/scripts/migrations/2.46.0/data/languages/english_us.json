@@ -276,6 +276,10 @@
     "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
       "translation": "Assigned user uuid",
       "section": "uiFollowUpFields"
+    },
+    "LNG_GENERIC_WARNING_NO_PASTE_USING_CONTEXT_MENU": {
+      "translation": "This action is unavailable via the context menu, but you can still use {{shortcut}}",
+      "section": "uiGenericErrorsWarningsInfoMessages"
     }
   }
 }
