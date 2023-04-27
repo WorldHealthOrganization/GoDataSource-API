@@ -623,7 +623,7 @@ const syncRecord = function (logger, model, record, options, done) {
         // skip createdAt, updatedAt properties from formatting
         // but make sure they are valid dates before trying to import them into database
         // because we might have cases where those values were altered outside of the system
-        if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+        if (['createdAt', 'updatedAt', 'dbUpdatedAt', 'deletedAt'].indexOf(prop) !== -1) {
           let propValue = _.get(obj, prop);
           // XML file don't have 'null' values, they use empty strings instead
           if (propValue === '') {

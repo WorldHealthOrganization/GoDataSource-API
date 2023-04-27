@@ -36,6 +36,7 @@ module.exports = function (Model) {
     timer.start();
     // update stamps
     update.updatedAt = new Date();
+    update.dbUpdatedAt = new Date();
     update.updatedBy = _.get(reqOpts, 'accessToken.userId', 'unavailable');
 
     // if there is a default scope query
