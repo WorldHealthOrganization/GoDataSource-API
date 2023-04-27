@@ -149,9 +149,7 @@ module.exports = function (Model) {
       }
 
       // set always dbUpdatedAt as current date
-      if (!context.options._init) {
-        context.instance.dbUpdatedAt = new Date();
-      }
+      context.instance.dbUpdatedAt = new Date();
 
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
@@ -177,9 +175,7 @@ module.exports = function (Model) {
       }
 
       // set always dbUpdatedAt as current date
-      if (!context.options._init) {
-        context.data.dbUpdatedAt = new Date();
-      }
+      context.data.dbUpdatedAt = new Date();
 
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
