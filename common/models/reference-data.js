@@ -688,7 +688,7 @@ module.exports = function (ReferenceData) {
                 }
 
                 // allow customizing some safe properties
-                const customizableProperties = ['iconId', 'colorCode', 'order', 'code', 'geoLocation'];
+                const customizableProperties = ['iconId', 'colorCode', 'order', 'code', 'geoLocation', 'isSystemWide', 'allowedRefDataItems'];
 
                 // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
                 if (error.code === 'MODEL_IN_USE') {
