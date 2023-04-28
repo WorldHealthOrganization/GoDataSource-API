@@ -143,6 +143,7 @@ const createUpdateLanguageTokens = (
                                   languageFileData.tokens[languageTokenModel.token].section :
                                   languageTokenModel.section,
                                 updatedAt: new Date(),
+                                dbUpdatedAt: new Date(),
                                 updatedBy: 'system'
                               }
                             })
@@ -175,6 +176,7 @@ const createUpdateLanguageTokens = (
                               createdAt: common.install.timestamps.createdAt,
                               createdBy: 'system',
                               updatedAt: common.install.timestamps.updatedAt,
+                              dbUpdatedAt: new Date(),
                               updatedBy: 'system',
                               isDefaultLanguageToken: true
                             })

@@ -623,7 +623,7 @@ const syncRecord = function (logger, model, record, options, done) {
         // skip createdAt, updatedAt properties from formatting
         // but make sure they are valid dates before trying to import them into database
         // because we might have cases where those values were altered outside of the system
-        if (['createdAt', 'updatedAt', 'deletedAt'].indexOf(prop) !== -1) {
+        if (['createdAt', 'updatedAt', 'dbUpdatedAt', 'deletedAt'].indexOf(prop) !== -1) {
           let propValue = _.get(obj, prop);
           // XML file don't have 'null' values, they use empty strings instead
           if (propValue === '') {
@@ -802,6 +802,27 @@ const syncRecord = function (logger, model, record, options, done) {
                     });
                 });
             });
+        }
+
+        // if we restore record make sure we remove deleted date too
+        if (
+          dbRecord.deleted &&
+          record.deleted !== undefined &&
+          (
+            record.deleted === false ||
+            (typeof record.deleted === 'string' && record.deleted.toLowerCase() === 'false') ||
+            record.deleted === 0
+          )
+        ) {
+          // update deletedAt
+          if (dbRecord.deletedAt) {
+            record.deletedAt = null;
+          }
+
+          // update deletedByParent
+          if (dbRecord.deletedByParent) {
+            record.deletedByParent = null;
+          }
         }
 
         // record just needs to be updated

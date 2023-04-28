@@ -276,6 +276,18 @@
     "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
       "translation": "Assigned user uuid",
       "section": "uiFollowUpFields"
+    },
+    "LNG_GENERIC_WARNING_BULK_CACHE_EXPIRED": {
+      "translation": "Bulk cache expired, please reselect list",
+      "section": "uiGenericErrorsWarningsInfoMessages"
+    },
+    "LNG_GENERIC_WARNING_NO_PASTE_USING_CONTEXT_MENU": {
+      "translation": "This action is unavailable via the context menu, but you can still use {{shortcut}}",
+      "section": "uiGenericErrorsWarningsInfoMessages"
+    },
+    "LNG_PAGE_LIST_LOCATIONS_EXPORT_DELETED_INFORMATION": {
+      "translation": "Include deleted locations",
+      "section": "uiLocationsListPage"
     }
   }
 }

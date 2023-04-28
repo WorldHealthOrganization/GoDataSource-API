@@ -918,7 +918,11 @@ module.exports = function (Location) {
         }));
       }
       // create locations from the hierarchical list
-      Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+      if (!locations.length) {
+        callback();
+      } else {
+        Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+      }
     } catch (error) {
       // handle JSON.parse errors
       callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {
