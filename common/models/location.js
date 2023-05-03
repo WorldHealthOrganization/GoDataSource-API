@@ -728,7 +728,7 @@ module.exports = function (Location) {
     // go through all locations
     locationsList.forEach(function (location) {
       // replace "Updated at" as current date ?
-      if (replaceUpdatedAtAsCurrentDate){
+      if (replaceUpdatedAtAsCurrentDate) {
         location.updatedAt = new Date();
       }
 
