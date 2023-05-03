@@ -1,0 +1,9 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_LIST_LOCATIONS_EXPORT_REPLACE_UPDATED_AT_AS_CURRENT_DATE": {
+      "translation": "Replace updated at as current date",
+      "section": "uiLocationsListPage"
+    }
+  }
+}
