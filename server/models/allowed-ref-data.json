@@ -1,0 +1,25 @@
+{
+  "name": "allowedRefData",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "RemovePropertiesFromDefinition": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "categoryId": {
+      "type": {
+        "itemId": "boolean"
+      }
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

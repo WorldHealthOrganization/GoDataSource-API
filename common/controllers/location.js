@@ -36,8 +36,8 @@ module.exports = function (Location) {
             JSON.stringify(
               Location.buildHierarchicalLocationsList(
                 locations,
-                null,
-                null,
+                undefined,
+                undefined,
                 filter && filter.where && filter.where.replaceUpdatedAtAsCurrentDate
               ),
               null,

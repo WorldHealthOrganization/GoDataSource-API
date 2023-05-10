@@ -173,4 +173,11 @@ module.exports = function (ReferenceData) {
       logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
+
+  /**
+   * Expose available categories per disease via API
+   */
+  ReferenceData.getAvailableCategoriesPerDisease = function (callback) {
+    callback(null, ReferenceData.availableCategoriesPerDisease);
+  };
 };

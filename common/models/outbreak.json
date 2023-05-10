@@ -202,6 +202,9 @@
       "description": "Flag specifying if the modifying of the legacy questionnaire is disabled. Default: false",
       "type": "boolean",
       "default": false
+    },
+    "allowedRefDataItems": {
+      "type": "allowedRefData"
     }
   },
   "indexes": {
