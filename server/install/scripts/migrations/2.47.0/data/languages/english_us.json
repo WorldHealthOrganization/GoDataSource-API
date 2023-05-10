@@ -90,7 +90,7 @@
       "section": "uiCreateOutbreakTemplatePage"
     },
     "LNG_PAGE_CREATE_OUTBREAK_TEMPLATE_COPY_REF_FROM_DISEASE_DIALOG": {
-      "translation": "Are you sure you want to overwrite outbreak template allowed reference data with those from '{{disease}}'",
+      "translation": "Do you want to overwrite outbreak template allowed reference data with those from '{{disease}}'",
       "section": "uiCreateOutbreakTemplatePage"
     },
     "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_TOOLTIP": {
@@ -98,7 +98,7 @@
       "section": "uiCreateOutbreakPage"
     },
     "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
-      "translation": "Are you sure you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
+      "translation": "Do you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
       "section": "uiCreateOutbreakPage"
     }
   }
