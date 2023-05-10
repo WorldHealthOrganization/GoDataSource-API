@@ -4,6 +4,102 @@
     "LNG_PAGE_LIST_LOCATIONS_EXPORT_REPLACE_UPDATED_AT_AS_CURRENT_DATE": {
       "translation": "Replace updated at with current server date/time",
       "section": "uiLocationsListPage"
+    },
+    "LNG_COMMON_LABEL_NOTHING_SELECTED": {
+      "translation": "Nothing selected",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_CHECK_ALL": {
+      "translation": "Check all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_UNCHECK_ALL": {
+      "translation": "Uncheck all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_ADD_ANOTHER": {
+      "translation": "Add item followed by adding one more",
+      "section": "uiCommonLabels"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE": {
+      "translation": "System-wide",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE_DESCRIPTION": {
+      "translation": "Visible on all outbreak if checked",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Allowed reference data",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_ENTRIES_COUNT": {
+      "translation": "System-wide",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_EDIT_NO_CATEGORIES": {
+      "translation": "No categories or category items matched the search criteria",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_ADD_NEW_ITEM_UNDER": {
+      "translation": "Add new item under '{{category}}'",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Reference data",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Reference data",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_TEMPLATE_COPY_REF_FROM_DISEASE_TOOLTIP": {
+      "translation": "Overwrite outbreak template allowed reference data with those from disease",
+      "section": "uiCreateOutbreakTemplatePage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_TEMPLATE_COPY_REF_FROM_DISEASE_DIALOG": {
+      "translation": "Are you sure you want to overwrite outbreak template allowed reference data with those from '{{disease}}'",
+      "section": "uiCreateOutbreakTemplatePage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_TOOLTIP": {
+      "translation": "Overwrite outbreak allowed reference data with those from disease",
+      "section": "uiCreateOutbreakPage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
+      "translation": "Are you sure you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
+      "section": "uiCreateOutbreakPage"
     }
   }
 }
