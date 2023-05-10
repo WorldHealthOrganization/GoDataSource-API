@@ -32,7 +32,21 @@ module.exports = function (Location) {
       })
       .then(function (locations) {
         app.utils.remote.helpers
-          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', 'locations.json', callback);
+          .offerFileToDownload(
+            JSON.stringify(
+              Location.buildHierarchicalLocationsList(
+                locations,
+                null,
+                null,
+                filter && filter.where && filter.where.replaceUpdatedAtAsCurrentDate
+              ),
+              null,
+              2
+            ),
+            'application/json',
+            'locations.json',
+            callback
+          );
       }).catch(callback);
   };
 
