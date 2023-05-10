@@ -168,7 +168,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Accepts where.includeDeletedLocations"
+          "description": "Accepts where.includeDeletedLocations and where.replaceUpdatedAtAsCurrentDate"
         }
       ],
       "returns": [

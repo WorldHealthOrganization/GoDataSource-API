@@ -664,9 +664,15 @@ module.exports = function (Location) {
    * @param locationsList
    * @param [removeIdentifiers] {boolean} If true, id and parentLocationId are omitted from the record
    * @param baseLevel
+   * @param replaceUpdatedAtAsCurrentDate
    * @return {*[]}
    */
-  Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers, baseLevel) {
+  Location.buildHierarchicalLocationsList = function (
+    locationsList,
+    removeIdentifiers,
+    baseLevel,
+    replaceUpdatedAtAsCurrentDate
+  ) {
     // by default keep identifiers
     if (removeIdentifiers === undefined) {
       removeIdentifiers = false;
@@ -721,6 +727,11 @@ module.exports = function (Location) {
 
     // go through all locations
     locationsList.forEach(function (location) {
+      // replace "Updated at" as current date ?
+      if (replaceUpdatedAtAsCurrentDate) {
+        location.updatedAt = new Date();
+      }
+
       // if the location is an instance
       if (location.toJSON) {
         // transform it to JSON
