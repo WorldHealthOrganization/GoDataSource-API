@@ -1458,12 +1458,8 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
 
 /**
  * Get a list of available reference data items for each property of the model
- * @param outbreakId
- * @param modelReferenceDataFieldsToCategoryMap
- * @return {Promise.<T>}
  */
 const getReferenceDataAvailableValuesForModel = function (outbreakId, modelReferenceDataFieldsToCategoryMap) {
-  const referenceDataValues = {};
   // find (active) reference data for the referenced categories
   return baseReferenceDataModel.helpers
     .getSystemAndOutbreakReferenceData(outbreakId, {
@@ -1473,9 +1469,15 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
         },
         active: true
       },
-      fields: ['id', 'categoryId', 'value', 'description']
+      fields: ['id', 'categoryId', 'value', 'active', 'isSystemWide']
     })
     .then(function (referenceDataItems) {
+      // init
+      const data = {
+        referenceDataValues: {},
+        propToCategory: {}
+      };
+
       // create a map of categories to items
       const referenceDataItemsByCategory = {};
       referenceDataItems.forEach(function (referenceDataItem) {
@@ -1485,30 +1487,34 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
         referenceDataItemsByCategory[referenceDataItem.categoryId].push({
           id: referenceDataItem.id,
           label: referenceDataItem.value,
-          value: referenceDataItem.value
+          value: referenceDataItem.value,
+          active: referenceDataItem.active,
+          isSystemWide: referenceDataItem.isSystemWide
         });
       });
 
       // keep a list of available values for each reference data related property
       Object.keys(modelReferenceDataFieldsToCategoryMap).forEach(function (modelProperty) {
-        // split the property in sub components
+        // split the property in subcomponents
+        data.propToCategory[modelProperty] = modelReferenceDataFieldsToCategoryMap[modelProperty];
         const propertyComponents = modelProperty.split('.');
-        // if there are sub components
+        // if there are subcomponents
         if (propertyComponents.length > 1) {
           // define parent component
-          if (!referenceDataValues[propertyComponents[0]]) {
-            referenceDataValues[propertyComponents[0]] = {};
+          if (!data.referenceDataValues[propertyComponents[0]]) {
+            data.referenceDataValues[propertyComponents[0]] = {};
           }
           // store the sub component under parent component
-          if (!referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
-            referenceDataValues[propertyComponents[0]][propertyComponents[1]] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
+          if (!data.referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
+            data.referenceDataValues[propertyComponents[0]][propertyComponents[1]] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
           }
         } else {
-          // no sub components, store property directly
-          referenceDataValues[modelProperty] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
+          // no subcomponents, store property directly
+          data.referenceDataValues[modelProperty] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
         }
       });
-      return referenceDataValues;
+
+      return data;
     });
 };
 
@@ -1754,6 +1760,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           modelProperties: {},
           suggestedFieldMapping: {},
           modelPropertyValues: {},
+          modelPropertyToRefCategory: {},
           modelArrayProperties: {}
         };
 
@@ -1826,9 +1833,15 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
             steps.push(function (callback) {
               // get reference data
               getReferenceDataAvailableValuesForModel(outbreakId, assocModelOptions.referenceDataFieldsToCategoryMap)
-                .then(function (referenceDataValues) {
+                .then(function (refData) {
                   // update result
-                  results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, referenceDataValues)});
+                  results[modelName] = Object.assign(
+                    {},
+                    results[modelName], {
+                      modelPropertyValues: _.merge(results[modelName].modelPropertyValues, refData.referenceDataValues),
+                      modelPropertyToRefCategory: _.merge(results[modelName].modelPropertyToRefCategory, refData.propToCategory)
+                    }
+                  );
                   callback(null, results[modelName]);
                 })
                 .catch(callback);
