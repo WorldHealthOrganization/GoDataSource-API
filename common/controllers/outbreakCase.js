@@ -1628,21 +1628,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
-    let updateRelations = [];
-    let convertedContact;
-    let caseInstance;
-
-    // override default scope to allow switching the type
-    const defaultScope = app.models.case.defaultScope;
-    app.models.case.defaultScope = function () {
-    };
-
+    let caseInstance, convertedContact;
     app.models.case
       .findOne({
         where: {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
           id: caseId
-        }
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers',
+          'questionnaireAnswersContact'
+        ]
       })
       .then(function (caseModel) {
         if (!caseModel) {
@@ -1690,12 +1686,27 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttributes(
+        return app.models.person.rawUpdateOne(
+          {
+            _id: caseId
+          },
           attributes,
           options
         );
       })
+      .then(() => {
+        return app.models.contact.findOne({
+          where: {
+            id: caseId
+          }
+        });
+      })
       .then(function (contact) {
+        if (!contact) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: caseId});
+        }
+
         convertedContact = contact;
         // after updating the case, find it's relations
         return app.models.relationship
@@ -1707,6 +1718,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (relations) {
         // update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -1737,11 +1749,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         callback(null, convertedContact);
       })
-      .catch(callback)
-      .finally(function () {
-        // restore default scope
-        app.models.case.defaultScope = defaultScope;
-      });
+      .catch(callback);
   };
 
   /**
