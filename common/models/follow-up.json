@@ -51,6 +51,9 @@
     },
     "responsibleUserId": {
       "type": "string"
+    },
+    "personId": {
+      "type": "string"
     }
   },
   "indexes": {

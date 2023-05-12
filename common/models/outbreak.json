@@ -2731,14 +2731,6 @@
           "description": "Foreign key for contact"
         },
         {
-          "arg": "body",
-          "type": "case",
-          "http": {
-            "source": "body"
-          },
-          "description": "Case specific properties"
-        },
-        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"

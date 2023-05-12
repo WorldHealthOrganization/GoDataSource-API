@@ -546,51 +546,69 @@ module.exports = function (Outbreak) {
    * @param options
    * @param callback
    */
-  Outbreak.prototype.convertContactToCase = function (contactId, params, options, callback) {
-    let updateRelations = [];
+  Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
     let convertedCase;
-
-    // parse case specific params, if not available fallback on default values
-    params = params || {};
-    params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
-    params.dateBecomeCase = params.dateBecomeCase || app.utils.helpers.getDate().toDate();
-    params.wasContact = true;
-    params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
-
-    // override default scope to allow switching the type
-    const defaultScope = app.models.contact.defaultScope;
-    app.models.contact.defaultScope = function () {
-    };
-
     app.models.contact
       .findOne({
         where: {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
           id: contactId
-        }
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers',
+          'questionnaireAnswersCase'
+        ]
       })
-      .then(function (contact) {
-        if (!contact) {
+      .then(function (contactModel) {
+        if (!contactModel) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
 
+        // define the attributes for update
+        const attributes = {
+          dateBecomeCase: app.utils.helpers.getDate().toDate(),
+          wasContact: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+          classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
+        };
+
         // retain data from custom forms upon conversion
-        if (!_.isEmpty(contact.questionnaireAnswers)) {
-          params.questionnaireAnswersContact = Object.assign({}, contact.questionnaireAnswers);
-          params.questionnaireAnswers = {};
+        if (!_.isEmpty(contactModel.questionnaireAnswers)) {
+          attributes.questionnaireAnswersContact = Object.assign({}, contactModel.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
         }
 
         // restore data from custom forms before conversion
-        if (!_.isEmpty(contact.questionnaireAnswersCase)) {
-          params.questionnaireAnswers = Object.assign({}, contact.questionnaireAnswersCase);
-          params.questionnaireAnswersCase = {};
+        if (!_.isEmpty(contactModel.questionnaireAnswersCase)) {
+          attributes.questionnaireAnswers = Object.assign({}, contactModel.questionnaireAnswersCase);
+          attributes.questionnaireAnswersCase = {};
         }
 
-        return contact.updateAttributes(params, options);
+        // the case has relations with other cases; proceed with the conversion
+        return app.models.person.rawUpdateOne(
+          {
+            _id: contactId
+          },
+          attributes,
+          options
+        );
       })
-      .then(function (_case) {
-        convertedCase = _case;
-        // after updating the contact, find it's relations
+      .then(() => {
+        return app.models.case.findOne({
+          where: {
+            id: contactId
+          }
+        });
+      })
+      .then(function (caseModel) {
+        if (!caseModel) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: contactId});
+        }
+
+        convertedCase = caseModel;
+
+        // after updating the case, find it's relations
         return app.models.relationship
           .find({
             where: {
@@ -600,6 +618,7 @@ module.exports = function (Outbreak) {
       })
       .then(function (relations) {
         // update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -630,11 +649,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         callback(null, convertedCase);
       })
-      .catch(callback)
-      .finally(function () {
-        // restore default scope
-        app.models.contact.defaultScope = defaultScope;
-      });
+      .catch(callback);
   };
 
   /**
