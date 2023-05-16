@@ -1271,18 +1271,7 @@ module.exports = function (Relationship) {
                 id: targetId
               });
             }
-            if (sourcePerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-              targetPerson.type !== 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
-            ) {
-              // otherwise stop with error
-              throw app.utils.apiError.getError('INVALID_RELATIONSHIP_SOURCE_TYPE', {
-                type: sourcePerson.type,
-                allowedTypes: [
-                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT',
-                  'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'
-                ]
-              });
-            }
+
             // everything went fine, return the two people
             return {
               source: sourcePerson,

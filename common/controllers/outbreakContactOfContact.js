@@ -896,4 +896,122 @@ module.exports = function (Outbreak) {
       logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
+
+  /**
+   * Convert a contact of contact to a contact
+   * @param contactOfContactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.convertContactOfContactToContact = function (contactOfContactId, options, callback) {
+    let contactOfContactInstance, convertedContact;
+    app.models.contactOfContact
+      .findOne({
+        where: {
+          id: contactOfContactId
+        },
+        fields: [
+          'id'
+        ]
+      })
+      .then(function (contactOfContactModel) {
+        if (!contactOfContactModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactOfContactId});
+        }
+
+        // keep the contactOfContactModel as we will do actions on it
+        contactOfContactInstance = contactOfContactModel;
+
+        // in order for a contact of contact to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
+        // check relations
+        return app.models.relationship
+          .count({
+            'persons': {
+              'elemMatch': {
+                'id': contactOfContactId,
+                'target': true
+              }
+            }
+          });
+      })
+      .then(function (relationsNumber) {
+        if (!relationsNumber) {
+          // the contact of contact doesn't have relations with other contacts; stop conversion
+          throw app.utils.apiError.getError('INVALID_CONTACT_OF_CONTACT_RELATIONSHIP', {id: contactOfContactId});
+        }
+
+        // define the attributes for update
+        const attributes = {
+          dateBecomeContact: app.utils.helpers.getDate().toDate(),
+          wasContactOfContact: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+        };
+
+        // restore data from custom forms before conversion
+        if (!_.isEmpty(contactOfContactInstance.questionnaireAnswersContact)) {
+          attributes.questionnaireAnswers = Object.assign({}, contactOfContactInstance.questionnaireAnswersContact);
+          attributes.questionnaireAnswersContact = {};
+        }
+
+        // the contact has relations with other contacts; proceed with the conversion
+        return app.models.person.rawUpdateOne(
+          {
+            _id: contactOfContactId
+          },
+          attributes,
+          options
+        );
+      })
+      .then(() => {
+        return app.models.contact.findOne({
+          where: {
+            id: contactOfContactId
+          }
+        });
+      })
+      .then(function (contactOfContactModel) {
+        if (!contactOfContactModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactOfContactId});
+        }
+
+        // keep the contactModel as we will do actions on it
+        convertedContact = contactOfContactModel;
+
+        // after updating the contact, find it's relations
+        return app.models.relationship
+          .find({
+            where: {
+              'persons.id': contactOfContactId
+            }
+          });
+      })
+      .then(function (relations) {
+        if (!relations.length) {
+          // the contact doesn't have relations with other contacts; stop conversion
+          throw app.utils.apiError.getError('INVALID_CONTACT_OF_CONTACT_RELATIONSHIP', {id: contactOfContactId});
+        }
+
+        // update relations
+        const updateRelations = [];
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === contactOfContactId) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }
+
+            persons.push(person);
+          });
+
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedContact);
+      })
+      .catch(callback);
+  };
 };

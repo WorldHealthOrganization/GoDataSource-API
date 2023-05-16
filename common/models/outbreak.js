@@ -253,13 +253,6 @@ module.exports = function (Outbreak) {
                   });
                 }
 
-                // do not allow contact-contact relationships
-                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                  throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
-                    id: person.id
-                  });
-                }
-
                 // do not allow relationships with discarded cases
                 if (
                   foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
