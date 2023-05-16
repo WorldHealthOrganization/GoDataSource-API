@@ -3394,4 +3394,114 @@ module.exports = function (Outbreak) {
       logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
+
+  /**
+   * Convert a contact to a contact of contact
+   * @param contactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.convertContactToContactOfContact = function (contactId, options, callback) {
+    let contactInstance, convertedContactOfContact;
+    app.models.contact
+      .findOne({
+        where: {
+          id: contactId
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers'
+        ]
+      })
+      .then(function (contactModel) {
+        if (!contactModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
+        }
+
+        // keep the contactModel as we will do actions on it
+        contactInstance = contactModel;
+
+        // in order for a contact to be converted to a contact of contact it must be related to at least another contact and it must be a target in that relationship
+        // check relations
+        return app.models.relationship
+          .count({
+            'persons': {
+              'elemMatch': {
+                'id': contactId,
+                'target': true
+              }
+            }
+          });
+      })
+      .then(function (relationsNumber) {
+        if (!relationsNumber) {
+          // the case doesn't have relations with other contacts; stop conversion
+          throw app.utils.apiError.getError('INVALID_CONTACT_RELATIONSHIP', {id: contactId});
+        }
+
+        // define the attributes for update
+        const attributes = {
+          dateBecomeContactOfContact: app.utils.helpers.getDate().toDate(),
+          wasContact: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+        };
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(contactInstance.questionnaireAnswers)) {
+          attributes.questionnaireAnswersContact = Object.assign({}, contactInstance.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return app.models.person.rawUpdateOne(
+          {
+            _id: contactId
+          },
+          attributes,
+          options
+        );
+      })
+      .then(() => {
+        return app.models.contactOfContact.findOne({
+          where: {
+            id: contactId
+          }
+        });
+      })
+      .then(function (contactOfContact) {
+        if (!contactOfContact) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactId});
+        }
+
+        convertedContactOfContact = contactOfContact;
+        // after updating the case, find it's relations
+        return app.models.relationship
+          .find({
+            where: {
+              'persons.id': contactId
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        const updateRelations = [];
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === contactId) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedContactOfContact);
+      })
+      .catch(callback);
+  };
 };

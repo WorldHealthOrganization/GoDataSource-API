@@ -812,6 +812,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_convert_to_contact_of_contact",
+      "permission": "ALLOW",
+      "property": "convertContactToContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_restore",
       "permission": "ALLOW",
       "property": "restoreContact"
@@ -1766,6 +1772,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "findContactOfContactRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "countContactOfContactRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "findContactOfContactRelationshipExposures"
@@ -1853,6 +1871,12 @@
       "principalId": "contact_create_bulk_contact_of_contact",
       "permission": "ALLOW",
       "property": "createContactMultipleContactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_convert_to_contact",
+      "permission": "ALLOW",
+      "property": "convertContactOfContactToContact"
     },
     {
       "principalType": "ROLE",
@@ -2751,6 +2775,34 @@
         "path": "/contacts/:nk/convert-to-case"
       }
     },
+    "prototype.convertContactToContactOfContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contactOfContact",
+          "type": "contactOfContact",
+          "description": "Contact of contact resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts contact to contact of contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/convert-to-contact-of-contact"
+      }
+    },
     "prototype.convertCaseToContact": {
       "accepts": [
         {
@@ -2777,6 +2829,34 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/convert-to-contact"
+      }
+    },
+    "prototype.convertContactOfContactToContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contact",
+          "type": "contact",
+          "description": "Contact resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts contact of contact to contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts-of-contacts/:nk/convert-to-contact"
       }
     },
     "prototype.getLocationsHierarchicalList": {
@@ -8107,6 +8187,63 @@
       "http": {
         "verb": "get",
         "path": "/contacts-of-contacts/:nk/relationships"
+      }
+    },
+    "prototype.findContactOfContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship contacts of a contact of contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship contacts of contact of contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/relationships/contacts"
+      }
+    },
+    "prototype.countContactOfContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship contacts (that pass the filter) of a contact of contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship contacts that pass a filter of a contact of contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/relationships/contacts/filtered-count"
       }
     },
     "prototype.createContactOfContactRelationship": {
