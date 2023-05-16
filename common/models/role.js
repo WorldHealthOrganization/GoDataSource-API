@@ -1709,6 +1709,14 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_convert_to_contact_of_contact',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'contact_export_daily_follow_up_list',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DAILY_FOLLOW_UP_LIST',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DAILY_FOLLOW_UP_LIST_DESCRIPTION',
@@ -3473,6 +3481,14 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_of_contact_list_relationship_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_list'
+          ]
+        },        {
           id: 'contact_of_contact_list_relationship_exposures',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
@@ -3603,6 +3619,14 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_bulk_delete'
+          ]
+        },
+        {
+          id: 'contact_of_contact_convert_to_contact',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         }
       ]
