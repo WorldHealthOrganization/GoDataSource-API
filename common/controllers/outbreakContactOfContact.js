@@ -911,7 +911,8 @@ module.exports = function (Outbreak) {
           id: contactOfContactId
         },
         fields: [
-          'id'
+          'id',
+          'questionnaireAnswersContact'
         ]
       })
       .then(function (contactOfContactModel) {
