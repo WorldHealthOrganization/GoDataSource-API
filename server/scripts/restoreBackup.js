@@ -17,15 +17,20 @@ if (!file) {
 let filePath = file.pop();
 
 // restore using provided file
-backup.restoreFromFile(filePath, (err) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
+backup.restoreFromFile(
+  filePath,
+  // #TODO - create restore-db log here too to have history of restores
+  undefined,
+  (err) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
 
-  // stop with success
-  console.log(`Successfully restored backup: ${filePath}`);
-  process.exit();
-});
+    // stop with success
+    console.log(`Successfully restored backup: ${filePath}`);
+    process.exit();
+  }
+);
 
 

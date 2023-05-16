@@ -100,6 +100,34 @@
     "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
       "translation": "Do you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
       "section": "uiCreateOutbreakPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_PREPARING": {
+      "translation": "Preparing data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING": {
+      "translation": "Unzipping backup...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_DECRYPTING": {
+      "translation": "Decrypting ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING_COLLECTIONS": {
+      "translation": "Unzipping collections ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_RESTORING": {
+      "translation": "Restoring ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_MIGRATING": {
+      "translation": "Migrating data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_FAILED_ERROR": {
+      "translation": "Backup restore failed. Please check logs for more details",
+      "section": "uiSystemBackupsPage"
     }
   }
 }

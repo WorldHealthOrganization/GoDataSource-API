@@ -92,10 +92,12 @@ const createBackup = function (modules, location, done) {
 
 /**
  * Restore the system using a backup file
- * @param backupId
- * @param done
  */
-const restoreBackup = function (backupId, done) {
+const restoreBackup = function (
+  backupId,
+  restoreLogId,
+  done
+) {
   app.models.backup
     .findOne({
       where: {
@@ -111,17 +113,23 @@ const restoreBackup = function (backupId, done) {
       }
 
       // begin backup restore
-      restoreBackupFromFile(backup.location, (err) => done(err));
+      restoreBackupFromFile(
+        backup.location,
+        restoreLogId,
+        (err) => done(err)
+      );
     })
     .catch((err) => done(err));
 };
 
 /**
  * Restore a backup from file
- * @param filePath
- * @param done
  */
-const restoreBackupFromFile = function (filePath, done) {
+const restoreBackupFromFile = function (
+  filePath,
+  restoreLogId,
+  done
+) {
   // cache reference to mongodb connection
   let connection = app.dataSources.mongoDb.connector;
 
@@ -134,13 +142,29 @@ const restoreBackupFromFile = function (filePath, done) {
 
     const password = getBackupPassword();
 
+    // handle restore log updates
+    const updateRestoreLog = (data) => {
+      return restoreLogId ?
+        connection.collection('databaseActionLog').updateOne(
+          {
+            _id: restoreLogId
+          }, {
+            '$set': data
+          }
+        ) :
+        Promise.resolve();
+    };
+
     let options = {
-      password: password
+      password: password,
+      prefix: 'restore_',
+      restoreLogId
     };
     return syncWorker.extractAndDecryptSnapshotArchive(filePath, options)
       .then(function (result) {
-        let collectionFilesDirName = result.collectionFilesDirName;
-        let tmpDirName = result.tmpDirName;
+        const collectionFilesDirName = result.collectionFilesDirName;
+        const tmpDirName = result.tmpDirName;
+        const restoreTotalSteps = result.restoreTotalSteps;
 
         return new Promise((resolve, reject) => {
           // read backup files in the temporary dir
@@ -175,8 +199,11 @@ const restoreBackupFromFile = function (filePath, done) {
 
             // start restoring the database using provided collection files
             return async.series(
-              collectionsFiles.map((fileName) => (doneCollection) => {
+              collectionsFiles.map((fileName, fileIndex) => (doneCollection) => {
                 let filePath = `${collectionFilesDirName}/${fileName}`;
+                const processedNo = restoreTotalSteps ?
+                  (restoreTotalSteps - collectionsFiles.length + fileIndex + 1) :
+                  -1;
 
                 return fs.readFile(
                   filePath,
@@ -261,7 +288,17 @@ const restoreBackupFromFile = function (filePath, done) {
                           // skip it
                           if (!collectionRecords.length) {
                             app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it`);
-                            return doneCollection();
+                            updateRestoreLog({
+                              updatedAt: new Date(),
+                              dbUpdatedAt: new Date(),
+                              processedNo
+                            }).then(() => {
+                              // remove collection json file
+                              fs.unlinkSync(filePath);
+                            }).then(() => {
+                              doneCollection();
+                            }).catch(doneCollection);
+                            return;
                           }
 
                           // create a bulk operation
@@ -284,7 +321,17 @@ const restoreBackupFromFile = function (filePath, done) {
                               return doneCollection(err);
                             }
                             app.logger.debug(`Restoring Collection ${collectionName} complete.`);
-                            return doneCollection();
+                            updateRestoreLog({
+                              updatedAt: new Date(),
+                              dbUpdatedAt: new Date(),
+                              processedNo
+                            }).then(() => {
+                              // remove collection json file
+                              fs.unlinkSync(filePath);
+                            }).then(() => {
+                              doneCollection();
+                            }).catch(doneCollection);
+                            return;
                           });
                         };
 
@@ -315,7 +362,7 @@ const restoreBackupFromFile = function (filePath, done) {
                       if (dbSync.collectionsWithFiles.hasOwnProperty(collectionName)) {
                         dbSync.importCollectionRelatedFiles(collectionName, tmpDirName, app.logger, options.password, (err) => {
                           if (err) {
-                            return doneCollection();
+                            return doneCollection(err);
                           }
                           return restoreCollection();
                         });
@@ -336,6 +383,13 @@ const restoreBackupFromFile = function (filePath, done) {
       .catch(err => {
         app.logger.error('Restoring backup failed', {err: err.toString ? err.toString() : JSON.stringify(err)});
         return Promise.reject(apiError.getError('RESTORE_BACKUP_FAILED'));
+      })
+      .then(() => {
+        return updateRestoreLog({
+          statusStep: 'LNG_STATUS_STEP_MIGRATING_DATABASE',
+          updatedAt: new Date(),
+          dbUpdatedAt: new Date()
+        });
       })
       .then(() => {
         app.logger.debug('Restoring backup finished successfully');
