@@ -100,6 +100,122 @@
     "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
       "translation": "Do you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
       "section": "uiCreateOutbreakPage"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT": {
+      "translation": "Was a contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was a contact of contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
+      "translation": "Date of becoming contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CASE": {
+      "translation": "Was a case",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CASE": {
+      "translation": "Date of becoming case",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS": {
+      "translation": "Number of contacts",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT": {
+      "translation": "Convert to contact",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT_RELATIONSHIP_WARNING": {
+      "translation": "Contact of contact needs to be exposed to another case or event in order to be able to convert it to a contac",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT_SUCCESS_MESSAGE": {
+      "translation": "Contact of contact converted and is now a contact",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Note: the relationships to cases/events (\"Exposures\") and also to contacts of contacts (\"Contacts\") are kept",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
+      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?",
+      "section": "uiDialogs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Contact - convert to contact of contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows converting a contact to a contact of contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
+      "translation": "Contact Of Contact - list relationship contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
+      "translation": "This permission allows listing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
+      "translation": "Contact of contact - convert to contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows converting a contact of contact to a contact",
+      "section": "availablePermissions"
+    },
+    "LNG_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was contact of contact",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT": {
+      "translation": "Date of becoming contact of contact",
+      "section": "uiContactFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Convert to contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CONTACT_OF_CONTACT_RELATIONSHIP_WARNING": {
+      "translation": "Contact needs to be exposed to another contact in order to be able to convert it to a contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CASE_CONTACTS_WARNING": {
+      "translation": "All contacts of contacts will be automatically converted to contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
+      "translation": "Contact converted and is now a contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_CONTACT_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_CASE_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_ISOLATED_CONTACTS": {
+      "translation": "The following contacts needs manually to be exposed to another case or event: {{contacts}}",
+      "section": "uiCasesListPage"
+    },
+    "LNG_CASE_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was contact of contact",
+      "section": "uiCaseFields"
+    },
+    "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_ADD_EXPOSURE": {
+      "translation": "Available entities",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_LIST_ENTITY_ADD_EXPOSURES_TITLE": {
+      "translation": "Available people",
+      "section": "uiEntityRelationshipsListAddPages"
     }
   }
 }
