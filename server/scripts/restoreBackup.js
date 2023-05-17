@@ -19,7 +19,7 @@ let filePath = file.pop();
 // restore using provided file
 backup.restoreFromFile(
   filePath,
-  // #TODO - create restore-db log here too to have history of restores
+  // restore log will be created by backup.restoreFromFile if no id is provided
   undefined,
   (err) => {
     if (err) {
