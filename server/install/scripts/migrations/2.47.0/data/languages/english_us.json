@@ -184,6 +184,10 @@
     "LNG_BACKUP_RESTORE_FIELD_LABEL_PROCESSED": {
       "translation": "Processed",
       "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ERROR": {
+      "translation": "Error",
+      "section": "uiBackupRestoreFields"
     }
   }
 }
