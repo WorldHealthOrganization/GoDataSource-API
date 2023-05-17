@@ -24,10 +24,11 @@ function encryptSync(password, options, filePath) {
     fs.readFile(filePath, function (error, buffer) {
       // handle read errors
       if (error) {
-        return reject(apiError.getError('FILE_NOT_FOUND'));
+        reject(apiError.getError('FILE_NOT_FOUND'));
+        return;
       }
       // encrypt the file
-      return aesCrypto
+      aesCrypto
         .encrypt(password, buffer)
         .then(function (encryptedData) {
           // if original file should be preserved
@@ -64,10 +65,11 @@ function decryptSync(password, options, filePath) {
     fs.readFile(filePath, function (error, buffer) {
       // handle read errors
       if (error) {
-        return reject(apiError.getError('FILE_NOT_FOUND'));
+        reject(apiError.getError('FILE_NOT_FOUND'));
+        return;
       }
       // decrypt the file
-      return aesCrypto
+      aesCrypto
         .decrypt(password, buffer)
         .then(function (decryptedData) {
           // if original file should be preserved
@@ -84,7 +86,8 @@ function decryptSync(password, options, filePath) {
             }
             resolve(filePath);
           });
-        });
+        })
+        .catch(reject);
     });
   });
 }

@@ -1,0 +1,85 @@
+{
+  "name": "restoreLog",
+  "base": "databaseActionLog",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "hidden": [
+    "type"
+  ],
+  "scope": {
+    "where": {
+      "type": "restore-db"
+    }
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "default": "restore-db",
+      "readOnly": true
+    },
+    "backupId": {
+      "type": "string",
+      "required": true
+    },
+    "totalNo": {
+      "type": "number",
+      "description": "Total number of steps to finish restore"
+    },
+    "processedNo": {
+      "type": "number",
+      "description": "Number of steps processed"
+    },
+    "statusStep": {
+      "type": "string",
+      "enum": [
+        "LNG_STATUS_STEP_PREPARING_RESTORE",
+        "LNG_STATUS_STEP_UNZIPPING",
+        "LNG_STATUS_STEP_DECRYPTING",
+        "LNG_STATUS_STEP_UNZIPPING_COLLECTIONS",
+        "LNG_STATUS_STEP_RESTORING",
+        "LNG_STATUS_STEP_MIGRATING_DATABASE",
+        "LNG_STATUS_STEP_RESTORE_FINISHED"
+      ]
+    },
+    "errStack": {
+      "type": "any"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "backup": {
+      "type": "belongsTo",
+      "model": "backup",
+      "foreignKey": "backupId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_restore",
+      "permission": "ALLOW",
+      "property": "find"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_restore",
+      "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "backup_restore",
+      "permission": "ALLOW",
+      "property": "findById"
+    }
+  ],
+  "methods": {}
+}
