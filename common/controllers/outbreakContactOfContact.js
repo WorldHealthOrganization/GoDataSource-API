@@ -172,6 +172,20 @@ module.exports = function (Outbreak) {
     filter.where = filter.where || {};
     filter.where.outbreakId = this.id;
 
+    // parse includeCaseFields query param
+    let includeCaseFields = false;
+    if (filter.where.hasOwnProperty('includeCaseFields')) {
+      includeCaseFields = filter.where.includeCaseFields;
+      delete filter.where.includeCaseFields;
+    }
+
+    // parse includeContactFields query param
+    let includeContactFields = false;
+    if (filter.where.hasOwnProperty('includeContactFields')) {
+      includeContactFields = filter.where.includeContactFields;
+      delete filter.where.includeContactFields;
+    }
+
     // parse useDbColumns query param
     let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
@@ -245,6 +259,161 @@ module.exports = function (Outbreak) {
         }
       }
     );
+
+    // do we need to include case/contact data in contact exported data if contact was a case/contact ?
+    let additionalFieldsToExport;
+    if (
+      includeCaseFields ||
+      includeContactFields
+    ) {
+      // initialize additional fields to export
+      additionalFieldsToExport = {
+        fields: {},
+        arrayProps: {},
+        locationFields: []
+      };
+
+      // determine contact of contact fields
+      const contactOfContactFields = {};
+      _.each(
+        app.models.contactOfContact.fieldLabelsMap,
+        (contactOfContactFieldToken, contactOfContactField) => {
+          // should exclude or include ?
+          let shouldExclude = false;
+          if (app.models.contactOfContact.definition.settings.excludeBaseProperties) {
+            for (let index = 0; index < app.models.contactOfContact.definition.settings.excludeBaseProperties.length; index++) {
+              let excludedField = app.models.contactOfContact.definition.settings.excludeBaseProperties[index];
+              if (
+                contactOfContactField === excludedField ||
+                contactOfContactField.startsWith(`${excludedField}.`) ||
+                contactOfContactField.startsWith(`${excludedField}[]`)
+              ) {
+                // must exclude field
+                shouldExclude = true;
+
+                // no need to check further
+                break;
+              }
+            }
+          }
+
+          // should exclude or include field ?
+          if (!shouldExclude) {
+            contactOfContactFields[contactOfContactField] = contactOfContactFieldToken;
+          }
+        }
+      );
+
+      // include case fields ?
+      if (includeCaseFields) {
+        // determine case fields
+        const caseFields = {};
+        _.each(
+          app.models.case.fieldLabelsMap,
+          (caseFieldToken, caseField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.case.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
+                if (
+                  caseField === excludedField ||
+                  caseField.startsWith(`${excludedField}.`) ||
+                  caseField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
+
+                  // no need to check further
+                  break;
+                }
+              }
+            }
+
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              caseFields[caseField] = caseFieldToken;
+            }
+          }
+        );
+
+        // determine what fields from case are missing from contact of contact
+        _.each(
+          caseFields,
+          (caseFieldToken, caseField) => {
+            if (!contactOfContactFields[caseField]) {
+              // add field
+              additionalFieldsToExport.fields[caseField] = caseFieldToken;
+
+              // is array property ?
+              if (app.models.case.arrayProps[caseField]) {
+                additionalFieldsToExport.arrayProps[caseField] = app.models.case.arrayProps[caseField];
+              }
+
+              // is location property ?
+              if (app.models.case.locationFields.indexOf(caseField) > -1) {
+                additionalFieldsToExport.locationFields.push(caseField);
+              }
+            }
+          }
+        );
+      }
+
+      // include contact fields ?
+      if (includeContactFields) {
+        // determine contact fields
+        const contactFields = {};
+        _.each(
+          app.models.contact.fieldLabelsMap,
+          (contactFieldToken, contactField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.contact.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
+                if (
+                  contactField === excludedField ||
+                  contactField.startsWith(`${excludedField}.`) ||
+                  contactField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
+
+                  // no need to check further
+                  break;
+                }
+              }
+            }
+
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              contactFields[contactField] = contactFieldToken;
+            }
+          }
+        );
+
+        // determine what fields from contact are missing from contact of contact
+        _.each(
+          contactFields,
+          (contactFieldToken, contactField) => {
+            if (!contactOfContactFields[contactField]) {
+              // add field
+              additionalFieldsToExport.fields[contactField] = contactFieldToken;
+
+              // is array property ?
+              if (app.models.contact.arrayProps[contactField]) {
+                additionalFieldsToExport.arrayProps[contactField] = app.models.contact.arrayProps[contactField];
+              }
+
+              // is location property ?
+              if (app.models.contact.locationFields.indexOf(contactField) > -1) {
+                additionalFieldsToExport.locationFields.push(contactField);
+              }
+            }
+          }
+        );
+      }
+    }
 
     // prefilter
     app.models.contactOfContact

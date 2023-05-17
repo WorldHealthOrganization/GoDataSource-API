@@ -228,6 +228,38 @@
       "modules": [
         "unauthenticated"
       ]
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_OF_CONTACT_INFORMATION": {
+      "translation": "Include contact of contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_OF_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If case was converted from a contact of contact it might contain additional contact of contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CONTACT_OF_CONTACT_INFORMATION": {
+      "translation": "Include contact of contact data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CONTACT_OF_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If contact was converted from a contact of contact it might contain additional contact of contact data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CASE_INFORMATION": {
+      "translation": "Include case data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CASE_INFORMATION_DESCRIPTION": {
+      "translation": "If contact of contact was converted from a case it might contain additional case data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CONTACT_INFORMATION": {
+      "translation": "Include contact data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If contact of contact was converted from a contact it might contain additional contact data",
+      "section": "uiContactsOfContactsListPage"
     }
   }
 }
