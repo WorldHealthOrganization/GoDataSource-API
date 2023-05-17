@@ -930,14 +930,17 @@ module.exports = function (Outbreak) {
             'persons': {
               'elemMatch': {
                 'id': contactOfContactId,
-                'target': true
+                'target': true,
+                'type': {
+                  inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                }
               }
             }
           });
       })
       .then(function (relationsNumber) {
         if (!relationsNumber) {
-          // the contact of contact doesn't have relations with other contacts; stop conversion
+          // the contact of contact doesn't have relations with other cases/events; stop conversion
           throw app.utils.apiError.getError('INVALID_CONTACT_OF_CONTACT_RELATIONSHIP', {id: contactOfContactId});
         }
 

@@ -3428,14 +3428,15 @@ module.exports = function (Outbreak) {
             'persons': {
               'elemMatch': {
                 'id': contactId,
-                'target': true
+                'target': true,
+                'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
               }
             }
           });
       })
       .then(function (relationsNumber) {
         if (!relationsNumber) {
-          // the case doesn't have relations with other contacts; stop conversion
+          // the contact of contact doesn't have relations with other contacts; stop conversion
           throw app.utils.apiError.getError('INVALID_CONTACT_RELATIONSHIP', {id: contactId});
         }
 

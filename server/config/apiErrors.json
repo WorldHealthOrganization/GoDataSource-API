@@ -105,11 +105,11 @@
   },
   "INVALID_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "The contact `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
+    "messagePattern": "The contact `<%= id %>` needs to be related to another contact and it must be a target in that relationship in order to be able to convert it to a contact a contact of contact"
   },
   "INVALID_CONTACT_OF_CONTACT_RELATIONSHIP": {
   "defaultStatusCode": 422,
-  "messagePattern": "The contact of contact `<%= id %>` needs to be related to another contact and it must be a target in that relationship in order to be able to convert it to a contact of contact"
+  "messagePattern": "The contact of contact `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
 },
   "MODEL_NOT_EDITABLE": {
     "defaultStatusCode": 422,

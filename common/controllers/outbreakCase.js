@@ -1655,7 +1655,10 @@ module.exports = function (Outbreak) {
             'persons': {
               'elemMatch': {
                 'id': caseId,
-                'target': true
+                'target': true,
+                'type': {
+                  inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                }
               }
             }
           });

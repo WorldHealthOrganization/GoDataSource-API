@@ -216,6 +216,18 @@
     "LNG_PAGE_LIST_ENTITY_ADD_EXPOSURES_TITLE": {
       "translation": "Available people",
       "section": "uiEntityRelationshipsListAddPages"
+    },
+    "LNG_API_ERROR_CODE_INVALID_CONTACT_RELATIONSHIP": {
+      "translation": "Contact needs to be exposed to another contact in order to be able to convert it to a contact of contact",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_API_ERROR_CODE_INVALID_CONTACT_OF_CONTACT_RELATIONSHIP": {
+      "translation": "Contact of contact needs to be exposed to another case or event in order to be able to convert it to a contact",
+      "modules": [
+        "unauthenticated"
+      ]
     }
   }
 }
