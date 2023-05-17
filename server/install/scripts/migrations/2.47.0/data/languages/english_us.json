@@ -100,6 +100,94 @@
     "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
       "translation": "Do you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
       "section": "uiCreateOutbreakPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_PREPARING": {
+      "translation": "Preparing data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING": {
+      "translation": "Unzipping backup...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_DECRYPTING": {
+      "translation": "Decrypting ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING_COLLECTIONS": {
+      "translation": "Unzipping collections ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_RESTORING": {
+      "translation": "Restoring ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_MIGRATING": {
+      "translation": "Migrating data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_FAILED_ERROR": {
+      "translation": "Backup restore failed. Please check logs for more details",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_LIST": {
+      "translation": "Backup restores",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ACTION_START_DATE": {
+      "translation": "Start date / time",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ACTION_COMPLETION_DATE": {
+      "translation": "Completion date / time",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_STATUS": {
+      "translation": "Status",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_BACKUP_ID": {
+      "translation": "Backup",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_STATUS_STEP": {
+      "translation": "Status step",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_PREPARING_RESTORE": {
+      "translation": "Preparing",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_UNZIPPING": {
+      "translation": "Unzipping",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_DECRYPTING": {
+      "translation": "Decrypting",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_UNZIPPING_COLLECTIONS": {
+      "translation": "Unzipping collections",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_RESTORING": {
+      "translation": "Restoring",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_MIGRATING_DATABASE": {
+      "translation": "Migrating",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_RESTORE_FINISHED": {
+      "translation": "Finished",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_PROCESSED": {
+      "translation": "Processed",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ERROR": {
+      "translation": "Error",
+      "section": "uiBackupRestoreFields"
     }
   }
 }

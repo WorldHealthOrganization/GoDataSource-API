@@ -1003,6 +1003,12 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, logger, p
   let collectionFilesTmpDir = path.join(tmpDir, collectionOpts.targetDir);
   let collectionFilesDir = path.isAbsolute(collectionOpts.srcDir) ? collectionOpts.srcDir : path.join(__dirname, '..', collectionOpts.srcDir);
 
+  // anything to do ?
+  if (!fs.existsSync(collectionFilesTmpDir)) {
+    done();
+    return;
+  }
+
   logger.debug(`Importing related files for collection '${collectionName}'`);
 
   /**
@@ -1059,7 +1065,7 @@ const importCollectionRelatedFiles = function (collectionName, tmpDir, logger, p
             });
           });
       }),
-      5,
+      10,
       function () {
         // decrypt finished; copy files to target dir
         return copyFiles();
