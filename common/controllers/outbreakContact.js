@@ -3493,13 +3493,18 @@ module.exports = function (Outbreak) {
         // check relations
         return app.models.relationship
           .count({
-            'persons': {
-              'elemMatch': {
-                'id': contactId,
-                'target': true,
-                'type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            $or: [
+              {
+                'persons.0.id': contactId,
+                'persons.0.target': true,
+                'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+              },
+              {
+                'persons.1.id': contactId,
+                'persons.1.target': true,
+                'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
               }
-            }
+            ]
           });
       })
       .then(function (relationsNumber) {
@@ -3548,6 +3553,10 @@ module.exports = function (Outbreak) {
           .find({
             where: {
               'persons.id': contactId
+            },
+            fields: {
+              id: true,
+              persons: true
             }
           });
       })

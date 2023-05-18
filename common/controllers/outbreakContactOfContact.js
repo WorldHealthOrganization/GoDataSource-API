@@ -1096,15 +1096,22 @@ module.exports = function (Outbreak) {
         // check relations
         return app.models.relationship
           .count({
-            'persons': {
-              'elemMatch': {
-                'id': contactOfContactId,
-                'target': true,
-                'type': {
-                  inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+            $or: [
+              {
+                'persons.0.id': contactOfContactId,
+                'persons.0.target': true,
+                'persons.1.type': {
+                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                }
+              },
+              {
+                'persons.1.id': contactOfContactId,
+                'persons.1.target': true,
+                'persons.0.type': {
+                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
                 }
               }
-            }
+            ]
           });
       })
       .then(function (relationsNumber) {
@@ -1155,6 +1162,10 @@ module.exports = function (Outbreak) {
           .find({
             where: {
               'persons.id': contactOfContactId
+            },
+            fields: {
+              id: true,
+              persons: true
             }
           });
       })

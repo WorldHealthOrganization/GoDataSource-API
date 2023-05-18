@@ -613,6 +613,10 @@ module.exports = function (Outbreak) {
           .find({
             where: {
               'persons.id': contactId
+            },
+            fields: {
+              id: true,
+              persons: true
             }
           });
       })
@@ -676,6 +680,10 @@ module.exports = function (Outbreak) {
               'persons.id': {
                 $in: contactsOfContacts
               }
+            },
+            fields: {
+              id: true,
+              persons: true
             }
           });
       })
