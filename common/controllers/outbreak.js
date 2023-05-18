@@ -546,7 +546,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
-    let convertedCase, contactsOfContacts = [];
+    let convertedCase, contactsOfContactsMap = {};
     app.models.contact
       .findOne({
         where: {
@@ -610,11 +610,10 @@ module.exports = function (Outbreak) {
 
         // after updating the case, find it's relations
         return app.models.relationship
-          .find({
-            where: {
-              'persons.id': contactId
-            },
-            fields: {
+          .rawFind({
+            'persons.id': contactId
+          }, {
+            projection: {
               id: true,
               persons: true
             }
@@ -633,12 +632,20 @@ module.exports = function (Outbreak) {
             } else {
               // find his contacts relationships (contacts of contacts) to convert them to "contact" type
               if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
-                contactsOfContacts.push(person.id);
+                contactsOfContactsMap[person.id] = true;
               }
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: contactId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
         });
         return Promise.all(updateRelations);
       })
@@ -661,7 +668,7 @@ module.exports = function (Outbreak) {
           .rawBulkUpdate(
             {
               id: {
-                $in: contactsOfContacts
+                $in: Object.keys(contactsOfContactsMap)
               }
             },
             {
@@ -675,13 +682,12 @@ module.exports = function (Outbreak) {
       .then(function () {
         // after converting the contacts of contacts, find the relations
         return app.models.relationship
-          .find({
-            where: {
-              'persons.id': {
-                $in: contactsOfContacts
-              }
-            },
-            fields: {
+          .rawFind({
+            'persons.id': {
+              $in: Object.keys(contactsOfContactsMap)
+            }
+          }, {
+            projection: {
               id: true,
               persons: true
             }
@@ -694,15 +700,22 @@ module.exports = function (Outbreak) {
           let persons = [];
           relation.persons.forEach(function (person) {
             // for every occurrence of current contact
-            if (contactsOfContacts.indexOf(person.id) !== -1) {
+            if (contactsOfContactsMap[person.id]) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
             }
 
             persons.push(person);
           });
-
-          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: contactId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
         });
         return Promise.all(updateRelations);
       })

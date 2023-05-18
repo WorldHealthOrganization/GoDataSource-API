@@ -1788,11 +1788,10 @@ module.exports = function (Outbreak) {
         convertedContact = contact;
         // after updating the case, find it's relations
         return app.models.relationship
-          .find({
-            where: {
-              'persons.id': caseId
-            },
-            fields: {
+          .rawFind({
+            'persons.id': caseId
+          }, {
+            projection: {
               id: true,
               persons: true
             }
@@ -1811,7 +1810,15 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: caseId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
         });
         return Promise.all(updateRelations);
       })
