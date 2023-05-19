@@ -103,10 +103,14 @@
     "defaultStatusCode": 422,
     "messagePattern": "The case `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
   },
-  "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
+  "INVALID_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Related person `<%= id %>` is a contact. Cannot create relationships between two contacts."
+    "messagePattern": "The contact `<%= id %>` needs to be related to another contact and it must be a target in that relationship in order to be able to convert it to a contact a contact of contact"
   },
+  "INVALID_CONTACT_OF_CONTACT_RELATIONSHIP": {
+  "defaultStatusCode": 422,
+  "messagePattern": "The contact of contact `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
+},
   "MODEL_NOT_EDITABLE": {
     "defaultStatusCode": 422,
     "messagePattern": "Model `<%= model %>` id `<%= id %>` is not editable (read-only)."

@@ -542,12 +542,11 @@ module.exports = function (Outbreak) {
   /**
    * Convert a contact to a case
    * @param contactId
-   * @param params Case specific params
    * @param options
    * @param callback
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
-    let convertedCase;
+    let convertedCase, contactsOfContactsMap = {};
     app.models.contact
       .findOne({
         where: {
@@ -606,13 +605,17 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: contactId});
         }
 
+        // keep the caseModel as we will do actions on it
         convertedCase = caseModel;
 
         // after updating the case, find it's relations
         return app.models.relationship
-          .find({
-            where: {
-              'persons.id': contactId
+          .rawFind({
+            'persons.id': contactId
+          }, {
+            projection: {
+              id: true,
+              persons: true
             }
           });
       })
@@ -626,10 +629,23 @@ module.exports = function (Outbreak) {
             if (person.id === contactId) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+            } else {
+              // find his contacts relationships (contacts of contacts) to convert them to "contact" type
+              if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
+                contactsOfContactsMap[person.id] = true;
+              }
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: contactId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
         });
         return Promise.all(updateRelations);
       })
@@ -645,6 +661,63 @@ module.exports = function (Outbreak) {
             },
             options
           );
+      })
+      .then(function () {
+        // convert contacts of contacts to contacts
+        return app.models.person
+          .rawBulkUpdate(
+            {
+              id: {
+                $in: Object.keys(contactsOfContactsMap)
+              }
+            },
+            {
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+              dateBecomeContact: app.utils.helpers.getDate().toDate(),
+              wasContactOfContact: true
+            },
+            options
+          );
+      })
+      .then(function () {
+        // after converting the contacts of contacts, find the relations
+        return app.models.relationship
+          .rawFind({
+            'persons.id': {
+              $in: Object.keys(contactsOfContactsMap)
+            }
+          }, {
+            projection: {
+              id: true,
+              persons: true
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        const updateRelations = [];
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (contactsOfContactsMap[person.id]) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }
+
+            persons.push(person);
+          });
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: contactId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
+        });
+        return Promise.all(updateRelations);
       })
       .then(function () {
         callback(null, convertedCase);
@@ -3371,7 +3444,13 @@ module.exports = function (Outbreak) {
       }
       return callback(null, {
         count: isolatedContacts.length,
-        ids: isolatedContacts.map((entry) => entry.contact.id)
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
       });
     });
   };
@@ -3704,6 +3783,37 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Find relationship contacts for a contact of contact. Relationship contacts are the relationships where the contact of contact is a source (it has nothing to do with person type contact)
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactOfContactRelationshipContacts = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(this.id, contactOfContactId, filter)
+      .then(function (contactsOfContacts) {
+        callback(null, contactsOfContacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationshipContacts = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(this.id, contactOfContactId, filter)
+      .then(function (contactsOfContacts) {
+        callback(null, contactsOfContacts);
+      })
+      .catch(callback);
+  };
+
 
   /**
    * Find relationship exposures for a contact of contact

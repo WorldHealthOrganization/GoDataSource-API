@@ -133,6 +133,10 @@
       "type": "boolean",
       "default": false
     },
+    "wasContactOfContact": {
+      "type": "boolean",
+      "default": false
+    },
     "outcomeId": {
       "type": "string"
     },
@@ -188,6 +192,7 @@
     "name",
     "description",
     "dateBecomeContact",
+    "dateBecomeContactOfContact",
     "followUp",
     "followUpHistory",
     "date"

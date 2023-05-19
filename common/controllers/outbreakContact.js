@@ -1469,6 +1469,13 @@ module.exports = function (Outbreak) {
       delete filter.where.includeCaseFields;
     }
 
+    // parse includeContactOfContactFields query param
+    let includeContactOfContactFields = false;
+    if (filter.where.hasOwnProperty('includeContactOfContactFields')) {
+      includeContactOfContactFields = filter.where.includeContactOfContactFields;
+      delete filter.where.includeContactOfContactFields;
+    }
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
@@ -1556,9 +1563,12 @@ module.exports = function (Outbreak) {
       }
     );
 
-    // do we need to include case data in contact exported data if contact was a case ?
+    // do we need to include case/contact of contact data in contact exported data if contact was a case/contact of contact ?
     let additionalFieldsToExport;
-    if (includeCaseFields) {
+    if (
+      includeCaseFields ||
+      includeContactOfContactFields
+    ) {
       // initialize additional fields to export
       additionalFieldsToExport = {
         fields: {},
@@ -1597,57 +1607,115 @@ module.exports = function (Outbreak) {
         }
       );
 
-      // determine case fields
-      const caseFields = {};
-      _.each(
-        app.models.case.fieldLabelsMap,
-        (caseFieldToken, caseField) => {
-          // should exclude or include ?
-          let shouldExclude = false;
-          if (app.models.case.definition.settings.excludeBaseProperties) {
-            for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
-              let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
-              if (
-                caseField === excludedField ||
-                caseField.startsWith(`${excludedField}.`) ||
-                caseField.startsWith(`${excludedField}[]`)
-              ) {
-                // must exclude field
-                shouldExclude = true;
+      // include case fields ?
+      if (includeCaseFields) {
+        // determine case fields
+        const caseFields = {};
+        _.each(
+          app.models.case.fieldLabelsMap,
+          (caseFieldToken, caseField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.case.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.case.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.case.definition.settings.excludeBaseProperties[index];
+                if (
+                  caseField === excludedField ||
+                  caseField.startsWith(`${excludedField}.`) ||
+                  caseField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
 
-                // no need to check further
-                break;
+                  // no need to check further
+                  break;
+                }
+              }
+            }
+
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              caseFields[caseField] = caseFieldToken;
+            }
+          }
+        );
+
+        // determine what fields from case are missing from contact
+        _.each(
+          caseFields,
+          (caseFieldToken, caseField) => {
+            if (!contactFields[caseField]) {
+              // add field
+              additionalFieldsToExport.fields[caseField] = caseFieldToken;
+
+              // is array property ?
+              if (app.models.case.arrayProps[caseField]) {
+                additionalFieldsToExport.arrayProps[caseField] = app.models.case.arrayProps[caseField];
+              }
+
+              // is location property ?
+              if (app.models.case.locationFields.indexOf(caseField) > -1) {
+                additionalFieldsToExport.locationFields.push(caseField);
               }
             }
           }
+        );
+      }
 
-          // should exclude or include field ?
-          if (!shouldExclude) {
-            caseFields[caseField] = caseFieldToken;
-          }
-        }
-      );
+      // include contact of contact fields ?
+      if (includeContactOfContactFields) {
+        // determine contact of contact fields
+        const contactOfContactFields = {};
+        _.each(
+          app.models.contactOfContact.fieldLabelsMap,
+          (contactOfContactFieldToken, contactOfContactField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.contactOfContact.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.contactOfContact.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.contactOfContact.definition.settings.excludeBaseProperties[index];
+                if (
+                  contactOfContactField === excludedField ||
+                  contactOfContactField.startsWith(`${excludedField}.`) ||
+                  contactOfContactField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
 
-      // determine what fields from case are missing from contact
-      _.each(
-        caseFields,
-        (caseFieldToken, caseField) => {
-          if (!contactFields[caseField]) {
-            // add field
-            additionalFieldsToExport.fields[caseField] = caseFieldToken;
-
-            // is array property ?
-            if (app.models.case.arrayProps[caseField]) {
-              additionalFieldsToExport.arrayProps[caseField] = app.models.case.arrayProps[caseField];
+                  // no need to check further
+                  break;
+                }
+              }
             }
 
-            // is location property ?
-            if (app.models.case.locationFields.indexOf(caseField) > -1) {
-              additionalFieldsToExport.locationFields.push(caseField);
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              contactOfContactFields[contactOfContactField] = contactOfContactFieldToken;
             }
           }
-        }
-      );
+        );
+
+        // determine what fields from contact of contact are missing from contact
+        _.each(
+          contactOfContactFields,
+          (contactOfContactFieldToken, contactOfContactField) => {
+            if (!contactFields[contactOfContactField]) {
+              // add field
+              additionalFieldsToExport.fields[contactOfContactField] = contactOfContactFieldToken;
+
+              // is array property ?
+              if (app.models.contactOfContact.arrayProps[contactOfContactField]) {
+                additionalFieldsToExport.arrayProps[contactOfContactField] = app.models.contactOfContact.arrayProps[contactOfContactField];
+              }
+
+              // is location property ?
+              if (app.models.contactOfContact.locationFields.indexOf(contactOfContactField) > -1) {
+                additionalFieldsToExport.locationFields.push(contactOfContactField);
+              }
+            }
+          }
+        );
+      }
     }
 
     // prefilter
@@ -3393,5 +3461,132 @@ module.exports = function (Outbreak) {
       outbreakId: self.id,
       logger: logger
     }, formatterOptions, createBatchActions, callback);
+  };
+
+  /**
+   * Convert a contact to a contact of contact
+   * @param contactId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.convertContactToContactOfContact = function (contactId, options, callback) {
+    let contactInstance, convertedContactOfContact;
+    app.models.contact
+      .findOne({
+        where: {
+          id: contactId
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers'
+        ]
+      })
+      .then(function (contactModel) {
+        if (!contactModel) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
+        }
+
+        // keep the contactModel as we will do actions on it
+        contactInstance = contactModel;
+
+        // in order for a contact to be converted to a contact of contact it must be related to at least another contact and it must be a target in that relationship
+        // check relations
+        return app.models.relationship
+          .count({
+            $or: [
+              {
+                'persons.0.id': contactId,
+                'persons.0.target': true,
+                'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+              },
+              {
+                'persons.1.id': contactId,
+                'persons.1.target': true,
+                'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+              }
+            ]
+          });
+      })
+      .then(function (relationsNumber) {
+        if (!relationsNumber) {
+          // the contact of contact doesn't have relations with other contacts; stop conversion
+          throw app.utils.apiError.getError('INVALID_CONTACT_RELATIONSHIP', {id: contactId});
+        }
+
+        // define the attributes for update
+        const attributes = {
+          dateBecomeContactOfContact: app.utils.helpers.getDate().toDate(),
+          wasContact: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+        };
+
+        // retain data from custom forms upon conversion
+        if (!_.isEmpty(contactInstance.questionnaireAnswers)) {
+          attributes.questionnaireAnswersContact = Object.assign({}, contactInstance.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
+        }
+
+        // the case has relations with other cases; proceed with the conversion
+        return app.models.person.rawUpdateOne(
+          {
+            _id: contactId
+          },
+          attributes,
+          options
+        );
+      })
+      .then(() => {
+        return app.models.contactOfContact.findOne({
+          where: {
+            id: contactId
+          }
+        });
+      })
+      .then(function (contactOfContact) {
+        if (!contactOfContact) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactId});
+        }
+
+        convertedContactOfContact = contactOfContact;
+        // after updating the case, find it's relations
+        return app.models.relationship
+          .rawFind({
+            'persons.id': contactId
+          }, {
+            projection: {
+              id: true,
+              persons: true
+            }
+          });
+      })
+      .then(function (relations) {
+        // update relations
+        const updateRelations = [];
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.id === contactId) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
+            .updateOne({
+              _id: contactId
+            }, {
+              $set: {
+                persons: persons
+              }
+            })
+          );
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        callback(null, convertedContactOfContact);
+      })
+      .catch(callback);
   };
 };
