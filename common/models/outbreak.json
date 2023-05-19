@@ -1082,6 +1082,18 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_convert_to_contact",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_convert_to_contact_of_contact",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "relationship_bulk_delete",
       "permission": "ALLOW",
       "property": "bulkDeleteRelationships"
