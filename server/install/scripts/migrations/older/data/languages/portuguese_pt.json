@@ -3753,50 +3753,6 @@
         ]
       }
     },
-    "referenceDataCategoryExposureIntensity": {
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": {
-        "translation": "Intensidade de exposição"
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_1_LOW": {
-        "translation": "1 - Baixo",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_1_LOW_DESCRIPTION": {
-        "translation": "",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM": {
-        "translation": "2 - Médio",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_2_MEDIUM_DESCRIPTION": {
-        "translation": "",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH": {
-        "translation": "3 - Alta",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_3_HIGH_DESCRIPTION": {
-        "translation": "",
-        "modules": [
-          "referenceData"
-        ]
-      },
-      "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY_DESCRIPTION": {
-        "translation": ""
-      }
-    },
     "referenceDataCategoryExposureFrequency": {
       "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY": {
         "translation": "Frequência de exposição"
