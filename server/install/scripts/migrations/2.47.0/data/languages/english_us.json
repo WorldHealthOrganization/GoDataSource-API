@@ -25,7 +25,7 @@
       ]
     },
     "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE_DESCRIPTION": {
-      "translation": "Visible on all outbreak if checked",
+      "translation": "Applies across all outbreaks",
       "section": "uiReferenceDataEntryFields",
       "modules": [
         "referenceData"
@@ -345,8 +345,8 @@
       "translation": "If contact of contact was converted from a contact it might contain additional contact data",
       "section": "uiContactsOfContactsListPage"
     },
-    "LNG_COMMON_LABEL_APPLIES_ACROSS_ALL_OUTBREAKS": {
-      "translation": "Applies across all outbreaks",
+    "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
+      "translation": "All options included",
       "section": "uiCommonLabels"
     }
   }
