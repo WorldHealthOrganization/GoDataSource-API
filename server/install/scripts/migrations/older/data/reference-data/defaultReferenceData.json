@@ -243,17 +243,6 @@
       "order": 5
     }
   },
-  "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY": {
-    "1 - Low": {
-      "readOnly": false
-    },
-    "2 - Medium": {
-      "readOnly": false
-    },
-    "3 - High": {
-      "readOnly": false
-    }
-  },
   "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY": {
     "1-5 Times": {
       "readOnly": false
