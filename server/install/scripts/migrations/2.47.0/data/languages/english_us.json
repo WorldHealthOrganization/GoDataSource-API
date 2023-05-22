@@ -5,10 +5,6 @@
       "translation": "Replace updated at with current server date/time",
       "section": "uiLocationsListPage"
     },
-    "LNG_COMMON_LABEL_NOTHING_SELECTED": {
-      "translation": "Nothing selected",
-      "section": "uiCommonLabels"
-    },
     "LNG_COMMON_BUTTON_CHECK_ALL": {
       "translation": "Check all",
       "section": "uiCommonLabels"
@@ -348,6 +344,10 @@
     "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CONTACT_INFORMATION_DESCRIPTION": {
       "translation": "If contact of contact was converted from a contact it might contain additional contact data",
       "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_COMMON_LABEL_APPLIES_ACROSS_ALL_OUTBREAKS": {
+      "translation": "Applies across all outbreaks",
+      "section": "uiCommonLabels"
     }
   }
 }
