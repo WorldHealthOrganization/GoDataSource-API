@@ -52,7 +52,8 @@ const worker = {
       contactOfContact: './../baseModelOptions/contactOfContact',
       relationship: './../baseModelOptions/relationship',
       referenceData: './../baseModelOptions/referenceData',
-      location: './../baseModelOptions/location'
+      location: './../baseModelOptions/location',
+      user: './../baseModelOptions/user'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {
