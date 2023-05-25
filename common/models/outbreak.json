@@ -7917,10 +7917,15 @@
         }
       ],
       "description": "Delete a list of follow ups.",
-      "http": {
-        "verb": "del",
-        "path": "/follow-ups/bulk"
-      }
+      "http": [
+        {
+          "verb": "del",
+          "path": "/follow-ups/bulk"
+        }, {
+          "verb": "post",
+          "path": "/follow-ups/bulk-delete"
+        }
+      ]
     },
     "prototype.bulkRestoreFollowUps": {
       "accepts": [
