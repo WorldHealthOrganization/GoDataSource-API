@@ -6491,10 +6491,15 @@
         "description": "Number of records deleted"
       },
       "description": "Bulk delete relationships.",
-      "http": {
-        "verb": "delete",
-        "path": "/relationships/bulk"
-      }
+      "http": [
+        {
+          "verb": "delete",
+          "path": "/relationships/bulk"
+        }, {
+          "verb": "post",
+          "path": "/relationships/bulk-delete"
+        }
+      ]
     },
     "prototype.bulkChangeTargetRelationships": {
       "accepts": [
