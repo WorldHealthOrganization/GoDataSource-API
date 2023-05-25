@@ -1,0 +1,14 @@
+{
+  "id": "english_us",
+  "name": "English",
+  "readOnly": true,
+  "tokens": {
+    "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_7": {
+      "translation": "Admin level 7",
+      "modules": [
+        "referenceData"
+      ],
+      "section": "locationGeographicalLevel"
+    }
+  }
+}
