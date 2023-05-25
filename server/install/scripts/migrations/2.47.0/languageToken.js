@@ -14,7 +14,24 @@ const createUpdateLanguageTokens = (callback) => {
     .catch(callback);
 };
 
+/**
+ * Create / Update only english language tokens
+ */
+const createUpdateSingleEnglishLanguageTokens = (callback) => {
+  languageMigrator
+    .createUpdateLanguageTokens(
+      `${__dirname}/data/english_single`, [
+        'english_us'
+      ]
+    )
+    .then(() => {
+      callback();
+    })
+    .catch(callback);
+};
+
 // export list of migration jobs; functions that receive a callback
 module.exports = {
-  createUpdateLanguageTokens
+  createUpdateLanguageTokens,
+  createUpdateSingleEnglishLanguageTokens
 };
