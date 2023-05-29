@@ -1529,6 +1529,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'contact_list_relationship_contacts',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_RELATIONSHIP_CONTACTS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',

@@ -385,6 +385,10 @@
       "translation": "Restore selected cases",
       "section": "uiCasesListPage"
     },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiCasesListPage"
+    },
     "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CASES": {
       "translation": "Are you sure you want to restore selected cases?",
       "section": "uiDialogs"
@@ -400,6 +404,62 @@
     "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
       "translation": "Please wait..Restoring cases is done one by one and it restores all related data that was deleted along with the cases (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiCasesListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT": {
+      "translation": "Contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT": {
+      "translation": "Contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS": {
+      "translation": "Delete selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS": {
+      "translation": "Restore selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts restored",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts is done one by one and it deletes all related data (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts is done one by one and it restores all related data that was deleted along with the contacts (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
     }
   }
 }

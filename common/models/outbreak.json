@@ -464,6 +464,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list_lab_result",
       "permission": "ALLOW",
       "property": "__get__cases__labResults"
@@ -825,6 +831,12 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContact"
     },
