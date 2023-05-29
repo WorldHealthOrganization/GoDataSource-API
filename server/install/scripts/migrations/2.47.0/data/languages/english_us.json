@@ -348,6 +348,49 @@
     "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
       "translation": "All options included",
       "section": "uiCommonLabels"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE": {
+      "translation": "Case - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting case information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE": {
+      "translation": "Case - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE_DESCRIPTION": {
+      "translation": "This permission allows restoring cases in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES": {
+      "translation": "Delete selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to delete selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES": {
+      "translation": "Restore selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to restore selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases restored"
     }
   }
 }

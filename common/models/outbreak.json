@@ -6497,7 +6497,7 @@
           "path": "/relationships/bulk"
         }, {
           "verb": "post",
-          "path": "/relationships/bulk-delete"
+          "path": "/relationships/bulk/delete"
         }
       ]
     },
@@ -7928,7 +7928,7 @@
           "path": "/follow-ups/bulk"
         }, {
           "verb": "post",
-          "path": "/follow-ups/bulk-delete"
+          "path": "/follow-ups/bulk/delete"
         }
       ]
     },

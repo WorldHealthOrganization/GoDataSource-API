@@ -2019,6 +2019,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'case_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'case_list_relationship_contacts',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_RELATIONSHIP_CONTACTS',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CASE_RELATIONSHIP_CONTACTS_DESCRIPTION',
