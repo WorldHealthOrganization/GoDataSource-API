@@ -1754,6 +1754,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "__count__contactsOfContacts"
@@ -1875,6 +1881,12 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_of_contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContactOfContact"
     },

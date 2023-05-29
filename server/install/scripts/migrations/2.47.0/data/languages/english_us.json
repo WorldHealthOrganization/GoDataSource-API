@@ -402,7 +402,7 @@
       "section": "uiCasesListPage"
     },
     "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
-      "translation": "Please wait..Restoring cases and all related data that was deleted along with the cases (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Restoring cases and all related data that was deleted along (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiCasesListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT": {
@@ -458,8 +458,64 @@
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_WAIT_MESSAGE": {
-      "translation": "Please wait..Restoring contacts and all related data that was deleted along with the contacts (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Restoring contacts and all related data that was deleted along (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact of contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts of contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Delete selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Restore selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts restored",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts of contacts and all related data (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts of contacts and all related data that was deleted along (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
     }
   }
 }
