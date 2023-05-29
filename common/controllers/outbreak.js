@@ -3456,6 +3456,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Retrieve the isolated contacts for a contact and count
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getContactIsolatedContacts = function (contactId, callback) {
+    app.models.contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
+      });
+    });
+  };
+
+  /**
    * Change source and targets of a relationship
    * @param relationshipId
    * @param sourceTargetIds

@@ -51,11 +51,17 @@ module.exports = function (Case) {
                         'persons.0.id': contact.id,
                         'persons.1.id': {
                           $ne: caseId
+                        },
+                        'persons.1.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                         }
                       },
                       {
                         'persons.0.id': {
                           $ne: caseId
+                        },
+                        'persons.0.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                         },
                         'persons.1.id': contact.id
                       }

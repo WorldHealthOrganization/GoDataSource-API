@@ -1472,7 +1472,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'contact_list_isolated_contacts'
           ]
         },
         {
@@ -1580,6 +1581,14 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_list'
+          ]
+        },
+        {
+          id: 'contact_list_isolated_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         },
         {

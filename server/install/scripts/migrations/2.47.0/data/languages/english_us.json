@@ -222,11 +222,19 @@
       "section": "uiContactsOfContactsListPage"
     },
     "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
-      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Note: the relationships to cases/events (\"Exposures\") and also to contacts of contacts (\"Contacts\") are kept",
+      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
       "section": "uiDialogs"
     },
     "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
-      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?",
+      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?<br>Note:<br> * All existing relationships will be kept.",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to case?<br>Notes:<br> * All existing relationships will be kept.{{warning}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
+      "translation": "Are you sure you want to convert this case: '{{name}}' to contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
       "section": "uiDialogs"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
@@ -270,7 +278,7 @@
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CASE_CONTACTS_WARNING": {
-      "translation": "All contacts of contacts will be automatically converted to contacts",
+      "translation": "<br> * All contacts of contacts will be automatically converted to contacts",
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
@@ -286,7 +294,7 @@
       "section": "uiModifyContactOfContactPage"
     },
     "LNG_PAGE_LIST_CASES_ACTION_ISOLATED_CONTACTS": {
-      "translation": "The following contacts needs manually to be exposed to another case or event: {{contacts}}",
+      "translation": "<br> * The following contacts need to be <b>manually exposed</b> to another case or event: ",
       "section": "uiCasesListPage"
     },
     "LNG_CASE_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
@@ -348,6 +356,18 @@
     "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
       "translation": "All options included",
       "section": "uiCommonLabels"
+    },
+      "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED": {
+      "translation": "Contact - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED_DESCRIPTION": {
+      "translation": "This permission allows determining which contact of contacts are isolated",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_ISOLATED_CONTACTS": {
+      "translation": "<br> * The following contacts of contacts need to be <b>manually exposed</b> to another contact: ",
+      "section": "uiCasesListPage"
     }
   }
 }

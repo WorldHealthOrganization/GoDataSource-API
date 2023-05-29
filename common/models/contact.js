@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const async = require("async");
 
 module.exports = function (Contact) {
   // set flag to not get controller
@@ -592,6 +593,73 @@ module.exports = function (Contact) {
             active: !!propsToUpdate.startDate
           }, context.options);
         }
+      });
+  };
+
+  Contact.getIsolatedContacts = function (contactId, callback) {
+    // get all relations with a contact of contact
+    return app.models.relationship
+      .rawFind({
+        $or: [
+          {
+            'persons.0.id': contactId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          },
+          {
+            'persons.1.id': contactId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          }
+        ]
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contactOfContact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
+          return (cb) => {
+            app.models.contactOfContact
+              .find({
+                where: {
+                  id: contactOfContact.id
+                }
+              })
+              .then((contactsOfContacts) => {
+                // contact missing ?
+                if (_.isEmpty(contactsOfContacts)) {
+                  cb(null, {isValid: false});
+                  return;
+                }
+
+                // retrieve contact of contact
+                const contactOfContact = contactsOfContacts[0];
+                // get all relations of the contact of the contact that are not with this contact
+                app.models.relationship
+                  .rawFind({
+                    $or: [
+                      {
+                        'persons.0.id': contactOfContact.id,
+                        'persons.1.id': {
+                          $ne: contactId
+                        },
+                        'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: contactId
+                        },
+                        'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                        'persons.1.id': contactOfContact.id
+                      }
+                    ]
+                  })
+                  .then((relationships) => cb(null, {contact: contactOfContact, isValid: !relationships.length}));
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, possibleIsolatedContacts) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
+        });
       });
   };
 
