@@ -1508,6 +1508,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__labResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "findCaseRelationshipExposures"
@@ -1538,7 +1544,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreCaseLabResult"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_restore_lab_result",
+      "permission": "ALLOW",
+      "property": "restoreContactLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContactLabResult"
     },

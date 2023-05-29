@@ -2767,6 +2767,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'lab_result_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'lab_result_import',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_LAB_RESULT_DESCRIPTION',
