@@ -516,6 +516,62 @@
     "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
       "translation": "Please wait..Restoring contacts of contacts and all related data that was deleted along (relationships...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT": {
+      "translation": "Event - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting event information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT": {
+      "translation": "Event - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows restoring events in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS": {
+      "translation": "Delete selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to delete selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS": {
+      "translation": "Restore selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to restore selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events restored",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting events and all related data (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring events and all related data that was deleted along (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
     }
   }
 }

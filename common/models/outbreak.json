@@ -722,6 +722,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
       "property": "findEvents"
@@ -747,6 +753,12 @@
     {
       "principalType": "ROLE",
       "principalId": "event_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__events"
     },

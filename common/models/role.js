@@ -1218,6 +1218,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'event_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'event_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'event_create_contact',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION',
