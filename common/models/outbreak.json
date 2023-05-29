@@ -422,6 +422,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_list",
       "permission": "ALLOW",
       "property": "findContacts"
@@ -1365,6 +1371,12 @@
     {
       "principalType": "ROLE",
       "principalId": "case_restore",
+      "permission": "ALLOW",
+      "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreCase"
     },

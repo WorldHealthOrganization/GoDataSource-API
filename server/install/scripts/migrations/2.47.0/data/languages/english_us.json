@@ -390,7 +390,16 @@
       "section": "uiDialogs"
     },
     "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_SUCCESS_MESSAGE": {
-      "translation": "Cases restored"
+      "translation": "Cases restored",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting cases is done one by one and it deletes all related data (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring cases is done one by one and it restores all related data that was deleted along with the cases (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
     }
   }
 }
