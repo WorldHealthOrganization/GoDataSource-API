@@ -22,6 +22,11 @@
       ]
     }
   },
+  "indexes": {
+    "locationIds_index": {
+      "locationIds": 1
+    }
+  },
   "validations": [],
   "relations": {
     "followUps": {
