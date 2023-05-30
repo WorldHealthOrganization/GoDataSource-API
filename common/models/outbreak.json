@@ -422,6 +422,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_list",
       "permission": "ALLOW",
       "property": "findContacts"
@@ -453,6 +459,12 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__contacts"
     },
@@ -710,6 +722,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
       "property": "findEvents"
@@ -735,6 +753,12 @@
     {
       "principalType": "ROLE",
       "principalId": "event_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__events"
     },
@@ -819,6 +843,12 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContact"
     },
@@ -1370,6 +1400,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
       "property": "filteredCountCases"
@@ -1472,6 +1508,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__labResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "findCaseRelationshipExposures"
@@ -1502,7 +1544,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreCaseLabResult"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_restore_lab_result",
+      "permission": "ALLOW",
+      "property": "restoreContactLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContactLabResult"
     },
@@ -1730,6 +1784,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "__count__contactsOfContacts"
@@ -1851,6 +1911,12 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_of_contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContactOfContact"
     },
@@ -6491,10 +6557,15 @@
         "description": "Number of records deleted"
       },
       "description": "Bulk delete relationships.",
-      "http": {
-        "verb": "delete",
-        "path": "/relationships/bulk"
-      }
+      "http": [
+        {
+          "verb": "delete",
+          "path": "/relationships/bulk"
+        }, {
+          "verb": "post",
+          "path": "/relationships/bulk/delete"
+        }
+      ]
     },
     "prototype.bulkChangeTargetRelationships": {
       "accepts": [
@@ -7917,10 +7988,15 @@
         }
       ],
       "description": "Delete a list of follow ups.",
-      "http": {
-        "verb": "del",
-        "path": "/follow-ups/bulk"
-      }
+      "http": [
+        {
+          "verb": "del",
+          "path": "/follow-ups/bulk"
+        }, {
+          "verb": "post",
+          "path": "/follow-ups/bulk/delete"
+        }
+      ]
     },
     "prototype.bulkRestoreFollowUps": {
       "accepts": [

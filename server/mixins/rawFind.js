@@ -30,6 +30,7 @@ module.exports = function (Model) {
    * @param {object} [options.sort]
    * @param {object} [options.projection]
    * @param {object} [options.includeDeletedRecords]
+   * @param {object} [options.hint]
    * @return {Promise<any>}
    */
   Model.rawFind = function (query, options = {}) {
@@ -87,6 +88,11 @@ module.exports = function (Model) {
     // apply limit
     if (options.limit) {
       queryDb = queryDb.limit(options.limit);
+    }
+
+    // apply hint
+    if (options.hint) {
+      queryDb = queryDb.hint(options.hint);
     }
 
     // convert result to array
