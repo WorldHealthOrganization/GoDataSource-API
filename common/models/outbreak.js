@@ -59,6 +59,10 @@ module.exports = function (Outbreak) {
     allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS'
   });
 
+  Outbreak.locationFields = [
+    'locationIds'
+  ];
+
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
     'countries[].id': 'LNG_REFERENCE_DATA_CATEGORY_COUNTRY',

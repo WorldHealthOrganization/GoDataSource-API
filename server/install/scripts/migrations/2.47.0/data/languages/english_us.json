@@ -628,6 +628,10 @@
     "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_SELECTED_LAB_RESULTS_WAIT_MESSAGE": {
       "translation": "Please wait..<br />{{no}} / {{total}} ({{date}})",
       "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
+      "translation": "Team",
+      "section": "uiLocationsUsageListPage"
     }
   }
 }

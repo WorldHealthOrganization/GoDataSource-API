@@ -4,6 +4,10 @@ const app = require('../../server/server');
 
 module.exports = function (Team) {
 
+  Team.locationFields = [
+    'locationIds'
+  ];
+
   // define a list of custom (non-loopback-supported) relations
   Team.customRelations = {
     members: {
