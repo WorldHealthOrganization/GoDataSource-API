@@ -280,7 +280,12 @@ function remapPropertiesUsingProcessedMap(
           if (!_.isEmpty(value)) {
             newArray.push(value);
           }
-        } else {
+        } else if (
+          // remove unnecessary empty values from arrays
+          // - the only place where we need empty values is when we have questionnaires with multi answers, but that should be handled by having objects with {date: '..', value: undefined }
+          value !== undefined &&
+          value !== null
+        ) {
           newArray.push(value);
         }
 
