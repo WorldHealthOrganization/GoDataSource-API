@@ -600,6 +600,10 @@ module.exports = function (Contact) {
     // get all relations with a contact of contact
     return app.models.relationship
       .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': contactId,
+
+        // filter
         $or: [
           {
             'persons.0.id': contactId,
@@ -610,6 +614,11 @@ module.exports = function (Contact) {
             'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
           }
         ]
+      }, {
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
       })
       .then((relationships) => {
         async.parallelLimit(relationships.map((rel) => {
@@ -633,6 +642,10 @@ module.exports = function (Contact) {
                 // get all relations of the contact of the contact that are not with this contact
                 app.models.relationship
                   .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contact.id,
+
+                    // filter
                     $or: [
                       {
                         'persons.0.id': contactOfContact.id,
@@ -649,6 +662,11 @@ module.exports = function (Contact) {
                         'persons.1.id': contactOfContact.id
                       }
                     ]
+                  }, {
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
                   })
                   .then((relationships) => cb(null, {contact: contactOfContact, isValid: !relationships.length}));
               })
