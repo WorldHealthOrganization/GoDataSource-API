@@ -113,13 +113,7 @@
       "contact_grouped_by_risk",
       "contact_of_contact_grouped_by_risk",
       "follow_up_grouped_by_team",
-      "team_list",
-      "case_convert_to_contact",
-      "contact_convert_to_case",
-      "contact_convert_to_contact_of_contact",
-      "contact_of_contact_convert_to_contact",
-      "case_list_isolated_cases",
-      "contact_list_isolated_contacts"
+      "team_list"
     ]
   },
   "Contact tracing coordinator": {

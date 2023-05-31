@@ -1754,7 +1754,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CASE_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'contact_list_isolated_contacts'
           ]
         },
         {
@@ -2269,7 +2270,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CASE_TO_CONTACT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CASE_TO_CONTACT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'case_list_isolated_cases'
           ]
         },
         {
