@@ -3,8 +3,8 @@
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
 const _ = require('lodash');
+const async = require('async');
 const helpers = require('../../components/helpers');
-const async = require("async");
 
 module.exports = function (Contact) {
   // set flag to not get controller
