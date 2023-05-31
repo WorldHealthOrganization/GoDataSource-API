@@ -652,6 +652,14 @@
     "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
       "translation": "Team",
       "section": "uiLocationsUsageListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - list relationship contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows listing contact of contact contacts",
+      "section": "availablePermissions"
     }
   }
 }
