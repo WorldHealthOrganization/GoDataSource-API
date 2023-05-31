@@ -495,7 +495,7 @@ const syncRecordFlags = {
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (logger, model, record, options, done) {
+const syncRecord = function (logger, model, personModel, record, options, done) {
 
   // log formatted message
   function log(level, message) {
@@ -675,7 +675,7 @@ const syncRecord = function (logger, model, record, options, done) {
     record.id !== ''
   ) {
     log('debug', `Trying to find record with id ${record.id}.`);
-    findRecord = model
+    findRecord = personModel
       .findOne({
         where: {
           id: record.id
@@ -787,7 +787,7 @@ const syncRecord = function (logger, model, record, options, done) {
                 .destroy(options)
                 .then(function () {
                   // get the record from the db to send it back
-                  return model
+                  return personModel
                     .findOne({
                       where: {
                         id: record.id

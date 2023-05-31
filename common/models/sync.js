@@ -274,13 +274,19 @@ module.exports = function (Sync) {
                             }
 
                             // sync the record with the main database
-                            dbSync.syncRecord(app.logger, syncModel, collectionRecord, reqOptions, (err) => {
-                              if (err) {
-                                app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                                failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
-                              }
-                              return doneRecord();
-                            });
+                            dbSync.syncRecord(
+                              app.logger,
+                              syncModel,
+                              app.models.person,
+                              collectionRecord,
+                              reqOptions,
+                              (err) => {
+                                if (err) {
+                                  app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                                  failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
+                                }
+                                return doneRecord();
+                              });
                           });
 
                           // depending on collection the sync can be done in parallel or in series
