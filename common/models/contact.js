@@ -643,7 +643,7 @@ module.exports = function (Contact) {
                 app.models.relationship
                   .rawFind({
                     // required to use index to improve greatly performance
-                    'persons.id': contact.id,
+                    'persons.id': contactOfContact.id,
 
                     // filter
                     $or: [
