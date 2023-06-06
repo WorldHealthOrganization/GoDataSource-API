@@ -368,7 +368,7 @@
     "LNG_PAGE_LIST_CONTACTS_ACTION_ISOLATED_CONTACTS": {
       "translation": "<br> * The following contacts of contacts need to be <b>manually exposed</b> to another contact: ",
       "section": "uiCasesListPage"
-    }
+    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE": {
       "translation": "Case - bulk delete",
       "section": "availablePermissions"
@@ -418,11 +418,11 @@
       "section": "uiCasesListPage"
     },
     "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_WAIT_MESSAGE": {
-      "translation": "Please wait..Deleting cases and all related data (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Deleting cases and all related data (lab results, isolated contacts, relationships, follow-ups, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiCasesListPage"
     },
     "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
-      "translation": "Please wait..Restoring cases and all related data that was deleted along (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Restoring cases and all related data that was deleted along (lab results, isolated contacts, relationships, follow-ups, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiCasesListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT": {
@@ -474,11 +474,11 @@
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_WAIT_MESSAGE": {
-      "translation": "Please wait..Deleting contacts and all related data (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Deleting contacts and all related data (isolated contacts of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_WAIT_MESSAGE": {
-      "translation": "Please wait..Restoring contacts and all related data that was deleted along (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Restoring contacts and all related data that was deleted along (isolated contacts of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiContactsListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT": {
@@ -586,11 +586,11 @@
       "section": "uiEventsListPage"
     },
     "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_WAIT_MESSAGE": {
-      "translation": "Please wait..Deleting events and all related data (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Deleting events and all related data (isolated contacts, relationships, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiEventsListPage"
     },
     "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_WAIT_MESSAGE": {
-      "translation": "Please wait..Restoring events and all related data that was deleted along (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "translation": "Please wait..Restoring events and all related data that was deleted along (isolated contacts, relationships, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
       "section": "uiEventsListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT": {
@@ -651,6 +651,10 @@
     },
     "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
       "translation": "Team",
+      "section": "uiLocationsUsageListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CONTACT_OF_CONTACTS": {
+      "translation": "Contact of Contacts",
       "section": "uiLocationsUsageListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
