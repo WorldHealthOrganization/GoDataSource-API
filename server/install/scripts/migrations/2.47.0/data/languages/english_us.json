@@ -632,6 +632,10 @@
     "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
       "translation": "Team",
       "section": "uiLocationsUsageListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CONTACT_OF_CONTACTS": {
+      "translation": "Contact of Contacts",
+      "section": "uiLocationsUsageListPage"
     }
   }
 }
