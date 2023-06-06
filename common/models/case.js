@@ -13,6 +13,10 @@ module.exports = function (Case) {
     // get all relations with a contact
     return app.models.relationship
       .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': caseId,
+
+        // filter
         $or: [
           {
             'persons.0.id': caseId,
@@ -23,6 +27,11 @@ module.exports = function (Case) {
             'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           }
         ]
+      }, {
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
       })
       .then((relationships) => {
         async.parallelLimit(relationships.map((rel) => {
@@ -46,6 +55,10 @@ module.exports = function (Case) {
                 // get all relations of the contact that are not with this case
                 app.models.relationship
                   .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contact.id,
+
+                    // filter
                     $or: [
                       {
                         'persons.0.id': contact.id,
@@ -60,6 +73,11 @@ module.exports = function (Case) {
                         'persons.1.id': contact.id
                       }
                     ]
+                  }, {
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
                   })
                   .then((relationships) => cb(null, {contact: contact, isValid: !relationships.length}));
               })

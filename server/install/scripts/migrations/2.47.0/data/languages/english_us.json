@@ -348,6 +348,290 @@
     "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
       "translation": "All options included",
       "section": "uiCommonLabels"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE": {
+      "translation": "Case - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting case information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE": {
+      "translation": "Case - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE_DESCRIPTION": {
+      "translation": "This permission allows restoring cases in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES": {
+      "translation": "Delete selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to delete selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES": {
+      "translation": "Restore selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to restore selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases restored",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting cases and all related data (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring cases and all related data that was deleted along (lab results, isolated contacts, relationships, follow-ups, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT": {
+      "translation": "Contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT": {
+      "translation": "Contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS": {
+      "translation": "Delete selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS": {
+      "translation": "Restore selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts restored",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts and all related data (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts and all related data that was deleted along (isolated contact of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact of contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts of contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Delete selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Restore selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts restored",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts of contacts and all related data (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts of contacts and all related data that was deleted along (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT": {
+      "translation": "Event - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting event information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT": {
+      "translation": "Event - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows restoring events in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS": {
+      "translation": "Delete selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to delete selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS": {
+      "translation": "Restore selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to restore selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events restored",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting events and all related data (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring events and all related data that was deleted along (isolated contacts, relationships, isolated contact of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT": {
+      "translation": "Lab result - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting lab result information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT": {
+      "translation": "Lab result - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows restoring lab results in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_DELETE_SELECTED_LAB_RESULTS": {
+      "translation": "Delete selected lab results",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_DELETE_SELECTED_LAB_RESULTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_LAB_RESULTS": {
+      "translation": "Are you sure you want to delete selected lab results?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SELECTED_LAB_RESULTS_SUCCESS_MESSAGE": {
+      "translation": "Lab results deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_RESTORE_SELECTED_LAB_RESULTS": {
+      "translation": "Restore selected lab results",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_RESTORE_SELECTED_LAB_RESULTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_LAB_RESULTS": {
+      "translation": "Are you sure you want to restore selected lab results?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_SELECTED_LAB_RESULTS_SUCCESS_MESSAGE": {
+      "translation": "Lab results restored",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SELECTED_LAB_RESULTS_WAIT_MESSAGE": {
+      "translation": "Please wait..<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_SELECTED_LAB_RESULTS_WAIT_MESSAGE": {
+      "translation": "Please wait..<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
+      "translation": "Team",
+      "section": "uiLocationsUsageListPage"
     }
   }
 }

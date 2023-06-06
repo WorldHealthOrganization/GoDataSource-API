@@ -67,11 +67,17 @@ module.exports = function (ExtendedPersistedModel) {
    * @param recordId string | string[]
    * @param filter
    * @param justCount
+   * @param stopAtFirstFind - justCount needs to be true for this option to be used
    * @return {Promise<any[] | never>}
    */
-  ExtendedPersistedModel.findModelUsage = function (recordId, filter, justCount) {
-    // build a list of check usage actions
-    const checkUsages = [];
+  ExtendedPersistedModel.findModelUsage = function (
+    recordId,
+    filter,
+    justCount,
+    stopAtFirstFind
+  ) {
+    // conditions
+    const conditions = [];
     // cache model name form the child model that used the function
     const currentModelName = this.modelName;
     // get list of model names (if any)
@@ -80,7 +86,7 @@ module.exports = function (ExtendedPersistedModel) {
     modelNames.forEach(function (modelName) {
       const orQuery = [];
       // build a search query using the fields that might contain the information
-      const operatorIn = justCount ? 'in' : '$in';
+      const operatorIn = justCount && !stopAtFirstFind ? 'in' : '$in';
       EPM.possibleRecordUsage[currentModelName][modelName].forEach(function (field) {
         orQuery.push({
           [field]: Array.isArray(recordId) ? {[operatorIn]: recordId} : recordId
@@ -97,24 +103,69 @@ module.exports = function (ExtendedPersistedModel) {
 
       // count/find the results
       if (justCount) {
-        checkUsages.push(
-          app.models[modelName].count(_filter.where)
-        );
+        conditions.push({
+          modelName,
+          where: _filter.where
+        });
       } else {
-        checkUsages.push(
-          app.models[modelName].rawFind(_filter.where)
-        );
+        conditions.push({
+          modelName,
+          where: _filter.where
+        });
       }
     });
-    return Promise.all(checkUsages)
-      .then(function (results) {
-        // associate the results with the queried models
-        const resultSet = {};
-        results.forEach(function (result, index) {
-          resultSet[modelNames[index]] = result;
-        });
-        return resultSet;
+
+    // execute in series until we find one
+    if (
+      justCount &&
+      stopAtFirstFind
+    ) {
+      return new Promise((resolve, reject) => {
+        // next promise
+        const nextPromise = () => {
+          // finished - nothing found
+          if (conditions.length < 1) {
+            resolve({});
+            return;
+          }
+
+          // first promise
+          const condition = conditions.shift();
+          app.models[condition.modelName].rawCountDocuments(
+            {
+              where: condition.where,
+              limit: 1
+            })
+            .then((response) => {
+              // found ?
+              if (response.count > 0) {
+                resolve({
+                  [condition.modelName]: response.count
+                });
+                return;
+              }
+
+              // not used so far, continue search
+              nextPromise();
+            })
+            .catch(reject);
+        };
+
+        // start
+        nextPromise();
       });
+    } else {
+      // execute
+      return Promise.all(conditions.map((condition) => justCount ? app.models[condition.modelName].count(condition.where) : app.models[condition.modelName].rawFind(condition.where)))
+        .then(function (results) {
+          // associate the results with the queried models
+          const resultSet = {};
+          results.forEach(function (result, index) {
+            resultSet[modelNames[index]] = result;
+          });
+          return resultSet;
+        });
+    }
   };
 
 
@@ -125,7 +176,7 @@ module.exports = function (ExtendedPersistedModel) {
    */
   ExtendedPersistedModel.isRecordInUse = function (recordId) {
     // important: use exact model that called the function, model name is used in business logic
-    return this.findModelUsage(recordId, {}, true)
+    return this.findModelUsage(recordId, {}, true, true)
       .then(function (results) {
         // if the usage count is greater than 1, model is in use
         return Object.values(results).reduce(function (a, b) {

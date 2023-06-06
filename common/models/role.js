@@ -1218,6 +1218,22 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'event_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'event_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'event_create_contact',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CONTACT_FROM_EVENT_DESCRIPTION',
@@ -1524,6 +1540,22 @@ module.exports = function (Role) {
           id: 'contact_generate_visual_id',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_VISUAL_ID',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_VISUAL_ID_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -2014,6 +2046,22 @@ module.exports = function (Role) {
           id: 'case_generate_visual_id',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CASE_VISUAL_ID',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CASE_VISUAL_ID_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -2714,6 +2762,22 @@ module.exports = function (Role) {
           id: 'lab_result_restore',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'lab_result_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
@@ -3476,6 +3540,22 @@ module.exports = function (Role) {
           id: 'contact_of_contact_generate_visual_id',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CONTACT_OF_CONTACT_VISUAL_ID_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_bulk_restore',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view'
           ]
