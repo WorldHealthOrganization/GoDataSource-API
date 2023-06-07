@@ -1126,9 +1126,12 @@ module.exports = function (FollowUp) {
                 delete record.contact._id;
 
                 // determine current address & get location
-                if (!_.isEmpty(record.contact.addresses)) {
+                if (
+                  record.contact.addresses &&
+                  record.contact.addresses.length > 0
+                ) {
                   const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-                  if (!_.isEmpty(contactResidence.locationId)) {
+                  if (contactResidence.locationId) {
                     locationIds[contactResidence.locationId] = true;
                   }
                 }
@@ -1143,8 +1146,8 @@ module.exports = function (FollowUp) {
 
             // retrieve current location for each contact
             locationIds = Object.keys(locationIds);
-            if (_.isEmpty(locationIds)) {
-              // there are no locations to retrieve so we can send response to client
+            if (!locationIds.length) {
+              // there are no locations to retrieve, so we can send response to client
               return callback(null, records);
             }
 
@@ -1164,10 +1167,14 @@ module.exports = function (FollowUp) {
                 // set locations
                 records.forEach((record) => {
                   // determine current address & get location
-                  if (!_.isEmpty(record.contact.addresses)) {
+                  if (
+                    record.contact &&
+                    record.contact.addresses &&
+                    record.contact.addresses.length > 0
+                  ) {
                     const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
                     if (
-                      !_.isEmpty(contactResidence.locationId) &&
+                      contactResidence.locationId &&
                       locationsMap[contactResidence.locationId]
                     ) {
                       contactResidence.location = locationsMap[contactResidence.locationId];
