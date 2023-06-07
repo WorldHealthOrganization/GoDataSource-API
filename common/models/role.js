@@ -3579,7 +3579,35 @@ module.exports = function (Role) {
             'outbreak_view',
             'relationship_list'
           ]
-        },        {
+        },
+        {
+          id: 'contact_of_contact_view_relationship_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_list'
+          ]
+        },
+        {
+          id: 'contact_of_contact_modify_relationship_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_modify'
+          ]
+        },
+        {
+          id: 'contact_of_contact_delete_relationship_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_delete'
+          ]
+        },
+        {
           id: 'contact_of_contact_list_relationship_exposures',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION',
@@ -3701,6 +3729,15 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_export'
+          ]
+        },
+        {
+          id: 'contact_of_contact_bulk_delete_relationships_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'relationship_bulk_delete'
           ]
         },
         {

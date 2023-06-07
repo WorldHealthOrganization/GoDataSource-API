@@ -437,7 +437,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
     // initialize relationship instance; will be cached
-    let relationshipInstance;
+    let relationshipInstance, relationshipType;
 
     app.models.relationship
       .findOne({
@@ -454,13 +454,21 @@ module.exports = function (Outbreak) {
         // cache relationship
         relationshipInstance = relationship;
 
-        // check if the relationship includes a contact; if so the last relationship of a contact with a case/event cannot be deleted
-        let relationshipContacts = relationship.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+        // check if the relationship includes a contact or contact of contact; if so the last relationship of a contact with a case/event or contact cannot be deleted
+        // ignore the events and cases
+        let relationshipContacts = relationship.persons.filter(
+          person => !!person.target &&
+            !['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'].includes(person.type)
+        );
         if (relationshipContacts.length) {
           // there are contacts in the relationship; check their other relationships;
           // creating array of promises as the relation might be contact - contact
           let promises = [];
           relationshipContacts.forEach(function (contactEntry) {
+            relationshipType = contactEntry.type;
+            const exposureTypes = contactEntry.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'];
             promises.push(
               // count contact relationships with case/events except the current relationship
               app.models.relationship
@@ -468,10 +476,22 @@ module.exports = function (Outbreak) {
                   id: {
                     neq: relationshipId
                   },
-                  'persons.id': contactEntry.id,
-                  'persons.type': {
-                    in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-                  }
+                  $or: [
+                    {
+                      'persons.0.id': contactEntry.id,
+                      'persons.0.target': true,
+                      'persons.1.type': {
+                        $in: exposureTypes
+                      }
+                    },
+                    {
+                      'persons.1.id': contactEntry.id,
+                      'persons.1.target': true,
+                      'persons.0.type': {
+                        $in: exposureTypes
+                      }
+                    }
+                  ]
                 })
                 .then(function (relNo) {
                   if (!relNo) {
@@ -509,7 +529,9 @@ module.exports = function (Outbreak) {
             return relationshipInstance.destroy(options);
           } else {
             // there are contacts with no other relationships with case/event; error
-            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+            throw app.utils.apiError.getError(relationshipType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+              'DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP' :
+              'DELETE_CONTACT_LAST_RELATIONSHIP', {
               contactIDs: contactIDs.join(', ')
             });
           }

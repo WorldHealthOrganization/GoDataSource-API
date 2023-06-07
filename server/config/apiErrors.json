@@ -167,6 +167,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
   },
+  "DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Cannot delete a contact of contact's last relationship with a contact. The contact of contact with ID <%= contactIDs %> doesn't have an additional relationship with a contact."
+  },
   "EXTERNAL_API_CONNECTION_ERROR": {
     "defaultStatusCode": 503,
     "messagePattern": "Communication with external service (<%= serviceName %>) failed"

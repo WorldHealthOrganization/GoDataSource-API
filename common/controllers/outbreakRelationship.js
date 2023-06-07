@@ -24,6 +24,8 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.bulkDeleteRelationships = function (where, options, callback) {
+    let personType;
+
     // where is required so we don't remove all relationships from an outbreak unless we want to do that :)
     if (_.isEmpty(where)) {
       return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
@@ -68,9 +70,18 @@ module.exports = function (Outbreak) {
           relationship.persons.forEach(person => {
             let mapContainer = 'otherPersons';
             let idsContainer = 'otherPersonsIds';
-            if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+            if (
+              person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
+              person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            ) {
               mapContainer = 'contacts';
               idsContainer = 'contactsIds';
+            }
+
+            // keep the person type for which the relationships will be deleted
+            // even if there are multiple relationships to be deleted, the target person type is the same
+            if (person.target) {
+              personType = person.type;
             }
 
             // initialize map to be used later to determine relationships deleted
@@ -93,6 +104,7 @@ module.exports = function (Outbreak) {
           accumulator.relationships[relationship.id] = relationship;
           return accumulator;
         }, {
+          types: {},
           relationships: {},
           contacts: {},
           contactsIds: [],
@@ -113,12 +125,14 @@ module.exports = function (Outbreak) {
             }
           }, {
             projection: {
+              type: 1,
               relationshipsRepresentation: 1
             }
           })
           .then(contacts => {
-            // cache contacts relationships
+            // cache type and contacts relationships
             contacts.forEach(contact => {
+              mappedData.types[contact.id] = contact.type;
               mappedData.contacts[contact.id].relatedRelationships = contact.relationshipsRepresentation;
             });
 
@@ -141,8 +155,16 @@ module.exports = function (Outbreak) {
         const isolatedContacts = [];
         _.each(data.contacts, (contactData, contactId) => {
           // check if this will become an isolated contact if we remove data
-          // this condition always will be either equal ( isolated case ), or greater, but never less...but it doesn't matter :)
-          if (contactData.relatedRelationships.length <= contactData.deleteRelationships.length) {
+          // find isolated contacts by removing the relationships that will be deleted and the "contacts" relationships
+          const exposureTypes = data.types[contactId] === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'];
+          const exposureRelationships = contactData.relatedRelationships.filter((relation) => relation.active &&
+            !contactData.deleteRelationships.includes(relation.id) &&
+            relation.target &&
+            exposureTypes.includes(relation.otherParticipantType)
+          );
+          if (!exposureRelationships.length) {
             // we found an isolated contact
             isolatedContacts.push(contactId);
           }
@@ -150,7 +172,9 @@ module.exports = function (Outbreak) {
 
         // can't delete relationships because at least one case will become isolated after that
         if (!_.isEmpty(isolatedContacts)) {
-          throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+          throw app.utils.apiError.getError(personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+            'DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP' :
+            'DELETE_CONTACT_LAST_RELATIONSHIP', {
             contactIDs: isolatedContacts.join(', '),
             contactIDsArray: isolatedContacts
           });

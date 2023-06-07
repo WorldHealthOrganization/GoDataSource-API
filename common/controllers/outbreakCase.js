@@ -1696,7 +1696,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
-    let caseInstance, convertedContact;
+    let caseInstance, convertedContact, relationshipPersonsMap = {};
     app.models.case
       .findOne({
         where: {
@@ -1807,12 +1807,15 @@ module.exports = function (Outbreak) {
             if (person.id === caseId) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }  else {
+              // find his contacts relationships to convert to update "type" from the "relationshipsRepresentation" field
+              relationshipPersonsMap[person.id] = true;
             }
             persons.push(person);
           });
           updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
             .updateOne({
-              _id: caseId
+              _id: relation.id
             }, {
               $set: {
                 persons: persons
@@ -1834,6 +1837,55 @@ module.exports = function (Outbreak) {
             },
             options
           );
+      })
+      .then(function () {
+        if (!Object.keys(relationshipPersonsMap).length) {
+          // nothing left to do
+          return Promise.resolve();
+        }
+
+        // get the relationship persons
+        return app.models.person
+          .rawFind({
+            _id: {
+              $in: Object.keys(relationshipPersonsMap)
+            }
+          }, {
+            projection: {
+              _id: 1,
+              relationshipsRepresentation: 1
+            }
+          });
+      })
+      .then(function (relationshipPersons) {
+        if (!relationshipPersons.length) {
+          // nothing left to do
+          return Promise.resolve();
+        }
+
+        // update persons
+        const updatePersons = [];
+        relationshipPersons.forEach(function (relation) {
+          let persons = [];
+          relation.relationshipsRepresentation.forEach(function (person) {
+            // for every occurrence of current contact
+            if (person.otherParticipantId === caseId) {
+              // update otherParticipantType to match the new one
+              person.otherParticipantType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }
+            persons.push(person);
+          });
+          updatePersons.push(app.dataSources.mongoDb.connector.collection(app.models.person.modelName)
+            .updateOne({
+              _id: relation.id
+            }, {
+              $set: {
+                relationshipsRepresentation: persons
+              }
+            })
+          );
+        });
+        return Promise.all(updatePersons);
       })
       .then(function () {
         callback(null, convertedContact);

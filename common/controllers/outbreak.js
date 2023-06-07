@@ -546,7 +546,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
-    let convertedCase, contactsOfContactsMap = {};
+    let convertedCase, contactsOfContactsMap = {}, relationshipPersonsMap = {};
     app.models.contact
       .findOne({
         where: {
@@ -630,6 +630,9 @@ module.exports = function (Outbreak) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
             } else {
+              // find his contacts relationships to convert to update "type" from the "relationshipsRepresentation" field
+              relationshipPersonsMap[person.id] = true;
+
               // find his contacts relationships (contacts of contacts) to convert them to "contact" type
               if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
                 contactsOfContactsMap[person.id] = true;
@@ -639,7 +642,7 @@ module.exports = function (Outbreak) {
           });
           updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
             .updateOne({
-              _id: contactId
+              _id: relation.id
             }, {
               $set: {
                 persons: persons
@@ -703,13 +706,16 @@ module.exports = function (Outbreak) {
             if (contactsOfContactsMap[person.id]) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            } else {
+              // find his contacts relationships to convert to update "type" from the "relationshipsRepresentation" field
+              relationshipPersonsMap[person.id] = true;
             }
 
             persons.push(person);
           });
           updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
             .updateOne({
-              _id: contactId
+              _id: relation.id
             }, {
               $set: {
                 persons: persons
@@ -718,6 +724,60 @@ module.exports = function (Outbreak) {
           );
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        if (!Object.keys(relationshipPersonsMap).length) {
+          // nothing left to do
+          return Promise.resolve();
+        }
+
+        // get the relationship persons
+        return app.models.person
+          .rawFind({
+            _id: {
+              $in: Object.keys(relationshipPersonsMap)
+            }
+          }, {
+            projection: {
+              _id: 1,
+              relationshipsRepresentation: 1
+            }
+          });
+      })
+      .then(function (relationshipPersons) {
+        if (!relationshipPersons.length) {
+          // nothing left to do
+          return Promise.resolve();
+        }
+
+        // update persons
+        const updatePersons = [];
+        relationshipPersons.forEach(function (relation) {
+          let persons = [];
+          relation.relationshipsRepresentation.forEach(function (person) {
+            // for every occurrence of current contact
+            if (
+              person.otherParticipantId === contactId ||
+              contactsOfContactsMap[person.otherParticipantId]
+            ) {
+              // update otherParticipantType to match the new one
+              person.otherParticipantType = contactsOfContactsMap[person.otherParticipantId] ?
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' :
+                'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+            }
+            persons.push(person);
+          });
+          updatePersons.push(app.dataSources.mongoDb.connector.collection(app.models.person.modelName)
+            .updateOne({
+              _id: relation.id
+            }, {
+              $set: {
+                relationshipsRepresentation: persons
+              }
+            })
+          );
+        });
+        return Promise.all(updatePersons);
       })
       .then(function () {
         callback(null, convertedCase);

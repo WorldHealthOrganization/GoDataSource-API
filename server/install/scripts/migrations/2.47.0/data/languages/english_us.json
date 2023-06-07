@@ -664,6 +664,44 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
       "translation": "This permission allows listing contact of contact contacts",
       "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - view relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows viewing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - modify relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows modify contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - delete relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows delete contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - bulk delete contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows deletion of contact of contact contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_API_ERROR_CODE_DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP": {
+      "translation": "Cannot delete a contact of contact's last relationship with a contact. The contact of contact doesn't have an additional relationship with a contact.",
+      "modules": [
+        "unauthenticated"
+      ]
     }
   }
 }

@@ -491,11 +491,14 @@ const syncRecordFlags = {
  * If record has updateAt timestamp higher than the main database, update
  * @param logger
  * @param model
+ * @param personModel
  * @param record
  * @param [options]
  * @param [done]
  */
 const syncRecord = function (logger, model, personModel, record, options, done) {
+  // alternate model used to identify a person
+  const alternateModel = ['case', 'contact', 'event', 'contactOfContact'].includes(model.modelName) ? personModel : model;
 
   // log formatted message
   function log(level, message) {
@@ -675,7 +678,7 @@ const syncRecord = function (logger, model, personModel, record, options, done) 
     record.id !== ''
   ) {
     log('debug', `Trying to find record with id ${record.id}.`);
-    findRecord = personModel
+    findRecord = alternateModel
       .findOne({
         where: {
           id: record.id
@@ -787,7 +790,7 @@ const syncRecord = function (logger, model, personModel, record, options, done) 
                 .destroy(options)
                 .then(function () {
                   // get the record from the db to send it back
-                  return personModel
+                  return alternateModel
                     .findOne({
                       where: {
                         id: record.id
