@@ -457,7 +457,7 @@ module.exports = function (Outbreak) {
         // check if the relationship includes a contact or contact of contact; if so the last relationship of a contact with a case/event or contact cannot be deleted
         // ignore the events and cases
         let relationshipContacts = relationship.persons.filter(
-          person => !!person.target &&
+          person => person.target &&
             !['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'].includes(person.type)
         );
         if (relationshipContacts.length) {
