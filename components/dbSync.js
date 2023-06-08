@@ -491,15 +491,19 @@ const syncRecordFlags = {
  * If record has updateAt timestamp higher than the main database, update
  * @param logger
  * @param model
- * @param personModel
+ * @param alternateSyncModel
  * @param record
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (logger, model, personModel, record, options, done) {
-  // alternate model used to identify a person
-  const alternateModel = ['case', 'contact', 'event', 'contactOfContact'].includes(model.modelName) ? personModel : model;
-
+const syncRecord = function (
+  logger,
+  model,
+  alternateModel,
+  record,
+  options,
+  done
+) {
   // log formatted message
   function log(level, message) {
     logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
@@ -694,7 +698,7 @@ const syncRecord = function (logger, model, personModel, record, options, done) 
   ) {
     const stringifiedAlternateQuery = JSON.stringify(alternateQueryForRecord);
     log('debug', `Trying to find record with alternate unique identifier ${stringifiedAlternateQuery}.`);
-    findRecord = model
+    findRecord = alternateModel
       .find({
         where: alternateQueryForRecord,
         limit: 2,
