@@ -689,14 +689,13 @@ module.exports = function (Outbreak) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
             }
-
             persons.push(person);
           });
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })
-       .then(function () {
+      .then(function () {
         callback(null, convertedCase);
       })
       .catch(callback);
