@@ -437,7 +437,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.helpers.deletePersonRelationship = function (personId, relationshipId, options, callback) {
     // initialize relationship instance; will be cached
-    let relationshipInstance, relationshipType;
+    let relationshipInstance;
 
     app.models.relationship
       .findOne({
@@ -458,14 +458,13 @@ module.exports = function (Outbreak) {
         // ignore the events and cases
         let relationshipContacts = relationship.persons.filter(
           person => person.target &&
-            !['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'].includes(person.type)
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'].includes(person.type)
         );
         if (relationshipContacts.length) {
           // there are contacts in the relationship; check their other relationships;
           // creating array of promises as the relation might be contact - contact
           let promises = [];
           relationshipContacts.forEach(function (contactEntry) {
-            relationshipType = contactEntry.type;
             const exposureTypes = contactEntry.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
               ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
               ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'];
@@ -476,6 +475,7 @@ module.exports = function (Outbreak) {
                   id: {
                     neq: relationshipId
                   },
+                  'persons.id': contactEntry.id,
                   $or: [
                     {
                       'persons.0.id': contactEntry.id,
@@ -529,9 +529,7 @@ module.exports = function (Outbreak) {
             return relationshipInstance.destroy(options);
           } else {
             // there are contacts with no other relationships with case/event; error
-            throw app.utils.apiError.getError(relationshipType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-              'DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP' :
-              'DELETE_CONTACT_LAST_RELATIONSHIP', {
+            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
               contactIDs: contactIDs.join(', ')
             });
           }

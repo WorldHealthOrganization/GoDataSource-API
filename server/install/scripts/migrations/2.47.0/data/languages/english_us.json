@@ -689,8 +689,8 @@
       "translation": "This permission allows deletion of contact of contact contact relationships",
       "section": "availablePermissions"
     },
-    "LNG_API_ERROR_CODE_DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP": {
-      "translation": "Cannot delete a contact of contact's last relationship with a contact. The contact of contact doesn't have an additional relationship with a contact.",
+    "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": {
+      "translation": "Cannot delete the last relationship exposure because the person doesn't have an additional relationship exposure.",
       "modules": [
         "unauthenticated"
       ]

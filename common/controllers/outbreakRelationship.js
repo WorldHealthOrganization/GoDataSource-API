@@ -24,8 +24,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.bulkDeleteRelationships = function (where, options, callback) {
-    let personType;
-
     // where is required so we don't remove all relationships from an outbreak unless we want to do that :)
     if (_.isEmpty(where)) {
       return callback(app.utils.apiError.getError('VALIDATION_ERROR', {
@@ -76,12 +74,6 @@ module.exports = function (Outbreak) {
             ) {
               mapContainer = 'contacts';
               idsContainer = 'contactsIds';
-            }
-
-            // keep the person type for which the relationships will be deleted
-            // even if there are multiple relationships to be deleted, the target person type is the same
-            if (person.target) {
-              personType = person.type;
             }
 
             // initialize map to be used later to determine relationships deleted
@@ -172,9 +164,7 @@ module.exports = function (Outbreak) {
 
         // can't delete relationships because at least one case will become isolated after that
         if (!_.isEmpty(isolatedContacts)) {
-          throw app.utils.apiError.getError(personType === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-            'DELETE_CONTACT_OF_CONTACT_LAST_RELATIONSHIP' :
-            'DELETE_CONTACT_LAST_RELATIONSHIP', {
+          throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
             contactIDs: isolatedContacts.join(', '),
             contactIDsArray: isolatedContacts
           });
