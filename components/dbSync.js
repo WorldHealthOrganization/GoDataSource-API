@@ -491,7 +491,7 @@ const syncRecordFlags = {
  * If record has updateAt timestamp higher than the main database, update
  * @param logger
  * @param model
- * @param alternateSyncModel
+ * @param alternateModel
  * @param record
  * @param [options]
  * @param [done]
