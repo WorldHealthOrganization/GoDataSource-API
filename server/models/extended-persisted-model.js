@@ -86,7 +86,7 @@ module.exports = function (ExtendedPersistedModel) {
     modelNames.forEach(function (modelName) {
       const orQuery = [];
       // build a search query using the fields that might contain the information
-      const operatorIn = justCount && !stopAtFirstFind ? 'in' : '$in';
+      const operatorIn = justCount && (!stopAtFirstFind || !app.models[modelName].rawCountDocuments) ? 'in' : '$in';
       EPM.possibleRecordUsage[currentModelName][modelName].forEach(function (field) {
         orQuery.push({
           [field]: Array.isArray(recordId) ? {[operatorIn]: recordId} : recordId
@@ -131,16 +131,32 @@ module.exports = function (ExtendedPersistedModel) {
 
           // first promise
           const condition = conditions.shift();
-          app.models[condition.modelName].rawCountDocuments(
-            {
-              where: condition.where,
-              limit: 1
-            })
+          (
+            app.models[condition.modelName].rawCountDocuments ?
+              app.models[condition.modelName].rawCountDocuments(
+                {
+                  where: condition.where,
+                  limit: 1
+                }) :
+              // limit not supported
+              app.models[condition.modelName].count(condition.where)
+          )
             .then((response) => {
               // found ?
-              if (response.count > 0) {
+              if (
+                (
+                  typeof response === 'number' &&
+                  response > 0
+                ) || (
+                  response &&
+                  typeof response.count === 'number' &&
+                  response.count > 0
+                )
+              ) {
                 resolve({
-                  [condition.modelName]: response.count
+                  [condition.modelName]: typeof response === 'number' ?
+                    response :
+                    response.count
                 });
                 return;
               }
@@ -181,7 +197,7 @@ module.exports = function (ExtendedPersistedModel) {
         // if the usage count is greater than 1, model is in use
         return Object.values(results).reduce(function (a, b) {
           return a + b;
-        }) > 0;
+        }, 0) > 0;
       });
   };
 
