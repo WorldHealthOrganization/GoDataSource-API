@@ -245,14 +245,6 @@
       "translation": "This permission allows converting a contact to a contact of contact",
       "section": "availablePermissions"
     },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-      "translation": "Contact Of Contact - list relationship contacts",
-      "section": "availablePermissions"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
-      "translation": "This permission allows listing contact of contact contacts",
-      "section": "availablePermissions"
-    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
       "translation": "Contact of contact - convert to contact",
       "section": "availablePermissions"
@@ -654,7 +646,7 @@
       "section": "uiLocationsUsageListPage"
     },
     "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CONTACT_OF_CONTACTS": {
-      "translation": "Contact of Contacts",
+      "translation": "Contact of contacts",
       "section": "uiLocationsUsageListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
