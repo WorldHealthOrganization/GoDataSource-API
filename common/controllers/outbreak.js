@@ -662,7 +662,7 @@ module.exports = function (Outbreak) {
             },
             {
               type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-              'followUp.startDate': {
+              'followUp': {
                 'originalStartDate': new Date(),
                 'startDate': new Date(),
                 'endDate': new Date(),
