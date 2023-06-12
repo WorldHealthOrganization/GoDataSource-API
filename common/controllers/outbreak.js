@@ -662,6 +662,21 @@ module.exports = function (Outbreak) {
             },
             {
               type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+              'followUp.startDate': {
+                'originalStartDate': new Date(),
+                'startDate': new Date(),
+                'endDate': new Date(),
+                'status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+              },
+              'followUpHistory': [
+                {
+                  "startDate": new Date(),
+                  "endDate": new Date()
+                }, {
+                  "status": "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP",
+                  "startDate": new Date()
+                }
+              ],
               dateBecomeContact: app.utils.helpers.getDate().toDate(),
               wasContactOfContact: true
             },
