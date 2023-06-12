@@ -649,6 +649,10 @@
       "translation": "Contact of contacts",
       "section": "uiLocationsUsageListPage"
     },
+    "LNG_SIDE_FILTERS_LOAD_FILTER_IS_PUBLIC_LABEL": {
+      "translation": "Public",
+      "section": "uiSideFilter"
+    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
       "translation": "Contact of contact - list relationship contacts",
       "section": "availablePermissions"
