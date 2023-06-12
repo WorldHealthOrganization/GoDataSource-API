@@ -667,7 +667,7 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
-        // get the converted contacts to update the rest of the fields and update the, again to trigger the hooks
+        // get the converted contacts to update the rest of the fields and update them again to trigger the hooks
         return app.models.contact
           .find({
             where: {
