@@ -718,7 +718,10 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relationshipPersons) {
-        if (!relationshipPersons.length) {
+        if (
+          !relationshipPersons ||
+          !relationshipPersons.length
+        ) {
           // nothing left to do
           return Promise.resolve();
         }
