@@ -11,7 +11,6 @@ const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain
 const apiError = require('./apiError');
 const bcrypt = require('bcrypt');
 const Config = require('./../server/config.json');
-const app = require("../server/server");
 
 const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
 
@@ -734,12 +733,12 @@ const syncRecord = function (app, model, record, options, done) {
       findRecord = app.models.person
         .rawFind(
           alternateQueryForRecord, {
-          projection: {
-            id: 1,
-            type: 1
-          },
-          limit: 2
-        })
+            projection: {
+              id: 1,
+              type: 1
+            },
+            limit: 2
+          })
         .then(function (results) {
           // check if the person was converted
           if (
@@ -747,7 +746,7 @@ const syncRecord = function (app, model, record, options, done) {
             results.length
           ) {
             // set the new model ?
-             const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
             if (model.modelName !== personModel.modelName) {
               model = personModel;
             }
@@ -759,7 +758,7 @@ const syncRecord = function (app, model, record, options, done) {
               where: alternateQueryForRecord,
               limit: 2,
               deleted: true
-            })
+            });
         });
     } else {
       findRecord = model
@@ -767,22 +766,22 @@ const syncRecord = function (app, model, record, options, done) {
           where: alternateQueryForRecord,
           limit: 2,
           deleted: true
-        })
+        });
     }
     findRecord.then(results => {
-        if (!results || !results.length) {
-          // no db record was found; continue with creating the record
-          return null;
-        } else if (results.length > 1) {
-          // more than one result found; we cannot know which one we should update
-          return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
-            alternateIdQuery: stringifiedAlternateQuery
-          }));
-        }
+      if (!results || !results.length) {
+        // no db record was found; continue with creating the record
+        return null;
+      } else if (results.length > 1) {
+        // more than one result found; we cannot know which one we should update
+        return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+          alternateIdQuery: stringifiedAlternateQuery
+        }));
+      }
 
-        // single record found; continue with it and try to update it
-        return results[0];
-      });
+      // single record found; continue with it and try to update it
+      return results[0];
+    });
   } else {
     log('debug', 'Record id not present');
     // record id not present, don't search for a record

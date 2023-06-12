@@ -784,23 +784,22 @@ module.exports = function (Relationship) {
 
         // validate each person
         relationship.persons.forEach(function (person) {
-            if (!Object.keys(relationshipPersonMap[person.id]).length) {
-              throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
-            }
-
-            // check type
-            if (person.type !== relationshipPersonMap[person.id].type) {
-              convertedPersonFound = true;
-              person.type = relationshipPersonMap[person.id].type;
-            }
-            persons.push(person);
+          if (!Object.keys(relationshipPersonMap[person.id]).length) {
+            throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
           }
-        );
+
+          // check type
+          if (person.type !== relationshipPersonMap[person.id].type) {
+            convertedPersonFound = true;
+            person.type = relationshipPersonMap[person.id].type;
+          }
+          persons.push(person);
+        });
 
         // update persons from relationship
-         return convertedPersonFound ?
-           relationship.updateAttributes({persons: persons}, context.options): persons
-           Promise.resolve();
+        return convertedPersonFound ?
+          relationship.updateAttributes({persons: persons}, context.options) :
+          Promise.resolve();
       })
       .then(() => {
         // keep a list of update actions
@@ -883,7 +882,7 @@ module.exports = function (Relationship) {
 
                 // update
                 return personRecord.updateAttributes(relationshipsPayload, context.options);
-               })
+              })
           );
         });
 
@@ -1033,7 +1032,7 @@ module.exports = function (Relationship) {
               // nothing to do
               callback();
             }
-          })
+          });
       })
       .catch(callback);
   });
