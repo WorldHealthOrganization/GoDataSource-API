@@ -757,247 +757,283 @@ module.exports = function (Relationship) {
     // get created/modified relationship
     let relationship = context.instance;
 
-    // keep a list of update actions
-    const updatePersonRecords = [];
-    const mustUpdateNoOfContactsAndExposuresMap = {};
+    // go through the people that are part of the relationship to check if they exists
+    const relationshipPersonMap = {};
+    const relationshipPersonTypeMap = {};
     // go through the people that are part of the relationship
-    relationship.persons.forEach(function (person, personIndex) {
-      // add to list of records that we need to update number of contacts and exposures
-      mustUpdateNoOfContactsAndExposuresMap[person.id] = true;
-
-      // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
-      updatePersonRecords.push(
-        // load the record
-        app.models.person
-          .findOne({
-            where: {
-              id: person.id
-            },
-            deleted: true
-          })
-          .then(function (personRecord) {
-            // if the record is not found, stop with err
-            if (!personRecord) {
-              throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
-            }
-            personRecord.systemTriggeredUpdate = true;
-
-            // initialize person relationships related payload; will be updated depending on action taken on relationships
-            let personRelationships = personRecord.relationshipsRepresentation || [];
-            let relationshipsPayload = {};
-
-            if (relationship.deleted) {
-              // remove relationship from relationshipsRepresentation
-              relationshipsPayload = {
-                '$pull': {
-                  relationshipsRepresentation: {
-                    id: relationship.id
-                  }
-                }
-              };
-
-              // when a relationship is deleted we need to check if the person has additional relationships
-              if (personRelationships.length - 1 > 0) {
-                // person will still have relationships
-                relationshipsPayload['$set'] = {
-                  hasRelationships: true
-                };
-              } else {
-                // no relationships remain
-                relationshipsPayload['$set'] = {
-                  hasRelationships: false
-                };
-              }
-            } else {
-              // relationship just created or updated
-              relationshipsPayload = {
-                '$set': {
-                  hasRelationships: true
-                }
-              };
-
-              // create payload for relationship representations
-              // get other participant
-              let otherParticipant = relationship.persons[personIndex === 0 ? 1 : 0];
-              let relationshipRepresentationPayload = {
-                id: relationship.id,
-                active: relationship.active,
-                otherParticipantType: otherParticipant.type,
-                otherParticipantId: otherParticipant.id,
-                target: person.target,
-                source: person.source
-              };
-
-              let relationshipIndex = personRelationships.findIndex(rel => rel.id === relationship.id);
-              if (relationshipIndex === -1) {
-                // relationship was not found in current person relationships; add it
-                relationshipsPayload['$addToSet'] = {
-                  relationshipsRepresentation: relationshipRepresentationPayload
-                };
-              } else {
-                // relationship already exists; replace its entry from the relationships representation with the new one
-                relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
-              }
-            }
-
-            // update
-            return personRecord.updateAttributes(relationshipsPayload, context.options);
-          })
-      );
+    let persons = [];
+    relationship.persons.forEach(function (person) {
+      relationshipPersonTypeMap[person.id] = person.type;
     });
 
-    // when the relationship is modified the source and target can be changed
-    // in this case we need to remove the relationship from the old participant
-    // Note: the relationships information is already updated above for the new participants
-    if (!context.isNewInstance && !relationship.deleted) {
-      let oldParticipants = app.utils.helpers.getValueFromContextOptions(context, 'oldParticipants');
-      // loop through the old participants and check if they are still in the relationship
-      oldParticipants.forEach(oldPerson => {
-        if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
-          // add to list of records that we need to update number of contacts and exposures
-          mustUpdateNoOfContactsAndExposuresMap[oldPerson.id] = true;
+    // load the record
+    app.models.person
+      .find({
+        where: {
+          _id: {
+            $in: Object.keys(relationshipPersonTypeMap)
+          }
+        }
+      })
+      .then(function (records) {
+        let convertedPersonFound = false;
+        for (const person of records) {
+          // keep each person model
+          relationshipPersonMap[person.id] = person;
+        }
 
-          // we need to update the old person
+        // validate each person
+        relationship.persons.forEach(function (person) {
+            if (!Object.keys(relationshipPersonMap[person.id]).length) {
+              throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
+            }
+
+            // check type
+            if (person.type !== relationshipPersonMap[person.id].type) {
+              convertedPersonFound = true;
+              person.type = relationshipPersonMap[person.id].type;
+            }
+            persons.push(person);
+          }
+        );
+
+        // update persons from relationship
+         return convertedPersonFound ?
+           relationship.updateAttributes({persons: persons}, context.options): persons
+           Promise.resolve();
+      })
+      .then(() => {
+        // keep a list of update actions
+        const updatePersonRecords = [];
+        const mustUpdateNoOfContactsAndExposuresMap = {};
+        // go through the people that are part of the relationship
+        relationship.persons.forEach(function (person, personIndex) {
+          // add to list of records that we need to update number of contacts and exposures
+          mustUpdateNoOfContactsAndExposuresMap[person.id] = true;
+
+          // trigger update operations on them (they might have before/after save listeners that need to be triggered on relationship updates)
           updatePersonRecords.push(
             // load the record
-            app.models.person
-              .findOne({
-                where: {
-                  id: oldPerson.id
-                },
-                deleted: true
-              })
+            Promise.resolve(relationshipPersonMap[person.id])
               .then(function (personRecord) {
                 // if the record is not found, stop with err
                 if (!personRecord) {
-                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${oldPerson.id}) not found.`);
+                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
                 }
+
                 personRecord.systemTriggeredUpdate = true;
 
                 // initialize person relationships related payload; will be updated depending on action taken on relationships
                 let personRelationships = personRecord.relationshipsRepresentation || [];
-                let relationshipsPayload = {
-                  // remove relationship from relationshipsRepresentation
-                  '$pull': {
-                    relationshipsRepresentation: {
-                      id: relationship.id
-                    }
-                  }
-                };
+                let relationshipsPayload = {};
 
-                // check if the person has additional relationships
-                if (personRelationships.length - 1 > 0) {
-                  // person will still have relationships
-                  relationshipsPayload['$set'] = {
-                    hasRelationships: true
+                if (relationship.deleted) {
+                  // remove relationship from relationshipsRepresentation
+                  relationshipsPayload = {
+                    '$pull': {
+                      relationshipsRepresentation: {
+                        id: relationship.id
+                      }
+                    }
                   };
+
+                  // when a relationship is deleted we need to check if the person has additional relationships
+                  if (personRelationships.length - 1 > 0) {
+                    // person will still have relationships
+                    relationshipsPayload['$set'] = {
+                      hasRelationships: true
+                    };
+                  } else {
+                    // no relationships remain
+                    relationshipsPayload['$set'] = {
+                      hasRelationships: false
+                    };
+                  }
                 } else {
-                  // no relationships remain
-                  relationshipsPayload['$set'] = {
-                    hasRelationships: false
+                  // relationship just created or updated
+                  relationshipsPayload = {
+                    '$set': {
+                      hasRelationships: true
+                    }
                   };
+
+                  // create payload for relationship representations
+                  // get other participant
+                  let otherParticipant = relationship.persons[personIndex === 0 ? 1 : 0];
+                  let relationshipRepresentationPayload = {
+                    id: relationship.id,
+                    active: relationship.active,
+                    otherParticipantType: otherParticipant.type,
+                    otherParticipantId: otherParticipant.id,
+                    target: person.target,
+                    source: person.source
+                  };
+
+                  let relationshipIndex = personRelationships.findIndex(rel => rel.id === relationship.id);
+                  if (relationshipIndex === -1) {
+                    // relationship was not found in current person relationships; add it
+                    relationshipsPayload['$addToSet'] = {
+                      relationshipsRepresentation: relationshipRepresentationPayload
+                    };
+                  } else {
+                    // relationship already exists; replace its entry from the relationships representation with the new one
+                    relationshipsPayload['$set'][`relationshipsRepresentation.${relationshipIndex}`] = relationshipRepresentationPayload;
+                  }
                 }
 
                 // update
                 return personRecord.updateAttributes(relationshipsPayload, context.options);
-              })
+               })
           );
-        }
-      });
-    }
+        });
 
-    // after finishing updating dates of last contact
-    Promise.all(updatePersonRecords)
-      // count contacts and exposures ?
-      .then(() => {
-        // attach update number of contacts and number of exposures requests
-        const personsToUpdate = Object.keys(mustUpdateNoOfContactsAndExposuresMap);
-        if (personsToUpdate.length < 1) {
-          return;
-        }
+        // when the relationship is modified the source and target can be changed
+        // in this case we need to remove the relationship from the old participant
+        // Note: the relationships information is already updated above for the new participants
+        if (!context.isNewInstance && !relationship.deleted) {
+          let oldParticipants = app.utils.helpers.getValueFromContextOptions(context, 'oldParticipants');
+          // loop through the old participants and check if they are still in the relationship
+          oldParticipants.forEach(oldPerson => {
+            if (!relationship.persons.find(newPerson => newPerson.id === oldPerson.id)) {
+              // add to list of records that we need to update number of contacts and exposures
+              mustUpdateNoOfContactsAndExposuresMap[oldPerson.id] = true;
 
-        // get collection name from settings (if defined)
-        let collectionName = _.get(app.models.person, 'definition.settings.mongodb.collection');
+              // we need to update the old person
+              updatePersonRecords.push(
+                // load the record
+                Promise.resolve(relationshipPersonMap[oldPerson.id])
+                  .then(function (personRecord) {
+                    // if the record is not found, stop with err
+                    if (!personRecord) {
+                      throw app.logger.error(`Failed to trigger person record updates. Person (id: ${oldPerson.id}) not found.`);
+                    }
+                    personRecord.systemTriggeredUpdate = true;
 
-        // if collection name was not defined in settings
-        if (!collectionName) {
-          // get it from model name
-          collectionName = app.models.person.modelName;
-        }
+                    // initialize person relationships related payload; will be updated depending on action taken on relationships
+                    let personRelationships = personRecord.relationshipsRepresentation || [];
+                    let relationshipsPayload = {
+                      // remove relationship from relationshipsRepresentation
+                      '$pull': {
+                        relationshipsRepresentation: {
+                          id: relationship.id
+                        }
+                      }
+                    };
 
-        // get collection
-        const collection = app.dataSources.mongoDb.connector.collection(collectionName);
-        return collection.updateMany(
-          {
-            _id: {
-              $in: personsToUpdate
+                    // check if the person has additional relationships
+                    if (personRelationships.length - 1 > 0) {
+                      // person will still have relationships
+                      relationshipsPayload['$set'] = {
+                        hasRelationships: true
+                      };
+                    } else {
+                      // no relationships remain
+                      relationshipsPayload['$set'] = {
+                        hasRelationships: false
+                      };
+                    }
+
+                    // update
+                    return personRecord.updateAttributes(relationshipsPayload, context.options);
+                  })
+              );
             }
-          }, [{
-            $set: {
-              numberOfContacts: {
-                $size: {
-                  $filter: {
-                    input: '$relationshipsRepresentation',
-                    as: 'item',
-                    cond: {
-                      $eq: [
-                        '$$item.source',
-                        true
-                      ]
+          });
+        }
+
+        // after finishing updating dates of last contact
+        Promise.all(updatePersonRecords)
+          // count contacts and exposures ?
+          .then(() => {
+            // attach update number of contacts and number of exposures requests
+            const personsToUpdate = Object.keys(mustUpdateNoOfContactsAndExposuresMap);
+            if (personsToUpdate.length < 1) {
+              return;
+            }
+
+            // get collection name from settings (if defined)
+            let collectionName = _.get(app.models.person, 'definition.settings.mongodb.collection');
+
+            // if collection name was not defined in settings
+            if (!collectionName) {
+              // get it from model name
+              collectionName = app.models.person.modelName;
+            }
+
+            // get collection
+            const collection = app.dataSources.mongoDb.connector.collection(collectionName);
+            return collection.updateMany(
+              {
+                _id: {
+                  $in: personsToUpdate
+                }
+              }, [{
+                $set: {
+                  numberOfContacts: {
+                    $size: {
+                      $filter: {
+                        input: '$relationshipsRepresentation',
+                        as: 'item',
+                        cond: {
+                          $eq: [
+                            '$$item.source',
+                            true
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  numberOfExposures: {
+                    $size: {
+                      $filter: {
+                        input: '$relationshipsRepresentation',
+                        as: 'item',
+                        cond: {
+                          $eq: [
+                            '$$item.target',
+                            true
+                          ]
+                        }
+                      }
                     }
                   }
                 }
-              },
-              numberOfExposures: {
-                $size: {
-                  $filter: {
-                    input: '$relationshipsRepresentation',
-                    as: 'item',
-                    cond: {
-                      $eq: [
-                        '$$item.target',
-                        true
-                      ]
-                    }
+              }]
+            );
+          })
+
+          // continue
+          .then(function () {
+            // get contact representation in the relationship
+            let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+
+            // check if the relationship created included a contact
+            if (contactInPersons) {
+              // trigger update operations on it (might have before/after save listeners that need to be triggered on relationship updates)
+              return app.models.contact
+                .findOne({
+                  where: {
+                    id: contactInPersons.id
+                  },
+                  deleted: true
+                })
+                .then(function (contactRecord) {
+                  // if the record is not found, stop with err
+                  if (!contactRecord) {
+                    throw app.logger.error(`Failed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
                   }
-                }
-              }
-            }
-          }]
-        );
-      })
-
-      // continue
-      .then(function () {
-        // get contact representation in the relationship
-        let contactInPersons = relationship.persons.find(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
-
-        // check if the relationship created included a contact
-        if (contactInPersons) {
-          // trigger update operations on it (might have before/after save listeners that need to be triggered on relationship updates)
-          return app.models.contact
-            .findOne({
-              where: {
-                id: contactInPersons.id
-              },
-              deleted: true
-            })
-            .then(function (contactRecord) {
-              // if the record is not found, stop with err
-              if (!contactRecord) {
-                throw app.logger.error(`Failed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
-              }
-              contactRecord.systemTriggeredUpdate = true;
-              // trigger record update
-              return contactRecord.updateAttributes({}, context.options);
-            })
-            .then(function () {
+                  contactRecord.systemTriggeredUpdate = true;
+                  // trigger record update
+                  return contactRecord.updateAttributes({}, context.options);
+                })
+                .then(function () {
+                  callback();
+                });
+            } else {
+              // nothing to do
               callback();
-            });
-        } else {
-          // nothing to do
-          callback();
-        }
+            }
+          })
       })
       .catch(callback);
   });

@@ -11,6 +11,7 @@ const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain
 const apiError = require('./apiError');
 const bcrypt = require('bcrypt');
 const Config = require('./../server/config.json');
+const app = require("../server/server");
 
 const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
 
@@ -489,25 +490,21 @@ const syncRecordFlags = {
  * Functionality description:
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
- * @param logger
+ * @param app
  * @param model
- * @param alternateModel
  * @param record
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (
-  logger,
-  model,
-  alternateModel,
-  record,
-  options,
-  done
-) {
+const syncRecord = function (app, model, record, options, done) {
   // log formatted message
   function log(level, message) {
-    logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
+    app.logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
   }
+
+  const isPersonModel = model.modelName === app.models.case.modelName ||
+    model.modelName === app.models.contact.modelName ||
+    model.modelName === app.models.contactOfContact.modelName;
 
   // convert first level GeoPoints to valid Loopback GeoPoint on sync action
   // on sync the GeoPoint is received as it is saved in the DB (contains coordinates)
@@ -682,13 +679,48 @@ const syncRecord = function (
     record.id !== ''
   ) {
     log('debug', `Trying to find record with id ${record.id}.`);
-    findRecord = alternateModel
-      .findOne({
-        where: {
+    if (isPersonModel) {
+      findRecord = app.models.person
+        .rawFind({
           id: record.id
-        },
-        deleted: true
-      });
+        }, {
+          projection: {
+            id: 1,
+            type: 1
+          },
+          limit: 1
+        })
+        .then(function (results) {
+          // check if the person was converted
+          if (
+            results &&
+            results.length
+          ) {
+            // set the new model ?
+            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            if (model.modelName !== personModel.modelName) {
+              model = personModel;
+            }
+          }
+
+          // get the record again to not change the workflow
+          return model
+            .findOne({
+              where: {
+                id: record.id
+              },
+              deleted: true
+            });
+        });
+    } else {
+      findRecord = model
+        .findOne({
+          where: {
+            id: record.id
+          },
+          deleted: true
+        });
+    }
   }
   // some models might query for different unique identifiers when id is not present
   else if (
@@ -698,13 +730,46 @@ const syncRecord = function (
   ) {
     const stringifiedAlternateQuery = JSON.stringify(alternateQueryForRecord);
     log('debug', `Trying to find record with alternate unique identifier ${stringifiedAlternateQuery}.`);
-    findRecord = alternateModel
-      .find({
-        where: alternateQueryForRecord,
-        limit: 2,
-        deleted: true
-      })
-      .then(results => {
+    if (isPersonModel) {
+      findRecord = app.models.person
+        .rawFind(
+          alternateQueryForRecord, {
+          projection: {
+            id: 1,
+            type: 1
+          },
+          limit: 2
+        })
+        .then(function (results) {
+          // check if the person was converted
+          if (
+            results &&
+            results.length
+          ) {
+            // set the new model ?
+             const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            if (model.modelName !== personModel.modelName) {
+              model = personModel;
+            }
+          }
+
+          // get the record again to not change the workflow
+          return model
+            .find({
+              where: alternateQueryForRecord,
+              limit: 2,
+              deleted: true
+            })
+        });
+    } else {
+      findRecord = model
+        .find({
+          where: alternateQueryForRecord,
+          limit: 2,
+          deleted: true
+        })
+    }
+    findRecord.then(results => {
         if (!results || !results.length) {
           // no db record was found; continue with creating the record
           return null;
@@ -794,7 +859,7 @@ const syncRecord = function (
                 .destroy(options)
                 .then(function () {
                   // get the record from the db to send it back
-                  return alternateModel
+                  return model
                     .findOne({
                       where: {
                         id: record.id

@@ -256,42 +256,31 @@ module.exports = function (Sync) {
 
                             // differentiate between different types of person
                             let syncModel = model;
-                            let alternateSyncModel = model;
                             if (model.modelName === app.models.person.modelName) {
                               switch (collectionRecord.type) {
                                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
                                   syncModel = app.models.case;
-                                  alternateSyncModel = app.models.person;
                                   break;
                                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
                                   syncModel = app.models.event;
-                                  alternateSyncModel = app.models.person;
                                   break;
                                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
                                   syncModel = app.models.contact;
-                                  alternateSyncModel = app.models.person;
                                   break;
                                 case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
                                   syncModel = app.models.contactOfContact;
-                                  alternateSyncModel = app.models.person;
                                   break;
                               }
                             }
 
                             // sync the record with the main database
-                            dbSync.syncRecord(
-                              app.logger,
-                              syncModel,
-                              alternateSyncModel,
-                              collectionRecord,
-                              reqOptions,
-                              (err) => {
-                                if (err) {
-                                  app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
-                                  failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
-                                }
-                                return doneRecord();
-                              });
+                            dbSync.syncRecord(app, syncModel, collectionRecord, reqOptions, (err) => {
+                              if (err) {
+                                app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
+                                failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
+                              }
+                              return doneRecord();
+                            });
                           });
 
                           // depending on collection the sync can be done in parallel or in series
