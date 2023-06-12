@@ -661,27 +661,40 @@ module.exports = function (Outbreak) {
               }
             },
             {
-              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-              'followUp': {
-                'originalStartDate': new Date(),
-                'startDate': new Date(),
-                'endDate': new Date(),
-                'status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
-              },
-              'followUpHistory': [
-                {
-                  "startDate": new Date(),
-                  "endDate": new Date()
-                }, {
-                  "status": "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP",
-                  "startDate": new Date()
-                }
-              ],
-              dateBecomeContact: app.utils.helpers.getDate().toDate(),
-              wasContactOfContact: true
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
             },
             options
           );
+      })
+      .then(function () {
+        // get the converted contacts to update the rest of the fields and update the, again to trigger the hooks
+        return app.models.contact
+          .find({
+            where: {
+              'id': {
+                $in: Object.keys(contactsOfContactsMap)
+              }
+            }
+          });
+      })
+      .then(function (records) {
+        if (
+          !records ||
+          !records.length
+        ) {
+          // nothing left to do
+          return Promise.resolve();
+        }
+
+        // update the rest of the fields
+        const updateContacts = [];
+        records.forEach(function (contact) {
+          updateContacts.push(contact.updateAttributes({
+            dateBecomeContact: app.utils.helpers.getDate().toDate(),
+            wasContactOfContact: true
+          }, options));
+        });
+        return Promise.all(updateContacts);
       })
       .then(function () {
         return app.models.relationship
