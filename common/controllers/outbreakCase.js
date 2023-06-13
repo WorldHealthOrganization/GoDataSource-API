@@ -1696,7 +1696,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
-    let caseInstance, convertedContact, relationshipPersonsMap = {};
+    let caseInstance, convertedContact;
     app.models.case
       .findOne({
         where: {
@@ -1804,9 +1804,6 @@ module.exports = function (Outbreak) {
             if (person.id === caseId) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
-            }  else {
-              // find his contacts relationships to convert to update "type" from the "relationshipsRepresentation" field
-              relationshipPersonsMap[person.id] = true;
             }
             persons.push(person);
           });
