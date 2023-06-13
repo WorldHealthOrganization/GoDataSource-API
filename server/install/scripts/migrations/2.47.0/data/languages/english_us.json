@@ -653,6 +653,12 @@
       "translation": "Public",
       "section": "uiSideFilter"
     },
+    "LNG_SIDE_FILTERS_SECTION_SORT_TITLE": {
+      "translation": "Sort ({{no}})"
+    },
+    "LNG_SIDE_FILTERS_SECTION_FILTER_TITLE": {
+      "translation": "Filter ({{no}})"
+    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
       "translation": "Contact of contact - list relationship contacts",
       "section": "availablePermissions"
