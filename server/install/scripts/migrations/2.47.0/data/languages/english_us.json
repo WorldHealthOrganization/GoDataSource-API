@@ -640,6 +640,12 @@
     "LNG_SIDE_FILTERS_LOAD_FILTER_IS_PUBLIC_LABEL": {
       "translation": "Public",
       "section": "uiSideFilter"
+    },
+    "LNG_SIDE_FILTERS_SECTION_SORT_TITLE": {
+      "translation": "Sort ({{no}})"
+    },
+    "LNG_SIDE_FILTERS_SECTION_FILTER_TITLE": {
+      "translation": "Filter ({{no}})"
     }
   }
 }
