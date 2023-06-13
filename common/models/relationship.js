@@ -760,7 +760,6 @@ module.exports = function (Relationship) {
     // go through the people that are part of the relationship to check if they exists
     const relationshipPersonMap = {};
     const relationshipPersonTypeMap = {};
-    // go through the people that are part of the relationship
     let persons = [];
     relationship.persons.forEach(function (person) {
       relationshipPersonTypeMap[person.id] = person.type;
