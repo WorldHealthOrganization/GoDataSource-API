@@ -777,7 +777,6 @@ module.exports = function (Relationship) {
             const recordIds = records.map(record => record.id);
             const idsNotFound = personIds.filter(personId => !recordIds.includes(personId)).join(', ');
             throw app.logger.error(`Failed to trigger person record updates. Persons (ids: ${idsNotFound}) not found.`);
-            // return next();
           }
 
           // map records found
