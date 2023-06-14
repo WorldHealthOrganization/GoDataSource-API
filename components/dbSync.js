@@ -668,7 +668,7 @@ const syncRecord = function (app, model, record, options, done) {
     })(record, model._parsedDateProperties);
   }
 
-  let findRecord = Promise.resolve();;
+  let findRecord = Promise.resolve();
   let alternateQueryForRecord;
 
   // check if a record with the given id exists if record.id exists
