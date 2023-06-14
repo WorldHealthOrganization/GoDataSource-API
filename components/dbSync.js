@@ -668,7 +668,7 @@ const syncRecord = function (app, model, record, options, done) {
     })(record, model._parsedDateProperties);
   }
 
-  let findRecord;
+  let findRecord = Promise.resolve();;
   let alternateQueryForRecord;
 
   // check if a record with the given id exists if record.id exists
@@ -702,25 +702,18 @@ const syncRecord = function (app, model, record, options, done) {
               model = personModel;
             }
           }
-
-          // get the record again to not change the workflow
-          return model
-            .findOne({
-              where: {
-                id: record.id
-              },
-              deleted: true
-            });
-        });
-    } else {
-      findRecord = model
-        .findOne({
-          where: {
-            id: record.id
-          },
-          deleted: true
         });
     }
+
+    // get the record
+    findRecord = findRecord.then(() => model
+      .findOne({
+        where: {
+          id: record.id
+        },
+        deleted: true
+      })
+    );
   }
   // some models might query for different unique identifiers when id is not present
   else if (
@@ -793,8 +786,6 @@ const syncRecord = function (app, model, record, options, done) {
     });
   } else {
     log('debug', 'Record id not present');
-    // record id not present, don't search for a record
-    findRecord = Promise.resolve();
   }
 
   const syncPromise = findRecord

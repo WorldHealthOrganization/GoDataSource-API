@@ -722,7 +722,7 @@ module.exports = function (Relationship) {
       // get case IDs from from the relationship
       let caseIds = data.source.all.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE').map(caseRecord => caseRecord.id);
       // if cases were found
-      if (caseIds) {
+      if (caseIds.length) {
         // find cases
         app.models.case
           .find({
