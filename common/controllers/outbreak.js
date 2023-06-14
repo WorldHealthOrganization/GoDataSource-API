@@ -659,7 +659,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         // check if there are contacts of contacts
         const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
-        if (!Object.keys(contactsOfContactsMap).length) {
+        if (!contactsOfContactsIds.length) {
           return [];
         }
 
@@ -680,7 +680,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         // check if there are contacts of contacts
         const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
-        if (!Object.keys(contactsOfContactsMap).length) {
+        if (!contactsOfContactsIds.length) {
           return [];
         }
 
@@ -713,7 +713,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         // check if there are contacts of contacts
         const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
-        if (!Object.keys(contactsOfContactsMap).length) {
+        if (!contactsOfContactsIds.length) {
           return [];
         }
 
@@ -754,7 +754,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         // check if there are contacts of contacts
         const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
-        if (!Object.keys(contactsOfContactsMap).length) {
+        if (!contactsOfContactsIds.length) {
           return;
         }
 
