@@ -1719,7 +1719,10 @@ module.exports = function (Outbreak) {
         // in order for a case to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
+          .rawFind({
+            // required to use index to improve greatly performance
+            'persons.id': caseId,
+
             $or: [
               {
                 'persons.0.id': caseId,
@@ -1736,6 +1739,12 @@ module.exports = function (Outbreak) {
                 }
               }
             ]
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
           });
       })
       .then(function (relationsNumber) {
@@ -1785,7 +1794,9 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: caseId});
         }
 
+        // keep the contact as we will do actions on it
         convertedContact = contact;
+
         // after updating the case, find it's relations
         return app.models.relationship
           .find({
@@ -1795,6 +1806,11 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
@@ -1863,7 +1879,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (caseData) {
             createCases.push(function (asyncCallback) {
               // sync the case
-              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+              return app.utils.dbSync.syncRecord(app, app.models.case, caseData.save, options)
                 .then(function () {
                   asyncCallback();
                 })

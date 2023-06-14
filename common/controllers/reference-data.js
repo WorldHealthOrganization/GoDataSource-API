@@ -123,7 +123,7 @@ module.exports = function (ReferenceData) {
       batchData.forEach(function (referenceDataItem) {
         syncReferenceData.push(function (asyncCallback) {
           // sync reference data
-          return app.utils.dbSync.syncRecord(logger, app.models.referenceData, referenceDataItem.save, options)
+          return app.utils.dbSync.syncRecord(app, app.models.referenceData, referenceDataItem.save, options)
             .then(function () {
               asyncCallback();
             })

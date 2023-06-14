@@ -546,7 +546,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
-    let convertedCase, contactsOfContactsMap = {}, relationshipPersonsMap = {};
+    let convertedCase, contactsOfContactsMap = {};
     app.models.contact
       .findOne({
         where: {
@@ -617,6 +617,11 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
@@ -652,12 +657,18 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!Object.keys(contactsOfContactsMap).length) {
+          return [];
+        }
+
         // convert contacts of contacts to contacts
         return app.models.person
           .rawBulkUpdate(
             {
               id: {
-                $in: Object.keys(contactsOfContactsMap)
+                $in: contactsOfContactsIds
               }
             },
             {
@@ -667,23 +678,26 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!Object.keys(contactsOfContactsMap).length) {
+          return [];
+        }
+
         // get the converted contacts to update the rest of the fields and update them again to trigger the hooks
         return app.models.contact
           .find({
             where: {
               'id': {
-                $in: Object.keys(contactsOfContactsMap)
+                $in: contactsOfContactsIds
               }
             }
           });
       })
       .then(function (records) {
-        if (
-          !records ||
-          !records.length
-        ) {
-          // nothing left to do
-          return Promise.resolve();
+        // check if there are records
+        if (!records.length) {
+          return;
         }
 
         // update the rest of the fields
@@ -697,16 +711,28 @@ module.exports = function (Outbreak) {
         return Promise.all(updateContacts);
       })
       .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!Object.keys(contactsOfContactsMap).length) {
+          return [];
+        }
+
+        // get the relationship persons for contacts of contacts
         return app.models.relationship
           .find({
             where: {
               'persons.id': {
-                $in: Object.keys(contactsOfContactsMap)
+                $in: contactsOfContactsIds
               }
             }
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
@@ -716,67 +742,35 @@ module.exports = function (Outbreak) {
             if (contactsOfContactsMap[person.id]) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
-            } else {
-              // find his contacts relationships to convert to update "type" from the "relationshipsRepresentation" field
-              relationshipPersonsMap[person.id] = true;
             }
             persons.push(person);
           });
-          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+
+          // force also trigger the ""after save" hook
+          updateRelations.push(relation.updateAttributes({persons: persons}, Object.assign(options, {forceTriggerPeopleUpdates: true})));
         });
         return Promise.all(updateRelations);
       })
       .then(function () {
-        if (!Object.keys(relationshipPersonsMap).length) {
-          // nothing left to do
-          return Promise.resolve();
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!Object.keys(contactsOfContactsMap).length) {
+          return;
         }
 
-        // get the relationship persons
-        return app.models.person
-          .rawFind({
-            _id: {
-              $in: Object.keys(relationshipPersonsMap)
-            }
-          }, {
-            projection: {
-              _id: 1,
-              relationshipsRepresentation: 1
-            }
-          });
-      })
-      .then(function (relationshipPersons) {
-        if (
-          !relationshipPersons ||
-          !relationshipPersons.length
-        ) {
-          // nothing left to do
-          return Promise.resolve();
-        }
-
-        // update persons
-        const updatePersons = [];
-        relationshipPersons.forEach(function (relation) {
-          let persons = [];
-          relation.relationshipsRepresentation.forEach(function (person) {
-            // gow through all occurrence of new converted contact of contact
-            if (contactsOfContactsMap[person.otherParticipantId]) {
-              // update otherParticipantType to match the new one
-              person.otherParticipantType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
-            }
-            persons.push(person);
-          });
-          updatePersons.push(app.dataSources.mongoDb.connector.collection(app.models.person.modelName)
-            .updateOne({
-              _id: relation.id
-            }, {
-              $set: {
-                relationshipsRepresentation: persons
+        // update personType from lab results for contacts of contacts
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: {
+                $in: contactsOfContactsIds
               }
-            })
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
           );
-        });
-        return Promise.all(updatePersons);
       })
       .then(function () {
         callback(null, convertedCase);

@@ -687,6 +687,7 @@ const syncRecord = function (app, model, record, options, done) {
             id: 1,
             type: 1
           },
+          includeDeletedRecords: 1,
           limit: 1
         })
         .then(function (results) {
@@ -737,6 +738,7 @@ const syncRecord = function (app, model, record, options, done) {
               id: 1,
               type: 1
             },
+            includeDeletedRecords: 1,
             limit: 2
           })
         .then(function (results) {

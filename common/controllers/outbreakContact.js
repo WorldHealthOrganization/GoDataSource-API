@@ -3350,7 +3350,7 @@ module.exports = function (Outbreak) {
             const dataToSave = recordData.save;
             createContacts.push(function (asyncCallback) {
               // sync the contact
-              return app.utils.dbSync.syncRecord(logger, app.models.contact, dataToSave.contact, options)
+              return app.utils.dbSync.syncRecord(app, app.models.contact, dataToSave.contact, options)
                 .then(function (syncResult) {
                   const contactRecord = syncResult.record;
                   // promisify next step
@@ -3369,7 +3369,7 @@ module.exports = function (Outbreak) {
                       }
 
                       // sync relationship
-                      return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                      return app.utils.dbSync.syncRecord(app, app.models.relationship, dataToSave.relationship, options)
                         .then(function () {
                           // relationship successfully created, move to tne next one
                           resolve();
@@ -3492,7 +3492,10 @@ module.exports = function (Outbreak) {
         // in order for a contact to be converted to a contact of contact it must be related to at least another contact and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
+          .rawFind({
+            // required to use index to improve greatly performance
+            'persons.id': contactId,
+
             $or: [
               {
                 'persons.0.id': contactId,
@@ -3505,6 +3508,12 @@ module.exports = function (Outbreak) {
                 'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
               }
             ]
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
           });
       })
       .then(function (relationsNumber) {
@@ -3547,7 +3556,9 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contactOfContact.modelName, id: contactId});
         }
 
+        // keep the contactOfContact as we will do actions on it
         convertedContactOfContact = contactOfContact;
+
         // after updating the case, find it's relations
         return app.models.relationship
           .find({
@@ -3557,6 +3568,11 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
@@ -3572,6 +3588,19 @@ module.exports = function (Outbreak) {
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: contactId
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedContactOfContact);

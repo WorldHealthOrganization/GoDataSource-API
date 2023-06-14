@@ -749,7 +749,10 @@ module.exports = function (Relationship) {
    */
   Relationship.observe('after save', function (context, callback) {
     // prevent infinite loops
-    if (app.utils.helpers.getValueFromContextOptions(context, 'triggerPeopleUpdates')) {
+    if (
+      app.utils.helpers.getValueFromContextOptions(context, 'triggerPeopleUpdates') &&
+      !context.options.forceTriggerPeopleUpdates
+    ) {
       return Promise.resolve();
     }
     // set triggerPeopleUpdates flag to avoid triggering this again on same relationship

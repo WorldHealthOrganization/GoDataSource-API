@@ -606,7 +606,7 @@ module.exports = function (LabResult) {
               labResultData.save.personId = personInstance.id;
 
               // sync the record
-              return app.utils.dbSync.syncRecord(logger, app.models.labResult, labResultData.save, options)
+              return app.utils.dbSync.syncRecord(app, app.models.labResult, labResultData.save, options)
                 .then(function () {
                   asyncCallback();
                 });

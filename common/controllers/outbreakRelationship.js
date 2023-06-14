@@ -644,7 +644,7 @@ module.exports = function (Outbreak) {
       batchData.forEach((relation) => {
         createOps.push(callback => {
           return app.utils.dbSync.syncRecord(
-            logger,
+            app,
             app.models.relationship,
             relation.save,
             options

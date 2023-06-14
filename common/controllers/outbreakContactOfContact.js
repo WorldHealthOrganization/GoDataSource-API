@@ -957,7 +957,7 @@ module.exports = function (Outbreak) {
 
             createContactsOfContacts.push(function (asyncCallback) {
               // sync the record
-              return app.utils.dbSync.syncRecord(logger, app.models.contactOfContact, dataToSave.contactOfContact, options)
+              return app.utils.dbSync.syncRecord(app, app.models.contactOfContact, dataToSave.contactOfContact, options)
                 .then(function (syncResult) {
                   const syncedRecord = syncResult.record;
                   // promisify next step
@@ -982,7 +982,7 @@ module.exports = function (Outbreak) {
                         }
 
                         // sync relationship
-                        return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                        return app.utils.dbSync.syncRecord(app, app.models.relationship, dataToSave.relationship, options)
                           .then(function () {
                             // relationship successfully created, move to tne next one
                             resolve();
@@ -1095,7 +1095,10 @@ module.exports = function (Outbreak) {
         // in order for a contact of contact to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
+          .rawFind({
+            // required to use index to improve greatly performance
+            'persons.id': contactOfContactId,
+
             $or: [
               {
                 'persons.0.id': contactOfContactId,
@@ -1112,6 +1115,12 @@ module.exports = function (Outbreak) {
                 }
               }
             ]
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
           });
       })
       .then(function (relationsNumber) {
@@ -1186,6 +1195,19 @@ module.exports = function (Outbreak) {
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: contactOfContactId
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedContact);
