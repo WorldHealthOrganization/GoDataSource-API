@@ -745,7 +745,7 @@ module.exports = function (Relationship) {
       } else {
         next();
       }
-    }
+    };
 
     // validate persons only on sync
     if (
