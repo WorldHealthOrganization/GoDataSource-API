@@ -742,23 +742,30 @@ const syncRecord = function (app, model, record, options, done) {
             limit: 2
           })
         .then(function (results) {
+          if (!results || !results.length) {
+            // no db record was found; continue with creating the record
+            return null;
+          } else if (results.length > 1) {
+            // more than one result found; we cannot know which one we should update
+            return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+              alternateIdQuery: stringifiedAlternateQuery
+            }));
+          }
+
           // check if the person was converted
-          if (
-            results &&
-            results.length
-          ) {
-            // set the new model ?
-            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
-            if (model.modelName !== personModel.modelName) {
-              model = personModel;
-            }
+          const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+          // set the new model ?
+          if (model.modelName !== personModel.modelName) {
+            model = personModel;
           }
 
           // get the record again to not change the workflow
           return model
             .find({
-              where: alternateQueryForRecord,
-              limit: 2,
+              where: {
+                _id: results[0].id
+              },
+              limit: 1,
               deleted: true
             });
         });
