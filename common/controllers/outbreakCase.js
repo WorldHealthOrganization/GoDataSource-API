@@ -1747,8 +1747,9 @@ module.exports = function (Outbreak) {
             }
           });
       })
-      .then(function (relationsNumber) {
-        if (!relationsNumber) {
+      .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
           // the case doesn't have relations with other cases; stop conversion
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }

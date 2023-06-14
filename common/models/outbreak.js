@@ -471,10 +471,11 @@ module.exports = function (Outbreak) {
             promises.push(
               // count contact relationships with case/events except the current relationship
               app.models.relationship
-                .count({
+                .rawFind({
                   id: {
                     neq: relationshipId
                   },
+                  // required to use index to improve greatly performance
                   'persons.id': contactEntry.id,
                   $or: [
                     {
@@ -492,9 +493,15 @@ module.exports = function (Outbreak) {
                       }
                     }
                   ]
+                }, {
+                  limit: 1,
+                  // required to use index to improve greatly performance
+                  hint: {
+                    'persons.id': 1
+                  }
                 })
-                .then(function (relNo) {
-                  if (!relNo) {
+                .then(function (relations) {
+                  if (!relations.length) {
                     // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
                     return contactEntry.id;
                   } else {

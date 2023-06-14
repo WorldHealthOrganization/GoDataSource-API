@@ -3516,8 +3516,9 @@ module.exports = function (Outbreak) {
             }
           });
       })
-      .then(function (relationsNumber) {
-        if (!relationsNumber) {
+      .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
           // the contact of contact doesn't have relations with other contacts; stop conversion
           throw app.utils.apiError.getError('INVALID_CONTACT_RELATIONSHIP', {id: contactId});
         }
