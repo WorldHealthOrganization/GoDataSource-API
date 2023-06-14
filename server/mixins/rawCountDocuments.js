@@ -29,6 +29,7 @@ module.exports = function (Model) {
    * @param {number} [options.limit]
    * @param {object} [options.includeDeletedRecords]
    * @param {object} [options.applyHasMoreLimit]
+   * @param {object} [options.hint]
    * @return {Promise<number>}
    */
   Model.rawCountDocuments = function (filter, options = {}) {
@@ -112,7 +113,8 @@ module.exports = function (Model) {
       .count(
         query, {
           limit: countLimit,
-          skip: options.skip
+          skip: options.skip,
+          hint: options.hint
         }
       )
       .then((counted) => {

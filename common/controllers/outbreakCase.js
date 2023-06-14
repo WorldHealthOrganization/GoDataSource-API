@@ -1719,26 +1719,28 @@ module.exports = function (Outbreak) {
         // in order for a case to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .rawFind({
-            // required to use index to improve greatly performance
-            'persons.id': caseId,
+          .rawCountDocuments({
+            where: {
+              // required to use index to improve greatly performance
+              'persons.id': caseId,
 
-            $or: [
-              {
-                'persons.0.id': caseId,
-                'persons.0.target': true,
-                'persons.1.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+              $or: [
+                {
+                  'persons.0.id': caseId,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
+                },
+                {
+                  'persons.1.id': caseId,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
                 }
-              },
-              {
-                'persons.1.id': caseId,
-                'persons.1.target': true,
-                'persons.0.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-                }
-              }
-            ]
+              ]
+            }
           }, {
             limit: 1,
             // required to use index to improve greatly performance
@@ -1747,9 +1749,8 @@ module.exports = function (Outbreak) {
             }
           });
       })
-      .then(function (relations) {
-        // check if there are relations
-        if (!relations.length) {
+      .then(function (response) {
+        if (!response.count) {
           // the case doesn't have relations with other cases; stop conversion
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }

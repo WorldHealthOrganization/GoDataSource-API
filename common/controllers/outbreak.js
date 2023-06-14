@@ -547,6 +547,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
     let convertedCase, contactsOfContactsMap = {};
+    const updateRelations = [];
     app.models.contact
       .findOne({
         where: {
@@ -622,8 +623,7 @@ module.exports = function (Outbreak) {
           return;
         }
 
-        // update relations
-        const updateRelations = [];
+        // collect update relations
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -641,7 +641,7 @@ module.exports = function (Outbreak) {
           });
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
-        return Promise.all(updateRelations);
+        return;
       })
       .then(function () {
         // update personType from lab results
@@ -733,8 +733,7 @@ module.exports = function (Outbreak) {
           return;
         }
 
-        // update relations
-        const updateRelations = [];
+        // collect update relations
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -745,9 +744,7 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-
-          // force also trigger the ""after save" hook
-          updateRelations.push(relation.updateAttributes({persons: persons}, Object.assign(options, {forceTriggerPeopleUpdates: true})));
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })

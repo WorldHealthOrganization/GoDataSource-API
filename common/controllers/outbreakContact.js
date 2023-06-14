@@ -3492,22 +3492,24 @@ module.exports = function (Outbreak) {
         // in order for a contact to be converted to a contact of contact it must be related to at least another contact and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .rawFind({
-            // required to use index to improve greatly performance
-            'persons.id': contactId,
+          .rawCountDocuments({
+            where: {
+              // required to use index to improve greatly performance
+              'persons.id': contactId,
 
-            $or: [
-              {
-                'persons.0.id': contactId,
-                'persons.0.target': true,
-                'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-              },
-              {
-                'persons.1.id': contactId,
-                'persons.1.target': true,
-                'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-              }
-            ]
+              $or: [
+                {
+                  'persons.0.id': contactId,
+                  'persons.0.target': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                },
+                {
+                  'persons.1.id': contactId,
+                  'persons.1.target': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                }
+              ]
+            }
           }, {
             limit: 1,
             // required to use index to improve greatly performance
@@ -3516,9 +3518,8 @@ module.exports = function (Outbreak) {
             }
           });
       })
-      .then(function (relations) {
-        // check if there are relations
-        if (!relations.length) {
+      .then(function (response) {
+        if (!response.count) {
           // the contact of contact doesn't have relations with other contacts; stop conversion
           throw app.utils.apiError.getError('INVALID_CONTACT_RELATIONSHIP', {id: contactId});
         }

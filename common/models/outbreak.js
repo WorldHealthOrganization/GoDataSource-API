@@ -471,28 +471,30 @@ module.exports = function (Outbreak) {
             promises.push(
               // count contact relationships with case/events except the current relationship
               app.models.relationship
-                .rawFind({
-                  id: {
-                    neq: relationshipId
-                  },
-                  // required to use index to improve greatly performance
-                  'persons.id': contactEntry.id,
-                  $or: [
-                    {
-                      'persons.0.id': contactEntry.id,
-                      'persons.0.target': true,
-                      'persons.1.type': {
-                        $in: exposureTypes
-                      }
+                .rawCountDocuments({
+                  where: {
+                    id: {
+                      neq: relationshipId
                     },
-                    {
-                      'persons.1.id': contactEntry.id,
-                      'persons.1.target': true,
-                      'persons.0.type': {
-                        $in: exposureTypes
+                    // required to use index to improve greatly performance
+                    'persons.id': contactEntry.id,
+                    $or: [
+                      {
+                        'persons.0.id': contactEntry.id,
+                        'persons.0.target': true,
+                        'persons.1.type': {
+                          $in: exposureTypes
+                        }
+                      },
+                      {
+                        'persons.1.id': contactEntry.id,
+                        'persons.1.target': true,
+                        'persons.0.type': {
+                          $in: exposureTypes
+                        }
                       }
-                    }
-                  ]
+                    ]
+                  }
                 }, {
                   limit: 1,
                   // required to use index to improve greatly performance
@@ -500,8 +502,8 @@ module.exports = function (Outbreak) {
                     'persons.id': 1
                   }
                 })
-                .then(function (relations) {
-                  if (!relations.length) {
+                .then(function (response) {
+                  if (!response.count) {
                     // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
                     return contactEntry.id;
                   } else {
