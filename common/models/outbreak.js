@@ -2030,13 +2030,20 @@ module.exports = function (Outbreak) {
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
     let query = app.utils.remote.searchByRelationProperty
-      .convertIncludeQueryToFilterQuery(filter, {people: 'case'});
+      .convertIncludeQueryToFilterQuery(filter, {people: 'case', relationships: 'relationship'});
     // get followUp query, if any
     const queryFollowUp = _.get(filter, 'where.followUp');
     // if there is no followUp query, but there is an older version of the filter
     if (!queryFollowUp && query.followUps) {
       // use that old version
       _.set(filter, 'where.followUp', query.followUps);
+    }
+    // get relationship query, if any
+    const queryRelationship = _.get(filter, 'where.relationship');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryRelationship && query.relationship) {
+      // use that old version
+      _.set(filter, 'where.relationship', query.relationship);
     }
     // get case query, if any
     const queryCase = _.get(filter, 'where.case');
