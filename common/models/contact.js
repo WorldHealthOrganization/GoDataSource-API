@@ -825,13 +825,19 @@ module.exports = function (Contact) {
   /**
    * Pre-filter contact for an outbreak using related models (case, followUp)
    * @param outbreak
-   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.case', 'where.followUp' MongoDB compatible queries
    * @param options Options from request
    * @return {Promise<void | never>}
    */
   Contact.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
+    // get relationships query, if any
+    let relationshipsQuery = _.get(filter, 'where.relationship');
+    // if found, remove it form main query
+    if (relationshipsQuery) {
+      delete filter.where.relationship;
+    }
     // get cases query, if any
     let casesQuery = _.get(filter, 'where.case');
     // if found, remove it form main query
@@ -855,6 +861,7 @@ module.exports = function (Contact) {
       });
 
     // if a cases query is present
+    let contactIds = undefined;
     if (casesQuery) {
       // restrict query to current outbreak
       casesQuery = {
@@ -885,7 +892,7 @@ module.exports = function (Contact) {
                 })
                 .then(function (relationships) {
                   // gather contact ids from the found relationships
-                  let contactIds = [];
+                  contactIds = [];
                   // go through the relationships
                   relationships.forEach(function (relationship) {
                     // go through the people
@@ -907,7 +914,6 @@ module.exports = function (Contact) {
                       }
                     ]
                   };
-                  return contactIds;
                 });
             });
         });
@@ -915,7 +921,7 @@ module.exports = function (Contact) {
     // if there is a followUp query
     if (followUpQuery) {
       buildQuery = buildQuery
-        .then(function (contactIds) {
+        .then(function () {
           // restrict followUp query to current outbreak
           followUpQuery = {
             $and: [
@@ -951,6 +957,57 @@ module.exports = function (Contact) {
             });
         });
     }
+
+    // if there is a relationship query
+    // - _.isEmpty to ignore if we need to filter only by case fields
+    if (!_.isEmpty(relationshipsQuery)) {
+      buildQuery = buildQuery
+        .then(function () {
+          // restrict relationship query to current outbreak
+          relationshipsQuery = {
+            $and: [
+              relationshipsQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+          // if contact ids were provided, restrict the query to those contactIds
+          if (contactIds) {
+            relationshipsQuery.$and.push({
+              'persons.id': {
+                $in: contactIds
+              }
+            });
+          }
+          // find followUps that match the query
+          return app.models.relationship
+            .rawFind(relationshipsQuery, {projection: {persons: 1}})
+            .then(function (relationships) {
+              // create unique array
+              const relationshipsIds = {};
+              relationships.forEach((relationship) => {
+                relationship.persons.forEach((person) => {
+                  relationshipsIds[person.id] = true;
+                });
+              });
+
+              // update contact query to include found contacts
+              contactQuery = {
+                and: [
+                  contactQuery,
+                  {
+                    id: {
+                      inq: Object.keys(relationshipsIds)
+                    }
+                  }
+                ]
+              };
+            });
+        });
+    }
+
+    // finished
     return buildQuery
       .then(function () {
         // restrict contacts query to current outbreak
