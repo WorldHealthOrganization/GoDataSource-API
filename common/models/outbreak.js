@@ -429,7 +429,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Delete a relation for a person
-   * Do not allow deletion of the last relationship of a contact with a case/event
+   * Do not allow deletion of the last exposure relationship of a contact/contact of contact
    * @param personId
    * @param relationshipId
    * @param options
@@ -439,6 +439,7 @@ module.exports = function (Outbreak) {
     // initialize relationship instance; will be cached
     let relationshipInstance;
 
+    // get the relationship
     app.models.relationship
       .findOne({
         where: {
@@ -448,101 +449,79 @@ module.exports = function (Outbreak) {
       })
       .then(function (relationship) {
         if (!relationship) {
-          return {count: 0};
+          // ignore invalid relationship
+          return;
         }
 
         // cache relationship
         relationshipInstance = relationship;
 
-        // check if the relationship includes a contact or contact of contact; if so the last relationship of a contact with a case/event or contact cannot be deleted
-        // ignore the events and cases
-        let relationshipContacts = relationship.persons.filter(
+        // check if the relationship includes a contact or contact of contact
+        let personRelationships = relationship.persons.filter(
           person => person.target &&
             ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'].includes(person.type)
         );
-        if (relationshipContacts.length) {
-          // there are contacts in the relationship; check their other relationships;
-          // creating array of promises as the relation might be contact - contact
-          let promises = [];
-          relationshipContacts.forEach(function (contactEntry) {
-            const exposureTypes = contactEntry.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'];
-            promises.push(
-              // count contact relationships with case/events except the current relationship
-              app.models.relationship
-                .rawCountDocuments({
-                  where: {
-                    id: {
-                      neq: relationshipId
-                    },
-                    // required to use index to improve greatly performance
-                    'persons.id': contactEntry.id,
-                    $or: [
-                      {
-                        'persons.0.id': contactEntry.id,
-                        'persons.0.target': true,
-                        'persons.1.type': {
-                          $in: exposureTypes
-                        }
-                      },
-                      {
-                        'persons.1.id': contactEntry.id,
-                        'persons.1.target': true,
-                        'persons.0.type': {
-                          $in: exposureTypes
-                        }
-                      }
-                    ]
-                  }
-                }, {
-                  limit: 1,
-                  // required to use index to improve greatly performance
-                  hint: {
-                    'persons.id': 1
-                  }
-                })
-                .then(function (response) {
-                  if (!response.count) {
-                    // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
-                    return contactEntry.id;
-                  } else {
-                    return;
-                  }
-                })
-            );
-          });
 
-          // execute promises
-          return Promise.all(promises);
-        } else {
+        // if there are only events/cases assume that there is at least another exposure
+        if (!personRelationships.length) {
+          return {count: 1};
+        }
+
+        // get the person
+        const person = personRelationships[0];
+
+        // count the exposure relationships excepting the current relationship
+        const exposureTypes = person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+          ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+          ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'];
+        return app.models.relationship
+          .rawCountDocuments({
+            where: {
+              id: {
+                neq: relationshipId
+              },
+              // required to use index to improve greatly performance
+              'persons.id': person.id,
+              $or: [
+                {
+                  'persons.0.id': person.id,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: exposureTypes
+                  }
+                },
+                {
+                  'persons.1.id': person.id,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: exposureTypes
+                  }
+                }
+              ]
+            }
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
+          });
+      })
+      .then(function (response) {
+        // ignore the invalid relationships
+        if (!response) {
           return;
         }
-      })
-      .then(function (result) {
-        // result can be undefined / object with count / array with contact ID elements to undefined elements
-        // for array of contact IDs need to throw error
-        if (typeof result === 'undefined') {
-          // delete relationship
-          return relationshipInstance.destroy(options);
-        } else if (typeof result.count !== 'undefined') {
-          return result;
-        } else {
-          // result is an array
-          // get contact IDs from result if they exist
-          let contactIDs = result.filter(entry => typeof entry !== 'undefined');
 
-          // if result doesn't contain contact IDs the relationship will be deleted
-          if (!contactIDs.length) {
-            // delete relationship
-            return relationshipInstance.destroy(options);
-          } else {
-            // there are contacts with no other relationships with case/event; error
-            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
-              contactIDs: contactIDs.join(', ')
-            });
-          }
+        // throw error because no other exposure exist
+        if (!response.count) {
+          throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+            contactIDs: [personId]
+          });
         }
+
+        // delete relationship
+        return relationshipInstance.destroy(options);
       })
       .then(function (relationship) {
         callback(null, relationship);
