@@ -732,10 +732,7 @@ const syncRecord = function (app, model, record, options, done) {
           alternateQueryForRecord, {
             projection: {
               id: 1,
-              type: 1,
-              wasCase: 1,
-              wasContact: 1,
-              wasContactOfContact: 1
+              type: 1
             },
             includeDeletedRecords: 1,
             limit: 2
@@ -751,28 +748,10 @@ const syncRecord = function (app, model, record, options, done) {
             }));
           }
 
-          // get record
-          const record = results[0];
-
           // check if the person was converted
-          const personModel = app.models[app.models.person.typeToModelMap[record.type]];
+          const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+          // set the new model ?
           if (model.modelName !== personModel.modelName) {
-            // return error if the person was not converted
-            if (
-              (
-                record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && (
-                  !record.wasCase || !record.wasContactOfContact
-                )
-              ) ||
-              !record.wasContact
-            ) {
-              // duplicate visual id found
-              return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
-                alternateIdQuery: stringifiedAlternateQuery
-              }));
-            }
-
-            // set the new model
             model = personModel;
           }
 

@@ -615,6 +615,9 @@ module.exports = function (Contact) {
           }
         ]
       }, {
+        projection: {
+          persons: 1
+        },
         // required to use index to improve greatly performance
         hint: {
           'persons.id': 1
@@ -625,20 +628,18 @@ module.exports = function (Contact) {
           const contactOfContact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
           return (cb) => {
             app.models.contactOfContact
-              .find({
+              .findOne({
                 where: {
                   id: contactOfContact.id
                 }
               })
-              .then((contactsOfContacts) => {
+              .then((contactOfContact) => {
                 // contact missing ?
-                if (_.isEmpty(contactsOfContacts)) {
+                if (!contactOfContact) {
                   cb(null, {isValid: false});
                   return;
                 }
 
-                // retrieve contact of contact
-                const contactOfContact = contactsOfContacts[0];
                 // get all relations of the contact of the contact that are not with this contact
                 app.models.relationship
                   .rawFind({
@@ -663,6 +664,9 @@ module.exports = function (Contact) {
                       }
                     ]
                   }, {
+                    projection: {
+                      _id: 1
+                    },
                     // required to use index to improve greatly performance
                     hint: {
                       'persons.id': 1
