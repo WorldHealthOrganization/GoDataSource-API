@@ -698,7 +698,9 @@ const syncRecord = function (app, logger, model, record, options, done) {
           // check if the person was converted
           if (
             results &&
-            results.length
+            results.length &&
+            app.models.person.typeToModelMap[results[0].type] &&
+            app.models[app.models.person.typeToModelMap[results[0].type]]
           ) {
             // set the new model ?
             const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
