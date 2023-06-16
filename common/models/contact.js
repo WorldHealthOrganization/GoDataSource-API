@@ -1041,7 +1041,10 @@ module.exports = function (Contact) {
             .rawFind(
               followUpQuery, {
                 projection: { personId: 1 },
-                includeDeletedRecords: filter.queryFlags && filter.queryFlags.followUp && filter.queryFlags.followUp.deleted
+                includeDeletedRecords: filter.queryFlags && (
+                  filter.queryFlags.followUp && filter.queryFlags.followUp.deleted ||
+                  filter.queryFlags.followUps && filter.queryFlags.followUps.deleted
+                )
               }
             )
             .then(function (followUps) {

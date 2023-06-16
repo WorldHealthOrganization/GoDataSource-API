@@ -722,6 +722,12 @@
       "modules": [
         "uiEventFields"
       ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "modules": [
+        "uiFollowUpFields"
+      ]
     }
   }
 }
