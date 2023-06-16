@@ -547,7 +547,6 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
     let convertedCase, contactsOfContactsMap = {};
-    const updateRelations = [];
     app.models.contact
       .findOne({
         where: {
@@ -624,6 +623,7 @@ module.exports = function (Outbreak) {
         }
 
         // collect update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -641,7 +641,7 @@ module.exports = function (Outbreak) {
           });
           updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
-        return;
+        return Promise.all(updateRelations);
       })
       .then(function () {
         // update personType from lab results
@@ -734,6 +734,7 @@ module.exports = function (Outbreak) {
         }
 
         // collect update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
