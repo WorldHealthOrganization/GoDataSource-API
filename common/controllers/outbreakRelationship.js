@@ -153,7 +153,10 @@ module.exports = function (Outbreak) {
             ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'];
           const exposureRelationships = contactData.relatedRelationships.filter((relation) => relation.active &&
             relation.target &&
-            !contactData.deleteRelationships.includes(relation.id) &&
+            (
+              !contactData.deleteRelationships ||
+              !contactData.deleteRelationships.includes(relation.id)
+            ) &&
             exposureTypes.includes(relation.otherParticipantType)
           );
           if (!exposureRelationships.length) {
