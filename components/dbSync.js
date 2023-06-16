@@ -497,6 +497,15 @@ const syncRecordFlags = {
  * @param [done]
  */
 const syncRecord = function (app, logger, model, record, options, done) {
+  // options is optional parameter
+  if (typeof options === 'function') {
+    done = options;
+    options = {};
+  }
+
+  // mark this operation as a sync (if not specified otherwise)
+  options._sync = options._sync !== undefined ? options._sync : true;
+
   // log formatted message
   function log(level, message) {
     logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
@@ -612,15 +621,6 @@ const syncRecord = function (app, logger, model, record, options, done) {
       });
     });
   };
-
-  // options is optional parameter
-  if (typeof options === 'function') {
-    done = options;
-    options = {};
-  }
-
-  // mark this operation as a sync (if not specified otherwise)
-  options._sync = options._sync !== undefined ? options._sync : true;
 
   // go through date type fields and convert them to a proper date
   if (!_.isEmpty(model._parsedDateProperties)) {
