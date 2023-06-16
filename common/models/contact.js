@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
 const _ = require('lodash');
+const async = require('async');
 const helpers = require('../../components/helpers');
 
 module.exports = function (Contact) {
@@ -592,6 +593,95 @@ module.exports = function (Contact) {
             active: !!propsToUpdate.startDate
           }, context.options);
         }
+      });
+  };
+
+  Contact.getIsolatedContacts = function (contactId, callback) {
+    // get all relations with a contact of contact
+    return app.models.relationship
+      .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': contactId,
+
+        // filter
+        $or: [
+          {
+            'persons.0.id': contactId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          },
+          {
+            'persons.1.id': contactId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          }
+        ]
+      }, {
+        projection: {
+          persons: 1
+        },
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contactOfContact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
+          return (cb) => {
+            app.models.contactOfContact
+              .findOne({
+                where: {
+                  id: contactOfContact.id
+                }
+              })
+              .then((contactOfContact) => {
+                // contact missing ?
+                if (!contactOfContact) {
+                  cb(null, {isValid: false});
+                  return;
+                }
+
+                // get all relations of the contact of the contact that are not with this contact
+                app.models.relationship
+                  .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contactOfContact.id,
+
+                    // filter
+                    $or: [
+                      {
+                        'persons.0.id': contactOfContact.id,
+                        'persons.1.id': {
+                          $ne: contactId
+                        },
+                        'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: contactId
+                        },
+                        'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                        'persons.1.id': contactOfContact.id
+                      }
+                    ]
+                  }, {
+                    projection: {
+                      _id: 1
+                    },
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
+                  })
+                  .then((relationships) => cb(null, {contact: contactOfContact, isValid: !relationships.length}));
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, possibleIsolatedContacts) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
+        });
       });
   };
 

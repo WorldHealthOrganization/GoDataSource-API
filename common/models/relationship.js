@@ -716,31 +716,95 @@ module.exports = function (Relationship) {
 
     // relation is active, by default
     data.target.active = true;
-    // get case IDs from from the relationship
-    let caseIds = data.source.all.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE').map(caseRecord => caseRecord.id);
-    // if cases were found
-    if (caseIds) {
-      // find cases
-      app.models.case
-        .find({
-          where: {
-            id: {
-              inq: caseIds
+
+    // update case status
+    const updateCaseStatus = function () {
+      // get case IDs from from the relationship
+      let caseIds = data.source.all.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE').map(caseRecord => caseRecord.id);
+      // if cases were found
+      if (caseIds.length) {
+        // find cases
+        app.models.case
+          .find({
+            where: {
+              id: {
+                inq: caseIds
+              }
             }
+          })
+          .then(function (cases) {
+            // if one of the cases is discarded
+            cases.forEach(function (caseRecord) {
+              if (app.models.case.discardedCaseClassifications.includes(caseRecord.classification)) {
+                // set the relation as inactive
+                data.target.active = false;
+              }
+            });
+            next();
+          });
+      } else {
+        next();
+      }
+    };
+
+    // validate persons only on sync
+    if (
+      context.options &&
+      context.options._sync &&
+      data.source &&
+      data.source.all &&
+      data.source.all.persons &&
+      data.source.all.persons.length &&
+      data.target &&
+      data.target.persons &&
+      data.target.persons.length
+    ) {
+      const personIds = data.source.all.persons.map(person => person.id);
+      app.models.person
+        .rawFind({
+          _id: {
+            $in: personIds
+          }
+        }, {
+          projection: {
+            _id: 1,
+            type: 1
+          },
+          hint: {
+            '_id': 1
           }
         })
-        .then(function (cases) {
-          // if one of the cases is discarded
-          cases.forEach(function (caseRecord) {
-            if (app.models.case.discardedCaseClassifications.includes(caseRecord.classification)) {
-              // set the relation as inactive
-              data.target.active = false;
+        .then((records) => {
+          if (
+            !records.length ||
+            records.length !== personIds.length
+          ) {
+            const recordIds = records.map(record => record.id);
+            const idsNotFound = personIds.filter(personId => !recordIds.includes(personId)).join(', ');
+            throw app.logger.error(`Failed to trigger person record updates. Persons (ids: ${idsNotFound}) not found.`);
+          }
+
+          // map records found
+          let recordsMap = {};
+          for (const person of records) {
+            recordsMap[person.id] = person.type;
+          }
+
+          // update type ?
+          data.target.persons.forEach((targetPerson, index) => {
+            if (recordsMap[targetPerson.id] !== targetPerson.type) {
+              data.target.persons[index].type = recordsMap[targetPerson.id];
+              data.source.existing.persons[index].type = recordsMap[targetPerson.id];
             }
           });
-          next();
-        });
+
+          // update case status
+          updateCaseStatus();
+        })
+        .catch(next);
     } else {
-      next();
+      // update case status
+      updateCaseStatus();
     }
   });
 

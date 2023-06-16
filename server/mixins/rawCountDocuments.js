@@ -29,6 +29,7 @@ module.exports = function (Model) {
    * @param {number} [options.limit]
    * @param {object} [options.includeDeletedRecords]
    * @param {object} [options.applyHasMoreLimit]
+   * @param {object} [options.hint]
    * @return {Promise<number>}
    */
   Model.rawCountDocuments = function (filter, options = {}) {
@@ -107,13 +108,20 @@ module.exports = function (Model) {
           )
       );
 
+    // create query options
+    const queryOptions = {
+      limit: countLimit,
+      skip: options.skip
+    };
+    if (options.hint) {
+      queryOptions.hint = options.hint;
+    }
+
     // perform find using mongo connector
     return app.dataSources.mongoDb.connector.collection(collectionName)
       .count(
-        query, {
-          limit: countLimit,
-          skip: options.skip
-        }
+        query,
+        queryOptions
       )
       .then((counted) => {
         app.logger.debug(`[QueryId: ${queryId}] MongoDB request completed with error after ${timer.getElapsedMilliseconds()} msec`);

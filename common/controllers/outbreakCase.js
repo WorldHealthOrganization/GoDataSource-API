@@ -1719,27 +1719,38 @@ module.exports = function (Outbreak) {
         // in order for a case to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
-            $or: [
-              {
-                'persons.0.id': caseId,
-                'persons.0.target': true,
-                'persons.1.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+          .rawCountDocuments({
+            where: {
+              // required to use index to improve greatly performance
+              'persons.id': caseId,
+
+              $or: [
+                {
+                  'persons.0.id': caseId,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
+                },
+                {
+                  'persons.1.id': caseId,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
                 }
-              },
-              {
-                'persons.1.id': caseId,
-                'persons.1.target': true,
-                'persons.0.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-                }
-              }
-            ]
+              ]
+            }
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
           });
       })
-      .then(function (relationsNumber) {
-        if (!relationsNumber) {
+      .then(function (response) {
+        if (!response.count) {
           // the case doesn't have relations with other cases; stop conversion
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }
@@ -1785,19 +1796,23 @@ module.exports = function (Outbreak) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: caseId});
         }
 
+        // keep the contact as we will do actions on it
         convertedContact = contact;
+
         // after updating the case, find it's relations
         return app.models.relationship
-          .rawFind({
-            'persons.id': caseId
-          }, {
-            projection: {
-              id: true,
-              persons: true
+          .find({
+            where: {
+              'persons.id': caseId
             }
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
@@ -1810,15 +1825,7 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
-            .updateOne({
-              _id: caseId
-            }, {
-              $set: {
-                persons: persons
-              }
-            })
-          );
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })
@@ -1874,7 +1881,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (caseData) {
             createCases.push(function (asyncCallback) {
               // sync the case
-              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.case, caseData.save, options)
                 .then(function () {
                   asyncCallback();
                 })

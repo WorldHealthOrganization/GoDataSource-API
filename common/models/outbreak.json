@@ -464,6 +464,11 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_list_isolated_contacts",
+      "permission": "ALLOW",
+      "property": "getContactIsolatedContacts"
+    },
+    {
       "principalId": "contact_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__contacts"
@@ -2550,6 +2555,29 @@
       "http": {
         "verb": "get",
         "path": "/contacts/:nk/relationships/count"
+      }
+    },
+    "prototype.getContactIsolatedContacts": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of isolated contacts and list of ids",
+          "required": true
+        }
+      ],
+      "description": "Get count of isolated contacts for a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:fk/isolated-contacts"
       }
     },
     "prototype.findEventRelationships": {

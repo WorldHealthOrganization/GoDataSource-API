@@ -28,6 +28,9 @@ module.exports = function (Case) {
           }
         ]
       }, {
+        projection: {
+          persons: 1
+        },
         // required to use index to improve greatly performance
         hint: {
           'persons.id': 1
@@ -38,20 +41,18 @@ module.exports = function (Case) {
           const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
           return (cb) => {
             app.models.contact
-              .find({
+              .findOne({
                 where: {
                   id: contact.id
                 }
               })
-              .then((contacts) => {
+              .then((contact) => {
                 // contact missing ?
-                if (_.isEmpty(contacts)) {
+                if (!contact) {
                   cb(null, {isValid: false});
                   return;
                 }
 
-                // retrieve contact
-                const contact = contacts[0];
                 // get all relations of the contact that are not with this case
                 app.models.relationship
                   .rawFind({
@@ -64,16 +65,25 @@ module.exports = function (Case) {
                         'persons.0.id': contact.id,
                         'persons.1.id': {
                           $ne: caseId
+                        },
+                        'persons.1.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                         }
                       },
                       {
                         'persons.0.id': {
                           $ne: caseId
                         },
+                        'persons.0.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                        },
                         'persons.1.id': contact.id
                       }
                     ]
                   }, {
+                    projection: {
+                      _id: 1
+                    },
                     // required to use index to improve greatly performance
                     hint: {
                       'persons.id': 1

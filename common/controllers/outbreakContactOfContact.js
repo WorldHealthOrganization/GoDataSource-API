@@ -957,7 +957,7 @@ module.exports = function (Outbreak) {
 
             createContactsOfContacts.push(function (asyncCallback) {
               // sync the record
-              return app.utils.dbSync.syncRecord(logger, app.models.contactOfContact, dataToSave.contactOfContact, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.contactOfContact, dataToSave.contactOfContact, options)
                 .then(function (syncResult) {
                   const syncedRecord = syncResult.record;
                   // promisify next step
@@ -982,7 +982,7 @@ module.exports = function (Outbreak) {
                         }
 
                         // sync relationship
-                        return app.utils.dbSync.syncRecord(logger, app.models.relationship, dataToSave.relationship, options)
+                        return app.utils.dbSync.syncRecord(app, logger, app.models.relationship, dataToSave.relationship, options)
                           .then(function () {
                             // relationship successfully created, move to tne next one
                             resolve();
@@ -1095,27 +1095,38 @@ module.exports = function (Outbreak) {
         // in order for a contact of contact to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
-            $or: [
-              {
-                'persons.0.id': contactOfContactId,
-                'persons.0.target': true,
-                'persons.1.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+          .rawCountDocuments({
+            where: {
+              // required to use index to improve greatly performance
+              'persons.id': contactOfContactId,
+
+              $or: [
+                {
+                  'persons.0.id': contactOfContactId,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
+                },
+                {
+                  'persons.1.id': contactOfContactId,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
                 }
-              },
-              {
-                'persons.1.id': contactOfContactId,
-                'persons.1.target': true,
-                'persons.0.type': {
-                  $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
-                }
-              }
-            ]
+              ]
+            }
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
           });
       })
-      .then(function (relationsNumber) {
-        if (!relationsNumber) {
+      .then(function (response) {
+        if (!response.count) {
           // the contact of contact doesn't have relations with other cases/events; stop conversion
           throw app.utils.apiError.getError('INVALID_CONTACT_OF_CONTACT_RELATIONSHIP', {id: contactOfContactId});
         }
@@ -1159,12 +1170,9 @@ module.exports = function (Outbreak) {
 
         // after updating the contact, find it's relations
         return app.models.relationship
-          .rawFind({
-            'persons.id': contactOfContactId
-          }, {
-            projection: {
-              id: true,
-              persons: true
+          .find({
+            where: {
+              'persons.id': contactOfContactId
             }
           });
       })
@@ -1184,20 +1192,24 @@ module.exports = function (Outbreak) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
             }
-
             persons.push(person);
           });
-          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
-            .updateOne({
-              _id: contactOfContactId
-            }, {
-              $set: {
-                persons: persons
-              }
-            })
-          );
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // update personType from lab results
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: contactOfContactId
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedContact);
