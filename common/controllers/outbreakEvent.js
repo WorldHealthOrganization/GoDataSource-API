@@ -275,7 +275,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (eventData) {
             createEvents.push(function (asyncCallback) {
               // sync the event
-              return app.utils.dbSync.syncRecord(app, app.models.event, eventData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.event, eventData.save, options)
                 .then(function () {
                   asyncCallback();
                 })

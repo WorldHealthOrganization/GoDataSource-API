@@ -645,6 +645,7 @@ module.exports = function (Outbreak) {
         createOps.push(callback => {
           return app.utils.dbSync.syncRecord(
             app,
+            logger,
             app.models.relationship,
             relation.save,
             options

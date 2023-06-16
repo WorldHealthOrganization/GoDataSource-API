@@ -833,6 +833,7 @@ module.exports = function (User) {
     //           user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
     //
     //           return app.utils.dbSync.syncRecord(
+    //             app,
     //             options.remotingContext.req.logger,
     //             app.models.user,
     //             user,

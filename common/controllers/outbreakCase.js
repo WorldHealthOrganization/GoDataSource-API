@@ -1881,7 +1881,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (caseData) {
             createCases.push(function (asyncCallback) {
               // sync the case
-              return app.utils.dbSync.syncRecord(app, app.models.case, caseData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.case, caseData.save, options)
                 .then(function () {
                   asyncCallback();
                 })

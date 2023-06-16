@@ -490,15 +490,16 @@ const syncRecordFlags = {
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
  * @param app
+ * @param logger
  * @param model
  * @param record
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (app, model, record, options, done) {
+const syncRecord = function (app, logger, model, record, options, done) {
   // log formatted message
   function log(level, message) {
-    app.logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
+    logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
   }
 
   // on sync, use person model to find converted persons

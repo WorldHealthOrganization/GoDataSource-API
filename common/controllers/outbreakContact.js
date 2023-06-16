@@ -3350,7 +3350,7 @@ module.exports = function (Outbreak) {
             const dataToSave = recordData.save;
             createContacts.push(function (asyncCallback) {
               // sync the contact
-              return app.utils.dbSync.syncRecord(app, app.models.contact, dataToSave.contact, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.contact, dataToSave.contact, options)
                 .then(function (syncResult) {
                   const contactRecord = syncResult.record;
                   // promisify next step
@@ -3369,7 +3369,7 @@ module.exports = function (Outbreak) {
                       }
 
                       // sync relationship
-                      return app.utils.dbSync.syncRecord(app, app.models.relationship, dataToSave.relationship, options)
+                      return app.utils.dbSync.syncRecord(app, logger, app.models.relationship, dataToSave.relationship, options)
                         .then(function () {
                           // relationship successfully created, move to tne next one
                           resolve();

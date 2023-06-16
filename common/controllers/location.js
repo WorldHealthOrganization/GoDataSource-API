@@ -196,7 +196,7 @@ module.exports = function (Location) {
       batchData.forEach(function (locationItem) {
         syncLocation.push(function (asyncCallback) {
           // sync location
-          return app.utils.dbSync.syncRecord(app, app.models.location, locationItem.save, options)
+          return app.utils.dbSync.syncRecord(app, logger, app.models.location, locationItem.save, options)
             .then(function () {
               asyncCallback();
             })

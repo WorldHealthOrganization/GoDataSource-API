@@ -882,7 +882,7 @@ module.exports = function (Location) {
         }
         // add sync location operation
         syncLocationOperations.push(function (cb) {
-          app.utils.dbSync.syncRecord(app, app.models.location, _location, options)
+          app.utils.dbSync.syncRecord(app, options.remotingContext.req.logger, app.models.location, _location, options)
             .then(function (syncedLocationResult) {
               const syncedLocation = syncedLocationResult.record;
               // store result
