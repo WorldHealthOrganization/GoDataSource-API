@@ -716,6 +716,18 @@
       "modules": [
         "uiRelationshipFields"
       ]
+    },
+    "LNG_EVENT_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "modules": [
+        "uiEventFields"
+      ]
     }
   }
 }
