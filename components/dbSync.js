@@ -710,14 +710,14 @@ const syncRecord = function (app, logger, model, record, options, done) {
     }
 
     // get the record
-    findRecord = findRecord.then(() => model
-      .findOne({
+    findRecord = findRecord.then(() => {
+      return model.findOne({
         where: {
           id: record.id
         },
         deleted: true
-      })
-    );
+      });
+    });
   }
   // some models might query for different unique identifiers when id is not present
   else if (
