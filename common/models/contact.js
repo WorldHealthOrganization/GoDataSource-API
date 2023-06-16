@@ -967,7 +967,12 @@ module.exports = function (Contact) {
         .then(function () {
           // find cases that match the query
           return app.models.case
-            .rawFind(casesQuery, {projection: {_id: 1}})
+            .rawFind(
+              casesQuery, {
+                projection: { _id: 1 },
+                includeDeletedRecords: filter.queryFlags && filter.queryFlags.case && filter.queryFlags.case.deleted
+              }
+            )
             .then(function (cases) {
               // find relationships with contacts for the matched cases
               return app.models.relationship
@@ -978,7 +983,9 @@ module.exports = function (Contact) {
                   },
                   'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
                 }, {
-                  projection: {persons: 1}
+                  projection: {persons: 1},
+                  // if we filtered deleted cases then we need to check deleted relationships too
+                  includeDeletedRecords: filter.queryFlags && filter.queryFlags.case && filter.queryFlags.case.deleted
                 })
                 .then(function (relationships) {
                   // gather contact ids from the found relationships
@@ -1031,7 +1038,12 @@ module.exports = function (Contact) {
           }
           // find followUps that match the query
           return app.models.followUp
-            .rawFind(followUpQuery, {projection: {personId: 1}})
+            .rawFind(
+              followUpQuery, {
+                projection: { personId: 1 },
+                includeDeletedRecords: filter.queryFlags && filter.queryFlags.followUp && filter.queryFlags.followUp.deleted
+              }
+            )
             .then(function (followUps) {
               // update contact query to include found contacts
               contactQuery = {
@@ -1072,7 +1084,12 @@ module.exports = function (Contact) {
           }
           // find followUps that match the query
           return app.models.relationship
-            .rawFind(relationshipsQuery, {projection: {persons: 1}})
+            .rawFind(
+              relationshipsQuery, {
+                projection: { persons: 1 },
+                includeDeletedRecords: filter.queryFlags && filter.queryFlags.relationship && filter.queryFlags.relationship.deleted
+              }
+            )
             .then(function (relationships) {
               // create unique array
               const relationshipsIds = {};

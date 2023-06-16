@@ -704,6 +704,18 @@
       "modules": [
         "unauthenticated"
       ]
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "modules": [
+        "uiRelationshipFields"
+      ]
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "modules": [
+        "uiRelationshipFields"
+      ]
     }
   }
 }
