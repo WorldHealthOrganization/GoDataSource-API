@@ -752,21 +752,24 @@ const syncRecord = function (app, logger, model, record, options, done) {
           }
 
           // check if the person was converted
-          const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
-          // set the new model ?
-          if (model.modelName !== personModel.modelName) {
-            model = personModel;
+          if (
+            app.models.person.typeToModelMap[results[0].type] &&
+            app.models[app.models.person.typeToModelMap[results[0].type]]
+          ) {
+            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            // set the new model ?
+            if (model.modelName !== personModel.modelName) {
+              model = personModel;
+            }
           }
 
           // get the record again to not change the workflow
-          return model
-            .find({
-              where: {
-                _id: results[0].id
-              },
-              limit: 1,
-              deleted: true
-            });
+          return model.findOne({
+            where: {
+              id: results[0].id
+            },
+            deleted: true
+          });
         });
     } else {
       findRecord = model
