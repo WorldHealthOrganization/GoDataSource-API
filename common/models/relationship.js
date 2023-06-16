@@ -751,6 +751,11 @@ module.exports = function (Relationship) {
     if (
       context.options &&
       context.options._sync &&
+      data.source &&
+      data.source.all &&
+      data.source.all.persons &&
+      data.source.all.persons.length &&
+      data.target &&
       data.target.persons &&
       data.target.persons.length
     ) {
