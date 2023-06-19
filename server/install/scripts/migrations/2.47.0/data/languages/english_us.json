@@ -758,6 +758,36 @@
       "modules": [
         "uiContactFields"
       ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiEventFields"
+      ]
     }
   }
 }
