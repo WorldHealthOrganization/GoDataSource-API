@@ -818,6 +818,42 @@
       "modules": [
         "uiCaseFields"
       ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Location",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiFollowUpFields"
+      ]
     }
   }
 }
