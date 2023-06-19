@@ -108,7 +108,8 @@ const createUpdateLanguageTokens = (
                         _id: 1,
                         token: 1,
                         translation: 1,
-                        section: 1
+                        section: 1,
+                        deleted: 1
                       }
                     })
                     .toArray()
@@ -120,6 +121,7 @@ const createUpdateLanguageTokens = (
 
                         // no change ?
                         if (
+                          !languageTokenModel.deleted &&
                           languageTokenModel.translation === languageFileData.tokens[languageTokenModel.token].translation && (
                             !languageFileData.tokens[languageTokenModel.token].section ||
                             languageTokenModel.section === languageFileData.tokens[languageTokenModel.token].section
@@ -130,6 +132,11 @@ const createUpdateLanguageTokens = (
 
                         // log
                         console.log(`Updating token '${languageTokenModel.token}' for language '${languageModel.name}'`);
+
+                        // log
+                        if (languageTokenModel.deleted) {
+                          console.log(`Restoring token '${languageTokenModel.token}' for language '${languageModel.name}'`);
+                        }
 
                         // update token
                         jobs.push(
@@ -144,7 +151,11 @@ const createUpdateLanguageTokens = (
                                   languageTokenModel.section,
                                 updatedAt: new Date(),
                                 dbUpdatedAt: new Date(),
-                                updatedBy: 'system'
+                                updatedBy: 'system',
+                                deleted: false
+                              },
+                              $unset: {
+                                deletedAt: ''
                               }
                             })
                         );
