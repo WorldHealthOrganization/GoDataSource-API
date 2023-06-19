@@ -728,6 +728,36 @@
       "modules": [
         "uiFollowUpFields"
       ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiContactFields"
+      ]
     }
   }
 }
