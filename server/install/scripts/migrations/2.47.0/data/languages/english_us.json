@@ -722,6 +722,138 @@
       "modules": [
         "uiEventFields"
       ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiContactFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiEventFields"
+      ]
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiCaseFields"
+      ]
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiCaseFields"
+      ]
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiCaseFields"
+      ]
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiCaseFields"
+      ]
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiCaseFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Location",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "modules": [
+        "uiFollowUpFields"
+      ]
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "modules": [
+        "uiFollowUpFields"
+      ]
     }
   }
 }
