@@ -65,12 +65,15 @@ module.exports = function (Outbreak) {
             return accumulator;
           }
 
+          // do not check if exposures are isolated
           relationship.persons.forEach(person => {
             let mapContainer = 'otherPersons';
             let idsContainer = 'otherPersonsIds';
             if (
-              person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
-              person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              person.target && (
+                person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
+                person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              )
             ) {
               mapContainer = 'contacts';
               idsContainer = 'contactsIds';
