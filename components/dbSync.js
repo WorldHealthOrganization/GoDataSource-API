@@ -777,22 +777,22 @@ const syncRecord = function (app, logger, model, record, options, done) {
           where: alternateQueryForRecord,
           limit: 2,
           deleted: true
+        })
+        .then(results => {
+          if (!results || !results.length) {
+            // no db record was found; continue with creating the record
+            return null;
+          } else if (results.length > 1) {
+            // more than one result found; we cannot know which one we should update
+            return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+              alternateIdQuery: stringifiedAlternateQuery
+            }));
+          }
+
+          // single record found; continue with it and try to update it
+          return results[0];
         });
     }
-    findRecord.then(results => {
-      if (!results || !results.length) {
-        // no db record was found; continue with creating the record
-        return null;
-      } else if (results.length > 1) {
-        // more than one result found; we cannot know which one we should update
-        return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
-          alternateIdQuery: stringifiedAlternateQuery
-        }));
-      }
-
-      // single record found; continue with it and try to update it
-      return results[0];
-    });
   } else {
     log('debug', 'Record id not present');
   }
