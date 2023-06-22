@@ -729,6 +729,23 @@ module.exports = function (FollowUp) {
       // cleanup
       delete filter.where.case;
     }
+
+    // get contact-of-contact query, if any
+    let contactOfContactQuery = _.get(filter, 'where.contactOfContact');
+    // if found, remove it form main query
+    if (contactOfContactQuery) {
+      // replace nested geo points filters
+      contactOfContactQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.contactOfContact,
+        contactOfContactQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
+      delete filter.where.contactOfContact;
+    }
     // get contact query, if any
     let contactQuery = _.get(filter, 'where.contact');
     // if found, remove it form main query
@@ -762,35 +779,62 @@ module.exports = function (FollowUp) {
     let contactIds;
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
-    // if a case query is present
-    if (caseQuery) {
+    // if a case/contact of contact query is present
+    if (
+      caseQuery ||
+      contactOfContactQuery
+    ) {
       // restrict query to current outbreak
-      caseQuery = {
-        $and: [
-          caseQuery,
-          {
-            outbreakId: outbreak.id
-          }
-        ]
+      const personConditions = [{
+        outbreakId: outbreak.id
+      }];
+
+      // add case query ?
+      if (caseQuery) {
+        personConditions.push(caseQuery);
+      }
+
+      // add contact of contact query ?
+      if (contactOfContactQuery) {
+        personConditions.push(contactOfContactQuery);
+      }
+
+      // create person query
+      const personQuery = {
+        $and: personConditions
       };
-      // filter cases based on query
+
+      // if both case and contact of contact filters are provided, use the person model
+      const model = caseQuery && contactOfContactQuery ?
+        app.models.person :
+        caseQuery ?
+          app.models.case :
+          app.models.contactOfContact;
+
+      // filter cases/contacts of contacts based on query
       buildQuery = buildQuery
         .then(function () {
-          return app.models.case
-            .rawFind(caseQuery, {projection: {_id: 1}})
-            .then(function (cases) {
-              // build a list of case ids that passed the filter
-              const caseIds = cases.map(caseRecord => caseRecord.id);
-              // find relations with contacts for those cases
+          return model
+            .rawFind(personQuery, {projection: {_id: 1}})
+            .then(function (persons) {
+              // build a list of case/contact of contact ids that passed the filter
+              const personIds = persons.map(personRecord => personRecord.id);
+              // find relations with contacts for those cases/contacts of contacts
               return app.models.relationship
                 .rawFind({
                   outbreakId: outbreak.id,
                   'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
                   'persons.id': {
-                    $in: caseIds
+                    $in: personIds
                   }
                 }, {
-                  projection: {persons: 1}
+                  projection: {
+                    _id: 1
+                  },
+                  // required to use index to improve greatly performance
+                  hint: {
+                    'persons.id': 1
+                  }
                 });
             })
             .then(function (relationships) {

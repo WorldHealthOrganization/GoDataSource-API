@@ -1,0 +1,25 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
+      "translation": "* This person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a contact",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_REGISTERED_AS_CONTACT_MESSAGE": {
+      "translation": "* You cannot edit the follow-up because this person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a contact",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiContactOfContactListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_OF_CONTACT_BUTTON": {
+      "translation": "Contact of contact",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_CONTACT": {
+      "translation": "Exposed to contact",
+      "section": "uiFollowUpsListPage"
+    }
+  }
+}

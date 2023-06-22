@@ -5204,7 +5204,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.contactOfContact', 'where.contact', 'where.case' MongoDB compatible queries, where.timeLastSeen', 'where.weekNumber' queries. Supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
         },
         {
           "arg": "options",
