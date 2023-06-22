@@ -165,7 +165,7 @@
   },
   "DELETE_CONTACT_LAST_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
+    "messagePattern": "Cannot delete the last relationship exposure because the person with ID <%= contactIDs %> doesn't have an additional relationship exposure."
   },
   "EXTERNAL_API_CONNECTION_ERROR": {
     "defaultStatusCode": 503,

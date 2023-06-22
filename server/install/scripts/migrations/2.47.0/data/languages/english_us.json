@@ -222,11 +222,19 @@
       "section": "uiContactsOfContactsListPage"
     },
     "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
-      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Note: the relationships to cases/events (\"Exposures\") and also to contacts of contacts (\"Contacts\") are kept",
+      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
       "section": "uiDialogs"
     },
     "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
-      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?",
+      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?<br>Note:<br> * All existing relationships will be kept.",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to case?<br>Notes:<br> * All existing relationships will be kept.{{warning}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
+      "translation": "Are you sure you want to convert this case: '{{name}}' to contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
       "section": "uiDialogs"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
@@ -235,14 +243,6 @@
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT_DESCRIPTION": {
       "translation": "This permission allows converting a contact to a contact of contact",
-      "section": "availablePermissions"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES": {
-      "translation": "Contact Of Contact - list relationship contacts",
-      "section": "availablePermissions"
-    },
-    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_EXPOSURES_DESCRIPTION": {
-      "translation": "This permission allows listing contact of contact contacts",
       "section": "availablePermissions"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
@@ -270,7 +270,7 @@
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CASE_CONTACTS_WARNING": {
-      "translation": "All contacts of contacts will be automatically converted to contacts",
+      "translation": "<br> * All contacts of contacts will be automatically converted to contacts",
       "section": "uiContactsListPage"
     },
     "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
@@ -286,7 +286,7 @@
       "section": "uiModifyContactOfContactPage"
     },
     "LNG_PAGE_LIST_CASES_ACTION_ISOLATED_CONTACTS": {
-      "translation": "The following contacts needs manually to be exposed to another case or event: {{contacts}}",
+      "translation": "<br> * The following contacts need to be <b>manually exposed</b> to another case or event: ",
       "section": "uiCasesListPage"
     },
     "LNG_CASE_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
@@ -348,6 +348,18 @@
     "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
       "translation": "All options included",
       "section": "uiCommonLabels"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED": {
+      "translation": "Contact - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED_DESCRIPTION": {
+      "translation": "This permission allows determining which contact of contacts are isolated",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_ISOLATED_CONTACTS": {
+      "translation": "<br> * The following contacts of contacts need to be <b>manually exposed</b> to another contact: ",
+      "section": "uiCasesListPage"
     },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE": {
       "translation": "Case - bulk delete",
@@ -634,12 +646,164 @@
       "section": "uiLocationsUsageListPage"
     },
     "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CONTACT_OF_CONTACTS": {
-      "translation": "Contact of Contacts",
+      "translation": "Contact of contacts",
       "section": "uiLocationsUsageListPage"
     },
     "LNG_SIDE_FILTERS_LOAD_FILTER_IS_PUBLIC_LABEL": {
       "translation": "Public",
       "section": "uiSideFilter"
+    },
+    "LNG_SIDE_FILTERS_SECTION_SORT_TITLE": {
+      "translation": "Sort ({{no}})"
+    },
+    "LNG_SIDE_FILTERS_SECTION_FILTER_TITLE": {
+      "translation": "Filter ({{no}})"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - list relationship contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows listing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - view relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows viewing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - modify relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows modify contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - delete relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows delete contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - bulk delete contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows deletion of contact of contact contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": {
+      "translation": "Cannot delete the last relationship exposure because the person doesn't have an additional relationship exposure.",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiEventFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiContactFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiEventFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiCaseFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Location",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiFollowUpFields"
     }
   }
 }

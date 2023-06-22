@@ -367,9 +367,15 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 30
+      buildNo: 44
     }, {
       name: 'createUpdateSingleEnglishLanguageTokens',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
       buildNo: 1
     }]
   }]

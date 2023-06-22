@@ -610,17 +610,19 @@ module.exports = function (Outbreak) {
 
         // after updating the case, find it's relations
         return app.models.relationship
-          .rawFind({
-            'persons.id': contactId
-          }, {
-            projection: {
-              id: true,
-              persons: true
+          .find({
+            where: {
+              'persons.id': contactId
             }
           });
       })
       .then(function (relations) {
-        // update relations
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
+        // collect update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
@@ -637,15 +639,7 @@ module.exports = function (Outbreak) {
             }
             persons.push(person);
           });
-          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
-            .updateOne({
-              _id: contactId
-            }, {
-              $set: {
-                persons: persons
-              }
-            })
-          );
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
       })
@@ -663,38 +657,83 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
         // convert contacts of contacts to contacts
         return app.models.person
           .rawBulkUpdate(
             {
               id: {
-                $in: Object.keys(contactsOfContactsMap)
+                $in: contactsOfContactsIds
               }
             },
             {
-              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-              dateBecomeContact: app.utils.helpers.getDate().toDate(),
-              wasContactOfContact: true
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
             },
             options
           );
       })
       .then(function () {
-        // after converting the contacts of contacts, find the relations
-        return app.models.relationship
-          .rawFind({
-            'persons.id': {
-              $in: Object.keys(contactsOfContactsMap)
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
+        // get the converted contacts to update the rest of the fields and update them again to trigger the hooks
+        return app.models.contact
+          .find({
+            where: {
+              'id': {
+                $in: contactsOfContactsIds
+              }
             }
-          }, {
-            projection: {
-              id: true,
-              persons: true
+          });
+      })
+      .then(function (records) {
+        // check if there are records
+        if (!records.length) {
+          return;
+        }
+
+        // update the rest of the fields
+        const updateContacts = [];
+        records.forEach(function (contact) {
+          updateContacts.push(contact.updateAttributes({
+            dateBecomeContact: app.utils.helpers.getDate().toDate(),
+            wasContactOfContact: true
+          }, options));
+        });
+        return Promise.all(updateContacts);
+      })
+      .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
+        // get the relationship persons for contacts of contacts
+        return app.models.relationship
+          .find({
+            where: {
+              'persons.id': {
+                $in: contactsOfContactsIds
+              }
             }
           });
       })
       .then(function (relations) {
-        // update relations
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
+        // collect update relations
         const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
@@ -704,20 +743,32 @@ module.exports = function (Outbreak) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
             }
-
             persons.push(person);
           });
-          updateRelations.push(app.dataSources.mongoDb.connector.collection(app.models.relationship.modelName)
-            .updateOne({
-              _id: contactId
-            }, {
-              $set: {
-                persons: persons
-              }
-            })
-          );
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
         });
         return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return;
+        }
+
+        // update personType from lab results for contacts of contacts
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: {
+                $in: contactsOfContactsIds
+              }
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
       })
       .then(function () {
         callback(null, convertedCase);
@@ -3439,6 +3490,29 @@ module.exports = function (Outbreak) {
    */
   Outbreak.prototype.getCaseIsolatedContacts = function (caseId, callback) {
     app.models.case.getIsolatedContacts(caseId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
+      });
+    });
+  };
+
+  /**
+   * Retrieve the isolated contacts for a contact and count
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getContactIsolatedContacts = function (contactId, callback) {
+    app.models.contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
       if (err) {
         return callback(err);
       }

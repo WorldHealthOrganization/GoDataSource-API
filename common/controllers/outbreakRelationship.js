@@ -65,10 +65,16 @@ module.exports = function (Outbreak) {
             return accumulator;
           }
 
+          // do not check if exposures are isolated
           relationship.persons.forEach(person => {
             let mapContainer = 'otherPersons';
             let idsContainer = 'otherPersonsIds';
-            if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+            if (
+              person.target && (
+                person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' ||
+                person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+              )
+            ) {
               mapContainer = 'contacts';
               idsContainer = 'contactsIds';
             }
@@ -93,6 +99,7 @@ module.exports = function (Outbreak) {
           accumulator.relationships[relationship.id] = relationship;
           return accumulator;
         }, {
+          types: {},
           relationships: {},
           contacts: {},
           contactsIds: [],
@@ -113,12 +120,14 @@ module.exports = function (Outbreak) {
             }
           }, {
             projection: {
+              type: 1,
               relationshipsRepresentation: 1
             }
           })
           .then(contacts => {
-            // cache contacts relationships
+            // cache type and contacts relationships
             contacts.forEach(contact => {
+              mappedData.types[contact.id] = contact.type;
               mappedData.contacts[contact.id].relatedRelationships = contact.relationshipsRepresentation;
             });
 
@@ -141,8 +150,19 @@ module.exports = function (Outbreak) {
         const isolatedContacts = [];
         _.each(data.contacts, (contactData, contactId) => {
           // check if this will become an isolated contact if we remove data
-          // this condition always will be either equal ( isolated case ), or greater, but never less...but it doesn't matter :)
-          if (contactData.relatedRelationships.length <= contactData.deleteRelationships.length) {
+          // find isolated contacts by removing the relationships that will be deleted and the "contacts" relationships
+          const exposureTypes = data.types[contactId] === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE'];
+          const exposureRelationships = contactData.relatedRelationships.filter((relation) => relation.active &&
+            relation.target &&
+            (
+              !contactData.deleteRelationships ||
+              !contactData.deleteRelationships.includes(relation.id)
+            ) &&
+            exposureTypes.includes(relation.otherParticipantType)
+          );
+          if (!exposureRelationships.length) {
             // we found an isolated contact
             isolatedContacts.push(contactId);
           }
@@ -630,6 +650,7 @@ module.exports = function (Outbreak) {
       batchData.forEach((relation) => {
         createOps.push(callback => {
           return app.utils.dbSync.syncRecord(
+            app,
             logger,
             app.models.relationship,
             relation.save,

@@ -489,18 +489,34 @@ const syncRecordFlags = {
  * Functionality description:
  * If no record is found or record is found and was created externally (no updateAt flag), create new record
  * If record has updateAt timestamp higher than the main database, update
+ * @param app
  * @param logger
  * @param model
  * @param record
  * @param [options]
  * @param [done]
  */
-const syncRecord = function (logger, model, record, options, done) {
+const syncRecord = function (app, logger, model, record, options, done) {
+  // options is optional parameter
+  if (typeof options === 'function') {
+    done = options;
+    options = {};
+  }
+
+  // mark this operation as a sync (if not specified otherwise)
+  options._sync = options._sync !== undefined ? options._sync : true;
 
   // log formatted message
   function log(level, message) {
     logger[level](`dbSync::syncRecord ${model.modelName}: ${message}`);
   }
+
+  // on sync, use person model to find converted persons
+  const usePersonModel = options._sync && (
+    model.modelName === app.models.case.modelName ||
+    model.modelName === app.models.contact.modelName ||
+    model.modelName === app.models.contactOfContact.modelName
+  );
 
   // convert first level GeoPoints to valid Loopback GeoPoint on sync action
   // on sync the GeoPoint is received as it is saved in the DB (contains coordinates)
@@ -606,15 +622,6 @@ const syncRecord = function (logger, model, record, options, done) {
     });
   };
 
-  // options is optional parameter
-  if (typeof options === 'function') {
-    done = options;
-    options = {};
-  }
-
-  // mark this operation as a sync (if not specified otherwise)
-  options._sync = options._sync !== undefined ? options._sync : true;
-
   // go through date type fields and convert them to a proper date
   if (!_.isEmpty(model._parsedDateProperties)) {
     (function setDateProps(obj, map) {
@@ -665,7 +672,7 @@ const syncRecord = function (logger, model, record, options, done) {
     })(record, model._parsedDateProperties);
   }
 
-  let findRecord;
+  let findRecord = Promise.resolve();
   let alternateQueryForRecord;
 
   // check if a record with the given id exists if record.id exists
@@ -675,13 +682,44 @@ const syncRecord = function (logger, model, record, options, done) {
     record.id !== ''
   ) {
     log('debug', `Trying to find record with id ${record.id}.`);
-    findRecord = model
-      .findOne({
+    if (usePersonModel) {
+      findRecord = app.models.person
+        .rawFind({
+          id: record.id
+        }, {
+          projection: {
+            id: 1,
+            type: 1
+          },
+          includeDeletedRecords: 1,
+          limit: 1
+        })
+        .then(function (results) {
+          // check if the person was converted
+          if (
+            results &&
+            results.length &&
+            app.models.person.typeToModelMap[results[0].type] &&
+            app.models[app.models.person.typeToModelMap[results[0].type]]
+          ) {
+            // set the new model ?
+            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            if (model.modelName !== personModel.modelName) {
+              model = personModel;
+            }
+          }
+        });
+    }
+
+    // get the record
+    findRecord = findRecord.then(() => {
+      return model.findOne({
         where: {
           id: record.id
         },
         deleted: true
       });
+    });
   }
   // some models might query for different unique identifiers when id is not present
   else if (
@@ -691,30 +729,72 @@ const syncRecord = function (logger, model, record, options, done) {
   ) {
     const stringifiedAlternateQuery = JSON.stringify(alternateQueryForRecord);
     log('debug', `Trying to find record with alternate unique identifier ${stringifiedAlternateQuery}.`);
-    findRecord = model
-      .find({
-        where: alternateQueryForRecord,
-        limit: 2,
-        deleted: true
-      })
-      .then(results => {
-        if (!results || !results.length) {
-          // no db record was found; continue with creating the record
-          return null;
-        } else if (results.length > 1) {
-          // more than one result found; we cannot know which one we should update
-          return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
-            alternateIdQuery: stringifiedAlternateQuery
-          }));
-        }
+    if (usePersonModel) {
+      findRecord = app.models.person
+        .rawFind(
+          alternateQueryForRecord, {
+            projection: {
+              id: 1,
+              type: 1
+            },
+            includeDeletedRecords: 1,
+            limit: 2
+          })
+        .then(function (results) {
+          if (!results || !results.length) {
+            // no db record was found; continue with creating the record
+            return null;
+          } else if (results.length > 1) {
+            // more than one result found; we cannot know which one we should update
+            return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+              alternateIdQuery: stringifiedAlternateQuery
+            }));
+          }
 
-        // single record found; continue with it and try to update it
-        return results[0];
-      });
+          // check if the person was converted
+          if (
+            app.models.person.typeToModelMap[results[0].type] &&
+            app.models[app.models.person.typeToModelMap[results[0].type]]
+          ) {
+            const personModel = app.models[app.models.person.typeToModelMap[results[0].type]];
+            // set the new model ?
+            if (model.modelName !== personModel.modelName) {
+              model = personModel;
+            }
+          }
+
+          // get the record again to not change the workflow
+          return model.findOne({
+            where: {
+              id: results[0].id
+            },
+            deleted: true
+          });
+        });
+    } else {
+      findRecord = model
+        .find({
+          where: alternateQueryForRecord,
+          limit: 2,
+          deleted: true
+        })
+        .then(results => {
+          if (!results || !results.length) {
+            // no db record was found; continue with creating the record
+            return null;
+          } else if (results.length > 1) {
+            // more than one result found; we cannot know which one we should update
+            return Promise.reject(apiError.getError('DUPLICATE_ALTERNATE_UNIQUE_IDENTIFIER', {
+              alternateIdQuery: stringifiedAlternateQuery
+            }));
+          }
+
+          // single record found; continue with it and try to update it
+          return results[0];
+        });
+    }
   } else {
     log('debug', 'Record id not present');
-    // record id not present, don't search for a record
-    findRecord = Promise.resolve();
   }
 
   const syncPromise = findRecord

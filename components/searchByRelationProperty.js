@@ -222,8 +222,19 @@ const deletePaginationFilterFromContext = function (context) {
  * @param filter
  * @param queryMap
  * @param filterParentOnly
+ * @param parentFilter
  */
-function convertIncludeQueryToFilterQuery(filter, queryMap = {}, filterParentOnly = true) {
+function convertIncludeQueryToFilterQuery(filter, queryMap = {}, filterParentOnly = true, parentFilter = undefined) {
+  // no parent filter provided, then it means that filter is the parent one
+  if (!parentFilter) {
+    parentFilter = filter;
+  }
+
+  // initialize filter flags
+  if (!filter.queryFlags) {
+    filter.queryFlags = {};
+  }
+
   // start with an empty list of filters
   let filters = {};
   // if relations should be included
@@ -250,8 +261,15 @@ function convertIncludeQueryToFilterQuery(filter, queryMap = {}, filterParentOnl
         }
         // get query, if available
         filters[filterName] = include.scope.where || {};
+
+        // send flags further in case we need them
+        if (include.scope.deleted) {
+          parentFilter.queryFlags[filterName] = parentFilter.queryFlags[filterName] || {};
+          parentFilter.queryFlags[filterName].deleted = true;
+        }
+
         // continue parsing sub-levels
-        Object.assign(filters, convertIncludeQueryToFilterQuery(include.scope, queryMap));
+        Object.assign(filters, convertIncludeQueryToFilterQuery(include.scope, queryMap, true, parentFilter));
         // if the include was provided only for filtering
         if (include.scope.justFilter) {
           // clean-up filter
