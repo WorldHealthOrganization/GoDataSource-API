@@ -21,9 +21,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -43,6 +51,9 @@
     }
   },
   "properties": {
+    "visualId": {
+      "type": "string"
+    },
     "type": {
       "type": "string",
       "required": true,

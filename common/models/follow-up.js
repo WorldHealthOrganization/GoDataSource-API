@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const moment = require('moment');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const exportHelper = require('./../../components/exportHelper');
 const FollowupGeneration = require('../../components/followupGeneration');
 const RoundRobin = require('rr');
 const Timer = require('../../components/Timer');
@@ -58,11 +59,32 @@ module.exports = function (FollowUp) {
 
   // map language token labels for model properties
   FollowUp.fieldLabelsMap = Object.assign({}, FollowUp.fieldLabelsMap, {
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER]: 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_ID]: 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME]: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME]: 'LNG_USER_FIELD_LABEL_LAST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER]: 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_ID]: 'LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME]: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME]: 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'contact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT',
     'contact.id': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_ID',
     'contact.visualId': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_VISUAL_ID',
     'contact.firstName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FIRST_NAME',
     'contact.lastName': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_LAST_NAME',
+    'contact.riskLevel': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_RISK_LEVEL',
+    'contact.gender': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER',
+    'contact.occupation': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION',
+    'contact.age': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE',
+    'contact.age.years': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS',
+    'contact.age.months': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS',
+    'contact.dob': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB',
+    'contact.dateOfLastContact': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT',
+    'contact.followUp': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP',
+    'contact.followUp.originalStartDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_ORIGINAL_START_DATE',
+    'contact.followUp.startDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_START_DATE',
+    'contact.followUp.endDate': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE',
+    'contact.followUp.status': 'LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_STATUS',
     'date': 'LNG_FOLLOW_UP_FIELD_LABEL_DATE',
     'address': 'LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS',
     'address.typeId': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_TYPEID',
@@ -85,9 +107,14 @@ module.exports = function (FollowUp) {
     'index': 'LNG_FOLLOW_UP_FIELD_LABEL_INDEX',
     'teamId': 'LNG_FOLLOW_UP_FIELD_LABEL_TEAM',
     'statusId': 'LNG_FOLLOW_UP_FIELD_LABEL_STATUSID',
+    [exportHelper.CUSTOM_COLUMNS.ALERTED]: 'LNG_FOLLOW_UP_FIELD_LABEL_ALERTED',
     'targeted': 'LNG_FOLLOW_UP_FIELD_LABEL_TARGETED',
     'comment': 'LNG_FOLLOW_UP_FIELD_LABEL_COMMENT',
-    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUserId': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
+    'responsibleUser': 'LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -99,9 +126,15 @@ module.exports = function (FollowUp) {
       properties: [
         'id',
         'createdAt',
-        'createdBy',
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_ID],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME],
+        [exportHelper.CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME],
         'updatedAt',
-        'updatedBy',
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_ID],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME],
+        [exportHelper.CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME],
         'deleted',
         'deletedAt',
         'createdOn'
@@ -113,7 +146,19 @@ module.exports = function (FollowUp) {
         'contact.id',
         'contact.visualId',
         'contact.firstName',
-        'contact.lastName'
+        'contact.lastName',
+        'contact.riskLevel',
+        'contact.gender',
+        'contact.occupation',
+        'contact.age',
+        'contact.age.years',
+        'contact.age.months',
+        'contact.dob',
+        'contact.dateOfLastContact',
+        'contact.followUp.originalStartDate',
+        'contact.followUp.startDate',
+        'contact.followUp.endDate',
+        'contact.followUp.status',
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
@@ -122,9 +167,13 @@ module.exports = function (FollowUp) {
         'index',
         'teamId',
         'statusId',
+        [exportHelper.CUSTOM_COLUMNS.ALERTED],
         'targeted',
         'comment',
-        'responsibleUserId'
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
@@ -214,12 +263,36 @@ module.exports = function (FollowUp) {
         'id',
         'visualId',
         'firstName',
-        'lastName'
+        'lastName',
+        'riskLevel',
+        'gender',
+        'occupation',
+        'age',
+        'dob',
+        'dateOfLastContact',
+        'followUp.originalStartDate',
+        'followUp.startDate',
+        'followUp.endDate',
+        'followUp.status',
       ]
     },
     'teamId': {
       modelName: 'team',
       useProperty: 'name'
+    },
+    'createdBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
+    },
+    'updatedBy': {
+      modelName: 'user',
+      useProperty: [
+        'firstName',
+        'lastName'
+      ]
     }
   };
 
@@ -644,12 +717,32 @@ module.exports = function (FollowUp) {
     let caseQuery = _.get(filter, 'where.case');
     // if found, remove it form main query
     if (caseQuery) {
+      // replace nested geo points filters
+      caseQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.case,
+        caseQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
       delete filter.where.case;
     }
     // get contact query, if any
     let contactQuery = _.get(filter, 'where.contact');
     // if found, remove it form main query
     if (contactQuery) {
+      // replace nested geo points filters
+      contactQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.contact,
+        contactQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
       delete filter.where.contact;
     }
     // get time last seen, if any
@@ -1033,9 +1126,12 @@ module.exports = function (FollowUp) {
                 delete record.contact._id;
 
                 // determine current address & get location
-                if (!_.isEmpty(record.contact.addresses)) {
+                if (
+                  record.contact.addresses &&
+                  record.contact.addresses.length > 0
+                ) {
                   const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
-                  if (!_.isEmpty(contactResidence.locationId)) {
+                  if (contactResidence.locationId) {
                     locationIds[contactResidence.locationId] = true;
                   }
                 }
@@ -1050,8 +1146,8 @@ module.exports = function (FollowUp) {
 
             // retrieve current location for each contact
             locationIds = Object.keys(locationIds);
-            if (_.isEmpty(locationIds)) {
-              // there are no locations to retrieve so we can send response to client
+            if (!locationIds.length) {
+              // there are no locations to retrieve, so we can send response to client
               return callback(null, records);
             }
 
@@ -1071,10 +1167,14 @@ module.exports = function (FollowUp) {
                 // set locations
                 records.forEach((record) => {
                   // determine current address & get location
-                  if (!_.isEmpty(record.contact.addresses)) {
+                  if (
+                    record.contact &&
+                    record.contact.addresses &&
+                    record.contact.addresses.length > 0
+                  ) {
                     const contactResidence = record.contact.addresses.find((address) => address.typeId === 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE');
                     if (
-                      !_.isEmpty(contactResidence.locationId) &&
+                      contactResidence.locationId &&
                       locationsMap[contactResidence.locationId]
                     ) {
                       contactResidence.location = locationsMap[contactResidence.locationId];
@@ -1099,8 +1199,15 @@ module.exports = function (FollowUp) {
     filter,
     countOnly
   ) => {
+    // must filter after lookup ?
+    const matchAfterLookup = filter && filter.where && JSON.stringify(filter.where).indexOf('contact.') > -1;
+
+    // include relationship ?
     let relations = [];
-    if (!countOnly) {
+    if (
+      !countOnly ||
+      matchAfterLookup
+    ) {
       relations.push({
         lookup: {
           from: 'person',
@@ -1111,11 +1218,14 @@ module.exports = function (FollowUp) {
         unwind: true
       });
     }
+
+    // filter
     return app.models.followUp
       .rawFindAggregate(
         filter, {
           countOnly: countOnly,
-          relations: relations
+          relations: relations,
+          matchAfterLookup
         }
       ).then((followUps) => {
         // nothing to do if we just want to count follow-ups

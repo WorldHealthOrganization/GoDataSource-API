@@ -108,7 +108,8 @@ const createUpdateLanguageTokens = (
                         _id: 1,
                         token: 1,
                         translation: 1,
-                        section: 1
+                        section: 1,
+                        deleted: 1
                       }
                     })
                     .toArray()
@@ -120,6 +121,7 @@ const createUpdateLanguageTokens = (
 
                         // no change ?
                         if (
+                          !languageTokenModel.deleted &&
                           languageTokenModel.translation === languageFileData.tokens[languageTokenModel.token].translation && (
                             !languageFileData.tokens[languageTokenModel.token].section ||
                             languageTokenModel.section === languageFileData.tokens[languageTokenModel.token].section
@@ -131,6 +133,11 @@ const createUpdateLanguageTokens = (
                         // log
                         console.log(`Updating token '${languageTokenModel.token}' for language '${languageModel.name}'`);
 
+                        // log
+                        if (languageTokenModel.deleted) {
+                          console.log(`Restoring token '${languageTokenModel.token}' for language '${languageModel.name}'`);
+                        }
+
                         // update token
                         jobs.push(
                           languageToken
@@ -141,7 +148,14 @@ const createUpdateLanguageTokens = (
                                 translation: languageFileData.tokens[languageTokenModel.token].translation,
                                 section: languageFileData.tokens[languageTokenModel.token].section ?
                                   languageFileData.tokens[languageTokenModel.token].section :
-                                  languageTokenModel.section
+                                  languageTokenModel.section,
+                                updatedAt: new Date(),
+                                dbUpdatedAt: new Date(),
+                                updatedBy: 'system',
+                                deleted: false
+                              },
+                              $unset: {
+                                deletedAt: ''
                               }
                             })
                         );
@@ -173,6 +187,7 @@ const createUpdateLanguageTokens = (
                               createdAt: common.install.timestamps.createdAt,
                               createdBy: 'system',
                               updatedAt: common.install.timestamps.updatedAt,
+                              dbUpdatedAt: new Date(),
                               updatedBy: 'system',
                               isDefaultLanguageToken: true
                             })

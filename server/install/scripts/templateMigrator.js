@@ -355,6 +355,8 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                             isContactsOfContactsActive: refItem.isContactsOfContactsActive,
                             isDateOfOnsetRequired: refItem.isDateOfOnsetRequired,
                             applyGeographicRestrictions: refItem.applyGeographicRestrictions,
+                            checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
+                            disableModifyingLegacyQuestionnaire: refItem.disableModifyingLegacyQuestionnaire,
                             deleted: false,
                             deletedAt: null
                           }
@@ -404,6 +406,8 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                           isContactsOfContactsActive: refItem.isContactsOfContactsActive,
                           isDateOfOnsetRequired: refItem.isDateOfOnsetRequired,
                           applyGeographicRestrictions: refItem.applyGeographicRestrictions,
+                          checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
+                          disableEditingLegacyQuestionnaire: refItem.disableEditingLegacyQuestionnaire,
                           deleted: false,
                           createdAt: common.install.timestamps.createdAt,
                           createdBy: 'system',

@@ -10,8 +10,8 @@ module.exports = function (ExportLog) {
   // disable some actions
   app.utils.remote.disableRemoteMethods(ExportLog, [
     'create',
-    'prototype.patchAttributes',
-    'prototype.deleteById'
+    'deleteById',
+    'prototype.patchAttributes'
   ]);
 
   /**

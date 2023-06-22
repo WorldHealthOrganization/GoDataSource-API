@@ -542,55 +542,73 @@ module.exports = function (Outbreak) {
   /**
    * Convert a contact to a case
    * @param contactId
-   * @param params Case specific params
    * @param options
    * @param callback
    */
-  Outbreak.prototype.convertContactToCase = function (contactId, params, options, callback) {
-    let updateRelations = [];
-    let convertedCase;
-
-    // parse case specific params, if not available fallback on default values
-    params = params || {};
-    params.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
-    params.dateBecomeCase = params.dateBecomeCase || app.utils.helpers.getDate().toDate();
-    params.wasContact = true;
-    params.classification = params.classification || 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT';
-
-    // override default scope to allow switching the type
-    const defaultScope = app.models.contact.defaultScope;
-    app.models.contact.defaultScope = function () {
-    };
-
+  Outbreak.prototype.convertContactToCase = function (contactId, options, callback) {
+    let convertedCase, contactsOfContactsMap = {};
     app.models.contact
       .findOne({
         where: {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
           id: contactId
-        }
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers',
+          'questionnaireAnswersCase'
+        ]
       })
-      .then(function (contact) {
-        if (!contact) {
+      .then(function (contactModel) {
+        if (!contactModel) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: contactId});
         }
 
+        // define the attributes for update
+        const attributes = {
+          dateBecomeCase: app.utils.helpers.getDate().toDate(),
+          wasContact: true,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+          classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
+        };
+
         // retain data from custom forms upon conversion
-        if (!_.isEmpty(contact.questionnaireAnswers)) {
-          params.questionnaireAnswersContact = Object.assign({}, contact.questionnaireAnswers);
-          params.questionnaireAnswers = {};
+        if (!_.isEmpty(contactModel.questionnaireAnswers)) {
+          attributes.questionnaireAnswersContact = Object.assign({}, contactModel.questionnaireAnswers);
+          attributes.questionnaireAnswers = {};
         }
 
         // restore data from custom forms before conversion
-        if (!_.isEmpty(contact.questionnaireAnswersCase)) {
-          params.questionnaireAnswers = Object.assign({}, contact.questionnaireAnswersCase);
-          params.questionnaireAnswersCase = {};
+        if (!_.isEmpty(contactModel.questionnaireAnswersCase)) {
+          attributes.questionnaireAnswers = Object.assign({}, contactModel.questionnaireAnswersCase);
+          attributes.questionnaireAnswersCase = {};
         }
 
-        return contact.updateAttributes(params, options);
+        // the case has relations with other cases; proceed with the conversion
+        return app.models.person.rawUpdateOne(
+          {
+            _id: contactId
+          },
+          attributes,
+          options
+        );
       })
-      .then(function (_case) {
-        convertedCase = _case;
-        // after updating the contact, find it's relations
+      .then(() => {
+        return app.models.case.findOne({
+          where: {
+            id: contactId
+          }
+        });
+      })
+      .then(function (caseModel) {
+        if (!caseModel) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.case.modelName, id: contactId});
+        }
+
+        // keep the caseModel as we will do actions on it
+        convertedCase = caseModel;
+
+        // after updating the case, find it's relations
         return app.models.relationship
           .find({
             where: {
@@ -599,7 +617,13 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relations) {
-        // update relations
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
+        // collect update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -607,6 +631,11 @@ module.exports = function (Outbreak) {
             if (person.id === contactId) {
               // update type to match the new one
               person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
+            } else {
+              // find his contacts relationships (contacts of contacts) to convert them to "contact" type
+              if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT') {
+                contactsOfContactsMap[person.id] = true;
+              }
             }
             persons.push(person);
           });
@@ -628,13 +657,123 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
+        // convert contacts of contacts to contacts
+        return app.models.person
+          .rawBulkUpdate(
+            {
+              id: {
+                $in: contactsOfContactsIds
+              }
+            },
+            {
+              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
+      })
+      .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
+        // get the converted contacts to update the rest of the fields and update them again to trigger the hooks
+        return app.models.contact
+          .find({
+            where: {
+              'id': {
+                $in: contactsOfContactsIds
+              }
+            }
+          });
+      })
+      .then(function (records) {
+        // check if there are records
+        if (!records.length) {
+          return;
+        }
+
+        // update the rest of the fields
+        const updateContacts = [];
+        records.forEach(function (contact) {
+          updateContacts.push(contact.updateAttributes({
+            dateBecomeContact: app.utils.helpers.getDate().toDate(),
+            wasContactOfContact: true
+          }, options));
+        });
+        return Promise.all(updateContacts);
+      })
+      .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return [];
+        }
+
+        // get the relationship persons for contacts of contacts
+        return app.models.relationship
+          .find({
+            where: {
+              'persons.id': {
+                $in: contactsOfContactsIds
+              }
+            }
+          });
+      })
+      .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
+        // collect update relations
+        const updateRelations = [];
+        relations.forEach(function (relation) {
+          let persons = [];
+          relation.persons.forEach(function (person) {
+            // for every occurrence of current contact
+            if (contactsOfContactsMap[person.id]) {
+              // update type to match the new one
+              person.type = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+            }
+            persons.push(person);
+          });
+          updateRelations.push(relation.updateAttributes({persons: persons}, options));
+        });
+        return Promise.all(updateRelations);
+      })
+      .then(function () {
+        // check if there are contacts of contacts
+        const contactsOfContactsIds = Object.keys(contactsOfContactsMap);
+        if (!contactsOfContactsIds.length) {
+          return;
+        }
+
+        // update personType from lab results for contacts of contacts
+        return app.models.labResult
+          .rawBulkUpdate(
+            {
+              personId: {
+                $in: contactsOfContactsIds
+              }
+            },
+            {
+              personType: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+            },
+            options
+          );
+      })
+      .then(function () {
         callback(null, convertedCase);
       })
-      .catch(callback)
-      .finally(function () {
-        // restore default scope
-        app.models.contact.defaultScope = defaultScope;
-      });
+      .catch(callback);
   };
 
   /**
@@ -782,6 +921,20 @@ module.exports = function (Outbreak) {
           });
         }
         instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Generate (next available) event visual id
+   * @param visualIdMask
+   * @param personId
+   * @param callback
+   */
+  Outbreak.prototype.generateEventVisualId = function (visualIdMask, personId, callback) {
+    Outbreak.helpers.validateOrGetAvailableEventVisualId(this, visualIdMask, personId)
+      .then(function (visualId) {
+        callback(null, visualId);
       })
       .catch(callback);
   };
@@ -2635,8 +2788,10 @@ module.exports = function (Outbreak) {
               }
             }, {
               '$unset': {
-                deleted: '',
                 deletedAt: ''
+              },
+              '$set': {
+                deleted: false
               }
             })
             .then(() => {
@@ -2652,7 +2807,7 @@ module.exports = function (Outbreak) {
                   options.remotingContext.req.logger.debug(`Failed to delete outbreak after the related language tokens restore failed. Error: ${err}`);
                 }
 
-                // failed to reverts the changes
+                // failed to revert changes
                 callback(err);
               });
             });
@@ -3340,7 +3495,36 @@ module.exports = function (Outbreak) {
       }
       return callback(null, {
         count: isolatedContacts.length,
-        ids: isolatedContacts.map((entry) => entry.contact.id)
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
+      });
+    });
+  };
+
+  /**
+   * Retrieve the isolated contacts for a contact and count
+   * @param caseId
+   * @param callback
+   */
+  Outbreak.prototype.getContactIsolatedContacts = function (contactId, callback) {
+    app.models.contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
       });
     });
   };
@@ -3673,6 +3857,37 @@ module.exports = function (Outbreak) {
       })
       .catch(callback);
   };
+
+  /**
+   * Find relationship contacts for a contact of contact. Relationship contacts are the relationships where the contact of contact is a source (it has nothing to do with person type contact)
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.findContactOfContactRelationshipContacts = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .findPersonRelationshipContacts(this.id, contactOfContactId, filter)
+      .then(function (contactsOfContacts) {
+        callback(null, contactsOfContacts);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count relationship contacts for a contact. Relationship contacts are the relationships where the contact is a source (it has nothing to do with person type contact)
+   * @param contactOfContactId
+   * @param filter
+   * @param callback
+   */
+  Outbreak.prototype.countContactOfContactRelationshipContacts = function (contactOfContactId, filter, callback) {
+    app.models.relationship
+      .countPersonRelationshipContacts(this.id, contactOfContactId, filter)
+      .then(function (contactsOfContacts) {
+        callback(null, contactsOfContacts);
+      })
+      .catch(callback);
+  };
+
 
   /**
    * Find relationship exposures for a contact of contact

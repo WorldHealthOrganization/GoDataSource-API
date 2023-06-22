@@ -153,6 +153,9 @@
     "bulkModifyFollowUps": {
       "batchSize": 1000
     },
+    "bulkModifyLabResults": {
+      "batchSize": 1000
+    },
     "setRelationshipInformationOnPerson": {
       "batchSize": 10000
     },

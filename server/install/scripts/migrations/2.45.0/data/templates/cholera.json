@@ -1,0 +1,266 @@
+{
+  "translations": {
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_INITIAL_RESPIRATORY_SAMPLE_COLLECTION": {
+      "arabic": "تجميع العينة الأولي ",
+      "modules": [
+        "referenceData"
+      ],
+      "english_us": "Initial Sample Collection ",
+      "french_fr": "Initial Respiratory Sample Collection ",
+      "spanish_es": "Initial Respiratory Sample Collection ",
+      "russian_ru": "Initial Sample Collection ",
+      "portuguese_pt": "Initial Respiratory Sample Collection "
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_UNK_LABEL": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "Unknown",
+      "english_us": "Unknown",
+      "french_fr": "Unknown",
+      "portuguese_pt": "Unknown",
+      "russian_ru": "Unknown",
+      "spanish_es": "Unknown"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS": {
+      "modules": [
+        "referenceData"
+      ],
+      "russian_ru": "Patient Symptoms",
+      "arabic": "أعراض المريض",
+      "english_us": "Patient Symptoms",
+      "portuguese_pt": "A0: Patient Symptoms",
+      "spanish_es": "A0: Patient Symptoms",
+      "french_fr": "A0: Patient Symptoms"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_MILD_LABEL": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "Some signs of dehydration (Plan B)",
+      "english_us": "Some signs of dehydration (Plan B)",
+      "french_fr": "Some signs of dehydration (Plan B)",
+      "portuguese_pt": "Some signs of dehydration (Plan B)",
+      "russian_ru": "Some signs of dehydration (Plan B)",
+      "spanish_es": "Some signs of dehydration (Plan B)"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_TEXT": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "Level of Dehydration",
+      "english_us": "Dehydration status/Treatment Plan",
+      "french_fr": "Level of Dehydration",
+      "portuguese_pt": "Level of Dehydration",
+      "russian_ru": "Level of Dehydration",
+      "spanish_es": "Level of Dehydration"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_LABEL": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "Yes",
+      "english_us": "Yes",
+      "french_fr": "Yes",
+      "portuguese_pt": "Yes",
+      "russian_ru": "Yes",
+      "spanish_es": "Yes"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_TEXT": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "Stool sample taken",
+      "english_us": "Stool sample taken",
+      "french_fr": "Stool sample taken",
+      "portuguese_pt": "Stool sample taken",
+      "russian_ru": "Stool sample taken",
+      "spanish_es": "Stool sample taken"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_NO_LABEL": {
+      "modules": [
+        "template"
+      ],
+      "arabic": "No",
+      "english_us": "No",
+      "french_fr": "No",
+      "portuguese_pt": "No",
+      "russian_ru": "No",
+      "spanish_es": "No"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_DISEASE_CHOLERA": {
+      "arabic": "Cholera",
+      "modules": [
+        "referenceData"
+      ],
+      "english_us": "Cholera",
+      "french_fr": "Cholera",
+      "portuguese_pt": "Cholera",
+      "russian_ru": "Cholera",
+      "spanish_es": "Cholera"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_QUESTION_BA_2_C_944_B_8_AFA_44_C_3_A_794_C_8_E_5_B_699586_E_TEXT": {
+      "arabic": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "modules": [
+        "template"
+      ],
+      "english_us": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "french_fr": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "portuguese_pt": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "russian_ru": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module",
+      "spanish_es": "**NOTE: After completing questionnaire, please add sample details in \"Lab results\" module"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_NONE_LABEL": {
+      "arabic": "No signs of dehydration (Plan A)",
+      "modules": [
+        "template"
+      ],
+      "english_us": "No signs of dehydration (Plan A)",
+      "french_fr": "No signs of dehydration (Plan A)",
+      "portuguese_pt": "No signs of dehydration (Plan A)",
+      "russian_ru": "No signs of dehydration (Plan A)",
+      "spanish_es": "No signs of dehydration (Plan A)"
+    },
+    "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_SEVERE_LABEL": {
+      "arabic": "Severe dehydration (Plan C)",
+      "modules": [
+        "template"
+      ],
+      "english_us": "Severe dehydration (Plan C)",
+      "french_fr": "Severe dehydration (Plan C)",
+      "portuguese_pt": "Severe dehydration (Plan C)",
+      "russian_ru": "Severe dehydration (Plan C)",
+      "spanish_es": "Severe dehydration (Plan C)"
+    }
+  },
+  "referenceData": [
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_CHOLERA",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_CHOLERA"
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS",
+      "order": 6
+    },
+    {
+      "id": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_INITIAL_RESPIRATORY_SAMPLE_COLLECTION",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY",
+      "value": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_INITIAL_RESPIRATORY_SAMPLE_COLLECTION",
+      "order": 7
+    }
+  ],
+  "outbreakTemplates": [
+    {
+      "id": "dd9b346e-ee09-44bd-afce-acb152be3579",
+      "name": "Cholera",
+      "description": "Aligned with GTFCC Cholera Outreak Response Field Manual, October 2019 (https://www.gtfcc.org/wp-content/uploads/2020/05/gtfcc-cholera-outbreak-response-field-manual.pdf)",
+      "disease": "LNG_REFERENCE_DATA_CATEGORY_DISEASE_CHOLERA",
+      "periodOfFollowup": 5,
+      "frequencyOfFollowUpPerDay": 1,
+      "generateFollowUpsOverwriteExisting": false,
+      "generateFollowUpsKeepTeamAssignment": true,
+      "generateFollowUpsTeamAssignmentAlgorithm": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+      "generateFollowUpsDateOfLastContact": true,
+      "intervalOfFollowUp": "",
+      "noDaysAmongContacts": 5,
+      "noDaysInChains": 5,
+      "noDaysNotSeen": 5,
+      "noLessContacts": 5,
+      "longPeriodsBetweenCaseOnset": 5,
+      "noDaysNewContacts": 1,
+      "caseInvestigationTemplate": [
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_TEXT",
+          "variable": "treatment_plan",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_A_0_PATIENT_SYMPTOMS",
+          "required": false,
+          "order": 1,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_NONE_LABEL",
+              "value": "none",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_MILD_LABEL",
+              "value": "mild",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_TREATMENT_PLAN_ANSWER_SEVERE_LABEL",
+              "value": "severe",
+              "alert": true,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        },
+        {
+          "multiAnswer": false,
+          "inactive": false,
+          "text": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_TEXT",
+          "variable": "sample_collection",
+          "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_INITIAL_RESPIRATORY_SAMPLE_COLLECTION",
+          "required": false,
+          "order": 2,
+          "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER",
+          "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+          "answers": [
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_LABEL",
+              "value": "yes",
+              "alert": false,
+              "additionalQuestions": [
+                {
+                  "multiAnswer": false,
+                  "inactive": false,
+                  "text": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_YES_QUESTION_BA_2_C_944_B_8_AFA_44_C_3_A_794_C_8_E_5_B_699586_E_TEXT",
+                  "variable": "ba2c944b-8afa-44c3-a794-c8e5b699586e",
+                  "category": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_CATEGORY_INITIAL_RESPIRATORY_SAMPLE_COLLECTION",
+                  "required": false,
+                  "order": 1,
+                  "answerType": "LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MARKUP",
+                  "answersDisplay": "LNG_OUTBREAK_QUESTIONNAIRE_ANSWERS_DISPLAY_ORIENTATION_VERTICAL",
+                  "answers": []
+                }
+              ],
+              "order": 1
+            },
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_NO_LABEL",
+              "value": "no",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 2
+            },
+            {
+              "label": "LNG_TEMPLATE_DD9B346E-EE09-44BD-AFCE-ACB152BE3579_CASEINVESTIGATIONTEMPLATE_QUESTION_SAMPLE_COLLECTION_ANSWER_UNK_LABEL",
+              "value": "unk",
+              "alert": false,
+              "additionalQuestions": null,
+              "order": 3
+            }
+          ]
+        }
+      ],
+      "contactInvestigationTemplate": [],
+      "contactFollowUpTemplate": [],
+      "labResultsTemplate": [],
+      "isContactLabResultsActive": true,
+      "isContactsOfContactsActive": true,
+      "isDateOfOnsetRequired": false,
+      "applyGeographicRestrictions": false
+    }
+  ]
+}

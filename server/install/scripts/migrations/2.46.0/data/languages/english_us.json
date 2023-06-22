@@ -1,0 +1,293 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_BULK_ADD_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_MODIFY_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkModifyContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_PAGE_BULK_MODIFY_CONTACTS_OF_CONTACTS_ADDRESS_DATE": {
+      "translation": "Address date",
+      "section": "uiBulkModifyContactsOfContactsPage"
+    },
+    "LNG_ENTITY_FIELD_LABEL_CLUSTER": {
+      "translation": "Cluster",
+      "section": "uiEntityFields"
+    },
+    "LNG_PAGE_CASE_COUNT_LAB_SEQUENCE_RESULT": {
+      "translation": "Lab result variant/strain result",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_PAGE_CASE_COUNT_DATE": {
+      "translation": "Date",
+      "section": "uiCaseCountMap"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK": {
+      "translation": "Event ID mask",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9) / 9 – Digit (auto-generated sequence number) / Y – Year (Using year from the date when an event has been reported) / @ – Letter (A through Z) / & - Any character(including spaces) / * for any character with no limitations in ID length",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_VISUAL_ID": {
+      "translation": "Event ID",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The event ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiEventFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID": {
+      "translation": "Event - generate id",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_EVENT_VISUAL_ID_DESCRIPTION": {
+      "translation": "This permission allows generation of event IDs ( visual id - outbreak event mask )",
+      "section": "availablePermissions"
+    },
+    "LNG_CASE_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DUPLICATE_PERSONS": {
+      "translation": "A person with the same name already exists:",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_SHEET_CONTEXT_MENU_PASTE": {
+      "translation": "Paste",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_DELETE": {
+      "translation": "Delete content",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_UNDO": {
+      "translation": "Undo",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_REDO": {
+      "translation": "Redo",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_APPEND_ROW": {
+      "translation": "Add row(s)",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_REMOVE_ROW": {
+      "translation": "Delete rows",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INTEGER": {
+      "translation": "Field must be an integer",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INVALID_COLUMNS": {
+      "translation": "Column(s) '{{fields}}' are invalid",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_EDITOR_HELP": {
+      "translation": "All cells with red backgrounds will display details on mouse hover about what is invalid and why",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_FORM_VALIDATION_ERROR_INVALID_ROWS": {
+      "translation": "Row(s) '{{rows}}' are invalid",
+      "section": "uiFormInputValidationErrors"
+    },
+    "LNG_COMMON_NOTHING_TO_SAVE": {
+      "translation": "Nothing to save",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_INVALID_ROWS": {
+      "translation": "You have invalid rows",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_ROWS_NO": {
+      "translation": "No. of rows to append",
+      "section": "uiCommonLabels"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_SELECTED_ROWS": {
+      "translation": "Are you sure you want to delete selected rows ({{rows}})?",
+      "section": "uiDialogs"
+    },
+    "LNG_SHEET_CONTEXT_MENU_COPY": {
+      "translation": "Copy raw",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_SHEET_CONTEXT_MENU_COPY_TEXT": {
+      "translation": "Copy text",
+      "section": "uiExcelLikeSheetWidget"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_API_ERROR_MSG": {
+      "translation": "Row {{row}} is invalid: {{err}}",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
+      "translation": "Records that were created with success were removed from the spreadsheet so we don't create duplicates",
+      "section": "uiBulkAddContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_API_ERROR_MSG": {
+      "translation": "Row {{row}} is invalid: {{err}}",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_PAGE_BULK_ADD_CONTACTS_OF_CONTACTS_LABEL_PARTIAL_ERROR_MSG": {
+      "translation": "Records that were created with success were removed from the spreadsheet so we don't create duplicates",
+      "section": "uiBulkAddContactsOfContactsPage"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_INDEX": {
+      "translation": "Day of follow-up",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_GENDER": {
+      "translation": "Gender",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE": {
+      "translation": "Age",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_YEARS": {
+      "translation": "Years",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_AGE_MONTHS": {
+      "translation": "Months",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DOB": {
+      "translation": "Date of birth",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_OCCUPATION": {
+      "translation": "Occupation",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_DATE_OF_LAST_CONTACT": {
+      "translation": "Date of last contact",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP": {
+      "translation": "Follow-up",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_ORIGINAL_START_DATE": {
+      "translation": "Follow-up original start date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_START_DATE": {
+      "translation": "Follow-up start date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_END_DATE": {
+      "translation": "Follow-up end date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CONTACT_FOLLOWUP_STATUS": {
+      "translation": "Follow-up status",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER": {
+      "translation": "Created by user",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_BY_USER_ID": {
+      "translation": "ID",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER": {
+      "translation": "Updated by user",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_BY_USER_ID": {
+      "translation": "ID",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ALERTED": {
+      "translation": "Alerted",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED": {
+      "translation": "Include alerted data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_ALERTED_DESCRIPTION": {
+      "translation": "When checked, the alerted data will be included in the exported file",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER": {
+      "translation": "Include created by user data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_CREATED_BY_USER_DESCRIPTION": {
+      "translation": "When checked, the created by user data will be included in the exported file",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER": {
+      "translation": "Include updated by user data",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_INCLUDE_UPDATED_BY_USER_DESCRIPTION": {
+      "translation": "When checked, the updated by user data will be included in the exported file",
+      "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PROCESSING_FILE": {
+      "translation": "Error processing file: {{error}}'",
+      "section": "uiImportData"
+    },
+    "LNG_CASE_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The case ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VISUAL_ID_DESCRIPTION": {
+      "translation": "The contact of contact ID should match the pattern defined for this outbreak: {{mask}}",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CASE_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiCaseFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiContactFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiEventFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_RESPONSIBLE_USER_UUID": {
+      "translation": "Assigned user uuid",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_GENERIC_WARNING_BULK_CACHE_EXPIRED": {
+      "translation": "Bulk cache expired, please reselect list",
+      "section": "uiGenericErrorsWarningsInfoMessages"
+    },
+    "LNG_GENERIC_WARNING_NO_PASTE_USING_CONTEXT_MENU": {
+      "translation": "This action is unavailable via the context menu, but you can still use {{shortcut}}",
+      "section": "uiGenericErrorsWarningsInfoMessages"
+    },
+    "LNG_PAGE_LIST_LOCATIONS_EXPORT_DELETED_INFORMATION": {
+      "translation": "Include deleted locations",
+      "section": "uiLocationsListPage"
+    }
+  }
+}

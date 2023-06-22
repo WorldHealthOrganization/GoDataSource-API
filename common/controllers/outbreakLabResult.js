@@ -9,8 +9,65 @@ const app = require('../../server/server');
 const WorkerRunner = require('./../../components/workerRunner');
 const _ = require('lodash');
 const exportHelper = require('./../../components/exportHelper');
+const genericHelpers = require('../../components/helpers');
+const Config = require('../../server/config.json');
 
 module.exports = function (Outbreak) {
+  /**
+   * Bulk modify lab results
+   * @param where
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkModifyLabResults = function (where, data, options, callback) {
+    // since the query can return many results we will do the update in batches
+    // Note: Updating each lab result one by one in order for the "before/after save" hooks to be executed for each entry
+    // container for count
+    let labResultsCount = 0;
+
+    // initialize parameters for handleActionsInBatches call
+    const getActionsCount = () => {
+      return app.models.labResult
+        .count(where)
+        .then(count => {
+          // cache count
+          labResultsCount = count;
+
+          return Promise.resolve(count);
+        });
+    };
+
+    const getBatchData = (batchNo, batchSize) => {
+      // get lab results for batch
+      return app.models.labResult
+        .find({
+          where: where,
+          skip: (batchNo - 1) * batchSize,
+          limit: batchSize,
+          order: 'createdAt ASC'
+        });
+    };
+
+    const itemAction = (labResultRecord) => {
+      return labResultRecord.updateAttributes(data, options);
+    };
+
+    genericHelpers.handleActionsInBatches(
+      getActionsCount,
+      getBatchData,
+      null,
+      itemAction,
+      _.get(Config, 'jobSettings.bulkModifyLabResults.batchSize', 1000),
+      10,
+      options.remotingContext.req.logger
+    )
+      .then(() => {
+        callback(null, {count: labResultsCount});
+      })
+      .catch(callback);
+  };
+
   /**
    * Attach before remote (GET outbreaks/{id}/lab-results/aggregate) hooks
    */
@@ -89,8 +146,8 @@ module.exports = function (Outbreak) {
         // count using query
         return app.models.labResult.rawCountDocuments(filter);
       })
-      .then(function (followUps) {
-        callback(null, followUps);
+      .then(function (labResults) {
+        callback(null, labResults);
       })
       .catch(callback);
   };
@@ -421,7 +478,7 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableCaseLabResultsFileUsingMap = function (body, options, callback) {
-    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.case, options, callback);
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this, body, app.models.case, options, callback);
   };
 
   /**
@@ -431,6 +488,6 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.importImportableContactLabResultsFileUsingMap = function (body, options, callback) {
-    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this.id, body, app.models.contact, options, callback);
+    app.models.labResult.helpers.importImportableLabResultsFileUsingMap(this, body, app.models.contact, options, callback);
   };
 };

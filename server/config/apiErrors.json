@@ -103,10 +103,14 @@
     "defaultStatusCode": 422,
     "messagePattern": "The case `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
   },
-  "INVALID_CONTACT_CONTACT_RELATIONSHIP": {
+  "INVALID_CONTACT_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Related person `<%= id %>` is a contact. Cannot create relationships between two contacts."
+    "messagePattern": "The contact `<%= id %>` needs to be related to another contact and it must be a target in that relationship in order to be able to convert it to a contact a contact of contact"
   },
+  "INVALID_CONTACT_OF_CONTACT_RELATIONSHIP": {
+  "defaultStatusCode": 422,
+  "messagePattern": "The contact of contact `<%= id %>` needs to be related to another case or event and it must be a target in that relationship in order to be able to convert it to a contact"
+},
   "MODEL_NOT_EDITABLE": {
     "defaultStatusCode": 422,
     "messagePattern": "Model `<%= model %>` id `<%= id %>` is not editable (read-only)."
@@ -153,7 +157,7 @@
   },
   "IMPORT_PARTIAL_SUCCESS": {
     "defaultStatusCode": 422,
-    "messagePattern": "Import Partial Success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
+    "messagePattern": "Import partial success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
   },
   "INVALID_SNAPSHOT_FILE": {
     "defaultStatusCode": 400,
@@ -161,7 +165,7 @@
   },
   "DELETE_CONTACT_LAST_RELATIONSHIP": {
     "defaultStatusCode": 422,
-    "messagePattern": "Cannot delete a contact's last relationship with a case or event. The contact with ID <%= contactIDs %> doesn't have an additional relationship with a case or event."
+    "messagePattern": "Cannot delete the last relationship exposure because the person with ID <%= contactIDs %> doesn't have an additional relationship exposure."
   },
   "EXTERNAL_API_CONNECTION_ERROR": {
     "defaultStatusCode": 503,
@@ -273,15 +277,15 @@
   },
   "ADDRESS_MUST_HAVE_USUAL_PLACE_OF_RESIDENCE": {
     "defaultStatusCode": 422,
-    "messagePattern": "One of the addresses must be set as Usual Place of Residence"
+    "messagePattern": "One of the addresses must be set as Current address"
   },
   "ADDRESS_MULTIPLE_USUAL_PLACE_OF_RESIDENCE": {
     "defaultStatusCode": 422,
-    "messagePattern": "Multiple addresses set as Usual Place of Residence. Only one address should be set as Usual Place of Residence"
+    "messagePattern": "Multiple addresses set as Current address. Only one address should be set as Current address"
   },
   "ADDRESS_PREVIOUS_PLACE_OF_RESIDENCE_MUST_HAVE_DATE": {
     "defaultStatusCode": 422,
-    "messagePattern": "Addresses set as Previous Usual Place of Residence must have a date set"
+    "messagePattern": "Addresses set as Previous Current address must have a date set"
   },
   "READ_DEVICE_INFORMATION_FAILURE": {
     "defaultStatusCode": 422,

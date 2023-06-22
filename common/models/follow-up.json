@@ -51,6 +51,9 @@
     },
     "responsibleUserId": {
       "type": "string"
+    },
+    "personId": {
+      "type": "string"
     }
   },
   "indexes": {
@@ -73,6 +76,9 @@
     },
     "address_geoLocation_index": {
       "address.geoLocation": "2dsphere"
+    },
+    "address_locationId_index": {
+      "address.locationId": 1
     },
     "fillLocation_geoLocation_index": {
       "fillLocation.geoLocation": "2dsphere"

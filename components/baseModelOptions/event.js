@@ -19,15 +19,29 @@ const getAdditionalFormatOptions = function (options) {
  */
 const formatItemFromImportableFile = function (item, formattedDataContainer, options) {
   // remap properties
-  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap);
+  const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  const formattedData = helpers.convertBooleanPropertiesNoModel(
+  let formattedData = helpers.convertPropertiesNoModelByType(
     options.modelBooleanProperties || [],
-    remappedProperties)[0];
+    remappedProperties,
+    helpers.DATA_TYPE.BOOLEAN
+  );
+
+  // process date values
+  formattedData = helpers.convertPropertiesNoModelByType(
+    options.modelDateProperties || [],
+    formattedData,
+    helpers.DATA_TYPE.DATE
+  );
 
   // set outbreak id
   formattedData.outbreakId = options.outbreakId;
+
+  // sanitize visual ID
+  if (formattedData.visualId) {
+    formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);
+  }
 
   // add case entry in the processed list
   formattedDataContainer.push({

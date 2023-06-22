@@ -364,10 +364,10 @@ module.exports = function (User) {
         config.passwordChange.path :
         '/account/change-password';
       let userName = `${info.user.firstName} ${info.user.lastName}`;
-      let changePassURL = `${config.public.protocol}://${config.public.host}:${config.public.port}${passwordChangePath}`;
+      let changePassURL = `${config.public.protocol}://${config.public.host}${config.public.port ? ':' + config.public.port : ''}${passwordChangePath}`;
 
       paragraph1 = _.template(paragraph1, {interpolate: /{{([\s\S]+?)}}/g})({userName: `${userName}`});
-      paragraph4 = `${config.public.protocol}://${config.public.host}:${config.public.port}${config.passwordReset.path}?token=${info.accessToken.id}`;
+      paragraph4 = `${config.public.protocol}://${config.public.host}${config.public.port ? ':' + config.public.port : ''}${config.passwordReset.path}?token=${info.accessToken.id}`;
       paragraph5 = _.template(paragraph5, {interpolate: /{{([\s\S]+?)}}/g})({changePassURL: `<a href="${changePassURL}">${changePassURL}</a>`});
 
       // load the html email template

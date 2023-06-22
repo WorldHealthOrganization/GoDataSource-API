@@ -76,6 +76,10 @@
     "dataSource": "mongoDb",
     "public": true
   },
+  "restoreLog": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
   "databaseActionLog": {
     "dataSource": "mongoDb",
     "public": false
@@ -357,6 +361,10 @@
     "public": true
   },
   "relationshipSourceTarget": {
+    "dataSource": null,
+    "public": false
+  },
+  "allowedRefData": {
     "dataSource": null,
     "public": false
   },

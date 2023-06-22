@@ -22,13 +22,36 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   const remappedProperties = helpers.remapPropertiesUsingProcessedMap([item], options.processedMap, options.valuesMap)[0];
 
   // process boolean values
-  const formattedRelationshipData = helpers.convertBooleanPropertiesNoModel(
+  let formattedRelationshipData = helpers.convertPropertiesNoModelByType(
     options.relationshipModelBooleanProperties || [],
-    helpers.extractImportableFieldsNoModel(options.relationshipImportableTopLevelProperties, remappedProperties.relationship));
+    helpers.extractImportableFieldsNoModel(
+      options.relationshipImportableTopLevelProperties,
+      remappedProperties.relationship
+    ),
+    helpers.DATA_TYPE.BOOLEAN
+  );
 
-  const formattedContactOfContactData = helpers.convertBooleanPropertiesNoModel(
+  let formattedContactOfContactData = helpers.convertPropertiesNoModelByType(
     options.contactOfContactModelBooleanProperties || [],
-    helpers.extractImportableFieldsNoModel(options.contactOfContactImportableTopLevelProperties, remappedProperties));
+    helpers.extractImportableFieldsNoModel(
+      options.contactOfContactImportableTopLevelProperties,
+      remappedProperties
+    ),
+    helpers.DATA_TYPE.BOOLEAN
+  );
+
+  // process date values
+  formattedRelationshipData = helpers.convertPropertiesNoModelByType(
+    options.relationshipModelDateProperties || [],
+    formattedRelationshipData,
+    helpers.DATA_TYPE.DATE
+  );
+
+  formattedContactOfContactData = helpers.convertPropertiesNoModelByType(
+    options.contactOfContactModelDateProperties || [],
+    formattedContactOfContactData,
+    helpers.DATA_TYPE.DATE
+  );
 
   // set outbreak id
   formattedRelationshipData.outbreakId = options.outbreakId;

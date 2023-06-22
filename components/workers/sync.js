@@ -7,7 +7,7 @@ const archiver = require('archiver');
 const fs = require('fs');
 const Moment = require('moment');
 const path = require('path');
-const AdmZip = require('adm-zip');
+const extractZip = require('extract-zip');
 const _ = require('lodash');
 const uuid = require('uuid');
 
@@ -309,9 +309,17 @@ const worker = {
             if (filter.where.hasOwnProperty('fromDate')) {
               // doing this because createdAt and updatedAt are equal when a record is created
               customFilter = {
-                updatedAt: {
-                  $gte: new Date(filter.where.fromDate)
-                }
+                '$or': [
+                  {
+                    'updatedAt': {
+                      $gte: new Date(filter.where.fromDate)
+                    }
+                  }, {
+                    'dbUpdatedAt': {
+                      $gte: new Date(filter.where.fromDate)
+                    }
+                  }
+                ]
               };
             }
 
@@ -863,99 +871,182 @@ const worker = {
    * @returns {Promise<any>}
    */
   extractAndDecryptSnapshotArchive: function (snapshotFile, options) {
-    return new Promise(function (resolve, reject) {
-      let tmpDir, tmpDirName, collectionFilesDirName;
+    // initialize mongodb connection
+    return getMongoDBConnection()
+      .then(function (dbConnection) {
+        let tmpDirName, collectionFilesDirName;
+        try {
+          logger.debug('Creating tmp directories');
+          // create a temporary directory to store the database files
+          // it always created the folder in the system temporary directory
+          const tmpDir = tmp.dirSync({
+            prefix: options.prefix ?
+              options.prefix :
+              undefined,
+            unsafeCleanup: true
+          });
+          tmpDirName = tmpDir.name;
+          // also create an archives subdir
+          collectionFilesDirName = `${tmpDirName}/collections`;
+          fs.mkdirSync(collectionFilesDirName);
+        } catch (err) {
+          logger.error(`Failed creating tmp directories; ${err}`);
+          return Promise.reject(err);
+        }
 
-      try {
-        logger.debug('Creating tmp directories');
-        // create a temporary directory to store the database files
-        // it always created the folder in the system temporary directory
-        tmpDir = tmp.dirSync({unsafeCleanup: true});
-        tmpDirName = tmpDir.name;
-        // also create an archives subdir
-        collectionFilesDirName = `${tmpDirName}/collections`;
-        fs.mkdirSync(collectionFilesDirName);
-      } catch (err) {
-        logger.error(`Failed creating tmp directories; ${err}`);
-        return reject(err);
-      }
+        // handle restore log updates
+        let restoreTotalSteps = 0;
+        let processedNo = 0;
+        const updateRestoreLog = (data) => {
+          return options.restoreLogId ?
+            dbConnection.collection('databaseActionLog').updateOne(
+              {
+                _id: options.restoreLogId
+              }, {
+                '$set': data
+              }
+            ) :
+            Promise.resolve();
+        };
 
-      // extract snapshot
-      try {
+        // update restore log if we have one
         logger.debug(`Extracting zip archive: ${snapshotFile}`);
-        let archive = new AdmZip(snapshotFile);
-        archive.extractAllTo(tmpDirName);
-      } catch (zipError) {
-        logger.error(`Failed to extract zip archive: ${snapshotFile}. ${zipError}`);
-        return reject(typeof zipError === 'string' ? {message: zipError} : zipError);
-      }
-
-      // decrypt all collection files archives if needed
-      let collectionArchives;
-      try {
-        // get only zip files
-        collectionArchives = fs.readdirSync(tmpDirName);
-        collectionArchives = collectionArchives.filter(function (fileName) {
-          return !fs.statSync(`${tmpDirName}/${fileName}`).isDirectory() && path.extname(fileName) === '.zip';
-        });
-      } catch (err) {
-        logger.error(`Failed to read collection archive files at : ${tmpDirName}. ${err}`);
-        return reject(err);
-      }
-
-      // define archive decryption action
-      let decryptArchives;
-      // if no password was provided
-      if (!options.password) {
-        // nothing to do, return file path as is
-        decryptArchives = Promise.resolve(collectionArchives);
-      } else {
-        // password provided, decrypt archives
-        let decryptFunctions = collectionArchives.map(function (filePath) {
-          return function (callback) {
-            workerRunner
-              .helpers
-              .decryptFile(options.password, {}, `${tmpDirName}/${filePath}`)
-              .then(function () {
-                callback();
-              })
-              .catch(callback);
-          };
-        });
-
-        decryptArchives = new Promise(function (resolve, reject) {
-          logger.debug(`Decripting archives from: ${tmpDirName}`);
-          async.parallelLimit(decryptFunctions, 5, function (err) {
-            if (err) {
-              logger.error(`Failed to decrypt archive files from : ${tmpDirName}. ${err}`);
-              return reject(err);
-            }
-            return resolve();
-          });
-        });
-      }
-
-      decryptArchives
-        .then(function () {
-          // extract collection archives
-          try {
-            logger.debug(`Extracting archives from: ${tmpDirName}`);
-            collectionArchives.forEach(function (filePath) {
-              let archive = new AdmZip(`${tmpDirName}/${filePath}`);
-              archive.extractAllTo(collectionFilesDirName);
-            });
-          } catch (zipError) {
-            logger.error(`Failed to extract collection archives at: ${tmpDirName}. ${zipError}`);
-            return reject(typeof zipError === 'string' ? {message: zipError} : zipError);
-          }
-          // collection files were decrypted and extracted; return collection files container directory
-          return resolve({
-            collectionFilesDirName: collectionFilesDirName,
-            tmpDirName: tmpDirName
-          });
+        let collectionArchives;
+        return updateRestoreLog({
+          statusStep: 'LNG_STATUS_STEP_UNZIPPING',
+          updatedAt: new Date(),
+          dbUpdatedAt: new Date()
         })
-        .catch(reject);
-    });
+          // unzip
+          // IMPORTANT: used extractZip because adm-zip can extract only by loading entire zip file into memory which means that it can't unzip big zip files
+          .then(() => extractZip(
+            snapshotFile, {
+              dir: tmpDirName
+            }
+          ))
+          // decrypt all collection files archives if needed
+          .then(() => {
+            // get only zip files
+            collectionArchives = fs.readdirSync(tmpDirName).filter(function (fileName) {
+              return !fs.statSync(`${tmpDirName}/${fileName}`).isDirectory() && path.extname(fileName) === '.zip';
+            });
+          })
+          .then(() => {
+            // * 3 = 1 for decrypting, 1 for unzipping and 1 for restoring
+            restoreTotalSteps = collectionArchives.length * 3;
+            return updateRestoreLog({
+              statusStep: 'LNG_STATUS_STEP_DECRYPTING',
+              totalNo: restoreTotalSteps,
+              processedNo: 0,
+              updatedAt: new Date(),
+              dbUpdatedAt: new Date()
+            });
+          })
+          .then(() => {
+            // define archive decryption action
+            if (options.password) {
+              // password provided, decrypt archives
+              const decryptFunctions = collectionArchives.map(function (filePath) {
+                return function (callback) {
+                  workerRunner
+                    .helpers
+                    .decryptFile(options.password, {}, `${tmpDirName}/${filePath}`)
+                    .then(() => {
+                      processedNo++;
+                      return updateRestoreLog({
+                        processedNo,
+                        updatedAt: new Date(),
+                        dbUpdatedAt: new Date()
+                      });
+                    })
+                    .then(() => {
+                      callback();
+                    })
+                    .catch(callback);
+                };
+              });
+
+              // start decrypting
+              return new Promise(function (resolve, reject) {
+                logger.debug(`Decrypting archives from: ${tmpDirName}`);
+                async.parallelLimit(decryptFunctions, 10, function (err) {
+                  // error ?
+                  if (err) {
+                    logger.error(`Failed to decrypt archive files from : ${tmpDirName}. ${err}`);
+                    return reject(err);
+                  }
+
+                  // finished
+                  return updateRestoreLog({
+                    statusStep: 'LNG_STATUS_STEP_UNZIPPING_COLLECTIONS',
+                    processedNo: collectionArchives.length,
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
+                  }).then(resolve).catch(reject);
+                });
+              });
+            }
+
+            // no decrypting necessary
+            return updateRestoreLog({
+              statusStep: 'LNG_STATUS_STEP_UNZIPPING_COLLECTIONS',
+              processedNo: collectionArchives.length,
+              updatedAt: new Date(),
+              dbUpdatedAt: new Date()
+            });
+          })
+          .then(() => {
+            return new Promise(function (resolve, reject) {
+              // unzip functions
+              const unzipFunctions = collectionArchives.map(function (filePath) {
+                return function (callback) {
+                  extractZip(
+                    `${tmpDirName}/${filePath}`, {
+                      dir: collectionFilesDirName
+                    }
+                  ).then(() => {
+                    // remove zip file
+                    fs.unlinkSync(`${tmpDirName}/${filePath}`);
+                  }).then(() => {
+                    processedNo++;
+                    return updateRestoreLog({
+                      processedNo,
+                      updatedAt: new Date(),
+                      dbUpdatedAt: new Date()
+                    });
+                  }).then(() => {
+                    callback();
+                  }).catch(callback);
+                };
+              });
+
+              // extract collection archives
+              logger.debug(`Extracting archives from: ${tmpDirName}`);
+              async.parallelLimit(unzipFunctions, 10, function (err) {
+                // error ?
+                if (err) {
+                  logger.error(`Failed to extract collection archives at: ${tmpDirName}. ${err}`);
+                  return reject(typeof err === 'string' ? {message: err} : err);
+                }
+
+                // finished
+                return updateRestoreLog({
+                  statusStep: 'LNG_STATUS_STEP_RESTORING',
+                  processedNo: 2 * collectionArchives.length,
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
+                }).then(() => {
+                  // collection files were decrypted and extracted; return collection files container directory
+                  resolve({
+                    collectionFilesDirName,
+                    tmpDirName,
+                    restoreTotalSteps
+                  });
+                }).catch(reject);
+              });
+            });
+          });
+      });
   }
 };
 

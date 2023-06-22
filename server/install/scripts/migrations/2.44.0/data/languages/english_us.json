@@ -16,6 +16,142 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_AUDIT_LOG_DESCRIPTION": {
       "translation": "This permission allows export of audit log data",
       "section": "availablePermissions"
+    },
+    "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NUMBER_OF_EVENTS": {
+      "translation": "Number of events",
+      "section": "uiTransmissionChainFields"
+    },
+    "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NO_ENTITIES": {
+      "translation": "Number of entities",
+      "section": "uiTransmissionChainFields"
+    },
+    "LNG_TRANSMISSION_CHAIN_FIELD_LABEL_NO_CASES_DECEASED": {
+      "translation": "Number of deceased cases",
+      "section": "uiTransmissionChainFields"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_EXPORT_FORMAT": {
+      "translation": "Export format",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_EXPORT_FORMAT_SINGLE_PAGE": {
+      "translation": "Single page",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_EXPORT_FORMAT_MULTI_PAGE": {
+      "translation": "Multiple pages",
+      "section": "uiDashboardPage"
+    },
+    "LNG_COMMON_LABEL_NO_OUTBREAK_SELECTED": {
+      "translation": "There is no outbreak selected",
+      "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_LIST_AUDIT_LOGS_EXPORT_TITLE": {
+      "translation": "Export audit logs",
+      "section": "uiAuditLogsListPage"
+    },
+    "LNG_PAGE_LIST_AUDIT_LOGS_EXPORT_BUTTON": {
+      "translation": "Export audit logs data",
+      "section": "uiAuditLogsListPage"
+    },
+    "LNG_PAGE_LIST_AUDIT_LOGS_GROUP_ACTION_EXPORT_SELECTED_AUDIT_LOGS": {
+      "translation": "Export the selected audit logs",
+      "section": "uiAuditLogsListPage"
+    },
+    "LNG_LAYOUT_MENU_ITEM_SET_SECURITY_QUESTION_LABEL": {
+      "translation": "Security questions"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_INVALID_RESPONSE_FROM_SERVER": {
+      "translation": "Invalid headers ({{headers}}...)"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_ACTION_ADD_CONTACT_OF_CONTACT": {
+      "translation": "Add contact of contact",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_COMMON_LABEL_NO_OF_CHANGES": {
+      "translation": "{{no}} changes",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_SHOW_HIDE_STATUS": {
+      "translation": "Show / Hide status",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS_ALL": {
+      "translation": "All fields",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_EXPORT_FIELDS": {
+      "translation": "Fields",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_TABS_SETTINGS": {
+      "translation": "Tab configuration",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_TABS_ORDER": {
+      "translation": "Tabs order",
+      "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_DATE_END_FOLLOW_UP": {
+      "translation": "End of follow-up"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_PERSON_TYPE": {
+      "translation": "Person type",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_OCCUPATION": {
+      "translation": "Occupation",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_RISK": {
+      "translation": "Risk",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Follow-up",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_COMMON_LABEL_STATUSES": {
+      "translation": "Status details"
+    },
+    "LNG_PAGE_VIEW_HELP_ITEM_TITLE": {
+      "translation": "View help item"
+    },
+    "LNG_HELP_ITEMS_SINGLE_SCREEN_VIEW_TITLE_LABEL": {
+      "translation": "View help item"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_ELEMENT_NOT_VISIBLE_ERROR_MSG": {
+      "translation": "Please make sure that \"{{fileName}}\" graph is visible"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_CLASSIFICATION_TITLE_SHORT": {
+      "translation": "EPI - classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_OUTCOME_TITLE_SHORT": {
+      "translation": "EPI - outcome",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EPI_CURVE_REPORTING_TITLE_SHORT": {
+      "translation": "EPI - reporting classification",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiDashboardPage"
+    },
+    "LNG_USER_FIELD_LABEL_LANGUAGE": {
+      "translation": "Preferred language",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_LANGUAGE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiUserFields"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "Follow-ups"
     }
   }
 }

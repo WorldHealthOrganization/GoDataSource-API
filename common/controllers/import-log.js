@@ -6,7 +6,7 @@ module.exports = function (ImportLog) {
   // disable some actions
   app.utils.remote.disableRemoteMethods(ImportLog, [
     'create',
-    'prototype.patchAttributes',
-    'prototype.deleteById'
+    'deleteById',
+    'prototype.patchAttributes'
   ]);
 };

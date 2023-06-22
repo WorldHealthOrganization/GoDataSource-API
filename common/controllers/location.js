@@ -8,6 +8,7 @@ const apiError = require('./../../components/apiError');
 const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
+const genericHelpers = require('../../components/helpers');
 
 const locationImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
@@ -17,22 +18,35 @@ module.exports = function (Location) {
    * Export hierarchical locations list
    * @param callback
    */
-  Location.exportHierarchicalList = function (callback) {
+  Location.exportHierarchicalList = function (filter, callback) {
     Location
       .find({
         // blacklist some fields in the export
         fields: {
-          createdAt: false,
-          createdBy: false,
-          updatedAt: false,
-          updatedBy: false,
-          deleted: false
+          dbUpdatedAt: false
         },
+        deleted: filter && filter.where && filter.where.includeDeletedLocations ?
+          true :
+          undefined,
         order: ['name ASC', 'parentLocationId ASC', 'id ASC']
       })
       .then(function (locations) {
         app.utils.remote.helpers
-          .offerFileToDownload(JSON.stringify(Location.buildHierarchicalLocationsList(locations), null, 2), 'application/json', 'locations.json', callback);
+          .offerFileToDownload(
+            JSON.stringify(
+              Location.buildHierarchicalLocationsList(
+                locations,
+                undefined,
+                undefined,
+                filter && filter.where && filter.where.replaceUpdatedAtAsCurrentDate
+              ),
+              null,
+              2
+            ),
+            'application/json',
+            'locations.json',
+            callback
+          );
       }).catch(callback);
   };
 
@@ -182,7 +196,7 @@ module.exports = function (Location) {
       batchData.forEach(function (locationItem) {
         syncLocation.push(function (asyncCallback) {
           // sync location
-          return app.utils.dbSync.syncRecord(logger, app.models.location, locationItem.save, options)
+          return app.utils.dbSync.syncRecord(app, logger, app.models.location, locationItem.save, options)
             .then(function () {
               asyncCallback();
             })
@@ -205,14 +219,24 @@ module.exports = function (Location) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.location._booleanProperties) {
-      app.models.location._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.location);
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.location,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.location,
+      genericHelpers.DATA_TYPE.DATE
+    );
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'location',
       batchSize: locationImportBatchSize,
-      modelBooleanProperties: app.models.location._booleanProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

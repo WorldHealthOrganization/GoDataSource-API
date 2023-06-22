@@ -190,7 +190,7 @@ const migrationVersions = [{
     fileName: 'template.js',
     actions: [{
       name: 'createUpdateDefaultOutbreakTemplates',
-      buildNo: 18
+      buildNo: 19
     }]
   }, {
     fileName: 'referenceData.js',
@@ -283,12 +283,99 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 2
+      buildNo: 5
     }]
   }, {
     fileName: 'outbreak.js',
     actions: [{
       name: 'cleanUnnecessaryData',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'setUsualPlaceOfResidenceLocationIdOnPerson',
+      buildNo: 2
+    }]
+  }, {
+    fileName: 'followUp.js',
+    actions: [{
+      name: 'setUsualPlaceOfResidenceLocationIdOnFollowUp',
+      buildNo: 2
+    }]
+  }]
+}, {
+  version: '2.45.0',
+  scripts: [{
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'template.js',
+    actions: [{
+      name: 'createUpdateDefaultOutbreakTemplates',
+      buildNo: 5
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 40
+    }]
+  }, {
+    fileName: 'missing-property-deleted.js',
+    actions: [{
+      name: 'addMissingDeletedProperty',
+      buildNo: 9
+    }]
+  }, {
+    fileName: 'person.js',
+    actions: [{
+      name: 'deleteRelatedDataIfPersonDeleted',
+      buildNo: 11
+    }]
+  }]
+}, {
+  version: '2.46.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 20
+    }, {
+      name: 'createUpdateSingleEnglishLanguageTokens',
+      buildNo: 1
+    }, {
+      name: 'createUpdateSingleSpanishLanguageTokens',
+      buildNo: 1
+    }, {
+      name: 'createUpdateSinglePortugueseLanguageTokens',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
+      buildNo: 3
+    }]
+  }]
+}, {
+  version: '2.47.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 44
+    }, {
+      name: 'createUpdateSingleEnglishLanguageTokens',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
       buildNo: 1
     }]
   }]
@@ -423,7 +510,8 @@ const run = function (cb) {
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
           startDate: new Date(),
-          executionMap: executionMap
+          executionMap: executionMap,
+          deleted: false
         });
     })
     .then(() => {

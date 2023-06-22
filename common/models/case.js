@@ -13,6 +13,10 @@ module.exports = function (Case) {
     // get all relations with a contact
     return app.models.relationship
       .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': caseId,
+
+        // filter
         $or: [
           {
             'persons.0.id': caseId,
@@ -23,43 +27,67 @@ module.exports = function (Case) {
             'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
           }
         ]
+      }, {
+        projection: {
+          persons: 1
+        },
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
       })
       .then((relationships) => {
         async.parallelLimit(relationships.map((rel) => {
           const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
           return (cb) => {
             app.models.contact
-              .find({
+              .findOne({
                 where: {
                   id: contact.id
                 }
               })
-              .then((contacts) => {
+              .then((contact) => {
                 // contact missing ?
-                if (_.isEmpty(contacts)) {
+                if (!contact) {
                   cb(null, {isValid: false});
                   return;
                 }
 
-                // retrieve contact
-                const contact = contacts[0];
                 // get all relations of the contact that are not with this case
                 app.models.relationship
                   .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contact.id,
+
+                    // filter
                     $or: [
                       {
                         'persons.0.id': contact.id,
                         'persons.1.id': {
                           $ne: caseId
+                        },
+                        'persons.1.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
                         }
                       },
                       {
                         'persons.0.id': {
                           $ne: caseId
                         },
+                        'persons.0.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                        },
                         'persons.1.id': contact.id
                       }
                     ]
+                  }, {
+                    projection: {
+                      _id: 1
+                    },
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
                   })
                   .then((relationships) => cb(null, {contact: contact, isValid: !relationships.length}));
               })
@@ -228,26 +256,32 @@ module.exports = function (Case) {
     'LNG_COMMON_LABEL_EXPORT_GROUP_EPIDEMIOLOGICAL_DATA': {
       properties: [
         'type',
-        'wasContact',
         'wasCase',
+        'dateBecomeCase',
+        'wasContact',
+        'dateBecomeContact',
+        'wasContactOfContact',
+        'dateBecomeContactOfContact',
         'classification',
         'dateOfInfection',
         'dateOfOnset',
         'isDateOfOnsetApproximate',
         'riskLevel',
         'riskReason',
-        'dateBecomeContact',
-        'dateBecomeCase',
         'investigationStatus',
         'dateInvestigationCompleted',
         'outcomeId',
         'dateOfOutcome',
         'transferRefused',
+        'deathLocationId',
         'safeBurial',
         'dateOfBurial',
         'burialLocationId',
         'burialPlaceName',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]
@@ -347,6 +381,7 @@ module.exports = function (Case) {
     'dateOfOutcome',
     'dateRanges',
     'transferRefused',
+    'deathLocationId',
     'safeBurial',
     'dateOfBurial',
     'burialLocationId',
@@ -384,6 +419,7 @@ module.exports = function (Case) {
   // this is solely used for attaching parent locations custom fields in prints
   // addresses and dateRanges location ids are being handled inside their own models
   Case.locationsFieldsMap = {
+    deathLocationId: 'LNG_CASE_FIELD_LABEL_DEATH_LOCATION_ID',
     burialLocationId: 'LNG_CASE_FIELD_LABEL_BURIAL_LOCATION_ID'
   };
 

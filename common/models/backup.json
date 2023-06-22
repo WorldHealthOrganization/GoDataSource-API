@@ -125,7 +125,25 @@
       }
     },
     "prototype.restoreBackup": {
-      "returns": [],
+      "accepts": [
+        {
+          "arg": "asynchronous",
+          "type": "boolean",
+          "description": "Asynchronous restore? Default: false"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "restoreLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
       "description": "Restore backup",
       "http": {
         "verb": "post",

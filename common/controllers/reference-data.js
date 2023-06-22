@@ -6,6 +6,7 @@ const Platform = require('../../components/platform');
 const _ = require('lodash');
 const importableFile = require('./../../components/importableFile');
 const Config = require('../../server/config.json');
+const genericHelpers = require('../../components/helpers');
 
 // used in import
 const referenceDataImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -122,7 +123,7 @@ module.exports = function (ReferenceData) {
       batchData.forEach(function (referenceDataItem) {
         syncReferenceData.push(function (asyncCallback) {
           // sync reference data
-          return app.utils.dbSync.syncRecord(logger, app.models.referenceData, referenceDataItem.save, options)
+          return app.utils.dbSync.syncRecord(app, logger, app.models.referenceData, referenceDataItem.save, options)
             .then(function () {
               asyncCallback();
             })
@@ -146,14 +147,24 @@ module.exports = function (ReferenceData) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.referenceData._booleanProperties) {
-      app.models.referenceData._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.referenceData);
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.referenceData,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.referenceData,
+      genericHelpers.DATA_TYPE.DATE
+    );
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'referenceData',
       batchSize: referenceDataImportBatchSize,
-      modelBooleanProperties: app.models.referenceData._booleanProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import
@@ -161,5 +172,12 @@ module.exports = function (ReferenceData) {
       modelName: app.models.referenceData.modelName,
       logger: logger
     }, formatterOptions, createBatchActions, callback);
+  };
+
+  /**
+   * Expose available categories per disease via API
+   */
+  ReferenceData.getAvailableCategoriesPerDisease = function (callback) {
+    callback(null, ReferenceData.availableCategoriesPerDisease);
   };
 };

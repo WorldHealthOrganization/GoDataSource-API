@@ -403,6 +403,27 @@ module.exports = function (Outbreak) {
       delete filter.where.useQuestionVariable;
     }
 
+    // parse includeCreatedByUser query param
+    let includeCreatedByUser = false;
+    if (filter.where.hasOwnProperty('includeCreatedByUser')) {
+      includeCreatedByUser = filter.where.includeCreatedByUser;
+      delete filter.where.includeCreatedByUser;
+    }
+
+    // parse includeUpdatedByUser query param
+    let includeUpdatedByUser = false;
+    if (filter.where.hasOwnProperty('includeUpdatedByUser')) {
+      includeUpdatedByUser = filter.where.includeUpdatedByUser;
+      delete filter.where.includeUpdatedByUser;
+    }
+
+    // parse includeAlerted query param
+    let includeAlerted = false;
+    if (filter.where.hasOwnProperty('includeAlerted')) {
+      includeAlerted = filter.where.includeAlerted;
+      delete filter.where.includeAlerted;
+    }
+
     // parse useDbColumns query param
     let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
@@ -432,6 +453,104 @@ module.exports = function (Outbreak) {
     // make sure anonymizeFields is valid
     if (!Array.isArray(anonymizeFields)) {
       anonymizeFields = [];
+    }
+
+    // support nested where.contact
+    const attachContactCondition = (condition) => {
+      // must initialize - where ?
+      if (!filter.where) {
+        filter.where = {};
+      }
+
+      // must initialize - where.contact ?
+      let andArray = [];
+      if (!filter.where.contact) {
+        filter.where.contact = {
+          $and: andArray
+        };
+      } else if (filter.where.contact.and) {
+        andArray = filter.where.contact.and;
+      } else if (filter.where.contact.$and) {
+        andArray = filter.where.contact.$and;
+      } else {
+        filter.where.contact.$and = andArray;
+      }
+
+      // append condition
+      andArray.push(condition);
+    };
+    const nestedSearchForRelationship = (searchObject) => {
+      // nothing to do ?
+      if (!searchObject) {
+        return;
+      }
+
+      // array ?
+      if (Array.isArray(searchObject)) {
+        // process array
+        searchObject.forEach((item) => {
+          nestedSearchForRelationship(item);
+        });
+
+        // finished
+        return;
+      }
+
+      // move to top in where since that is supported further
+      if (typeof searchObject === 'object') {
+        Object.keys(searchObject).forEach((objectKey) => {
+          if (objectKey === 'contact') {
+            attachContactCondition(searchObject[objectKey]);
+            delete searchObject[objectKey];
+          } else if (objectKey.startsWith('contact.')) {
+            attachContactCondition({
+              [objectKey.substring('contact.'.length)]: searchObject[objectKey]
+            });
+            delete searchObject[objectKey];
+          }
+        });
+      }
+
+      // search or items
+      if (
+        searchObject.or &&
+        Array.isArray(searchObject.or)
+      ) {
+        nestedSearchForRelationship(searchObject.or);
+      }
+
+      // search $or items
+      if (
+        searchObject.$or &&
+        Array.isArray(searchObject.$or)
+      ) {
+        nestedSearchForRelationship(searchObject.$or);
+      }
+
+      // search and items
+      if (
+        searchObject.and &&
+        Array.isArray(searchObject.and)
+      ) {
+        nestedSearchForRelationship(searchObject.and);
+      }
+
+      // search $and items
+      if (
+        searchObject.$and &&
+        Array.isArray(searchObject.$and)
+      ) {
+        nestedSearchForRelationship(searchObject.$and);
+      }
+    };
+
+    // do this check only if we don't have something on first level already
+    // transform nested to already first level supported prefilter where.contact
+    if (
+      filter.where &&
+      !filter.where.contact
+    ) {
+      nestedSearchForRelationship(filter.where);
     }
 
     // prefilters
@@ -509,8 +628,12 @@ module.exports = function (Outbreak) {
             locationFields: app.models.followUp.locationFields,
 
             // fields that we need to bring from db, but we don't want to include in the export
+            // - responsibleUserId might be included since it is used on import, otherwise we won't have the ability to map this field
             projection: [
-              'personId'
+              'personId',
+              'responsibleUserId',
+              'createdBy',
+              'updatedBy'
             ]
           },
           filter,
@@ -528,7 +651,10 @@ module.exports = function (Outbreak) {
             useDbColumns,
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
-            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+            contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId,
+            includeCreatedByUser,
+            includeUpdatedByUser,
+            includeAlerted
           },
           prefilters, {
             followUpTeam: {
@@ -557,12 +683,34 @@ module.exports = function (Outbreak) {
                 '_id',
                 'visualId',
                 'firstName',
-                'lastName'
+                'lastName',
+                'riskLevel',
+                'gender',
+                'occupation',
+                'age',
+                'dob',
+                'dateOfLastContact',
+                'followUp'
               ],
               key: '_id',
               keyValue: `(followUp) => {
                 return followUp && followUp.personId ?
                   followUp.personId :
+                  undefined;
+              }`
+            },
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
                   undefined;
               }`
             }

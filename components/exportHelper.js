@@ -55,6 +55,19 @@ const NON_FLAT_TYPES = [
 // default export type - in case export type isn't provided
 const DEFAULT_EXPORT_TYPE = EXPORT_TYPE.JSON;
 
+// export custom columns
+const CUSTOM_COLUMNS = {
+  ALERTED: 'alerted',
+  CREATED_BY_USER: 'createdByUser',
+  CREATED_BY_USER_ID: 'createdByUser.id',
+  CREATED_BY_USER_FIRST_NAME: 'createdByUser.firstName',
+  CREATED_BY_USER_LAST_NAME: 'createdByUser.lastName',
+  UPDATED_BY_USER: 'updatedByUser',
+  UPDATED_BY_USER_ID: 'updatedByUser.id',
+  UPDATED_BY_USER_FIRST_NAME: 'updatedByUser.firstName',
+  UPDATED_BY_USER_LAST_NAME: 'updatedByUser.lastName'
+};
+
 // spreadsheet limits
 const SHEET_LIMITS = {
   XLSX: {
@@ -150,6 +163,49 @@ function exportFilteredModelsList(
   joins
 ) {
   try {
+    // initialize custom relations
+    const initializeCustomRelations = () => {
+      // add createdByUser ?
+      if (options.includeCreatedByUser) {
+        relations = relations || {};
+        relations.createdByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.createdBy ?
+              item.createdBy :
+              undefined;
+          }`
+        };
+      }
+
+      // add updatedByUser ?
+      if (options.includeUpdatedByUser) {
+        relations = relations || {};
+        relations.updatedByUser = {
+          type: RELATION_TYPE.HAS_ONE,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.updatedBy ?
+              item.updatedBy :
+              undefined;
+          }`
+        };
+      }
+    };
+
     // validate & parse relations
     const validateAndParseRelations = () => {
       // no relations to validate ?
@@ -166,207 +222,245 @@ function exportFilteredModelsList(
       };
 
       // go through relations and check that we have the expected data
-      Object.keys(relations).forEach((relationName) => {
-        // get relation data
-        const relationData = relations[relationName];
+      // - name needs to be unique, when 1 level that shouldn't be a problem due to linter but multiple levels create problems
+      const validateRelationsUsedNames = {};
+      const validateRelations = (relationsToValidate) => {
+        Object.keys(relationsToValidate).forEach((relationName) => {
+          // get relation data
+          const relationData = relationsToValidate[relationName];
 
-        // not an object ?
-        if (
-          !relationData ||
-          !_.isObject(relationData)
-        ) {
-          throwError(
-            relationName,
-            'expecting object'
-          );
-        }
+          // did we initialize a relation with this name already ?
+          if (validateRelationsUsedNames[relationName]) {
+            throwError(
+              relationName,
+              'duplicate relation name'
+            );
+          }
 
-        // no type or invalid type ?
-        if (
-          !relationData.type ||
-          RELATION_TYPE[relationData.type] === undefined
-        ) {
-          throwError(
-            relationName,
-            'invalid type'
-          );
-        }
+          // add relation name to unique names
+          validateRelationsUsedNames[relationName] = true;
 
-        // must have collection name
-        if (
-          !relationData.collection ||
-          typeof relationData.collection !== 'string'
-        ) {
-          throwError(
-            relationName,
-            `invalid collection name (${typeof relationData.collection})`
-          );
-        }
+          // not an object ?
+          if (
+            !relationData ||
+            !_.isObject(relationData)
+          ) {
+            throwError(
+              relationName,
+              'expecting object'
+            );
+          }
 
-        // must have project so we force retrieval of only what is necessary
-        if (
-          !relationData.project ||
-          !Array.isArray(relationData.project) ||
-          relationData.project.length < 1
-        ) {
-          throwError(
-            relationName,
-            'invalid project provided'
-          );
-        }
+          // no type or invalid type ?
+          if (
+            !relationData.type ||
+            RELATION_TYPE[relationData.type] === undefined
+          ) {
+            throwError(
+              relationName,
+              'invalid type'
+            );
+          }
 
-        // validate accordingly to its type
-        switch (relationData.type) {
-          case RELATION_TYPE.HAS_ONE:
-            // must have key
-            if (
-              !relationData.key ||
-              typeof relationData.key !== 'string'
-            ) {
-              throwError(
-                relationName,
-                `invalid key name (${typeof relationData.key})`
-              );
-            }
+          // must have collection name
+          if (
+            !relationData.collection ||
+            typeof relationData.collection !== 'string'
+          ) {
+            throwError(
+              relationName,
+              `invalid collection name (${typeof relationData.collection})`
+            );
+          }
 
-            // must have keyValue
-            if (
-              !relationData.keyValue ||
-              typeof relationData.keyValue !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid key value (${typeof relationData.keyValue})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.keyValue = eval(relationData.keyValue);
-              } catch (e) {
+          // must have project, so we force retrieval of only what is necessary
+          if (
+            !relationData.project ||
+            !Array.isArray(relationData.project) ||
+            relationData.project.length < 1
+          ) {
+            throwError(
+              relationName,
+              'invalid project provided'
+            );
+          }
+
+          // validate accordingly to its type
+          switch (relationData.type) {
+            case RELATION_TYPE.HAS_ONE:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
                 throwError(
                   relationName,
-                  'invalid key value method content'
+                  `invalid key name (${typeof relationData.key})`
                 );
               }
-            }
 
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // must have keyValue
+              if (
+                !relationData.keyValue ||
+                typeof relationData.keyValue !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid key value (${typeof relationData.keyValue})`
                 );
-              }
-            }
-
-            // replace
-            if (
-              relationData.replace &&
-              typeof relationData.replace !== 'object'
-            ) {
-              // invalid definition
-              throwError(
-                relationName,
-                `invalid replace (${typeof relationData.replace})`
-              );
-            } else {
-              _.each(relationData.replace, (value, key) => {
-                if (
-                  !key ||
-                  typeof key !== 'string' ||
-                  !value ||
-                  typeof value !== 'object' ||
-                  !value.value ||
-                  typeof value.value !== 'string'
-                ) {
-                  // invalid definition
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValue = eval(relationData.keyValue);
+                } catch (e) {
                   throwError(
                     relationName,
-                    `invalid replace (${typeof relationData.replace})`
+                    'invalid key value method content'
                   );
                 }
-              });
-            }
+              }
 
-            // finished
-            break;
-
-          case RELATION_TYPE.GET_ONE:
-            // must have query
-            if (
-              !relationData.query ||
-              typeof relationData.query !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid query (${typeof relationData.query})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.query = eval(relationData.query);
-              } catch (e) {
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
                 throwError(
                   relationName,
-                  'invalid query method content'
+                  `invalid after (${typeof relationData.after})`
                 );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
-            }
 
-            // must have sort
-            if (
-              !relationData.sort ||
-              typeof relationData.sort !== 'object'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid sort (${typeof relationData.sort})`
-              );
-            }
-
-            // after is optional
-            if (
-              relationData.after &&
-              typeof relationData.after !== 'string'
-            ) {
-              // invalid content
-              throwError(
-                relationName,
-                `invalid after (${typeof relationData.after})`
-              );
-            } else {
-              // transform to method
-              try {
-                relationData.after = eval(relationData.after);
-              } catch (e) {
+              // replace
+              if (
+                relationData.replace &&
+                typeof relationData.replace !== 'object'
+              ) {
+                // invalid definition
                 throwError(
                   relationName,
-                  'invalid after method content'
+                  `invalid replace (${typeof relationData.replace})`
+                );
+              } else {
+                _.each(relationData.replace, (value, key) => {
+                  if (
+                    !key ||
+                    typeof key !== 'string' ||
+                    !value ||
+                    typeof value !== 'object' ||
+                    !value.value ||
+                    typeof value.value !== 'string'
+                  ) {
+                    // invalid definition
+                    throwError(
+                      relationName,
+                      `invalid replace (${typeof relationData.replace})`
+                    );
+                  }
+                });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.GET_ONE:
+              // must have query
+              if (
+                !relationData.query ||
+                typeof relationData.query !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid query (${typeof relationData.query})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.query = eval(relationData.query);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid query method content'
+                  );
+                }
+              }
+
+              // must have sort
+              if (
+                !relationData.sort ||
+                typeof relationData.sort !== 'object'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid sort (${typeof relationData.sort})`
                 );
               }
+
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
+              }
+
+              // finished
+              break;
+          }
+
+          // do we have children relations ?
+          if (relationData.relations) {
+            // validate base
+            if (
+              typeof relationData.relations !== 'object' ||
+              Array.isArray(relationData.relations)
+            ) {
+              throwError(
+                relationName,
+                'invalid children relations provided'
+              );
             }
 
-            // finished
-            break;
-        }
-      });
+            // validate children relations
+            validateRelations(relationData.relations);
+          }
+        });
+      };
+
+      // validate the main ones
+      validateRelations(relations);
     };
+
+    // initialize custom relations
+    initializeCustomRelations();
 
     // validate & parse relations
     validateAndParseRelations();
@@ -500,6 +594,27 @@ function exportFilteredModelsList(
         {},
         modelOptions.fieldLabelsMap
       );
+
+      // remove createdByUser ?
+      if (!options.includeCreatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.CREATED_BY_USER_LAST_NAME];
+      }
+
+      // remove updatedByUser ?
+      if (!options.includeUpdatedByUser) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_ID];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_FIRST_NAME];
+        delete fieldLabelsMap[CUSTOM_COLUMNS.UPDATED_BY_USER_LAST_NAME];
+      }
+
+      // remove alerted ?
+      if (!options.includeAlerted) {
+        delete fieldLabelsMap[CUSTOM_COLUMNS.ALERTED];
+      }
 
       // filter field labels list if fields groups were provided
       let modelExportFieldsOrder = modelOptions.exportFieldsOrder;
@@ -958,6 +1073,49 @@ function exportFilteredModelsList(
 
       // finished
       return response;
+    };
+
+    //  map questions with alert answers for easy find
+    const initializeQuestionsWithAlertAnswers = (questionsWithAlertAnswers, questions) => {
+      // get alerted answers
+      if (questions) {
+        for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+          const question = questions[questionIndex];
+          // alert applies only to those questions that have option values
+          if (
+            (
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_SINGLE_ANSWER' ||
+              question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS'
+            ) &&
+            question.answers &&
+            question.answers.length
+          ) {
+            for (let answerIndex = 0; answerIndex < question.answers.length; answerIndex++) {
+              // get data
+              const answer = question.answers[answerIndex];
+
+              // answer alert ?
+              if (answer.alert) {
+                // init
+                if (!questionsWithAlertAnswers[question.variable]) {
+                  questionsWithAlertAnswers[question.variable] = {};
+                }
+
+                // mark answer as alert
+                questionsWithAlertAnswers[question.variable][answer.value] = true;
+              }
+
+              // go through all sub questions
+              if (
+                answer.additionalQuestions &&
+                answer.additionalQuestions.length
+              ) {
+                initializeQuestionsWithAlertAnswers(questionsWithAlertAnswers, answer.additionalQuestions);
+              }
+            }
+          }
+        }
+      }
     };
 
     // prepare temporary workbook
@@ -2016,7 +2174,8 @@ function exportFilteredModelsList(
         return sheetHandler
           .updateExportLog({
             processedNo: sheetHandler.processedNo,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
           .then(() => {
             switch (exportType) {
@@ -2058,22 +2217,47 @@ function exportFilteredModelsList(
 
       // format relations
       const mappedRelations = {};
-      const formattedRelations = [];
-      _.each(
-        relations,
-        (relationData, relationName) => {
-          // create relation handler
-          const relHandler = {
-            name: relationName,
-            data: relationData
-          };
-
-          // attach to map for easy access too
-          mappedRelations[relHandler.name] = relHandler;
-
-          // add to relations
-          formattedRelations.push(relHandler);
+      const formattedRelationsPerLevel = [];
+      const deepScanForRelations = (
+        relationsInQuestion,
+        level
+      ) => {
+        // must initialize list of relations for this level ?
+        if (formattedRelationsPerLevel.length < level) {
+          formattedRelationsPerLevel.push([]);
         }
+
+        // go through relations and format them
+        _.each(
+          relationsInQuestion,
+          (relationData, relationName) => {
+            // create relation handler
+            const relHandler = {
+              name: relationName,
+              data: relationData
+            };
+
+            // attach to map for easy access too
+            mappedRelations[relHandler.name] = relHandler;
+
+            // add to relations
+            formattedRelationsPerLevel[level - 1].push(relHandler);
+
+            // do we have children relations ?
+            if (relHandler.data.relations) {
+              deepScanForRelations(
+                relHandler.data.relations,
+                level + 1
+              );
+            }
+          }
+        );
+      };
+
+      // start scan from the root
+      deepScanForRelations(
+        relations,
+        1
       );
 
       // format joins
@@ -2144,20 +2328,29 @@ function exportFilteredModelsList(
       const formattedPrefilters = formatPrefilters(prefilters);
 
       // determine replacements
-      // - for now only relationships ofer the possibility of replacements
+      // - for now only relationships offer the possibility of replacements
       const replacements = {};
-      formattedRelations.forEach((relation) => {
-        // nothing to do here
-        if (!relation.data.replace) {
-          return;
-        }
+      formattedRelationsPerLevel.forEach((formattedRelations) => {
+        formattedRelations.forEach((relation) => {
+          // nothing to do here
+          if (!relation.data.replace) {
+            return;
+          }
 
-        // merge replacements
-        Object.assign(
-          replacements,
-          relation.data.replace
-        );
+          // merge replacements
+          Object.assign(
+            replacements,
+            relation.data.replace
+          );
+        });
       });
+
+      // get questions with alert answers
+      const questionsWithAlertAnswersMap = {};
+      initializeQuestionsWithAlertAnswers(
+        questionsWithAlertAnswersMap,
+        options.questionnaire
+      );
 
       // finished
       return {
@@ -2198,6 +2391,8 @@ function exportFilteredModelsList(
         // questionnaire
         questionnaireQuestionsData: prepareQuestionnaireData(columns),
         questionnaireUseVariablesAsHeaders: !!options.useQuestionVariable,
+        questionsWithAlertAnswersMap: questionsWithAlertAnswersMap,
+        hasQuestionsWithAlertAnswers: Object.keys(questionsWithAlertAnswersMap).length > 0,
 
         // no need for header translations ?
         useDbColumns: !!options.useDbColumns,
@@ -2226,7 +2421,7 @@ function exportFilteredModelsList(
         },
 
         // convert relations to array for easier access
-        relations: formattedRelations,
+        relationsPerLevel: formattedRelationsPerLevel,
         relationsMap: mappedRelations,
         replacements,
 
@@ -2381,7 +2576,8 @@ function exportFilteredModelsList(
       return sheetHandler
         .updateExportLog({
           statusStep: 'LNG_STATUS_STEP_ENCRYPT',
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          dbUpdatedAt: new Date()
         })
         .then(() => {
           // single file to encrypt ?
@@ -2440,7 +2636,8 @@ function exportFilteredModelsList(
             statusStep: 'LNG_STATUS_STEP_ARCHIVE',
             extension: zipExtension,
             mimeType: 'application/zip',
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
           .then(() => {
             // handle archive async
@@ -2522,6 +2719,7 @@ function exportFilteredModelsList(
               createdAt: new Date(),
               createdBy: options.userId,
               updatedAt: new Date(),
+              dbUpdatedAt: new Date(),
               updatedBy: options.userId,
               mimeType: sheetHandler.mimeType,
               extension: exportType,
@@ -2809,7 +3007,8 @@ function exportFilteredModelsList(
                     [`aggregateFilter${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
                       JSON.stringify(aggregateFilter) :
                       null,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   })
                   .then(() => {
                     // prepare records that will be exported
@@ -3453,7 +3652,8 @@ function exportFilteredModelsList(
               return sheetHandler.saveAggregateFilter ?
                 sheetHandler.updateExportLog({
                   aggregateFilter: JSON.stringify(aggregateFilter),
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 }) :
                 null;
             })
@@ -4865,12 +5065,13 @@ function exportFilteredModelsList(
 
         // handle relation
         const writeDataToFileDetermineMissingRelationsData = (
+          relationsToRetrieve,
           relationsAccumulator,
           record
         ) => {
-          for (let relationIndex = 0; relationIndex < sheetHandler.relations.length; relationIndex++) {
+          for (let relationIndex = 0; relationIndex < relationsToRetrieve.length; relationIndex++) {
             // get relation data
-            const relation = sheetHandler.relations[relationIndex];
+            const relation = relationsToRetrieve[relationIndex];
 
             // take action accordingly
             // - relations should be ...valid at this point, at least the format
@@ -4949,9 +5150,12 @@ function exportFilteredModelsList(
 
         // process relations
         // - must return promise
-        const writeDataToFileProcessRelations = (data) => {
+        const writeDataToFileProcessRelations = (
+          relationsToRetrieve,
+          data
+        ) => {
           // no relations ?
-          if (sheetHandler.relations.length < 1) {
+          if (relationsToRetrieve.length < 1) {
             return Promise.resolve();
           }
 
@@ -4970,6 +5174,7 @@ function exportFilteredModelsList(
 
             // do we have relations ?
             writeDataToFileDetermineMissingRelationsData(
+              relationsToRetrieve,
               relationsToProcess,
               record
             );
@@ -5190,7 +5395,7 @@ function exportFilteredModelsList(
               // retrieve next request
               const requestData = dbRequests.splice(0, 1)[0];
 
-              // depending of relation type we need to handle things differently
+              // depending on relation type we need to handle things differently
               switch (requestData.retrieveType) {
                 case RELATION_RETRIEVAL_TYPE.KEY_IN:
                   keyInHandler(requestData)
@@ -5221,12 +5426,13 @@ function exportFilteredModelsList(
 
         // attach relations data to record
         const writeDataToFileAttachRelations = (
+          relationsToRetrieve,
           record,
           relationsData
         ) => {
-          for (let relIndex = 0; relIndex < sheetHandler.relations.length; relIndex++) {
+          for (let relIndex = 0; relIndex < relationsToRetrieve.length; relIndex++) {
             // get relation
-            const relation = sheetHandler.relations[relIndex];
+            const relation = relationsToRetrieve[relIndex];
 
             // nothing to set here ?
             if (!relationsData[relation.name]) {
@@ -5297,7 +5503,7 @@ function exportFilteredModelsList(
               // get data
               const column = sheetHandler.columns.headerColumns[columnIndex];
 
-              // if column is anonymize then there is no need to retrieve data for this cell
+              // if column is anonymized then there is no need to retrieve data for this cell
               // - or column can't contain language tokens
               if (
                 column.anonymize ||
@@ -5374,22 +5580,77 @@ function exportFilteredModelsList(
 
         // handle write data to file
         const writeDataToFile = (data) => {
-          // for context sake,need to define it locally
+          // for context’s sake, need to define it locally
           // - promise visibility
           const recordData = data;
 
-          // retrieve necessary data & write record to file
-          return Promise.resolve()
-            // retrieve relations data
-            .then(() => {
-              return writeDataToFileProcessRelations(recordData);
-            })
+          // check if at least one answer is alerted
+          const answersCheckAlerted = (modelInstance) => {
+            // check if modelInstance has questionnaire answers
+            if (
+              !modelInstance ||
+              !modelInstance.questionnaireAnswers
+            ) {
+              return false;
+            }
 
-            // map relation data
-            .then((relationsData) => {
+            // check if we need to mark follow-up as alerted because of questionnaire answers
+            const props = Object.keys(modelInstance.questionnaireAnswers);
+            for (let propIndex = 0; propIndex < props.length; propIndex++) {
+              // get answer data
+              const questionVariable = props[propIndex];
+              const answers = modelInstance.questionnaireAnswers[questionVariable];
+
+              // retrieve answer value
+              // only the newest one is of interest, the old ones shouldn't trigger an alert
+              // the first item should be the newest
+              const answerKey = answers && answers.length ?
+                answers[0].value :
+                undefined;
+
+              // there is no point in checking the value if there isn't one
+              if (
+                !answerKey &&
+                typeof answerKey !== 'number'
+              ) {
+                continue;
+              }
+
+              // at least one alerted ?
+              if (Array.isArray(answerKey)) {
+                // go through all answers
+                for (let answerKeyIndex = 0; answerKeyIndex < answerKey.length; answerKeyIndex++) {
+                  if (
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                    sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey[answerKeyIndex]]
+                  ) {
+                    return true;
+                  }
+                }
+              } else if (
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable] &&
+                sheetHandler.questionsWithAlertAnswersMap[questionVariable][answerKey]
+              ) {
+                return true;
+              }
+            }
+
+            // return false if no alerted found
+            return false;
+          };
+
+          // handle relations and children relations
+          const processRelations = (levelIndex) => {
+            // retrieve relations data
+            const relationsToRetrieve = sheetHandler.relationsPerLevel[levelIndex];
+            return writeDataToFileProcessRelations(
+              relationsToRetrieve,
+              recordData
+            ).then((relationsData) => {
+              // map relation data
               // no relations ?
               if (
-                sheetHandler.relations.length < 1 ||
+                relationsToRetrieve.length < 1 ||
                 !relationsData
               ) {
                 return;
@@ -5407,10 +5668,31 @@ function exportFilteredModelsList(
 
                 // process relations
                 writeDataToFileAttachRelations(
+                  relationsToRetrieve,
                   record,
                   relationsData
                 );
               }
+            })
+              // retrieve next level relations
+              .then(() => {
+                // nothing else to retrieve ?
+                if (sheetHandler.relationsPerLevel.length <= levelIndex + 1) {
+                  return Promise.resolve();
+                }
+
+                // retrieve next level of relations
+                return processRelations(levelIndex + 1);
+              });
+          };
+
+          // retrieve necessary data & write record to file
+          return Promise.resolve()
+            // retrieve relations data
+            .then(() => {
+              return sheetHandler.relationsPerLevel.length < 1 ?
+                Promise.resolve() :
+                processRelations(0);
             })
 
             // retrieve missing language tokens & write data
@@ -5455,6 +5737,14 @@ function exportFilteredModelsList(
                 // record doesn't exist anymore - deleted ?
                 if (!record) {
                   return Promise.resolve();
+                }
+
+                // check alerted
+                if (
+                  options.includeAlerted &&
+                  sheetHandler.hasQuestionsWithAlertAnswers
+                ) {
+                  record[CUSTOM_COLUMNS.ALERTED] = answersCheckAlerted(record);
                 }
 
                 // convert geo-points (if any)
@@ -5608,7 +5898,8 @@ function exportFilteredModelsList(
                   // update export log
                   return sheetHandler.updateExportLog({
                     processedNo: sheetHandler.processedNo,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   });
                 });
             });
@@ -5626,7 +5917,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_PREFILTERS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5649,7 +5941,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_RECORDS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5661,7 +5954,8 @@ function exportFilteredModelsList(
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_LOCATIONS',
                   aggregateCompletionDate: new Date(),
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5672,7 +5966,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_CONFIGURE_HEADERS',
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
                 });
               })
 
@@ -5689,7 +5984,8 @@ function exportFilteredModelsList(
                   {
                     totalNo: counted,
                     statusStep: 'LNG_STATUS_STEP_EXPORTING_RECORDS',
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    dbUpdatedAt: new Date()
                   })
                   .then(() => {
                     // start the actual exporting of data
@@ -5740,6 +6036,7 @@ function exportFilteredModelsList(
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
           updatedAt: new Date(),
+          dbUpdatedAt: new Date(),
           actionCompletionDate: new Date(),
           sizeBytes
         });
@@ -5762,7 +6059,8 @@ function exportFilteredModelsList(
             // statusStep - keep as it is because it could help to know where it failed, on what step
             error: err.message,
             errStack: err.stack,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           })
 
           // remove temporary collection if it was created ?
@@ -5933,6 +6231,7 @@ module.exports = {
   RELATION_TYPE,
   JOIN_TYPE,
   TEMPORARY_DATABASE_PREFIX,
+  CUSTOM_COLUMNS,
 
   // methods
   exportFilteredModelsList,

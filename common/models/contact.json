@@ -21,9 +21,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -44,9 +52,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -67,9 +83,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -119,6 +143,10 @@
       "type": "boolean",
       "default": false
     },
+    "wasContactOfContact": {
+      "type": "boolean",
+      "default": false
+    },
     "active": {
       "type": "boolean",
       "description": "A contact is active if at least one of the cases related to it has non-discarded classification",
@@ -145,6 +173,7 @@
     "dateOfInfection",
     "dateOfOnset",
     "dateBecomeCase",
+    "dateBecomeContactOfContact",
     "dateRanges",
     "classificationHistory",
     "date"

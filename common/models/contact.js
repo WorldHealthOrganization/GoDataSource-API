@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const dateParser = app.utils.helpers.getDateDisplayValue;
 const _ = require('lodash');
+const async = require('async');
 const helpers = require('../../components/helpers');
 
 module.exports = function (Contact) {
@@ -22,6 +23,12 @@ module.exports = function (Contact) {
     // relationship person labels
     const relationshipFieldLabelsMap = {
       'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON',
+      'relatedPersonData': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA',
+      'relatedPersonData.id': 'LNG_ENTITY_FIELD_LABEL_ID',
+      'relatedPersonData.name': 'LNG_ENTITY_FIELD_LABEL_NAME',
+      'relatedPersonData.firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
+      'relatedPersonData.lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
+      'relatedPersonData.visualId': 'LNG_CASE_FIELD_LABEL_VISUAL_ID',
       'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
       'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
       'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -89,7 +96,11 @@ module.exports = function (Contact) {
     'documents[].type': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
     'wasCase': 'LNG_CONTACT_FIELD_LABEL_WAS_CASE',
+    'dateBecomeCase': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CASE',
+    'wasContact': 'LNG_CONTACT_FIELD_LABEL_WAS_CONTACT',
     'dateBecomeContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
+    'wasContactOfContact': 'LNG_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT',
+    'dateBecomeContactOfContact': 'LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'dateOfLastContact': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_LAST_CONTACT',
     'riskLevel': 'LNG_CONTACT_FIELD_LABEL_RISK_LEVEL',
@@ -122,7 +133,11 @@ module.exports = function (Contact) {
     'vaccinesReceived[].date': 'LNG_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
-    'responsibleUserId': 'LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUserId': 'LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
+    'responsibleUser': 'LNG_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_CONTACT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -167,6 +182,7 @@ module.exports = function (Contact) {
         'type',
         'wasCase',
         'wasContact',
+        'wasContactOfContact',
         'classification',
         'dateOfInfection',
         'dateOfOnset',
@@ -185,8 +201,10 @@ module.exports = function (Contact) {
         'outcomeId',
         'dateOfOutcome',
         'dateBecomeContact',
-        'dateBecomeCase',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]
@@ -234,6 +252,12 @@ module.exports = function (Contact) {
       properties: [
         'relationship',
         'relationship.relatedId',
+        'relationship.relatedPersonData',
+        'relationship.relatedPersonData.id',
+        'relationship.relatedPersonData.name',
+        'relationship.relatedPersonData.firstName',
+        'relationship.relatedPersonData.lastName',
+        'relationship.relatedPersonData.visualId',
         'relationship.contactDate',
         'relationship.contactDateEstimated',
         'relationship.certaintyLevelId',
@@ -572,6 +596,95 @@ module.exports = function (Contact) {
       });
   };
 
+  Contact.getIsolatedContacts = function (contactId, callback) {
+    // get all relations with a contact of contact
+    return app.models.relationship
+      .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': contactId,
+
+        // filter
+        $or: [
+          {
+            'persons.0.id': contactId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          },
+          {
+            'persons.1.id': contactId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+          }
+        ]
+      }, {
+        projection: {
+          persons: 1
+        },
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contactOfContact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT');
+          return (cb) => {
+            app.models.contactOfContact
+              .findOne({
+                where: {
+                  id: contactOfContact.id
+                }
+              })
+              .then((contactOfContact) => {
+                // contact missing ?
+                if (!contactOfContact) {
+                  cb(null, {isValid: false});
+                  return;
+                }
+
+                // get all relations of the contact of the contact that are not with this contact
+                app.models.relationship
+                  .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contactOfContact.id,
+
+                    // filter
+                    $or: [
+                      {
+                        'persons.0.id': contactOfContact.id,
+                        'persons.1.id': {
+                          $ne: contactId
+                        },
+                        'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: contactId
+                        },
+                        'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                        'persons.1.id': contactOfContact.id
+                      }
+                    ]
+                  }, {
+                    projection: {
+                      _id: 1
+                    },
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
+                  })
+                  .then((relationships) => cb(null, {contact: contactOfContact, isValid: !relationships.length}));
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, possibleIsolatedContacts) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
+        });
+      });
+  };
+
   /**
    * After save hooks
    */
@@ -802,13 +915,19 @@ module.exports = function (Contact) {
   /**
    * Pre-filter contact for an outbreak using related models (case, followUp)
    * @param outbreak
-   * @param filter Supports 'where.case', 'where.followUp' MongoDB compatible queries
+   * @param filter Supports 'where.relationship', 'where.case', 'where.followUp' MongoDB compatible queries
    * @param options Options from request
    * @return {Promise<void | never>}
    */
   Contact.preFilterForOutbreak = function (outbreak, filter, options) {
     // set a default filter
     filter = filter || {};
+    // get relationships query, if any
+    let relationshipsQuery = _.get(filter, 'where.relationship');
+    // if found, remove it form main query
+    if (relationshipsQuery) {
+      delete filter.where.relationship;
+    }
     // get cases query, if any
     let casesQuery = _.get(filter, 'where.case');
     // if found, remove it form main query
@@ -832,6 +951,7 @@ module.exports = function (Contact) {
       });
 
     // if a cases query is present
+    let contactIds = undefined;
     if (casesQuery) {
       // restrict query to current outbreak
       casesQuery = {
@@ -847,7 +967,12 @@ module.exports = function (Contact) {
         .then(function () {
           // find cases that match the query
           return app.models.case
-            .rawFind(casesQuery, {projection: {_id: 1}})
+            .rawFind(
+              casesQuery, {
+                projection: { _id: 1 },
+                includeDeletedRecords: filter.queryFlags && filter.queryFlags.case && filter.queryFlags.case.deleted
+              }
+            )
             .then(function (cases) {
               // find relationships with contacts for the matched cases
               return app.models.relationship
@@ -858,11 +983,13 @@ module.exports = function (Contact) {
                   },
                   'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
                 }, {
-                  projection: {persons: 1}
+                  projection: {persons: 1},
+                  // if we filtered deleted cases then we need to check deleted relationships too
+                  includeDeletedRecords: filter.queryFlags && filter.queryFlags.case && filter.queryFlags.case.deleted
                 })
                 .then(function (relationships) {
                   // gather contact ids from the found relationships
-                  let contactIds = [];
+                  contactIds = [];
                   // go through the relationships
                   relationships.forEach(function (relationship) {
                     // go through the people
@@ -884,7 +1011,6 @@ module.exports = function (Contact) {
                       }
                     ]
                   };
-                  return contactIds;
                 });
             });
         });
@@ -892,7 +1018,7 @@ module.exports = function (Contact) {
     // if there is a followUp query
     if (followUpQuery) {
       buildQuery = buildQuery
-        .then(function (contactIds) {
+        .then(function () {
           // restrict followUp query to current outbreak
           followUpQuery = {
             $and: [
@@ -912,7 +1038,15 @@ module.exports = function (Contact) {
           }
           // find followUps that match the query
           return app.models.followUp
-            .rawFind(followUpQuery, {projection: {personId: 1}})
+            .rawFind(
+              followUpQuery, {
+                projection: { personId: 1 },
+                includeDeletedRecords: filter.queryFlags && (
+                  filter.queryFlags.followUp && filter.queryFlags.followUp.deleted ||
+                  filter.queryFlags.followUps && filter.queryFlags.followUps.deleted
+                )
+              }
+            )
             .then(function (followUps) {
               // update contact query to include found contacts
               contactQuery = {
@@ -928,6 +1062,62 @@ module.exports = function (Contact) {
             });
         });
     }
+
+    // if there is a relationship query
+    // - _.isEmpty to ignore if we need to filter only by case fields
+    if (!_.isEmpty(relationshipsQuery)) {
+      buildQuery = buildQuery
+        .then(function () {
+          // restrict relationship query to current outbreak
+          relationshipsQuery = {
+            $and: [
+              relationshipsQuery,
+              {
+                outbreakId: outbreak.id
+              }
+            ]
+          };
+          // if contact ids were provided, restrict the query to those contactIds
+          if (contactIds) {
+            relationshipsQuery.$and.push({
+              'persons.id': {
+                $in: contactIds
+              }
+            });
+          }
+          // find followUps that match the query
+          return app.models.relationship
+            .rawFind(
+              relationshipsQuery, {
+                projection: { persons: 1 },
+                includeDeletedRecords: filter.queryFlags && filter.queryFlags.relationship && filter.queryFlags.relationship.deleted
+              }
+            )
+            .then(function (relationships) {
+              // create unique array
+              const relationshipsIds = {};
+              relationships.forEach((relationship) => {
+                relationship.persons.forEach((person) => {
+                  relationshipsIds[person.id] = true;
+                });
+              });
+
+              // update contact query to include found contacts
+              contactQuery = {
+                and: [
+                  contactQuery,
+                  {
+                    id: {
+                      inq: Object.keys(relationshipsIds)
+                    }
+                  }
+                ]
+              };
+            });
+        });
+    }
+
+    // finished
     return buildQuery
       .then(function () {
         // restrict contacts query to current outbreak

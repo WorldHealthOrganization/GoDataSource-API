@@ -337,6 +337,13 @@ module.exports = function (Outbreak) {
       delete filter.where.includeContactFields;
     }
 
+    // parse includeContactOfContactFields query param
+    let includeContactOfContactFields = false;
+    if (filter.where.hasOwnProperty('includeContactOfContactFields')) {
+      includeContactOfContactFields = filter.where.includeContactOfContactFields;
+      delete filter.where.includeContactOfContactFields;
+    }
+
     // parse useQuestionVariable query param
     let useQuestionVariable = false;
     if (filter.where.hasOwnProperty('useQuestionVariable')) {
@@ -396,9 +403,12 @@ module.exports = function (Outbreak) {
       }
     );
 
-    // do we need to include contact data in case exported data if case was a contact ?
+    // do we need to include contact/contact of contact data in case exported data if case was a contact/contact of contact ?
     let additionalFieldsToExport;
-    if (includeContactFields) {
+    if (
+      includeContactFields ||
+      includeContactOfContactFields
+    ) {
       // initialize additional fields to export
       additionalFieldsToExport = {
         fields: {},
@@ -437,57 +447,115 @@ module.exports = function (Outbreak) {
         }
       );
 
-      // determine contact fields
-      const contactFields = {};
-      _.each(
-        app.models.contact.fieldLabelsMap,
-        (contactFieldToken, contactField) => {
-          // should exclude or include ?
-          let shouldExclude = false;
-          if (app.models.contact.definition.settings.excludeBaseProperties) {
-            for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
-              let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
-              if (
-                contactField === excludedField ||
-                contactField.startsWith(`${excludedField}.`) ||
-                contactField.startsWith(`${excludedField}[]`)
-              ) {
-                // must exclude field
-                shouldExclude = true;
+      // include contact fields ?
+      if (includeContactFields) {
+        // determine contact fields
+        const contactFields = {};
+        _.each(
+          app.models.contact.fieldLabelsMap,
+          (contactFieldToken, contactField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.contact.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.contact.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.contact.definition.settings.excludeBaseProperties[index];
+                if (
+                  contactField === excludedField ||
+                  contactField.startsWith(`${excludedField}.`) ||
+                  contactField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
 
-                // no need to check further
-                break;
+                  // no need to check further
+                  break;
+                }
+              }
+            }
+
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              contactFields[contactField] = contactFieldToken;
+            }
+          }
+        );
+
+        // determine what fields from contact are missing from case
+        _.each(
+          contactFields,
+          (contactFieldToken, contactField) => {
+            if (!caseFields[contactField]) {
+              // add field
+              additionalFieldsToExport.fields[contactField] = contactFieldToken;
+
+              // is array property ?
+              if (app.models.contact.arrayProps[contactField]) {
+                additionalFieldsToExport.arrayProps[contactField] = app.models.contact.arrayProps[contactField];
+              }
+
+              // is location property ?
+              if (app.models.contact.locationFields.indexOf(contactField) > -1) {
+                additionalFieldsToExport.locationFields.push(contactField);
               }
             }
           }
+        );
+      }
 
-          // should exclude or include field ?
-          if (!shouldExclude) {
-            contactFields[contactField] = contactFieldToken;
-          }
-        }
-      );
+      // include contact of contact fields ?
+      if (includeContactOfContactFields) {
+        // determine contact of contact fields
+        const contactOfContactFields = {};
+        _.each(
+          app.models.contactOfContact.fieldLabelsMap,
+          (contactOfContactFieldToken, contactOfContactField) => {
+            // should exclude or include ?
+            let shouldExclude = false;
+            if (app.models.contactOfContact.definition.settings.excludeBaseProperties) {
+              for (let index = 0; index < app.models.contactOfContact.definition.settings.excludeBaseProperties.length; index++) {
+                let excludedField = app.models.contactOfContact.definition.settings.excludeBaseProperties[index];
+                if (
+                  contactOfContactField === excludedField ||
+                  contactOfContactField.startsWith(`${excludedField}.`) ||
+                  contactOfContactField.startsWith(`${excludedField}[]`)
+                ) {
+                  // must exclude field
+                  shouldExclude = true;
 
-      // determine what fields from contact are missing from case
-      _.each(
-        contactFields,
-        (contactFieldToken, contactField) => {
-          if (!caseFields[contactField]) {
-            // add field
-            additionalFieldsToExport.fields[contactField] = contactFieldToken;
-
-            // is array property ?
-            if (app.models.contact.arrayProps[contactField]) {
-              additionalFieldsToExport.arrayProps[contactField] = app.models.contact.arrayProps[contactField];
+                  // no need to check further
+                  break;
+                }
+              }
             }
 
-            // is location property ?
-            if (app.models.contact.locationFields.indexOf(contactField) > -1) {
-              additionalFieldsToExport.locationFields.push(contactField);
+            // should exclude or include field ?
+            if (!shouldExclude) {
+              contactOfContactFields[contactOfContactField] = contactOfContactFieldToken;
             }
           }
-        }
-      );
+        );
+
+        // determine what fields from contact are missing from case
+        _.each(
+          contactOfContactFields,
+          (contactOfContactFieldToken, contactOfContactField) => {
+            if (!caseFields[contactOfContactField]) {
+              // add field
+              additionalFieldsToExport.fields[contactOfContactField] = contactOfContactFieldToken;
+
+              // is array property ?
+              if (app.models.contactOfContact.arrayProps[contactOfContactField]) {
+                additionalFieldsToExport.arrayProps[contactOfContactField] = app.models.contactOfContact.arrayProps[contactOfContactField];
+              }
+
+              // is location property ?
+              if (app.models.contactOfContact.locationFields.indexOf(contactOfContactField) > -1) {
+                additionalFieldsToExport.locationFields.push(contactOfContactField);
+              }
+            }
+          }
+        );
+      }
     }
 
     // prefilter
@@ -512,7 +580,13 @@ module.exports = function (Outbreak) {
             exportFieldsGroup: app.models.case.exportFieldsGroup,
             exportFieldsOrder: app.models.case.exportFieldsOrder,
             locationFields: app.models.case.locationFields,
-            additionalFieldsToExport
+            additionalFieldsToExport,
+
+            // fields that we need to bring from db, but we might not include in the export (you can still include it since we need it on import)
+            // - responsibleUserId might be included since it is used on import, otherwise we won't have the ability to map this field
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -531,7 +605,23 @@ module.exports = function (Outbreak) {
             jsonReplaceUndefinedWithNull,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
           },
-          prefilters
+          prefilters, {
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
+              }`
+            }
+          }
         );
       })
       .then((exportData) => {
@@ -1402,12 +1492,43 @@ module.exports = function (Outbreak) {
 
     // merge conditions
     if (where) {
+      // check relationship
+      let relationship;
+      if (where.relationship) {
+        relationship = where.relationship;
+        delete where.relationship;
+      }
+
+      // check lab result
+      let labResult;
+      if (where.labResult) {
+        labResult = where.labResult;
+        delete where.labResult;
+      }
+
+      // re-create where
       where = {
         $and: [
           whereCaseCountMap,
           where
         ]
       };
+
+      // re-add relationship
+      if (
+        relationship &&
+        Object.keys(relationship).length
+      ) {
+        where.relationship = relationship;
+      }
+
+      // re-add lab result
+      if (
+        labResult &&
+        Object.keys(labResult).length
+      ) {
+        where.labResult = labResult;
+      }
     } else {
       where = whereCaseCountMap;
     }
@@ -1575,21 +1696,17 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.convertCaseToContact = function (caseId, options, callback) {
-    let updateRelations = [];
-    let convertedContact;
-    let caseInstance;
-
-    // override default scope to allow switching the type
-    const defaultScope = app.models.case.defaultScope;
-    app.models.case.defaultScope = function () {
-    };
-
+    let caseInstance, convertedContact;
     app.models.case
       .findOne({
         where: {
-          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
           id: caseId
-        }
+        },
+        fields: [
+          'id',
+          'questionnaireAnswers',
+          'questionnaireAnswersContact'
+        ]
       })
       .then(function (caseModel) {
         if (!caseModel) {
@@ -1602,17 +1719,38 @@ module.exports = function (Outbreak) {
         // in order for a case to be converted to a contact it must be related to at least another case/event and it must be a target in that relationship
         // check relations
         return app.models.relationship
-          .count({
-            'persons': {
-              'elemMatch': {
-                'id': caseId,
-                'target': true
-              }
+          .rawCountDocuments({
+            where: {
+              // required to use index to improve greatly performance
+              'persons.id': caseId,
+
+              $or: [
+                {
+                  'persons.0.id': caseId,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
+                },
+                {
+                  'persons.1.id': caseId,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE']
+                  }
+                }
+              ]
+            }
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
             }
           });
       })
-      .then(function (relationsNumber) {
-        if (!relationsNumber) {
+      .then(function (response) {
+        if (!response.count) {
           // the case doesn't have relations with other cases; stop conversion
           throw app.utils.apiError.getError('INVALID_CASE_RELATIONSHIP', {id: caseId});
         }
@@ -1637,13 +1775,30 @@ module.exports = function (Outbreak) {
         }
 
         // the case has relations with other cases; proceed with the conversion
-        return caseInstance.updateAttributes(
+        return app.models.person.rawUpdateOne(
+          {
+            _id: caseId
+          },
           attributes,
           options
         );
       })
+      .then(() => {
+        return app.models.contact.findOne({
+          where: {
+            id: caseId
+          }
+        });
+      })
       .then(function (contact) {
+        if (!contact) {
+          // the case doesn't have relations with other cases; stop conversion
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {model: app.models.contact.modelName, id: caseId});
+        }
+
+        // keep the contact as we will do actions on it
         convertedContact = contact;
+
         // after updating the case, find it's relations
         return app.models.relationship
           .find({
@@ -1653,7 +1808,13 @@ module.exports = function (Outbreak) {
           });
       })
       .then(function (relations) {
+        // check if there are relations
+        if (!relations.length) {
+          return;
+        }
+
         // update relations
+        const updateRelations = [];
         relations.forEach(function (relation) {
           let persons = [];
           relation.persons.forEach(function (person) {
@@ -1684,11 +1845,7 @@ module.exports = function (Outbreak) {
       .then(function () {
         callback(null, convertedContact);
       })
-      .catch(callback)
-      .finally(function () {
-        // restore default scope
-        app.models.case.defaultScope = defaultScope;
-      });
+      .catch(callback);
   };
 
   /**
@@ -1724,7 +1881,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (caseData) {
             createCases.push(function (asyncCallback) {
               // sync the case
-              return app.utils.dbSync.syncRecord(logger, app.models.case, caseData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.case, caseData.save, options)
                 .then(function () {
                   asyncCallback();
                 })
@@ -1748,15 +1905,35 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.case._booleanProperties) {
-      app.models.case._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.case);
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.case,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
+    // model date properties
+    let modelDateProperties =  genericHelpers.getModelPropertiesByDataType(
+      app.models.case,
+      genericHelpers.DATA_TYPE.DATE
+    );
+
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    genericHelpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      self.caseInvestigationTemplate ?
+        self.caseInvestigationTemplate.toJSON() :
+        undefined
+    );
+    modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'case',
       batchSize: caseImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.case._booleanProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

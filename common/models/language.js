@@ -76,7 +76,8 @@ module.exports = function (Language) {
                   outbreakId: outbreakId,
                   modules: modules,
                   createdAt: languageToken.createdAt,
-                  updatedAt: languageToken.updatedAt
+                  updatedAt: languageToken.updatedAt,
+                  dbUpdatedAt: new Date()
                 };
 
                 // add is default language token ?

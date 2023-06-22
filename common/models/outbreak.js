@@ -43,6 +43,7 @@ module.exports = function (Outbreak) {
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
+    eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
     caseIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK',
     contactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK',
     contactOfContactIdMask: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK',
@@ -52,8 +53,15 @@ module.exports = function (Outbreak) {
     'arcGisServers[].type': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_TYPE',
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
     isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
-    applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS'
+    applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
+    checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET',
+    disableModifyingLegacyQuestionnaire: 'LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE',
+    allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS'
   });
+
+  Outbreak.locationFields = [
+    'locationIds'
+  ];
 
   Outbreak.referenceDataFieldsToCategoryMap = {
     disease: 'LNG_REFERENCE_DATA_CATEGORY_DISEASE',
@@ -249,13 +257,6 @@ module.exports = function (Outbreak) {
                   });
                 }
 
-                // do not allow contact-contact relationships
-                if (type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' && foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                  throw app.utils.apiError.getError('INVALID_CONTACT_CONTACT_RELATIONSHIP', {
-                    id: person.id
-                  });
-                }
-
                 // do not allow relationships with discarded cases
                 if (
                   foundPerson.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
@@ -428,7 +429,7 @@ module.exports = function (Outbreak) {
 
   /**
    * Delete a relation for a person
-   * Do not allow deletion of the last relationship of a contact with a case/event
+   * Do not allow deletion of the last exposure relationship of a contact/contact of contact
    * @param personId
    * @param relationshipId
    * @param options
@@ -438,6 +439,7 @@ module.exports = function (Outbreak) {
     // initialize relationship instance; will be cached
     let relationshipInstance;
 
+    // get the relationship
     app.models.relationship
       .findOne({
         where: {
@@ -447,72 +449,79 @@ module.exports = function (Outbreak) {
       })
       .then(function (relationship) {
         if (!relationship) {
-          return {count: 0};
+          // ignore invalid relationship
+          return;
         }
 
         // cache relationship
         relationshipInstance = relationship;
 
-        // check if the relationship includes a contact; if so the last relationship of a contact with a case/event cannot be deleted
-        let relationshipContacts = relationship.persons.filter(person => person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
-        if (relationshipContacts.length) {
-          // there are contacts in the relationship; check their other relationships;
-          // creating array of promises as the relation might be contact - contact
-          let promises = [];
-          relationshipContacts.forEach(function (contactEntry) {
-            promises.push(
-              // count contact relationships with case/events except the current relationship
-              app.models.relationship
-                .count({
-                  id: {
-                    neq: relationshipId
-                  },
-                  'persons.id': contactEntry.id,
-                  'persons.type': {
-                    in: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-                  }
-                })
-                .then(function (relNo) {
-                  if (!relNo) {
-                    // no other relationships with case/event exist for the contact; return the contactId to return it in an error message
-                    return contactEntry.id;
-                  } else {
-                    return;
-                  }
-                })
-            );
-          });
+        // check if the relationship includes a contact or contact of contact
+        let personRelationships = relationship.persons.filter(
+          person => person.target &&
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'].includes(person.type)
+        );
 
-          // execute promises
-          return Promise.all(promises);
-        } else {
+        // if there are only events/cases assume that there is at least another exposure
+        if (!personRelationships.length) {
+          return {count: 1};
+        }
+
+        // get the person
+        const person = personRelationships[0];
+
+        // count the exposure relationships excepting the current relationship
+        const exposureTypes = person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+          ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+          ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT'];
+        return app.models.relationship
+          .rawCountDocuments({
+            where: {
+              id: {
+                neq: relationshipId
+              },
+              // required to use index to improve greatly performance
+              'persons.id': person.id,
+              $or: [
+                {
+                  'persons.0.id': person.id,
+                  'persons.0.target': true,
+                  'persons.1.type': {
+                    $in: exposureTypes
+                  }
+                },
+                {
+                  'persons.1.id': person.id,
+                  'persons.1.target': true,
+                  'persons.0.type': {
+                    $in: exposureTypes
+                  }
+                }
+              ]
+            }
+          }, {
+            limit: 1,
+            // required to use index to improve greatly performance
+            hint: {
+              'persons.id': 1
+            }
+          });
+      })
+      .then(function (response) {
+        // ignore the invalid relationships
+        if (!response) {
           return;
         }
-      })
-      .then(function (result) {
-        // result can be undefined / object with count / array with contact ID elements to undefined elements
-        // for array of contact IDs need to throw error
-        if (typeof result === 'undefined') {
-          // delete relationship
-          return relationshipInstance.destroy(options);
-        } else if (typeof result.count !== 'undefined') {
-          return result;
-        } else {
-          // result is an array
-          // get contact IDs from result if they exist
-          let contactIDs = result.filter(entry => typeof entry !== 'undefined');
 
-          // if result doesn't contain contact IDs the relationship will be deleted
-          if (!contactIDs.length) {
-            // delete relationship
-            return relationshipInstance.destroy(options);
-          } else {
-            // there are contacts with no other relationships with case/event; error
-            throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
-              contactIDs: contactIDs.join(', ')
-            });
-          }
+        // throw error because no other exposure exist
+        if (!response.count) {
+          throw app.utils.apiError.getError('DELETE_CONTACT_LAST_RELATIONSHIP', {
+            contactIDs: [personId]
+          });
         }
+
+        // delete relationship
+        return relationshipInstance.destroy(options);
       })
       .then(function (relationship) {
         callback(null, relationship);
@@ -595,6 +604,24 @@ module.exports = function (Outbreak) {
     }
 
     return next();
+  };
+
+  /**
+   * In case an event is provided then retrieve the next available event visual id, or if a visual id is provided check if
+   * it matches the outbreak mask and it isn't a duplicate
+   * @param outbreak
+   * @param visualId
+   * @param [eventId]
+   * @return Visual ID or throws one of the following validation errors: DUPLICATE_VISUAL_ID / INVALID_VISUAL_ID_MASK
+   */
+  Outbreak.helpers.validateOrGetAvailableEventVisualId = function (outbreak, visualId, eventId) {
+    // validate visualId uniqueness
+    return Outbreak.helpers
+      .validateVisualIdUniqueness(outbreak.id, visualId, eventId)
+      .then(() => {
+        // generate visual id accordingly to visualId mask
+        return Outbreak.helpers.getAvailableVisualId(outbreak, 'eventIdMask', visualId, eventId);
+      });
   };
 
   /**
@@ -1702,6 +1729,9 @@ module.exports = function (Outbreak) {
       // decide what type of visual id should we resolve based on the person type
       let maskProperty = null;
       switch (personType) {
+        case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+          maskProperty = 'eventIdMask';
+          break;
         case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
           maskProperty = 'caseIdMask';
           break;
@@ -2008,13 +2038,20 @@ module.exports = function (Outbreak) {
     const filter = _.get(context, 'args.filter', {});
     // convert filters from old format into the new one
     let query = app.utils.remote.searchByRelationProperty
-      .convertIncludeQueryToFilterQuery(filter, {people: 'case'});
+      .convertIncludeQueryToFilterQuery(filter, {people: 'case', relationships: 'relationship'});
     // get followUp query, if any
     const queryFollowUp = _.get(filter, 'where.followUp');
     // if there is no followUp query, but there is an older version of the filter
     if (!queryFollowUp && query.followUps) {
       // use that old version
       _.set(filter, 'where.followUp', query.followUps);
+    }
+    // get relationship query, if any
+    const queryRelationship = _.get(filter, 'where.relationship');
+    // if there is no relationship query, but there is an older version of the filter
+    if (!queryRelationship && query.relationship) {
+      // use that old version
+      _.set(filter, 'where.relationship', query.relationship);
     }
     // get case query, if any
     const queryCase = _.get(filter, 'where.case');

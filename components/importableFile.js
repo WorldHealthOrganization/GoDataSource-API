@@ -48,6 +48,273 @@ const supportedFileExtensionsInZip = [
   '.ods'
 ];
 
+// #TODO - ugly hack until new version of excelljs is provided to include fix (4.3.0 didn't include this fix even if code is merged):
+// - https://github.com/exceljs/exceljs/pull/1576
+// MUST DELETE ONCE FIX PROVIDE - BEGIN
+const parseSax = require('exceljs/lib/utils/parse-sax');
+const utils = require('exceljs/lib/utils/utils');
+const colCache = require('exceljs/lib/utils/col-cache');
+const Row = require('exceljs/lib/doc/row');
+const Column = require('exceljs/lib/doc/column');
+const parseWorksheet = async function *parse() {
+  const {iterator, options} = this;
+  let emitSheet = false;
+  let emitHyperlinks = false;
+  let hyperlinks = null;
+  switch (options.worksheets) {
+    case 'emit':
+      emitSheet = true;
+      break;
+    case 'prep':
+      break;
+    default:
+      break;
+  }
+  switch (options.hyperlinks) {
+    case 'emit':
+      emitHyperlinks = true;
+      break;
+    case 'cache':
+      this.hyperlinks = hyperlinks = {};
+      break;
+    default:
+      break;
+  }
+  if (!emitSheet && !emitHyperlinks && !hyperlinks) {
+    return;
+  }
+
+  // references
+  const {sharedStrings, styles, properties} = this.workbook;
+
+  // xml position
+  let inCols = false;
+  let inRows = false;
+  let inHyperlinks = false;
+
+  // parse state
+  let cols = null;
+  let row = null;
+  let c = null;
+  let current = null;
+  for await (const events of parseSax(iterator)) {
+    const worksheetEvents = [];
+    for (const {eventType, value} of events) {
+      if (eventType === 'opentag') {
+        const node = value;
+        if (emitSheet) {
+          switch (node.name) {
+            case 'cols':
+              inCols = true;
+              cols = [];
+              break;
+            case 'sheetData':
+              inRows = true;
+              break;
+
+            case 'col':
+              if (inCols) {
+                cols.push({
+                  min: parseInt(node.attributes.min, 10),
+                  max: parseInt(node.attributes.max, 10),
+                  width: parseFloat(node.attributes.width),
+                  styleId: parseInt(node.attributes.style || '0', 10),
+                });
+              }
+              break;
+
+            case 'row':
+              if (inRows) {
+                const r = parseInt(node.attributes.r, 10);
+                row = new Row(this, r);
+                if (node.attributes.ht) {
+                  row.height = parseFloat(node.attributes.ht);
+                }
+                if (node.attributes.s) {
+                  const styleId = parseInt(node.attributes.s, 10);
+                  const style = styles.getStyleModel(styleId);
+                  if (style) {
+                    row.style = style;
+                  }
+                }
+              }
+              break;
+            case 'c':
+              if (row) {
+                c = {
+                  ref: node.attributes.r,
+                  s: parseInt(node.attributes.s, 10),
+                  t: node.attributes.t,
+                };
+              }
+              break;
+            case 'f':
+              if (c) {
+                current = c.f = {text: ''};
+              }
+              break;
+            case 'v':
+              if (c) {
+                current = c.v = {text: ''};
+              }
+              break;
+            case 'is':
+            case 't':
+              if (c) {
+                current = c.v = {text: ''};
+              }
+              break;
+            case 'mergeCell':
+              break;
+            default:
+              break;
+          }
+        }
+
+        // =================================================================
+        //
+        if (emitHyperlinks || hyperlinks) {
+          switch (node.name) {
+            case 'hyperlinks':
+              inHyperlinks = true;
+              break;
+            case 'hyperlink':
+              if (inHyperlinks) {
+                const hyperlink = {
+                  ref: node.attributes.ref,
+                  rId: node.attributes['r:id'],
+                };
+                if (emitHyperlinks) {
+                  worksheetEvents.push({eventType: 'hyperlink', value: hyperlink});
+                } else {
+                  hyperlinks[hyperlink.ref] = hyperlink;
+                }
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      } else if (eventType === 'text') {
+        // only text data is for sheet values
+        if (emitSheet) {
+          if (current) {
+            current.text += value;
+          }
+        }
+      } else if (eventType === 'closetag') {
+        const node = value;
+        if (emitSheet) {
+          switch (node.name) {
+            case 'cols':
+              inCols = false;
+              this._columns = Column.fromModel(cols);
+              break;
+            case 'sheetData':
+              inRows = false;
+              break;
+
+            case 'row':
+              this._dimensions.expandRow(row);
+              worksheetEvents.push({eventType: 'row', value: row});
+              row = null;
+              break;
+
+            case 'c':
+              if (row && c) {
+                const address = colCache.decodeAddress(c.ref);
+                const cell = row.getCell(address.col);
+                if (c.s) {
+                  const style = styles.getStyleModel(c.s);
+                  if (style) {
+                    cell.style = style;
+                  }
+                }
+
+                if (c.f) {
+                  const cellValue = {
+                    formula: c.f.text,
+                  };
+                  if (c.v) {
+                    if (c.t === 'str') {
+                      cellValue.result = utils.xmlDecode(c.v.text);
+                    } else {
+                      cellValue.result = parseFloat(c.v.text);
+                    }
+                  }
+                  cell.value = cellValue;
+                } else if (c.v) {
+                  switch (c.t) {
+                    case 's': {
+                      const index = parseInt(c.v.text, 10);
+                      if (sharedStrings) {
+                        cell.value = sharedStrings[index];
+                      } else {
+                        cell.value = {
+                          sharedString: index,
+                        };
+                      }
+                      break;
+                    }
+
+                    case 'inlineStr':
+                    case 'str':
+                      cell.value = utils.xmlDecode(c.v.text);
+                      break;
+
+                    case 'e':
+                      cell.value = {error: c.v.text};
+                      break;
+
+                    case 'b':
+                      cell.value = parseInt(c.v.text, 10) !== 0;
+                      break;
+
+                    default:
+                      if (utils.isDateFmt(cell.numFmt)) {
+                        cell.value = utils.excelToDate(
+                          parseFloat(c.v.text),
+                          properties.model && properties.model.date1904
+                        );
+                      } else {
+                        cell.value = parseFloat(c.v.text);
+                      }
+                      break;
+                  }
+                }
+                if (hyperlinks) {
+                  const hyperlink = hyperlinks[c.ref];
+                  if (hyperlink) {
+                    cell.text = cell.value;
+                    cell.value = undefined;
+                    cell.hyperlink = hyperlink;
+                  }
+                }
+                c = null;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+        if (emitHyperlinks || hyperlinks) {
+          switch (node.name) {
+            case 'hyperlinks':
+              inHyperlinks = false;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+    if (worksheetEvents.length > 0) {
+      yield worksheetEvents;
+    }
+  }
+};
+// MUST DELETE ONCE FIX PROVIDE - END
+
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -686,6 +953,13 @@ const getXlsxHeaders = function (filesToParse, extension) {
           });
           workbookReader.read();
           workbookReader.on('worksheet', worksheet => {
+            // #TODO - ugly hack until new version of excelljs is provided to include fix (4.3.0 didn't include this fix even if code is merged):
+            // - https://github.com/exceljs/exceljs/pull/1576
+            // MUST DELETE ONCE FIX PROVIDE - BEGIN
+            worksheet.parse = parseWorksheet;
+            // MUST DELETE ONCE FIX PROVIDE - END
+
+            // parse rows
             worksheet.on('row', row => {
               // check for headers row
               if (row.number === 1) {
@@ -1184,12 +1458,8 @@ const getForeignKeysValues = function (foreignKeysMap, outbreak) {
 
 /**
  * Get a list of available reference data items for each property of the model
- * @param outbreakId
- * @param modelReferenceDataFieldsToCategoryMap
- * @return {Promise.<T>}
  */
 const getReferenceDataAvailableValuesForModel = function (outbreakId, modelReferenceDataFieldsToCategoryMap) {
-  const referenceDataValues = {};
   // find (active) reference data for the referenced categories
   return baseReferenceDataModel.helpers
     .getSystemAndOutbreakReferenceData(outbreakId, {
@@ -1199,9 +1469,15 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
         },
         active: true
       },
-      fields: ['id', 'categoryId', 'value', 'description']
+      fields: ['id', 'categoryId', 'value', 'active', 'isSystemWide']
     })
     .then(function (referenceDataItems) {
+      // init
+      const data = {
+        referenceDataValues: {},
+        propToCategory: {}
+      };
+
       // create a map of categories to items
       const referenceDataItemsByCategory = {};
       referenceDataItems.forEach(function (referenceDataItem) {
@@ -1211,30 +1487,34 @@ const getReferenceDataAvailableValuesForModel = function (outbreakId, modelRefer
         referenceDataItemsByCategory[referenceDataItem.categoryId].push({
           id: referenceDataItem.id,
           label: referenceDataItem.value,
-          value: referenceDataItem.value
+          value: referenceDataItem.value,
+          active: referenceDataItem.active,
+          isSystemWide: referenceDataItem.isSystemWide
         });
       });
 
       // keep a list of available values for each reference data related property
       Object.keys(modelReferenceDataFieldsToCategoryMap).forEach(function (modelProperty) {
-        // split the property in sub components
+        // split the property in subcomponents
+        data.propToCategory[modelProperty] = modelReferenceDataFieldsToCategoryMap[modelProperty];
         const propertyComponents = modelProperty.split('.');
-        // if there are sub components
+        // if there are subcomponents
         if (propertyComponents.length > 1) {
           // define parent component
-          if (!referenceDataValues[propertyComponents[0]]) {
-            referenceDataValues[propertyComponents[0]] = {};
+          if (!data.referenceDataValues[propertyComponents[0]]) {
+            data.referenceDataValues[propertyComponents[0]] = {};
           }
           // store the sub component under parent component
-          if (!referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
-            referenceDataValues[propertyComponents[0]][propertyComponents[1]] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
+          if (!data.referenceDataValues[propertyComponents[0]][propertyComponents[1]]) {
+            data.referenceDataValues[propertyComponents[0]][propertyComponents[1]] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
           }
         } else {
-          // no sub components, store property directly
-          referenceDataValues[modelProperty] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
+          // no subcomponents, store property directly
+          data.referenceDataValues[modelProperty] = referenceDataItemsByCategory[modelReferenceDataFieldsToCategoryMap[modelProperty]] || [];
         }
       });
-      return referenceDataValues;
+
+      return data;
     });
 };
 
@@ -1480,6 +1760,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           modelProperties: {},
           suggestedFieldMapping: {},
           modelPropertyValues: {},
+          modelPropertyToRefCategory: {},
           modelArrayProperties: {}
         };
 
@@ -1552,9 +1833,15 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
             steps.push(function (callback) {
               // get reference data
               getReferenceDataAvailableValuesForModel(outbreakId, assocModelOptions.referenceDataFieldsToCategoryMap)
-                .then(function (referenceDataValues) {
+                .then(function (refData) {
                   // update result
-                  results[modelName] = Object.assign({}, results[modelName], {modelPropertyValues: _.merge(results[modelName].modelPropertyValues, referenceDataValues)});
+                  results[modelName] = Object.assign(
+                    {},
+                    results[modelName], {
+                      modelPropertyValues: _.merge(results[modelName].modelPropertyValues, refData.referenceDataValues),
+                      modelPropertyToRefCategory: _.merge(results[modelName].modelPropertyToRefCategory, refData.propToCategory)
+                    }
+                  );
                   callback(null, results[modelName]);
                 })
                 .catch(callback);

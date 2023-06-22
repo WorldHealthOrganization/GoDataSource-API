@@ -14,6 +14,7 @@ module.exports = function (Event) {
     deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
     deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
+    'visualId': 'LNG_EVENT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
     'numberOfContacts': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_CONTACTS',
@@ -36,7 +37,11 @@ module.exports = function (Event) {
     'address.date': 'LNG_ADDRESS_FIELD_LABEL_ADDRESS_DATE',
     'address.phoneNumber': 'LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER',
     'address.emailAddress': 'LNG_ADDRESS_FIELD_LABEL_EMAIL_ADDRESS',
-    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUserId': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
+    'responsibleUser': 'LNG_EVENT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY',
     'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE'
   };
@@ -70,6 +75,7 @@ module.exports = function (Event) {
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_CORE_DEMOGRAPHIC_DATA': {
       properties: [
+        'visualId',
         'name',
         'type',
         'date',
@@ -78,7 +84,10 @@ module.exports = function (Event) {
         'eventCategory',
         'endDate',
         'description',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures',
         'numberOfContacts'
       ]
@@ -114,6 +123,7 @@ module.exports = function (Event) {
   // default export order
   Event.exportFieldsOrder = [
     'id',
+    'visualId',
     'dateOfReporting',
     'isDateOfReportingApproximate'
   ];
@@ -128,6 +138,7 @@ module.exports = function (Event) {
   ];
 
   Event.printFieldsinOrder = [
+    'visualId',
     'type',
     'name',
     'date',

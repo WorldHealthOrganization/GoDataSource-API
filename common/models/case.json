@@ -21,9 +21,48 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "followUps",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -44,9 +83,17 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -86,6 +133,10 @@
       "type": "boolean",
       "default": false
     },
+    "wasContactOfContact": {
+      "type": "boolean",
+      "default": false
+    },
     "outcomeId": {
       "type": "string"
     },
@@ -119,6 +170,9 @@
       "type": "boolean",
       "default": false
     },
+    "deathLocationId": {
+      "type": "string"
+    },
     "questionnaireAnswers": {
       "type": "object"
     },
@@ -138,20 +192,21 @@
     "name",
     "description",
     "dateBecomeContact",
+    "dateBecomeContactOfContact",
     "followUp",
     "followUpHistory",
     "date"
   ],
   "validations": [],
   "relations": {
-    "labResults": {
-      "type": "hasMany",
-      "model": "labResult",
-      "foreignKey": "personId"
-    },
     "followUps": {
       "type": "hasMany",
       "model": "followUp",
+      "foreignKey": "personId"
+    },
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
       "foreignKey": "personId"
     }
   },

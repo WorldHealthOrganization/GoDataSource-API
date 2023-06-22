@@ -21,6 +21,11 @@ module.exports = function (ContactOfContact) {
     // relationship person labels
     const relationshipFieldLabelsMap = {
       'relatedId': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON',
+      'relatedPersonData': 'LNG_RELATIONSHIP_FIELD_LABEL_PERSONS_RELATED_PERSON_DATA',
+      'relatedPersonData.id': 'LNG_ENTITY_FIELD_LABEL_ID',
+      'relatedPersonData.firstName': 'LNG_ENTITY_FIELD_LABEL_FIRST_NAME',
+      'relatedPersonData.lastName': 'LNG_ENTITY_FIELD_LABEL_LAST_NAME',
+      'relatedPersonData.visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
       'contactDate': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE',
       'contactDateEstimated': 'LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE_ESTIMATED',
       'certaintyLevelId': 'LNG_RELATIONSHIP_FIELD_LABEL_CERTAINTY_LEVEL',
@@ -73,6 +78,12 @@ module.exports = function (ContactOfContact) {
     'documents': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENTS',
     'documents[].type': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_TYPE',
     'documents[].number': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DOCUMENT_NUMBER',
+    'wasCase': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CASE',
+    'dateBecomeCase': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CASE',
+    'wasContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT',
+    'dateBecomeContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT',
+    'wasContactOfContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT',
+    'dateBecomeContactOfContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT',
     'dateOfReporting': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_REPORTING',
     'dateOfLastContact': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_OF_LAST_CONTACT',
     'riskLevel': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RISK_LEVEL',
@@ -104,7 +115,11 @@ module.exports = function (ContactOfContact) {
     'vaccinesReceived[].date': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_DATE',
     'vaccinesReceived[].status': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_VACCINE_STATUS',
     'pregnancyStatus': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_PREGNANCY_STATUS',
-    'responsibleUserId': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID'
+    'responsibleUserId': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_UUID', // required for import map
+    'responsibleUser': 'LNG_CONTACT_OF_CONTACT_FIELD_LABEL_RESPONSIBLE_USER_ID',
+    'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
+    'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
   });
 
   // map language token labels for export fields group
@@ -145,7 +160,11 @@ module.exports = function (ContactOfContact) {
       properties: [
         'type',
         'wasCase',
+        'dateBecomeCase',
         'wasContact',
+        'dateBecomeContact',
+        'wasContactOfContact',
+        'dateBecomeContactOfContact',
         'classification',
         'dateOfInfection',
         'dateOfOnset',
@@ -156,10 +175,11 @@ module.exports = function (ContactOfContact) {
         'dateOfOutcome',
         'safeBurial',
         'dateOfBurial',
-        'dateBecomeContact',
         'transferRefused',
-        'dateBecomeCase',
-        'responsibleUserId',
+        'responsibleUser',
+        'responsibleUser.id',
+        'responsibleUser.firstName',
+        'responsibleUser.lastName',
         'numberOfExposures'
       ]
     },
@@ -201,6 +221,11 @@ module.exports = function (ContactOfContact) {
       properties: [
         'relationship',
         'relationship.relatedId',
+        'relationship.relatedPersonData',
+        'relationship.relatedPersonData.id',
+        'relationship.relatedPersonData.firstName',
+        'relationship.relatedPersonData.lastName',
+        'relationship.relatedPersonData.visualId',
         'relationship.contactDate',
         'relationship.contactDateEstimated',
         'relationship.certaintyLevelId',

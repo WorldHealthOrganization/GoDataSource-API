@@ -21,9 +21,79 @@
             },
             "delete": {
               "where": {
-                "deletedByParent": {
-                  "eq": null
-                }
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "followUps",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
+              },
+              "set": {
+                "deletedByParent": ":FK_UUID"
+              }
+            }
+          }
+        },
+        {
+          "relation": "labResults",
+          "operations": {
+            "restore": {
+              "where": {
+                "deletedByParent": ":FK_UUID"
+              },
+              "set": {
+                "deletedByParent": null
+              }
+            },
+            "delete": {
+              "where": {
+                "$or": [
+                  {
+                    "deletedByParent": {
+                      "$exists": false
+                    }
+                  }, {
+                    "deletedByParent": {
+                      "$eq": null
+                    }
+                  }
+                ]
               },
               "set": {
                 "deletedByParent": ":FK_UUID"
@@ -69,6 +139,14 @@
       "type": "boolean",
       "default": false
     },
+    "wasCase": {
+      "type": "boolean",
+      "default": false
+    },
+    "wasContact": {
+      "type": "boolean",
+      "default": false
+    },
     "active": {
       "type": "boolean",
       "description": "A contact is active if at least one of the cases related to it has non-discarded classification",
@@ -89,12 +167,24 @@
     "dateOfInfection",
     "dateOfOnset",
     "dateBecomeCase",
+    "dateBecomeContact",
     "dateRanges",
     "classificationHistory",
     "date"
   ],
   "validations": [],
-  "relations": {},
+  "relations": {
+    "followUps": {
+      "type": "hasMany",
+      "model": "followUp",
+      "foreignKey": "personId"
+    },
+    "labResults": {
+      "type": "hasMany",
+      "model": "labResult",
+      "foreignKey": "personId"
+    }
+  },
   "acls": [],
   "methods": {}
 }

@@ -27,7 +27,6 @@
         "LNG_REFERENCE_DATA_CATEGORY_DOCUMENT_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_DISEASE",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_INTENSITY",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_FREQUENCY",
         "LNG_REFERENCE_DATA_CATEGORY_EXPOSURE_DURATION",
         "LNG_REFERENCE_DATA_CATEGORY_CERTAINTY_LEVEL",
@@ -40,12 +39,9 @@
         "LNG_REFERENCE_DATA_CATEGORY_OUTCOME",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_DATE_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_SOCIAL_RELATIONSHIP_TYPE",
-        "LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
         "LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL",
-        "LNG_REFERENCE_DATA_CATEGORY_COUNTRY",
         "LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE",
         "LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE",
         "LNG_REFERENCE_DATA_CATEGORY_VACCINE",
@@ -98,6 +94,12 @@
     },
     "geoLocation": {
       "type": "customGeoPoint"
+    },
+    "isSystemWide": {
+      "type": "boolean"
+    },
+    "allowedRefDataItems": {
+      "type": "allowedRefData"
     }
   },
   "indexes": {
@@ -172,6 +174,12 @@
       "principalId": "reference_data_import",
       "permission": "ALLOW",
       "property": "importImportableReferenceDataFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getAvailableCategoriesPerDisease"
     }
   ],
   "methods": {
@@ -272,6 +280,30 @@
       "http": {
         "verb": "post",
         "path": "/import-importable-file-using-map"
+      }
+    },
+    "getAvailableCategoriesPerDisease": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "categories",
+          "type": [
+            {
+              "type": {
+                "id": "string",
+                "name": "string"
+              }
+            }
+          ],
+          "description": "List of available reference data categories that can be per disease",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Retrieve the list of available reference data categories that can be per disease.",
+      "http": {
+        "verb": "get",
+        "path": "/available-categories-per-disease"
       }
     }
   }

@@ -1,0 +1,15 @@
+{
+  "id": "portuguese_pt",
+  "name": "Português",
+  "readOnly": true,
+  "tokens": {
+    "LNG_PAGE_LIST_LONG_PERIOD_BETWEEN_ONSET_DATES_ACTION_MODIFY": {
+      "translation": "Modificar '{{name}}'",
+      "section": "uiLongPeriodBetweenOnsetDatesReportListPage"
+    },
+    "LNG_PAGE_VIEW_LOCATION_NAME": {
+      "translation": "{{name}}",
+      "section": "uiModifyLocationPage"
+    }
+  }
+}

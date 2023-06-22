@@ -554,13 +554,13 @@ module.exports = function (LabResult) {
 
   /**
    * Import an importable lab results file using file ID and a map to remap parameters & reference data values
-   * @param {string} outbreakId - Outbreak ID
+   * @param {string} outbreak - Outbreak Model
    * @param {Object} body - Request body
    * @param {Object} personModel - Person model to be used when finding the person for the lab result
    * @param {Object} options - Request options
    * @param {Function} callback
    */
-  LabResult.helpers.importImportableLabResultsFileUsingMap = (outbreakId, body, personModel, options, callback) => {
+  LabResult.helpers.importImportableLabResultsFileUsingMap = (outbreakModel, body, personModel, options, callback) => {
     // create a transaction logger as the one on the req will be destroyed once the response is sent
     const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
 
@@ -590,7 +590,7 @@ module.exports = function (LabResult) {
                   {id: labResultData.save.personId},
                   {visualId: labResultData.save.personId}
                 ],
-                outbreakId: outbreakId
+                outbreakId: outbreakModel.id
               }
             })
             .then(function (personInstance) {
@@ -606,7 +606,7 @@ module.exports = function (LabResult) {
               labResultData.save.personId = personInstance.id;
 
               // sync the record
-              return app.utils.dbSync.syncRecord(logger, app.models.labResult, labResultData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.labResult, labResultData.save, options)
                 .then(function () {
                   asyncCallback();
                 });
@@ -630,21 +630,41 @@ module.exports = function (LabResult) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.labResult._booleanProperties) {
-      app.models.labResult._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.labResult);
-    }
+    // model boolean properties
+    const modelBooleanProperties = helpers.getModelPropertiesByDataType(
+      app.models.labResult,
+      helpers.DATA_TYPE.BOOLEAN
+    );
 
+    // model date properties
+    let modelDateProperties = helpers.getModelPropertiesByDataType(
+      app.models.labResult,
+      helpers.DATA_TYPE.DATE
+    );
+
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    helpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      outbreakModel.labResultsTemplate ?
+        outbreakModel.labResultsTemplate.toJSON() :
+        undefined
+    );
+    modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'labResult',
       batchSize: labResultImportBatchSize,
-      outbreakId: outbreakId,
-      modelBooleanProperties: app.models.labResult._booleanProperties
+      outbreakId: outbreakModel.id,
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import
     importableFile.processImportableFileData(app, {
       modelName: app.models.labResult.modelName,
-      outbreakId: outbreakId,
+      outbreakId: outbreakModel.id,
       logger: logger,
       parallelActionsLimit: 10
     }, formatterOptions, createBatchActions, callback);

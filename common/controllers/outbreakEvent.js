@@ -12,6 +12,7 @@ const _ = require('lodash');
 const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
+const exportHelper = require('../../components/exportHelper');
 
 // used in event import
 const eventImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -189,7 +190,13 @@ module.exports = function (Outbreak) {
             fieldLabelsMap: app.models.event.fieldLabelsMap,
             exportFieldsGroup: app.models.event.exportFieldsGroup,
             exportFieldsOrder: app.models.event.exportFieldsOrder,
-            locationFields: app.models.event.locationFields
+            locationFields: app.models.event.locationFields,
+
+            // fields that we need to bring from db, but we might not include in the export (you can still include it since we need it on import)
+            // - responsibleUserId might be included since it is used on import, otherwise we won't have the ability to map this field
+            projection: [
+              'responsibleUserId'
+            ]
           },
           filter,
           exportType,
@@ -205,6 +212,23 @@ module.exports = function (Outbreak) {
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
             contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+          },
+          undefined, {
+            responsibleUser: {
+              type: exportHelper.RELATION_TYPE.HAS_ONE,
+              collection: 'user',
+              project: [
+                '_id',
+                'firstName',
+                'lastName'
+              ],
+              key: '_id',
+              keyValue: `(item) => {
+                return item && item.responsibleUserId ?
+                  item.responsibleUserId :
+                  undefined;
+              }`
+            }
           }
         );
       })
@@ -251,7 +275,7 @@ module.exports = function (Outbreak) {
           batchData.forEach(function (eventData) {
             createEvents.push(function (asyncCallback) {
               // sync the event
-              return app.utils.dbSync.syncRecord(logger, app.models.event, eventData.save, options)
+              return app.utils.dbSync.syncRecord(app, logger, app.models.event, eventData.save, options)
                 .then(function () {
                   asyncCallback();
                 })
@@ -275,15 +299,25 @@ module.exports = function (Outbreak) {
     };
 
     // construct options needed by the formatter worker
-    if (!app.models.event._booleanProperties) {
-      app.models.event._booleanProperties = app.utils.helpers.getModelBooleanProperties(app.models.event);
-    }
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.event,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
 
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.event,
+      genericHelpers.DATA_TYPE.DATE
+    );
+
+    // options for the formatting method
     const formatterOptions = Object.assign({
       dataType: 'event',
       batchSize: eventImportBatchSize,
       outbreakId: self.id,
-      modelBooleanProperties: app.models.event._booleanProperties
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
     }, body);
 
     // start import

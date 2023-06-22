@@ -116,13 +116,24 @@
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
     },
+    "deathLocationId": {
+      "type": "string"
+    },
     "dateOfBurial": {
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
     },
+    "dateBecomeCase": {
+      "type": "date",
+      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
+    },
     "dateBecomeContact": {
       "type": "date",
       "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
+    },
+    "dateBecomeContactOfContact": {
+      "type": "date",
+      "description": "Contact of contact property; Defining it here as on sync we use the person model and not the contact of contact model"
     },
     "followUp": {
       "description": "Contact property; Defining it here as on sync we use the person model and not the contact model. Object containing start/end dates for the contact's follow-up period. The dates are automatically calculated based on contact relationships dates and outbreak.periodOfFollowup",

@@ -763,7 +763,7 @@ module.exports = function (User) {
     //   .getTemporaryFileById(data.fileId)
     //   .then(file => {
     //     const rawUsersList = file.data;
-    //     const usersList = app.utils.helpers.convertBooleanProperties(
+    //     const usersList = app.utils.helpers.convertPropertiesNoModelByType(
     //       app.models.user,
     //       app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
     //
@@ -833,6 +833,7 @@ module.exports = function (User) {
     //           user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
     //
     //           return app.utils.dbSync.syncRecord(
+    //             app,
     //             options.remotingContext.req.logger,
     //             app.models.user,
     //             user,

@@ -91,15 +91,99 @@ module.exports = function (Backup) {
 
   /**
    * Restore a backup from database using its ID
-   * @param done
    */
-  Backup.prototype.restoreBackup = function (done) {
-    backup.restore(this.id, (err) => {
-      if (err) {
-        return done(err);
-      }
-      return done();
-    });
+  Backup.prototype.restoreBackup = function (asynchronous, requestOptions, done) {
+    app.models.databaseActionLog
+      .create({
+        type: 'restore-db',
+        backupId: this.id,
+        actionStartDate: new Date(),
+        status: 'LNG_SYNC_STATUS_IN_PROGRESS',
+        statusStep: 'LNG_STATUS_STEP_PREPARING_RESTORE',
+        totalNo: 0,
+        processedNo: 0,
+        deleted: false,
+        createdAt: new Date(),
+        createdBy: requestOptions.accessToken.userId,
+        updatedAt: new Date(),
+        dbUpdatedAt: new Date(),
+        updatedBy: requestOptions.accessToken.userId
+      })
+      .then((actionLog) => {
+        if (asynchronous) {
+          // restore
+          backup.restore(
+            this.id,
+            actionLog.id,
+            (err) => {
+              // error ?
+              if (err) {
+                actionLog.updateAttributes({
+                  status: 'LNG_SYNC_STATUS_FAILED',
+                  error: err.message,
+                  errStack: err.stack,
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
+                });
+
+                // finished
+                return;
+              }
+
+              // finished with success
+              actionLog.updateAttributes({
+                status: 'LNG_SYNC_STATUS_SUCCESS',
+                statusStep: 'LNG_STATUS_STEP_RESTORE_FINISHED',
+                updatedAt: new Date(),
+                dbUpdatedAt: new Date(),
+                actionCompletionDate: new Date()
+              });
+            }
+          );
+
+          // finalize
+          done(
+            undefined,
+            actionLog.id
+          );
+        } else {
+          backup.restore(
+            this.id,
+            actionLog.id,
+            (err) => {
+              // error ?
+              if (err) {
+                actionLog.updateAttributes({
+                  status: 'LNG_SYNC_STATUS_FAILED',
+                  error: err.message,
+                  errStack: err.stack,
+                  updatedAt: new Date(),
+                  dbUpdatedAt: new Date()
+                });
+
+                // finished
+                return done(err);
+              }
+
+              // finished with success
+              actionLog.updateAttributes({
+                status: 'LNG_SYNC_STATUS_SUCCESS',
+                statusStep: 'LNG_STATUS_STEP_RESTORE_FINISHED',
+                updatedAt: new Date(),
+                dbUpdatedAt: new Date(),
+                actionCompletionDate: new Date()
+              });
+
+              // finished
+              return done(
+                undefined,
+                actionLog.id
+              );
+            }
+          );
+        }
+      })
+      .catch(done);
   };
 
   /**

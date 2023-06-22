@@ -115,6 +115,19 @@
       "description": "Flag specifying whether the team assignment concept (geographical restriction o data) will be applied on the web app.",
       "type": "boolean",
       "default": false
+    },
+    "checkLastContactDateAgainstDateOnSet": {
+      "description": "Flag specifying whether Date of Last Contact that is BEFORE the Date of Onset of source case. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "disableModifyingLegacyQuestionnaire": {
+      "description": "Flag specifying if the modifying of the legacy questionnaire is disabled. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "allowedRefDataItems": {
+      "type": "allowedRefData"
     }
   },
   "validations": [],

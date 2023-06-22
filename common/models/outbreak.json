@@ -144,17 +144,23 @@
       "default": [],
       "importTopLevelOnly": true
     },
+    "eventIdMask": {
+      "type": "string",
+      "required": true,
+      "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
+      "default": "EV-9999999999"
+    },
     "caseIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CA-9999999999"
     },
     "contactIdMask": {
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CO-9999999999"
     },
     "arcGisServers": [
       "arcGisServer"
@@ -171,7 +177,7 @@
       "type": "string",
       "required": true,
       "pattern": "^(?:9*[^9()]*|[^9()]*9*[^9()]*|[^9()]*9*)$",
-      "default": "9999999999"
+      "default": "CC-9999999999"
     },
     "isContactsOfContactsActive": {
       "type": "boolean",
@@ -186,6 +192,19 @@
       "description": "Flag specifying whether the geographical restriction of data will be applied for the outbreak",
       "type": "boolean",
       "default": false
+    },
+    "checkLastContactDateAgainstDateOnSet": {
+      "description": "Flag specifying whether Date of Last Contact that is BEFORE the Date of Onset of source case. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "disableModifyingLegacyQuestionnaire": {
+      "description": "Flag specifying if the modifying of the legacy questionnaire is disabled. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "allowedRefDataItems": {
+      "type": "allowedRefData"
     }
   },
   "indexes": {
@@ -403,6 +422,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__cases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_list",
       "permission": "ALLOW",
       "property": "findContacts"
@@ -434,6 +459,17 @@
     {
       "principalType": "ROLE",
       "principalId": "contact_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list_isolated_contacts",
+      "permission": "ALLOW",
+      "property": "getContactIsolatedContacts"
+    },
+    {
+      "principalId": "contact_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__contacts"
     },
@@ -691,6 +727,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreEvent"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "event_list",
       "permission": "ALLOW",
       "property": "findEvents"
@@ -716,6 +758,12 @@
     {
       "principalType": "ROLE",
       "principalId": "event_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__events"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__events"
     },
@@ -793,7 +841,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_convert_to_contact_of_contact",
+      "permission": "ALLOW",
+      "property": "convertContactToContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_restore",
+      "permission": "ALLOW",
+      "property": "restoreContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContact"
     },
@@ -808,6 +868,12 @@
       "principalId": "case_generate_visual_id",
       "permission": "ALLOW",
       "property": "generateCaseVisualId"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "event_generate_visual_id",
+      "permission": "ALLOW",
+      "property": "generateEventVisualId"
     },
     {
       "principalType": "ROLE",
@@ -898,6 +964,24 @@
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "countPeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list",
+      "permission": "ALLOW",
+      "property": "getPersonPossibleDuplicates"
     },
     {
       "principalType": "ROLE",
@@ -1028,6 +1112,18 @@
     {
       "principalType": "ROLE",
       "principalId": "relationship_share",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_convert_to_contact",
+      "permission": "ALLOW",
+      "property": "bulkCreateRelationships"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_convert_to_contact_of_contact",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
     },
@@ -1309,6 +1405,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreCase"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list",
       "permission": "ALLOW",
       "property": "filteredCountCases"
@@ -1354,6 +1456,12 @@
       "principalId": "event_import",
       "permission": "ALLOW",
       "property": "importImportableEventsFileUsingMap"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyLabResults"
     },
     {
       "principalType": "ROLE",
@@ -1405,6 +1513,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__labResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_list_relationship_exposures",
       "permission": "ALLOW",
       "property": "findCaseRelationshipExposures"
@@ -1435,7 +1549,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreCaseLabResult"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_restore_lab_result",
+      "permission": "ALLOW",
+      "property": "restoreContactLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
       "permission": "ALLOW",
       "property": "restoreContactLabResult"
     },
@@ -1663,6 +1789,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_delete",
+      "permission": "ALLOW",
+      "property": "__destroyById__contactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_list",
       "permission": "ALLOW",
       "property": "__count__contactsOfContacts"
@@ -1714,6 +1846,18 @@
       "principalId": "relationship_create",
       "permission": "ALLOW",
       "property": "countContactOfContactRelationshipsAvailablePeople"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "findContactOfContactRelationshipContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_relationship_contacts",
+      "permission": "ALLOW",
+      "property": "countContactOfContactRelationshipContacts"
     },
     {
       "principalType": "ROLE",
@@ -1777,6 +1921,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContact"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_of_contact_export_dossier",
       "permission": "ALLOW",
       "property": "contactOfContactDossier"
@@ -1804,6 +1954,12 @@
       "principalId": "contact_create_bulk_contact_of_contact",
       "permission": "ALLOW",
       "property": "createContactMultipleContactsOfContacts"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_convert_to_contact",
+      "permission": "ALLOW",
+      "property": "convertContactOfContactToContact"
     },
     {
       "principalType": "ROLE",
@@ -2401,6 +2557,29 @@
         "path": "/contacts/:nk/relationships/count"
       }
     },
+    "prototype.getContactIsolatedContacts": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of isolated contacts and list of ids",
+          "required": true
+        }
+      ],
+      "description": "Get count of isolated contacts for a contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts/:fk/isolated-contacts"
+      }
+    },
     "prototype.findEventRelationships": {
       "accepts": [
         {
@@ -2682,14 +2861,6 @@
           "description": "Foreign key for contact"
         },
         {
-          "arg": "body",
-          "type": "case",
-          "http": {
-            "source": "body"
-          },
-          "description": "Case specific properties"
-        },
-        {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -2708,6 +2879,34 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/convert-to-case"
+      }
+    },
+    "prototype.convertContactToContactOfContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contact"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contactOfContact",
+          "type": "contactOfContact",
+          "description": "Contact of contact resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts contact to contact of contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts/:nk/convert-to-contact-of-contact"
       }
     },
     "prototype.convertCaseToContact": {
@@ -2736,6 +2935,34 @@
       "http": {
         "verb": "post",
         "path": "/cases/:nk/convert-to-contact"
+      }
+    },
+    "prototype.convertContactOfContactToContact": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contact",
+          "type": "contact",
+          "description": "Contact resulted from the conversion",
+          "required": true,
+          "root": true
+        }
+      ],
+      "description": "Converts contact of contact to contact.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts-of-contacts/:nk/convert-to-contact"
       }
     },
     "prototype.getLocationsHierarchicalList": {
@@ -2861,6 +3088,35 @@
       "http": {
         "verb": "post",
         "path": "/events/:nk/restore"
+      }
+    },
+    "prototype.generateEventVisualId": {
+      "accepts": [
+        {
+          "arg": "visualIdMask",
+          "type": "string",
+          "required": true,
+          "description": "Visual ID mask partially resolved (except for the sequence no.)"
+        },
+        {
+          "arg": "personId",
+          "type": "string",
+          "description": "Event ID for validating existing visual ID (optional)"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "visualId",
+          "type": "string",
+          "description": "Visual ID",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Generates the next (available) visual ID based on the outbreak mask.",
+      "http": {
+        "verb": "post",
+        "path": "/events/generate-visual-id"
       }
     },
     "prototype.generateCaseVisualId": {
@@ -4788,7 +5044,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, offset, limit, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includePersonExposureFields, where.retrieveOldestExposure, where.includeCaseFields, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -6329,10 +6585,15 @@
         "description": "Number of records deleted"
       },
       "description": "Bulk delete relationships.",
-      "http": {
-        "verb": "delete",
-        "path": "/relationships/bulk"
-      }
+      "http": [
+        {
+          "verb": "delete",
+          "path": "/relationships/bulk"
+        }, {
+          "verb": "post",
+          "path": "/relationships/bulk/delete"
+        }
+      ]
     },
     "prototype.bulkChangeTargetRelationships": {
       "accepts": [
@@ -6632,6 +6893,41 @@
         }
       ]
     },
+    "prototype.getPersonPossibleDuplicates": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "case",
+          "description": "Model instance data. Accepts only case, contact and contact of contact",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "duplicates",
+          "type": [
+            "case"
+          ],
+          "description": "List of cases, contacts and contacts of contacts that are duplicates",
+          "required": true
+        }
+      ],
+      "description": "Get list of cases, contacts and contacts of contacts that are possible duplicates",
+      "http": {
+        "verb": "post",
+        "path": "/people/duplicates/find"
+      }
+    },
     "prototype.findEvents": {
       "accepts": [
         {
@@ -6661,6 +6957,10 @@
         {
           "verb": "get",
           "path": "/events"
+        },
+        {
+          "verb": "post",
+          "path": "/events/filter"
         }
       ]
     },
@@ -7716,10 +8016,15 @@
         }
       ],
       "description": "Delete a list of follow ups.",
-      "http": {
-        "verb": "del",
-        "path": "/follow-ups/bulk"
-      }
+      "http": [
+        {
+          "verb": "del",
+          "path": "/follow-ups/bulk"
+        }, {
+          "verb": "post",
+          "path": "/follow-ups/bulk/delete"
+        }
+      ]
     },
     "prototype.bulkRestoreFollowUps": {
       "accepts": [
@@ -7933,6 +8238,10 @@
         {
           "verb": "get",
           "path": "/contacts-of-contacts"
+        },
+        {
+          "verb": "post",
+          "path": "/contacts-of-contacts/filter"
         }
       ]
     },
@@ -7994,6 +8303,63 @@
       "http": {
         "verb": "get",
         "path": "/contacts-of-contacts/:nk/relationships"
+      }
+    },
+    "prototype.findContactOfContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "contacts",
+          "type": [
+            "exposureOrContact"
+          ],
+          "description": "Relationship contacts of a contact of contact",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries relationship contacts of contact of contact.",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/relationships/contacts"
+      }
+    },
+    "prototype.countContactOfContactRelationshipContacts": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: the main filter applies on 'person' record while filter.where.relationship query applies on relationship"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of relationship contacts (that pass the filter) of a contact of contact",
+          "required": true
+        }
+      ],
+      "description": "Counts the relationship contacts that pass a filter of a contact of contact",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/relationships/contacts/filtered-count"
       }
     },
     "prototype.createContactOfContactRelationship": {
@@ -8306,7 +8672,7 @@
         {
           "arg": "filter",
           "type": "object",
-          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+          "description": "Filter defining fields, where, order, offset, limit, where.includePersonExposureFields, where.retrieveOldestExposure, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\\\"something\\\":\\\"value\\\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
         },
         {
           "arg": "type",
@@ -9032,12 +9398,59 @@
         "path": "/follow-ups/bulk"
       }
     },
+    "prototype.bulkModifyLabResults": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances",
+          "http": {
+            "source": "query"
+          },
+          "required": true
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "labResult",
+          "description": "Lab result properties",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "response",
+          "type": {
+            "count": {
+              "type": "number"
+            }
+          },
+          "description": "Number of updated lab results",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Bulk update lab results",
+      "http": {
+        "verb": "put",
+        "path": "/lab-results/bulk"
+      }
+    },
     "prototype.getCaseCountMap": {
       "accepts": [
         {
           "arg": "where",
           "type": "object",
-          "description": "Criteria to match model instances"
+          "description": "Criteria to match model instances. Note: where supports 'relationship' and 'labResult' MongoDB compatible queries."
         },
         {
           "arg": "options",

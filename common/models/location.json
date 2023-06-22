@@ -164,7 +164,13 @@
   ],
   "methods": {
     "exportHierarchicalList": {
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Accepts where.includeDeletedLocations and where.replaceUpdatedAtAsCurrentDate"
+        }
+      ],
       "returns": [
         {
           "arg": "body",

@@ -1,6 +1,6 @@
 {
   "name": "go-data-api",
-  "version": "2.44.0",
+  "version": "2.48.0",
   "main": "server/server.js",
   "engines": {
     "node": ">=14"
@@ -43,6 +43,7 @@
     "exceljs": "4.3.0",
     "express": "4.17.1",
     "express-session": "1.17.2",
+    "extract-zip": "2.0.1",
     "form-data": "4.0.0",
     "formidable": "1.2.2",
     "fs-extra": "10.0.0",
@@ -75,7 +76,7 @@
     "xlsx": "0.17.0"
   },
   "devDependencies": {
-    "eslint": "7.32.0",
+    "eslint": "8.23.1",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-run-command": "0.0.10",

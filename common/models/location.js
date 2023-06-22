@@ -664,9 +664,15 @@ module.exports = function (Location) {
    * @param locationsList
    * @param [removeIdentifiers] {boolean} If true, id and parentLocationId are omitted from the record
    * @param baseLevel
+   * @param replaceUpdatedAtAsCurrentDate
    * @return {*[]}
    */
-  Location.buildHierarchicalLocationsList = function (locationsList, removeIdentifiers, baseLevel) {
+  Location.buildHierarchicalLocationsList = function (
+    locationsList,
+    removeIdentifiers,
+    baseLevel,
+    replaceUpdatedAtAsCurrentDate
+  ) {
     // by default keep identifiers
     if (removeIdentifiers === undefined) {
       removeIdentifiers = false;
@@ -721,6 +727,11 @@ module.exports = function (Location) {
 
     // go through all locations
     locationsList.forEach(function (location) {
+      // replace "Updated at" as current date ?
+      if (replaceUpdatedAtAsCurrentDate) {
+        location.updatedAt = new Date();
+      }
+
       // if the location is an instance
       if (location.toJSON) {
         // transform it to JSON
@@ -871,7 +882,7 @@ module.exports = function (Location) {
         }
         // add sync location operation
         syncLocationOperations.push(function (cb) {
-          app.utils.dbSync.syncRecord(options.remotingContext.req.logger, app.models.location, _location, options)
+          app.utils.dbSync.syncRecord(app, options.remotingContext.req.logger, app.models.location, _location, options)
             .then(function (syncedLocationResult) {
               const syncedLocation = syncedLocationResult.record;
               // store result
@@ -918,7 +929,11 @@ module.exports = function (Location) {
         }));
       }
       // create locations from the hierarchical list
-      Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+      if (!locations.length) {
+        callback();
+      } else {
+        Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+      }
     } catch (error) {
       // handle JSON.parse errors
       callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {

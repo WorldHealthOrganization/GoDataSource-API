@@ -1,0 +1,809 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_PAGE_LIST_LOCATIONS_EXPORT_REPLACE_UPDATED_AT_AS_CURRENT_DATE": {
+      "translation": "Replace updated at with current server date/time",
+      "section": "uiLocationsListPage"
+    },
+    "LNG_COMMON_BUTTON_CHECK_ALL": {
+      "translation": "Check all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_UNCHECK_ALL": {
+      "translation": "Uncheck all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_BUTTON_ADD_ANOTHER": {
+      "translation": "Add multiple",
+      "section": "uiCommonLabels"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE": {
+      "translation": "System-wide",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_IS_SYSTEM_WIDE_DESCRIPTION": {
+      "translation": "Applies across all outbreaks",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Allowed reference data",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_ENTRIES_COUNT": {
+      "translation": "System-wide",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_EDIT_NO_CATEGORIES": {
+      "translation": "No categories or category items matched the search criteria",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_LABEL_ADD_NEW_ITEM_UNDER": {
+      "translation": "Add new item under '{{category}}'",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Reference data",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS": {
+      "translation": "Reference data",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_TEMPLATE_COPY_REF_FROM_DISEASE_TOOLTIP": {
+      "translation": "Overwrite outbreak template allowed reference data with those from disease",
+      "section": "uiCreateOutbreakTemplatePage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_TEMPLATE_COPY_REF_FROM_DISEASE_DIALOG": {
+      "translation": "Do you want to overwrite outbreak template allowed reference data with those from '{{disease}}'",
+      "section": "uiCreateOutbreakTemplatePage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_TOOLTIP": {
+      "translation": "Overwrite outbreak allowed reference data with those from disease",
+      "section": "uiCreateOutbreakPage"
+    },
+    "LNG_PAGE_CREATE_OUTBREAK_COPY_REF_FROM_DISEASE_DIALOG": {
+      "translation": "Do you want to overwrite outbreak allowed reference data with those from '{{disease}}'",
+      "section": "uiCreateOutbreakPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_PREPARING": {
+      "translation": "Preparing data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING": {
+      "translation": "Unzipping backup...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_DECRYPTING": {
+      "translation": "Decrypting ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_UNZIPPING_COLLECTIONS": {
+      "translation": "Unzipping collections ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_RESTORING": {
+      "translation": "Restoring ({{no}} / {{total}})",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_MIGRATING": {
+      "translation": "Migrating data...",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_FAILED_ERROR": {
+      "translation": "Backup restore failed. Please check logs for more details",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_PAGE_SYSTEM_BACKUPS_RESTORE_LIST": {
+      "translation": "Backup restores",
+      "section": "uiSystemBackupsPage"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ACTION_START_DATE": {
+      "translation": "Start date / time",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ACTION_COMPLETION_DATE": {
+      "translation": "Completion date / time",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_STATUS": {
+      "translation": "Status",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_BACKUP_ID": {
+      "translation": "Backup",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_STATUS_STEP": {
+      "translation": "Status step",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_PREPARING_RESTORE": {
+      "translation": "Preparing",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_UNZIPPING": {
+      "translation": "Unzipping",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_DECRYPTING": {
+      "translation": "Decrypting",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_UNZIPPING_COLLECTIONS": {
+      "translation": "Unzipping collections",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_RESTORING": {
+      "translation": "Restoring",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_MIGRATING_DATABASE": {
+      "translation": "Migrating",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_STATUS_STEP_RESTORE_FINISHED": {
+      "translation": "Finished",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_PROCESSED": {
+      "translation": "Processed",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_BACKUP_RESTORE_FIELD_LABEL_ERROR": {
+      "translation": "Error",
+      "section": "uiBackupRestoreFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT": {
+      "translation": "Was a contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was a contact of contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT": {
+      "translation": "Date of becoming contact",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_WAS_CASE": {
+      "translation": "Was a case",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CASE": {
+      "translation": "Date of becoming case",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_NUMBER_OF_CONTACTS": {
+      "translation": "Number of contacts",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT": {
+      "translation": "Convert to contact",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT_RELATIONSHIP_WARNING": {
+      "translation": "Contact of contact needs to be exposed to another case or event in order to be able to convert it to a contact",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_CONVERT_TO_CONTACT_SUCCESS_MESSAGE": {
+      "translation": "Contact of contact converted and is now a contact",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
+      "translation": "Are you sure you want to convert contact of contact: '{{name}}' to contact?<br>Note:<br> * All existing relationships will be kept.",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to case?<br>Notes:<br> * All existing relationships will be kept.{{warning}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
+      "translation": "Are you sure you want to convert this case: '{{name}}' to contact?<br>Notes:<br> * All existing relationships will be kept.{{isolatedContacts}}",
+      "section": "uiDialogs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Contact - convert to contact of contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows converting a contact to a contact of contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT": {
+      "translation": "Contact of contact - convert to contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows converting a contact of contact to a contact",
+      "section": "availablePermissions"
+    },
+    "LNG_CONTACT_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was contact of contact",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT": {
+      "translation": "Date of becoming contact of contact",
+      "section": "uiContactFields"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Convert to contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CONTACT_OF_CONTACT_RELATIONSHIP_WARNING": {
+      "translation": "Contact needs to be exposed to another contact in order to be able to convert it to a contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_TO_CASE_CONTACTS_WARNING": {
+      "translation": "<br> * All contacts of contacts will be automatically converted to contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_CONVERT_CONTACT_OF_CONTACT_SUCCESS_MESSAGE": {
+      "translation": "Contact converted and is now a contact of contact",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_CONTACT_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_CASE_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_ISOLATED_CONTACTS": {
+      "translation": "<br> * The following contacts need to be <b>manually exposed</b> to another case or event: ",
+      "section": "uiCasesListPage"
+    },
+    "LNG_CASE_FIELD_LABEL_WAS_CONTACT_OF_CONTACT": {
+      "translation": "Was contact of contact",
+      "section": "uiCaseFields"
+    },
+    "LNG_APP_PAGE_AVAILABLE_ENTITIES_FOR_ADD_EXPOSURE": {
+      "translation": "Available entities",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_LIST_ENTITY_ADD_EXPOSURES_TITLE": {
+      "translation": "Available people",
+      "section": "uiEntityRelationshipsListAddPages"
+    },
+    "LNG_API_ERROR_CODE_INVALID_CONTACT_RELATIONSHIP": {
+      "translation": "Contact needs to be exposed to another contact in order to be able to convert it to a contact of contact",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_API_ERROR_CODE_INVALID_CONTACT_OF_CONTACT_RELATIONSHIP": {
+      "translation": "Contact of contact needs to be exposed to another case or event in order to be able to convert it to a contact",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_OF_CONTACT_INFORMATION": {
+      "translation": "Include contact of contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_CONTACT_OF_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If case was converted from a contact of contact it might contain additional contact of contact data",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CONTACT_OF_CONTACT_INFORMATION": {
+      "translation": "Include contact of contact data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_EXPORT_CONTACT_OF_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If contact was converted from a contact of contact it might contain additional contact of contact data",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CASE_INFORMATION": {
+      "translation": "Include case data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CASE_INFORMATION_DESCRIPTION": {
+      "translation": "If contact of contact was converted from a case it might contain additional case data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CONTACT_INFORMATION": {
+      "translation": "Include contact data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_EXPORT_CONTACT_INFORMATION_DESCRIPTION": {
+      "translation": "If contact of contact was converted from a contact it might contain additional contact data",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_COMMON_LABEL_ALL_OPTIONS_INCLUDED": {
+      "translation": "All options included",
+      "section": "uiCommonLabels"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED": {
+      "translation": "Contact - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_ISOLATED_DESCRIPTION": {
+      "translation": "This permission allows determining which contact of contacts are isolated",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_ISOLATED_CONTACTS": {
+      "translation": "<br> * The following contacts of contacts need to be <b>manually exposed</b> to another contact: ",
+      "section": "uiCasesListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE": {
+      "translation": "Case - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CASE_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting case information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE": {
+      "translation": "Case - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CASE_DESCRIPTION": {
+      "translation": "This permission allows restoring cases in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES": {
+      "translation": "Delete selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_DELETE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to delete selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES": {
+      "translation": "Restore selected cases",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_GROUP_ACTION_RESTORE_SELECTED_CASES_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiCasesListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CASES": {
+      "translation": "Are you sure you want to restore selected cases?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases restored",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_DELETE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting cases and all related data (lab results, isolated contacts, relationships, follow-ups, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_RESTORE_SELECTED_CASES_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring cases and all related data that was deleted along (lab results, isolated contacts, relationships, follow-ups, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiCasesListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT": {
+      "translation": "Contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT": {
+      "translation": "Contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS": {
+      "translation": "Delete selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS": {
+      "translation": "Restore selected contacts",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts restored",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts and all related data (isolated contacts of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts and all related data that was deleted along (isolated contacts of contacts, relationships, follow-ups, lab results...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting contact of contact information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT": {
+      "translation": "Contact of contact - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_CONTACT_OF_CONTACT_DESCRIPTION": {
+      "translation": "This permission allows restoring contacts of contacts in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Delete selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to delete selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS": {
+      "translation": "Restore selected contacts of contacts",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_GROUP_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_CONTACTS_OF_CONTACTS": {
+      "translation": "Are you sure you want to restore selected contacts of contacts?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_SUCCESS_MESSAGE": {
+      "translation": "Contacts of contacts restored",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_DELETE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting contacts of contacts and all related data (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_RESTORE_SELECTED_CONTACTS_OF_CONTACTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring contacts of contacts and all related data that was deleted along (relationships...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT": {
+      "translation": "Event - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting event information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT": {
+      "translation": "Event - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_EVENT_DESCRIPTION": {
+      "translation": "This permission allows restoring events in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS": {
+      "translation": "Delete selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_DELETE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to delete selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS": {
+      "translation": "Restore selected events",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_GROUP_ACTION_RESTORE_SELECTED_EVENTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiEventsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_EVENTS": {
+      "translation": "Are you sure you want to restore selected events?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_SUCCESS_MESSAGE": {
+      "translation": "Events restored",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_DELETE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting events and all related data (isolated contacts, relationships, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
+    },
+    "LNG_PAGE_LIST_EVENTS_ACTION_RESTORE_SELECTED_EVENTS_WAIT_MESSAGE": {
+      "translation": "Please wait..Restoring events and all related data that was deleted along (isolated contacts, relationships, isolated contacts of contacts...)<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiEventsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT": {
+      "translation": "Lab result - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting lab result information",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT": {
+      "translation": "Lab result - bulk restore",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_RESTORE_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows restoring lab results in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_DELETE_SELECTED_LAB_RESULTS": {
+      "translation": "Delete selected lab results",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_DELETE_SELECTED_LAB_RESULTS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_LAB_RESULTS": {
+      "translation": "Are you sure you want to delete selected lab results?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SELECTED_LAB_RESULTS_SUCCESS_MESSAGE": {
+      "translation": "Lab results deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_RESTORE_SELECTED_LAB_RESULTS": {
+      "translation": "Restore selected lab results",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_GROUP_ACTION_RESTORE_SELECTED_LAB_RESULTS_DESCRIPTION": {
+      "translation": "All selected records should be deleted",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_MULTIPLE_LAB_RESULTS": {
+      "translation": "Are you sure you want to restore selected lab results?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_SELECTED_LAB_RESULTS_SUCCESS_MESSAGE": {
+      "translation": "Lab results restored",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_DELETE_SELECTED_LAB_RESULTS_WAIT_MESSAGE": {
+      "translation": "Please wait..<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_LAB_RESULTS_ACTION_RESTORE_SELECTED_LAB_RESULTS_WAIT_MESSAGE": {
+      "translation": "Please wait..<br />{{no}} / {{total}} ({{date}})",
+      "section": "uiLabResultsListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_TEAM": {
+      "translation": "Team",
+      "section": "uiLocationsUsageListPage"
+    },
+    "LNG_PAGE_LIST_USAGE_LOCATIONS_TYPE_LABEL_CONTACT_OF_CONTACTS": {
+      "translation": "Contact of contacts",
+      "section": "uiLocationsUsageListPage"
+    },
+    "LNG_SIDE_FILTERS_LOAD_FILTER_IS_PUBLIC_LABEL": {
+      "translation": "Public",
+      "section": "uiSideFilter"
+    },
+    "LNG_SIDE_FILTERS_SECTION_SORT_TITLE": {
+      "translation": "Sort ({{no}})"
+    },
+    "LNG_SIDE_FILTERS_SECTION_FILTER_TITLE": {
+      "translation": "Filter ({{no}})"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - list relationship contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows listing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - view relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows viewing contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - modify relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows modify contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - delete relationship contact",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows delete contact of contact contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS": {
+      "translation": "Contact of contact - bulk delete contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_CONTACT_OF_CONTACT_RELATIONSHIP_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows deletion of contact of contact contact relationships",
+      "section": "availablePermissions"
+    },
+    "LNG_API_ERROR_CODE_DELETE_CONTACT_LAST_RELATIONSHIP": {
+      "translation": "Cannot delete the last relationship exposure because the person doesn't have an additional relationship exposure.",
+      "modules": [
+        "unauthenticated"
+      ]
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiEventFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiContactFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiEventFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiEventFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiCaseFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_LOCATION": {
+      "translation": "Location",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiFollowUpFields"
+    }
+  }
+}

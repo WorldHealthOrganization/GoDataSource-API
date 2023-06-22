@@ -216,7 +216,7 @@ module.exports = function (Sync) {
                   }
 
                   // cache reference to Loopback's model
-                  let model = app.models[dbSync.collectionsMap[collectionName]];
+                  const model = app.models[dbSync.collectionsMap[collectionName]];
 
                   return fs.readFile(
                     filePath,
@@ -254,8 +254,27 @@ module.exports = function (Sync) {
                               return doneRecord();
                             }
 
+                            // differentiate between different types of person
+                            let syncModel = model;
+                            if (model.modelName === app.models.person.modelName) {
+                              switch (collectionRecord.type) {
+                                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE':
+                                  syncModel = app.models.case;
+                                  break;
+                                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT':
+                                  syncModel = app.models.event;
+                                  break;
+                                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT':
+                                  syncModel = app.models.contact;
+                                  break;
+                                case 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT':
+                                  syncModel = app.models.contactOfContact;
+                                  break;
+                              }
+                            }
+
                             // sync the record with the main database
-                            dbSync.syncRecord(app.logger, model, collectionRecord, reqOptions, (err) => {
+                            dbSync.syncRecord(app, app.logger, syncModel, collectionRecord, reqOptions, (err) => {
                               if (err) {
                                 app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
                                 failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
