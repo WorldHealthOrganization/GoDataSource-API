@@ -1,0 +1,29 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_EMAIL": {
+      "translation": "Email",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_MANUAL_COORDINATES": {
+      "translation": "Coordinates are accurate",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_TYPE": {
+      "translation": "Type",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_DATE": {
+      "translation": "Date",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_CITY": {
+      "translation": "City",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
+      "translation": "Postal code",
+      "section": "uiContactOfContactFields"
+    }
+  }
+}
