@@ -114,6 +114,7 @@ const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
 // relations types
 const RELATION_TYPE = {
   HAS_ONE: 'HAS_ONE',
+  HAS_MANY: 'HAS_MANY',
   GET_ONE: 'GET_ONE'
 };
 
@@ -370,6 +371,87 @@ function exportFilteredModelsList(
                     );
                   }
                 });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.HAS_MANY:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
+                throwError(
+                  relationName,
+                  `invalid key name (${typeof relationData.key})`
+                );
+              }
+
+              // must have keyValues
+              if (
+                !relationData.keyValues ||
+                typeof relationData.keyValues !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid key values (${typeof relationData.keyValues})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValues = eval(relationData.keyValues);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid key values method content'
+                  );
+                }
+              }
+
+              // must have format
+              if (
+                !relationData.format ||
+                typeof relationData.format !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid format (${typeof relationData.format})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.format = eval(relationData.format);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid format method content'
+                  );
+                }
+              }
+
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
 
               // finished
@@ -850,7 +932,8 @@ function exportFilteredModelsList(
             if (
               dataFilter &&
               !_.isEmpty(dataFilter.projection) &&
-              !dataFilter.projection[arrayField]
+              !dataFilter.projection[arrayField] &&
+              typeof modelOptions.arrayProps[arrayField] === 'object'
             ) {
               Object.keys(modelOptions.arrayProps[arrayField]).forEach((arrayFieldProperty) => {
                 if (
@@ -4219,78 +4302,91 @@ function exportFilteredModelsList(
                   // go through each child property and create proper header columns
                   if (sheetHandler.columns.arrayColumnMaxValues[propertyName]) {
                     for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
-                      for (let childProperty in arrayProps[propertyName]) {
-                        // determine child property information
-                        const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
-                          childProperty :
-                          sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+                      if (typeof arrayProps[propertyName] === 'object') {
+                        for (let childProperty in arrayProps[propertyName]) {
+                          // determine child property information
+                          const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
+                            childProperty :
+                            sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
 
-                        // child property contains parent info ?
-                        const propertyOfAnObjectIndex = childProperty.indexOf('.');
-                        if (propertyOfAnObjectIndex > -1) {
-                          // determine parent property
-                          const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
+                          // child property contains parent info ?
+                          const propertyOfAnObjectIndex = childProperty.indexOf('.');
+                          if (propertyOfAnObjectIndex > -1) {
+                            // determine parent property
+                            const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
 
-                          // remove previous column if it was a parent column
-                          if (parentProperty) {
-                            removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            // remove previous column if it was a parent column
+                            if (parentProperty) {
+                              removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            }
+                          }
+
+                          // add columns
+                          const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
+                          const childColumn = addHeaderColumn(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childPathWithoutIndexes,
+                            uuid.v4(),
+                            undefined,
+                            undefined,
+                            !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          );
+
+                          // if location column we need to push some extra columns
+                          if (
+                            sheetHandler.columns.includeParentLocationData &&
+                            sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
+                          ) {
+                            // attach location guid
+                            if (!sheetHandler.dontTranslateValues) {
+                              addHeaderColumn(
+                                `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
+                                childColumn.path,
+                                childColumn.pathWithoutIndexes,
+                                uuid.v4(),
+                                (value) => {
+                                  return value;
+                                },
+                                undefined,
+                                true
+                              );
+                            }
+
+                            // attach location identifiers
+                            attachLocationIdentifiers(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
+                              sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent location geographical level details
+                            attachParentLocationGeographicalLevelDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent locations name details
+                            attachParentLocationsNameDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
                           }
                         }
-
-                        // add columns
-                        const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
-                        const childColumn = addHeaderColumn(
-                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
-                          `${propertyName}[${arrayIndex}].${childProperty}`,
-                          childPathWithoutIndexes,
+                      } else {
+                        // add column
+                        addHeaderColumn(
+                          `${propertyLabelTokenTranslation} [${arrayIndex + 1}]`,
+                          `${propertyName}[${arrayIndex}]`,
+                          `${propertyName}[]`,
                           uuid.v4(),
                           undefined,
                           undefined,
-                          !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          false
                         );
-
-                        // if location column we need to push some extra columns
-                        if (
-                          sheetHandler.columns.includeParentLocationData &&
-                          sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
-                        ) {
-                          // attach location guid
-                          if (!sheetHandler.dontTranslateValues) {
-                            addHeaderColumn(
-                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
-                              childColumn.path,
-                              childColumn.pathWithoutIndexes,
-                              uuid.v4(),
-                              (value) => {
-                                return value;
-                              },
-                              undefined,
-                              true
-                            );
-                          }
-
-                          // attach location identifiers
-                          attachLocationIdentifiers(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
-                            sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent location geographical level details
-                          attachParentLocationGeographicalLevelDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent locations name details
-                          attachParentLocationsNameDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-                        }
                       }
                     }
                   }
@@ -5118,6 +5214,53 @@ function exportFilteredModelsList(
                 // finished
                 break;
 
+              // has many
+              case RELATION_TYPE.HAS_MANY:
+
+                // determine if we have something to retrieve
+                const keyValues = relation.data.keyValues(record);
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  continue;
+                }
+
+                // initialize retrieval if necessary
+                if (!relationsAccumulator[relation.data.collection]) {
+                  relationsAccumulator[relation.data.collection] = {};
+                }
+
+                // specific type of retrieval
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN] = {};
+                }
+
+                // attach request for our key if necessary
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key] = {
+                    relations: {},
+                    values: {}
+                  };
+                }
+
+                // attach relation if necessary, for identification
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name] = {};
+                }
+
+                // map ids
+                keyValues.forEach((keyValue) => {
+                  // map id with our relation
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name][keyValue] = true;
+
+                  // attach value to list of records to retrieve
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].values[keyValue] = true;
+                });
+
+                // finished
+                break;
+
               // get one
               case RELATION_TYPE.GET_ONE:
 
@@ -5458,6 +5601,40 @@ function exportFilteredModelsList(
                 // finished
                 break;
 
+              case RELATION_TYPE.HAS_MANY:
+                // relationship value
+                const keyValues = relation.data.keyValues(record);
+
+                // set value for this relationship
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  record[relation.name] = undefined;
+                } else {
+                  record[relation.name] = [];
+                  keyValues.forEach((keyValue) => {
+                    // nothing to do ?
+                    if (!relationsData[relation.name][keyValue]) {
+                      return;
+                    }
+
+                    // add
+                    record[relation.name].push(relation.data.format(
+                      _.cloneDeep(relationsData[relation.name][keyValue]),
+                      sheetHandler.dontTranslateValues
+                    ));
+                  });
+                }
+
+                // do we have an after method ?
+                if (relation.data.after) {
+                  relation.data.after(record);
+                }
+
+                // finished
+                break;
+
               case RELATION_TYPE.GET_ONE:
                 // set value for this relationship
                 record[relation.name] = relationsData[relation.name][record._id];
@@ -5756,7 +5933,7 @@ function exportFilteredModelsList(
                   // get data
                   const column = sheetHandler.columns.headerColumns[columnIndex];
 
-                  // if column is anonymize then there is no need to retrieve data for this cell
+                  // if column is anonymized then there is no need to retrieve data for this cell
                   if (column.anonymize) {
                     // non flat data ?
                     if (sheetHandler.process.exportIsNonFlat) {
