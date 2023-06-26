@@ -932,7 +932,8 @@ function exportFilteredModelsList(
             if (
               dataFilter &&
               !_.isEmpty(dataFilter.projection) &&
-              !dataFilter.projection[arrayField]
+              !dataFilter.projection[arrayField] &&
+              typeof modelOptions.arrayProps[arrayField] === 'object'
             ) {
               Object.keys(modelOptions.arrayProps[arrayField]).forEach((arrayFieldProperty) => {
                 if (
@@ -4301,78 +4302,91 @@ function exportFilteredModelsList(
                   // go through each child property and create proper header columns
                   if (sheetHandler.columns.arrayColumnMaxValues[propertyName]) {
                     for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
-                      for (let childProperty in arrayProps[propertyName]) {
-                        // determine child property information
-                        const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
-                          childProperty :
-                          sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+                      if (typeof arrayProps[propertyName] === 'object') {
+                        for (let childProperty in arrayProps[propertyName]) {
+                          // determine child property information
+                          const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
+                            childProperty :
+                            sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
 
-                        // child property contains parent info ?
-                        const propertyOfAnObjectIndex = childProperty.indexOf('.');
-                        if (propertyOfAnObjectIndex > -1) {
-                          // determine parent property
-                          const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
+                          // child property contains parent info ?
+                          const propertyOfAnObjectIndex = childProperty.indexOf('.');
+                          if (propertyOfAnObjectIndex > -1) {
+                            // determine parent property
+                            const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
 
-                          // remove previous column if it was a parent column
-                          if (parentProperty) {
-                            removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            // remove previous column if it was a parent column
+                            if (parentProperty) {
+                              removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            }
+                          }
+
+                          // add columns
+                          const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
+                          const childColumn = addHeaderColumn(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childPathWithoutIndexes,
+                            uuid.v4(),
+                            undefined,
+                            undefined,
+                            !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          );
+
+                          // if location column we need to push some extra columns
+                          if (
+                            sheetHandler.columns.includeParentLocationData &&
+                            sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
+                          ) {
+                            // attach location guid
+                            if (!sheetHandler.dontTranslateValues) {
+                              addHeaderColumn(
+                                `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
+                                childColumn.path,
+                                childColumn.pathWithoutIndexes,
+                                uuid.v4(),
+                                (value) => {
+                                  return value;
+                                },
+                                undefined,
+                                true
+                              );
+                            }
+
+                            // attach location identifiers
+                            attachLocationIdentifiers(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
+                              sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent location geographical level details
+                            attachParentLocationGeographicalLevelDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent locations name details
+                            attachParentLocationsNameDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
                           }
                         }
-
-                        // add columns
-                        const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
-                        const childColumn = addHeaderColumn(
-                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
-                          `${propertyName}[${arrayIndex}].${childProperty}`,
-                          childPathWithoutIndexes,
+                      } else {
+                        // add column
+                        addHeaderColumn(
+                          `${propertyLabelTokenTranslation} [${arrayIndex + 1}]`,
+                          `${propertyName}[${arrayIndex}]`,
+                          `${propertyName}[]`,
                           uuid.v4(),
                           undefined,
                           undefined,
-                          !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          false
                         );
-
-                        // if location column we need to push some extra columns
-                        if (
-                          sheetHandler.columns.includeParentLocationData &&
-                          sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
-                        ) {
-                          // attach location guid
-                          if (!sheetHandler.dontTranslateValues) {
-                            addHeaderColumn(
-                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
-                              childColumn.path,
-                              childColumn.pathWithoutIndexes,
-                              uuid.v4(),
-                              (value) => {
-                                return value;
-                              },
-                              undefined,
-                              true
-                            );
-                          }
-
-                          // attach location identifiers
-                          attachLocationIdentifiers(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
-                            sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent location geographical level details
-                          attachParentLocationGeographicalLevelDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent locations name details
-                          attachParentLocationsNameDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-                        }
                       }
                     }
                   }
