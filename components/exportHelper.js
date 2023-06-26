@@ -114,6 +114,7 @@ const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
 // relations types
 const RELATION_TYPE = {
   HAS_ONE: 'HAS_ONE',
+  HAS_MANY: 'HAS_MANY',
   GET_ONE: 'GET_ONE'
 };
 
@@ -370,6 +371,87 @@ function exportFilteredModelsList(
                     );
                   }
                 });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.HAS_MANY:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
+                throwError(
+                  relationName,
+                  `invalid key name (${typeof relationData.key})`
+                );
+              }
+
+              // must have keyValues
+              if (
+                !relationData.keyValues ||
+                typeof relationData.keyValues !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid key values (${typeof relationData.keyValues})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValues = eval(relationData.keyValues);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid key values method content'
+                  );
+                }
+              }
+
+              // must have format
+              if (
+                !relationData.format ||
+                typeof relationData.format !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid format (${typeof relationData.format})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.format = eval(relationData.format);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid format method content'
+                  );
+                }
+              }
+
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
 
               // finished
@@ -5118,6 +5200,53 @@ function exportFilteredModelsList(
                 // finished
                 break;
 
+              // has many
+              case RELATION_TYPE.HAS_MANY:
+
+                // determine if we have something to retrieve
+                const keyValues = relation.data.keyValues(record);
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  continue;
+                }
+
+                // initialize retrieval if necessary
+                if (!relationsAccumulator[relation.data.collection]) {
+                  relationsAccumulator[relation.data.collection] = {};
+                }
+
+                // specific type of retrieval
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN] = {};
+                }
+
+                // attach request for our key if necessary
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key] = {
+                    relations: {},
+                    values: {}
+                  };
+                }
+
+                // attach relation if necessary, for identification
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name] = {};
+                }
+
+                // map ids
+                keyValues.forEach((keyValue) => {
+                  // map id with our relation
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name][keyValue] = true;
+
+                  // attach value to list of records to retrieve
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].values[keyValue] = true;
+                });
+
+                // finished
+                break;
+
               // get one
               case RELATION_TYPE.GET_ONE:
 
@@ -5449,6 +5578,40 @@ function exportFilteredModelsList(
                 record[relation.name] = relationsData[relation.name][keyValue] ?
                   _.cloneDeep(relationsData[relation.name][keyValue]) :
                   undefined;
+
+                // do we have an after method ?
+                if (relation.data.after) {
+                  relation.data.after(record);
+                }
+
+                // finished
+                break;
+
+              case RELATION_TYPE.HAS_MANY:
+                // relationship value
+                const keyValues = relation.data.keyValues(record);
+
+                // set value for this relationship
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  record[relation.name] = undefined;
+                } else {
+                  record[relation.name] = [];
+                  keyValues.forEach((keyValue) => {
+                    // nothing to do ?
+                    if (!relationsData[relation.name][keyValue]) {
+                      return;
+                    }
+
+                    // add
+                    record[relation.name].push(relation.data.format(
+                      _.cloneDeep(relationsData[relation.name][keyValue]),
+                      sheetHandler.dontTranslateValues
+                    ));
+                  });
+                }
 
                 // do we have an after method ?
                 if (relation.data.after) {
