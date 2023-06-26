@@ -5919,7 +5919,7 @@ function exportFilteredModelsList(
                   // get data
                   const column = sheetHandler.columns.headerColumns[columnIndex];
 
-                  // if column is anonymize then there is no need to retrieve data for this cell
+                  // if column is anonymized then there is no need to retrieve data for this cell
                   if (column.anonymize) {
                     // non flat data ?
                     if (sheetHandler.process.exportIsNonFlat) {
