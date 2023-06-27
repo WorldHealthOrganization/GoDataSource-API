@@ -24,6 +24,10 @@
     "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
       "translation": "Postal code",
       "section": "uiContactOfContactFields"
+    },
+    "LNG_COMMON_BUTTON_ALL_BECAUSE_NONE_SELECTED": {
+      "translation": "If you don't check any options for a category then all options from that category will be visible",
+      "section": "uiCommonButtons"
     }
   }
 }
