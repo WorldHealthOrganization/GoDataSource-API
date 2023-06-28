@@ -14,7 +14,8 @@
       "id": true,
       "defaultFn": "uuidv4",
       "readOnly": true,
-      "unique": true
+      "unique": true,
+      "safeForImport": true
     },
     "name": {
       "type": "string",

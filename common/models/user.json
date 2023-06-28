@@ -18,7 +18,8 @@
       "id": true,
       "defaultFn": "uuidv4",
       "readOnly": true,
-      "unique": true
+      "unique": true,
+      "safeForImport": true
     },
     "firstName": {
       "type": "string",
@@ -104,16 +105,16 @@
     }
   },
   "mixins": {
-    "ReadOnlyProperty": true,
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
+    "PlatformStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
+    "ReadOnlyProperty": true,
     "AttachController": true,
     "IncludeCustomRelations": true,
     "DateProperty": true,
-    "RawFind": true,
-    "PlatformStamp": true
+    "RawFind": true
   },
   "validations": [],
   "relations": {
