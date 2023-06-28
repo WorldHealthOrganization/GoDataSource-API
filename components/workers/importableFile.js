@@ -53,7 +53,9 @@ const worker = {
       relationship: './../baseModelOptions/relationship',
       referenceData: './../baseModelOptions/referenceData',
       location: './../baseModelOptions/location',
-      user: './../baseModelOptions/user'
+      user: './../baseModelOptions/user',
+      role: './../baseModelOptions/role',
+      team: './../baseModelOptions/team'
     };
 
     if (!dataTypeToFormatterMap[options.dataType]) {
