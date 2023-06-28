@@ -26,8 +26,12 @@
       "section": "uiContactOfContactFields"
     },
     "LNG_COMMON_BUTTON_ALL_BECAUSE_NONE_SELECTED": {
-      "translation": "If you don't check any options for a category then all options from that category will be visible",
+      "translation": "If you don't check at least one option for a category then all options from that category will be visible",
       "section": "uiCommonButtons"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT": {
+      "translation": "Date of becoming contact of contact",
+      "section": "uiContactOfContactFields"
     }
   }
 }
