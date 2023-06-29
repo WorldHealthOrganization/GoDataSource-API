@@ -32,6 +32,10 @@
     "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_DATE_BECOME_CONTACT_OF_CONTACT": {
       "translation": "Date of becoming contact of contact",
       "section": "uiContactOfContactFields"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiLabResultsFields"
     }
   }
 }
