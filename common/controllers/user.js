@@ -205,29 +205,25 @@ module.exports = function (User) {
         .then((accessToken) => {
           // send email
           app.models.user.sendEmail({
-              email: ctx.instance.email,
-              user: ctx.instance,
-              accessToken: accessToken
-            }
-          );
+            email: ctx.instance.email,
+            user: ctx.instance,
+            accessToken: accessToken
+          });
 
           // disable forceResetPassword
           return ctx.instance.updateAttributes({
             passwordChange: false,
             forceResetPassword: false
           });
-          //c.then(() => next());
         })
         .catch((err) => {
           app.logger.warn('Failed to generate reset password token', err);
-          return buildError('PASSWORD_RECOVERY_FAILED');
-          return next(err);
         });
     }
     next();
   });
 
-    /**
+  /**
    * Hook before user/login method
    */
   User.beforeRemote('login', (ctx, modelInstance, next) => {
@@ -952,11 +948,11 @@ module.exports = function (User) {
 
       // get the logged user
       const loggedUser = options &&
-        options.remotingContext &&
-        options.remotingContext.req &&
-        options.remotingContext.req.authData ?
-          options.remotingContext.req.authData.user :
-          undefined;
+      options.remotingContext &&
+      options.remotingContext.req &&
+      options.remotingContext.req.authData ?
+        options.remotingContext.req.authData.user :
+        undefined;
 
       // go through all entries
       batchData.forEach(function (userItem) {

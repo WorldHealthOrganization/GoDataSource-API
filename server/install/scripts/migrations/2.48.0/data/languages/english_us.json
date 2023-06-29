@@ -24,6 +24,86 @@
     "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_ADDRESS_POSTAL_CODE": {
       "translation": "Postal code",
       "section": "uiContactOfContactFields"
+    },
+    "LNG_USER_FIELD_LABEL_SETTINGS": {
+      "translation": "Settings",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS": {
+      "translation": "Security questions",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_LOGIN_RETRIES_COUNT": {
+      "translation": "Login retries count",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
+      "translation": "Last login date",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_RESET_PASSWORD_RETRIES_COUNT": {
+      "translation": "Reset password retries count",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
+      "translation": "Last reset password date",
+      "section": "uiUserFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM": {
+      "translation": "Team - export",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM_DESCRIPTION": {
+      "translation": "This permission allows exporting teams",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_TEAM": {
+      "translation": "Team - import",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_TEAM_DESCRIPTION": {
+      "translation": "This permission allows importing teams",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER_ROLE": {
+      "translation": "Role - export",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER_ROLE_DESCRIPTION": {
+      "translation": "This permission allows exporting roles",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_ROLE": {
+      "translation": "Role - import",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_ROLE_DESCRIPTION": {
+      "translation": "This permission allows importing roles",
+      "section": "availablePermissions"
+    },
+    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_UUID": {
+      "translation": "ID",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_NAME": {
+      "translation": "Name",
+      "section": "uiUserFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION": {
+      "translation": "Password reset",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION": {
+      "translation": "<h1>Instructions for changing your Go.Data password</h1>Hello {{name}}!<br><br>Forgot your password?<br><br>To reset your password please follow the link below:<br><br>{{resetPasswordLink}}<br><br>If you suspect someone may have unauthorised access to your account, we suggest you change your password as a precaution by visiting {{changePasswordLink}}.<br><br>Thanks,<br><br>Go.Data Team",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_IMPORT_ACTION": {
+      "translation": "Password reset",
+      "section": "passwordReset"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION": {
+      "translation": "<h1>Instructions for changing your Go.Data password</h1>Hello {{name}}!<br><br>Your user account has been successfully migrated to new system. In order to ensure the security of your account and maintain a high level of data protection, it is necessary for you to reset your password. This is a standard procedure that helps safeguard your personal information and prevents any unauthorized access.<br><br>To reset your password please follow the link below:<br><br>{{resetPasswordLink}}<br><br>If you suspect someone may have unauthorised access to your account, we suggest you change your password as a precaution by visiting {{changePasswordLink}}.<br><br>Thanks,<br><br>Go.Data Team",
+      "section": "passwordReset"
     }
   }
 }

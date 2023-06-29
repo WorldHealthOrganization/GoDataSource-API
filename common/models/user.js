@@ -2,8 +2,6 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
-const path = require('path');
-const fs = require('fs');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const Config = require('./../../server/config.json');
@@ -348,12 +346,12 @@ module.exports = function (User) {
       !info.user ||
       !info.user.languageId
     ) {
-      app.logger.error(`No valid user data to send email`);
+      app.logger.error('No valid user data to send email');
       return false;
     }
 
     // load user language dictionary
-    app.models.language.getLanguageDictionary(info.user.languageId, function (error, dictionary) {
+    app.models.language.getLanguageDictionary(info.user.languageId, function (error) {
       if (error) {
         app.logger.error(`Failed to retrieve tokens for the following language: ${info.user.languageId}`);
         return false;
@@ -415,9 +413,9 @@ module.exports = function (User) {
 
           // resolve variables from translations
           emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
-              name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
-              changePasswordLink: changePasswordLink,
-              resetPasswordLink: resetPasswordLink
+            name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
+            changePasswordLink: changePasswordLink,
+            resetPasswordLink: resetPasswordLink
           });
 
           // send email
@@ -436,7 +434,7 @@ module.exports = function (User) {
    */
   User.sendEmail = function (info) {
     User.createAndSendEmail(info);
-  }
+  };
 
   /**
    * Send password reset email
