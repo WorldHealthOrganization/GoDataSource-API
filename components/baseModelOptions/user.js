@@ -35,7 +35,16 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
     helpers.DATA_TYPE.DATE
   );
 
-  // add relationship entry in the processed list
+  // check language
+  if (
+    !formattedData.languageId ||
+    !options.availableLanguages ||
+    !options.availableLanguages[formattedData.languageId]
+  ) {
+    formattedData.languageId = helpers.DEFAULT_LANGUAGE;
+  }
+
+  // add user entry in the processed list
   formattedDataContainer.push({
     raw: item,
     save: formattedData

@@ -26,6 +26,10 @@ const DATA_TYPE = {
   DATE: 'Date'
 };
 
+// default language - in case we don't have user language
+// - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
+const DEFAULT_LANGUAGE = 'english_us';
+
 const arrayFields = {
   'addresses': 'address',
   'address': 'address',
@@ -2863,5 +2867,6 @@ Object.assign(module.exports, {
   fillGeoLocationInformation,
   countPeopleContactsAndExposures,
   randomString,
-  DATA_TYPE: DATA_TYPE
+  DATA_TYPE: DATA_TYPE,
+  DEFAULT_LANGUAGE: DEFAULT_LANGUAGE,
 });

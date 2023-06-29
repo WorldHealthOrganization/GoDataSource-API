@@ -22,8 +22,15 @@ module.exports = function (Model) {
     // store a list of importable properties
     let importableProperties = [];
     Model.forEachProperty(function (propertyName) {
-      // don't include hidden properties
-      if (!Array.isArray(Model.definition.settings.hidden) || !Model.definition.settings.hidden.includes(propertyName)) {
+      // include hidden properties only if they marked as safe for import
+      if (
+        !Array.isArray(Model.definition.settings.hidden) ||
+        !Model.definition.settings.hidden.includes(propertyName) || (
+          Model.safeForImportHiddenFields &&
+          Array.isArray(Model.safeForImportHiddenFields) &&
+          Model.safeForImportHiddenFields.includes(propertyName)
+        )
+      ) {
         // non-readOnly properties are importable
         // readOnly properties are importable only if marked as safe for import
         if (
