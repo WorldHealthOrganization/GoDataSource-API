@@ -1269,7 +1269,8 @@ const includeSubLocationsInLocationFilter = function (
               const customLocationFilters = [
                 'usualPlaceOfResidenceLocationId',
                 'deathLocationId',
-                'burialLocationId'
+                'burialLocationId',
+                'locationIds'
               ];
               let propertyReplaced = false;
               customLocationFilters.forEach((customLocationField) => {
