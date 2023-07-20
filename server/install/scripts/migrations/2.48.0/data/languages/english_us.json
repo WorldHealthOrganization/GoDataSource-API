@@ -36,6 +36,10 @@
     "LNG_LAB_RESULT_FIELD_LABEL_DELETED_AT": {
       "translation": "Deleted at",
       "section": "uiLabResultsFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiOutbreakFields"
     }
   }
 }
