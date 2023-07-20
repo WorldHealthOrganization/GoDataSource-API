@@ -40,6 +40,22 @@
     "LNG_OUTBREAK_FIELD_LABEL_DELETED_AT": {
       "translation": "Deleted at",
       "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiOutbreakTemplateFields"
     }
   }
 }
