@@ -88,6 +88,22 @@
     "LNG_USER_FIELD_LABEL_UPDATED_AT": {
       "translation": "Updated at (UTC)",
       "section": "uiUserFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiUserRoleFields"
     }
   }
 }
