@@ -478,6 +478,12 @@ module.exports = function (ExtendedPersistedModel) {
               id: {
                 inq: Object.keys(userIds)
               }
+            },
+            fields: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
             }
           })
           .then((users) => {
