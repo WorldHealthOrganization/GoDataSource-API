@@ -883,6 +883,30 @@ module.exports = function (User) {
   };
 
   /**
+   * Find for filters
+   */
+  User.findForFilters = function (where, callback) {
+    app.models.user
+      .find({
+        where: where || {},
+        fields: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true
+        },
+        order: ['firstName ASC', 'lastName ASC']
+      })
+      .then((users) => {
+        callback(
+          null,
+          users
+        );
+      })
+      .catch(callback);
+  };
+
+  /**
    * Two-factor authentication step 2
    * @param data
    * @param options
