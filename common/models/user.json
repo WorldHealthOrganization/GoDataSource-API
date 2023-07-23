@@ -173,7 +173,7 @@
       "principalType": "ROLE",
       "principalId": "user_list_for_filters",
       "permission": "ALLOW",
-      "property": "find"
+      "property": "findForFilters"
     },
     {
       "principalType": "ROLE",
@@ -247,6 +247,33 @@
         "verb": "post",
         "path": "/reset-password-with-security-question"
       }
+    },
+    "findForFilters": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "users",
+          "type": [
+            "user"
+          ],
+          "description": "List of users that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries users with limited information.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/for-filters"
+        }
+      ]
     },
     "exportFilteredUsers": {
       "accepts": [

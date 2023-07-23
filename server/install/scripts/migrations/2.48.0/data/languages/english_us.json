@@ -37,6 +37,74 @@
       "translation": "Deleted at",
       "section": "uiLabResultsFields"
     },
+    "LNG_OUTBREAK_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_CLUSTER_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiClusterFields"
+    },
+    "LNG_CLUSTER_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiClusterFields"
+    },
+    "LNG_CLUSTER_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiClusterFields"
+    },
+    "LNG_CLUSTER_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiClusterFields"
+    },
+    "LNG_USER_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at (UTC)",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at (UTC)",
+      "section": "uiUserRoleFields"
+    },
     "LNG_USER_FIELD_LABEL_SETTINGS": {
       "translation": "Settings",
       "section": "uiUserFields"
