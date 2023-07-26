@@ -729,6 +729,23 @@ module.exports = function (FollowUp) {
       // cleanup
       delete filter.where.case;
     }
+
+    // get contact-of-contact query, if any
+    let contactOfContactQuery = _.get(filter, 'where.contactOfContact');
+    // if found, remove it form main query
+    if (contactOfContactQuery) {
+      // replace nested geo points filters
+      contactOfContactQuery = app.utils.remote.convertNestedGeoPointsFilterToMongo(
+        app.models.contactOfContact,
+        contactOfContactQuery || {},
+        true,
+        undefined,
+        true
+      );
+
+      // cleanup
+      delete filter.where.contactOfContact;
+    }
     // get contact query, if any
     let contactQuery = _.get(filter, 'where.contact');
     // if found, remove it form main query
@@ -759,7 +776,7 @@ module.exports = function (FollowUp) {
     }
     // get main followUp query
     let followUpQuery = _.get(filter, 'where', {});
-    let contactIds;
+    let contactMap = {};
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
     // if a case query is present
@@ -790,22 +807,78 @@ module.exports = function (FollowUp) {
                     $in: caseIds
                   }
                 }, {
-                  projection: {persons: 1}
+                  projection: {
+                    persons: 1
+                  },
+                  // required to use index to improve greatly performance
+                  hint: {
+                    'persons.id': 1
+                  }
                 });
             })
             .then(function (relationships) {
               // build a list of contact ids from the found relations
-              contactIds = [];
               relationships.forEach(function (relation) {
                 relation.persons.forEach(function (person) {
                   if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                    contactIds.push(person.id);
+                    contactMap[person.id] = true;
                   }
                 });
               });
             });
         });
     }
+
+    // if a contact of contact query is present
+    if (contactOfContactQuery) {
+      // restrict query to current outbreak
+      contactOfContactQuery = {
+        $and: [
+          contactOfContactQuery,
+          {
+            outbreakId: outbreak.id
+          }
+        ]
+      };
+      // filter contact of contacts based on query
+      buildQuery = buildQuery
+        .then(function () {
+          return app.models.contactOfContact
+            .rawFind(contactOfContactQuery, {projection: {_id: 1}})
+            .then(function (contactOfContacts) {
+              // build a list of contactOfContact ids that passed the filter
+              const contactOfContactIds = contactOfContacts.map(contactOfContactRecord => contactOfContactRecord.id);
+              // find relations with contacts for those contact of contacts
+              return app.models.relationship
+                .rawFind({
+                  outbreakId: outbreak.id,
+                  'persons.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.id': {
+                    $in: contactOfContactIds
+                  }
+                }, {
+                  projection: {
+                    persons: 1
+                  },
+                  // required to use index to improve greatly performance
+                  hint: {
+                    'persons.id': 1
+                  }
+                });
+            })
+            .then(function (relationships) {
+              // build a list of contact ids from the found relations
+              relationships.forEach(function (relation) {
+                relation.persons.forEach(function (person) {
+                  if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                    contactMap[person.id] = true;
+                  }
+                });
+              });
+            });
+        });
+    }
+
     // if time last seen filter is present
     if (timeLastSeen != null) {
       buildQuery = buildQuery
@@ -842,7 +915,8 @@ module.exports = function (FollowUp) {
     return buildQuery
       .then(function () {
         // if contact Ids were specified
-        if (contactIds) {
+        const contactIds = Object.keys(contactMap);
+        if (contactIds.length) {
           // make sure there is a contact query
           if (!contactQuery) {
             contactQuery = {};

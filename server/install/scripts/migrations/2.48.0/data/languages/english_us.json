@@ -105,6 +105,29 @@
       "translation": "Updated at (UTC)",
       "section": "uiUserRoleFields"
     },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
+      "translation": "* This person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a contact",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_REGISTERED_AS_CONTACT_MESSAGE": {
+      "translation": "* You cannot edit the follow-up because this person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a contact",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiContactOfContactListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_OF_CONTACT_BUTTON": {
+      "translation": "Contact of contact",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_LABEL_CONTACT": {
+      "translation": "Exposed to contact",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_DESCRIPTION": {
+      "translation": "<div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Pending]:</span><span> this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete no / total]:</span><span> the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete:]</span><span> all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Incomplete no / total]:</span><span> the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Handled above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Completed above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
+    },
     "LNG_USER_FIELD_LABEL_SETTINGS": {
       "translation": "Settings",
       "section": "uiUserFields"
