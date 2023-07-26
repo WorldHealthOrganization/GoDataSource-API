@@ -776,7 +776,7 @@ module.exports = function (FollowUp) {
     }
     // get main followUp query
     let followUpQuery = _.get(filter, 'where', {});
-    let contactIds = [];
+    let contactMap = {};
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
     // if a case query is present
@@ -821,7 +821,7 @@ module.exports = function (FollowUp) {
               relationships.forEach(function (relation) {
                 relation.persons.forEach(function (person) {
                   if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                    contactIds.push(person.id);
+                    contactMap[person.id] = true;
                   }
                 });
               });
@@ -871,7 +871,7 @@ module.exports = function (FollowUp) {
               relationships.forEach(function (relation) {
                 relation.persons.forEach(function (person) {
                   if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
-                    contactIds.push(person.id);
+                    contactMap[person.id] = true;
                   }
                 });
               });
@@ -915,6 +915,7 @@ module.exports = function (FollowUp) {
     return buildQuery
       .then(function () {
         // if contact Ids were specified
+        const contactIds = Object.keys(contactMap);
         if (contactIds.length) {
           // make sure there is a contact query
           if (!contactQuery) {
