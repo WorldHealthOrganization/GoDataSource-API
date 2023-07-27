@@ -495,7 +495,7 @@ module.exports = function (User) {
       collectionName: 'outbreak',
       labelProperty: 'name'
     }
-  }
+  };
 
   User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
