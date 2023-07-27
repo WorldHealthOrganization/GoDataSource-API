@@ -184,8 +184,8 @@
       "translation": "This permission allows importing roles",
       "section": "availablePermissions"
     },
-    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_UUID": {
-      "translation": "ID",
+    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_IMPORT_MAP": {
+      "translation": "Active outbreak Name",
       "section": "uiUserFields"
     },
     "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_NAME": {

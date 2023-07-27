@@ -488,6 +488,15 @@ module.exports = function (User) {
     }
   };
 
+  // used on importable file logic
+  User.foreignKeyFields = {
+    'activeOutbreakId': {
+      modelName: 'outbreak',
+      collectionName: 'outbreak',
+      labelProperty: 'name'
+    }
+  }
+
   User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
@@ -502,8 +511,9 @@ module.exports = function (User) {
     lastName: 'LNG_USER_FIELD_LABEL_LAST_NAME',
     languageId: 'LNG_LAYOUT_LANGUAGE_LABEL',
     password: 'LNG_COMMON_FIELD_LABEL_PASSWORD',
+    activeOutbreakId: 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_IMPORT_MAP', // required for import map
     'activeOutbreak': 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK',
-    'activeOutbreak.id': 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_UUID',
+    'activeOutbreak.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     'activeOutbreak.name': 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_NAME',
     institutionName: 'LNG_USER_FIELD_LABEL_INSTITUTION_NAME',
     telephoneNumbers: 'LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS',
