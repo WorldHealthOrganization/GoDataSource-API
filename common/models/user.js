@@ -469,8 +469,13 @@ module.exports = function (User) {
   ];
 
   User.arrayProps = {
-    roleIds: true,
-    outbreakIds: true
+    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
+    securityQuestions: {
+      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+      'question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
+      'answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER'
+    }
   };
 
   User.foreignKeyResolverMap = {
@@ -497,15 +502,6 @@ module.exports = function (User) {
     }
   };
 
-  User.arrayProps = {
-    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
-    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
-    securityQuestions: {
-      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-      'question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
-      'answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER'
-    }
-  };
 
   User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
