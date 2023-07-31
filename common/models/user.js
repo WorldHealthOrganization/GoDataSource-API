@@ -350,83 +350,75 @@ module.exports = function (User) {
       return false;
     }
 
-    // load user language dictionary
-    app.models.language.getLanguageDictionary(info.user.languageId, function (error) {
-      if (error) {
-        app.logger.error(`Failed to retrieve tokens for the following language: ${info.user.languageId}`);
-        return false;
-      }
+    // get email tokens
+    const emailSubjectToken = importAction ?
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_IMPORT_ACTION' :
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION';
+    const emailBodyToken = importAction ?
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION' :
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION';
 
-      // get email tokens
-      const emailSubjectToken  = importAction ?
-        'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_IMPORT_ACTION':
-        'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION';
-      const emailBodyToken  = importAction ?
-        'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION':
-        'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION';
+    // get tokens
+    app.models.languageToken
+      .rawFind({
+        languageId: info.user.languageId,
+        token: {
+          $in: [
+            emailSubjectToken,
+            emailBodyToken
+          ]
+        }
+      }, {
+        projection: {
+          token: 1,
+          translation: 1
+        }
+      })
+      .then((tokens) => {
+        // no valid tokens ?
+        if (
+          !tokens ||
+          tokens.length !== 2
+        ) {
+          app.logger.error(`No valid tokens found for the following language: ${info.user.languageId}`);
+          return;
+        }
 
-      // get tokens
-      app.models.languageToken
-        .rawFind({
-          languageId: info.user.languageId,
-          token: {
-            $in: [
-              emailSubjectToken,
-              emailBodyToken
-            ]
-          }
-        }, {
-          projection: {
-            token: 1,
-            translation: 1
-          }
-        })
-        .then((tokens) => {
-          // no valid tokens ?
-          if (
-            !tokens ||
-            tokens.length !== 2
-          ) {
-            app.logger.error(`No valid tokens found for the following language: ${info.user.languageId}`);
-            return;
-          }
+        // get the config settings
+        const passwordChangePath = _.get(Config, 'passwordChange.path', '/account/change-password');
+        const publicHost = _.get(Config, 'public.host', 'localhost');
+        const publicProtocol = _.get(Config, 'public.protocol', 'http');
+        const publicPort = _.get(Config, 'public.port', '');
+        let changePasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordChangePath}`;
+        changePasswordLink = `<a href="${changePasswordLink}">${changePasswordLink}</a>`;
+        const passwordResetPath = _.get(Config, 'passwordReset.path', '/auth/reset-password');
+        const passwordResetFrom = _.get(Config, 'passwordReset.from', 'no-reply@who.int');
+        let resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
+        resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
 
-          // get the config settings
-          const passwordChangePath  = _.get(Config, 'passwordChange.path', '/account/change-password');
-          const publicHost  = _.get(Config, 'public.host', 'localhost');
-          const publicProtocol  = _.get(Config, 'public.protocol', 'http');
-          const publicPort  = _.get(Config, 'public.port', '');
-          let changePasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordChangePath}`;
-          changePasswordLink = `<a href="${changePasswordLink}">${changePasswordLink}</a>`;
-          const passwordResetPath = _.get(Config, 'passwordReset.path', '/auth/reset-password');
-          const passwordResetFrom = _.get(Config, 'passwordReset.from', 'no-reply@who.int');
-          let resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
-          resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
+        // get translations
+        const emailSubject = tokens[0].token === emailSubjectToken ?
+          tokens[0].translation :
+          tokens[1].translation;
+        let emailBody = tokens[0].token === emailBodyToken ?
+          tokens[0].translation :
+          tokens[1].translation;
 
-          // get translations
-          const emailSubject = tokens[0].token === emailSubjectToken ?
-            tokens[0].translation :
-            tokens[1].translation;
-          let emailBody = tokens[0].token === emailBodyToken ?
-            tokens[0].translation :
-            tokens[1].translation;
-
-          // resolve variables from translations
-          emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
-            name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
-            changePasswordLink: changePasswordLink,
-            resetPasswordLink: resetPasswordLink
-          });
-
-          // send email
-          app.models.Email.send({
-            to: info.email,
-            from: passwordResetFrom,
-            subject: emailSubject,
-            html: emailBody
-          });
+        // resolve variables from translations
+        emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
+          name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
+          changePasswordLink: changePasswordLink,
+          resetPasswordLink: resetPasswordLink
         });
-    });
+
+        // send email
+        app.models.Email.send({
+          to: info.email,
+          from: passwordResetFrom,
+          subject: emailSubject,
+          html: emailBody
+        });
+      });
   };
 
   /**
