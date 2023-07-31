@@ -2041,6 +2041,34 @@
         }
       ]
     },
+    "count": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of outbreaks that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Count outbreaks.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/count"
+        },
+        {
+          "verb": "post",
+          "path": "/count"
+        }
+      ]
+    },
     "prototype.findCaseRelationships": {
       "accepts": [
         {
