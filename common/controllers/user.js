@@ -910,8 +910,31 @@ module.exports = function (User) {
             return item && item.activeOutbreakId ?
               item.activeOutbreakId :
               undefined;
-          }`
+          }`,
+          replace: {
+            'activeOutbreakId': {
+              value: 'activeOutbreak.name'
+            }
+          }
         },
+        language: {
+          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          collection: 'language',
+          project: [
+            'name'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.languageId ?
+              item.languageId :
+              undefined;
+          }`,
+          replace: {
+            'languageId': {
+              value: 'language.name'
+            }
+          }
+        }
       })
       .then((exportData) => {
         // send export id further

@@ -184,14 +184,6 @@
       "translation": "This permission allows importing roles",
       "section": "availablePermissions"
     },
-    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_IMPORT_MAP": {
-      "translation": "Active outbreak Name",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK_NAME": {
-      "translation": "Name",
-      "section": "uiUserFields"
-    },
     "LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION": {
       "translation": "Password reset",
       "section": "passwordReset"
@@ -273,7 +265,7 @@
       "section": "uiUserRoleFields"
     },
     "LNG_PAGE_LIST_USER_ROLES_IMPORT_BUTTON": {
-      "translation": "Export role data",
+      "translation": "Import role data",
       "section": "uiUserRoleFields"
     },
     "LNG_PAGE_LIST_USER_ROLES_EXPORT_TITLE": {
