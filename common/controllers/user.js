@@ -63,15 +63,21 @@ module.exports = function (User) {
       // force to change the password
       if (ctx.isNewInstance) {
         // create user
-        if (ctx.instance && !ctx.instance.password) {
+        if (ctx.instance) {
+          // force reset password always and create a new password if it's not provided
           ctx.instance.forceResetPassword = true;
-          ctx.instance.password = randomPassword;
+          if (!ctx.instance.password) {
+            ctx.instance.password = randomPassword;
+          }
         }
       } else {
         // update user
-        if (ctx.data && !ctx.data.password) {
-          ctx.instance.forceResetPassword = true;
-          ctx.data.password = randomPassword;
+        if (ctx.data) {
+          // force reset password always and create a new password if it's not provided
+          ctx.data.forceResetPassword = true;
+          if (!ctx.data.password) {
+            ctx.data.password = randomPassword;
+          }
         }
       }
     }
