@@ -2011,6 +2011,36 @@
     }
   ],
   "methods": {
+    "find": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreaks",
+          "type": [
+            "outbreak"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get outbreaks.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/"
+        },
+        {
+          "verb": "post",
+          "path": "/filter"
+        }
+      ]
+    },
     "prototype.findCaseRelationships": {
       "accepts": [
         {
