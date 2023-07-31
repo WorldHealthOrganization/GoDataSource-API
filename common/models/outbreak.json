@@ -2011,6 +2011,64 @@
     }
   ],
   "methods": {
+    "find": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "outbreaks",
+          "type": [
+            "outbreak"
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get outbreaks.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/"
+        },
+        {
+          "verb": "post",
+          "path": "/filter"
+        }
+      ]
+    },
+    "count": {
+      "accepts": [
+        {
+          "arg": "where",
+          "type": "object",
+          "description": "Criteria to match model instances"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of outbreaks that match the search criteria",
+          "required": true
+        }
+      ],
+      "description": "Count outbreaks.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/count"
+        },
+        {
+          "verb": "post",
+          "path": "/count"
+        }
+      ]
+    },
     "prototype.findCaseRelationships": {
       "accepts": [
         {
