@@ -284,6 +284,14 @@
       "translation": "Security questions",
       "section": "uiUserFields"
     },
+    "LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION": {
+      "translation": "Question",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER": {
+      "translation": "Answer",
+      "section": "uiUserFields"
+    },
     "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
       "translation": "Last login date",
       "section": "uiUserFields"

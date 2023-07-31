@@ -3911,6 +3911,10 @@ module.exports = function (Role) {
     'id'
   ];
 
+  Role.arrayProps = {
+    permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS'
+  };
+
   Role.fieldLabelsMap = Object.assign({}, Role.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',

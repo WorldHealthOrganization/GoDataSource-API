@@ -497,6 +497,16 @@ module.exports = function (User) {
     }
   };
 
+  User.arrayProps = {
+    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
+    securityQuestions: {
+      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+      'question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
+      'answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER'
+    }
+  };
+
   User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
@@ -519,6 +529,9 @@ module.exports = function (User) {
     outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
     disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS',
     securityQuestions: 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS',
+    'securityQuestions[].id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'securityQuestions[].question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
+    'securityQuestions[].answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER',
     lastLoginDate: 'LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE',
     lastResetPasswordDate: 'LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE',
     dontCacheFilters: 'LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS'

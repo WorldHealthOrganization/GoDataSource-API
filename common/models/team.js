@@ -51,6 +51,11 @@ module.exports = function (Team) {
     'id'
   ];
 
+  Team.arrayProps = {
+    userIds: 'LNG_TEAM_FIELD_LABEL_USERS',
+    locationIds: 'LNG_TEAM_FIELD_LABEL_LOCATIONS'
+  };
+
   Team.fieldLabelsMap = Object.assign({}, Team.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
