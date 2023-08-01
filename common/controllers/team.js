@@ -160,7 +160,6 @@ module.exports = function (Team) {
     // create a transaction logger as the one on the req will be destroyed once the response is sent
     const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
 
-
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
 
@@ -222,8 +221,7 @@ module.exports = function (Team) {
     // start import
     importableFile.processImportableFileData(app, {
       modelName: app.models.team.modelName,
-      logger: logger,
-      parallelActionsLimit: 10
+      logger: logger
     }, formatterOptions, createBatchActions, callback);
   };
 };

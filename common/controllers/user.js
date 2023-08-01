@@ -959,7 +959,6 @@ module.exports = function (User) {
     // create a transaction logger as the one on the req will be destroyed once the response is sent
     const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
 
-
     // treat the sync as a regular operation, not really a sync
     options._sync = false;
 

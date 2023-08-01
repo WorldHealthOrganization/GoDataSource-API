@@ -2149,7 +2149,7 @@ const processImportableFileData = function (app, options, formatterOptions, batc
             resourceType: options.modelName,
             totalNo: total,
             processedNo: 0,
-            outbreakIDs: [options.outbreakId]
+            outbreakIDs: options.outbreakId ? [options.outbreakId] : undefined
           })
           .then(result => {
             // cache log entry
