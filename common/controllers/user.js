@@ -59,12 +59,10 @@ module.exports = function (User) {
       !ctx.options._sync &&
       ctx.options.platform === Platform.IMPORT
     ) {
-      // generate a random password if it's not provided
-      // force to change the password
+      // force reset password and generated a new password (if it's not provided)
       if (ctx.isNewInstance) {
         // create user
         if (ctx.instance) {
-          // force reset password always and create a new password if it's not provided
           ctx.instance.forceResetPassword = true;
           if (!ctx.instance.password) {
             ctx.instance.password = randomPassword;
@@ -73,7 +71,6 @@ module.exports = function (User) {
       } else {
         // update user
         if (ctx.data) {
-          // force reset password always and create a new password if it's not provided
           ctx.data.forceResetPassword = true;
           if (!ctx.data.password) {
             ctx.data.password = randomPassword;

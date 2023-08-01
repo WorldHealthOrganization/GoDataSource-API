@@ -22,7 +22,7 @@ module.exports = function (Model) {
     // store a list of importable properties
     let importableProperties = [];
     Model.forEachProperty(function (propertyName) {
-      // include hidden properties only if they marked as safe for import
+      // include also the hidden properties if they marked as safe for import
       if (
         !Array.isArray(Model.definition.settings.hidden) ||
         !Model.definition.settings.hidden.includes(propertyName) || (
