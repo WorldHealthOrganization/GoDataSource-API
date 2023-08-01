@@ -906,6 +906,7 @@ module.exports = function (User) {
           type: exportHelper.RELATION_TYPE.HAS_ONE,
           collection: 'outbreak',
           project: [
+            '_id',
             'name'
           ],
           key: '_id',
@@ -916,7 +917,7 @@ module.exports = function (User) {
           }`,
           replace: {
             'activeOutbreakId': {
-              value: 'activeOutbreak.name'
+              value: dontTranslateValues ? 'activeOutbreak._id' : 'activeOutbreak.name'
             }
           }
         },
@@ -924,6 +925,7 @@ module.exports = function (User) {
           type: exportHelper.RELATION_TYPE.HAS_ONE,
           collection: 'language',
           project: [
+            '_id',
             'name'
           ],
           key: '_id',
@@ -934,7 +936,7 @@ module.exports = function (User) {
           }`,
           replace: {
             'languageId': {
-              value: 'language.name'
+              value: dontTranslateValues ? 'language._id' :  'language.name'
             }
           }
         }

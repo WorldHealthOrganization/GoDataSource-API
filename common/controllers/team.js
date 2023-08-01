@@ -7,6 +7,7 @@ const importableFile = require('../../components/importableFile');
 const WorkerRunner = require('../../components/workerRunner');
 const Platform = require('../../components/platform');
 const _ = require('lodash');
+const exportHelper = require("../../components/exportHelper");
 
 // used in team import
 const teamImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -138,8 +139,48 @@ module.exports = function (Team) {
         dontTranslateValues,
         jsonReplaceUndefinedWithNull,
         contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
-      }
-    )
+      },
+      undefined, {
+        userIds: {
+          type: exportHelper.RELATION_TYPE.HAS_MANY,
+          collection: 'user',
+          project: [
+            '_id',
+            'firstName',
+            'lastName'
+          ],
+          key: '_id',
+          keyValues: `(item) => {
+            return item && item.userIds ?
+              item.userIds :
+              undefined;
+          }`,
+          format: `(item, dontTranslateValues) => {
+            return dontTranslateValues ?
+              item.id :
+              [item.firstName, item.lastName].filter(Boolean).join(' ');
+          }`
+        },
+        locationIds: {
+          type: exportHelper.RELATION_TYPE.HAS_MANY,
+          collection: 'location',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValues: `(item) => {
+            return item && item.locationIds ?
+              item.locationIds :
+              undefined;
+          }`,
+          format: `(item, dontTranslateValues) => {
+            return dontTranslateValues ?
+              item.id :
+              item.name;
+          }`
+        }
+      })
       .then((exportData) => {
         // send export id further
         callback(
