@@ -56,10 +56,9 @@ module.exports = function (User) {
     // check for import action
     if (
       ctx.options &&
-      !ctx.options._sync &&
       ctx.options.platform === Platform.IMPORT
     ) {
-      // force reset password and generated a new password (if it's not provided)
+      // force reset password if it's a new user or the password was generated
       if (ctx.isNewInstance) {
         // create user
         if (ctx.instance) {
@@ -70,11 +69,12 @@ module.exports = function (User) {
         }
       } else {
         // update user
-        if (ctx.data) {
+        if (
+          ctx.data &&
+          !ctx.data.password
+        ) {
           ctx.data.forceResetPassword = true;
-          if (!ctx.data.password) {
-            ctx.data.password = randomPassword;
-          }
+          ctx.data.password = randomPassword;
         }
       }
     }
@@ -136,7 +136,6 @@ module.exports = function (User) {
               ctx.options.remotingContext.options &&
               ctx.options.remotingContext.options.skipOldPasswordCheck
             ) || (
-              !ctx.options._sync &&
               ctx.options.platform === Platform.IMPORT
             )
           ) {
@@ -190,7 +189,6 @@ module.exports = function (User) {
     // check for import action to send reset email
     if (
       ctx.options &&
-      !ctx.options._sync &&
       ctx.options.platform === Platform.IMPORT &&
       ctx.instance &&
       ctx.instance.forceResetPassword
@@ -497,10 +495,8 @@ module.exports = function (User) {
     let reqBody = context.args.data;
 
     // skip old password checking if feature is disabled or on import
-    context.options.skipOldPasswordCheck = config.skipOldPasswordForUserModify || (
-      !context.options._sync &&
-      context.options.platform === Platform.IMPORT
-    );
+    context.options.skipOldPasswordCheck = config.skipOldPasswordForUserModify ||
+      context.options.platform === Platform.IMPORT;
 
     if (context.instance.id === context.req.authData.user.id) {
       delete reqBody.roleIds;
