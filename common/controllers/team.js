@@ -7,7 +7,7 @@ const importableFile = require('../../components/importableFile');
 const WorkerRunner = require('../../components/workerRunner');
 const Platform = require('../../components/platform');
 const _ = require('lodash');
-const exportHelper = require("../../components/exportHelper");
+const exportHelper = require('../../components/exportHelper');
 
 // used in team import
 const teamImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
