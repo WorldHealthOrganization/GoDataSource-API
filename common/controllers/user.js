@@ -62,6 +62,7 @@ module.exports = function (User) {
       if (ctx.isNewInstance) {
         // create user
         if (ctx.instance) {
+          ctx.instance.passwordChange = true;
           ctx.instance.forceResetPassword = true;
           if (!ctx.instance.password) {
             ctx.instance.password = randomPassword;
@@ -71,10 +72,10 @@ module.exports = function (User) {
         // update user
         if (
           ctx.data &&
-          !ctx.data.password
+          ctx.data.password
         ) {
+          ctx.data.passwordChange = true;
           ctx.data.forceResetPassword = true;
-          ctx.data.password = randomPassword;
         }
       }
     }
@@ -135,9 +136,8 @@ module.exports = function (User) {
               ctx.options.remotingContext &&
               ctx.options.remotingContext.options &&
               ctx.options.remotingContext.options.skipOldPasswordCheck
-            ) || (
+            ) ||
               ctx.options.platform === Platform.IMPORT
-            )
           ) {
             return;
           }
@@ -206,16 +206,12 @@ module.exports = function (User) {
         .then((accessToken) => {
           // send email
           app.models.user.sendEmail({
-            email: ctx.instance.email,
-            user: ctx.instance,
-            accessToken: accessToken
-          });
-
-          // disable forceResetPassword
-          return ctx.instance.updateAttributes({
-            passwordChange: false,
-            forceResetPassword: false
-          });
+              email: ctx.instance.email,
+              user: ctx.instance,
+              accessToken: accessToken
+            },
+            true
+          );
         })
         .catch((err) => {
           app.logger.warn('Failed to generate reset password token', err);
@@ -913,7 +909,7 @@ module.exports = function (User) {
           }`,
           replace: {
             'activeOutbreakId': {
-              value: dontTranslateValues ? 'activeOutbreak._id' : 'activeOutbreak.name'
+              value: 'activeOutbreak.name'
             }
           }
         },

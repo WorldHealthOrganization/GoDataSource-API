@@ -424,8 +424,8 @@ module.exports = function (User) {
   /**
    * Send custom email
    */
-  User.sendEmail = function (info) {
-    User.createAndSendEmail(info);
+  User.sendEmail = function (info, importAction = false) {
+    User.createAndSendEmail(info, importAction);
   };
 
   /**
@@ -450,7 +450,8 @@ module.exports = function (User) {
   ];
 
   User.referenceDataFieldsToCategoryMap = {
-    institutionName: 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME'
+    institutionName: 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME',
+    'securityQuestions[].question': 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION'
   };
 
   User.referenceDataFields = Object.keys(User.referenceDataFieldsToCategoryMap);

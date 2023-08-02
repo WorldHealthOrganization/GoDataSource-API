@@ -2869,5 +2869,5 @@ Object.assign(module.exports, {
   countPeopleContactsAndExposures,
   randomString,
   DATA_TYPE: DATA_TYPE,
-  DEFAULT_LANGUAGE: DEFAULT_LANGUAGE,
+  DEFAULT_LANGUAGE: DEFAULT_LANGUAGE
 });

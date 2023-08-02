@@ -387,6 +387,12 @@ const migrationVersions = [{
       name: 'createUpdateLanguageTokens',
       buildNo: 12
     }]
+  }, {
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }]
   }]
 }];
 

@@ -217,7 +217,7 @@
       "section": "uiImportUserData"
     },
     "LNG_PAGE_IMPORT_USER_DATA_WARNING": {
-      "translation": "<br> * in order to associate the available outbreaks and the active outbreak you must have access to the outbreak list.<br> * in order to associate the roles you must have access to the role list.<br> * in order to associate the language you must have access to the language list (if no language is provided, the default language will be set).<br> * the roles and team must be already configured/imported in the system in order to associate them to users.<br> * in order to send a password reset email, SMTP needs to be properly configured on the system (without SMTP configuration, the password reset email cannot be sent to the user's email address).<br> * if no password is provided, a new password will be generated. ",
+      "translation": "<br> * in order to associate the available outbreaks, active outbreak and roles you must have access to the outbreaks and roles).<br> *  in order to associate the roles to users they must be already configured/imported in the system.<br> * in order to send a password reset email, SMTP needs to be properly configured on the system (without SMTP configuration, the password reset email cannot be sent to the user's email address).",
       "section": "uiImportUserData"
     },
     "LNG_PAGE_LIST_USERS_TITLE": {
@@ -287,6 +287,20 @@
     "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
       "translation": "Last reset password date",
       "section": "uiUserFields"
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION": {
+      "translation": "Security questions question category",
+      "section": "uiReferenceDataSecurityQuestionsQuestion",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION_DESCRIPTION": {
+      "translation": "Security questions question category description",
+      "section": "uiReferenceDataSecurityQuestionsQuestion",
+      "modules": [
+        "referenceData"
+      ]
     }
   }
 }
