@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const async = require('async');
 const Config = require('./../../server/config.json');
 const clusterHelpers = require('./../../components/clusterHelpers');
+const helpers = require('../../components/helpers');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -343,11 +344,16 @@ module.exports = function (User) {
       !info.accessToken ||
       !info.accessToken.id ||
       !info.email ||
-      !info.user ||
-      !info.user.languageId
+      !info.user
+
     ) {
       app.logger.error('No valid user data to send email');
       return false;
+    }
+
+    // use the default language if the user has no preferred language
+    if (!info.user.languageId){
+      info.user.languageId = helpers.DEFAULT_LANGUAGE;
     }
 
     // get email tokens
@@ -358,10 +364,14 @@ module.exports = function (User) {
       'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION' :
       'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION';
 
-    // get tokens
+    // get tokens for the user language and also for the default language
     app.models.languageToken
       .rawFind({
-        languageId: info.user.languageId,
+        languageId: {
+          $in: [
+            ...new Set([info.user.languageId, helpers.DEFAULT_LANGUAGE])
+          ]
+        },
         token: {
           $in: [
             emailSubjectToken,
@@ -371,17 +381,41 @@ module.exports = function (User) {
       }, {
         projection: {
           token: 1,
-          translation: 1
+          translation: 1,
+          languageId: 1
         }
       })
       .then((tokens) => {
-        // no valid tokens ?
+        // map the tokens by language
+        const tokenMap = tokens.reduce((acc, item) => {
+          if (!acc[item.languageId]) {
+            acc[item.languageId] = {};
+          }
+          acc[item.languageId][item.token] = item.translation;
+          return acc;
+        }, {});
+
+        // use the default language translations in case the user's language translations were not found.
+        // if no translations found, send email using tokens
+        let emailSubject = emailSubjectToken;
+        let emailBody = emailBodyToken;
         if (
-          !tokens ||
-          tokens.length !== 2
+          tokenMap[info.user.languageId] ||
+          tokenMap[helpers.DEFAULT_LANGUAGE]
         ) {
-          app.logger.error(`No valid tokens found for the following language: ${info.user.languageId}`);
-          return;
+          // get subject
+          if (tokenMap[info.user.languageId][emailSubjectToken]) {
+            emailSubject = tokenMap[info.user.languageId][emailSubjectToken];
+          } else {
+            emailSubject = tokenMap[helpers.DEFAULT_LANGUAGE][emailSubjectToken];
+          }
+
+          // get body
+          if (tokenMap[info.user.languageId][emailBodyToken]) {
+            emailBody = tokenMap[info.user.languageId][emailBodyToken];
+          } else {
+            emailBody = tokenMap[helpers.DEFAULT_LANGUAGE][emailBodyToken];
+          }
         }
 
         // get the config settings
@@ -395,14 +429,6 @@ module.exports = function (User) {
         const passwordResetFrom = _.get(Config, 'passwordReset.from', 'no-reply@who.int');
         let resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
         resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
-
-        // get translations
-        const emailSubject = tokens[0].token === emailSubjectToken ?
-          tokens[0].translation :
-          tokens[1].translation;
-        let emailBody = tokens[0].token === emailBodyToken ?
-          tokens[0].translation :
-          tokens[1].translation;
 
         // resolve variables from translations
         emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
