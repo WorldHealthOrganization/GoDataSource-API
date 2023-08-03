@@ -205,7 +205,8 @@ module.exports = function (User) {
         })
         .then((accessToken) => {
           // send email
-          app.models.user.sendEmail({
+          app.models.user.sendEmail(
+            {
               email: ctx.instance.email,
               user: ctx.instance,
               accessToken: accessToken
