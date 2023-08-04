@@ -34,6 +34,7 @@ module.exports = function (User) {
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
   User.afterRemote('setPassword', (ctx, modelInstance, next) => {
+    // update user details so next time it's not required to change its password again
     User
       .findById(ctx.args.id)
       .then(user => {
@@ -44,7 +45,8 @@ module.exports = function (User) {
           loginRetriesCount: 0,
           lastLoginDate: null,
           resetPasswordRetriesCount: 0,
-          lastResetPasswordDate: null
+          lastResetPasswordDate: null,
+          passwordChange: false
         }).then(() => next());
       });
   });
@@ -63,7 +65,6 @@ module.exports = function (User) {
         // create user
         if (ctx.instance) {
           ctx.instance.passwordChange = true;
-          ctx.instance.forceResetPassword = true;
           if (!ctx.instance.password) {
             ctx.instance.password = randomPassword;
           }
@@ -75,7 +76,6 @@ module.exports = function (User) {
           ctx.data.password
         ) {
           ctx.data.passwordChange = true;
-          ctx.data.forceResetPassword = true;
         }
       }
     }
@@ -191,7 +191,7 @@ module.exports = function (User) {
       ctx.options &&
       ctx.options.platform === Platform.IMPORT &&
       ctx.instance &&
-      ctx.instance.forceResetPassword
+      ctx.instance.passwordChange
     ) {
       // generate a password reset token
       ctx.instance.createAccessToken(
