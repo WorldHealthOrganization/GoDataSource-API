@@ -382,6 +382,12 @@ const migrationVersions = [{
 }, {
   version: '2.48.0',
   scripts: [{
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'addMissingDefaultValues',
+      buildNo: 3
+    }]
+  }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
