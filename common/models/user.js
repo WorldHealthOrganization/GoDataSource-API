@@ -352,7 +352,7 @@ module.exports = function (User) {
     }
 
     // use the default language if the user has no preferred language
-    if (!info.user.languageId){
+    if (!info.user.languageId) {
       info.user.languageId = helpers.DEFAULT_LANGUAGE;
     }
 

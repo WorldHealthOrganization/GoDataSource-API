@@ -3,62 +3,7 @@
     "LNG_SECURITY_QUESTION_1": {
       "translation": "What was your childhood nickname?",
       "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_2": {
-      "translation": "In what city or town did your mother and father meet?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_3": {
-      "translation": "What is your favourite team?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_4": {
-      "translation": "What was your favourite sport in high school?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_5": {
-      "translation": "What was the house number and street name you lived in as a child?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_6": {
-      "translation": "What primary school did you attend?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_7": {
-      "translation": "What is your spouse or partner's mother's maiden name?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_8": {
-      "translation": "What is the middle name of your oldest child?",
-      "modules": [
-        "referenceData"
-      ],
-      "section": "referenceDataCategorySecurityQuestionsQuestion"
-    },
-    "LNG_SECURITY_QUESTION_9": {
-      "translation": "In what town or city was your first full time job?",
-      "modules": [
+        "unauthenticated",
         "referenceData"
       ],
       "section": "referenceDataCategorySecurityQuestionsQuestion"
@@ -66,6 +11,71 @@
     "LNG_SECURITY_QUESTION_10": {
       "translation": "In what town or city did you meet your spouse/partner?",
       "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_2": {
+      "translation": "In what city or town did your mother and father meet?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_3": {
+      "translation": "What is your favourite team?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_4": {
+      "translation": "What was your favourite sport in high school?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_5": {
+      "translation": "What was the house number and street name you lived in as a child?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_6": {
+      "translation": "What primary school did you attend?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_7": {
+      "translation": "What is your spouse or partner's mother's maiden name?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_8": {
+      "translation": "What is the middle name of your oldest child?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_9": {
+      "translation": "In what town or city was your first full time job?",
+      "modules": [
+        "unauthenticated",
         "referenceData"
       ],
       "section": "referenceDataCategorySecurityQuestionsQuestion"
@@ -77,6 +87,12 @@
       "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
       "value": "LNG_SECURITY_QUESTION_1",
       "code": "sq1"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_10",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_10",
+      "code": "sq10"
     },
     {
       "id": "LNG_SECURITY_QUESTION_2",
@@ -125,12 +141,6 @@
       "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
       "value": "LNG_SECURITY_QUESTION_9",
       "code": "sq9"
-    },
-    {
-      "id": "LNG_SECURITY_QUESTION_10",
-      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
-      "value": "LNG_SECURITY_QUESTION_10",
-      "code": "sq10"
     }
   ]
 }
