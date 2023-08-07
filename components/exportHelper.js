@@ -17,10 +17,6 @@ const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
 const convertLoopbackQueryToMongo = require('./convertLoopbackFilterToMongo');
 
-// default language - in case we don't have user language
-// - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
-const DEFAULT_LANGUAGE = 'english_us';
-
 // temporary database prefix
 const TEMPORARY_DATABASE_PREFIX = 'zExport_';
 
@@ -2437,7 +2433,7 @@ function exportFilteredModelsList(
 
       // finished
       return {
-        languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
+        languageId: options.contextUserLanguageId || genericHelpers.DEFAULT_LANGUAGE,
         exportLogId,
         temporaryCollectionName: `${TEMPORARY_DATABASE_PREFIX}${exportLogId}`,
         temporaryDistinctLocationsKey: 'allUsedLocationIds',
@@ -2850,7 +2846,7 @@ function exportFilteredModelsList(
 
               // if records not found in current language try english
               if (
-                languageId !== DEFAULT_LANGUAGE &&
+                languageId !== genericHelpers.DEFAULT_LANGUAGE &&
                 tokenIds.length !== tokens.length
               ) {
                 // find tokens that are missing
@@ -2869,7 +2865,7 @@ function exportFilteredModelsList(
 
                 // retrieve missing tokens
                 return retrieveMissingTokens(
-                  DEFAULT_LANGUAGE,
+                  genericHelpers.DEFAULT_LANGUAGE,
                   missingTokenIds
                 );
               }

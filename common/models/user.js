@@ -2,12 +2,11 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
-const path = require('path');
-const fs = require('fs');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const Config = require('./../../server/config.json');
 const clusterHelpers = require('./../../components/clusterHelpers');
+const helpers = require('../../components/helpers');
 
 module.exports = function (User) {
   // set flag to force using the controller
@@ -336,62 +335,134 @@ module.exports = function (User) {
   };
 
   /**
+   * Create and send an email
+   * @param info User info
+   * @param importActio Import/reset password tokens
+   */
+  User.createAndSendEmail = function(info, importAction) {
+    // validate the inputs
+    if (
+      !info ||
+      !info.accessToken ||
+      !info.accessToken.id ||
+      !info.email ||
+      !info.user
+    ) {
+      app.logger.error('No valid user data to send email');
+      return false;
+    }
+
+    // use the default language if the user has no preferred language
+    if (!info.user.languageId) {
+      info.user.languageId = helpers.DEFAULT_LANGUAGE;
+    }
+
+    // get email tokens
+    const emailSubjectToken = importAction ?
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_IMPORT_ACTION' :
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION';
+    const emailBodyToken = importAction ?
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION' :
+      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION';
+
+    // get tokens for the user language and also for the default language
+    app.models.languageToken
+      .rawFind({
+        languageId: {
+          $in: [
+            ...new Set([info.user.languageId, helpers.DEFAULT_LANGUAGE])
+          ]
+        },
+        token: {
+          $in: [
+            emailSubjectToken,
+            emailBodyToken
+          ]
+        }
+      }, {
+        projection: {
+          token: 1,
+          translation: 1,
+          languageId: 1
+        }
+      })
+      .then((tokens) => {
+        // map the tokens by language
+        const tokenMap = tokens.reduce((acc, item) => {
+          if (!acc[item.languageId]) {
+            acc[item.languageId] = {};
+          }
+          acc[item.languageId][item.token] = item.translation;
+          return acc;
+        }, {});
+
+        // use the default language translations in case the user's language translations were not found.
+        // if no translations found, send email using tokens
+        let emailSubject = emailSubjectToken;
+        let emailBody = emailBodyToken;
+        if (
+          tokenMap[info.user.languageId] ||
+          tokenMap[helpers.DEFAULT_LANGUAGE]
+        ) {
+          // get subject
+          if (tokenMap[info.user.languageId][emailSubjectToken]) {
+            emailSubject = tokenMap[info.user.languageId][emailSubjectToken];
+          } else if (tokenMap[helpers.DEFAULT_LANGUAGE][emailSubjectToken]) {
+            emailSubject = tokenMap[helpers.DEFAULT_LANGUAGE][emailSubjectToken];
+          }
+
+          // get body
+          if (tokenMap[info.user.languageId][emailBodyToken]) {
+            emailBody = tokenMap[info.user.languageId][emailBodyToken];
+          } else if (tokenMap[helpers.DEFAULT_LANGUAGE][emailBodyToken]) {
+            emailBody = tokenMap[helpers.DEFAULT_LANGUAGE][emailBodyToken];
+          }
+        }
+
+        // get the config settings
+        const passwordChangePath = _.get(Config, 'passwordChange.path', '/account/change-password');
+        const publicHost = _.get(Config, 'public.host', 'localhost');
+        const publicProtocol = _.get(Config, 'public.protocol', 'http');
+        const publicPort = _.get(Config, 'public.port', '');
+        let changePasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordChangePath}`;
+        changePasswordLink = `<a href="${changePasswordLink}">${changePasswordLink}</a>`;
+        const passwordResetPath = _.get(Config, 'passwordReset.path', '/auth/reset-password');
+        const passwordResetFrom = _.get(Config, 'passwordReset.from', 'no-reply@who.int');
+        let resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
+        resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
+
+        // resolve variables from translations
+        emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
+          name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
+          changePasswordLink: changePasswordLink,
+          resetPasswordLink: resetPasswordLink
+        });
+
+        // send email
+        app.models.Email.send({
+          to: info.email,
+          from: passwordResetFrom,
+          subject: emailSubject,
+          html: emailBody
+        });
+      });
+  };
+
+  /**
+   * Send custom email
+   * @param info User info
+   * @param importActio Import/reset password tokens
+   */
+  User.sendEmail = function (info, importAction) {
+    User.createAndSendEmail(info, importAction);
+  };
+
+  /**
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
-    // load user language dictionary
-    app.models.language.getLanguageDictionary(info.user.languageId, function (error, dictionary) {
-      if (error) {
-        app.logger.error(`Failed to retrieve tokens for the following language: ${info.user.languageId}`);
-        return false;
-      }
-
-      // translate email body params
-      let heading = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_HEADING');
-      let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT');
-      let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH1');
-      let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH2');
-      let paragraph3 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH3');
-      let paragraph4;
-      let paragraph5 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH5');
-      let paragraph6 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH6');
-      let paragraph7 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_PARAGRAPH7');
-
-      // it contains the reset password url
-      const config = JSON.parse(fs.readFileSync(path.resolve(`${__dirname}/../../server/config.json`)));
-
-      const passwordChangePath = config.passwordChange && config.passwordChange.path ?
-        config.passwordChange.path :
-        '/account/change-password';
-      let userName = `${info.user.firstName} ${info.user.lastName}`;
-      let changePassURL = `${config.public.protocol}://${config.public.host}${config.public.port ? ':' + config.public.port : ''}${passwordChangePath}`;
-
-      paragraph1 = _.template(paragraph1, {interpolate: /{{([\s\S]+?)}}/g})({userName: `${userName}`});
-      paragraph4 = `${config.public.protocol}://${config.public.host}${config.public.port ? ':' + config.public.port : ''}${config.passwordReset.path}?token=${info.accessToken.id}`;
-      paragraph5 = _.template(paragraph5, {interpolate: /{{([\s\S]+?)}}/g})({changePassURL: `<a href="${changePassURL}">${changePassURL}</a>`});
-
-      // load the html email template
-      const template = _.template(fs.readFileSync(path.resolve(`${__dirname}/../../server/views/passwordResetEmail.ejs`)));
-
-      // resolve template params
-      let resolvedTemplate = template({
-        heading: heading,
-        paragraph1: paragraph1,
-        paragraph2: paragraph2,
-        paragraph3: paragraph3,
-        paragraph4: paragraph4,
-        paragraph5: paragraph5,
-        paragraph6: paragraph6,
-        paragraph7: paragraph7,
-      });
-
-      app.models.Email.send({
-        to: info.email,
-        from: config.passwordReset.from,
-        subject: subject,
-        html: resolvedTemplate
-      });
-    });
+    // use the reset password tokens
+    User.createAndSendEmail(info, false);
   });
 
   /**
@@ -403,15 +474,31 @@ module.exports = function (User) {
     delete userData.roleIds;
   };
 
+  // hidden fields safe for import
+  User.safeForImportHiddenFields = [
+    'password'
+  ];
+
   User.referenceDataFieldsToCategoryMap = {
-    institutionName: 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME'
+    institutionName: 'LNG_REFERENCE_DATA_CATEGORY_INSTITUTION_NAME',
+    'securityQuestions[].question': 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION'
   };
 
   User.referenceDataFields = Object.keys(User.referenceDataFieldsToCategoryMap);
 
+  // default export order
+  User.exportFieldsOrder = [
+    'id'
+  ];
+
   User.arrayProps = {
-    roleIds: true,
-    outbreakIds: true
+    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
+    securityQuestions: {
+      'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+      'question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
+      'answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER'
+    }
   };
 
   User.foreignKeyResolverMap = {
@@ -429,6 +516,16 @@ module.exports = function (User) {
     }
   };
 
+  // used on importable file logic
+  User.foreignKeyFields = {
+    'activeOutbreakId': {
+      modelName: 'outbreak',
+      collectionName: 'outbreak',
+      labelProperty: 'name'
+    }
+  };
+
+
   User.fieldLabelsMap = Object.assign({}, User.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
@@ -441,14 +538,21 @@ module.exports = function (User) {
     email: 'LNG_USER_FIELD_LABEL_EMAIL',
     firstName: 'LNG_USER_FIELD_LABEL_FIRST_NAME',
     lastName: 'LNG_USER_FIELD_LABEL_LAST_NAME',
-    languageId: 'LNG_LAYOUT_LANGUAGE_LABEL',
+    languageId: 'LNG_USER_FIELD_LABEL_LANGUAGE',
     password: 'LNG_COMMON_FIELD_LABEL_PASSWORD',
     activeOutbreakId: 'LNG_USER_FIELD_LABEL_ACTIVE_OUTBREAK',
     institutionName: 'LNG_USER_FIELD_LABEL_INSTITUTION_NAME',
     telephoneNumbers: 'LNG_USER_FIELD_LABEL_TELEPHONE_NUMBERS',
     'telephoneNumbers.LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE': 'LNG_USER_FIELD_LABEL_PRIMARY_TELEPHONE',
-    'roleIds[]': 'LNG_USER_FIELD_LABEL_ROLES',
-    'outbreakIds[]': 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
-    disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS'
+    roleIds: 'LNG_USER_FIELD_LABEL_ROLES',
+    outbreakIds: 'LNG_USER_FIELD_LABEL_AVAILABLE_OUTBREAKS',
+    disregardGeographicRestrictions: 'LNG_USER_FIELD_LABEL_DISREGARD_GEOGRAPHIC_RESTRICTIONS',
+    securityQuestions: 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS',
+    'securityQuestions[].id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    'securityQuestions[].question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
+    'securityQuestions[].answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER',
+    lastLoginDate: 'LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE',
+    lastResetPasswordDate: 'LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE',
+    dontCacheFilters: 'LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS'
   });
 };

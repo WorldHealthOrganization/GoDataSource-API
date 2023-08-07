@@ -461,6 +461,18 @@ module.exports = function (Role) {
             'user_role_view',
             'user_role_create'
           ]
+        },
+        {
+          id: 'user_role_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_USER_ROLE_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'user_role_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_ROLE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_USER_ROLE_DESCRIPTION',
+          requires: []
         }
       ]
     },
@@ -1073,6 +1085,18 @@ module.exports = function (Role) {
             'outbreak_view',
             'follow_up_list'
           ]
+        },
+        {
+          id: 'team_export',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'team_import',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_TEAM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_TEAM_DESCRIPTION',
+          requires: []
         },
         {
           id: 'team_list_workload',
@@ -3881,4 +3905,26 @@ module.exports = function (Role) {
         return roles;
       });
   };
+
+  // default export order
+  Role.exportFieldsOrder = [
+    'id'
+  ];
+
+  Role.arrayProps = {
+    permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS'
+  };
+
+  Role.fieldLabelsMap = Object.assign({}, Role.fieldLabelsMap, {
+    id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
+    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
+    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    name: 'LNG_USER_ROLE_FIELD_LABEL_NAME',
+    permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS'
+  });
 };
