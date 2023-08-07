@@ -824,6 +824,16 @@ module.exports = function (User) {
       anonymizeFields = [];
     }
 
+    // ignore the default sys admin user
+    filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          id: {
+            neq: genericHelpers.DEFAULT_SYSTEM_ADMIN_ID
+          },
+        }
+      }, filter || {});
+
     // export
     WorkerRunner.helpers.exportFilteredModelsList(
       {
@@ -976,10 +986,11 @@ module.exports = function (User) {
 
       // go through all entries
       batchData.forEach(function (userItem) {
-        // ignore the current user to prevent override the password
+        // ignore default sys admin user and also the current user to prevent override the password
         if (
           loggedUser &&
           userItem.save && (
+            userItem.save.id === genericHelpers.DEFAULT_SYSTEM_ADMIN_ID ||
             userItem.save.email === loggedUser.email ||
             userItem.save.id === loggedUser.id
           )
