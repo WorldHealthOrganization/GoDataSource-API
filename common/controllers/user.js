@@ -939,7 +939,7 @@ module.exports = function (User) {
           }`,
           replace: {
             'languageId': {
-              value: dontTranslateValues ? 'language._id' :  'language.name'
+              value: 'language.name'
             }
           }
         }

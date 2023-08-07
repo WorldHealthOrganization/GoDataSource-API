@@ -25,22 +25,9 @@ module.exports = function (SecurityQuestion) {
           id: true
         }
       })
-      .then(function (questionItems) {
-        // return if no question found
-        if (!questionItems.length) {
-          return callback(null, []);
-        }
-
-        // get questions
-        const questionList = {};
-
-        // add default entries for all questionItems
-        questionItems.forEach(function (categoryItem) {
-          questionList[categoryItem.id] = true;
-        });
-
-        // send result
-        callback(null, Object.keys(questionList));
+      .then(function (questions) {
+        // return question ids
+        return callback(null, questions.map((item=> item.id)));
       })
       .catch(callback);
   };

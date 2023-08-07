@@ -336,8 +336,10 @@ module.exports = function (User) {
 
   /**
    * Create and send an email
+   * @param info User info
+   * @param importActio Import/reset password tokens
    */
-  User.createAndSendEmail = function(info, importAction = false) {
+  User.createAndSendEmail = function(info, importAction) {
     // validate the inputs
     if (
       !info ||
@@ -345,7 +347,6 @@ module.exports = function (User) {
       !info.accessToken.id ||
       !info.email ||
       !info.user
-
     ) {
       app.logger.error('No valid user data to send email');
       return false;
@@ -406,14 +407,14 @@ module.exports = function (User) {
           // get subject
           if (tokenMap[info.user.languageId][emailSubjectToken]) {
             emailSubject = tokenMap[info.user.languageId][emailSubjectToken];
-          } else {
+          } else if (tokenMap[helpers.DEFAULT_LANGUAGE][emailSubjectToken]) {
             emailSubject = tokenMap[helpers.DEFAULT_LANGUAGE][emailSubjectToken];
           }
 
           // get body
           if (tokenMap[info.user.languageId][emailBodyToken]) {
             emailBody = tokenMap[info.user.languageId][emailBodyToken];
-          } else {
+          } else if (tokenMap[helpers.DEFAULT_LANGUAGE][emailBodyToken]) {
             emailBody = tokenMap[helpers.DEFAULT_LANGUAGE][emailBodyToken];
           }
         }
@@ -449,8 +450,10 @@ module.exports = function (User) {
 
   /**
    * Send custom email
+   * @param info User info
+   * @param importActio Import/reset password tokens
    */
-  User.sendEmail = function (info, importAction = false) {
+  User.sendEmail = function (info, importAction) {
     User.createAndSendEmail(info, importAction);
   };
 
@@ -458,7 +461,8 @@ module.exports = function (User) {
    * Send password reset email
    */
   User.on('resetPasswordRequest', function (info) {
-    User.createAndSendEmail(info);
+    // use the reset password tokens
+    User.createAndSendEmail(info, false);
   });
 
   /**
