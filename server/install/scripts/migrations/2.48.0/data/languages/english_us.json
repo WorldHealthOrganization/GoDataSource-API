@@ -217,7 +217,7 @@
       "section": "uiImportUserData"
     },
     "LNG_PAGE_IMPORT_USER_DATA_WARNING": {
-      "translation": "<br> * in order to associate the available outbreaks, active outbreak and roles you must have access to the outbreaks and roles).<br> *  in order to associate the roles to users they must be already configured/imported in the system.<br> * in order to send a password reset email, SMTP needs to be properly configured on the system (without SMTP configuration, the password reset email cannot be sent to the user's email address).",
+      "translation": " * in order to associate the available outbreaks, active outbreak and roles you must have access to outbreaks and roles.<br> *  in order to associate roles to users they should already be configured/imported in the system.<br> * if no password is provided at import a reset password email will be sent to users (for this to work please make sure SMTP is configured).",
       "section": "uiImportUserData"
     },
     "LNG_PAGE_LIST_USERS_TITLE": {
