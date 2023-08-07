@@ -27,7 +27,7 @@ module.exports = function (SecurityQuestion) {
       })
       .then(function (questions) {
         // return question ids
-        return callback(null, questions.map((item=> item.id)));
+        callback(null, questions.map((item=> item.id)));
       })
       .catch(callback);
   };
