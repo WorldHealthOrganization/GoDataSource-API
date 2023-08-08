@@ -147,7 +147,8 @@ module.exports = function (Team) {
           project: [
             '_id',
             'firstName',
-            'lastName'
+            'lastName',
+            'email'
           ],
           key: '_id',
           keyValues: `(item) => {
@@ -158,7 +159,12 @@ module.exports = function (Team) {
           format: `(item, dontTranslateValues) => {
             return dontTranslateValues ?
               item.id :
-              [item.firstName, item.lastName].filter(Boolean).join(' ');
+              (
+                [item.firstName, item.lastName].filter(Boolean).join(' ').trim() +
+                ' ( ' +
+                item.email +
+                ' )'
+              )
           }`
         },
         locationIds: {
