@@ -30,6 +30,9 @@
     },
     "migrateDate": {
       "type": "string"
+    },
+    "description": {
+      "type": "string"
     }
   },
   "indexes": {
