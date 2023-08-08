@@ -3925,6 +3925,7 @@ module.exports = function (Role) {
     deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
     deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
     name: 'LNG_USER_ROLE_FIELD_LABEL_NAME',
-    permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS'
+    permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS',
+    description: 'LNG_USER_ROLE_FIELD_LABEL_DESCRIPTION'
   });
 };
