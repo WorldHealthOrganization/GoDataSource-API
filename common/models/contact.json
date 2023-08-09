@@ -135,6 +135,10 @@
     "outcomeId": {
       "type": "string"
     },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
+    },
     "safeBurial": {
       "type": "boolean",
       "default": false
