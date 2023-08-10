@@ -403,10 +403,10 @@ const migrationVersions = [{
     fileName: 'followUpStatus.js',
     actions: [{
       name: 'replaceFollowUpStatus',
-      buildNo: 2
+      buildNo: 1
     }, {
       name: 'deleteFollowUpStatus',
-      buildNo: 14
+      buildNo: 1
     }, {
       name: 'disableFollowUpStatus',
       buildNo: 1

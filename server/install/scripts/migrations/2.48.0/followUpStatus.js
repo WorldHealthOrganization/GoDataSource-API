@@ -170,7 +170,7 @@ const disableFollowUpStatus = (callback) => {
       }
 
       // mark followup status as disabled
-      console.log('The "Died" status was marked as disabled');
+      console.log('The "Died" status will be marked as disabled');
       return referenceDataCollection
         .updateOne({
           _id: referenceData._id
