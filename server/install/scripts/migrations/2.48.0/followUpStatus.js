@@ -63,7 +63,9 @@ const replaceFollowUpStatus = (callback) => {
             _id: data._id
           }, {
             $set: {
-              'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED'
+              'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED',
+              updateAt: new Date(),
+              dbUpdatedAt: new Date()
             }
           });
       };
@@ -114,8 +116,8 @@ const deleteFollowUpStatus = (callback) => {
     })
     .then(referenceData => {
       if (!referenceData) {
-        console.log('No reference data item found in the system');
-        return Promise.resolve(false);
+        console.log('The system could not find the "Never ill / Not a Case" status for deleting');
+        return;
       }
 
       // mark followup status as deleted
@@ -126,7 +128,9 @@ const deleteFollowUpStatus = (callback) => {
         }, {
           $set: {
             deleted: true,
-            deletedAt: new Date()
+            deletedAt: new Date(),
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           }
         });
     })
@@ -165,8 +169,8 @@ const disableFollowUpStatus = (callback) => {
     })
     .then(referenceData => {
       if (!referenceData) {
-        console.log('No reference data item found in the system');
-        return Promise.resolve(false);
+        console.log('The system could not find the "Died" status for disabling');
+        return;
       }
 
       // mark followup status as disabled
@@ -177,7 +181,8 @@ const disableFollowUpStatus = (callback) => {
         }, {
           $set: {
             active: false,
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            dbUpdatedAt: new Date()
           }
         });
     })

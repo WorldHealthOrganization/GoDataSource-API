@@ -107,6 +107,7 @@ module.exports = function (Contact) {
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
+    'transferRefused': 'LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
