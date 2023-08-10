@@ -135,6 +135,13 @@
     "outcomeId": {
       "type": "string"
     },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
+    },
     "safeBurial": {
       "type": "boolean",
       "default": false

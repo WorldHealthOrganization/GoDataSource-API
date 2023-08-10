@@ -301,6 +301,30 @@
       "modules": [
         "referenceData"
       ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_OUTCOME": {
+      "translation": "Outcome",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_OUTCOME_DESCRIPTION": {
+      "translation": "",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": {
+      "translation": "Date of outcome",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME_DESCRIPTION": {
+      "translation": "The date of the final outcome for this contact",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED": {
+      "translation": "Refused transfer to treatment unit",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED_DESCRIPTION": {
+      "translation": "Record if the contact refused to attend at a treatment facility",
+      "section": "uiContactFields"
     }
   }
 }
