@@ -128,18 +128,6 @@
     "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_DESCRIPTION": {
       "translation": "<div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Pending]:</span><span> this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete no / total]:</span><span> the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete:]</span><span> all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Incomplete no / total]:</span><span> the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Handled above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Completed above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
     },
-    "LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS": {
-      "translation": "Security questions",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
-      "translation": "Last login date",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
-      "translation": "Last reset password date",
-      "section": "uiUserFields"
-    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM": {
       "translation": "Team - export",
       "section": "availablePermissions"
@@ -217,7 +205,7 @@
       "section": "uiImportUserData"
     },
     "LNG_PAGE_IMPORT_USER_DATA_WARNING": {
-      "translation": " * in order to associate the available outbreaks, active outbreak and roles you must have access to outbreaks and roles.<br> *  in order to associate roles to users they should already be configured/imported in the system.<br> * if no password is provided at import a reset password email will be sent to users (for this to work please make sure SMTP is configured).",
+      "translation": " * in order to associate the available outbreaks, active outbreak and roles you must have access to outbreaks and roles.<br> *  roles should've already been imported into the system in order to associate them with users.<br> * if no password is provided at import a reset password email will be sent to users (for this to work please make sure SMTP is configured).",
       "section": "uiImportUserData"
     },
     "LNG_PAGE_LIST_USERS_TITLE": {
@@ -280,14 +268,6 @@
       "translation": "Answer",
       "section": "uiUserFields"
     },
-    "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
-      "translation": "Last login date",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
-      "translation": "Last reset password date",
-      "section": "uiUserFields"
-    },
     "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION": {
       "translation": "Security questions question category",
       "section": "uiReferenceDataSecurityQuestionsQuestion",
@@ -325,6 +305,10 @@
     "LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED_DESCRIPTION": {
       "translation": "Record if the contact refused to attend at a treatment facility",
       "section": "uiContactFields"
+    },
+    "LNG_PAGE_IMPORT_TEAM_DATA_WARNING": {
+      "translation": " * users should've already been imported into the system in order to associate them with teams.",
+      "section": "uiImportTeamData"
     }
   }
 }
