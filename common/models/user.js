@@ -551,8 +551,6 @@ module.exports = function (User) {
     'securityQuestions[].id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     'securityQuestions[].question': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_QUESTION',
     'securityQuestions[].answer': 'LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS_ANSWER',
-    lastLoginDate: 'LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE',
-    lastResetPasswordDate: 'LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE',
     dontCacheFilters: 'LNG_USER_FIELD_LABEL_DONT_CACHE_FILTERS'
   });
 };
