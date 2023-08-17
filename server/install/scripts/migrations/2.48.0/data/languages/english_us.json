@@ -309,6 +309,22 @@
     "LNG_PAGE_IMPORT_TEAM_DATA_WARNING": {
       "translation": " * users should've already been imported into the system in order to associate them with teams.",
       "section": "uiImportTeamData"
+    },
+    "LNG_COMMON_LABEL_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_REQUIRED": {
+      "translation": "Required",
+      "section": "uiCommonLabels"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
+      "translation": "Fields",
+      "section": "uiOutbreakFields"
     }
   }
 }
