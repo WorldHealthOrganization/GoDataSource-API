@@ -205,6 +205,9 @@
     },
     "allowedRefDataItems": {
       "type": "allowedRefData"
+    },
+    "visibleAndMandatoryFields": {
+      "type": "visibleAndMandatory"
     }
   },
   "indexes": {
