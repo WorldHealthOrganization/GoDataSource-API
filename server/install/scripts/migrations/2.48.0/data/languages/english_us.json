@@ -325,6 +325,10 @@
     "LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
       "translation": "Fields",
       "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
+      "translation": "Fields",
+      "section": "uiOutbreakTemplateFields"
     }
   }
 }
