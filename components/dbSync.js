@@ -365,7 +365,7 @@ function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
   // update filter only if languageTokenFilter is an array
   if (Array.isArray(languageTokenFilter)) {
     // Note: should be in sync with the subTemplates names from templateParser.js
-    const subTemplates = ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
+    const subTemplates = ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
 
     // create language token mongo filter; creating it as an '$or' filter
     let languageTokenMongoFilter = {
