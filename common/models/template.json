@@ -88,6 +88,11 @@
         "templateQuestion"
       ]
     },
+    "eventInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
