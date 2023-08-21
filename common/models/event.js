@@ -1,5 +1,9 @@
 'use strict';
 
+const app = require('../../server/server');
+const _ = require('lodash');
+const helpers = require('../../components/helpers');
+
 module.exports = function (Event) {
   // set flag to not get controller
   Event.hasController = false;
@@ -43,7 +47,10 @@ module.exports = function (Event) {
     'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
     'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
     'eventCategory': 'LNG_EVENT_FIELD_LABEL_EVENT_CATEGORY',
-    'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE'
+    'endDate': 'LNG_EVENT_FIELD_LABEL_END_DATE',
+
+    // must be last item from the list
+    'questionnaireAnswers': 'LNG_EVENT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
   };
 
   // used on importable file logic
@@ -58,6 +65,20 @@ module.exports = function (Event) {
       ]
     }
   };
+
+  Event.extendedForm = {
+    template: 'eventInvestigationTemplate',
+    containerProperty: 'questionnaireAnswers',
+    isBasicArray: (variable) => {
+      return variable.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_MULTIPLE_ANSWERS';
+    }
+  };
+
+  // merge merge properties so we don't remove anything from a array / properties defined as being "mergeble" in case we don't send the entire data
+  // this is relevant only when we update a record since on create we don't have old data that we need to merge
+  Event.mergeFieldsOnUpdate = [
+    'questionnaireAnswers'
+  ];
 
   // map language token labels for export fields group
   Event.exportFieldsGroup = {
@@ -117,6 +138,11 @@ module.exports = function (Event) {
       required: [
         'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA'
       ]
+    },
+    'LNG_COMMON_LABEL_EXPORT_GROUP_QUESTIONNAIRE_DATA': {
+      properties: [
+        'questionnaireAnswers'
+      ]
     }
   };
 
@@ -166,4 +192,36 @@ module.exports = function (Event) {
   Event.getAlternateUniqueIdentifierQueryForSync = () => {
     return null;
   };
+
+  /**
+   * Before save hooks
+   */
+  Event.observe('before save', function (context, next) {
+    // sort multi answer questions
+    const data = context.isNewInstance ? context.instance : context.data;
+    helpers.sortMultiAnswerQuestions(data);
+
+    // retrieve outbreak data
+    let model = _.get(context, 'options.remotingContext.instance');
+    if (model) {
+      if (!(model instanceof app.models.outbreak)) {
+        model = undefined;
+      }
+    }
+
+    // convert date fields to date before saving them in database
+    helpers
+      .convertQuestionStringDatesToDates(
+        data,
+        model ?
+          model.eventInvestigationTemplate :
+          null
+      )
+      .then(() => {
+        // finished
+        next();
+      })
+      .catch(next);
+  });
+
 };
