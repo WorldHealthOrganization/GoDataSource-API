@@ -1,0 +1,30 @@
+{
+  "name": "visibleAndMandatory",
+  "base": "Model",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "mixins": {
+    "RemovePropertiesFromDefinition": true
+  },
+  "hidden": [
+    "id"
+  ],
+  "properties": {
+    "groupId": {
+      "type": {
+        "fieldId": {
+          "type": {
+            "visible": "boolean",
+            "mandatory": "boolean"
+          }
+        }
+      }
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

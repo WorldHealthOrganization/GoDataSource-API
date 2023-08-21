@@ -133,6 +133,9 @@
     },
     "allowedRefDataItems": {
       "type": "allowedRefData"
+    },
+    "visibleAndMandatoryFields": {
+      "type": "visibleAndMandatory"
     }
   },
   "validations": [],
