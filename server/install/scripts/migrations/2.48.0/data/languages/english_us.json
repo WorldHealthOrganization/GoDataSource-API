@@ -370,10 +370,6 @@
       "translation": "This permission allows modifying outbreak template event questionnaire",
       "section": "availablePermissions"
     },
-    "LNG_PAGE_CREATE_EVENT_TAB_INFECTION_TITLE": {
-      "translation": "Epidemiology",
-      "section": "uiCreateEventPage"
-    },
     "LNG_PAGE_EVENT_MERGE_DUPLICATE_RECORDS_TAB_QUESTIONNAIRE_TITLE": {
       "translation": "Questionnaire",
       "section": "uiEventMergeDuplicateRecordsPage"
