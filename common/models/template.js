@@ -37,7 +37,7 @@ module.exports = function (Template) {
     // make sure the questions are ordered on load. This was made on on-load vs before save for simplicity
     // even though it will perform better on before save, there is a lot of logic that can be broken by affecting that code now
     // and a refactoring is already planned for questionnaires
-    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
+    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
       templateParser.orderQuestions(context.data[template]);
     });
 

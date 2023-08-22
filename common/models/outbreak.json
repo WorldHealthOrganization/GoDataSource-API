@@ -130,6 +130,13 @@
       "default": [],
       "importTopLevelOnly": true
     },
+    "eventInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ],
+      "default": [],
+      "importTopLevelOnly": true
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"

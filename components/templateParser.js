@@ -7,6 +7,7 @@ const helpers = require('./helpers');
 const subTemplates = [
   'caseInvestigationTemplate',
   'contactInvestigationTemplate',
+  'eventInvestigationTemplate',
   'contactFollowUpTemplate',
   'labResultsTemplate'
 ];

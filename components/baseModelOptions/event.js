@@ -38,6 +38,12 @@ const formatItemFromImportableFile = function (item, formattedDataContainer, opt
   // set outbreak id
   formattedData.outbreakId = options.outbreakId;
 
+  // sanitize questionnaire answers
+  if (formattedData.questionnaireAnswers) {
+    // convert properties that should be date to actual date objects
+    formattedData.questionnaireAnswers = helpers.convertQuestionnairePropsToDate(formattedData.questionnaireAnswers);
+  }
+
   // sanitize visual ID
   if (formattedData.visualId) {
     formattedData.visualId = helpers.sanitizePersonVisualId(formattedData.visualId);

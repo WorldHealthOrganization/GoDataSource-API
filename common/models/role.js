@@ -916,6 +916,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'outbreak_modify_event_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
           id: 'outbreak_modify_contact_follow_up_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
@@ -996,6 +1005,15 @@ module.exports = function (Role) {
           id: 'outbreak_template_modify_contact_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_modify_event_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE_DESCRIPTION',
           requires: [
             'outbreak_template_view',
             'outbreak_template_modify'

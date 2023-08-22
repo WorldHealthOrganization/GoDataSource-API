@@ -329,6 +329,58 @@
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
       "translation": "Fields",
       "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE": {
+      "translation": "Contact investigation template",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_EVENT_QUESTIONNAIRE": {
+      "translation": "Event form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_ACTION_EVENT_QUESTIONNAIRE": {
+      "translation": "Event form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_EVENT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
+      "translation": "Questionnaire answers",
+      "section": "uiEventFields"
+    },
+    "LNG_PAGE_MODIFY_EVENT_TAB_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyEventPage"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE": {
+      "translation": "Event investigation template",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE": {
+      "translation": "Outbreak - modify event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE": {
+      "translation": "Outbreak template - modify event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak template event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_EVENT_MERGE_DUPLICATE_RECORDS_TAB_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiEventMergeDuplicateRecordsPage"
+    },
+    "LNG_PAGE_CREATE_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show event form question numbers",
+      "section": "uiCreateEventPage"
+    },
+    "LNG_PAGE_MODIFY_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show event form question numbers",
+      "section": "uiModifyEventPage"
     }
   }
 }

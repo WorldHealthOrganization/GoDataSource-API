@@ -78,6 +78,9 @@
     },
     "address": {
       "type": "address"
+    },
+    "questionnaireAnswers": {
+      "type": "object"
     }
   },
   "indexes": {

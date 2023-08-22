@@ -41,6 +41,7 @@ module.exports = function (Outbreak) {
     'fieldsToDisplayNode[]': 'LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE',
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
+    eventInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
@@ -1709,7 +1710,7 @@ module.exports = function (Outbreak) {
     // make sure the questions are ordered on load. This was made on on-load vs before save for simplicity
     // even though it will perform better on before save, there is a lot of logic that can be broken by affecting that code now
     // and a refactoring is already planned for questionnaires
-    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
+    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
       templateParser.orderQuestions(context.data[template]);
     });
 
