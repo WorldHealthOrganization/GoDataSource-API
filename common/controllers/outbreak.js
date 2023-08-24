@@ -88,6 +88,7 @@ module.exports = function (Outbreak) {
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
+    'prototype.findContactOfContactRelationships',
     'prototype.findEventRelationships'
   ]);
 
