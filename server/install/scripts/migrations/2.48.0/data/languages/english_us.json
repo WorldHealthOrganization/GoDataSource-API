@@ -381,6 +381,62 @@
     "LNG_PAGE_MODIFY_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
       "translation": "Show event form question numbers",
       "section": "uiModifyEventPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_SEE_LAB_RESULTS": {
+      "translation": "Lab results",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_SEE_LAB_RESULTS": {
+      "translation": "See lab results",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact- list lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows viewing list of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - view lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows viewing a lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - modify lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows modifying of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - delete lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows deletion of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - restore lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows restoring of deleted lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - export lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows exporting of lab results",
+      "section": "availablePermissions"
     }
   }
 }
