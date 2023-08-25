@@ -381,6 +381,18 @@
     "LNG_PAGE_MODIFY_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
       "translation": "Show event form question numbers",
       "section": "uiModifyEventPage"
+    },
+    "LNG_COMMON_LABEL_NEEDS": {
+      "translation": "Needs:",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_REQUIRES": {
+      "translation": "requires",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_NO_SEARCH_MATCHES": {
+      "translation": "No items matched the search criteria",
+      "section": "uiCommonLabels"
     }
   }
 }
