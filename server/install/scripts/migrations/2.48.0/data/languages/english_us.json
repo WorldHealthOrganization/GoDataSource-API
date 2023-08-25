@@ -382,6 +382,18 @@
       "translation": "Show event form question numbers",
       "section": "uiModifyEventPage"
     },
+    "LNG_COMMON_LABEL_NEEDS": {
+      "translation": "Needs:",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_REQUIRES": {
+      "translation": "requires",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_NO_SEARCH_MATCHES": {
+      "translation": "No items matched the search criteria",
+      "section": "uiCommonLabels"
+    },
     "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_SEE_LAB_RESULTS": {
       "translation": "Lab results",
       "section": "uiModifyContactOfContactPage"
@@ -437,6 +449,5 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
       "translation": "This permission allows exporting of lab results",
       "section": "availablePermissions"
-    }
   }
 }
