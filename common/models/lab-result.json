@@ -94,6 +94,11 @@
       "type": "belongsTo",
       "model": "contact",
       "foreignKey": "personId"
+    },
+    "contactOfContact": {
+      "type": "belongsTo",
+      "model": "contactOfContact",
+      "foreignKey": "personId"
     }
   },
   "acls": [],

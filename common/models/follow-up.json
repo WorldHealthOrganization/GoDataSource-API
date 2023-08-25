@@ -97,6 +97,16 @@
       "model": "contact",
       "foreignKey": "personId"
     },
+    "case": {
+      "type": "belongsTo",
+      "model": "case",
+      "foreignKey": "personId"
+    },
+    "contactOfContact": {
+      "type": "belongsTo",
+      "model": "contactOfContact",
+      "foreignKey": "personId"
+    },
     "team": {
       "type": "belongsTo",
       "model": "team",

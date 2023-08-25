@@ -47,6 +47,14 @@ module.exports = function (Outbreak) {
       ]
     };
 
+    // fix for some filter options received from web ( e.g $elemMatch search in array properties )
+    Object.assign(
+      filter,
+      app.utils.remote.convertLoopbackFilterToMongo({
+        where: filter.where || {}
+      })
+    );
+
     // add geographical restriction to filter if needed
     app.models.event
       .addGeographicalRestrictions(options.remotingContext, filter.where)

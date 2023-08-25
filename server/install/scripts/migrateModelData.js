@@ -398,6 +398,9 @@ const migrationVersions = [{
     actions: [{
       name: 'createUpdateDefaultReferenceData',
       buildNo: 1
+    }, {
+      name: 'updateHospitalizationIsolationType',
+      buildNo: 1
     }]
   }, {
     fileName: 'followUpStatus.js',
