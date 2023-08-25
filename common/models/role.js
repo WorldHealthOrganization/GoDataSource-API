@@ -3798,6 +3798,57 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view'
           ]
+        },
+        {
+          id: 'contact_of_contact_list_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_list',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_view_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_view',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_modify_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_modify',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_delete_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_delete'
+          ]
+        },
+        {
+          id: 'contact_of_contact_restore_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_restore'
+          ]
+        },
+        {
+          id: 'contact_of_contact_export_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_export'
+          ]
         }
       ]
     },
