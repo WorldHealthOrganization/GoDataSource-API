@@ -3752,6 +3752,40 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Restore a deleted lab result
+   * @param contactOfContactId
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactOfContactLabResult = function (contactOfContactId, labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          personId: contactOfContactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
    * Find relations for a contact of contact
    * @param contactOfContactId
    * @param filter
