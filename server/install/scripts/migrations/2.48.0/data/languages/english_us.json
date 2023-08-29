@@ -449,6 +449,10 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
       "translation": "This permission allows exporting of lab results",
       "section": "availablePermissions"
+    },
+    "LNG_APP_PAGE_CONTACT_OF_CONTACT_LAB_RESULTS": {
+      "translation": "Contact of contact lab results",
+      "section": "uiSavedFiltersForPagesLabels"
     }
   }
 }
