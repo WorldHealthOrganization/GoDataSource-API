@@ -82,6 +82,11 @@
       "type": "boolean",
       "default": false
     },
+    "generateFollowUpsWhenCreatingContacts": {
+      "description": "Flag that specifies whether follow ups are automatically generated when creating contacts. Default: false",
+      "type": "boolean",
+      "default": false
+    },
     "intervalOfFollowUp": {
       "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
       "type": "string"

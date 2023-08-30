@@ -453,6 +453,22 @@
     "LNG_APP_PAGE_CONTACT_OF_CONTACT_LAB_RESULTS": {
       "translation": "Contact of contact lab results",
       "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS": {
+      "translation": "Create follow-ups automatically when creating contacts",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS_DESCRIPTION": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating contacts.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS": {
+      "translation": "Create follow-ups automatically when creating contacts",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS_DESCRIPTION": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating contacts.",
+      "section": "uiOutbreakTemplateFields"
     }
   }
 }
