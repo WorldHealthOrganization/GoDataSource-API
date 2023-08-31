@@ -23,9 +23,14 @@ const _createFollowUpEntry = function (props, contact) {
 };
 
 // count contacts that have follow up period between the passed start/end dates
-module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, options) {
+module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, options) {
   // where condition used to count eligible contacts
-  let where = {
+  // check if the follow-ups should be generated only for specific contacts.
+  let where = contactIds.length ? {
+    _id: {
+      $in: contactIds
+    }
+  } : {
     $and: [
       {
         outbreakId: outbreakId,
@@ -131,9 +136,13 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, skip, limit, options) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, skip, limit, options) {
   // where condition used to count eligible contacts
-  let where = {
+  let where = contactIds.length ? {
+    _id: {
+      $in: contactIds
+    }
+  }: {
     $and: [
       {
         outbreakId: outbreakId,

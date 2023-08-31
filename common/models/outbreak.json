@@ -3756,7 +3756,7 @@
           "arg": "body",
           "type": "object",
           "model": "generateFollowup",
-          "description": "Follow up required period start/end dates and targeted optional flag.",
+          "description": "Follow up period start/end dates and targeted optional flag. contactIds optional array containing the contact IDs for which to generate follow ups.",
           "http": {
             "source": "body"
           },
