@@ -84,9 +84,11 @@ module.exports = function (Outbreak) {
     // check if the follow-ups should be generated only for specific contacts.
     const contactIds = !data.contactIds ?
       [] :
-      Array.isArray(data.contactIds) ?
-        data.contactIds :
-        [data.contactIds];
+      (
+        Array.isArray(data.contactIds) ?
+          data.contactIds :
+          [data.contactIds]
+      );
 
     // check if 'targeted' flag exists in the request, if not default to true
     // this flag will be set upon all generated follow ups
