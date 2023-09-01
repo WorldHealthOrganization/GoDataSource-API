@@ -134,7 +134,7 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
       );
 
     // use the merged conditions
-    where = {...filter.where};
+    where = filter.where;
   }
 
   // add geographical restriction to filter if needed
@@ -262,7 +262,7 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
       );
 
     // use the merged conditions
-    where = {...filter.where};
+    where = filter.where;
   }
 
   // add geographical restriction to filter if needed
