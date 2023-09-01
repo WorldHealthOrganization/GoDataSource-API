@@ -23,7 +23,7 @@ const _createFollowUpEntry = function (props, contact) {
 };
 
 // count contacts that have follow up period between the passed start/end dates
-module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, options) {
+module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, options) {
   // where condition used to count eligible contacts
   let where = {
     $and: [
@@ -116,6 +116,26 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
       }
     ]
   };
+
+  // check if the follow-ups should be generated only for specific contacts.
+  if (contactIds.length) {
+    // let filter = { where: where};
+    const filter = App.utils.remote
+      .mergeFilters(
+        {
+          where: {
+            _id: {
+              $in: contactIds
+            }
+          }
+        }, {
+          where: where
+        }
+      );
+
+    // use the merged conditions
+    where = {...filter.where};
+  }
 
   // add geographical restriction to filter if needed
   return App.models.person
@@ -131,7 +151,7 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, skip, limit, options) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, skip, limit, options) {
   // where condition used to count eligible contacts
   let where = {
     $and: [
@@ -224,6 +244,26 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
       }
     ]
   };
+
+  // check if the follow-ups should be generated only for specific contacts.
+  if (contactIds.length) {
+    // let filter = { where: where};
+    const filter = App.utils.remote
+      .mergeFilters(
+        {
+          where: {
+            _id: {
+              $in: contactIds
+            }
+          }
+        }, {
+          where: where
+        }
+      );
+
+    // use the merged conditions
+    where = {...filter.where};
+  }
 
   // add geographical restriction to filter if needed
   return App.models.person

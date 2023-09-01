@@ -78,6 +78,7 @@ function run(callback) {
           generateFollowUpsKeepTeamAssignment: item.generateFollowUpsKeepTeamAssignment,
           generateFollowUpsTeamAssignmentAlgorithm: item.generateFollowUpsTeamAssignmentAlgorithm,
           generateFollowUpsDateOfLastContact: item.generateFollowUpsDateOfLastContact,
+          generateFollowUpsWhenCreatingContacts: item.generateFollowUpsWhenCreatingContacts,
           intervalOfFollowUp: item.intervalOfFollowUp ? item.intervalOfFollowUp : '',
           noDaysAmongContacts: item.noDaysAmongContacts,
           noDaysInChains: item.noDaysInChains,
