@@ -30,8 +30,7 @@
       "type": "string"
     },
     "locationId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "geoLocation": {
       "required": false,

@@ -10,12 +10,10 @@
   ],
   "properties": {
     "startDate": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "endDate": {
-      "type": "date",
-      "required": true
+      "type": "date"
     }
   },
   "validations": [],
