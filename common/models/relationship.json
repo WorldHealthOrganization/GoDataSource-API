@@ -16,17 +16,14 @@
       "required": true
     },
     "contactDate": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "contactDateEstimated": {
       "type": "boolean",
-      "required": true,
       "default": false
     },
     "certaintyLevelId": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "exposureTypeId": {
       "type": "string"
