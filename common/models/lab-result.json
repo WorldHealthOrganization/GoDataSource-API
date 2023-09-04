@@ -15,8 +15,7 @@
       "type": "string"
     },
     "dateSampleTaken": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateSampleDelivered": {
       "type": "date"
