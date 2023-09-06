@@ -3,6 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
+const async = require("async");
 
 module.exports = function (Event) {
   // set flag to not get controller
@@ -193,6 +194,99 @@ module.exports = function (Event) {
     return null;
   };
 
+  Event.getIsolatedContacts = function (eventId, callback) {
+    // get all relations with a contact
+    return app.models.relationship
+      .rawFind({
+        // required to use index to improve greatly performance
+        'persons.id': eventId,
+
+        // filter
+        $or: [
+          {
+            'persons.0.id': eventId,
+            'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          },
+          {
+            'persons.1.id': eventId,
+            'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
+          }
+        ]
+      }, {
+        projection: {
+          persons: 1
+        },
+        // required to use index to improve greatly performance
+        hint: {
+          'persons.id': 1
+        }
+      })
+      .then((relationships) => {
+        async.parallelLimit(relationships.map((rel) => {
+          const contact = rel.persons.find((p) => p.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT');
+          return (cb) => {
+            app.models.contact
+              .findOne({
+                where: {
+                  id: contact.id
+                }
+              })
+              .then((contact) => {
+                // contact missing ?
+                if (!contact) {
+                  cb(null, {isValid: false});
+                  return;
+                }
+
+                // get all relations of the contact that are not with this event
+                app.models.relationship
+                  .rawFind({
+                    // required to use index to improve greatly performance
+                    'persons.id': contact.id,
+
+                    // filter
+                    $or: [
+                      {
+                        'persons.0.id': contact.id,
+                        'persons.1.id': {
+                          $ne: eventId
+                        },
+                        'persons.1.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                        }
+                      },
+                      {
+                        'persons.0.id': {
+                          $ne: eventId
+                        },
+                        'persons.0.type': {
+                          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+                        },
+                        'persons.1.id': contact.id
+                      }
+                    ]
+                  }, {
+                    projection: {
+                      _id: 1
+                    },
+                    // required to use index to improve greatly performance
+                    hint: {
+                      'persons.id': 1
+                    }
+                  })
+                  .then((relationships) => cb(null, {contact: contact, isValid: !relationships.length}));
+              })
+              .catch((error) => cb(error));
+          };
+        }), 10, (err, possibleIsolatedContacts) => {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, possibleIsolatedContacts.filter((entry) => entry.isValid));
+        });
+      });
+  };
+
   /**
    * Before save hooks
    */
@@ -224,4 +318,47 @@ module.exports = function (Event) {
       .catch(next);
   });
 
+  /**
+   * Event after delete
+   * Actions:
+   * Remove any contacts that remain isolated after the event deletion
+   */
+  Event.observe('after delete', (context, next) => {
+    if (context.options.mergeDuplicatesAction) {
+      // don't remove isolated contacts when merging two events
+      return next();
+    }
+
+    const eventId = context.instance.id;
+    Event.getIsolatedContacts(eventId, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // construct the list of contacts that we need to remove
+      const contactsJobs = [];
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          // remove contact job
+          contactsJobs.push((function (contactModel) {
+            return (callback) => {
+              contactModel.destroy(
+                {
+                  extraProps: {
+                    deletedByParent: eventId
+                  }
+                },
+                callback
+              );
+            };
+          })(isolatedContact.contact));
+        }
+      });
+
+      // delete each isolated contact & and its relationship
+      async.parallelLimit(contactsJobs, 10, function (error) {
+        next(error);
+      });
+    });
+  });
 };

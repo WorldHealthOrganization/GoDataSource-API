@@ -706,6 +706,50 @@ module.exports = function (Contact) {
   });
 
   /**
+   * Contact after delete
+   * Actions:
+   * Remove any contacts of contacts that remain isolated after the contact deletion
+   */
+  Contact.observe('after delete', (context, next) => {
+    if (context.options.mergeDuplicatesAction) {
+      // don't remove isolated contacts of contacts when merging two contacts
+      return next();
+    }
+
+    const contactId = context.instance.id;
+    Contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // construct the list of contacts of contacts that we need to remove
+      const contactsOfContactsJobs = [];
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          // remove contact job
+          contactsOfContactsJobs.push((function (contactOfContactModel) {
+            return (callback) => {
+              contactOfContactModel.destroy(
+                {
+                  extraProps: {
+                    deletedByParent: contactId
+                  }
+                },
+                callback
+              );
+            };
+          })(isolatedContact.contact));
+        }
+      });
+
+      // delete each isolated contact of contact & and its relationship
+      async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+        next(error);
+      });
+    });
+  });
+
+  /**
    * Retrieve all contact's that have follow ups on the given date
    * Group them by place/case/riskLevel
    * If group by place is set, placeLevel property is required
