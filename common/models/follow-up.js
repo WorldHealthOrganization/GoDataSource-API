@@ -776,12 +776,13 @@ module.exports = function (FollowUp) {
     }
     // get main followUp query
     let followUpQuery = _.get(filter, 'where', {});
-    let contactMap = {};
+    let contactMap;
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
     // if a case query is present
     if (caseQuery) {
       // restrict query to current outbreak
+      contactMap = contactMap || {};
       caseQuery = {
         $and: [
           caseQuery,
@@ -798,6 +799,12 @@ module.exports = function (FollowUp) {
             .then(function (cases) {
               // build a list of case ids that passed the filter
               const caseIds = cases.map(caseRecord => caseRecord.id);
+
+              // no need to continue if nothing found
+              if (caseIds.length < 1) {
+                return [];
+              }
+
               // find relations with contacts for those cases
               return app.models.relationship
                 .rawFind({
@@ -832,6 +839,7 @@ module.exports = function (FollowUp) {
     // if a contact of contact query is present
     if (contactOfContactQuery) {
       // restrict query to current outbreak
+      contactMap = contactMap || {};
       contactOfContactQuery = {
         $and: [
           contactOfContactQuery,
@@ -848,6 +856,12 @@ module.exports = function (FollowUp) {
             .then(function (contactOfContacts) {
               // build a list of contactOfContact ids that passed the filter
               const contactOfContactIds = contactOfContacts.map(contactOfContactRecord => contactOfContactRecord.id);
+
+              // no need to continue if nothing found
+              if (contactOfContactIds.length < 1) {
+                return [];
+              }
+
               // find relations with contacts for those contact of contacts
               return app.models.relationship
                 .rawFind({
@@ -915,8 +929,7 @@ module.exports = function (FollowUp) {
     return buildQuery
       .then(function () {
         // if contact Ids were specified
-        const contactIds = Object.keys(contactMap);
-        if (contactIds.length) {
+        if (contactMap) {
           // make sure there is a contact query
           if (!contactQuery) {
             contactQuery = {};
@@ -927,7 +940,7 @@ module.exports = function (FollowUp) {
               contactQuery,
               {
                 _id: {
-                  $in: contactIds
+                  $in: Object.keys(contactMap)
                 }
               }
             ]
