@@ -776,12 +776,13 @@ module.exports = function (FollowUp) {
     }
     // get main followUp query
     let followUpQuery = _.get(filter, 'where', {});
-    let contactMap = {};
+    let contactMap;
     // start with a resolved promise (so we can link others)
     let buildQuery = Promise.resolve();
     // if a case query is present
     if (caseQuery) {
       // restrict query to current outbreak
+      contactMap = contactMap || {};
       caseQuery = {
         $and: [
           caseQuery,
@@ -832,6 +833,7 @@ module.exports = function (FollowUp) {
     // if a contact of contact query is present
     if (contactOfContactQuery) {
       // restrict query to current outbreak
+      contactMap = contactMap || {};
       contactOfContactQuery = {
         $and: [
           contactOfContactQuery,
@@ -915,8 +917,10 @@ module.exports = function (FollowUp) {
     return buildQuery
       .then(function () {
         // if contact Ids were specified
-        const contactIds = Object.keys(contactMap);
-        if (contactIds.length) {
+        const contactIds = contactMap ?
+          Object.keys(contactMap) :
+          undefined;
+        if (contactMap) {
           // make sure there is a contact query
           if (!contactQuery) {
             contactQuery = {};
