@@ -505,6 +505,10 @@
     "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CONTACT_FOLLOW_UPS": {
       "translation": "View follow-ups",
       "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_MODIFY_RELATIONSHIP_TITLE": {
+      "translation": "Modify relationship",
+      "section": "uiChainsOfTransmissionGraph"
     }
   }
 }
