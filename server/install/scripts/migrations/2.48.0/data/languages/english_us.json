@@ -469,6 +469,46 @@
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS_DESCRIPTION": {
       "translation": "Flag that specifies whether follow-ups are automatically generated when creating contacts.",
       "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CONTACT_TITLE": {
+      "translation": "View follow-ups",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_VIEW_FOLLOW_UPS_FOR_RELATED_CONTACTS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiModifyCasePage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_TAB_FOLLOW_UPS_TITLE": {
+      "translation": "Follow-ups",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CONTACT_OF_CONTACT_WAS_CONTACT_TITLE": {
+      "translation": "This contact of contact was a contact",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CONTACT_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_MODIFY_RELATIONSHIP_TITLE": {
+      "translation": "Modify relationship",
+      "section": "uiChainsOfTransmissionGraph"
     }
   }
 }
