@@ -3,7 +3,7 @@
 const app = require('../../server/server');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
-const async = require("async");
+const async = require('async');
 
 module.exports = function (Event) {
   // set flag to not get controller
