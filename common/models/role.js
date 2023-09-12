@@ -1233,7 +1233,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'event_list_isolated_contacts'
           ]
         },
         {
@@ -1359,6 +1360,14 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_list'
+          ]
+        },
+        {
+          id: 'event_list_isolated_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         },
         {

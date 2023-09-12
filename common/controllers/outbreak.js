@@ -870,7 +870,49 @@ module.exports = function (Outbreak) {
         }
 
         // undo delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(
+          options,
+          (err, result) => {
+            // an error occurred?
+            if (err) {
+              return callback(err);
+            }
+
+            // retrieve contacts of contacts that were deleted and were associated with this contact
+            const contactsOfContactsJobs = [];
+            app.models.contactOfContact
+              .find({
+                deleted: true,
+                where: {
+                  deletedByParent: contactId,
+                  deleted: true
+                }
+              })
+              .then((contactsOfContacts) => {
+                // construct the list of contacts of contacts that we need to restore
+                (contactsOfContacts || []).forEach((contactOfContact) => {
+                  contactsOfContactsJobs.push((function (contactOfContactModel) {
+                    return (callback) => {
+                      contactOfContactModel.undoDelete(
+                        {
+                          extraProps: {
+                            deletedByParent: null
+                          }
+                        },
+                        callback
+                      );
+                    };
+                  })(contactOfContact));
+                });
+
+                // restore contacts of contacts that were removed along with this contact
+                async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                  callback(error, result);
+                });
+              })
+              .catch(callback);
+          }
+        );
       })
       .catch(callback);
   };
@@ -896,7 +938,49 @@ module.exports = function (Outbreak) {
         }
 
         // undo delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(
+          options,
+          (err, result) => {
+            // an error occurred?
+            if (err) {
+              return callback(err);
+            }
+
+            // retrieve contacts that were deleted and were associated with this event
+            const contactsJobs = [];
+            app.models.contact
+              .find({
+                deleted: true,
+                where: {
+                  deletedByParent: eventId,
+                  deleted: true
+                }
+              })
+              .then((contacts) => {
+                // construct the list of contacts that we need to restore
+                (contacts || []).forEach((contact) => {
+                  contactsJobs.push((function (contactModel) {
+                    return (callback) => {
+                      contactModel.undoDelete(
+                        {
+                          extraProps: {
+                            deletedByParent: null
+                          }
+                        },
+                        callback
+                      );
+                    };
+                  })(contact));
+                });
+
+                // restore contacts that were removed along with this event
+                async.parallelLimit(contactsJobs, 10, function (error) {
+                  callback(error, result);
+                });
+              })
+              .catch(callback);
+          }
+        );
       })
       .catch(callback);
   };
@@ -3510,6 +3594,30 @@ module.exports = function (Outbreak) {
       });
     });
   };
+
+  /**
+   * Retrieve an event isolated contacts and count
+   * @param eventId
+   * @param callback
+   */
+  Outbreak.prototype.getEventIsolatedContacts = function (eventId, callback) {
+    app.models.event.getIsolatedContacts(eventId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
+      });
+    });
+  };
+
 
   /**
    * Retrieve the isolated contacts for a contact and count
