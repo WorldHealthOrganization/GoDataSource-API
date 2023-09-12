@@ -831,7 +831,46 @@ module.exports = function (Outbreak) {
                             deletedByParent: null
                           }
                         },
-                        callback
+                        (err, result) => {
+                          // an error occurred?
+                          if (err) {
+                            return callback(err);
+                          }
+
+                          // retrieve contacts of contacts that were deleted and were associated with this contact
+                          const contactsOfContactsJobs = [];
+                          app.models.contactOfContact
+                            .find({
+                              deleted: true,
+                              where: {
+                                deletedByParent: contact.id,
+                                deleted: true
+                              }
+                            })
+                            .then((contactsOfContacts) => {
+                              // construct the list of contacts of contacts that we need to restore
+                              (contactsOfContacts || []).forEach((contactOfContact) => {
+                                contactsOfContactsJobs.push((function (contactOfContactModel) {
+                                  return (callback) => {
+                                    contactOfContactModel.undoDelete(
+                                      {
+                                        extraProps: {
+                                          deletedByParent: null
+                                        }
+                                      },
+                                      callback
+                                    );
+                                  };
+                                })(contactOfContact));
+                              });
+
+                              // restore contacts of contacts that were removed along with this contact
+                              async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                                callback(error, result);
+                              });
+                            })
+                            .catch(callback);
+                        }
                       );
                     };
                   })(contact));
@@ -967,7 +1006,46 @@ module.exports = function (Outbreak) {
                             deletedByParent: null
                           }
                         },
-                        callback
+                        (err, result) => {
+                          // an error occurred?
+                          if (err) {
+                            return callback(err);
+                          }
+
+                          // retrieve contacts of contacts that were deleted and were associated with this contact
+                          const contactsOfContactsJobs = [];
+                          app.models.contactOfContact
+                            .find({
+                              deleted: true,
+                              where: {
+                                deletedByParent: contact.id,
+                                deleted: true
+                              }
+                            })
+                            .then((contactsOfContacts) => {
+                              // construct the list of contacts of contacts that we need to restore
+                              (contactsOfContacts || []).forEach((contactOfContact) => {
+                                contactsOfContactsJobs.push((function (contactOfContactModel) {
+                                  return (callback) => {
+                                    contactOfContactModel.undoDelete(
+                                      {
+                                        extraProps: {
+                                          deletedByParent: null
+                                        }
+                                      },
+                                      callback
+                                    );
+                                  };
+                                })(contactOfContact));
+                              });
+
+                              // restore contacts of contacts that were removed along with this contact
+                              async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                                callback(error, result);
+                              });
+                            })
+                            .catch(callback);
+                        }
                       );
                     };
                   })(contact));
