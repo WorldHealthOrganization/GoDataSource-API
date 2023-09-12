@@ -509,6 +509,18 @@
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_MODIFY_RELATIONSHIP_TITLE": {
       "translation": "Modify relationship",
       "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_EVENT_WITH_EXPOSED_CONTACTS": {
+      "translation": "Event '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS": {
+      "translation": "Event - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows determining which contacts are isolated",
+      "section": "availablePermissions"
     }
   }
 }

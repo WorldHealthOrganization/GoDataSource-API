@@ -391,7 +391,7 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 25
+      buildNo: 26
     }]
   }, {
     fileName: 'referenceData.js',
@@ -412,6 +412,12 @@ const migrationVersions = [{
       buildNo: 1
     }, {
       name: 'disableFollowUpStatus',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
       buildNo: 1
     }]
   }]
