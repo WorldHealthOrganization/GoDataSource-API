@@ -11,7 +11,7 @@ const findBatchSize = 1000;
 const updateBatchSize = 10;
 
 /**
- * Add "event_list_isolated_contacts" permission for the following permissions: contact_delete
+ * Add "event_list_isolated_contacts" permission for the event_delete permission
  */
 const addMissingPermission = (callback) => {
   // constants
