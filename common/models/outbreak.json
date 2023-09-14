@@ -1126,6 +1126,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_list_isolated_contacts",
+      "permission": "ALLOW",
+      "property": "getEventIsolatedContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "relationship_share",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
@@ -6261,6 +6267,29 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/relationships/contacts/filtered-count"
+      }
+    },
+    "prototype.getEventIsolatedContacts": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for events"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of isolated contacts and list of ids",
+          "required": true
+        }
+      ],
+      "description": "Get count of isolated contacts for an event",
+      "http": {
+        "verb": "get",
+        "path": "/events/:fk/isolated-contacts"
       }
     },
     "prototype.countCasesPerClassification": {

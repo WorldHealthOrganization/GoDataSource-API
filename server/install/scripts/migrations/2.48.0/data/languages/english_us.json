@@ -509,6 +509,38 @@
     "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_MODIFY_RELATIONSHIP_TITLE": {
       "translation": "Modify relationship",
       "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_EVENT_WITH_EXPOSED_CONTACTS": {
+      "translation": "Event '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
+      "translation": "Restoring event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the event (e.g. contacts, contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": {
+      "translation": "Case '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
+      "translation": "Restoring case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. contacts, contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT_WITH_EXPOSED_CONTACTS": {
+      "translation": "Contact '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
+      "translation": "Restoring contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS": {
+      "translation": "Event - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows determining which contacts are isolated",
+      "section": "availablePermissions"
     }
   }
 }
