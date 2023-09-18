@@ -1655,6 +1655,20 @@ const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictio
 };
 
 /**
+ * Set value in options;
+ */
+const setValueInOptions = function (
+  options,
+  modelName,
+  id,
+  key,
+  value,
+  container = '_data'
+) {
+  _.set(options, `${modelName}._instance[${id}][${container}][${key}]`, value);
+};
+
+/**
  * Set value in context options;
  * Creating options.${context.Model.modelName}._instance[${context.instance.id}][${container}] object in context and store the 'value' at the 'key' position
  * @param context
@@ -1663,7 +1677,30 @@ const buildAndTranslateAnswerLabel = function (questionText, answerValue, dictio
  * @param [container]
  */
 const setValueInContextOptions = function (context, key, value, container = '_data') {
-  _.set(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}][${container}][${key}]`, value);
+  context.options = context.options || {};
+  setValueInOptions(
+    context.options,
+    context.Model.modelName,
+    context.instance ?
+      context.instance.id :
+      context.currentInstance.id,
+    key,
+    value,
+    container
+  );
+};
+
+/**
+ * Get value from options for the key
+ */
+const getValueFromOptions = function (
+  options,
+  modelName,
+  id,
+  key,
+  container = '_data'
+) {
+  return _.get(options, `${modelName}._instance[${id}][${container}][${key}]`, null);
 };
 
 /**
@@ -1675,7 +1712,16 @@ const setValueInContextOptions = function (context, key, value, container = '_da
  * @param [container]
  */
 const getValueFromContextOptions = function (context, key, container = '_data') {
-  return _.get(context, `options.${context.Model.modelName}._instance[${context.instance ? context.instance.id : context.currentInstance.id}][${container}][${key}]`, null);
+  context.options = context.options || {};
+  return getValueFromOptions(
+    context.options,
+    context.Model.modelName,
+    context.instance ?
+      context.instance.id :
+      context.currentInstance.id,
+    key,
+    container
+  );
 };
 
 /**
@@ -2842,7 +2888,9 @@ Object.assign(module.exports, {
   setOriginalValueInContextOptions: setOriginalValueInContextOptions,
   getOriginalValueFromContextOptions: getOriginalValueFromContextOptions,
   paginateResultSet: paginateResultSet,
+  setValueInOptions: setValueInOptions,
   setValueInContextOptions: setValueInContextOptions,
+  getValueFromOptions: getValueFromOptions,
   getValueFromContextOptions: getValueFromContextOptions,
   getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,

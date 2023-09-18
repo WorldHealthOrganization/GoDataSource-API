@@ -561,7 +561,6 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLa
  * @param overwriteExistingFollowUps flag specifying whether exiting follow-ups should be overwritten
  * @param teamAssignmentPerDay map of team assignment per day; used to not rely only on round-robin as we may reach odd scenarios
  * @param intervalOfFollowUp Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')
- * @param generateFollowUpsDateOfLastContact flag specifying if contact tracing should start on the date of the last contact
  * @returns {{add: [], update: {}}}
  */
 module.exports.generateFollowupsForContact = function (
@@ -573,8 +572,7 @@ module.exports.generateFollowupsForContact = function (
   targeted,
   overwriteExistingFollowUps,
   teamAssignmentPerDay,
-  intervalOfFollowUp,
-  generateFollowUpsDateOfLastContact
+  intervalOfFollowUp
 ) {
 
   // process follow-up interval restrictions
@@ -645,10 +643,7 @@ module.exports.generateFollowupsForContact = function (
 
   // if passed period is higher than contact's follow up period
   // restrict follow up start/date to a maximum of contact's follow up period
-  // check also if contact tracing should start on the date of the last contact
-  let firstIncubationDay = generateFollowUpsDateOfLastContact ?
-    Helpers.getDate(contact.followUp.startDate).subtract(1, 'days') :
-    Helpers.getDate(contact.followUp.startDate);
+  let firstIncubationDay = Helpers.getDate(contact.followUp.startDate);
   let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
   if (period.endDate.isAfter(lastIncubationDay)) {
     period.endDate = lastIncubationDay.clone();

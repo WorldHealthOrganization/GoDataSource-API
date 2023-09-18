@@ -489,17 +489,21 @@ module.exports = function (Contact) {
 
   /**
    * Update Follow-Up dates if needed (if conditions are met)
-   * @param context
-   * @return {*|void|Promise<T | never>}
    */
-  Contact.updateFollowUpDatesIfNeeded = function (context) {
+  Contact.updateFollowUpDatesIfNeeded = function (
+    contactInstance,
+    options
+  ) {
     // prevent infinite loops
-    if (app.utils.helpers.getValueFromContextOptions(context, 'updateFollowUpDatesIfNeeded')) {
+    if (app.utils.helpers.getValueFromOptions(
+      options,
+      app.models.contact.modelName,
+      contactInstance.id,
+      'updateFollowUpDatesIfNeeded'
+    )) {
       return Promise.resolve();
     }
     let relationshipInstance;
-    // get contact instance
-    let contactInstance = context.instance;
     // get newest relationship, if any
     return app.models.relationship
       .findOne({
@@ -542,7 +546,11 @@ module.exports = function (Contact) {
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+          // check also if contact tracing should start on the date of the last contact
+          propsToUpdate.startDate = outbreak.generateFollowUpsDateOfLastContact ?
+            helpers.getDate(relationshipInstance.contactDate) :
+            helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
@@ -552,6 +560,17 @@ module.exports = function (Contact) {
           }
           // set follow-up end date
           propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+
+          // set generateFollowUpsDateOfLastContact if the outbreak feature is enabled
+          if (outbreak.generateFollowUpsDateOfLastContact){
+            propsToUpdate.generateFollowUpsDateOfLastContact = true;
+          } else {
+            // set to false it "unsetAttribute" cannot be used to remove property
+            // otherwise, remove the property after update contact
+            if (!contactInstance.unsetAttribute) {
+              propsToUpdate.generateFollowUpsDateOfLastContact = false;
+            }
+          }
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
@@ -563,8 +582,13 @@ module.exports = function (Contact) {
             }
             // if either original or new value was not set (when the other was present)
             if (
-              !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
-              contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+              (
+                !contactInstance.followUp[updatePropName] &&
+                propsToUpdate[updatePropName]
+              ) || (
+                contactInstance.followUp[updatePropName] &&
+                !propsToUpdate[updatePropName]
+              )
             ) {
               // flag as an update
               return shouldUpdate = true;
@@ -588,13 +612,28 @@ module.exports = function (Contact) {
         // if updates are required
         if (shouldUpdate) {
           // set a flag for this operation so we prevent infinite loops
-          app.utils.helpers.setValueInContextOptions(context, 'updateFollowUpDatesIfNeeded', true);
+          app.utils.helpers.setValueInOptions(
+            options,
+            app.models.contact.modelName,
+            contactInstance.id,
+            'updateFollowUpDatesIfNeeded',
+            true
+          );
           // update contact
           return contactInstance.updateAttributes({
             followUp: propsToUpdate,
             // contact is active if it has valid follow-up interval
             active: !!propsToUpdate.startDate
-          }, context.options);
+          }, options)
+            .then(() => {
+              // no change is required if outbreak.generateFollowUpsDateOfLastContact is active
+              if (outbreak.generateFollowUpsDateOfLastContact) {
+                return;
+              }
+
+              // delete the generateFollowUpsDateOfLastContact property
+              return contactInstance.unsetAttribute('followUp.generateFollowUpsDateOfLastContact');
+            });
         }
       });
   };
@@ -695,7 +734,10 @@ module.exports = function (Contact) {
     // if this is an exiting record
     if (!context.isNewInstance) {
       // update follow-up dates, if needed
-      Contact.updateFollowUpDatesIfNeeded(context)
+      Contact.updateFollowUpDatesIfNeeded(
+        context.instance,
+        context.options
+      )
         .then(function () {
           next();
         })

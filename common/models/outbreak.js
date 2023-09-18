@@ -1696,6 +1696,86 @@ module.exports = function (Outbreak) {
     );
   });
 
+  /**
+   * On update, update contact followup start date, end date
+   */
+  Outbreak.observe('after save', function (context, next) {
+    // return if it's a new record or there is no changed field
+    if (
+      context.isNewInstance ||
+      !context.options.changedFields ||
+      context.options.changedFields.length === 0
+    ) {
+      return next();
+    }
+
+    // return if the changed fields are not 'Duration for the follow-up period in days' or 'Contact tracing should start on the date of the last contact'"
+    const followUpFieldsChanged = context.options.changedFields.map((item) => item.field)
+      .filter((field) => ['periodOfFollowup', 'generateFollowUpsDateOfLastContact'].includes(field));
+    if (followUpFieldsChanged.length === 0) {
+      return next();
+    }
+
+    // since the query can return many results we will do the update in batches
+    // Note: Updating each contact one by one in order for the "before/after save" hooks to be executed for each entry
+    // Number of find requests at the same time
+    // Don't set this value to high so we don't exceed Mongo 16MB limit
+    const findBatchSize = 1000;
+
+    // set how many item update actions to run in parallel
+    const updateBatchSize = 10;
+
+    // update all contacts (including deleted)
+    const where = {
+      outbreakId: context.instance.id
+    };
+
+    // initialize parameters for handleActionsInBatches call
+    const getActionsCount = () => {
+      return app.models.contact
+        .count(Object.assign({}, where, { includeDeletedRecords: true }))
+        .then(count => {
+          return Promise.resolve(count);
+        });
+    };
+
+    // get records in batches
+    const getBatchData = (batchNo, batchSize) => {
+      // get contacts for batch
+      return app.models.contact
+        .find({
+          deleted: true,
+          where: where,
+          skip: (batchNo - 1) * batchSize,
+          limit: batchSize,
+          order: 'createdAt ASC'
+        });
+    };
+
+    // update contact
+    const itemAction = (contact) => {
+      return app.models.contact.updateFollowUpDatesIfNeeded(
+        contact,
+        context.options
+      );
+    };
+
+    // process data in batches
+    genericHelpers.handleActionsInBatches(
+      getActionsCount,
+      getBatchData,
+      null,
+      itemAction,
+      findBatchSize,
+      updateBatchSize,
+      context.options.remotingContext.req.logger
+    )
+      .then(() => {
+        next();
+      })
+      .catch((err) => next(err));
+  });
+
   // on load, include default ArcGis servers
   Outbreak.observe('loaded', function (context, next) {
     // if the outbreak does not have ArcGis servers defined
