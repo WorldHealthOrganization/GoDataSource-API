@@ -2132,7 +2132,7 @@ module.exports = function (Outbreak) {
               const firstFollowUpDay = contactsMap[groupData._id].lastContactDate.clone().add(1, 'days');
 
               // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-              const lastFollowUpDay = genericHelpers.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
+              const lastFollowUpDay = localizationHelper.getDateEndOfDay(firstFollowUpDay.clone().add(outbreak.periodOfFollowup, 'days'));
 
               // determine relevant follow-ups
               // those that are in our period of interest
@@ -2179,7 +2179,7 @@ module.exports = function (Outbreak) {
                 const firstFollowUpDay = contactData.lastContactDate.clone().add(1, 'days');
 
                 // calculate end day of follow up by taking the last contact day and adding the outbreak period of follow up to it
-                const lastFollowUpDay = genericHelpers.getDateEndOfDay(
+                const lastFollowUpDay = localizationHelper.getDateEndOfDay(
                   firstFollowUpDay.clone().add(
                     // last contact date is inclusive
                     outbreak.periodOfFollowup > 0 ? outbreak.periodOfFollowup - 1 : 0, 'days'
@@ -2490,14 +2490,14 @@ module.exports = function (Outbreak) {
   Outbreak.prototype.filteredCountContactsOnFollowUpList = function (filter = {}, options, callback) {
     // defensive checks
     filter.where = filter.where || {};
-    let startDate = genericHelpers.getDate().toDate();
-    let endDate = genericHelpers.getDateEndOfDay().toDate();
+    let startDate = localizationHelper.getDateStartOfDay().toDate();
+    let endDate = localizationHelper.getDateEndOfDay().toDate();
     if (filter.where.startDate) {
-      startDate = genericHelpers.getDate(filter.where.startDate).toDate();
+      startDate = localizationHelper.getDateStartOfDay(filter.where.startDate).toDate();
       delete filter.where.startDate;
     }
     if (filter.where.endDate) {
-      endDate = genericHelpers.getDateEndOfDay(filter.where.endDate).toDate();
+      endDate = localizationHelper.getDateEndOfDay(filter.where.endDate).toDate();
       delete filter.where.endDate;
     }
 
@@ -2864,8 +2864,8 @@ module.exports = function (Outbreak) {
     const models = app.models;
 
     let standardFormat = 'YYYY-MM-DD';
-    let startDate = genericHelpers.getDate(body.startDate);
-    let endDate = genericHelpers.getDate(body.endDate);
+    let startDate = localizationHelper.getDateStartOfDay(body.startDate);
+    let endDate = localizationHelper.getDateStartOfDay(body.endDate);
 
     // make sure range dates are valid or single date
     if (!startDate.isValid() || !endDate.isValid()) {
@@ -3144,8 +3144,8 @@ module.exports = function (Outbreak) {
                     row.age = age;
 
                     if (contact.followUp) {
-                      let followUpStartDate = genericHelpers.getDate(contact.followUp.startDate);
-                      let followUpEndDate = genericHelpers.getDate(contact.followUp.endDate);
+                      let followUpStartDate = localizationHelper.getDateStartOfDay(contact.followUp.startDate);
+                      let followUpEndDate = localizationHelper.getDateStartOfDay(contact.followUp.endDate);
 
                       row.followUpStartDate = followUpStartDate.format(standardFormat);
                       row.followUpEndDate = followUpEndDate.format(standardFormat);
@@ -3526,7 +3526,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeContactOfContact: app.utils.helpers.getDate().toDate(),
+          dateBecomeContactOfContact: localizationHelper.today().toDate(),
           wasContact: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
         };
