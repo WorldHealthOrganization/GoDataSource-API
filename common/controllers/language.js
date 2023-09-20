@@ -378,7 +378,7 @@ module.exports = function (Language) {
         callback(
           null, {
             languageId: this.id,
-            lastUpdateDate: data.lastToken ? moment(data.lastToken.updatedAt).toISOString() : null,
+            lastUpdateDate: data.lastToken ? localizationHelper.toMoment(data.lastToken.updatedAt).toISOString() : null,
             tokens: data.tokens
           }
         );
