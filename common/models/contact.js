@@ -504,20 +504,31 @@ module.exports = function (Contact) {
       return Promise.resolve();
     }
     let relationshipInstance;
+    // create filter to get the newest relationship, if any
+    let filter = {
+      order: 'contactDate DESC',
+      where: {
+        'persons.id': contactInstance.id,
+        'persons.type': {
+          inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+        },
+        active: true
+      }
+    };
+
+    // get deleted relationship if the contact is deleted
+    if (
+      contactInstance.deleted &&
+      options.updateDeletedRecords
+    ) {
+      filter = Object.assign(filter, {deleted: true});
+    }
+
     // get newest relationship, if any
     return app.models.relationship
-      .findOne({
-        order: 'contactDate DESC',
-        where: {
-          'persons.id': contactInstance.id,
-          'persons.type': {
-            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-          },
-          active: true
-        }
-      })
+      .findOne(filter)
       .then(function (relationshipRecord) {
         // get relationship instance, if any
         relationshipInstance = relationshipRecord;
@@ -561,15 +572,9 @@ module.exports = function (Contact) {
           // set follow-up end date
           propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
 
-          // set generateFollowUpsDateOfLastContact if the outbreak feature is enabled
-          if (outbreak.generateFollowUpsDateOfLastContact){
+          // set generateFollowUpsDateOfLastContact if only the outbreak feature is enabled
+          if (outbreak.generateFollowUpsDateOfLastContact) {
             propsToUpdate.generateFollowUpsDateOfLastContact = true;
-          } else {
-            // set to false it "unsetAttribute" cannot be used to remove property
-            // otherwise, remove the property after update contact
-            if (!contactInstance.unsetAttribute) {
-              propsToUpdate.generateFollowUpsDateOfLastContact = false;
-            }
           }
         }
         // check if contact instance should be updated (check if any property changed value)
@@ -624,16 +629,7 @@ module.exports = function (Contact) {
             followUp: propsToUpdate,
             // contact is active if it has valid follow-up interval
             active: !!propsToUpdate.startDate
-          }, options)
-            .then(() => {
-              // no change is required if outbreak.generateFollowUpsDateOfLastContact is active
-              if (outbreak.generateFollowUpsDateOfLastContact) {
-                return;
-              }
-
-              // delete the generateFollowUpsDateOfLastContact property
-              return contactInstance.unsetAttribute('followUp.generateFollowUpsDateOfLastContact');
-            });
+          }, options);
         }
       });
   };
@@ -736,7 +732,7 @@ module.exports = function (Contact) {
       // update follow-up dates, if needed
       Contact.updateFollowUpDatesIfNeeded(
         context.instance,
-        context.options
+        Object.assign({}, context.options)
       )
         .then(function () {
           next();

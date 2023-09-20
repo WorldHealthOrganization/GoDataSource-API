@@ -47,12 +47,9 @@ module.exports = function (Outbreak) {
     // if end date is not provided, use outbreak follow-up period
     let followupStartDate = data.startDate ?
       genericHelpers.getDate(data.startDate) :
-      genericHelpers.getDate().add(
-        this.generateFollowUpsDateOfLastContact ?
-          0 :
-          1,
-        'days'
-      );
+      this.generateFollowUpsDateOfLastContact ?
+        genericHelpers.getDate() :
+        genericHelpers.getDate().add(1, 'days');
     let followupEndDate = genericHelpers.getDateEndOfDay(
       data.endDate ?
         data.endDate :

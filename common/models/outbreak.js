@@ -1710,9 +1710,17 @@ module.exports = function (Outbreak) {
     }
 
     // return if the changed fields are not 'Duration for the follow-up period in days' or 'Contact tracing should start on the date of the last contact'"
-    const followUpFieldsChanged = context.options.changedFields.map((item) => item.field)
-      .filter((field) => ['periodOfFollowup', 'generateFollowUpsDateOfLastContact'].includes(field));
-    if (followUpFieldsChanged.length === 0) {
+    let followUpFieldsChanged = false;
+    for (let i = 0; i < context.options.changedFields.length; i++) {
+      if (
+        context.options.changedFields[i].field === 'periodOfFollowup' ||
+        context.options.changedFields[i].field === 'generateFollowUpsDateOfLastContact'
+      ) {
+        followUpFieldsChanged = true;
+        break;
+      }
+    }
+    if (!followUpFieldsChanged) {
       return next();
     }
 
@@ -1726,6 +1734,8 @@ module.exports = function (Outbreak) {
     const updateBatchSize = 10;
 
     // update all contacts (including deleted)
+    // set a flag in context.options needed for triggers
+    context.options.updateDeletedRecords = true;
     const where = {
       outbreakId: context.instance.id
     };
@@ -1746,6 +1756,13 @@ module.exports = function (Outbreak) {
         .find({
           deleted: true,
           where: where,
+          fields: {
+            id: true,
+            deleted: true,
+            outbreakId: true,
+            type: true,
+            followUp: true
+          },
           skip: (batchNo - 1) * batchSize,
           limit: batchSize,
           order: 'createdAt ASC'
@@ -1756,7 +1773,7 @@ module.exports = function (Outbreak) {
     const itemAction = (contact) => {
       return app.models.contact.updateFollowUpDatesIfNeeded(
         contact,
-        context.options
+        Object.assign({}, context.options)
       );
     };
 
