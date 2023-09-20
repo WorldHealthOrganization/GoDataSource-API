@@ -1772,9 +1772,28 @@ module.exports = function (Outbreak) {
     // update contact
     const itemAction = (contact) => {
       return app.models.contact.updateFollowUpDatesIfNeeded(
-        contact,
+        contact.id,
+        contact.outbreakId,
+        contact.type,
+        contact.deleted,
+        contact.followUp,
         Object.assign({}, context.options)
-      );
+      )
+        .then((data) => {
+          // no property to update ?
+          if (
+            !data ||
+            Object.keys(data).length === 0
+          ) {
+            return;
+          }
+
+          // update contact
+          return contact.updateAttributes(
+            data,
+            Object.assign({}, context.options)
+          );
+        });
     };
 
     // process data in batches
