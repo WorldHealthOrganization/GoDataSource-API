@@ -13,7 +13,7 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 const fork = require('child_process').fork;
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
@@ -469,9 +469,9 @@ module.exports = function (Outbreak) {
                         address: app.models.address.getHumanReadableAddress(record.address),
                         phoneNumber: _.get(record, 'address.phoneNumber', ''),
                         day: record.index,
-                        from: moment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
-                        to: moment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
-                        date: record.date ? moment(record.date).format('YYYY-MM-DD') : undefined,
+                        from: localizationHelper.toMoment(_.get(record, 'contact.followUp.startDate')).format('YYYY-MM-DD'),
+                        to: localizationHelper.toMoment(_.get(record, 'contact.followUp.endDate')).format('YYYY-MM-DD'),
+                        date: record.date ? localizationHelper.toMoment(record.date).format('YYYY-MM-DD') : undefined,
                         targeted: record.targeted ? yesLabel : noLabel
                       };
 
@@ -554,7 +554,7 @@ module.exports = function (Outbreak) {
               });
               // define a list of common labels
               const commonLabels = {
-                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${contactData ? app.models.person.getDisplayName(contactData) : moment(startDate).format('YYYY-MM-DD')}`,
+                title: `${dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TITLE')}: ${contactData ? app.models.person.getDisplayName(contactData) : localizationHelper.toMoment(startDate).format('YYYY-MM-DD')}`,
                 groupTitle: dictionary.getTranslation(groupBy === 'place' ? 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' : 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE'),
                 total: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TOTAL')
               };
@@ -954,8 +954,8 @@ module.exports = function (Outbreak) {
                               locationsMap[record.currentAddress.locationId].name :
                               unknownLocationTranslation,
                             address: app.models.address.getHumanReadableAddress(record.currentAddress),
-                            from: moment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
-                            to: moment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
+                            from: localizationHelper.toMoment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
+                            to: localizationHelper.toMoment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
                             // needed for building tables
                             followUps: record.followUps,
                             followUp: record.followUp
@@ -1404,7 +1404,7 @@ module.exports = function (Outbreak) {
                   return Promise.all(pdfPromises);
                 })
                 .then(() => {
-                  let archiveName = `contactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                  let archiveName = `contactDossiers_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
                   let archivePath = `${tmpDirName}/${archiveName}`;
                   let zip = new AdmZip();
 
@@ -2137,7 +2137,7 @@ module.exports = function (Outbreak) {
               // determine relevant follow-ups
               // those that are in our period of interest
               contactsMap[groupData._id].followUps = _.filter(groupData.followUps, (followUpData) => {
-                return followUpData.date && moment(followUpData.date).isBetween(firstFollowUpDay, lastFollowUpDay, undefined, '[]');
+                return followUpData.date && localizationHelper.toMoment(followUpData.date).isBetween(firstFollowUpDay, lastFollowUpDay, undefined, '[]');
               });
             });
 
@@ -2233,7 +2233,7 @@ module.exports = function (Outbreak) {
                 {
                   label: dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE'),
                   value: contactData.lastContactDate ?
-                    moment(contactData.lastContactDate).format('YYYY-MM-DD') :
+                    localizationHelper.toMoment(contactData.lastContactDate).format('YYYY-MM-DD') :
                     ''
                 },
                 {
@@ -2266,7 +2266,7 @@ module.exports = function (Outbreak) {
                 (contactData.followUps || []).forEach((followUp) => {
                   // add follow-up only if there isn't already one on that date
                   // if there is, it means that that one is newer since follow-ups are sorted by date DESC and we don't need to set this one
-                  const dateFormated = moment(followUp.date).format('YYYY-MM-DD');
+                  const dateFormated = localizationHelper.toMoment(followUp.date).format('YYYY-MM-DD');
                   if (!tableData[tableData.length - 1][dateFormated]) {
                     // format questionnaire answers to old format so we can use the old functionality & also use the latest value
                     followUp.questionnaireAnswers = followUp.questionnaireAnswers || {};
@@ -2276,7 +2276,7 @@ module.exports = function (Outbreak) {
                     tableData[tableData.length - 1][dateFormated] = genericHelpers.translateQuestionAnswers(
                       question,
                       question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME' ?
-                        (followUp.questionnaireAnswers[question.variable] ? moment(followUp.questionnaireAnswers[question.variable]).format('YYYY-MM-DD') : '') :
+                        (followUp.questionnaireAnswers[question.variable] ? localizationHelper.toMoment(followUp.questionnaireAnswers[question.variable]).format('YYYY-MM-DD') : '') :
                         followUp.questionnaireAnswers[question.variable],
                       dictionary
                     );
@@ -2723,7 +2723,7 @@ module.exports = function (Outbreak) {
     }
 
     // Get the date of the selected day for report to add to the pdf title (by default, current day)
-    let selectedDayForReport = moment(filter.dateOfFollowUp).format('ll');
+    let selectedDayForReport = localizationHelper.toMoment(filter.dateOfFollowUp).format('ll');
 
     // Get the dictionary so we can translate the case classifications and other neccessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
@@ -2772,7 +2772,7 @@ module.exports = function (Outbreak) {
               coverage: '0',
               registered: '0',
               released: '0',
-              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? moment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? localizationHelper.toMoment(dataObj.people[0].followUp.endDate).format('ll') : '-'
             };
 
             // Update the row's values according to each contact's details
@@ -3185,7 +3185,7 @@ module.exports = function (Outbreak) {
                     // they are ordered by descending by date prior to this
                     if (contact.followUps.length) {
                       contact.followUps.forEach((followUp) => {
-                        let rowId = moment(followUp.date).format(standardFormat);
+                        let rowId = localizationHelper.toMoment(followUp.date).format(standardFormat);
                         row[rowId] = {
                           value: dictionary.getTranslation(followUpStatusMap[followUp.statusId]) || '',
                           isDate: true
@@ -3195,7 +3195,7 @@ module.exports = function (Outbreak) {
 
                     // move days that don't belong to main table to additional day tables
                     let mainTableDateHeaders = headers.filter((header) => header.hasOwnProperty('isDate'));
-                    let lastDayInMainTable = genericHelpers.convertToDate(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
+                    let lastDayInMainTable = localizationHelper.getDateStartOfDay(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
 
                     // get all date values from row, keep only until last day in the table
                     // rest split among additional tables
@@ -3206,13 +3206,13 @@ module.exports = function (Outbreak) {
                         row[prop] !== undefined &&
                         row[prop].isDate
                       ) {
-                        let parsedDate = genericHelpers.convertToDate(prop);
+                        let parsedDate = localizationHelper.getDateStartOfDay(prop);
                         if (parsedDate.isAfter(lastDayInMainTable)) {
                           // find the suitable additional table
                           let suitableAdditionalTable = additionalTables.filter((tableDef) => {
                             if (tableDef.headers.length) {
                               let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
-                              return parsedDate.isSameOrBefore(genericHelpers.convertToDate(lastDay));
+                              return parsedDate.isSameOrBefore(localizationHelper.getDateStartOfDay(lastDay));
                             }
                             return false;
                           });
