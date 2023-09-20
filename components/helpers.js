@@ -3,9 +3,7 @@
 module.exports = {};
 
 // dependencies
-const momentLib = require('moment');
-const momentRange = require('moment-range');
-const moment = momentRange.extendMoment(momentLib);
+const localizationHelper = require('./localizationHelper');
 const _ = require('lodash');
 const apiError = require('./apiError');
 const spreadSheetFile = require('./spreadSheetFile');
@@ -20,7 +18,6 @@ const EpiWeek = require('epi-week');
 const config = require('../server/config');
 const {performance} = require('perf_hooks');
 const randomize = require('randomatic');
-const localizationHelper = require('./localizationHelper');
 
 const DATA_TYPE = {
   BOOLEAN: 'Boolean',
@@ -108,7 +105,7 @@ const getDateChunks = function (start, end, chunkType, weekType) {
   let result = [];
   switch (chunkType) {
     case 'day':
-      let range = moment.range(start, end);
+      let range = localizationHelper.getRange(start, end);
       result = Array.from(range.by('day')).map(day => ({start: localizationHelper.getDate(day), end: localizationHelper.getDateEndOfDay(day)}));
       break;
     case 'week':
@@ -434,29 +431,6 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
 };
 
 /**
- * Convert filter date attributes from string to date
- * @param obj
- */
-const convertPropsToDate = function (obj) {
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      if (typeof obj[prop] == 'object' && obj[prop] !== null) {
-        convertPropsToDate(obj[prop]);
-      } else {
-        // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
-          // try to convert the string value to date, if valid, replace the old value
-          let convertedDate = moment(obj[prop]);
-          if (convertedDate.isValid()) {
-            obj[prop] = convertedDate.toDate();
-          }
-        }
-      }
-    }
-  }
-};
-
-/**
  * Extract only the importable fields for a model from a record data
  * @param Model
  * @param data
@@ -627,7 +601,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         result[headersMap[header]] = source[header];
         // handle dates separately
         if (source[header] instanceof Date) {
-          result[headersMap[header]] = getDateDisplayValue(source[header]);
+          result[headersMap[header]] = localizationHelper.getDateDisplayValue(source[header]);
         }
       }
     });
@@ -995,7 +969,7 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       if (object[property] && typeof object[property] === 'object') {
         // handle dates separately
         if (object[property] instanceof Date) {
-          result[propertyName] = getDateDisplayValue(object[property]);
+          result[propertyName] = localizationHelper.getDateDisplayValue(object[property]);
         } else {
           // process it
           result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
@@ -1007,15 +981,6 @@ const getFlatObject = function (object, prefix, humanFriendly) {
     });
   }
   return result;
-};
-
-/**
- * Format a date string for display purpose
- * @param dateString
- * @returns {string}
- */
-const getDateDisplayValue = function (dateString) {
-  return dateString && moment(dateString).isValid() ? new Date(dateString).toISOString() : dateString;
 };
 
 /**
@@ -1051,30 +1016,12 @@ const isPathOK = function (path) {
 };
 
 /**
- * Format a date
- * If it fails, return empty string
- * @param value
- * @returns {string}
- */
-const formatDate = function (value) {
-  let result = '';
-  if (value) {
-    let tmpDate = moment(getDateDisplayValue(value));
-    if (tmpDate.isValid()) {
-      result = tmpDate.format('YYYY-MM-DD');
-    }
-  }
-  return result;
-};
-
-/**
  * Format all the marked date type fields on the model
  * @param model
  * @param dateFieldsList
  * @returns {Object}
  */
 const formatDateFields = function (model, dateFieldsList) {
-
   // Format date fields
   dateFieldsList.forEach((field) => {
     let reference = getReferencedValue(model, field);
@@ -1088,10 +1035,10 @@ const formatDateFields = function (model, dateFieldsList) {
           return;
         }
 
-        _.set(model, indicator.exactPath, formatDate(indicator.value));
+        _.set(model, indicator.exactPath, localizationHelper.formatDate(indicator.value));
       });
     } else {
-      _.set(model, reference.exactPath, formatDate(reference.value));
+      _.set(model, reference.exactPath, localizationHelper.formatDate(reference.value));
     }
   });
 };
@@ -1321,15 +1268,6 @@ const getBuildInformation = function () {
 };
 
 /**
- * Check if a (string) date is valid (correct ISO format)
- * @param date
- * @return {boolean}
- */
-const isValidDate = function (date) {
-  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(\.\d{3})?Z*)?$/.test(date);
-};
-
-/**
  * Gets the "date" properties of the questionnaire
  */
 const getQuestionnaireDateProperties = (questionnaireDateProperties, questions) => {
@@ -1440,37 +1378,6 @@ const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
  */
 const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataType) {
   /**
-   * Converts Excel date in integer format into JS date
-   * @param serial
-   * @returns {string}
-   */
-  const excelDateToJSDate = function (serial) {
-    // constants
-    const SECONDS_IN_DAY = 86400; // 24 * 60 * 60
-    const DIFF_NUMBER_OF_DAYS = 25569; // (25567 + 2) - number of days between: Jan 1, 1900 and Jan 1, 1970, plus 2 ("excel leap year bug")
-
-    // get date in utc
-    const utcDays = Math.floor(serial - DIFF_NUMBER_OF_DAYS);
-    const utcValue = utcDays * SECONDS_IN_DAY;
-    const dateInfo = moment(utcValue * 1000);
-
-    // calculate hours, minutes ans seconds
-    const fractionalDay = serial - Math.floor(serial) + 0.0000001;
-    let totalSeconds = Math.floor(SECONDS_IN_DAY * fractionalDay);
-    const seconds = totalSeconds % 60;
-    totalSeconds -= seconds;
-    const hours = Math.floor(totalSeconds / (60 * 60));
-    const minutes = Math.floor(totalSeconds / 60) % 60;
-
-    // return full date
-    return dateInfo
-      .hour(hours)
-      .minute(minutes)
-      .seconds(seconds)
-      .toISOString();
-  };
-
-  /**
    * Set property boolean/date value on a record given its reference
    * Also accepts array references
    * @param record Record to be updated
@@ -1496,7 +1403,7 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
           case DATA_TYPE.DATE:
             // if value is a number convert it into JavaScript date
             if (!isNaN(Number(refValue.value))) {
-              _.set(record, refValue.exactPath, excelDateToJSDate(refValue.value));
+              _.set(record, refValue.exactPath, localizationHelper.excelDateToJSDate(refValue.value));
             }
 
             break;
@@ -1785,10 +1692,6 @@ function sha256(string) {
   return crypto.createHash('sha256').update(string).digest('hex');
 }
 
-function convertToDate(date) {
-  return moment(date).startOf('day');
-}
-
 /**
  * Migrate data in batches
  * @param Model
@@ -1988,7 +1891,7 @@ const sortMultiAnswerQuestions = function (model) {
         answers[prop].length
       ) {
         // sort them by date
-        answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
+        answers[prop] = answers[prop].sort((a, b) => localizationHelper.convertToDate(b.date).format('X') - localizationHelper.convertToDate(a.date).format('X'));
       }
     }
   }
@@ -2009,7 +1912,7 @@ const convertQuestionStringDatesToDates = function (
     // nothing to do ?
     if (modelChanges.questionnaireAnswers) {
       // convert dates
-      convertPropsToDate(modelChanges.questionnaireAnswers);
+      localizationHelper.convertPropsToDate(modelChanges.questionnaireAnswers);
 
       // do we have questionnaire template so we can check the format we're importing ?
       if (!_.isEmpty(template)) {
@@ -2128,7 +2031,7 @@ const convertQuestionnairePropsToDate = function (questions) {
       return prop;
     }
     // try to convert the string value to date, if valid, replace the old value
-    if (isValidDate(prop)) {
+    if (localizationHelper.isValidDate(prop)) {
       let convertedDate = localizationHelper.getDate(prop);
       if (convertedDate.isValid()) {
         return convertedDate.toDate();
@@ -2533,7 +2436,7 @@ const sanitizePersonVisualId = (visualId) => {
     visualId : (
       visualId
         .toString()
-        .replace(/YYYY/g, moment().format('YYYY'))
+        .replace(/YYYY/g, localizationHelper.getDate().format('YYYY'))
         .replace(/\*/g, '')
     );
 };
@@ -2795,8 +2698,8 @@ Object.assign(module.exports, {
   getDateEndOfDay: localizationHelper.getDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate,
-  isValidDate: isValidDate,
+  convertPropsToDate: localizationHelper.convertPropsToDate,
+  isValidDate: localizationHelper.isValidDate,
   extractImportableFields: extractImportableFields,
   extractImportableFieldsNoModel: extractImportableFieldsNoModel,
   exportListFile: exportListFile,
@@ -2804,7 +2707,7 @@ Object.assign(module.exports, {
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
-  getDateDisplayValue: getDateDisplayValue,
+  getDateDisplayValue: localizationHelper.getDateDisplayValue,
   parseModelFieldValues: parseModelFieldValues,
   isPathOK: isPathOK,
   formatDateFields: formatDateFields,
@@ -2825,7 +2728,7 @@ Object.assign(module.exports, {
   getValueFromContextOptions: getValueFromContextOptions,
   getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
-  convertToDate: convertToDate,
+  convertToDate: localizationHelper.convertToDate,
   migrateModelDataInBatches: migrateModelDataInBatches,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
