@@ -10,8 +10,7 @@
   },
   "properties": {
     "date": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "statusId": {
       "type": "string"
@@ -37,8 +36,7 @@
       "required": true
     },
     "targeted": {
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "comment": {
       "type": "string"
@@ -95,6 +93,16 @@
     "contact": {
       "type": "belongsTo",
       "model": "contact",
+      "foreignKey": "personId"
+    },
+    "case": {
+      "type": "belongsTo",
+      "model": "case",
+      "foreignKey": "personId"
+    },
+    "contactOfContact": {
+      "type": "belongsTo",
+      "model": "contactOfContact",
       "foreignKey": "personId"
     },
     "team": {

@@ -107,6 +107,7 @@ module.exports = function (Contact) {
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
+    'transferRefused': 'LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
@@ -404,11 +405,13 @@ module.exports = function (Contact) {
     'occupation',
     'addresses',
     'documents',
+    'outcomeId',
+    'dateOfOutcome',
+    'transferRefused',
     'riskLevel',
     'riskReason',
     'wasCase',
     'outcomeId',
-    'dateOfOutcome',
     'dateBecomeContact',
     'safeBurial',
     'dateOfBurial',
@@ -700,6 +703,50 @@ module.exports = function (Contact) {
     } else {
       next();
     }
+  });
+
+  /**
+   * Contact after delete
+   * Actions:
+   * Remove any contacts of contacts that remain isolated after the contact deletion
+   */
+  Contact.observe('after delete', (context, next) => {
+    if (context.options.mergeDuplicatesAction) {
+      // don't remove isolated contacts of contacts when merging two contacts
+      return next();
+    }
+
+    const contactId = context.instance.id;
+    Contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // construct the list of contacts of contacts that we need to remove
+      const contactsOfContactsJobs = [];
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          // remove contact job
+          contactsOfContactsJobs.push((function (contactOfContactModel) {
+            return (callback) => {
+              contactOfContactModel.destroy(
+                {
+                  extraProps: {
+                    deletedByParent: contactId
+                  }
+                },
+                callback
+              );
+            };
+          })(isolatedContact.contact));
+        }
+      });
+
+      // delete each isolated contact of contact & and its relationship
+      async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+        next(error);
+      });
+    });
   });
 
   /**

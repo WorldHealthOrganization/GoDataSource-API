@@ -32,6 +32,7 @@ module.exports = function (Outbreak) {
     generateFollowUpsKeepTeamAssignment: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT',
     generateFollowUpsTeamAssignmentAlgorithm: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
     generateFollowUpsDateOfLastContact: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT',
+    generateFollowUpsWhenCreatingContacts: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS',
     intervalOfFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS',
     noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
     noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
@@ -41,6 +42,7 @@ module.exports = function (Outbreak) {
     'fieldsToDisplayNode[]': 'LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE',
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
+    eventInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
@@ -56,7 +58,8 @@ module.exports = function (Outbreak) {
     applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
     checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET',
     disableModifyingLegacyQuestionnaire: 'LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE',
-    allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS'
+    allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS',
+    visibleAndMandatoryFields: 'LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS'
   });
 
   Outbreak.locationFields = [
@@ -1708,7 +1711,7 @@ module.exports = function (Outbreak) {
     // make sure the questions are ordered on load. This was made on on-load vs before save for simplicity
     // even though it will perform better on before save, there is a lot of logic that can be broken by affecting that code now
     // and a refactoring is already planned for questionnaires
-    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
+    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
       templateParser.orderQuestions(context.data[template]);
     });
 

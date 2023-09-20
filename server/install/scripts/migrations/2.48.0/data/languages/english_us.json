@@ -128,18 +128,6 @@
     "LNG_PAGE_IMPORT_DATA_LABEL_MODEL_MAPPINGS_DESCRIPTION": {
       "translation": "<div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Pending]:</span><span> this field has not been completely loaded and mapped yet (please click on the 'Map sub-options' button)</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete no / total]:</span><span> the number of values that have been mapped out of the total number of distinct values in the input file, this information is useful if you decide not to map everything, or to check that nothing is missed</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Complete:]</span><span> all file options are mapped and ready for import</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Incomplete no / total]:</span><span> the number of invalid values that are present out of the total number of distinct mapped values in the input file</span></div><div style='padding-bottom: 10px'><span style='color: #D72631; font-weight: bold;'>[Handled above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused</span></div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Completed above]:</span><span> a mapping already provided to the system for another field in this import is applicable here also and has been reused globally for all valid fields</span></div>"
     },
-    "LNG_USER_FIELD_LABEL_SECURITY_QUESTIONS": {
-      "translation": "Security questions",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
-      "translation": "Last login date",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
-      "translation": "Last reset password date",
-      "section": "uiUserFields"
-    },
     "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_TEAM": {
       "translation": "Team - export",
       "section": "availablePermissions"
@@ -217,7 +205,7 @@
       "section": "uiImportUserData"
     },
     "LNG_PAGE_IMPORT_USER_DATA_WARNING": {
-      "translation": " * in order to associate the available outbreaks, active outbreak and roles you must have access to outbreaks and roles.<br> *  in order to associate roles to users they should already be configured/imported in the system.<br> * if no password is provided at import a reset password email will be sent to users (for this to work please make sure SMTP is configured).",
+      "translation": " * in order to associate the available outbreaks, active outbreak and roles you must have access to outbreaks and roles.<br> *  roles should've already been imported into the system in order to associate them with users.<br> * a reset password email will be sent to the new users and to the existing users when updating the password (for this to work please make sure SMTP is configured).<br> * the logged-in user who is performing the import and the system default admin user will not be updated to prevent any accidental overriding of their password with an incorrect one.",
       "section": "uiImportUserData"
     },
     "LNG_PAGE_LIST_USERS_TITLE": {
@@ -280,14 +268,6 @@
       "translation": "Answer",
       "section": "uiUserFields"
     },
-    "LNG_USER_FIELD_LABEL_LAST_LOGIN_DATE": {
-      "translation": "Last login date",
-      "section": "uiUserFields"
-    },
-    "LNG_USER_FIELD_LABEL_LAST_RESET_PASSWORD_DATE": {
-      "translation": "Last reset password date",
-      "section": "uiUserFields"
-    },
     "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION": {
       "translation": "Security questions question category",
       "section": "uiReferenceDataSecurityQuestionsQuestion",
@@ -301,6 +281,266 @@
       "modules": [
         "referenceData"
       ]
+    },
+    "LNG_CONTACT_FIELD_LABEL_OUTCOME": {
+      "translation": "Outcome",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_OUTCOME_DESCRIPTION": {
+      "translation": "",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME": {
+      "translation": "Date of outcome",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME_DESCRIPTION": {
+      "translation": "The date of the final outcome for this contact",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED": {
+      "translation": "Refused transfer to treatment unit",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED_DESCRIPTION": {
+      "translation": "Record if the contact refused to attend at a treatment facility",
+      "section": "uiContactFields"
+    },
+    "LNG_PAGE_IMPORT_TEAM_DATA_WARNING": {
+      "translation": " * users should've already been imported into the system in order to associate them with teams.",
+      "section": "uiImportTeamData"
+    },
+    "LNG_COMMON_LABEL_EXPAND_ALL": {
+      "translation": "Expand all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_COLLAPSE_ALL": {
+      "translation": "Collapse all",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_REQUIRED": {
+      "translation": "Required",
+      "section": "uiCommonLabels"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
+      "translation": "Fields",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS": {
+      "translation": "Fields",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE": {
+      "translation": "Contact investigation template",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_EVENT_QUESTIONNAIRE": {
+      "translation": "Event form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_ACTION_EVENT_QUESTIONNAIRE": {
+      "translation": "Event form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_EVENT_FIELD_LABEL_QUESTIONNAIRE_ANSWERS": {
+      "translation": "Questionnaire answers",
+      "section": "uiEventFields"
+    },
+    "LNG_PAGE_MODIFY_EVENT_TAB_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiModifyEventPage"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE": {
+      "translation": "Event investigation template",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE": {
+      "translation": "Outbreak - modify event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE": {
+      "translation": "Outbreak template - modify event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak template event questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_EVENT_MERGE_DUPLICATE_RECORDS_TAB_QUESTIONNAIRE_TITLE": {
+      "translation": "Questionnaire",
+      "section": "uiEventMergeDuplicateRecordsPage"
+    },
+    "LNG_PAGE_CREATE_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show event form question numbers",
+      "section": "uiCreateEventPage"
+    },
+    "LNG_PAGE_MODIFY_EVENT_TAB_OPTION_SHOW_QUESTION_NUMBERS": {
+      "translation": "Show event form question numbers",
+      "section": "uiModifyEventPage"
+    },
+    "LNG_COMMON_LABEL_NEEDS": {
+      "translation": "Needs:",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_REQUIRES": {
+      "translation": "requires",
+      "section": "uiCommonLabels"
+    },
+    "LNG_COMMON_LABEL_NO_SEARCH_MATCHES": {
+      "translation": "No items matched the search criteria",
+      "section": "uiCommonLabels"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_SEE_LAB_RESULTS": {
+      "translation": "Lab results",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_SEE_LAB_RESULTS": {
+      "translation": "See lab results",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - list lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows viewing list of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - view lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows viewing a lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - modify lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows modifying of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - delete lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows deletion of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - restore lab result",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows restoring of deleted lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT": {
+      "translation": "Contact of contact - export lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION": {
+      "translation": "This permission allows exporting of lab results",
+      "section": "availablePermissions"
+    },
+    "LNG_APP_PAGE_CONTACT_OF_CONTACT_LAB_RESULTS": {
+      "translation": "Contact of contact lab results",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS": {
+      "translation": "Create follow-ups automatically when creating contacts",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS_DESCRIPTION": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating contacts.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS": {
+      "translation": "Create follow-ups automatically when creating contacts",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS_DESCRIPTION": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating contacts.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_CONTACT_TITLE": {
+      "translation": "View follow-ups",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_VIEW_FOLLOW_UPS_FOR_RELATED_CONTACTS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_MODIFY_CASE_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups for related contacts",
+      "section": "uiModifyCasePage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_TAB_FOLLOW_UPS_TITLE": {
+      "translation": "Follow-ups",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiModifyContactPage"
+    },
+    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiContactsOfContactsListPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CONTACT_OF_CONTACT_WAS_CONTACT_TITLE": {
+      "translation": "This contact of contact was a contact",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_ACTION_VIEW_CONTACT_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_GRAPH_CHAINS_OF_TRANSMISSION_ACTION_MODIFY_RELATIONSHIP_TITLE": {
+      "translation": "Modify relationship",
+      "section": "uiChainsOfTransmissionGraph"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_EVENT_WITH_EXPOSED_CONTACTS": {
+      "translation": "Event '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_EVENT": {
+      "translation": "Restoring event '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the event (e.g. contacts, contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CASE_WITH_EXPOSED_CONTACTS": {
+      "translation": "Case '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CASE": {
+      "translation": "Restoring case '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the case (e.g. contacts, contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_CONTACT_WITH_EXPOSED_CONTACTS": {
+      "translation": "Contact '{{name}}' has <span style='font-weight: bold; color: var(--gd-danger);'>{{numberOfContacts}} exposed contacts that will be deleted</span>. <span style='font-weight: bold; color: var(--gd-danger);'>Any related records (e.g. follow-ups, laboratory results, relationships)</span> will be deleted too. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_RESTORE_CONTACT": {
+      "translation": "Restoring contact '{{name}}' will also <span style='font-weight: bold; color: var(--gd-success);'>restore any related records that were deleted at the same time as the contact (e.g. contacts of contacts, follow-ups, laboratory results, relationships)</span>. Click Ok to continue",
+      "section": "uiDialogs"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS": {
+      "translation": "Event - list isolated contacts",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION": {
+      "translation": "This permission allows determining which contacts are isolated",
+      "section": "availablePermissions"
     }
   }
 }

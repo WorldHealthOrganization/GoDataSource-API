@@ -916,6 +916,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'outbreak_modify_event_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_EVENT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
           id: 'outbreak_modify_contact_follow_up_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
@@ -996,6 +1005,15 @@ module.exports = function (Role) {
           id: 'outbreak_template_modify_contact_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_modify_event_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE_DESCRIPTION',
           requires: [
             'outbreak_template_view',
             'outbreak_template_modify'
@@ -1215,7 +1233,8 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_EVENT_DESCRIPTION',
           requires: [
-            'outbreak_view'
+            'outbreak_view',
+            'event_list_isolated_contacts'
           ]
         },
         {
@@ -1341,6 +1360,14 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'relationship_list'
+          ]
+        },
+        {
+          id: 'event_list_isolated_contacts',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
           ]
         },
         {
@@ -3779,6 +3806,57 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONVERT_CONTACT_OF_CONTACT_TO_CONTACT_DESCRIPTION',
           requires: [
             'outbreak_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_list_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_list',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_view_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_view',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_modify_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_modify',
+            'contact_of_contact_view'
+          ]
+        },
+        {
+          id: 'contact_of_contact_delete_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_delete'
+          ]
+        },
+        {
+          id: 'contact_of_contact_restore_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_RESTORE_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_restore'
+          ]
+        },
+        {
+          id: 'contact_of_contact_export_lab_result',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_OF_CONTACT_LAB_RESULT_DESCRIPTION',
+          requires: [
+            'lab_result_export'
           ]
         }
       ]

@@ -15,8 +15,7 @@
       "type": "string"
     },
     "dateSampleTaken": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "dateSampleDelivered": {
       "type": "date"
@@ -93,6 +92,11 @@
     "contact": {
       "type": "belongsTo",
       "model": "contact",
+      "foreignKey": "personId"
+    },
+    "contactOfContact": {
+      "type": "belongsTo",
+      "model": "contactOfContact",
       "foreignKey": "personId"
     }
   },

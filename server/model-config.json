@@ -368,6 +368,10 @@
     "dataSource": null,
     "public": false
   },
+  "visibleAndMandatory": {
+    "dataSource": null,
+    "public": false
+  },
   "fillLocation": {
     "dataSource": null,
     "public": false

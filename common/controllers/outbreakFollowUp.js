@@ -41,8 +41,21 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = genericHelpers.getDate(data.startDate);
-    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
+    // if start date is not provided, use "tomorrow"
+    // if end date is not provided, use outbreak follow-up period
+    let followupStartDate = data.startDate ?
+      genericHelpers.getDate(data.startDate) :
+      genericHelpers.getDate().add(1, 'days');
+    let followupEndDate = genericHelpers.getDateEndOfDay(
+      data.endDate ?
+        data.endDate :
+        followupStartDate.clone().add(
+          this.periodOfFollowup > 0 ?
+            this.periodOfFollowup - 1 :
+            0,
+          'days'
+        )
+    );
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -67,6 +80,15 @@ module.exports = function (Outbreak) {
         )
       );
     }
+
+    // check if the follow-ups should be generated only for specific contacts.
+    const contactIds = !data.contactIds ?
+      [] :
+      (
+        Array.isArray(data.contactIds) ?
+          data.contactIds :
+          [data.contactIds]
+      );
 
     // check if 'targeted' flag exists in the request, if not default to true
     // this flag will be set upon all generated follow ups
@@ -109,6 +131,7 @@ module.exports = function (Outbreak) {
         followupStartDate.toDate(),
         followupEndDate.toDate(),
         outbreakId,
+        contactIds,
         options
       )
       .then(contactsCount => {
@@ -138,6 +161,7 @@ module.exports = function (Outbreak) {
                   followupStartDate.toDate(),
                   followupEndDate.toDate(),
                   outbreakId,
+                  contactIds,
                   (batchNo - 1) * batchSize,
                   batchSize,
                   options

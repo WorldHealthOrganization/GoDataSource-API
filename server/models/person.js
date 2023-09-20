@@ -2305,21 +2305,20 @@ module.exports = function (Person) {
         // convert to mongo filter
         const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
 
-        // construct aggregate filter
-        const aggregateFilters = [];
-
         // filter by relationship ?
         // - case, contact ...
         let relationshipQuery;
         if (!_.isEmpty(mongoFilter.where.relationship)) {
           // get conditions
           relationshipQuery = mongoFilter.where.relationship;
-          delete mongoFilter.where.relationship;
         }
 
-        // filter by lab result ?
-        // - case
-        // #TODO - not needed for now since UI doesn't use it, but API find supports it, if someone uses it..then too bad
+        // filter by case ?
+        let relationshipCaseQuery;
+        if (!_.isEmpty(mongoFilter.where.case)) {
+          // get conditions
+          relationshipCaseQuery = mongoFilter.where.case;
+        }
 
         // filter by follow-up ?
         // - case, contact ...
@@ -2327,98 +2326,166 @@ module.exports = function (Person) {
         if (!_.isEmpty(mongoFilter.where.followUp)) {
           // get conditions
           followUpQuery = mongoFilter.where.followUp;
-          delete mongoFilter.where.followUp;
         }
 
-        // filter by case ?
-        // - contact
-        // #TODO - kinda complicated to implement at this point, contact - relationship - case (implement after mongo upgrade)
+        // cleanup
+        delete mongoFilter.where.relationship;
+        delete mongoFilter.where.case;
+        delete mongoFilter.where.followUp;
 
-        // filter by contact ?
-        // - contact of contact
-        // #TODO - kinda complicated to implement at this point, contact of contact - relationship - contact (implement after mongo upgrade)
+        // start creating aggregate filters
+        return Promise.resolve()
+          // main query
+          .then(() => {
+            // construct aggregate filter
+            return [{
+              $match: mongoFilter.where
+            }];
+          })
 
-        // query
-        aggregateFilters.push({
-          $match: mongoFilter.where
-        });
+          // relationship query
+          .then((aggregateFilters) => {
+            // filter by relationship ?
+            if (
+              relationshipQuery ||
+              relationshipCaseQuery
+            ) {
+              // lookup
+              aggregateFilters.push({
+                $lookup: {
+                  from: 'relationship',
+                  localField: '_id',
+                  foreignField: 'persons.id',
+                  as: 'relationships'
+                }
+              });
 
-        // filter by relationship ?
-        if (relationshipQuery) {
-          // lookup
-          aggregateFilters.push({
-            $lookup: {
-              from: 'relationship',
-              localField: '_id',
-              foreignField: 'persons.id',
-              as: 'relationships'
+              // search
+              aggregateFilters.push({
+                $match: {
+                  relationships: {
+                    $elemMatch: relationshipQuery ?
+                      Object.assign(
+                        {
+                          deleted: false
+                        },
+                        relationshipQuery
+                      ) : {
+                        deleted: false
+                      }
+                  }
+                }
+              });
             }
-          });
 
-          // search
-          aggregateFilters.push({
-            $match: {
-              relationships: {
-                $elemMatch: Object.assign({
-                  deleted: false,
+            // finished
+            return aggregateFilters;
+          })
 
-                }, relationshipQuery)
+          // case query
+          .then((aggregateFilters) => {
+            // filter by relationship ?
+            if (relationshipCaseQuery) {
+              // add extra filters
+              relationshipCaseQuery = app.utils.remote.mergeFilters(
+                { where: relationshipCaseQuery },
+                {
+                  where: {
+                    outbreakId
+                  }
+                }
+              ).where;
+
+              // filter
+              return app.models.case
+                .rawFind(
+                  relationshipCaseQuery, {
+                    projection: {
+                      _id: 1
+                    }
+                  }
+                )
+                .then((cases) => {
+                  // attach condition
+                  aggregateFilters.push({
+                    $match: {
+                      'relationships.persons.id': {
+                        $in: cases.map((caseItem) => caseItem.id)
+                      }
+                    }
+                  });
+
+                  // finished
+                  return aggregateFilters;
+                });
+            }
+
+            // finished
+            return aggregateFilters;
+          })
+
+          // follow-up
+          .then((aggregateFilters) => {
+            // filter by follow-up ?
+            if (followUpQuery) {
+              // lookup
+              aggregateFilters.push({
+                $lookup: {
+                  from: 'followUp',
+                  localField: '_id',
+                  foreignField: 'personId',
+                  as: 'followUps'
+                }
+              });
+
+              // search
+              aggregateFilters.push({
+                $match: {
+                  followUps: {
+                    $elemMatch: Object.assign({
+                      deleted: false,
+
+                    }, followUpQuery)
+                  }
+                }
+              });
+            }
+
+            // finished
+            return aggregateFilters;
+          })
+
+          // finishing touches
+          .then((aggregateFilters) => {
+            // group by classification
+            aggregateFilters.push({
+              $group: {
+                _id: `$${groupByProperty}`,
+                count: {
+                  $sum: 1
+                }
               }
-            }
-          });
-        }
+            });
 
-        // filter by follow-up ?
-        if (followUpQuery) {
-          // lookup
-          aggregateFilters.push({
-            $lookup: {
-              from: 'followUp',
-              localField: '_id',
-              foreignField: 'personId',
-              as: 'followUps'
-            }
-          });
-
-          // search
-          aggregateFilters.push({
-            $match: {
-              followUps: {
-                $elemMatch: Object.assign({
-                  deleted: false,
-
-                }, followUpQuery)
+            // sort by group size
+            aggregateFilters.push({
+              $sort: {
+                count: 1
               }
-            }
-          });
-        }
+            });
 
-        // group by classification
-        aggregateFilters.push({
-          $group: {
-            _id: `$${groupByProperty}`,
-            count: {
-              $sum: 1
-            }
-          }
-        });
+            // retrieve data
+            return app.dataSources.mongoDb.connector
+              .collection('person')
+              .aggregate(
+                aggregateFilters, {
+                  allowDiskUse: true
+                }
+              )
+              .toArray();
+          })
 
-        // sort by group size
-        aggregateFilters.push({
-          $sort: {
-            count: 1
-          }
-        });
-
-        // retrieve data
-        return app.dataSources.mongoDb.connector
-          .collection('person')
-          .aggregate(
-            aggregateFilters, {
-              allowDiskUse: true
-            }
-          )
-          .toArray()
+          // process data
           .then((data) => {
             // result
             const result = {

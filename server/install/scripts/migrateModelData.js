@@ -391,12 +391,33 @@ const migrationVersions = [{
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
-      buildNo: 12
+      buildNo: 26
     }]
   }, {
     fileName: 'referenceData.js',
     actions: [{
       name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }, {
+      name: 'updateHospitalizationIsolationType',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'followUpStatus.js',
+    actions: [{
+      name: 'replaceFollowUpStatus',
+      buildNo: 1
+    }, {
+      name: 'deleteFollowUpStatus',
+      buildNo: 1
+    }, {
+      name: 'disableFollowUpStatus',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
       buildNo: 1
     }]
   }]

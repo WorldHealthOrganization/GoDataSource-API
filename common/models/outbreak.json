@@ -82,6 +82,11 @@
       "type": "boolean",
       "default": false
     },
+    "generateFollowUpsWhenCreatingContacts": {
+      "description": "Flag that specifies whether follow ups are automatically generated when creating contacts. Default: false",
+      "type": "boolean",
+      "default": false
+    },
     "intervalOfFollowUp": {
       "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
       "type": "string"
@@ -124,6 +129,13 @@
       "importTopLevelOnly": true
     },
     "contactInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ],
+      "default": [],
+      "importTopLevelOnly": true
+    },
+    "eventInvestigationTemplate": {
       "type": [
         "templateQuestion"
       ],
@@ -205,6 +217,9 @@
     },
     "allowedRefDataItems": {
       "type": "allowedRefData"
+    },
+    "visibleAndMandatoryFields": {
+      "type": "visibleAndMandatory"
     }
   },
   "indexes": {
@@ -1111,6 +1126,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "event_list_isolated_contacts",
+      "permission": "ALLOW",
+      "property": "getEventIsolatedContacts"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "relationship_share",
       "permission": "ALLOW",
       "property": "bulkCreateRelationships"
@@ -1485,6 +1506,12 @@
       "principalType": "ROLE",
       "principalId": "lab_result_list",
       "permission": "ALLOW",
+      "property": "filteredCountContactOfContactLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_list",
+      "permission": "ALLOW",
       "property": "findLabResultsAggregate"
     },
     {
@@ -1558,6 +1585,18 @@
       "principalId": "contact_restore_lab_result",
       "permission": "ALLOW",
       "property": "restoreContactLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "lab_result_bulk_restore",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContactLabResult"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_restore_lab_result",
+      "permission": "ALLOW",
+      "property": "restoreContactOfContactLabResult"
     },
     {
       "principalType": "ROLE",
@@ -1735,6 +1774,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "contact_of_contact_export_lab_result",
+      "permission": "ALLOW",
+      "property": "exportFilteredLabResults"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_export_lab_result",
       "permission": "ALLOW",
       "property": "exportFilteredCaseLabResults"
@@ -1744,6 +1789,12 @@
       "principalId": "contact_export_lab_result",
       "permission": "ALLOW",
       "property": "exportFilteredContactLabResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_export_lab_result",
+      "permission": "ALLOW",
+      "property": "exportFilteredContactOfContactLabResults"
     },
     {
       "principalType": "ROLE",
@@ -1960,6 +2011,36 @@
       "principalId": "contact_of_contact_convert_to_contact",
       "permission": "ALLOW",
       "property": "convertContactOfContactToContact"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_lab_result",
+      "permission": "ALLOW",
+      "property": "__get__contactsOfContacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_list_lab_result",
+      "permission": "ALLOW",
+      "property": "__count__contactsOfContacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_view_lab_result",
+      "permission": "ALLOW",
+      "property": "__findById__contactsOfContacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_modify_lab_result",
+      "permission": "ALLOW",
+      "property": "__updateById__contactsOfContacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_of_contact_delete_lab_result",
+      "permission": "ALLOW",
+      "property": "__destroyById__contactsOfContacts__labResults"
     },
     {
       "principalType": "ROLE",
@@ -3681,7 +3762,7 @@
           "arg": "body",
           "type": "object",
           "model": "generateFollowup",
-          "description": "Follow up required period start/end dates and targeted optional flag.",
+          "description": "Follow up period start/end dates and targeted optional flag. contactIds optional array containing the contact IDs for which to generate follow ups.",
           "http": {
             "source": "body"
           },
@@ -5727,6 +5808,39 @@
         "path": "/contacts/:nk/lab-results/filtered-count"
       }
     },
+    "prototype.filteredCountContactOfContactLabResults": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports filter.flags.applyHasMoreLimit that limits the number of counted records for a faster response."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "description": "Number of lab results that pass the filter",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Counts the lab results that pass a filter",
+      "http": {
+        "verb": "get",
+        "path": "/contacts-of-contacts/:nk/lab-results/filtered-count"
+      }
+    },
     "prototype.findLabResultsAggregate": {
       "accepts": [
         {
@@ -6153,6 +6267,29 @@
       "http": {
         "verb": "get",
         "path": "/events/:nk/relationships/contacts/filtered-count"
+      }
+    },
+    "prototype.getEventIsolatedContacts": {
+      "accepts": [
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for events"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "data",
+          "type": "object",
+          "root": true,
+          "description": "Count of isolated contacts and list of ids",
+          "required": true
+        }
+      ],
+      "description": "Get count of isolated contacts for an event",
+      "http": {
+        "verb": "get",
+        "path": "/events/:fk/isolated-contacts"
       }
     },
     "prototype.countCasesPerClassification": {
@@ -9146,6 +9283,107 @@
           "path": "/contacts/:nk/lab-results/export"
         }
       ]
+    },
+    "prototype.exportFilteredContactOfContactLabResults": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, offset, limit, where.useQuestionVariable, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Param 'where.useQuestionVariable' is used to display question variables as column headers. Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "encryptPassword",
+          "type": "string",
+          "description": "If provided, the exported file will be encrypted using aes-256-ctr algorithm using the provided password"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export filtered list of lab results",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/contacts-of-contacts/:nk/lab-results/export"
+        }, {
+          "verb": "post",
+          "path": "/contacts-of-contacts/:nk/lab-results/export"
+        }
+      ]
+    },
+    "prototype.restoreContactOfContactLabResult": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for contacts of contacts"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for lab results"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "labResult",
+          "type": "labResult",
+          "description": "Lab Result",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Restores a deleted lab result.",
+      "http": {
+        "verb": "post",
+        "path": "/contacts-of-contacts/:nk/lab-results/:fk/restore"
+      }
     },
     "prototype.contactOfContactDossier": {
       "accepts": [

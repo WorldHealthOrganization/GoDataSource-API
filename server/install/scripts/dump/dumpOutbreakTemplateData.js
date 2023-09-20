@@ -78,6 +78,7 @@ function run(callback) {
           generateFollowUpsKeepTeamAssignment: item.generateFollowUpsKeepTeamAssignment,
           generateFollowUpsTeamAssignmentAlgorithm: item.generateFollowUpsTeamAssignmentAlgorithm,
           generateFollowUpsDateOfLastContact: item.generateFollowUpsDateOfLastContact,
+          generateFollowUpsWhenCreatingContacts: item.generateFollowUpsWhenCreatingContacts,
           intervalOfFollowUp: item.intervalOfFollowUp ? item.intervalOfFollowUp : '',
           noDaysAmongContacts: item.noDaysAmongContacts,
           noDaysInChains: item.noDaysInChains,
@@ -87,6 +88,7 @@ function run(callback) {
           noDaysNewContacts: item.noDaysNewContacts,
           caseInvestigationTemplate: item.caseInvestigationTemplate,
           contactInvestigationTemplate: item.contactInvestigationTemplate,
+          eventInvestigationTemplate: item.eventInvestigationTemplate,
           contactFollowUpTemplate: item.contactFollowUpTemplate,
           labResultsTemplate: item.labResultsTemplate,
           isContactLabResultsActive: item.isContactLabResultsActive,
@@ -151,6 +153,7 @@ function run(callback) {
         // questionnaire translations
         pushQuestionsTranslations(item.caseInvestigationTemplate);
         pushQuestionsTranslations(item.contactInvestigationTemplate);
+        pushQuestionsTranslations(item.eventInvestigationTemplate);
         pushQuestionsTranslations(item.contactFollowUpTemplate);
         pushQuestionsTranslations(item.labResultsTemplate);
       });

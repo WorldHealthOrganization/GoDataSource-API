@@ -199,6 +199,29 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count a contact of contact's lab-results
+   * @param contactOfContactId
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountContactOfContactLabResults = function (contactOfContactId, filter, options, callback) {
+    filter = filter || {};
+    filter.where = filter.where || {};
+    filter.where.personId = contactOfContactId;
+    filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT';
+
+    app.models.labResult
+      .preFilterForOutbreak(this, filter, options)
+      .then(filter => {
+        // handle custom filter options
+        return app.models.labResult.rawCountDocuments(filter);
+      })
+      .then(result => callback(null, result))
+      .catch(callback);
+  };
+
+  /**
    * Attach before remote (GET outbreaks/{id}/lab-results/export) hooks
    */
   Outbreak.beforeRemote('prototype.exportFilteredLabResults', function (context, modelInstance, next) {
@@ -457,6 +480,48 @@ module.exports = function (Outbreak) {
     // only case lab results
     filter.where.personId = contactId;
     filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT';
+
+    // trigger export
+    Outbreak.prototype.exportFilteredLabResults.call(
+      this,
+      filter,
+      exportType,
+      encryptPassword,
+      anonymizeFields,
+      fieldsGroupList,
+      options,
+      callback
+    );
+  };
+
+  /**
+   * Export filtered contact of contact lab results to file
+   * @param contactOfContactId
+   * @param filter
+   * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
+   * @param encryptPassword
+   * @param anonymizeFields
+   * @param fieldsGroupList
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportFilteredContactOfContactLabResults = function (
+    contactOfContactId,
+    filter,
+    exportType,
+    encryptPassword,
+    anonymizeFields,
+    fieldsGroupList,
+    options,
+    callback
+  ) {
+    // defensive checks
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // only case lab results
+    filter.where.personId = contactOfContactId;
+    filter.where.personType = 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT';
 
     // trigger export
     Outbreak.prototype.exportFilteredLabResults.call(

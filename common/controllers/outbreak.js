@@ -22,12 +22,17 @@ module.exports = function (Outbreak) {
     'prototype.__delete__cases',
     'prototype.__delete__cases__labResults',
     'prototype.__delete__cases__relationships',
-    'prototype.__delete__clusters',
+    'prototype.__delete__cases__followUps',
     'prototype.__delete__contacts',
-    'prototype.__delete__contacts__followUps',
-    'prototype.__delete__contacts__relationships',
     'prototype.__delete__contacts__labResults',
+    'prototype.__delete__contacts__relationships',
+    'prototype.__delete__contacts__followUps',
+    'prototype.__delete__contactsOfContacts',
+    'prototype.__delete__contactsOfContacts__labResults',
+    'prototype.__delete__contactsOfContacts__relationships',
+    'prototype.__delete__contactsOfContacts__followUps',
     'prototype.__delete__events',
+    'prototype.__delete__clusters',
     'prototype.__create__clusters__relationships',
     'prototype.__delete__clusters__relationships',
     'prototype.__findById__clusters__relationships',
@@ -35,7 +40,6 @@ module.exports = function (Outbreak) {
     'prototype.__destroyById__clusters__relationships',
     'prototype.__get__clusters__relationships',
     'prototype.__count__clusters__relationships',
-    'prototype.__delete__contacts__relationships',
     'prototype.__get__referenceData',
     'prototype.__delete__referenceData',
     'prototype.__count__referenceData',
@@ -84,6 +88,7 @@ module.exports = function (Outbreak) {
   app.utils.remote.searchByRelationProperty.attachOnRemotes(Outbreak, [
     'prototype.findCaseRelationships',
     'prototype.findContactRelationships',
+    'prototype.findContactOfContactRelationships',
     'prototype.findEventRelationships'
   ]);
 
@@ -826,7 +831,46 @@ module.exports = function (Outbreak) {
                             deletedByParent: null
                           }
                         },
-                        callback
+                        (err, result) => {
+                          // an error occurred?
+                          if (err) {
+                            return callback(err);
+                          }
+
+                          // retrieve contacts of contacts that were deleted and were associated with this contact
+                          const contactsOfContactsJobs = [];
+                          app.models.contactOfContact
+                            .find({
+                              deleted: true,
+                              where: {
+                                deletedByParent: contact.id,
+                                deleted: true
+                              }
+                            })
+                            .then((contactsOfContacts) => {
+                              // construct the list of contacts of contacts that we need to restore
+                              (contactsOfContacts || []).forEach((contactOfContact) => {
+                                contactsOfContactsJobs.push((function (contactOfContactModel) {
+                                  return (callback) => {
+                                    contactOfContactModel.undoDelete(
+                                      {
+                                        extraProps: {
+                                          deletedByParent: null
+                                        }
+                                      },
+                                      callback
+                                    );
+                                  };
+                                })(contactOfContact));
+                              });
+
+                              // restore contacts of contacts that were removed along with this contact
+                              async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                                callback(error, result);
+                              });
+                            })
+                            .catch(callback);
+                        }
                       );
                     };
                   })(contact));
@@ -865,7 +909,49 @@ module.exports = function (Outbreak) {
         }
 
         // undo delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(
+          options,
+          (err, result) => {
+            // an error occurred?
+            if (err) {
+              return callback(err);
+            }
+
+            // retrieve contacts of contacts that were deleted and were associated with this contact
+            const contactsOfContactsJobs = [];
+            app.models.contactOfContact
+              .find({
+                deleted: true,
+                where: {
+                  deletedByParent: contactId,
+                  deleted: true
+                }
+              })
+              .then((contactsOfContacts) => {
+                // construct the list of contacts of contacts that we need to restore
+                (contactsOfContacts || []).forEach((contactOfContact) => {
+                  contactsOfContactsJobs.push((function (contactOfContactModel) {
+                    return (callback) => {
+                      contactOfContactModel.undoDelete(
+                        {
+                          extraProps: {
+                            deletedByParent: null
+                          }
+                        },
+                        callback
+                      );
+                    };
+                  })(contactOfContact));
+                });
+
+                // restore contacts of contacts that were removed along with this contact
+                async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                  callback(error, result);
+                });
+              })
+              .catch(callback);
+          }
+        );
       })
       .catch(callback);
   };
@@ -891,7 +977,88 @@ module.exports = function (Outbreak) {
         }
 
         // undo delete
-        instance.undoDelete(options, callback);
+        instance.undoDelete(
+          options,
+          (err, result) => {
+            // an error occurred?
+            if (err) {
+              return callback(err);
+            }
+
+            // retrieve contacts that were deleted and were associated with this event
+            const contactsJobs = [];
+            app.models.contact
+              .find({
+                deleted: true,
+                where: {
+                  deletedByParent: eventId,
+                  deleted: true
+                }
+              })
+              .then((contacts) => {
+                // construct the list of contacts that we need to restore
+                (contacts || []).forEach((contact) => {
+                  contactsJobs.push((function (contactModel) {
+                    return (callback) => {
+                      contactModel.undoDelete(
+                        {
+                          extraProps: {
+                            deletedByParent: null
+                          }
+                        },
+                        (err, result) => {
+                          // an error occurred?
+                          if (err) {
+                            return callback(err);
+                          }
+
+                          // retrieve contacts of contacts that were deleted and were associated with this contact
+                          const contactsOfContactsJobs = [];
+                          app.models.contactOfContact
+                            .find({
+                              deleted: true,
+                              where: {
+                                deletedByParent: contact.id,
+                                deleted: true
+                              }
+                            })
+                            .then((contactsOfContacts) => {
+                              // construct the list of contacts of contacts that we need to restore
+                              (contactsOfContacts || []).forEach((contactOfContact) => {
+                                contactsOfContactsJobs.push((function (contactOfContactModel) {
+                                  return (callback) => {
+                                    contactOfContactModel.undoDelete(
+                                      {
+                                        extraProps: {
+                                          deletedByParent: null
+                                        }
+                                      },
+                                      callback
+                                    );
+                                  };
+                                })(contactOfContact));
+                              });
+
+                              // restore contacts of contacts that were removed along with this contact
+                              async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+                                callback(error, result);
+                              });
+                            })
+                            .catch(callback);
+                        }
+                      );
+                    };
+                  })(contact));
+                });
+
+                // restore contacts that were removed along with this event
+                async.parallelLimit(contactsJobs, 10, function (error) {
+                  callback(error, result);
+                });
+              })
+              .catch(callback);
+          }
+        );
       })
       .catch(callback);
   };
@@ -3507,6 +3674,30 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Retrieve an event isolated contacts and count
+   * @param eventId
+   * @param callback
+   */
+  Outbreak.prototype.getEventIsolatedContacts = function (eventId, callback) {
+    app.models.event.getIsolatedContacts(eventId, (err, isolatedContacts) => {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, {
+        count: isolatedContacts.length,
+        ids: isolatedContacts.map((entry) => entry.contact.id),
+        contacts: isolatedContacts.map((entry) => ({
+          id: entry.contact.id,
+          firstName: entry.contact.firstName,
+          middleName: entry.contact.middleName,
+          lastName: entry.contact.lastName
+        }))
+      });
+    });
+  };
+
+
+  /**
    * Retrieve the isolated contacts for a contact and count
    * @param caseId
    * @param callback
@@ -3726,6 +3917,40 @@ module.exports = function (Outbreak) {
         where: {
           id: labResultId,
           personId: contactId,
+          deleted: true
+        }
+      })
+      .then(function (instance) {
+        if (!instance) {
+          throw app.utils.apiError.getError(
+            'MODEL_NOT_FOUND',
+            {
+              model: app.models.labResult.modelName,
+              id: labResultId
+            }
+          );
+        }
+
+        // undo delete
+        instance.undoDelete(options, callback);
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Restore a deleted lab result
+   * @param contactOfContactId
+   * @param labResultId
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.restoreContactOfContactLabResult = function (contactOfContactId, labResultId, options, callback) {
+    app.models.labResult
+      .findOne({
+        deleted: true,
+        where: {
+          id: labResultId,
+          personId: contactOfContactId,
           deleted: true
         }
       })

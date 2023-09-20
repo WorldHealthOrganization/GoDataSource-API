@@ -120,8 +120,7 @@
       "readOnly": true
     },
     "firstName": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "gender": {
       "type": "string"
@@ -140,6 +139,13 @@
     "outcomeId": {
       "type": "string"
     },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
+    },
     "safeBurial": {
       "type": "boolean",
       "default": false
@@ -151,8 +157,7 @@
       "type": "string"
     },
     "classification": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "investigationStatus": {
       "type": "string"
@@ -165,10 +170,6 @@
     },
     "riskReason": {
       "type": "string"
-    },
-    "transferRefused": {
-      "type": "boolean",
-      "default": false
     },
     "deathLocationId": {
       "type": "string"
