@@ -1,6 +1,6 @@
 'use strict';
 
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 const app = require('../../server/server');
 const _ = require('lodash');
 const genericHelpers = require('../../components/helpers');
@@ -2710,7 +2710,7 @@ module.exports = function (Outbreak) {
     dateToFilter = _.get(filter, 'where.date', null);
     if (dateToFilter !== null) {
       // add date to filter if it is valid; else use today
-      dateToFilter = moment(dateToFilter).isValid() ? genericHelpers.getDateEndOfDay(dateToFilter) : genericHelpers.getDateEndOfDay();
+      dateToFilter = localizationHelper.toMoment(dateToFilter).isValid() ? genericHelpers.getDateEndOfDay(dateToFilter) : genericHelpers.getDateEndOfDay();
 
       // date was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.date;
@@ -2817,7 +2817,7 @@ module.exports = function (Outbreak) {
           // check if the contact is still under follow-up
           // get end date of contact follow-ups
           // not having an end date should not be encountered; considering this case as still under follow-up
-          let followUpEndDate = moment(_.get(contact, 'followUp.endDate', null));
+          let followUpEndDate = localizationHelper.toMoment(_.get(contact, 'followUp.endDate', null));
           followUpEndDate = genericHelpers.getDateEndOfDay(followUpEndDate);
           if (!followUpEndDate.isValid() || followUpEndDate.isSameOrAfter(dateToFilter)) {
             // update contactsUnderFollowUpCount
@@ -3551,7 +3551,7 @@ module.exports = function (Outbreak) {
                       header: followUp.index
                     });
                     // add follow-up date
-                    data[0]['index' + i] = moment(followUp.date).format('YYYY-MM-DD');
+                    data[0]['index' + i] = localizationHelper.toMoment(followUp.date).format('YYYY-MM-DD');
                     // add follow-up status
                     data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
                   });
@@ -3577,7 +3577,7 @@ module.exports = function (Outbreak) {
                       app.models.person.getDisplayName(contact),
                       `${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${pdfUtils.displayValue(dictionary.getTranslation(contact.gender))}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
-                      `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
+                      `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${localizationHelper.toMoment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(currentAddress)}`,
                       `${dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(currentAddress ? currentAddress.phoneNumber : null)}`
                     ]
@@ -4560,10 +4560,7 @@ module.exports = function (Outbreak) {
     }
     const { startDate, endDate, pathogen, locationCode } = data;
 
-    const momentLib = require('moment');
-    const momentRange = require('moment-range');
-    const moment = momentRange.extendMoment(momentLib);
-    const range = moment.range(moment.utc(startDate).startOf('day'), moment.utc(endDate).startOf('day'));
+    const range = localizationHelper.getRange(startDate, endDate);
 
     // props to be filled
     const indicators = {

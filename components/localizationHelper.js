@@ -54,7 +54,7 @@ const getDaysSince = function (startDate, endDate) {
  * Range
  */
 const getRange = function (start, end) {
-  return moment.range(start, end);
+  return moment.range(getDateStartOfDay(start), getDateStartOfDay(end));
 };
 
 /**

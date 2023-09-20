@@ -172,8 +172,8 @@ module.exports = function (Outbreak) {
       // set them according to date
       if (date) {
         // determine start & end dates
-        startDate = genericHelpers.getDate(date.startDate);
-        endDate = genericHelpers.getDateEndOfDay(date.endDate);
+        startDate = localizationHelper.getDateStartOfDay(date.startDate);
+        endDate = localizationHelper.getDateEndOfDay(date.endDate);
 
         // determine date condition that will be added when retrieving follow-ups
         dateCondition = {
@@ -2067,7 +2067,7 @@ module.exports = function (Outbreak) {
             // map relationship data
             (relationshipData || []).forEach((data) => {
               if (contactsMap[data._id]) {
-                contactsMap[data._id].lastContactDate = genericHelpers.getDate(data.lastContactDate);
+                contactsMap[data._id].lastContactDate = localizationHelper.getDateStartOfDay(data.lastContactDate);
               }
             });
 

@@ -50,15 +50,6 @@ const nonModelObjects = {
 };
 
 /**
- * Get difference between dates in days
- * @param startDate
- * @param endDate
- */
-const getDaysSince = function (startDate, endDate) {
-  return (localizationHelper.getDate(endDate)).diff(localizationHelper.getDate(startDate), 'days');
-};
-
-/**
  * Remove non-ASCII chars from a string
  * @param string
  * @return {*}
@@ -100,13 +91,13 @@ const calculateEndOfWeek = function (date, weekType) {
  * @param weekType Type of week (epi, iso, sunday)
  */
 const getDateChunks = function (start, end, chunkType, weekType) {
-  start = localizationHelper.getDate(start);
+  start = localizationHelper.getDateStartOfDay(start);
   end = localizationHelper.getDateEndOfDay(end);
   let result = [];
   switch (chunkType) {
     case 'day':
       let range = localizationHelper.getRange(start, end);
-      result = Array.from(range.by('day')).map(day => ({start: localizationHelper.getDate(day), end: localizationHelper.getDateEndOfDay(day)}));
+      result = Array.from(range.by('day')).map(day => ({start: localizationHelper.getDateStartOfDay(day), end: localizationHelper.getDateEndOfDay(day)}));
       break;
     case 'week':
     case 'month':
@@ -120,7 +111,7 @@ const getDateChunks = function (start, end, chunkType, weekType) {
           lastDate = end;
         }
         result.push({
-          start: localizationHelper.getDate(date.clone()),
+          start: localizationHelper.getDateStartOfDay(date.clone()),
           end: lastDate.clone()
         });
         date = lastDate;
@@ -148,7 +139,7 @@ const getChunksForInterval = function (interval, chunk, weekType) {
   chunk = chunk ? chunkMap[chunk] : chunkMap.day;
 
   // make sure we're always dealing with moment dates
-  interval[0] = localizationHelper.getDate(interval[0]);
+  interval[0] = localizationHelper.getDateStartOfDay(interval[0]);
   interval[1] = localizationHelper.getDateEndOfDay(interval[1]);
 
   // get chunks
@@ -1629,8 +1620,8 @@ const getPeriodIntervalForDate = function (
     fullPeriodInterval &&
     fullPeriodInterval.length > 1
   ) {
-    date = localizationHelper.getDate(date).isAfter(fullPeriodInterval[0]) ? date : localizationHelper.getDate(fullPeriodInterval[0]);
-    date = localizationHelper.getDate(date).isBefore(fullPeriodInterval[1]) ? date : localizationHelper.getDateEndOfDay(fullPeriodInterval[1]);
+    date = localizationHelper.getDateStartOfDay(date).isAfter(fullPeriodInterval[0]) ? date : localizationHelper.getDateStartOfDay(fullPeriodInterval[0]);
+    date = localizationHelper.getDateStartOfDay(date).isBefore(fullPeriodInterval[1]) ? date : localizationHelper.getDateEndOfDay(fullPeriodInterval[1]);
   }
 
   // get period in which the case needs to be included
@@ -1638,7 +1629,7 @@ const getPeriodIntervalForDate = function (
   switch (periodType) {
     case 'day':
       // get day interval for date
-      startDay = localizationHelper.getDate(date);
+      startDay = localizationHelper.getDateStartOfDay(date);
       endDay = localizationHelper.getDateEndOfDay(date);
       break;
     case 'week':
@@ -1646,15 +1637,15 @@ const getPeriodIntervalForDate = function (
       weekType = weekType || 'iso';
       switch (weekType) {
         case 'iso':
-          startDay = localizationHelper.getDate(date).startOf('isoWeek');
+          startDay = localizationHelper.getDateStartOfDay(date).startOf('isoWeek');
           endDay = localizationHelper.getDateEndOfDay(date).endOf('isoWeek');
           break;
         case 'sunday':
-          startDay = localizationHelper.getDate(date).startOf('week');
+          startDay = localizationHelper.getDateStartOfDay(date).startOf('week');
           endDay = localizationHelper.getDateEndOfDay(date).endOf('week');
           break;
         case 'epi':
-          date = localizationHelper.getDate(date);
+          date = localizationHelper.getDateStartOfDay(date);
           const epiWeek = EpiWeek(date.clone().toDate());
           startDay = date.clone().week(epiWeek.week).startOf('week');
           endDay = date.clone().week(epiWeek.week).endOf('week');
@@ -1664,7 +1655,7 @@ const getPeriodIntervalForDate = function (
       break;
     case 'month':
       // get month period interval for date
-      startDay = localizationHelper.getDate(date).startOf('month');
+      startDay = localizationHelper.getDateStartOfDay(date).startOf('month');
       endDay = localizationHelper.getDateEndOfDay(date).endOf('month');
       break;
   }
@@ -1674,7 +1665,7 @@ const getPeriodIntervalForDate = function (
     fullPeriodInterval &&
     fullPeriodInterval.length > 1
   ) {
-    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : localizationHelper.getDate(fullPeriodInterval[0]);
+    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : localizationHelper.getDateStartOfDay(fullPeriodInterval[0]);
     endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : localizationHelper.getDateEndOfDay(fullPeriodInterval[1]);
     endDay = endDay.isAfter(startDay) ? endDay : localizationHelper.getDateEndOfDay(startDay);
   }
@@ -1891,7 +1882,7 @@ const sortMultiAnswerQuestions = function (model) {
         answers[prop].length
       ) {
         // sort them by date
-        answers[prop] = answers[prop].sort((a, b) => localizationHelper.convertToDate(b.date).format('X') - localizationHelper.convertToDate(a.date).format('X'));
+        answers[prop] = answers[prop].sort((a, b) => localizationHelper.toMoment(b.date).format('X') - localizationHelper.toMoment(a.date).format('X'));
       }
     }
   }
@@ -2032,7 +2023,7 @@ const convertQuestionnairePropsToDate = function (questions) {
     }
     // try to convert the string value to date, if valid, replace the old value
     if (localizationHelper.isValidDate(prop)) {
-      let convertedDate = localizationHelper.getDate(prop);
+      let convertedDate = localizationHelper.getDateStartOfDay(prop);
       if (convertedDate.isValid()) {
         return convertedDate.toDate();
       }
@@ -2692,10 +2683,8 @@ const randomString = (charset, minLength, maxLength) => {
 };
 
 Object.assign(module.exports, {
-  getDate: localizationHelper.getDate,
   streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
-  getDateEndOfDay: localizationHelper.getDateEndOfDay,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
   convertPropsToDate: localizationHelper.convertPropsToDate,
@@ -2728,7 +2717,6 @@ Object.assign(module.exports, {
   getValueFromContextOptions: getValueFromContextOptions,
   getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
-  convertToDate: localizationHelper.convertToDate,
   migrateModelDataInBatches: migrateModelDataInBatches,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
@@ -2737,7 +2725,6 @@ Object.assign(module.exports, {
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
   getDateChunks: getDateChunks,
-  getDaysSince: getDaysSince,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,
