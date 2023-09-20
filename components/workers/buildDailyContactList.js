@@ -2,7 +2,7 @@
 
 // dependencies
 const PdfUtils = require('../pdfDoc');
-const Moment = require('moment');
+const localizationHelper = require('../localizationHelper');
 const GenericHelpers = require('../helpers');
 const Async = require('async');
 
@@ -39,7 +39,7 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   const startDate = GenericHelpers.getDate(contactFollowUpProps.startDate);
   const endDate = GenericHelpers.getDateEndOfDay(contactFollowUpProps.endDate);
   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
-    let existingFollowUps = partialRecord.followUps.find((followUp) => Moment(followUp.date).isSame(date, 'day'));
+    let existingFollowUps = partialRecord.followUps.find((followUp) => localizationHelper.toMoment(followUp.date).isSame(date, 'day'));
     if (!existingFollowUps) {
       // build a fake follow up entry, used only when displaying in the table
       partialRecord.followUps.push({
@@ -49,10 +49,10 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   }
 
   // resort follow ups by date
-  partialRecord.followUps = partialRecord.followUps.sort((left, right) => Moment.utc(left.date).diff(Moment.utc(right.date)));
+  partialRecord.followUps = partialRecord.followUps.sort((left, right) => localizationHelper.now().utc(left.date).diff(localizationHelper.now().utc(right.date)));
 
   partialRecord.followUps.forEach((followUp) => {
-    let date = Moment(followUp.date);
+    let date = localizationHelper.toMoment(followUp.date);
 
     // create a formatted date
     const formattedDate = date.format(FOLLOWUP_DATE_ID_FORMAT);
@@ -105,7 +105,7 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   // move days that don't belong to main table to additional day tables
   let mainTableDateHeaders = headers.filter((header) => header.hasOwnProperty('isDate'));
   if (mainTableDateHeaders.length) {
-    let lastDayInMainTable = GenericHelpers.convertToDate(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
+    let lastDayInMainTable = localizationHelper.getDateStartOfDay(mainTableDateHeaders[mainTableDateHeaders.length - 1].id);
 
     // get all date values from row, keep only until last day in the table
     // rest split among additional tables
@@ -116,13 +116,13 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
         partialRecord[prop] !== undefined &&
         partialRecord[prop].isDate
       ) {
-        let parsedDate = GenericHelpers.convertToDate(prop);
+        let parsedDate = localizationHelper.getDateStartOfDay(prop);
         if (parsedDate.isAfter(lastDayInMainTable)) {
           // find the suitable additional table
           let suitableAdditionalTable = additionalTables.filter((tableDef) => {
             if (tableDef.headers.length) {
               let lastDay = tableDef.headers[tableDef.headers.length - 1].id;
-              return parsedDate.isSameOrBefore(GenericHelpers.convertToDate(lastDay));
+              return parsedDate.isSameOrBefore(localizationHelper.getDateStartOfDay(lastDay));
             }
             return false;
           });
