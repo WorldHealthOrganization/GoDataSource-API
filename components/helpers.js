@@ -2436,7 +2436,7 @@ const sanitizePersonVisualId = (visualId) => {
     visualId : (
       visualId
         .toString()
-        .replace(/YYYY/g, localizationHelper.getDate().format('YYYY'))
+        .replace(/YYYY/g, localizationHelper.now().format('YYYY'))
         .replace(/\*/g, '')
     );
 };

@@ -6,6 +6,20 @@ const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(momentLib);
 
 /**
+ * Now (date + time)
+ */
+const now = function () {
+  return moment();
+};
+
+/**
+ * Today (date + start of day time)
+ */
+const today = function () {
+  return moment().startOf('day');
+};
+
+/**
  * Convert a Date object into moment date and reset time to start of the day
  * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
  * @param date If no date is given, the current datetime is returned
@@ -134,6 +148,8 @@ const excelDateToJSDate = function (serial) {
 
 // exports
 module.exports = {
+  now,
+  today,
   getDate,
   getDateEndOfDay,
   getRange,
