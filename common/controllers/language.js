@@ -4,7 +4,7 @@ const app = require('../../server/server');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const _ = require('lodash');
-const moment = require('moment');
+const localizationHelper = require('./../../components/localizationHelper');
 const apiError = require('../../components/apiError');
 const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
 
@@ -289,7 +289,7 @@ module.exports = function (Language) {
     // do we need to retrieve only updated tokens ?
     if (whereFilter.updatedSince) {
       // retrieve date
-      const updatedSince = moment(whereFilter.updatedSince).toISOString();
+      const updatedSince = localizationHelper.toMoment(whereFilter.updatedSince).toISOString();
       delete whereFilter.updatedSince;
 
       // filter tokens
