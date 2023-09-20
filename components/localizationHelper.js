@@ -25,7 +25,7 @@ const today = function () {
  * @param date If no date is given, the current datetime is returned
  * @param dayOfWeek If not sent the day of the week will not be changed
  */
-const getDate = function (date, dayOfWeek) {
+const getDateStartOfDay = function (date, dayOfWeek) {
   let momentDate = date ? moment.utc(date).startOf('day') : moment.utc(moment().format('YYYY-MM-DD')).startOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
@@ -39,6 +39,15 @@ const getDate = function (date, dayOfWeek) {
 const getDateEndOfDay = function (date, dayOfWeek) {
   let momentDate = date ? moment.utc(date).endOf('day') : moment.utc(moment().format('YYYY-MM-DD')).endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
+};
+
+/**
+ * Get difference between dates in days
+ * @param startDate
+ * @param endDate
+ */
+const getDaysSince = function (startDate, endDate) {
+  return getDateStartOfDay(endDate).diff(getDateStartOfDay(startDate), 'days');
 };
 
 /**
@@ -79,8 +88,8 @@ const formatDate = function (value) {
  * @param date
  * @returns {moment.Moment}
  */
-const convertToDate = function (date) {
-  return moment(date).startOf('day');
+const toMoment = function (date) {
+  return moment(date);
 };
 
 /**
@@ -150,12 +159,13 @@ const excelDateToJSDate = function (serial) {
 module.exports = {
   now,
   today,
-  getDate,
+  getDateStartOfDay,
   getDateEndOfDay,
+  getDaysSince,
   getRange,
   getDateDisplayValue,
   formatDate,
-  convertToDate,
+  toMoment,
   isValidDate,
   convertPropsToDate,
   excelDateToJSDate

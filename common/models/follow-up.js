@@ -1,7 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 const _ = require('lodash');
 const helpers = require('../../components/helpers');
 const exportHelper = require('./../../components/exportHelper');
@@ -386,7 +386,7 @@ module.exports = function (FollowUp) {
         }
         // set index based on the difference in days from start date until the follow up set date
         // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-        context.instance.index = helpers.getDaysSince(moment(person.followUp.startDate), context.instance.date) + 1;
+        context.instance.index = localizationHelper.getDaysSince(person.followUp.startDate, context.instance.date) + 1;
       });
   }
 

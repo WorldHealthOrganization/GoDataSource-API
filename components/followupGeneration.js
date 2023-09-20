@@ -3,7 +3,7 @@
 // dependencies
 const App = require('../server/server');
 const Helpers = require('./helpers');
-const Moment = require('moment');
+const localizationHelper = require('./localizationHelper');
 const PromiseQueue = require('p-queue');
 
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
@@ -11,7 +11,7 @@ const PromiseQueue = require('p-queue');
 const _createFollowUpEntry = function (props, contact) {
   // set index based on the difference in days from start date until the follow up set date
   // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-  props.index = Helpers.getDaysSince(Moment(contact.followUp.startDate), props.date) + 1;
+  props.index = localizationHelper.getDaysSince(contact.followUp.startDate, props.date) + 1;
 
   // set follow up address to match contact's current address
   props.address = App.models.person.getCurrentAddress(contact);
