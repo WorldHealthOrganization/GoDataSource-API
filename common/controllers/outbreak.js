@@ -570,7 +570,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeCase: app.utils.helpers.getDate().toDate(),
+          dateBecomeCase: localizationHelper.today().toDate(),
           wasContact: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
           classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
@@ -709,7 +709,7 @@ module.exports = function (Outbreak) {
         const updateContacts = [];
         records.forEach(function (contact) {
           updateContacts.push(contact.updateAttributes({
-            dateBecomeContact: app.utils.helpers.getDate().toDate(),
+            dateBecomeContact: localizationHelper.today().toDate(),
             wasContactOfContact: true
           }, options));
         });
@@ -1175,7 +1175,7 @@ module.exports = function (Outbreak) {
         });
 
         // get now date
-        let now = new Date();
+        let now = localizationHelper.now().toDate();
 
         // get the new contacts in the outbreak
         return app.models.contact.find(app.utils.remote
@@ -1650,7 +1650,7 @@ module.exports = function (Outbreak) {
     }
 
     // get now date
-    let now = new Date();
+    let now = localizationHelper.now().toDate();
 
     // initialize results
     let results = {
@@ -1865,8 +1865,8 @@ module.exports = function (Outbreak) {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
       // normalize periodInterval dates
-      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
-      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
+      periodInterval[0] = localizationHelper.getDateStartOfDay(periodInterval[0]);
+      periodInterval[1] = localizationHelper.getDateEndOfDay(periodInterval[1]);
     } else {
       // set default periodInterval depending on periodType
       periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
@@ -2432,7 +2432,7 @@ module.exports = function (Outbreak) {
         // make sure limit per day is not exceeded for upcoming follow ups
         let followUpsToAdd = [];
         // store today date references, needed when checking for future follow ups
-        let today = genericHelpers.getDate();
+        let today = localizationHelper.today();
         if (
           modelType === appModels.contact.modelName ||
           modelType === appModels.case.modelName
@@ -2444,7 +2444,7 @@ module.exports = function (Outbreak) {
               // reset follow up day to the start of the day
               // change person id to point to winner model
               let followUps = modelFollowUs.map((followUp) => {
-                followUp.date = genericHelpers.getDate(followUp.date).toDate().toISOString();
+                followUp.date = localizationHelper.getDateStartOfDay(followUp.date).toDate().toISOString();
                 return followUp;
               });
 
@@ -2459,7 +2459,7 @@ module.exports = function (Outbreak) {
           // if group is in the future, remove from the end until the limit per day is ok
           for (let group in groupedFollowUps) {
             if (groupedFollowUps.hasOwnProperty(group)) {
-              if (genericHelpers.getDate(group).isAfter(today)) {
+              if (localizationHelper.getDateStartOfDay(group).isAfter(today)) {
                 groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
@@ -2710,13 +2710,13 @@ module.exports = function (Outbreak) {
     dateToFilter = _.get(filter, 'where.date', null);
     if (dateToFilter !== null) {
       // add date to filter if it is valid; else use today
-      dateToFilter = localizationHelper.toMoment(dateToFilter).isValid() ? genericHelpers.getDateEndOfDay(dateToFilter) : genericHelpers.getDateEndOfDay();
+      dateToFilter = localizationHelper.toMoment(dateToFilter).isValid() ? localizationHelper.getDateEndOfDay(dateToFilter) : localizationHelper.today();
 
       // date was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.date;
     } else {
       // use today as default filter
-      dateToFilter = genericHelpers.getDateEndOfDay();
+      dateToFilter = localizationHelper.today();
     }
 
     // add date to filter
@@ -2818,7 +2818,7 @@ module.exports = function (Outbreak) {
           // get end date of contact follow-ups
           // not having an end date should not be encountered; considering this case as still under follow-up
           let followUpEndDate = localizationHelper.toMoment(_.get(contact, 'followUp.endDate', null));
-          followUpEndDate = genericHelpers.getDateEndOfDay(followUpEndDate);
+          followUpEndDate = localizationHelper.getDateEndOfDay(followUpEndDate);
           if (!followUpEndDate.isValid() || followUpEndDate.isSameOrAfter(dateToFilter)) {
             // update contactsUnderFollowUpCount
             locationMap[contactLocationId].contactsUnderFollowUpCount++;
@@ -3369,8 +3369,8 @@ module.exports = function (Outbreak) {
     let endDate;
     // set them according to date
     if (date) {
-      startDate = genericHelpers.getDate(date);
-      endDate = genericHelpers.getDateEndOfDay(date);
+      startDate = localizationHelper.getDateStartOfDay(date);
+      endDate = localizationHelper.getDateEndOfDay(date);
     }
 
     // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, from the specified date
@@ -3394,8 +3394,8 @@ module.exports = function (Outbreak) {
     if (startDate && endDate) {
       _filter.include.scope.where = {
         date: {
-          gte: new Date(startDate),
-          lte: new Date(endDate)
+          gte: startDate.toDate(),
+          lte: endDate.toDate()
         }
       };
     }
