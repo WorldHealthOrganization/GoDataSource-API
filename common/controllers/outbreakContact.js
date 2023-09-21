@@ -178,8 +178,8 @@ module.exports = function (Outbreak) {
         // determine date condition that will be added when retrieving follow-ups
         dateCondition = {
           date: {
-            gte: new Date(startDate),
-            lte: new Date(endDate)
+            gte: startDate.toDate(),
+            lte: endDate.toDate()
           }
         };
       }
@@ -2713,7 +2713,7 @@ module.exports = function (Outbreak) {
       !filter.dateOfFollowUp &&
       !filter.where.dateOfFollowUp
     ) {
-      filter.dateOfFollowUp = new Date();
+      filter.dateOfFollowUp = localizationHelper.now().toDate();
     }
 
     // got dateOfFollowUp in where as it should be and not under filter ?
