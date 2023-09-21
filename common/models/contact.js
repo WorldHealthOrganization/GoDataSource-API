@@ -488,7 +488,7 @@ module.exports = function (Contact) {
   ];
 
   /**
-   * Update Follow-Up dates if needed (if conditions are met)
+   * Determine Follow-Up dates if we need to update this data
    */
   Contact.determineFollowUpDates = function (
     retrieveOutbreak,
