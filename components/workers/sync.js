@@ -5,17 +5,16 @@ const async = require('async');
 const tmp = require('tmp');
 const archiver = require('archiver');
 const fs = require('fs');
-const Moment = require('moment');
 const path = require('path');
 const extractZip = require('extract-zip');
 const _ = require('lodash');
 const uuid = require('uuid');
-
 const logger = require('./../logger')(true);
 const dbSync = require('./../dbSync');
 const workerRunner = require('./../workerRunner');
 const dbConfig = require('./../../server/datasources').mongoDb;
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
+const localizationHelper = require('../localizationHelper');
 
 const noElementsInFilterArrayLimit = 20000;
 
@@ -838,7 +837,7 @@ const worker = {
                     }
 
                     // archive file name
-                    let archiveName = `${tmp.tmpdir}/snapshot_${Moment().format('YYYY-MM-DD_HH-mm-ss')}_${uuid.v4()}.zip`;
+                    let archiveName = `${tmp.tmpdir}/snapshot_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}_${uuid.v4()}.zip`;
 
                     // archive directory
                     createZipArchive(archivesDirName, archiveName, logger)
