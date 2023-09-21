@@ -2,8 +2,8 @@
 
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const _ = require('lodash');
-const moment = require('moment');
 const adminEmailConfig = require('../../../../config.json').adminEmail;
+const localizationHelper = require('../../../../../components/localizationHelper');
 
 // roles map from model
 const rolesMap = require('../../defaultRoles');
@@ -205,7 +205,7 @@ function migrateRoles(mongoDBConnection) {
                   roleData.name !== mappedRole.newName
                 )
               ) &&
-              moment(roleData.migrateDate).isBefore(moment(mappedRole.migrateDate))
+              localizationHelper.toMoment(roleData.migrateDate).isBefore(localizationHelper.toMoment(mappedRole.migrateDate))
             )
           ) {
             // update role
