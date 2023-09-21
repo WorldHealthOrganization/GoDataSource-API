@@ -8,12 +8,12 @@ const async = require('async');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
 const _ = require('lodash');
-const moment = require('moment');
 const config = require('../server/config');
 const syncWorker = require('./workerRunner').sync;
 const apiError = require('./apiError');
 const WorkerRunner = require('./../components/workerRunner');
 const uuid = require('uuid');
+const localizationHelper = require('../components/localizationHelper');
 
 /**
  * Get backup password
@@ -296,7 +296,7 @@ const restoreBackupFromFile = function (
                                     let recordPropValue = _.get(obj, prop);
                                     if (recordPropValue) {
                                       // try to convert the string value to date, if valid, replace the old value
-                                      let convertedDate = moment(recordPropValue);
+                                      let convertedDate = localizationHelper.toMoment(recordPropValue);
                                       if (convertedDate.isValid()) {
                                         _.set(obj, prop, convertedDate.toDate());
                                       }
