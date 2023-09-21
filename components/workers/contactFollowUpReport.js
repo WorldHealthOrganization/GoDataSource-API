@@ -3,14 +3,9 @@
 // module dependencies
 const MongoClient = require('mongodb').MongoClient;
 const DbConfig = require('./../../server/datasources').mongoDb;
-const MomentLibrary = require('moment');
-const MomentRange = require('moment-range');
 const _ = require('lodash');
-const Helpers = require('../../components/helpers');
 const convertLoopbackFilterToMongo = require('../../components/convertLoopbackFilterToMongo');
-
-// add moment-range plugin
-const Moment = MomentRange.extendMoment(MomentLibrary);
+const localizationHelper = require('../../components/localizationHelper');
 
 // follow ups collection name
 const collectionName = 'followUp';
@@ -71,12 +66,12 @@ const worker = {
   ) {
     // parse dates for mongodb conditions
     if (startDate) {
-      startDate = Helpers.getDate(startDate).toDate();
+      startDate = localizationHelper.getDateStartOfDay(startDate).toDate();
     }
 
     endDate = endDate ?
-      Helpers.getDateEndOfDay(endDate).toDate() :
-      Helpers.getDateEndOfDay().toDate();
+      localizationHelper.getDateEndOfDay(endDate).toDate() :
+      localizationHelper.getDateEndOfDay().toDate();
 
     // filter by classification ?
     const classification = _.get(whereFilter, 'classification');
@@ -248,7 +243,7 @@ const worker = {
 
                 // get range of days
                 if (days.length < 1) {
-                  const range = Moment.range(startDate, endDate);
+                  const range = localizationHelper.getRange(startDate, endDate);
                   days = Array.from(range.by('days')).map((m => m.toString()));
 
                   // result props
@@ -272,7 +267,7 @@ const worker = {
                     currentDay.percentage = percentage || 0;
 
                     // convert date back to UTC
-                    result.days[Helpers.getDate(d).format()] = currentDay;
+                    result.days[localizationHelper.getDateStartOfDay(d).format()] = currentDay;
                     delete result.days[d];
                   }
 
@@ -281,14 +276,14 @@ const worker = {
 
                 // group follow ups by day
                 const groupedByDayRecords = _.groupBy(records, function (record) {
-                  return Helpers.getDate(record.date).toString();
+                  return localizationHelper.getDateStartOfDay(record.date).toString();
                 });
 
                 for (let i = 0; i < days.length; i++) {
-                  const currentDate = Helpers.getDate(days[i]);
+                  const currentDate = localizationHelper.getDateStartOfDay(days[i]);
 
                   // find all follow ups with same day
-                  const day = Object.keys(groupedByDayRecords).find(day => Helpers.getDate(day).isSame(currentDate), 'day');
+                  const day = Object.keys(groupedByDayRecords).find(day => localizationHelper.getDateStartOfDay(day).isSame(currentDate), 'day');
                   if (day) {
                     // group them by contact
                     // as a contact may have multiple follow ups on same day
