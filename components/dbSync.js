@@ -11,6 +11,7 @@ const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain
 const apiError = require('./apiError');
 const bcrypt = require('bcrypt');
 const Config = require('./../server/config.json');
+const localizationHelper = require('./localizationHelper');
 
 const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
 
@@ -638,7 +639,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
             _.set(obj, prop, propValue);
           }
           if (propValue) {
-            const convertedDate = helpers.getDate(propValue);
+            const convertedDate = localizationHelper.toMoment(propValue);
             if (!convertedDate.isValid()) {
               _.set(obj, prop, null);
             }
@@ -661,7 +662,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
             }
             if (recordPropValue) {
               // try to convert the string value to date, if valid, replace the old value
-              let convertedDate = helpers.getDate(recordPropValue);
+              let convertedDate = localizationHelper.getDateStartOfDay(recordPropValue);
               if (convertedDate.isValid()) {
                 _.set(obj, prop, convertedDate.toDate());
               }
