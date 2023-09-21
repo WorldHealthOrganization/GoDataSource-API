@@ -3,7 +3,6 @@
 // dependencies
 const PdfUtils = require('../pdfDoc');
 const localizationHelper = require('../localizationHelper');
-const GenericHelpers = require('../helpers');
 const Async = require('async');
 
 // format for follow up column dates ids
@@ -36,8 +35,8 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   // they are already sorted by index (reflection of date of follow up)
   // build follow up period + adjacent dates that are out of period
   const contactFollowUpProps = partialRecord.followUp;
-  const startDate = GenericHelpers.getDate(contactFollowUpProps.startDate);
-  const endDate = GenericHelpers.getDateEndOfDay(contactFollowUpProps.endDate);
+  const startDate = localizationHelper.getDateStartOfDay(contactFollowUpProps.startDate);
+  const endDate = localizationHelper.getDateEndOfDay(contactFollowUpProps.endDate);
   for (let date = startDate.clone(); date.isSameOrBefore(endDate); date.add(1, 'day')) {
     let existingFollowUps = partialRecord.followUps.find((followUp) => localizationHelper.toMoment(followUp.date).isSame(date, 'day'));
     if (!existingFollowUps) {
