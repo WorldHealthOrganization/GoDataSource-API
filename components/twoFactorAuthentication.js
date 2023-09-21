@@ -4,11 +4,11 @@
 const app = require('../server/server');
 const _ = require('lodash');
 const randomize = require('randomatic');
-const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 const config = _.get(require('../server/config'), 'login.twoFactorAuthentication', {});
 const baseLanguageModel = require('./baseModelOptions/language');
+const localizationHelper = require('./localizationHelper');
 
 /**
  * Check if 2FA is enabled for the given loginType
@@ -67,7 +67,7 @@ const setInfoInAccessToken = (accessToken) => {
   // update payload
   accessToken.twoFADisabled = true;
   accessToken.twoFACode = randomize('?', config.length, {chars: config.charset});
-  accessToken.twoFACodeExpirationDate = moment().add(config.ttlMinutes, 'm').toDate();
+  accessToken.twoFACodeExpirationDate = localizationHelper.now().add(config.ttlMinutes, 'm').toDate();
 };
 
 /**
@@ -190,7 +190,7 @@ const verifyStep2Data = (data, options) => {
         twoFADisabled: true,
         twoFACode: code,
         twoFACodeExpirationDate: {
-          gte: moment().utc().toDate()
+          gte: localizationHelper.now().utc().toDate()
         }
       }
     })
