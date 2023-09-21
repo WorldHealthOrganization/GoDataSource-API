@@ -6,7 +6,6 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
-const Moment = require('moment');
 const uuid = require('uuid').v4;
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
 const WorkerRunner = require('../../components/workerRunner');
@@ -15,6 +14,7 @@ const genericHelpers = require('../../components/helpers');
 const importableFile = require('../../components/importableFile');
 const Config = require('../../server/config.json');
 const exportHelper = require('../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 // used in user import
 const userImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -260,8 +260,8 @@ module.exports = function (User) {
           return next();
         }
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const lastLoginDate = Moment(user.lastLoginDate);
-          const now = Moment();
+          const lastLoginDate = localizationHelper.toMoment(user.lastLoginDate);
+          const now = localizationHelper.now();
           const isValidForReset = lastLoginDate.add(config.login.resetTime, config.login.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= config.login.maxRetries;
           if (isValidForReset) {
@@ -370,7 +370,7 @@ module.exports = function (User) {
             return next();
           }
 
-          const now = Moment().toDate();
+          const now = localizationHelper.now().toDate();
           const userAttributesToUpdate = {};
           if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
             if (user.loginRetriesCount >= config.login.maxRetries) {
@@ -659,8 +659,8 @@ module.exports = function (User) {
           user.lastResetPasswordDate
         ) {
           // check if then number of failed attempts has been reached
-          const lastResetPasswordDate = Moment(user.lastResetPasswordDate);
-          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(Moment());
+          const lastResetPasswordDate = localizationHelper.toMoment(user.lastResetPasswordDate);
+          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(localizationHelper.now());
           if (
             user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries &&
             !isValidForReset
@@ -714,7 +714,7 @@ module.exports = function (User) {
             ) {
               return user.updateAttributes({
                 resetPasswordRetriesCount: user.resetPasswordRetriesCount ? ++user.resetPasswordRetriesCount : 1,
-                lastResetPasswordDate: Moment().toDate()
+                lastResetPasswordDate: localizationHelper.now().toDate()
               });
             }
           })
