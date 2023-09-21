@@ -5,7 +5,6 @@ const path = require('path');
 const csvStringify = require('csv-stringify');
 const _ = require('lodash');
 const fs = require('fs');
-const moment = require('moment');
 const archiver = require('archiver');
 const xlsx = require('xlsx');
 const pdfkit = require('pdfkit');
@@ -16,6 +15,7 @@ const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
 const convertLoopbackQueryToMongo = require('./convertLoopbackFilterToMongo');
+const localizationHelper = require('./localizationHelper');
 
 // temporary database prefix
 const TEMPORARY_DATABASE_PREFIX = 'zExport_';
@@ -4718,7 +4718,7 @@ function exportFilteredModelsList(
                                         const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
 
                                         // find answer
-                                        value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                        value = (value || []).find((item) => item.date && localizationHelper.toMoment(item.date).isSame(multiAnswerDate, 'day'));
                                         value = value ?
                                           (
                                             value.value ?
@@ -4762,7 +4762,7 @@ function exportFilteredModelsList(
                                       const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
 
                                       // find answer
-                                      value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                      value = (value || []).find((item) => item.date && localizationHelper.toMoment(item.date).isSame(multiAnswerDate, 'day'));
                                       value = value ?
                                         value.value :
                                         value;
@@ -4949,7 +4949,7 @@ function exportFilteredModelsList(
                                     } else {
                                       // date value
                                       childValue = childValue instanceof Date ?
-                                        moment(childValue).toISOString() :
+                                        localizationHelper.toMoment(childValue).toISOString() :
                                         childValue;
 
                                       // normal value
@@ -6025,7 +6025,7 @@ function exportFilteredModelsList(
                     cellValue instanceof Date
                   ) {
                     // format date as string
-                    cellValue = moment(cellValue).toISOString();
+                    cellValue = localizationHelper.toMoment(cellValue).toISOString();
 
                     // remove new lines since these might break files like csv and others
                   } else if (
