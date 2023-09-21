@@ -5,8 +5,8 @@ const formidable = require('formidable');
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
-const moment = require('moment');
 const syncConfig = require('../../server/config.json').sync;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Sync) {
 
@@ -856,7 +856,7 @@ module.exports = function (Sync) {
             } else {
               // get date from which we will sync the data
               // in order to prevent data loss from the moment where the sync was started to the moment when the actionStartDate was set, get data from 1 minute earlier
-              let syncDate = moment(lastSyncLogEntry.actionStartDate).subtract(1, 'minutes');
+              let syncDate = localizationHelper.toMoment(lastSyncLogEntry.actionStartDate).subtract(1, 'minutes');
               syncLogEntry.informationStartDate = syncDate;
               app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.informationStartDate).toISOString()}'. Syncing data from that date onwards`);
             }
