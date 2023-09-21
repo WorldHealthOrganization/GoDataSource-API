@@ -13,12 +13,12 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
 const apiError = require('../../components/apiError');
 const exportHelper = require('./../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -880,13 +880,13 @@ module.exports = function (Outbreak) {
       // normalize periodInterval dates
       // let empty if start date is not provided
       if (periodInterval[0]) {
-        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toISOString();
+        periodInterval[0] = localizationHelper.getDateStartOfDay(periodInterval[0]).toISOString();
       }
 
       // and current date if end date is not provided
       periodInterval[1] = periodInterval[1] ?
-        genericHelpers.getDateEndOfDay(periodInterval[1]).toISOString() :
-        genericHelpers.getDateEndOfDay().toISOString();
+        localizationHelper.getDateEndOfDay(periodInterval[1]).toISOString() :
+        localizationHelper.getDateEndOfDay().toISOString();
     } else {
       // set default periodInterval depending on periodType
       periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
@@ -990,8 +990,8 @@ module.exports = function (Outbreak) {
         if (!periodInterval[0]) {
           periodInterval[0] = cases.length > 0 &&
           cases[0].dateOfReporting ?
-            genericHelpers.getDate(cases[0].dateOfReporting).toISOString() :
-            genericHelpers.getDateEndOfDay().toISOString();
+            localizationHelper.getDateStartOfDay(cases[0].dateOfReporting).toISOString() :
+            localizationHelper.getDateEndOfDay().toISOString();
         }
 
         // get periodMap for interval
@@ -1401,7 +1401,7 @@ module.exports = function (Outbreak) {
                     return Promise.all(pdfPromises);
                   })
                   .then(() => {
-                    let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archiveName = `caseDossiers_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
                     let archivePath = `${tmpDirName}/${archiveName}`;
                     let zip = new AdmZip();
 
@@ -1757,7 +1757,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeContact: app.utils.helpers.getDate().toDate(),
+          dateBecomeContact: localizationHelper.today().toDate(),
           wasCase: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
         };
