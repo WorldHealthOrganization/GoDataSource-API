@@ -84,12 +84,19 @@ const formatDate = function (value) {
 };
 
 /**
- * Convert to date..
- * @param date
+ * Convert to date
  * @returns {moment.Moment}
  */
-const toMoment = function (date) {
-  return moment(date);
+const toMoment = function (
+  date,
+  format
+) {
+  return format ?
+    moment(
+      date,
+      format
+    ) :
+    moment(date);
 };
 
 /**
