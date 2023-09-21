@@ -2,7 +2,6 @@
 
 // dependencies
 const App = require('../server/server');
-const Helpers = require('./helpers');
 const localizationHelper = require('./localizationHelper');
 const PromiseQueue = require('p-queue');
 
@@ -643,8 +642,8 @@ module.exports.generateFollowupsForContact = function (
 
   // if passed period is higher than contact's follow up period
   // restrict follow up start/date to a maximum of contact's follow up period
-  let firstIncubationDay = Helpers.getDate(contact.followUp.startDate);
-  let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
+  let firstIncubationDay = localizationHelper.getDateStartOfDay(contact.followUp.startDate);
+  let lastIncubationDay = localizationHelper.getDateStartOfDay(contact.followUp.endDate);
   if (period.endDate.isAfter(lastIncubationDay)) {
     period.endDate = lastIncubationDay.clone();
   }
@@ -664,7 +663,7 @@ module.exports.generateFollowupsForContact = function (
     let followUpIdsToUpdateForDate = [];
 
     // get list of follow ups that are on the same day as the day we want to generate
-    let followUpsInThisDay = contact.followUpsList.filter((followUp) => Helpers.getDate(followUp.date).isSame(followUpDate, 'd'));
+    let followUpsInThisDay = contact.followUpsList.filter((followUp) => localizationHelper.getDateStartOfDay(followUp.date).isSame(followUpDate, 'd'));
     let followUpsInThisDayCount = followUpsInThisDay.length;
 
     // do not generate over the daily quota
@@ -673,7 +672,7 @@ module.exports.generateFollowupsForContact = function (
     // for today and in the future,
     // if overwriteExistingFollowUps is true
     // recreate the follow ups that are not performed
-    if (overwriteExistingFollowUps && followUpDate.isSameOrAfter(Helpers.getDateEndOfDay(), 'day')) {
+    if (overwriteExistingFollowUps && followUpDate.isSameOrAfter(localizationHelper.getDateEndOfDay(), 'day')) {
       followUpIdsToUpdateForDate.push(...followUpsInThisDay
         .filter(f => {
           if (f.statusId !== 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED') {
