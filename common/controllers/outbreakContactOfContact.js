@@ -11,13 +11,13 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-const moment = require('moment');
 const apiError = require('../../components/apiError');
 const Config = require('../../server/config.json');
 const WorkerRunner = require('./../../components/workerRunner');
 const exportHelper = require('./../../components/exportHelper');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
+const localizationHelper = require('../../components/localizationHelper');
 
 // used in contact of contact import
 const contactOfContactImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -900,7 +900,7 @@ module.exports = function (Outbreak) {
                     return Promise.all(pdfPromises);
                   })
                   .then(() => {
-                    let archiveName = `contactOfContactDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archiveName = `contactOfContactDossiers_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
                     let archivePath = `${tmpDirName}/${archiveName}`;
                     let zip = new AdmZip();
 
@@ -1133,7 +1133,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeContact: app.utils.helpers.getDate().toDate(),
+          dateBecomeContact: localizationHelper.today().toDate(),
           wasContactOfContact: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
         };
