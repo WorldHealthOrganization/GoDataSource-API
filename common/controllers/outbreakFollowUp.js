@@ -41,11 +41,15 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    // if start date is not provided, use "tomorrow"
+    // if start date is not provided:
+    // - use "today" if contact tracing should start with the date of the last contact
+    // - otherwise, use "tomorrow"
     // if end date is not provided, use outbreak follow-up period
     let followupStartDate = data.startDate ?
       genericHelpers.getDate(data.startDate) :
-      genericHelpers.getDate().add(1, 'days');
+      this.generateFollowUpsDateOfLastContact ?
+        genericHelpers.getDate() :
+        genericHelpers.getDate().add(1, 'days');
     let followupEndDate = genericHelpers.getDateEndOfDay(
       data.endDate ?
         data.endDate :
@@ -114,9 +118,6 @@ module.exports = function (Outbreak) {
     let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
       data.intervalOfFollowUp :
       this.intervalOfFollowUp;
-
-    // check if contact tracing should start on the date of the last contact
-    const generateFollowUpsDateOfLastContact = this.generateFollowUpsDateOfLastContact;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
@@ -208,8 +209,7 @@ module.exports = function (Outbreak) {
                             targeted,
                             overwriteExistingFollowUps,
                             teamAssignmentPerDay,
-                            intervalOfFollowUp,
-                            generateFollowUpsDateOfLastContact
+                            intervalOfFollowUp
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);
