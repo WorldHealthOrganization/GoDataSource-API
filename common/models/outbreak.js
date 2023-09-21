@@ -1743,10 +1743,7 @@ module.exports = function (Outbreak) {
     // initialize parameters for handleActionsInBatches call
     const getActionsCount = () => {
       return app.models.contact
-        .count(Object.assign({}, where, { includeDeletedRecords: true }))
-        .then(count => {
-          return Promise.resolve(count);
-        });
+        .count(Object.assign({}, where, { includeDeletedRecords: true }));
     };
 
     // get records in batches
@@ -1771,27 +1768,24 @@ module.exports = function (Outbreak) {
 
     // update contact
     const itemAction = (contact) => {
-      return app.models.contact.updateFollowUpDatesIfNeeded(
+      const contactOptions = Object.assign({}, context.options);
+      return app.models.contact.determineFollowUpDates(
+        () => Promise.resolve(context.instance),
         contact.id,
-        contact.outbreakId,
-        contact.type,
         contact.deleted,
         contact.followUp,
-        Object.assign({}, context.options)
+        contactOptions
       )
         .then((data) => {
           // no property to update ?
-          if (
-            !data ||
-            Object.keys(data).length === 0
-          ) {
+          if (!data) {
             return;
           }
 
           // update contact
           return contact.updateAttributes(
             data,
-            Object.assign({}, context.options)
+            contactOptions
           );
         });
     };
