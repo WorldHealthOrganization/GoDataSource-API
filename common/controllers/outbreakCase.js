@@ -653,12 +653,9 @@ module.exports = function (Outbreak) {
       noDaysAmongContacts = this.noDaysAmongContacts;
     }
 
-    // get now date
-    let now = new Date();
-
     // get from noDaysAmongContacts ago
-    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0));
-    xDaysAgo.setDate(now.getDate() - noDaysAmongContacts);
+    let xDaysAgo = new Date(localizationHelper.now().toDate().setHours(0, 0, 0, 0));
+    xDaysAgo.setDate(localizationHelper.now().toDate().getDate() - noDaysAmongContacts);
 
     // get outbreakId
     let outbreakId = this.id;
@@ -702,7 +699,7 @@ module.exports = function (Outbreak) {
         };
 
         // get the newCasesAmongKnownContactsIDs
-        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && localizationHelper.toMoment(item.dateBecomeCase).toDate() >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
 
         // send response
