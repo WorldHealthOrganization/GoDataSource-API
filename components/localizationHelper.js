@@ -164,6 +164,7 @@ const excelDateToJSDate = function (serial) {
 
 // exports
 module.exports = {
+  Moment: moment.Moment,
   now,
   today,
   getDateStartOfDay,
