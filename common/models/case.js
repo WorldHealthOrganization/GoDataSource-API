@@ -3,10 +3,10 @@
 const app = require('../../server/server');
 const casesWorker = require('../../components/workerRunner').cases;
 const _ = require('lodash');
-const moment = require('moment');
 const helpers = require('../../components/helpers');
 const async = require('async');
 const caseConstants = require('../../components/baseModelOptions/case').constants;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Case) {
   Case.getIsolatedContacts = function (caseId, callback) {
@@ -555,10 +555,10 @@ module.exports = function (Case) {
     // always work with end of day
     if (endDate) {
       // get end of day for specified date
-      endDate = app.utils.helpers.getDateEndOfDay(endDate).toISOString();
+      endDate = localizationHelper.getDateEndOfDay(endDate).toISOString();
     } else {
       // nothing sent, use current day's end of day
-      endDate = app.utils.helpers.getDateEndOfDay().toISOString();
+      endDate = localizationHelper.getDateEndOfDay().toISOString();
     }
 
     // add geographical restrictions if needed
@@ -628,7 +628,7 @@ module.exports = function (Case) {
           .then(function (cases) {
             // if there are not cases, use end date
             const startDate = cases.length > 0 ?
-              app.utils.helpers.getDateEndOfDay(cases[0][timePropertyName]).toISOString() :
+              localizationHelper.getDateEndOfDay(cases[0][timePropertyName]).toISOString() :
               endDate;
 
             // define period interval
@@ -845,8 +845,8 @@ module.exports = function (Case) {
 
                 // calculate delay if both dates are available (onset is ensured by the query)
                 if (labResultDate) {
-                  const onset = moment(result.dateOfOnset);
-                  const labTest = moment(result.dateSampleTaken);
+                  const onset = localizationHelper.toMoment(result.dateOfOnset);
+                  const labTest = localizationHelper.toMoment(result.dateSampleTaken);
                   result.delay = labTest.diff(onset, 'days');
                 }
 
@@ -938,8 +938,8 @@ module.exports = function (Case) {
           };
           // calculate delay if both dates are available (onset is ensured by the query)
           if (hospitalizationIsolationDate) {
-            const onset = moment(result.dateOfOnset);
-            const hospitalisationIsolation = moment(hospitalizationIsolationDate.startDate);
+            const onset = localizationHelper.toMoment(result.dateOfOnset);
+            const hospitalisationIsolation = localizationHelper.toMoment(hospitalizationIsolationDate.startDate);
             result.delay = hospitalisationIsolation.diff(onset, 'days');
           }
           results.push(result);
@@ -1096,8 +1096,8 @@ module.exports = function (Case) {
     filter.where = filter.where || {};
 
     // date limit
-    const dateLimitEndOfDay = app.utils.helpers.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
-    const dateLimitStartOfDay = app.utils.helpers.getDate(filter.flags ? filter.flags.date : undefined).toDate();
+    const dateLimitEndOfDay = localizationHelper.getDateEndOfDay(filter.flags ? filter.flags.date : undefined).toDate();
+    const dateLimitStartOfDay = localizationHelper.getDateStartOfDay(filter.flags ? filter.flags.date : undefined).toDate();
 
     // update filter for geographical restriction if needed
     const refItems = [];
