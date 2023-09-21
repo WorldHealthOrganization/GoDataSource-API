@@ -3,7 +3,7 @@
 const app = require('../../server/server');
 const backupHelper = require('../../components/backup');
 const fs = require('fs');
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Backup) {
   Backup.hasController = true;
@@ -87,7 +87,7 @@ module.exports = function (Backup) {
         // when done update backup status and file location
         return new Promise(function (resolve, reject) {
           // keep backup start time
-          const startedAt = moment();
+          const startedAt = localizationHelper.now();
 
           // start creating backup
           backupHelper.create(modules, location, (err, backupFilePath) => {
@@ -111,7 +111,7 @@ module.exports = function (Backup) {
                   JSON.stringify(failReason) :
                 '',
               startedAt: startedAt,
-              endedAt: moment()
+              endedAt: localizationHelper.now()
             })
               .then(function (record) {
                 app.logger.debug(`Backup ${record.id}: Successfully updated backup entry status`);
