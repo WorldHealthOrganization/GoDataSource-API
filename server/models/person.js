@@ -7,6 +7,7 @@ const helpers = require('../../components/helpers');
 const _ = require('lodash');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Person) {
 
@@ -1042,13 +1043,13 @@ module.exports = function (Person) {
 
                   if (filter) {
                     if (filter.dateOfFollowUp) {
-                      dateInterval = [helpers.getDate(filter.dateOfFollowUp), helpers.getDateEndOfDay(filter.dateOfFollowUp)];
+                      dateInterval = [localizationHelper.getDateStartOfDay(filter.dateOfFollowUp), localizationHelper.getDateEndOfDay(filter.dateOfFollowUp)];
                       delete filter.dateOfFollowUp;
                     } else if (filter.startDate && filter.endDate) {
-                      dateInterval = [helpers.getDate(filter.startDate), helpers.getDateEndOfDay(filter.endDate)];
+                      dateInterval = [localizationHelper.getDateStartOfDay(filter.startDate), localizationHelper.getDateEndOfDay(filter.endDate)];
                     }
                   } else {
-                    dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
+                    dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
                   }
 
                   // For contacts, we also need the follow up from either the required date or today so the filter is
@@ -1782,7 +1783,7 @@ module.exports = function (Person) {
             return -1;
           } else {
             // compare dates
-            return helpers.getDate(date1).diff(helpers.getDate(date2));
+            return localizationHelper.getDateStartOfDay(date1).diff(localizationHelper.getDateStartOfDay(date2));
           }
         };
 
@@ -1844,13 +1845,13 @@ module.exports = function (Person) {
           // determine lastGraphDate
           // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
           recordData.lastGraphDate = recordData.date ?
-            helpers.getDate(recordData.date) :
+            localizationHelper.getDateStartOfDay(recordData.date) :
             undefined;
 
           // determine firstGraphDate
           // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
           recordData.firstGraphDate = recordData.date ?
-            helpers.getDate(recordData.date) :
+            localizationHelper.getDateStartOfDay(recordData.date) :
             undefined;
 
           // determine lastGraphDate starting with lab results
@@ -1870,7 +1871,7 @@ module.exports = function (Person) {
               // actions only if we have date of result
               if (lab.dateOfResult) {
                 // determine lastGraphDate
-                const dateOfResult = helpers.getDate(lab.dateOfResult);
+                const dateOfResult = localizationHelper.getDateStartOfDay(lab.dateOfResult);
                 recordData.lastGraphDate = !recordData.lastGraphDate ?
                   dateOfResult : (
                     dateOfResult.isAfter(recordData.lastGraphDate) ?
@@ -1889,7 +1890,7 @@ module.exports = function (Person) {
                 // fallback to dateSampleTaken
               } else if (lab.dateSampleTaken) {
                 // determine lastGraphDate
-                const dateSampleTaken = helpers.getDate(lab.dateSampleTaken);
+                const dateSampleTaken = localizationHelper.getDateStartOfDay(lab.dateSampleTaken);
                 recordData.lastGraphDate = !recordData.lastGraphDate ?
                   dateSampleTaken : (
                     dateSampleTaken.isAfter(recordData.lastGraphDate) ?
@@ -1923,10 +1924,10 @@ module.exports = function (Person) {
               }
 
               // make sure we have start date
-              dateRange.startDate = dateRange.startDate ? helpers.getDate(dateRange.startDate) : helpers.getDate(recordData.date);
+              dateRange.startDate = dateRange.startDate ? localizationHelper.getDateStartOfDay(dateRange.startDate) : localizationHelper.getDateStartOfDay(recordData.date);
 
               // if we don't have an end date then we need to set the current date since this is still in progress
-              dateRange.endDate = dateRange.endDate ? helpers.getDate(dateRange.endDate) : helpers.getDate();
+              dateRange.endDate = dateRange.endDate ? localizationHelper.getDateStartOfDay(dateRange.endDate) : localizationHelper.getDateStartOfDay();
 
               // determine min graph date
               if (dateRange.startDate) {
@@ -1963,7 +1964,7 @@ module.exports = function (Person) {
           // determine min & max dates taking in consideration dateOfOutcome
           if (recordData.dateOfOutcome) {
             // determine dateOfOutcome
-            const dateOfOutcome = helpers.getDate(recordData.dateOfOutcome);
+            const dateOfOutcome = localizationHelper.getDateStartOfDay(recordData.dateOfOutcome);
 
             // determine min graph date
             recordData.firstGraphDate = !recordData.firstGraphDate ?
@@ -1985,7 +1986,7 @@ module.exports = function (Person) {
           // determine min & max dates taking in consideration dateOfBurial
           if (recordData.dateOfBurial) {
             // determine dateOfBurial
-            const dateOfBurial = helpers.getDate(recordData.dateOfBurial);
+            const dateOfBurial = localizationHelper.getDateStartOfDay(recordData.dateOfBurial);
 
             // determine min graph date
             recordData.firstGraphDate = !recordData.firstGraphDate ?
