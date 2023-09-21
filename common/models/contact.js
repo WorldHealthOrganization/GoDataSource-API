@@ -489,60 +489,83 @@ module.exports = function (Contact) {
 
   /**
    * Update Follow-Up dates if needed (if conditions are met)
-   * @param context
-   * @return {*|void|Promise<T | never>}
    */
-  Contact.updateFollowUpDatesIfNeeded = function (context) {
+  Contact.updateFollowUpDatesIfNeeded = function (
+    id,
+    outbreakId,
+    type,
+    deleted,
+    followUp,
+    options
+  ) {
     // prevent infinite loops
-    if (app.utils.helpers.getValueFromContextOptions(context, 'updateFollowUpDatesIfNeeded')) {
-      return Promise.resolve();
+    if (app.utils.helpers.getValueFromOptions(
+      options,
+      app.models.contact.modelName,
+      id,
+      'updateFollowUpDatesIfNeeded'
+    )) {
+      return {};
     }
     let relationshipInstance;
-    // get contact instance
-    let contactInstance = context.instance;
+    // create filter to get the newest relationship, if any
+    let filter = {
+      order: 'contactDate DESC',
+      where: {
+        'persons.id': id,
+        'persons.type': {
+          inq: type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
+            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+        },
+        active: true
+      }
+    };
+
+    // get deleted relationship if the contact is deleted
+    if (
+      deleted &&
+      options.updateDeletedRecords
+    ) {
+      filter = Object.assign(filter, {deleted: true});
+    }
+
     // get newest relationship, if any
     return app.models.relationship
-      .findOne({
-        order: 'contactDate DESC',
-        where: {
-          'persons.id': contactInstance.id,
-          'persons.type': {
-            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-          },
-          active: true
-        }
-      })
+      .findOne(filter)
       .then(function (relationshipRecord) {
         // get relationship instance, if any
         relationshipInstance = relationshipRecord;
         // get the outbreak as we need the followUpPeriod
-        return app.models.outbreak.findById(contactInstance.outbreakId);
+        return app.models.outbreak.findById(outbreakId);
       })
       .then(function (outbreak) {
         // check for found outbreak
         if (!outbreak) {
-          throw app.logger.error(`Error when updating contact (id: ${contactInstance.id}) follow-up dates. Outbreak (id: ${contactInstance.outbreakId}) was not found.`);
+          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Outbreak (id: ${outbreakId}) was not found.`);
         }
         // keep a flag for updating contact
         let shouldUpdate = false;
         // build a list of properties that need to be updated
         // & preserve previous value
-        const previousStatusValue = _.get(contactInstance, 'followUp.status');
+        const previousStatusValue = _.get(followUp, 'status');
         const propsToUpdate = {
           status: previousStatusValue ?
             previousStatusValue :
             'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
         };
         // preserve original startDate, if any
-        if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
-          propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
+        if (followUp && followUp.originalStartDate) {
+          propsToUpdate.originalStartDate = followUp.originalStartDate;
         }
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+          // check also if contact tracing should start on the date of the last contact
+          propsToUpdate.startDate = outbreak.generateFollowUpsDateOfLastContact ?
+            helpers.getDate(relationshipInstance.contactDate) :
+            helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
@@ -552,28 +575,38 @@ module.exports = function (Contact) {
           }
           // set follow-up end date
           propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+
+          // set generateFollowUpsDateOfLastContact if only the outbreak feature is enabled
+          if (outbreak.generateFollowUpsDateOfLastContact) {
+            propsToUpdate.generateFollowUpsDateOfLastContact = true;
+          }
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
           .forEach(function (updatePropName) {
             // if the property is missing (probably never, but lets be safe)
-            if (!contactInstance.followUp) {
+            if (!followUp) {
               // flag as an update
               return shouldUpdate = true;
             }
             // if either original or new value was not set (when the other was present)
             if (
-              !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
-              contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+              (
+                !followUp[updatePropName] &&
+                propsToUpdate[updatePropName]
+              ) || (
+                followUp[updatePropName] &&
+                !propsToUpdate[updatePropName]
+              )
             ) {
               // flag as an update
               return shouldUpdate = true;
             }
             // both original and new values are present, but the new values are different than the old ones
             if (
-              contactInstance.followUp[updatePropName] &&
+              followUp[updatePropName] &&
               propsToUpdate[updatePropName] &&
-              ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              ((new Date(followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
             ) {
               // flag as an update
               return shouldUpdate = true;
@@ -588,13 +621,20 @@ module.exports = function (Contact) {
         // if updates are required
         if (shouldUpdate) {
           // set a flag for this operation so we prevent infinite loops
-          app.utils.helpers.setValueInContextOptions(context, 'updateFollowUpDatesIfNeeded', true);
-          // update contact
-          return contactInstance.updateAttributes({
+          app.utils.helpers.setValueInOptions(
+            options,
+            app.models.contact.modelName,
+            id,
+            'updateFollowUpDatesIfNeeded',
+            true
+          );
+
+          // return new data
+          return {
             followUp: propsToUpdate,
             // contact is active if it has valid follow-up interval
             active: !!propsToUpdate.startDate
-          }, context.options);
+          };
         }
       });
   };
@@ -695,7 +735,29 @@ module.exports = function (Contact) {
     // if this is an exiting record
     if (!context.isNewInstance) {
       // update follow-up dates, if needed
-      Contact.updateFollowUpDatesIfNeeded(context)
+      Contact.updateFollowUpDatesIfNeeded(
+        context.instance.id,
+        context.instance.outbreakId,
+        context.instance.type,
+        context.instance.deleted,
+        context.instance.followUp,
+        Object.assign({}, context.options)
+      )
+        .then(function (data) {
+          // no property to update ?
+          if (
+            !data ||
+            Object.keys(data).length === 0
+          ) {
+            return;
+          }
+
+          // update contact
+          return context.instance.updateAttributes(
+            data,
+            Object.assign({}, context.options)
+          );
+        })
         .then(function () {
           next();
         })
