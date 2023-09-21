@@ -10,6 +10,7 @@ const _ = require('lodash');
 const baseTransmissionChainModel = require('../../components/baseModelOptions/transmissionChain');
 const apiError = require('../../components/apiError');
 const Helpers = require('../../components/helpers');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -54,7 +55,7 @@ module.exports = function (Outbreak) {
       .create({
         outbreakId: self.id,
         name: data.name,
-        startDate: new Date(),
+        startDate: localizationHelper.now().toDate(),
         status: 'LNG_COT_STATUS_IN_PROGRESS',
         showContacts: where.includeContacts,
         showContactsOfContacts: where.includeContactsOfContacts
@@ -155,7 +156,7 @@ module.exports = function (Outbreak) {
         return cotDBEntry
           .updateAttributes({
             status: 'LNG_COT_STATUS_SUCCESS',
-            endDate: new Date()
+            endDate: localizationHelper.now().toDate()
           });
       })
       .catch(err => {
@@ -169,7 +170,7 @@ module.exports = function (Outbreak) {
           .updateAttributes({
             status: 'LNG_COT_STATUS_FAILED',
             error: err.toString() ? err.toString() : JSON.stringify(err),
-            endDate: new Date()
+            endDate: localizationHelper.now().toDate()
           })
           .catch(err => {
             options.remotingContext.req.logger.debug(`Transmission chain (${cotDBEntry.id}) calculation failed with error ${err}`);
@@ -301,7 +302,7 @@ module.exports = function (Outbreak) {
     // use a cases index to make sure we don't count a case multiple times
     const casesIndex = {};
     // calculate date used to compare contact date of onset with
-    const newCasesFromDate = new Date();
+    const newCasesFromDate = localizationHelper.now().toDate();
     newCasesFromDate.setDate(newCasesFromDate.getDate() - noDaysInChains);
 
     // get known transmission chains (case-case relationships)
@@ -318,7 +319,7 @@ module.exports = function (Outbreak) {
                 casesIndex[person.id] = true;
                 result.total++;
                 // check if the case is new (date of reporting is later than the threshold date)
-                if ((new Date(person.dateOfReporting)) >= newCasesFromDate) {
+                if (localizationHelper.toMoment(person.dateOfReporting).toDate() >= newCasesFromDate) {
                   result.newCases++;
                   result.caseIDs.push(person.id);
                 }
@@ -373,8 +374,8 @@ module.exports = function (Outbreak) {
         relationships.forEach(function (relation) {
           // we're only interested in the cases that have dateOfOnset set (this should be already done by the query, but double-check)
           if (relation.people[0].dateOfOnset && relation.people[1].dateOfOnset) {
-            const case1Date = new Date(relation.people[0].dateOfOnset);
-            const case2Date = new Date(relation.people[1].dateOfOnset);
+            const case1Date = localizationHelper.toMoment(relation.people[0].dateOfOnset).toDate();
+            const case2Date = localizationHelper.toMoment(relation.people[1].dateOfOnset).toDate();
             // get time difference in days
             const timeDifferenceInDays = Math.ceil(Math.abs(case1Date.getTime() - case2Date.getTime()) / (1000 * 3600 * 24));
             // if the time difference is bigger then the threshold
@@ -454,7 +455,7 @@ module.exports = function (Outbreak) {
             // get target person (the other person from people list)
             const targetPerson = relationship.people[sourceIndex ? 0 : 1];
             // if target person's date of onset is earlier than the source's person
-            if ((new Date(targetPerson.dateOfOnset)) < (new Date(sourcePerson.dateOfOnset))) {
+            if (localizationHelper.toMoment(targetPerson.dateOfOnset).toDate() < localizationHelper.toMoment(sourcePerson.dateOfOnset).toDate()) {
               //store info about both people and their relationship
               const result = {
                 primaryCase: sourcePerson,
