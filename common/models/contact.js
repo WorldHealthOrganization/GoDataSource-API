@@ -559,18 +559,18 @@ module.exports = function (Contact) {
           // set follow-up start date to be the same as relationship contact date
           // check also if contact tracing should start on the date of the last contact
           propsToUpdate.startDate = outbreak.generateFollowUpsDateOfLastContact ?
-            helpers.getDate(relationshipInstance.contactDate) :
-            helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate) :
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate).add(1, 'days');
 
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
             shouldUpdate = true;
             // set it as follow-up start date
-            propsToUpdate.originalStartDate = helpers.getDate(propsToUpdate.startDate);
+            propsToUpdate.originalStartDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate);
           }
           // set follow-up end date
-          propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+          propsToUpdate.endDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
 
           // set generateFollowUpsDateOfLastContact if only the outbreak feature is enabled
           if (outbreak.generateFollowUpsDateOfLastContact) {
@@ -816,11 +816,11 @@ module.exports = function (Contact) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
-      dateInterval = [helpers.getDate(date.startDate), helpers.getDateEndOfDay(date.endDate)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date.startDate), localizationHelper.getDateEndOfDay(date.endDate)];
     } else if (typeof date === 'string') {
-      dateInterval = [helpers.getDate(date), helpers.getDateEndOfDay(date)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date), localizationHelper.getDateEndOfDay(date)];
     } else {
-      dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
+      dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
     }
 
     // check for geographical restriction
