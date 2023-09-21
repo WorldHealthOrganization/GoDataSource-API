@@ -11,8 +11,8 @@ const async = require('async');
 const fs = require('fs');
 const Platform = require('./../../components/platform');
 // used to manipulate dates
-const moment = require('moment');
 const apiError = require('./../../components/apiError');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
 
@@ -1192,7 +1192,7 @@ module.exports = function (Outbreak) {
                 // go trough their relationships
                 caseRecord.relationships.forEach(function (relationship) {
                   // store only the relationships that are newer than their conversion date
-                  if (app.utils.helpers.getDate(relationship.contactDate) >= app.utils.helpers.getDate(caseRecord.dateBecomeCase)) {
+                  if (localizationHelper.getDateStartOfDay(relationship.contactDate) >= localizationHelper.getDateStartOfDay(caseRecord.dateBecomeCase)) {
                     relationshipIds.push(relationship.id);
                   }
                 });
@@ -1545,7 +1545,7 @@ module.exports = function (Outbreak) {
       qAnswer.length &&
       qAnswer[0].date) {
       // find the answer that matches the date the question has
-      qAnswer = qAnswer.find(a => genericHelpers.getDate(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
+      qAnswer = qAnswer.find(a => localizationHelper.toMoment(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
     } else {
       if (Array.isArray(qAnswer) && qAnswer.length) {
         qAnswer = qAnswer[0];
@@ -1589,7 +1589,7 @@ module.exports = function (Outbreak) {
           qAnswer.forEach(answer => {
             const clonedQ = _.cloneDeep(question);
             clonedQ.value = null;
-            clonedQ.multiAnswerDate = genericHelpers.getDate(answer.date).format('YYYY-MM-DD');
+            clonedQ.multiAnswerDate = localizationHelper.toMoment(answer.date).format('YYYY-MM-DD');
             mapStandardAnswerToQuestion(answers, answer, clonedQ);
             question.multiAnswers.push({
               date: clonedQ.multiAnswerDate,
@@ -2091,7 +2091,7 @@ module.exports = function (Outbreak) {
         if (err) {
           callback(err);
         } else {
-          let archiveName = `caseInvestigationTemplates_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+          let archiveName = `caseInvestigationTemplates_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
           let archivePath = `${tmpDirName}/${archiveName}`;
           let zip = new AdmZip();
 
@@ -2825,7 +2825,7 @@ module.exports = function (Outbreak) {
                   // update isolated nodes filter depending on active filter value
                   let followUpPeriod = outbreak.periodOfFollowup;
                   // get day of the start of the follow-up period starting from specified end date (by default, today)
-                  let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
+                  let followUpStartDate = localizationHelper.getDateStartOfDay(endDate).subtract(followUpPeriod, 'days');
 
                   if (activeFilter) {
                     // get cases/events reported in the last followUpPeriod days
