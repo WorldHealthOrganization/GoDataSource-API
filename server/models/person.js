@@ -510,7 +510,7 @@ module.exports = function (Person) {
               })
               .then((languages) => {
                 // prepare reference data items that we need to create
-                const now = new Date();
+                const now = localizationHelper.now().toDate();
                 const authorInfo = {
                   createdBy: 'system',
                   updatedBy: 'system',
@@ -888,11 +888,11 @@ module.exports = function (Person) {
         }
         // make sure lastContactDate is a Date
         if (lastContactDate && !(lastContactDate instanceof Date)) {
-          lastContactDate = new Date(lastContactDate);
+          lastContactDate = localizationHelper.toMoment(lastContactDate).toDate();
         }
         // make sure dateOfLastContact is a Date
         if (personRecord.dateOfLastContact && !(personRecord.dateOfLastContact instanceof Date)) {
-          personRecord.dateOfLastContact = new Date(personRecord.dateOfLastContact);
+          personRecord.dateOfLastContact = localizationHelper.toMoment(personRecord.dateOfLastContact).toDate();
         }
         // check if there are any differences between date of last contact and last contact date
         if (
@@ -1236,7 +1236,7 @@ module.exports = function (Person) {
         } else if (!a.date && !b.date) {
           return 0;
         } else {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
+          return localizationHelper.toMoment(a.date).toDate().getTime() - localizationHelper.toMoment(b.date).toDate().getTime();
         }
       });
     }

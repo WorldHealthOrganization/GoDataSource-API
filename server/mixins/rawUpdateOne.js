@@ -4,6 +4,7 @@ const _ = require('lodash');
 const app = require('../server');
 const Timer = require('../../components/Timer');
 const uuid = require('uuid');
+const localizationHelper = require('../../components/localizationHelper');
 
 /**
  * Raw Update One (avoid loopback ODM)
@@ -35,8 +36,8 @@ module.exports = function (Model) {
     const timer = new Timer();
     timer.start();
     // update stamps
-    update.updatedAt = new Date();
-    update.dbUpdatedAt = new Date();
+    update.updatedAt = localizationHelper.now().toDate();
+    update.dbUpdatedAt = localizationHelper.now().toDate();
     update.updatedBy = _.get(reqOpts, 'accessToken.userId', 'unavailable');
 
     // if there is a default scope query

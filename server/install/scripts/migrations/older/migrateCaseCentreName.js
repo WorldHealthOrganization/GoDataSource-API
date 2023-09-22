@@ -6,6 +6,7 @@ const Async = require('async');
 const DataSources = require('../../../../datasources');
 const _ = require('lodash');
 const Uuid = require('uuid');
+const localizationHelper = require('../../../../../components/localizationHelper');
 
 // taken from language token model
 // doing this to not start the whole app
@@ -23,7 +24,7 @@ const batchSize = 1000;
 
 // common fields
 const centreNameReferenceDataCategory = 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME';
-const now = new Date();
+const now = localizationHelper.now().toDate();
 const authorInfo = {
   createdBy: 'system',
   updatedBy: 'system',
