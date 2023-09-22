@@ -2833,7 +2833,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            gte: new Date(followUpStartDate)
+                            gte: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);
@@ -2843,7 +2843,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            lt: new Date(followUpStartDate)
+                            lt: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);

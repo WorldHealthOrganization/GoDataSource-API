@@ -321,7 +321,7 @@ module.exports = function (app) {
           backup.removeBackups({
             where: {
               date: {
-                lt: new Date(baseTime)
+                lt: localizationHelper.toMoment(baseTime).toDate()
               },
               automatic: true
             }
@@ -341,7 +341,7 @@ module.exports = function (app) {
         .updateAll({
           status: 'LNG_SYNC_STATUS_IN_PROGRESS',
           actionStartDate: {
-            lt: new Date(localizationHelper.now().subtract(actionCleanupInterval, 'hours'))
+            lt: localizationHelper.now().subtract(actionCleanupInterval, 'hours').toDate()
           }
         }, {
           status: 'LNG_SYNC_STATUS_FAILED',

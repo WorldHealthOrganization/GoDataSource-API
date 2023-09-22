@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 /**
  * Register/Update device (phone) history
@@ -55,7 +56,7 @@ module.exports = function (app) {
           }
           // otherwise update its last seen date
           return device.updateAttributes({
-            lastSeen: new Date()
+            lastSeen: localizationHelper.now().toDate()
           });
         })
         .then(function (device) {

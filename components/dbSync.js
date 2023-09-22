@@ -837,7 +837,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
 
       // if updated timestamp is greater than the one in the main database, update
       // also make sure that if the record is soft deleted, it stays that way
-      if (new Date(dbRecord.updatedAt).getTime() < new Date(record.updatedAt).getTime()) {
+      if (localizationHelper.toMoment(dbRecord.updatedAt).toDate().getTime() < localizationHelper.toMoment(record.updatedAt).toDate().getTime()) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
 
