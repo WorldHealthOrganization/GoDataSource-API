@@ -195,11 +195,6 @@
       "type": "boolean",
       "default": false
     },
-    "isDateOfOnsetRequired": {
-      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
-      "type": "boolean",
-      "default": true
-    },
     "applyGeographicRestrictions": {
       "description": "Flag specifying whether the geographical restriction of data will be applied for the outbreak",
       "type": "boolean",

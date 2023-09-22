@@ -259,7 +259,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": true,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     }
   ]

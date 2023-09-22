@@ -93,7 +93,6 @@ function run(callback) {
           labResultsTemplate: item.labResultsTemplate,
           isContactLabResultsActive: item.isContactLabResultsActive,
           isContactsOfContactsActive: item.isContactsOfContactsActive,
-          isDateOfOnsetRequired: item.isDateOfOnsetRequired,
           applyGeographicRestrictions: item.applyGeographicRestrictions,
           checkLastContactDateAgainstDateOnSet: item.checkLastContactDateAgainstDateOnSet,
           disableModifyingLegacyQuestionnaire: item.disableModifyingLegacyQuestionnaire

@@ -48,10 +48,6 @@ const addMissingDefaultValues = (callback) => {
             $exists: false
           }
         }, {
-          isDateOfOnsetRequired: {
-            $exists: false
-          }
-        }, {
           applyGeographicRestrictions: {
             $exists: false
           }
@@ -79,7 +75,6 @@ const addMissingDefaultValues = (callback) => {
               generateFollowUpsTeamAssignmentAlgorithm: 1,
               isContactLabResultsActive: 1,
               isContactsOfContactsActive: 1,
-              isDateOfOnsetRequired: 1,
               applyGeographicRestrictions: 1
             }
           })
@@ -114,11 +109,6 @@ const addMissingDefaultValues = (callback) => {
         // isContactsOfContactsActive
         if (data.isContactsOfContactsActive === undefined) {
           setData.isContactsOfContactsActive = outbreakDefinition.properties.isContactsOfContactsActive.default;
-        }
-
-        // isDateOfOnsetRequired
-        if (data.isDateOfOnsetRequired === undefined) {
-          setData.isDateOfOnsetRequired = outbreakDefinition.properties.isDateOfOnsetRequired.default;
         }
 
         // applyGeographicRestrictions
