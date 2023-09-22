@@ -28,8 +28,7 @@ module.exports = function (Team) {
    * A team is in use if it has current or future follow-ups assigned
    */
   Team.beforeRemote('deleteById', function (context, modelInstance, next) {
-    const today = localizationHelper.now().toDate();
-    today.setHours(0,0,0,0);
+    const today = localizationHelper.getDateStartOfDay().toDate();
     app.models.followUp
       .count({
         teamId: context.args.id,

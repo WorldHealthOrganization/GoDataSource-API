@@ -531,15 +531,13 @@ module.exports = function (FollowUp) {
     // if a filter was passed
     if (dateFilter) {
       // used passed filter
-      dateFilter.setHours(0, 0, 0, 0);
+      dateFilter = localizationHelper.getDateStartOfDay(dateFilter).toDate();
     } else {
       // by default, date filter is for today
-      dateFilter = localizationHelper.now().toDate();
-      dateFilter.setHours(0, 0, 0, 0);
+      dateFilter = localizationHelper.getDateStartOfDay().toDate();
     }
     // update end date filter
-    endDateFilter = localizationHelper.toMoment(dateFilter).toDate();
-    endDateFilter.setHours(23, 59, 59, 999);
+    endDateFilter = localizationHelper.getDateEndOfDay(dateFilter).toDate();
 
     // get follow-ups
     return FollowUp.find(app.utils.remote
