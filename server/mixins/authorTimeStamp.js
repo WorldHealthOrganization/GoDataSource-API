@@ -1,5 +1,7 @@
 'use strict';
 
+const localizationHelper = require('../../components/localizationHelper');
+
 /**
  * Extract request form options (if available)
  * @param options
@@ -69,7 +71,7 @@ module.exports = function (Model) {
     // check for "before save" changes
     if (context.options && context.options._syncActionBeforeSaveChanges) {
       // get updatedAt
-      let updatedAt = new Date(target.updatedAt);
+      let updatedAt = localizationHelper.toMoment(target.updatedAt).toDate();
 
       // increment updatedAt with 1 millisecond
       updatedAt.setMilliseconds(updatedAt.getMilliseconds() + 1);
@@ -124,7 +126,7 @@ module.exports = function (Model) {
         // update createdAt property if it is missing from the instance
         // or it's not an init / sync action
         if (!context.instance.createdAt || (!context.options._init && !context.options._sync)) {
-          context.instance.createdAt = new Date();
+          context.instance.createdAt = localizationHelper.now().toDate();
         }
 
         // lets keep original author if sync snapshot provides it
@@ -145,11 +147,11 @@ module.exports = function (Model) {
       // update updatedAt property if it is missing from the instance
       // or it's not an init / sync action
       if (!context.instance.updatedAt || (!context.options._init && !context.options._sync)) {
-        context.instance.updatedAt = new Date();
+        context.instance.updatedAt = localizationHelper.now().toDate();
       }
 
       // set always dbUpdatedAt as current date
-      context.instance.dbUpdatedAt = new Date();
+      context.instance.dbUpdatedAt = localizationHelper.now().toDate();
 
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
@@ -171,11 +173,11 @@ module.exports = function (Model) {
       // update updatedAt property if it is missing from the update payload
       // or it's not an init / sync action
       if (!context.data.updatedAt || (!context.options._init && !context.options._sync)) {
-        context.data.updatedAt = new Date();
+        context.data.updatedAt = localizationHelper.now().toDate();
       }
 
       // set always dbUpdatedAt as current date
-      context.data.dbUpdatedAt = new Date();
+      context.data.dbUpdatedAt = localizationHelper.now().toDate();
 
       // increment updatedAt if needed
       incrementUpdatedAtIfNeeded(context);
