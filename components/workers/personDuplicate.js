@@ -141,18 +141,33 @@ const worker = {
 
     // build a list of results
     let results = [];
+    let alreadyFoundKey = {};
     // go through the list of indices
     Object.keys(index).forEach(function (indexType) {
       // go through indexed entries of each index
       Object.keys(index[indexType]).forEach(function (groupId) {
         // if there is more than one record indexed
         if (index[indexType][groupId].records.length > 1) {
-          // add the list of possible duplicates group to the result
-          results.push({
-            duplicateKey: indexType,
-            indexKey: groupId,
-            people: index[indexType][groupId].records
-          });
+          // remove duplicates
+          const peopleRecords = index[indexType][groupId].records;
+
+          // determine group key used to remove duplicates
+          // - we could use a hashing function, but since there shouldn't be more than 2 - 3 duplicate ids per group it shouldn't matter
+          peopleRecords.sort((pr1, pr2) => pr1._id.localeCompare(pr2._id));
+          const peopleKey = peopleRecords.map((pr) => pr._id).join();
+
+          // already found ?
+          if (!alreadyFoundKey[peopleKey]) {
+            // mark as found
+            alreadyFoundKey[peopleKey] = true;
+
+            // add the list of possible duplicates group to the result
+            results.push({
+              duplicateKey: indexType,
+              indexKey: groupId,
+              people: peopleRecords
+            });
+          }
         }
       });
     });
