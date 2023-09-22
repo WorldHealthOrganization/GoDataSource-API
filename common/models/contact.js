@@ -602,7 +602,7 @@ module.exports = function (Contact) {
             if (
               followUp[updatePropName] &&
               propsToUpdate[updatePropName] &&
-              ((new Date(followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              (localizationHelper.toMoment(followUp[updatePropName]).toDate().getTime() !== localizationHelper.toMoment(propsToUpdate[updatePropName]).toDate().getTime())
             ) {
               // flag as an update
               return shouldUpdate = true;
@@ -1265,7 +1265,7 @@ module.exports = function (Contact) {
       // if it's different than current followUp status
       if (dataSource.followUp.status !== lastKnownFollowStatus.status) {
         // end last known followUp status entry
-        lastKnownFollowStatus.endDate = new Date();
+        lastKnownFollowStatus.endDate = localizationHelper.now().toDate();
 
         // add the new followUp status in the history
         dataSource.followUpHistory.push({
@@ -1290,7 +1290,7 @@ module.exports = function (Contact) {
       // add current followUp status to history
       data.target.followUpHistory.push({
         status: dataSource.followUp.status,
-        startDate: new Date()
+        startDate: localizationHelper.now().toDate()
       });
     }
   }

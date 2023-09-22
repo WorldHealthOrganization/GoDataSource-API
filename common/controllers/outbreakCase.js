@@ -654,7 +654,7 @@ module.exports = function (Outbreak) {
     }
 
     // get from noDaysAmongContacts ago
-    let xDaysAgo = new Date(localizationHelper.now().toDate().setHours(0, 0, 0, 0));
+    let xDaysAgo = localizationHelper.now().toDate().setHours(0, 0, 0, 0);
     xDaysAgo.setDate(localizationHelper.now().toDate().getDate() - noDaysAmongContacts);
 
     // get outbreakId

@@ -1288,7 +1288,7 @@ module.exports = function (Outbreak) {
     // no end date filter provided
     if (!endDate) {
       // end date is current date
-      endDate = new Date();
+      endDate = localizationHelper.now().toDate();
     } else {
       // remove end date from filter
       delete filter.where.endDate;
@@ -2460,7 +2460,7 @@ module.exports = function (Outbreak) {
           for (let group in groupedFollowUps) {
             if (groupedFollowUps.hasOwnProperty(group)) {
               if (localizationHelper.getDateStartOfDay(group).isAfter(today)) {
-                groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => localizationHelper.toMoment(b.createdAt).toDate() - localizationHelper.toMoment(a.createdAt).toDate());
 
                 let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
                 if (lengthDiff > 0) {
@@ -2725,7 +2725,7 @@ module.exports = function (Outbreak) {
       .mergeFilters({
         where: {
           dateOfReporting: {
-            lte: new Date(dateToFilter)
+            lte: localizationHelper.toMoment(dateToFilter).toDate()
           }
         },
         include: {
@@ -2734,7 +2734,7 @@ module.exports = function (Outbreak) {
             where: {
               date: {
                 // filter until date as follow-ups can be scheduled in the future
-                lte: new Date(dateToFilter)
+                lte: localizationHelper.toMoment(dateToFilter).toDate()
               }
             },
             order: 'date DESC',

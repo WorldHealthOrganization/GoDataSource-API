@@ -8,6 +8,7 @@ const WorkerRunner = require('../../components/workerRunner');
 const Platform = require('../../components/platform');
 const _ = require('lodash');
 const exportHelper = require('../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 // used in team import
 const teamImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
@@ -27,7 +28,7 @@ module.exports = function (Team) {
    * A team is in use if it has current or future follow-ups assigned
    */
   Team.beforeRemote('deleteById', function (context, modelInstance, next) {
-    const today = new Date();
+    const today = localizationHelper.now().toDate();
     today.setHours(0,0,0,0);
     app.models.followUp
       .count({

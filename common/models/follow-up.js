@@ -534,11 +534,11 @@ module.exports = function (FollowUp) {
       dateFilter.setHours(0, 0, 0, 0);
     } else {
       // by default, date filter is for today
-      dateFilter = new Date();
+      dateFilter = localizationHelper.now().toDate();
       dateFilter.setHours(0, 0, 0, 0);
     }
     // update end date filter
-    endDateFilter = new Date(dateFilter);
+    endDateFilter = localizationHelper.toMoment(dateFilter).toDate();
     endDateFilter.setHours(23, 59, 59, 999);
 
     // get follow-ups

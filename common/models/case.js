@@ -444,7 +444,7 @@ module.exports = function (Case) {
       // if it's different than current classification
       if (dataSource.classification !== lastKnownClassification.classification) {
         // end last known classification entry
-        lastKnownClassification.endDate = new Date();
+        lastKnownClassification.endDate = localizationHelper.now().toDate();
         // add the new classification in the history
         dataSource.classificationHistory.push({
           classification: dataSource.classification,
@@ -465,7 +465,7 @@ module.exports = function (Case) {
       // add current classification to history
       data.target.classificationHistory.push({
         classification: dataSource.classification,
-        startDate: new Date()
+        startDate: localizationHelper.now().toDate()
       });
     }
   }
