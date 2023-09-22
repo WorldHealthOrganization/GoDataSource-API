@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const common = require('./_common');
 const uuid = require('uuid');
+const localizationHelper = require('../../../components/localizationHelper');
 
 /**
  * Create / Update language tokens
@@ -149,8 +150,8 @@ const createUpdateLanguageTokens = (
                                 section: languageFileData.tokens[languageTokenModel.token].section ?
                                   languageFileData.tokens[languageTokenModel.token].section :
                                   languageTokenModel.section,
-                                updatedAt: new Date(),
-                                dbUpdatedAt: new Date(),
+                                updatedAt: localizationHelper.now().toDate(),
+                                dbUpdatedAt: localizationHelper.now().toDate(),
                                 updatedBy: 'system',
                                 deleted: false
                               },
@@ -187,7 +188,7 @@ const createUpdateLanguageTokens = (
                               createdAt: common.install.timestamps.createdAt,
                               createdBy: 'system',
                               updatedAt: common.install.timestamps.updatedAt,
-                              dbUpdatedAt: new Date(),
+                              dbUpdatedAt: localizationHelper.now().toDate(),
                               updatedBy: 'system',
                               isDefaultLanguageToken: true
                             })

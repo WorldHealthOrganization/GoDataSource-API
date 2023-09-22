@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const App = require('../server');
 const Timer = require('../../components/Timer');
+const localizationHelper = require('../../components/localizationHelper');
 const Uuid = require('uuid').v4;
 
 /**
@@ -38,7 +39,7 @@ module.exports = function (Model) {
     const platform = _.get(reqOpts, 'platform');
 
     // used for author timestamps
-    let now = new Date();
+    let now = localizationHelper.now().toDate();
 
     // get through each record and attach author fields (timestamps and 'by' fields)
     data = data.map((record) => {
