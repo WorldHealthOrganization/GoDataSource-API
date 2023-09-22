@@ -116,11 +116,6 @@
       "type": "boolean",
       "default": false
     },
-    "isDateOfOnsetRequired": {
-      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
-      "type": "boolean",
-      "default": true
-    },
     "applyGeographicRestrictions": {
       "description": "Flag specifying whether the team assignment concept (geographical restriction o data) will be applied on the web app.",
       "type": "boolean",

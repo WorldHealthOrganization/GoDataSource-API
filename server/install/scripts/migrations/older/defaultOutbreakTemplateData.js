@@ -335,7 +335,6 @@ function run(callback) {
                       contactFollowUpTemplate: data.contactFollowUpTemplate,
                       labResultsTemplate: data.labResultsTemplate,
                       isContactLabResultsActive: !!data.isContactLabResultsActive,
-                      isDateOfOnsetRequired: !!data.isDateOfOnsetRequired,
                       applyGeographicRestrictions: !!data.applyGeographicRestrictions,
                       deleted: false,
                       deletedAt: null
@@ -388,7 +387,6 @@ function run(callback) {
                       contactFollowUpTemplate: newTemplateItem.contactFollowUpTemplate,
                       labResultsTemplate: newTemplateItem.labResultsTemplate,
                       isContactLabResultsActive: !!newTemplateItem.isContactLabResultsActive,
-                      isDateOfOnsetRequired: !!newTemplateItem.isDateOfOnsetRequired,
                       applyGeographicRestrictions: !!newTemplateItem.applyGeographicRestrictions
                     }, common.install.timestamps), options)
                     .then(() => {

@@ -2510,7 +2510,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": true,
       "applyGeographicRestrictions": false
     }
   ]

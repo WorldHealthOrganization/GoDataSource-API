@@ -29033,7 +29033,6 @@
       ],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -30639,7 +30638,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -32597,7 +32595,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -33591,7 +33588,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -34628,7 +34624,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -45825,7 +45820,6 @@
       ],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": false,
       "applyGeographicRestrictions": false
     },
     {
@@ -46858,7 +46852,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": false,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": true,
       "applyGeographicRestrictions": false
     }
   ]
