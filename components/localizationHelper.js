@@ -89,7 +89,7 @@ const formatDate = function (value) {
  */
 const toMoment = function (
   date,
-  format
+  format = undefined
 ) {
   return format ?
     moment(
