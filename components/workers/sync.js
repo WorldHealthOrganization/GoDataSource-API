@@ -311,11 +311,11 @@ const worker = {
                 '$or': [
                   {
                     'updatedAt': {
-                      $gte: new Date(filter.where.fromDate)
+                      $gte: localizationHelper.toMoment(filter.where.fromDate).toDate()
                     }
                   }, {
                     'dbUpdatedAt': {
-                      $gte: new Date(filter.where.fromDate)
+                      $gte: localizationHelper.toMoment(filter.where.fromDate).toDate()
                     }
                   }
                 ]
@@ -913,8 +913,8 @@ const worker = {
         let collectionArchives;
         return updateRestoreLog({
           statusStep: 'LNG_STATUS_STEP_UNZIPPING',
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date()
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate()
         })
           // unzip
           // IMPORTANT: used extractZip because adm-zip can extract only by loading entire zip file into memory which means that it can't unzip big zip files
@@ -937,8 +937,8 @@ const worker = {
               statusStep: 'LNG_STATUS_STEP_DECRYPTING',
               totalNo: restoreTotalSteps,
               processedNo: 0,
-              updatedAt: new Date(),
-              dbUpdatedAt: new Date()
+              updatedAt: localizationHelper.now().toDate(),
+              dbUpdatedAt: localizationHelper.now().toDate()
             });
           })
           .then(() => {
@@ -954,8 +954,8 @@ const worker = {
                       processedNo++;
                       return updateRestoreLog({
                         processedNo,
-                        updatedAt: new Date(),
-                        dbUpdatedAt: new Date()
+                        updatedAt: localizationHelper.now().toDate(),
+                        dbUpdatedAt: localizationHelper.now().toDate()
                       });
                     })
                     .then(() => {
@@ -979,8 +979,8 @@ const worker = {
                   return updateRestoreLog({
                     statusStep: 'LNG_STATUS_STEP_UNZIPPING_COLLECTIONS',
                     processedNo: collectionArchives.length,
-                    updatedAt: new Date(),
-                    dbUpdatedAt: new Date()
+                    updatedAt: localizationHelper.now().toDate(),
+                    dbUpdatedAt: localizationHelper.now().toDate()
                   }).then(resolve).catch(reject);
                 });
               });
@@ -990,8 +990,8 @@ const worker = {
             return updateRestoreLog({
               statusStep: 'LNG_STATUS_STEP_UNZIPPING_COLLECTIONS',
               processedNo: collectionArchives.length,
-              updatedAt: new Date(),
-              dbUpdatedAt: new Date()
+              updatedAt: localizationHelper.now().toDate(),
+              dbUpdatedAt: localizationHelper.now().toDate()
             });
           })
           .then(() => {
@@ -1010,8 +1010,8 @@ const worker = {
                     processedNo++;
                     return updateRestoreLog({
                       processedNo,
-                      updatedAt: new Date(),
-                      dbUpdatedAt: new Date()
+                      updatedAt: localizationHelper.now().toDate(),
+                      dbUpdatedAt: localizationHelper.now().toDate()
                     });
                   }).then(() => {
                     callback();
@@ -1032,8 +1032,8 @@ const worker = {
                 return updateRestoreLog({
                   statusStep: 'LNG_STATUS_STEP_RESTORING',
                   processedNo: 2 * collectionArchives.length,
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 }).then(() => {
                   // collection files were decrypted and extracted; return collection files container directory
                   resolve({
