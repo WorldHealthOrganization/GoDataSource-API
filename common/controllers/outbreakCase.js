@@ -886,7 +886,7 @@ module.exports = function (Outbreak) {
         localizationHelper.getDateEndOfDay().toISOString();
     } else {
       // set default periodInterval depending on periodType
-      periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+      periodInterval = localizationHelper.getPeriodIntervalForDate(undefined, periodType);
     }
 
     // create date condition
@@ -992,7 +992,7 @@ module.exports = function (Outbreak) {
         }
 
         // get periodMap for interval
-        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        let periodMap = localizationHelper.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
         Object.keys(periodMap).forEach(function (entry) {
           Object.assign(periodMap[entry], {
@@ -1013,7 +1013,7 @@ module.exports = function (Outbreak) {
           let caseDate = item.dateBecomeCase || item.dateOfReporting;
 
           // get interval based on date of onset
-          const casePeriodInterval = genericHelpers.getPeriodIntervalForDate(periodInterval, periodType, caseDate);
+          const casePeriodInterval = localizationHelper.getPeriodIntervalForDate(periodInterval, periodType, caseDate);
 
           // create a period identifier
           let casePeriodIdentifier = casePeriodInterval.join(' - ');

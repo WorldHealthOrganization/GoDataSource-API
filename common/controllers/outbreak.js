@@ -1869,7 +1869,7 @@ module.exports = function (Outbreak) {
       periodInterval[1] = localizationHelper.getDateEndOfDay(periodInterval[1]);
     } else {
       // set default periodInterval depending on periodType
-      periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+      periodInterval = localizationHelper.getPeriodIntervalForDate(undefined, periodType);
     }
 
     // initialize includeTotals and includeDeaths flags; default: false
@@ -1987,7 +1987,7 @@ module.exports = function (Outbreak) {
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (cases) {
         // get periodMap for interval
-        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        let periodMap = localizationHelper.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
         Object.keys(periodMap).forEach(function (entry) {
           Object.assign(periodMap[entry], {
@@ -2029,7 +2029,7 @@ module.exports = function (Outbreak) {
 
           if (addInPeriod) {
             // get period in which the case needs to be included
-            const casePeriodInterval = genericHelpers.getPeriodIntervalForDate(periodInterval, periodType);
+            const casePeriodInterval = localizationHelper.getPeriodIntervalForDate(periodInterval, periodType);
 
             // create a period identifier
             let casePeriodIdentifier = casePeriodInterval.join(' - ');

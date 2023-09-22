@@ -4,6 +4,7 @@
 const momentLib = require('moment');
 const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(momentLib);
+const EpiWeek = require('epi-week');
 
 /**
  * Now (date + time)
@@ -109,6 +110,182 @@ const isValidDate = function (date) {
 };
 
 /**
+ * Calculate end of week for different type of weeks
+ * @param date
+ * @param weekType ISO, Sunday Starting, CDC (EPI WEEK)
+ */
+const calculateEndOfWeek = function (date, weekType) {
+  weekType = weekType || 'iso';
+  let result = null;
+  switch (weekType) {
+    case 'iso':
+      result = date.clone().endOf('isoWeek');
+      break;
+    case 'sunday':
+      result = date.clone().endOf('week');
+      break;
+    case 'epi':
+      const epiWeek = EpiWeek(date.clone().toDate());
+      result = date.clone().week(epiWeek.week).endOf('week');
+      break;
+  }
+  return result;
+};
+
+/**
+ * Split a date interval into chunks of specified length
+ * @param start Interval start date
+ * @param end Interval end date
+ * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
+ * @param weekType Type of week (epi, iso, sunday)
+ */
+const getDateChunks = function (start, end, chunkType, weekType = 'iso') {
+  start = getDateStartOfDay(start);
+  end = getDateEndOfDay(end);
+  let result = [];
+  switch (chunkType) {
+    case 'day':
+      let range = getRange(start, end);
+      result = Array.from(range.by('day')).map(day => ({start: getDateStartOfDay(day), end: getDateEndOfDay(day)}));
+      break;
+    case 'week':
+    case 'month':
+      let date = start.clone();
+      while (date.isBefore(end)) {
+        if (!date.isSame(start)) {
+          date.add(1, 'day');
+        }
+        let lastDate = chunkType === 'week' ? calculateEndOfWeek(date, weekType) : date.clone().endOf(chunkType);
+        if (lastDate.isSameOrAfter(end)) {
+          lastDate = end;
+        }
+        result.push({
+          start: getDateStartOfDay(date.clone()),
+          end: lastDate.clone()
+        });
+        date = lastDate;
+      }
+      break;
+  }
+  return result;
+};
+
+/**
+ * Split a date interval into chunks of specified length
+ * @param interval Array containing the margin dates of the interval
+ * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
+ * @param weekType Type of week (epi, iso, sunday)
+ * @returns {{}} Map of chunks
+ */
+const getChunksForInterval = function (interval, chunk, weekType = 'iso') {
+  // initialize map of chunk values
+  let chunkMap = {
+    day: 'day',
+    week: 'week',
+    month: 'month'
+  };
+  // set default chunk to 1 day
+  chunk = chunk ? chunkMap[chunk] : chunkMap.day;
+
+  // make sure we're always dealing with moment dates
+  interval[0] = getDateStartOfDay(interval[0]);
+  interval[1] = getDateEndOfDay(interval[1]);
+
+  // get chunks
+  let chunks = getDateChunks(interval[0], interval[1], chunk, weekType);
+
+  // initialize result
+  let result = {};
+
+  // parse the chunks and create map with UTC dates
+  chunks.forEach(chunk => {
+    // create period identifier
+    let identifier = chunk.start.toString() + ' - ' + chunk.end.toString();
+
+    // store period entry in the map
+    result[identifier] = {
+      start: chunk.start,
+      end: chunk.end
+    };
+  });
+
+  return result;
+};
+
+/**
+ * Get a period interval of period type for date
+ * @param fullPeriodInterval period interval limits (max start date/max end date)
+ * @param periodType enum: ['day', 'week', 'month']
+ * @param date
+ * @param weekType iso / sunday / epi (default: iso)
+ * @return {['startDate', 'endDate']}
+ */
+const getPeriodIntervalForDate = function (
+  fullPeriodInterval,
+  periodType,
+  date = undefined,
+  weekType = 'iso'
+) {
+  // make sure dates are in interval limits
+  if (
+    fullPeriodInterval &&
+    fullPeriodInterval.length > 1
+  ) {
+    date = getDateStartOfDay(date).isAfter(fullPeriodInterval[0]) ? date : getDateStartOfDay(fullPeriodInterval[0]);
+    date = getDateStartOfDay(date).isBefore(fullPeriodInterval[1]) ? date : getDateEndOfDay(fullPeriodInterval[1]);
+  }
+
+  // get period in which the case needs to be included
+  let startDay, endDay;
+  switch (periodType) {
+    case 'day':
+      // get day interval for date
+      startDay = getDateStartOfDay(date);
+      endDay = getDateEndOfDay(date);
+      break;
+    case 'week':
+      // get week interval for date
+      weekType = weekType || 'iso';
+      switch (weekType) {
+        case 'iso':
+          startDay = getDateStartOfDay(date).startOf('isoWeek');
+          endDay = getDateEndOfDay(date).endOf('isoWeek');
+          break;
+        case 'sunday':
+          startDay = getDateStartOfDay(date).startOf('week');
+          endDay = getDateEndOfDay(date).endOf('week');
+          break;
+        case 'epi':
+          date = getDateStartOfDay(date);
+          const epiWeek = EpiWeek(date.clone().toDate());
+          startDay = date.clone().week(epiWeek.week).startOf('week');
+          endDay = date.clone().week(epiWeek.week).endOf('week');
+          break;
+      }
+
+      break;
+    case 'month':
+      // get month period interval for date
+      startDay = getDateStartOfDay(date).startOf('month');
+      endDay = getDateEndOfDay(date).endOf('month');
+      break;
+  }
+
+  // make sure dates are in interval limits
+  if (
+    fullPeriodInterval &&
+    fullPeriodInterval.length > 1
+  ) {
+    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : getDateStartOfDay(fullPeriodInterval[0]);
+    endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : getDateEndOfDay(fullPeriodInterval[1]);
+    endDay = endDay.isAfter(startDay) ? endDay : getDateEndOfDay(startDay);
+  }
+
+  // return period interval
+  return [startDay.toString(), endDay.toString()];
+};
+
+/**
  * Convert filter date attributes from string to date
  * @param obj
  */
@@ -176,6 +353,8 @@ module.exports = {
   formatDate,
   toMoment,
   isValidDate,
+  getChunksForInterval,
+  getPeriodIntervalForDate,
   convertPropsToDate,
   excelDateToJSDate
 };

@@ -638,7 +638,7 @@ module.exports = function (Case) {
             ];
 
             // build period map
-            const periodMap = app.utils.helpers.getChunksForInterval(periodInterval, periodType, weekType);
+            const periodMap = localizationHelper.getChunksForInterval(periodInterval, periodType, weekType);
 
             // get available case categories
             return app.models.referenceData

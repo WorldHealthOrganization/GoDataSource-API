@@ -14,7 +14,6 @@ const fs = require('fs');
 const packageJson = require('../package');
 const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
-const EpiWeek = require('epi-week');
 const config = require('../server/config');
 const {performance} = require('perf_hooks');
 const randomize = require('randomatic');
@@ -58,109 +57,6 @@ const getAsciiString = function (string) {
   /* eslint-disable no-control-regex */
   return string.replace(/[^\x00-\x7F]/g, '');
   /* eslint-enable no-control-regex */
-};
-
-/**
- * Calculate end of week for different type of weeks
- * @param date
- * @param weekType ISO, Sunday Starting, CDC (EPI WEEK)
- */
-const calculateEndOfWeek = function (date, weekType) {
-  weekType = weekType || 'iso';
-  let result = null;
-  switch (weekType) {
-    case 'iso':
-      result = date.clone().endOf('isoWeek');
-      break;
-    case 'sunday':
-      result = date.clone().endOf('week');
-      break;
-    case 'epi':
-      const epiWeek = EpiWeek(date.clone().toDate());
-      result = date.clone().week(epiWeek.week).endOf('week');
-      break;
-  }
-  return result;
-};
-
-/**
- * Split a date interval into chunks of specified length
- * @param start Interval start date
- * @param end Interval end date
- * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
- * @param weekType Type of week (epi, iso, sunday)
- */
-const getDateChunks = function (start, end, chunkType, weekType) {
-  start = localizationHelper.getDateStartOfDay(start);
-  end = localizationHelper.getDateEndOfDay(end);
-  let result = [];
-  switch (chunkType) {
-    case 'day':
-      let range = localizationHelper.getRange(start, end);
-      result = Array.from(range.by('day')).map(day => ({start: localizationHelper.getDateStartOfDay(day), end: localizationHelper.getDateEndOfDay(day)}));
-      break;
-    case 'week':
-    case 'month':
-      let date = start.clone();
-      while (date.isBefore(end)) {
-        if (!date.isSame(start)) {
-          date.add(1, 'day');
-        }
-        let lastDate = chunkType === 'week' ? calculateEndOfWeek(date, weekType) : date.clone().endOf(chunkType);
-        if (lastDate.isSameOrAfter(end)) {
-          lastDate = end;
-        }
-        result.push({
-          start: localizationHelper.getDateStartOfDay(date.clone()),
-          end: lastDate.clone()
-        });
-        date = lastDate;
-      }
-      break;
-  }
-  return result;
-};
-
-/**
- * Split a date interval into chunks of specified length
- * @param interval Array containing the margin dates of the interval
- * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
- * @param weekType Type of week (epi, iso, sunday)
- * @returns {{}} Map of chunks
- */
-const getChunksForInterval = function (interval, chunk, weekType) {
-  // initialize map of chunk values
-  let chunkMap = {
-    day: 'day',
-    week: 'week',
-    month: 'month'
-  };
-  // set default chunk to 1 day
-  chunk = chunk ? chunkMap[chunk] : chunkMap.day;
-
-  // make sure we're always dealing with moment dates
-  interval[0] = localizationHelper.getDateStartOfDay(interval[0]);
-  interval[1] = localizationHelper.getDateEndOfDay(interval[1]);
-
-  // get chunks
-  let chunks = getDateChunks(interval[0], interval[1], chunk, weekType);
-
-  // initialize result
-  let result = {};
-
-  // parse the chunks and create map with UTC dates
-  chunks.forEach(chunk => {
-    // create period identifier
-    let identifier = chunk.start.toString() + ' - ' + chunk.end.toString();
-
-    // store period entry in the map
-    result[identifier] = {
-      start: chunk.start,
-      end: chunk.end
-    };
-  });
-
-  return result;
 };
 
 /**
@@ -1648,79 +1544,6 @@ const paginateResultSet = function (filter, resultSet) {
 };
 
 /**
- * Get a period interval of period type for date
- * @param fullPeriodInterval period interval limits (max start date/max end date)
- * @param periodType enum: ['day', 'week', 'month']
- * @param date
- * @param weekType iso / sunday / epi (default: iso)
- * @return {['startDate', 'endDate']}
- */
-const getPeriodIntervalForDate = function (
-  fullPeriodInterval,
-  periodType,
-  date,
-  weekType
-) {
-  // make sure dates are in interval limits
-  if (
-    fullPeriodInterval &&
-    fullPeriodInterval.length > 1
-  ) {
-    date = localizationHelper.getDateStartOfDay(date).isAfter(fullPeriodInterval[0]) ? date : localizationHelper.getDateStartOfDay(fullPeriodInterval[0]);
-    date = localizationHelper.getDateStartOfDay(date).isBefore(fullPeriodInterval[1]) ? date : localizationHelper.getDateEndOfDay(fullPeriodInterval[1]);
-  }
-
-  // get period in which the case needs to be included
-  let startDay, endDay;
-  switch (periodType) {
-    case 'day':
-      // get day interval for date
-      startDay = localizationHelper.getDateStartOfDay(date);
-      endDay = localizationHelper.getDateEndOfDay(date);
-      break;
-    case 'week':
-      // get week interval for date
-      weekType = weekType || 'iso';
-      switch (weekType) {
-        case 'iso':
-          startDay = localizationHelper.getDateStartOfDay(date).startOf('isoWeek');
-          endDay = localizationHelper.getDateEndOfDay(date).endOf('isoWeek');
-          break;
-        case 'sunday':
-          startDay = localizationHelper.getDateStartOfDay(date).startOf('week');
-          endDay = localizationHelper.getDateEndOfDay(date).endOf('week');
-          break;
-        case 'epi':
-          date = localizationHelper.getDateStartOfDay(date);
-          const epiWeek = EpiWeek(date.clone().toDate());
-          startDay = date.clone().week(epiWeek.week).startOf('week');
-          endDay = date.clone().week(epiWeek.week).endOf('week');
-          break;
-      }
-
-      break;
-    case 'month':
-      // get month period interval for date
-      startDay = localizationHelper.getDateStartOfDay(date).startOf('month');
-      endDay = localizationHelper.getDateEndOfDay(date).endOf('month');
-      break;
-  }
-
-  // make sure dates are in interval limits
-  if (
-    fullPeriodInterval &&
-    fullPeriodInterval.length > 1
-  ) {
-    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : localizationHelper.getDateStartOfDay(fullPeriodInterval[0]);
-    endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : localizationHelper.getDateEndOfDay(fullPeriodInterval[1]);
-    endDay = endDay.isAfter(startDay) ? endDay : localizationHelper.getDateEndOfDay(startDay);
-  }
-
-  // return period interval
-  return [startDay.toString(), endDay.toString()];
-};
-
-/**
  * Hexadecimal Sha256 hash
  * @param string
  * @return {string}
@@ -2732,7 +2555,6 @@ Object.assign(module.exports, {
   streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
   getAsciiString: getAsciiString,
-  getChunksForInterval: getChunksForInterval,
   extractImportableFields: extractImportableFields,
   extractImportableFieldsNoModel: extractImportableFieldsNoModel,
   exportListFile: exportListFile,
@@ -2760,7 +2582,6 @@ Object.assign(module.exports, {
   setValueInContextOptions: setValueInContextOptions,
   getValueFromOptions: getValueFromOptions,
   getValueFromContextOptions: getValueFromContextOptions,
-  getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
   migrateModelDataInBatches: migrateModelDataInBatches,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
@@ -2769,7 +2590,6 @@ Object.assign(module.exports, {
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
-  getDateChunks: getDateChunks,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,
