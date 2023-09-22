@@ -1566,7 +1566,7 @@ module.exports = function (Outbreak) {
       });
     } else {
       if (qAnswer instanceof Date || localizationHelper.isValidDate(qAnswer)) {
-        question.value = genericHelpers.getDateDisplayValue(qAnswer);
+        question.value = localizationHelper.getDateDisplayValue(qAnswer);
       } else {
         question.value = qAnswer;
       }

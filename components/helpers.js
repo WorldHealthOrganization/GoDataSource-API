@@ -2740,7 +2740,6 @@ Object.assign(module.exports, {
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
-  getDateDisplayValue: localizationHelper.getDateDisplayValue,
   parseModelFieldValues: parseModelFieldValues,
   isPathOK: isPathOK,
   formatDateFields: formatDateFields,

@@ -1,8 +1,8 @@
 'use strict';
 
 const app = require('../../server/server');
-const dateParser = app.utils.helpers.getDateDisplayValue;
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (ContactOfContact) {
   // set flag to not get controller
@@ -312,10 +312,10 @@ module.exports = function (ContactOfContact) {
 
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   ContactOfContact.fieldToValueParsersMap = {
-    dob: dateParser,
-    dateOfOutcome: dateParser,
-    dateOfBurial: dateParser,
-    'addresses[].date': dateParser
+    dob: localizationHelper.getDateDisplayValue,
+    dateOfOutcome: localizationHelper.getDateDisplayValue,
+    dateOfBurial: localizationHelper.getDateDisplayValue,
+    'addresses[].date': localizationHelper.getDateDisplayValue
   };
   ContactOfContact.fieldsToParse = Object.keys(ContactOfContact.fieldToValueParsersMap);
 
