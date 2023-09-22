@@ -270,7 +270,7 @@ const restoreBackupFromFile = function (
                             // custom properties should be checked property by property
                             // we can't know exactly the types
                             if (record.questionnaireAnswers) {
-                              helpers.convertPropsToDate(record.questionnaireAnswers);
+                              localizationHelper.convertPropsToDate(record.questionnaireAnswers);
                             }
 
                             let specialDatePropsMap = null;

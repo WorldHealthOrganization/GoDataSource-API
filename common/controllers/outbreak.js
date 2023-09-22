@@ -2635,7 +2635,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('**', function (context, modelInstance, next) {
     if (context.args.filter) {
-      genericHelpers.convertPropsToDate(context.args.filter);
+      localizationHelper.convertPropsToDate(context.args.filter);
       genericHelpers.includeSubLocationsInLocationFilter(
         app,
         context.args.filter,
@@ -2643,7 +2643,7 @@ module.exports = function (Outbreak) {
         next
       );
     } else if (context.args.where) {
-      genericHelpers.convertPropsToDate(context.args.where);
+      localizationHelper.convertPropsToDate(context.args.where);
       genericHelpers.includeSubLocationsInLocationFilter(
         app, {
           where: context.args.where

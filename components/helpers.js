@@ -2733,7 +2733,6 @@ Object.assign(module.exports, {
   remapProperties: remapProperties,
   getAsciiString: getAsciiString,
   getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: localizationHelper.convertPropsToDate,
   isValidDate: localizationHelper.isValidDate,
   extractImportableFields: extractImportableFields,
   extractImportableFieldsNoModel: extractImportableFieldsNoModel,
