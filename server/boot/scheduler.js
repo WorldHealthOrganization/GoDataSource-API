@@ -1,7 +1,6 @@
 'use strict';
 
 // requires
-const moment = require('moment');
 const async = require('async');
 const fs = require('fs');
 const path = require('path');
@@ -10,6 +9,7 @@ const syncActionsSettings = configSettings.sync;
 const SyncClient = require('../../components/syncClient');
 const tmp = require('tmp');
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 // function used to check if a routine should be executed or not
 // if executed return an execution time, needed for further execution
@@ -20,7 +20,7 @@ const shouldExecute = function (startTime, interval, timeUnit) {
     m: 'minutes',
     d: 'days'
   };
-  return moment().isAfter(moment(startTime).add(interval, unitsMap[timeUnit]));
+  return localizationHelper.now().isAfter(localizationHelper.toMoment(startTime).add(interval, unitsMap[timeUnit]));
 };
 
 // initialize ID to be set as createdBy for automatic sync
@@ -121,7 +121,7 @@ module.exports = function (app) {
           // if routines configuration doesn't exist, create it
           if (!routinesConfig.backup) {
             routinesConfig.backup = {
-              startTime: moment(),
+              startTime: localizationHelper.now(),
               lastExecutedTime: null,
               timeUnit: 'h',
               interval: interval,
@@ -160,7 +160,7 @@ module.exports = function (app) {
           // if routines configuration doesn't exist, create it
           if (!routinesConfig.backup) {
             routinesConfig.backup = {
-              startTime: moment(),
+              startTime: localizationHelper.now(),
               lastExecutedTime: null,
               timeUnit: 'h',
               interval: null,
@@ -182,22 +182,22 @@ module.exports = function (app) {
           }
 
           // determine time when we should execute today
-          const whenBackupShouldBeDoneToday = moment(
-            `${moment().format('YYYY-MM-DD')} ${routinesConfig.backup.backupTime}:00`,
+          const whenBackupShouldBeDoneToday = localizationHelper.toMoment(
+            `${localizationHelper.now().format('YYYY-MM-DD')} ${routinesConfig.backup.backupTime}:00`,
             'YYYY-MM-DD HH:mm:ss'
           );
 
           // check if we already executed today
           if (
             routinesConfig.backup.lastExecutedTime &&
-            moment(routinesConfig.backup.lastExecutedTime).isSameOrAfter(whenBackupShouldBeDoneToday)
+            localizationHelper.toMoment(routinesConfig.backup.lastExecutedTime).isSameOrAfter(whenBackupShouldBeDoneToday)
           ) {
             // already created backup for today
             return done();
           }
 
           // need to create backup
-          executeBackupCreation = moment().isSameOrAfter(whenBackupShouldBeDoneToday);
+          executeBackupCreation = localizationHelper.now().isSameOrAfter(whenBackupShouldBeDoneToday);
         } else {
           // can't do backup
           // - method not supported
@@ -212,7 +212,7 @@ module.exports = function (app) {
         // create backup ?
         if (executeBackupCreation) {
           // save the last execution time to now
-          routinesConfig.backup.lastExecutedTime = moment();
+          routinesConfig.backup.lastExecutedTime = localizationHelper.now();
 
           // cache backup model, used in many places below
           const backupModel = app.models.backup;
@@ -220,7 +220,7 @@ module.exports = function (app) {
           // create new backup record with pending status
           backupModel
             .create({
-              date: Date.now(),
+              date: localizationHelper.now().toDate(),
               modules: backupSettings.modules,
               location: null,
               userId: null,
@@ -231,7 +231,7 @@ module.exports = function (app) {
             .then((record) => {
               // start the backup process
               // keep backup start date
-              const startedAt = moment();
+              const startedAt = localizationHelper.now();
 
               // when done update backup status and file location
               backup.create(backupSettings.modules, backupSettings.location, (err, backupFilePath) => {
@@ -254,7 +254,7 @@ module.exports = function (app) {
                   status: newStatus,
                   location: backupFilePath,
                   startedAt: startedAt,
-                  endedAt: moment(),
+                  endedAt: localizationHelper.now(),
                   error: errorMsg
                 });
               });
@@ -297,7 +297,7 @@ module.exports = function (app) {
         // if routines configuration doesn't exist, create it
         if (!routinesConfig.backupCleanup) {
           routinesConfig.backupCleanup = {
-            startTime: moment(),
+            startTime: localizationHelper.now(),
             lastExecutedTime: null,
             timeUnit: 'd',
             interval: interval
@@ -315,13 +315,13 @@ module.exports = function (app) {
 
         if (shouldExecute(baseTime, backupRoutineConfig.interval, backupRoutineConfig.timeUnit)) {
           // save the last execution time to now
-          backupRoutineConfig.lastExecutedTime = moment();
+          backupRoutineConfig.lastExecutedTime = localizationHelper.now();
 
           // remove backups which are older than the configured retention interval
           backup.removeBackups({
             where: {
               date: {
-                lt: new Date(baseTime)
+                lt: localizationHelper.toMoment(baseTime).toDate()
               },
               automatic: true
             }
@@ -341,7 +341,7 @@ module.exports = function (app) {
         .updateAll({
           status: 'LNG_SYNC_STATUS_IN_PROGRESS',
           actionStartDate: {
-            lt: new Date(moment().subtract(actionCleanupInterval, 'hours'))
+            lt: localizationHelper.now().subtract(actionCleanupInterval, 'hours').toDate()
           }
         }, {
           status: 'LNG_SYNC_STATUS_FAILED',
@@ -383,14 +383,14 @@ module.exports = function (app) {
 
               if (shouldExecute(routinesEntry.lastExecutedTime || routinesEntry.startTime, routinesEntry.interval, routinesEntry.timeUnit)) {
                 // save the last execution time to now
-                routinesEntry.lastExecutedTime = moment();
+                routinesEntry.lastExecutedTime = localizationHelper.now();
 
                 triggerAutomaticSync(server);
               }
             } else {
               // create entry for the server in the routinesConfig with
               routinesConfig.sync[server.url] = {
-                startTime: moment(),
+                startTime: localizationHelper.now(),
                 lastExecutedTime: null,
                 timeUnit: 'h',
                 interval: server.syncInterval
@@ -476,7 +476,7 @@ module.exports = function (app) {
           // used to determine when can we delete snapshot files
           const snapshotMatchRegex = /^snapshot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}_[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}.zip$/i;
           const removeSyncSnapshotsAfterHours = configSettings.removeSyncSnapshotsAfter || 24;
-          const deleteSnapshotBeforeDateTime = moment().subtract(removeSyncSnapshotsAfterHours, 'hours');
+          const deleteSnapshotBeforeDateTime = localizationHelper.now().subtract(removeSyncSnapshotsAfterHours, 'hours');
 
           // used to determine when can we delete snapshot files
           // fix for back-words compatibility, to remove old directories, that weren't deleted on time when zip was created
@@ -485,12 +485,12 @@ module.exports = function (app) {
           // used to determine when can we delete uploaded files with formidable.IncomingForm
           const uploadedMatchRegex = /^upload_[a-zA-Z0-9_]+$/i;
           const removeTmpUploadedFilesAfter = configSettings.removeTmpUploadedFilesAfter || 24;
-          const deleteTmpUploadBeforeDateTime = moment().subtract(removeTmpUploadedFilesAfter, 'hours');
+          const deleteTmpUploadBeforeDateTime = localizationHelper.now().subtract(removeTmpUploadedFilesAfter, 'hours');
 
           // used to determine when can we delete uploaded files used to import data
           const uploadedImportMatchRegex = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}(_metadata)?$/i;
           const removeTmpUploadedImportFilesAfter = configSettings.removeTmpUploadedImportFilesAfter || 24;
-          const deleteTmpUploadImportBeforeDateTime = moment().subtract(removeTmpUploadedImportFilesAfter, 'hours');
+          const deleteTmpUploadImportBeforeDateTime = localizationHelper.now().subtract(removeTmpUploadedImportFilesAfter, 'hours');
 
           // used to remove directory
           const removeDirectory = (dirToRemovePath) => {
@@ -541,7 +541,7 @@ module.exports = function (app) {
               const fileStats = fs.statSync(currentPath);
               if (
                 fileStats.birthtime &&
-                moment(fileStats.birthtime).isBefore(beforeDate)
+                localizationHelper.toMoment(fileStats.birthtime).isBefore(beforeDate)
               ) {
                 try {
                   // delete file / directory
@@ -623,7 +623,7 @@ module.exports = function (app) {
         deleteAuditLogInProgress = true;
 
         // must remove older audit logs
-        const beforeDate = moment().subtract(removeAuditLogsOlderThanNDays, 'days');
+        const beforeDate = localizationHelper.now().subtract(removeAuditLogsOlderThanNDays, 'days');
         app.models.auditLog
           .rawBulkHardDelete({
             createdAt: {

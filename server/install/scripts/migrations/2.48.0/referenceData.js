@@ -2,6 +2,7 @@
 
 const referenceDataMigrator = require('../../referenceDataMigrator');
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
+const localizationHelper = require('../../../../../components/localizationHelper');
 
 /**
  * Create / Update default reference data
@@ -56,8 +57,8 @@ const updateHospitalizationIsolationType = (callback) => {
         }, {
           $set: {
             readOnly: false,
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           }
         });
     })

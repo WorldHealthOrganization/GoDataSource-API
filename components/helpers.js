@@ -3,9 +3,7 @@
 module.exports = {};
 
 // dependencies
-const momentLib = require('moment');
-const momentRange = require('moment-range');
-const moment = momentRange.extendMoment(momentLib);
+const localizationHelper = require('./localizationHelper');
 const _ = require('lodash');
 const apiError = require('./apiError');
 const spreadSheetFile = require('./spreadSheetFile');
@@ -16,7 +14,6 @@ const fs = require('fs');
 const packageJson = require('../package');
 const workerRunner = require('./workerRunner');
 const crypto = require('crypto');
-const EpiWeek = require('epi-week');
 const config = require('../server/config');
 const {performance} = require('perf_hooks');
 const randomize = require('randomatic');
@@ -52,37 +49,6 @@ const nonModelObjects = {
 };
 
 /**
- * Convert a Date object into moment date and reset time to start of the day
- * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
- * @param date If no date is given, the current datetime is returned
- * @param dayOfWeek If not sent the day of the week will not be changed
- */
-const getDate = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc(moment().format('YYYY-MM-DD')).startOf('day');
-  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
-};
-
-/**
- * Convert a Date object into moment date and reset time to end of the day
- * Additionally if dayOfWeek is sent the function will return the date for the date's corresponding day of the week
- * @param date If no date is given, the current datetime is returned
- * @param dayOfWeek If not sent the date will not be changed
- */
-const getDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc(moment().format('YYYY-MM-DD')).endOf('day');
-  return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
-};
-
-/**
- * Get difference between dates in days
- * @param startDate
- * @param endDate
- */
-const getDaysSince = function (startDate, endDate) {
-  return (getDate(endDate)).diff(getDate(startDate), 'days');
-};
-
-/**
  * Remove non-ASCII chars from a string
  * @param string
  * @return {*}
@@ -91,109 +57,6 @@ const getAsciiString = function (string) {
   /* eslint-disable no-control-regex */
   return string.replace(/[^\x00-\x7F]/g, '');
   /* eslint-enable no-control-regex */
-};
-
-/**
- * Calculate end of week for different type of weeks
- * @param date
- * @param weekType ISO, Sunday Starting, CDC (EPI WEEK)
- */
-const calculateEndOfWeek = function (date, weekType) {
-  weekType = weekType || 'iso';
-  let result = null;
-  switch (weekType) {
-    case 'iso':
-      result = date.clone().endOf('isoWeek');
-      break;
-    case 'sunday':
-      result = date.clone().endOf('week');
-      break;
-    case 'epi':
-      const epiWeek = EpiWeek(date.clone().toDate());
-      result = date.clone().week(epiWeek.week).endOf('week');
-      break;
-  }
-  return result;
-};
-
-/**
- * Split a date interval into chunks of specified length
- * @param start Interval start date
- * @param end Interval end date
- * @param chunkType String Length of each resulted chunk; Can be a (day, week, month)
- * @param weekType Type of week (epi, iso, sunday)
- */
-const getDateChunks = function (start, end, chunkType, weekType) {
-  start = getDate(start);
-  end = getDateEndOfDay(end);
-  let result = [];
-  switch (chunkType) {
-    case 'day':
-      let range = moment.range(start, end);
-      result = Array.from(range.by('day')).map(day => ({start: getDate(day), end: getDateEndOfDay(day)}));
-      break;
-    case 'week':
-    case 'month':
-      let date = start.clone();
-      while (date.isBefore(end)) {
-        if (!date.isSame(start)) {
-          date.add(1, 'day');
-        }
-        let lastDate = chunkType === 'week' ? calculateEndOfWeek(date, weekType) : date.clone().endOf(chunkType);
-        if (lastDate.isSameOrAfter(end)) {
-          lastDate = end;
-        }
-        result.push({
-          start: getDate(date.clone()),
-          end: lastDate.clone()
-        });
-        date = lastDate;
-      }
-      break;
-  }
-  return result;
-};
-
-/**
- * Split a date interval into chunks of specified length
- * @param interval Array containing the margin dates of the interval
- * @param chunk String Length of each resulted chunk; Can be a daily/weekly/monthly
- * @param weekType Type of week (epi, iso, sunday)
- * @returns {{}} Map of chunks
- */
-const getChunksForInterval = function (interval, chunk, weekType) {
-  // initialize map of chunk values
-  let chunkMap = {
-    day: 'day',
-    week: 'week',
-    month: 'month'
-  };
-  // set default chunk to 1 day
-  chunk = chunk ? chunkMap[chunk] : chunkMap.day;
-
-  // make sure we're always dealing with moment dates
-  interval[0] = getDate(interval[0]);
-  interval[1] = getDateEndOfDay(interval[1]);
-
-  // get chunks
-  let chunks = getDateChunks(interval[0], interval[1], chunk, weekType);
-
-  // initialize result
-  let result = {};
-
-  // parse the chunks and create map with UTC dates
-  chunks.forEach(chunk => {
-    // create period identifier
-    let identifier = chunk.start.toString() + ' - ' + chunk.end.toString();
-
-    // store period entry in the map
-    result[identifier] = {
-      start: chunk.start,
-      end: chunk.end
-    };
-  });
-
-  return result;
 };
 
 /**
@@ -455,29 +318,6 @@ const remapProperties = function (list, fieldsMap, valuesMap) {
 };
 
 /**
- * Convert filter date attributes from string to date
- * @param obj
- */
-const convertPropsToDate = function (obj) {
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      if (typeof obj[prop] == 'object' && obj[prop] !== null) {
-        convertPropsToDate(obj[prop]);
-      } else {
-        // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
-          // try to convert the string value to date, if valid, replace the old value
-          let convertedDate = moment(obj[prop]);
-          if (convertedDate.isValid()) {
-            obj[prop] = convertedDate.toDate();
-          }
-        }
-      }
-    }
-  }
-};
-
-/**
  * Extract only the importable fields for a model from a record data
  * @param Model
  * @param data
@@ -648,7 +488,7 @@ const exportListFileSync = function (headers, dataSet, fileType, title = 'List')
         result[headersMap[header]] = source[header];
         // handle dates separately
         if (source[header] instanceof Date) {
-          result[headersMap[header]] = getDateDisplayValue(source[header]);
+          result[headersMap[header]] = localizationHelper.getDateDisplayValue(source[header]);
         }
       }
     });
@@ -1016,7 +856,7 @@ const getFlatObject = function (object, prefix, humanFriendly) {
       if (object[property] && typeof object[property] === 'object') {
         // handle dates separately
         if (object[property] instanceof Date) {
-          result[propertyName] = getDateDisplayValue(object[property]);
+          result[propertyName] = localizationHelper.getDateDisplayValue(object[property]);
         } else {
           // process it
           result = Object.assign({}, result, getFlatObject(object[property], propertyName, humanFriendly));
@@ -1028,15 +868,6 @@ const getFlatObject = function (object, prefix, humanFriendly) {
     });
   }
   return result;
-};
-
-/**
- * Format a date string for display purpose
- * @param dateString
- * @returns {string}
- */
-const getDateDisplayValue = function (dateString) {
-  return dateString && moment(dateString).isValid() ? new Date(dateString).toISOString() : dateString;
 };
 
 /**
@@ -1072,30 +903,12 @@ const isPathOK = function (path) {
 };
 
 /**
- * Format a date
- * If it fails, return empty string
- * @param value
- * @returns {string}
- */
-const formatDate = function (value) {
-  let result = '';
-  if (value) {
-    let tmpDate = moment(getDateDisplayValue(value));
-    if (tmpDate.isValid()) {
-      result = tmpDate.format('YYYY-MM-DD');
-    }
-  }
-  return result;
-};
-
-/**
  * Format all the marked date type fields on the model
  * @param model
  * @param dateFieldsList
  * @returns {Object}
  */
 const formatDateFields = function (model, dateFieldsList) {
-
   // Format date fields
   dateFieldsList.forEach((field) => {
     let reference = getReferencedValue(model, field);
@@ -1109,10 +922,10 @@ const formatDateFields = function (model, dateFieldsList) {
           return;
         }
 
-        _.set(model, indicator.exactPath, formatDate(indicator.value));
+        _.set(model, indicator.exactPath, localizationHelper.formatDate(indicator.value));
       });
     } else {
-      _.set(model, reference.exactPath, formatDate(reference.value));
+      _.set(model, reference.exactPath, localizationHelper.formatDate(reference.value));
     }
   });
 };
@@ -1342,15 +1155,6 @@ const getBuildInformation = function () {
 };
 
 /**
- * Check if a (string) date is valid (correct ISO format)
- * @param date
- * @return {boolean}
- */
-const isValidDate = function (date) {
-  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(\.\d{3})?Z*)?$/.test(date);
-};
-
-/**
  * Gets the "date" properties of the questionnaire
  */
 const getQuestionnaireDateProperties = (questionnaireDateProperties, questions) => {
@@ -1461,37 +1265,6 @@ const getModelPropertiesByDataType = function (model, dataType, prefix = '') {
  */
 const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataType) {
   /**
-   * Converts Excel date in integer format into JS date
-   * @param serial
-   * @returns {string}
-   */
-  const excelDateToJSDate = function (serial) {
-    // constants
-    const SECONDS_IN_DAY = 86400; // 24 * 60 * 60
-    const DIFF_NUMBER_OF_DAYS = 25569; // (25567 + 2) - number of days between: Jan 1, 1900 and Jan 1, 1970, plus 2 ("excel leap year bug")
-
-    // get date in utc
-    const utcDays = Math.floor(serial - DIFF_NUMBER_OF_DAYS);
-    const utcValue = utcDays * SECONDS_IN_DAY;
-    const dateInfo = moment(utcValue * 1000);
-
-    // calculate hours, minutes ans seconds
-    const fractionalDay = serial - Math.floor(serial) + 0.0000001;
-    let totalSeconds = Math.floor(SECONDS_IN_DAY * fractionalDay);
-    const seconds = totalSeconds % 60;
-    totalSeconds -= seconds;
-    const hours = Math.floor(totalSeconds / (60 * 60));
-    const minutes = Math.floor(totalSeconds / 60) % 60;
-
-    // return full date
-    return dateInfo
-      .hour(hours)
-      .minute(minutes)
-      .seconds(seconds)
-      .toISOString();
-  };
-
-  /**
    * Set property boolean/date value on a record given its reference
    * Also accepts array references
    * @param record Record to be updated
@@ -1517,7 +1290,7 @@ const convertPropertiesNoModelByType = function (modelProperties, dataSet, dataT
           case DATA_TYPE.DATE:
             // if value is a number convert it into JavaScript date
             if (!isNaN(Number(refValue.value))) {
-              _.set(record, refValue.exactPath, excelDateToJSDate(refValue.value));
+              _.set(record, refValue.exactPath, localizationHelper.excelDateToJSDate(refValue.value));
             }
 
             break;
@@ -1771,89 +1544,12 @@ const paginateResultSet = function (filter, resultSet) {
 };
 
 /**
- * Get a period interval of period type for date
- * @param fullPeriodInterval period interval limits (max start date/max end date)
- * @param periodType enum: ['day', 'week', 'month']
- * @param date
- * @param weekType iso / sunday / epi (default: iso)
- * @return {['startDate', 'endDate']}
- */
-const getPeriodIntervalForDate = function (
-  fullPeriodInterval,
-  periodType,
-  date,
-  weekType
-) {
-  // make sure dates are in interval limits
-  if (
-    fullPeriodInterval &&
-    fullPeriodInterval.length > 1
-  ) {
-    date = getDate(date).isAfter(fullPeriodInterval[0]) ? date : getDate(fullPeriodInterval[0]);
-    date = getDate(date).isBefore(fullPeriodInterval[1]) ? date : getDateEndOfDay(fullPeriodInterval[1]);
-  }
-
-  // get period in which the case needs to be included
-  let startDay, endDay;
-  switch (periodType) {
-    case 'day':
-      // get day interval for date
-      startDay = getDate(date);
-      endDay = getDateEndOfDay(date);
-      break;
-    case 'week':
-      // get week interval for date
-      weekType = weekType || 'iso';
-      switch (weekType) {
-        case 'iso':
-          startDay = getDate(date).startOf('isoWeek');
-          endDay = getDateEndOfDay(date).endOf('isoWeek');
-          break;
-        case 'sunday':
-          startDay = getDate(date).startOf('week');
-          endDay = getDateEndOfDay(date).endOf('week');
-          break;
-        case 'epi':
-          date = getDate(date);
-          const epiWeek = EpiWeek(date.clone().toDate());
-          startDay = date.clone().week(epiWeek.week).startOf('week');
-          endDay = date.clone().week(epiWeek.week).endOf('week');
-          break;
-      }
-
-      break;
-    case 'month':
-      // get month period interval for date
-      startDay = getDate(date).startOf('month');
-      endDay = getDateEndOfDay(date).endOf('month');
-      break;
-  }
-
-  // make sure dates are in interval limits
-  if (
-    fullPeriodInterval &&
-    fullPeriodInterval.length > 1
-  ) {
-    startDay = startDay.isAfter(fullPeriodInterval[0]) ? startDay : getDate(fullPeriodInterval[0]);
-    endDay = endDay.isBefore(fullPeriodInterval[1]) ? endDay : getDateEndOfDay(fullPeriodInterval[1]);
-    endDay = endDay.isAfter(startDay) ? endDay : getDateEndOfDay(startDay);
-  }
-
-  // return period interval
-  return [startDay.toString(), endDay.toString()];
-};
-
-/**
  * Hexadecimal Sha256 hash
  * @param string
  * @return {string}
  */
 function sha256(string) {
   return crypto.createHash('sha256').update(string).digest('hex');
-}
-
-function convertToDate(date) {
-  return moment(date).startOf('day');
 }
 
 /**
@@ -2055,7 +1751,7 @@ const sortMultiAnswerQuestions = function (model) {
         answers[prop].length
       ) {
         // sort them by date
-        answers[prop] = answers[prop].sort((a, b) => moment(b.date).format('X') - moment(a.date).format('X'));
+        answers[prop] = answers[prop].sort((a, b) => localizationHelper.toMoment(b.date).format('X') - localizationHelper.toMoment(a.date).format('X'));
       }
     }
   }
@@ -2076,7 +1772,7 @@ const convertQuestionStringDatesToDates = function (
     // nothing to do ?
     if (modelChanges.questionnaireAnswers) {
       // convert dates
-      convertPropsToDate(modelChanges.questionnaireAnswers);
+      localizationHelper.convertPropsToDate(modelChanges.questionnaireAnswers);
 
       // do we have questionnaire template so we can check the format we're importing ?
       if (!_.isEmpty(template)) {
@@ -2195,8 +1891,8 @@ const convertQuestionnairePropsToDate = function (questions) {
       return prop;
     }
     // try to convert the string value to date, if valid, replace the old value
-    if (isValidDate(prop)) {
-      let convertedDate = getDate(prop);
+    if (localizationHelper.isValidDate(prop)) {
+      let convertedDate = localizationHelper.getDateStartOfDay(prop);
       if (convertedDate.isValid()) {
         return convertedDate.toDate();
       }
@@ -2600,7 +2296,7 @@ const sanitizePersonVisualId = (visualId) => {
     visualId : (
       visualId
         .toString()
-        .replace(/YYYY/g, moment().format('YYYY'))
+        .replace(/YYYY/g, localizationHelper.now().format('YYYY'))
         .replace(/\*/g, '')
     );
 };
@@ -2856,14 +2552,9 @@ const randomString = (charset, minLength, maxLength) => {
 };
 
 Object.assign(module.exports, {
-  getDate: getDate,
   streamToBuffer: streamUtils.streamToBuffer,
   remapProperties: remapProperties,
-  getDateEndOfDay: getDateEndOfDay,
   getAsciiString: getAsciiString,
-  getChunksForInterval: getChunksForInterval,
-  convertPropsToDate: convertPropsToDate,
-  isValidDate: isValidDate,
   extractImportableFields: extractImportableFields,
   extractImportableFieldsNoModel: extractImportableFieldsNoModel,
   exportListFile: exportListFile,
@@ -2871,7 +2562,6 @@ Object.assign(module.exports, {
   getReferencedValue: getReferencedValue,
   resolveModelForeignKeys: resolveModelForeignKeys,
   getFlatObject: getFlatObject,
-  getDateDisplayValue: getDateDisplayValue,
   parseModelFieldValues: parseModelFieldValues,
   isPathOK: isPathOK,
   formatDateFields: formatDateFields,
@@ -2892,9 +2582,7 @@ Object.assign(module.exports, {
   setValueInContextOptions: setValueInContextOptions,
   getValueFromOptions: getValueFromOptions,
   getValueFromContextOptions: getValueFromContextOptions,
-  getPeriodIntervalForDate: getPeriodIntervalForDate,
   sha256: sha256,
-  convertToDate: convertToDate,
   migrateModelDataInBatches: migrateModelDataInBatches,
   covertAddressesGeoPointToLoopbackFormat: covertAddressesGeoPointToLoopbackFormat,
   sortMultiAnswerQuestions: sortMultiAnswerQuestions,
@@ -2902,8 +2590,6 @@ Object.assign(module.exports, {
   convertQuestionAnswerToOldFormat: convertQuestionAnswerToOldFormat,
   convertQuestionnaireAnswersToOldFormat: convertQuestionnaireAnswersToOldFormat,
   convertQuestionnaireAnswersToNewFormat: convertQuestionnaireAnswersToNewFormat,
-  getDateChunks: getDateChunks,
-  getDaysSince: getDaysSince,
   convertQuestionnairePropsToDate: convertQuestionnairePropsToDate,
   getFilterCustomOption: getFilterCustomOption,
   attachLocations: attachLocations,

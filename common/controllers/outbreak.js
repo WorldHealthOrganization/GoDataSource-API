@@ -1,6 +1,6 @@
 'use strict';
 
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 const app = require('../../server/server');
 const _ = require('lodash');
 const genericHelpers = require('../../components/helpers');
@@ -570,7 +570,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeCase: app.utils.helpers.getDate().toDate(),
+          dateBecomeCase: localizationHelper.today().toDate(),
           wasContact: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
           classification: 'LNG_REFERENCE_DATA_CATEGORY_CASE_CLASSIFICATION_SUSPECT'
@@ -709,7 +709,7 @@ module.exports = function (Outbreak) {
         const updateContacts = [];
         records.forEach(function (contact) {
           updateContacts.push(contact.updateAttributes({
-            dateBecomeContact: app.utils.helpers.getDate().toDate(),
+            dateBecomeContact: localizationHelper.today().toDate(),
             wasContactOfContact: true
           }, options));
         });
@@ -1175,7 +1175,7 @@ module.exports = function (Outbreak) {
         });
 
         // get now date
-        let now = new Date();
+        let now = localizationHelper.now().toDate();
 
         // get the new contacts in the outbreak
         return app.models.contact.find(app.utils.remote
@@ -1288,7 +1288,7 @@ module.exports = function (Outbreak) {
     // no end date filter provided
     if (!endDate) {
       // end date is current date
-      endDate = new Date();
+      endDate = localizationHelper.now().toDate();
     } else {
       // remove end date from filter
       delete filter.where.endDate;
@@ -1650,7 +1650,7 @@ module.exports = function (Outbreak) {
     }
 
     // get now date
-    let now = new Date();
+    let now = localizationHelper.now().toDate();
 
     // initialize results
     let results = {
@@ -1865,11 +1865,11 @@ module.exports = function (Outbreak) {
       // periodInterval was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.periodInterval;
       // normalize periodInterval dates
-      periodInterval[0] = genericHelpers.getDate(periodInterval[0]);
-      periodInterval[1] = genericHelpers.getDateEndOfDay(periodInterval[1]);
+      periodInterval[0] = localizationHelper.getDateStartOfDay(periodInterval[0]);
+      periodInterval[1] = localizationHelper.getDateEndOfDay(periodInterval[1]);
     } else {
       // set default periodInterval depending on periodType
-      periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+      periodInterval = localizationHelper.getPeriodIntervalForDate(undefined, periodType);
     }
 
     // initialize includeTotals and includeDeaths flags; default: false
@@ -1987,7 +1987,7 @@ module.exports = function (Outbreak) {
       .mergeFilters(defaultFilter, filter || {}))
       .then(function (cases) {
         // get periodMap for interval
-        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        let periodMap = localizationHelper.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
         Object.keys(periodMap).forEach(function (entry) {
           Object.assign(periodMap[entry], {
@@ -2029,7 +2029,7 @@ module.exports = function (Outbreak) {
 
           if (addInPeriod) {
             // get period in which the case needs to be included
-            const casePeriodInterval = genericHelpers.getPeriodIntervalForDate(periodInterval, periodType);
+            const casePeriodInterval = localizationHelper.getPeriodIntervalForDate(periodInterval, periodType);
 
             // create a period identifier
             let casePeriodIdentifier = casePeriodInterval.join(' - ');
@@ -2432,7 +2432,7 @@ module.exports = function (Outbreak) {
         // make sure limit per day is not exceeded for upcoming follow ups
         let followUpsToAdd = [];
         // store today date references, needed when checking for future follow ups
-        let today = genericHelpers.getDate();
+        let today = localizationHelper.today();
         if (
           modelType === appModels.contact.modelName ||
           modelType === appModels.case.modelName
@@ -2444,7 +2444,7 @@ module.exports = function (Outbreak) {
               // reset follow up day to the start of the day
               // change person id to point to winner model
               let followUps = modelFollowUs.map((followUp) => {
-                followUp.date = genericHelpers.getDate(followUp.date).toDate().toISOString();
+                followUp.date = localizationHelper.getDateStartOfDay(followUp.date).toDate().toISOString();
                 return followUp;
               });
 
@@ -2459,8 +2459,8 @@ module.exports = function (Outbreak) {
           // if group is in the future, remove from the end until the limit per day is ok
           for (let group in groupedFollowUps) {
             if (groupedFollowUps.hasOwnProperty(group)) {
-              if (genericHelpers.getDate(group).isAfter(today)) {
-                groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+              if (localizationHelper.getDateStartOfDay(group).isAfter(today)) {
+                groupedFollowUps[group] = groupedFollowUps[group].sort((a, b) => localizationHelper.toMoment(b.createdAt).toDate() - localizationHelper.toMoment(a.createdAt).toDate());
 
                 let lengthDiff = groupedFollowUps[group].length - outbreakLimitPerDay;
                 if (lengthDiff > 0) {
@@ -2635,7 +2635,7 @@ module.exports = function (Outbreak) {
    */
   Outbreak.beforeRemote('**', function (context, modelInstance, next) {
     if (context.args.filter) {
-      genericHelpers.convertPropsToDate(context.args.filter);
+      localizationHelper.convertPropsToDate(context.args.filter);
       genericHelpers.includeSubLocationsInLocationFilter(
         app,
         context.args.filter,
@@ -2643,7 +2643,7 @@ module.exports = function (Outbreak) {
         next
       );
     } else if (context.args.where) {
-      genericHelpers.convertPropsToDate(context.args.where);
+      localizationHelper.convertPropsToDate(context.args.where);
       genericHelpers.includeSubLocationsInLocationFilter(
         app, {
           where: context.args.where
@@ -2710,13 +2710,13 @@ module.exports = function (Outbreak) {
     dateToFilter = _.get(filter, 'where.date', null);
     if (dateToFilter !== null) {
       // add date to filter if it is valid; else use today
-      dateToFilter = moment(dateToFilter).isValid() ? genericHelpers.getDateEndOfDay(dateToFilter) : genericHelpers.getDateEndOfDay();
+      dateToFilter = localizationHelper.toMoment(dateToFilter).isValid() ? localizationHelper.getDateEndOfDay(dateToFilter) : localizationHelper.today();
 
       // date was sent; remove it from the filter as it shouldn't reach DB
       delete filter.where.date;
     } else {
       // use today as default filter
-      dateToFilter = genericHelpers.getDateEndOfDay();
+      dateToFilter = localizationHelper.today();
     }
 
     // add date to filter
@@ -2725,7 +2725,7 @@ module.exports = function (Outbreak) {
       .mergeFilters({
         where: {
           dateOfReporting: {
-            lte: new Date(dateToFilter)
+            lte: localizationHelper.toMoment(dateToFilter).toDate()
           }
         },
         include: {
@@ -2734,7 +2734,7 @@ module.exports = function (Outbreak) {
             where: {
               date: {
                 // filter until date as follow-ups can be scheduled in the future
-                lte: new Date(dateToFilter)
+                lte: localizationHelper.toMoment(dateToFilter).toDate()
               }
             },
             order: 'date DESC',
@@ -2817,8 +2817,8 @@ module.exports = function (Outbreak) {
           // check if the contact is still under follow-up
           // get end date of contact follow-ups
           // not having an end date should not be encountered; considering this case as still under follow-up
-          let followUpEndDate = moment(_.get(contact, 'followUp.endDate', null));
-          followUpEndDate = genericHelpers.getDateEndOfDay(followUpEndDate);
+          let followUpEndDate = localizationHelper.toMoment(_.get(contact, 'followUp.endDate', null));
+          followUpEndDate = localizationHelper.getDateEndOfDay(followUpEndDate);
           if (!followUpEndDate.isValid() || followUpEndDate.isSameOrAfter(dateToFilter)) {
             // update contactsUnderFollowUpCount
             locationMap[contactLocationId].contactsUnderFollowUpCount++;
@@ -3369,8 +3369,8 @@ module.exports = function (Outbreak) {
     let endDate;
     // set them according to date
     if (date) {
-      startDate = genericHelpers.getDate(date);
-      endDate = genericHelpers.getDateEndOfDay(date);
+      startDate = localizationHelper.getDateStartOfDay(date);
+      endDate = localizationHelper.getDateEndOfDay(date);
     }
 
     // Filter to get all of the outbreak's contacts that are under follow-up, and all their follow-ups, from the specified date
@@ -3394,8 +3394,8 @@ module.exports = function (Outbreak) {
     if (startDate && endDate) {
       _filter.include.scope.where = {
         date: {
-          gte: new Date(startDate),
-          lte: new Date(endDate)
+          gte: startDate.toDate(),
+          lte: endDate.toDate()
         }
       };
     }
@@ -3551,7 +3551,7 @@ module.exports = function (Outbreak) {
                       header: followUp.index
                     });
                     // add follow-up date
-                    data[0]['index' + i] = moment(followUp.date).format('YYYY-MM-DD');
+                    data[0]['index' + i] = localizationHelper.toMoment(followUp.date).format('YYYY-MM-DD');
                     // add follow-up status
                     data[data.length - 1]['index' + i] = dictionary.getTranslation(app.models.followUp.statusAcronymMap[followUp.statusId]);
                   });
@@ -3577,7 +3577,7 @@ module.exports = function (Outbreak) {
                       app.models.person.getDisplayName(contact),
                       `${dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER')}: ${pdfUtils.displayValue(dictionary.getTranslation(contact.gender))}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_AGE')}: ${_.get(contact, 'age.years')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_YEARS')} ${_.get(contact, 'age.months')} ${dictionary.getTranslation('LNG_AGE_FIELD_LABEL_MONTHS')}`,
-                      `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${moment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
+                      `${dictionary.getTranslation('LNG_RELATIONSHIP_FIELD_LABEL_CONTACT_DATE')}: ${localizationHelper.toMoment(contact.dateOfLastContact).format('YYYY-MM-DD')}`,
                       `${dictionary.getTranslation('LNG_CONTACT_FIELD_LABEL_ADDRESSES')}: ${app.models.address.getHumanReadableAddress(currentAddress)}`,
                       `${dictionary.getTranslation('LNG_ADDRESS_FIELD_LABEL_PHONE_NUMBER')}: ${pdfUtils.displayValue(currentAddress ? currentAddress.phoneNumber : null)}`
                     ]
@@ -4560,10 +4560,7 @@ module.exports = function (Outbreak) {
     }
     const { startDate, endDate, pathogen, locationCode } = data;
 
-    const momentLib = require('moment');
-    const momentRange = require('moment-range');
-    const moment = momentRange.extendMoment(momentLib);
-    const range = moment.range(moment.utc(startDate).startOf('day'), moment.utc(endDate).startOf('day'));
+    const range = localizationHelper.getRange(startDate, endDate);
 
     // props to be filled
     const indicators = {

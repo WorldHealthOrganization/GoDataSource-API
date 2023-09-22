@@ -1,16 +1,6 @@
 'use strict';
 
-const moment = require('moment');
-
-/**
- * Check if a (string) date is valid (correct ISO format)
- * - IMPORTANT: duplicate code to avoid circular dependency issue
- * @param date
- * @return {boolean}
- */
-const isValidDate = function (date) {
-  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(\.\d{3})?Z*)?$/.test(date);
-};
+const localizationHelper = require('./localizationHelper');
 
 /**
  * Check if a property is in date format, if so, convert it to date object
@@ -19,9 +9,9 @@ const isValidDate = function (date) {
  */
 const checkIfDateAndConvert = function (prop) {
   // check if the property is in date format
-  if (typeof prop === 'string' && isValidDate(prop)) {
+  if (typeof prop === 'string' && localizationHelper.isValidDate(prop)) {
     // try to convert the string value to date, if valid, replace the old value
-    let convertedDate = moment(prop);
+    let convertedDate = localizationHelper.toMoment(prop);
     if (convertedDate.isValid()) {
       prop = convertedDate.toDate();
     }

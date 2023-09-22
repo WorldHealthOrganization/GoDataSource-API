@@ -1,7 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
-const dateParser = app.utils.helpers.getDateDisplayValue;
+const localizationHelper = require('../../components/localizationHelper');
 const _ = require('lodash');
 const async = require('async');
 const helpers = require('../../components/helpers');
@@ -385,11 +385,11 @@ module.exports = function (Contact) {
 
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
-    dob: dateParser,
-    dateOfOutcome: dateParser,
-    dateOfBurial: dateParser,
-    'addresses[].date': dateParser,
-    'followUps[].date': dateParser
+    dob: localizationHelper.getDateDisplayValue,
+    dateOfOutcome: localizationHelper.getDateDisplayValue,
+    dateOfBurial: localizationHelper.getDateDisplayValue,
+    'addresses[].date': localizationHelper.getDateDisplayValue,
+    'followUps[].date': localizationHelper.getDateDisplayValue
   };
   Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
 
@@ -488,12 +488,11 @@ module.exports = function (Contact) {
   ];
 
   /**
-   * Update Follow-Up dates if needed (if conditions are met)
+   * Determine Follow-Up dates if we need to update this data
    */
-  Contact.updateFollowUpDatesIfNeeded = function (
+  Contact.determineFollowUpDates = function (
+    retrieveOutbreak,
     id,
-    outbreakId,
-    type,
     deleted,
     followUp,
     options
@@ -503,20 +502,17 @@ module.exports = function (Contact) {
       options,
       app.models.contact.modelName,
       id,
-      'updateFollowUpDatesIfNeeded'
+      'determineFollowUpDates'
     )) {
-      return {};
+      return Promise.resolve();
     }
-    let relationshipInstance;
     // create filter to get the newest relationship, if any
-    let filter = {
+    const filter = {
       order: 'contactDate DESC',
       where: {
         'persons.id': id,
         'persons.type': {
-          inq: type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
-            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
         },
         active: true
       }
@@ -527,23 +523,23 @@ module.exports = function (Contact) {
       deleted &&
       options.updateDeletedRecords
     ) {
-      filter = Object.assign(filter, {deleted: true});
+      filter.deleted = true;
     }
 
     // get newest relationship, if any
+    let outbreak;
     return app.models.relationship
       .findOne(filter)
-      .then(function (relationshipRecord) {
-        // get relationship instance, if any
-        relationshipInstance = relationshipRecord;
-        // get the outbreak as we need the followUpPeriod
-        return app.models.outbreak.findById(outbreakId);
+      .then((relationshipInstance) => {
+        return retrieveOutbreak().then((outbreakModel) => {
+          // set data
+          outbreak = outbreakModel;
+
+          // finished
+          return relationshipInstance;
+        });
       })
-      .then(function (outbreak) {
-        // check for found outbreak
-        if (!outbreak) {
-          throw app.logger.error(`Error when updating contact (id: ${id}) follow-up dates. Outbreak (id: ${outbreakId}) was not found.`);
-        }
+      .then(function (relationshipInstance) {
         // keep a flag for updating contact
         let shouldUpdate = false;
         // build a list of properties that need to be updated
@@ -563,18 +559,18 @@ module.exports = function (Contact) {
           // set follow-up start date to be the same as relationship contact date
           // check also if contact tracing should start on the date of the last contact
           propsToUpdate.startDate = outbreak.generateFollowUpsDateOfLastContact ?
-            helpers.getDate(relationshipInstance.contactDate) :
-            helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate) :
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate).add(1, 'days');
 
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
             shouldUpdate = true;
             // set it as follow-up start date
-            propsToUpdate.originalStartDate = helpers.getDate(propsToUpdate.startDate);
+            propsToUpdate.originalStartDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate);
           }
           // set follow-up end date
-          propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+          propsToUpdate.endDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
 
           // set generateFollowUpsDateOfLastContact if only the outbreak feature is enabled
           if (outbreak.generateFollowUpsDateOfLastContact) {
@@ -606,7 +602,7 @@ module.exports = function (Contact) {
             if (
               followUp[updatePropName] &&
               propsToUpdate[updatePropName] &&
-              ((new Date(followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              (localizationHelper.toMoment(followUp[updatePropName]).toDate().getTime() !== localizationHelper.toMoment(propsToUpdate[updatePropName]).toDate().getTime())
             ) {
               // flag as an update
               return shouldUpdate = true;
@@ -625,7 +621,7 @@ module.exports = function (Contact) {
             options,
             app.models.contact.modelName,
             id,
-            'updateFollowUpDatesIfNeeded',
+            'determineFollowUpDates',
             true
           );
 
@@ -735,27 +731,23 @@ module.exports = function (Contact) {
     // if this is an exiting record
     if (!context.isNewInstance) {
       // update follow-up dates, if needed
-      Contact.updateFollowUpDatesIfNeeded(
+      Contact.determineFollowUpDates(
+        () => app.models.outbreak.findById(context.instance.outbreakId),
         context.instance.id,
-        context.instance.outbreakId,
-        context.instance.type,
         context.instance.deleted,
         context.instance.followUp,
-        Object.assign({}, context.options)
+        context.options
       )
         .then(function (data) {
           // no property to update ?
-          if (
-            !data ||
-            Object.keys(data).length === 0
-          ) {
+          if (!data) {
             return;
           }
 
           // update contact
           return context.instance.updateAttributes(
             data,
-            Object.assign({}, context.options)
+            context.options
           );
         })
         .then(function () {
@@ -824,11 +816,11 @@ module.exports = function (Contact) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
-      dateInterval = [helpers.getDate(date.startDate), helpers.getDateEndOfDay(date.endDate)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date.startDate), localizationHelper.getDateEndOfDay(date.endDate)];
     } else if (typeof date === 'string') {
-      dateInterval = [helpers.getDate(date), helpers.getDateEndOfDay(date)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date), localizationHelper.getDateEndOfDay(date)];
     } else {
-      dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
+      dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
     }
 
     // check for geographical restriction
@@ -1273,7 +1265,7 @@ module.exports = function (Contact) {
       // if it's different than current followUp status
       if (dataSource.followUp.status !== lastKnownFollowStatus.status) {
         // end last known followUp status entry
-        lastKnownFollowStatus.endDate = new Date();
+        lastKnownFollowStatus.endDate = localizationHelper.now().toDate();
 
         // add the new followUp status in the history
         dataSource.followUpHistory.push({
@@ -1298,7 +1290,7 @@ module.exports = function (Contact) {
       // add current followUp status to history
       data.target.followUpHistory.push({
         status: dataSource.followUp.status,
-        startDate: new Date()
+        startDate: localizationHelper.now().toDate()
       });
     }
   }

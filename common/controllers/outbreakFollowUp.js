@@ -14,6 +14,7 @@ const genericHelpers = require('../../components/helpers');
 const Platform = require('../../components/platform');
 const WorkerRunner = require('./../../components/workerRunner');
 const exportHelper = require('./../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -46,11 +47,12 @@ module.exports = function (Outbreak) {
     // - otherwise, use "tomorrow"
     // if end date is not provided, use outbreak follow-up period
     let followupStartDate = data.startDate ?
-      genericHelpers.getDate(data.startDate) :
-      this.generateFollowUpsDateOfLastContact ?
-        genericHelpers.getDate() :
-        genericHelpers.getDate().add(1, 'days');
-    let followupEndDate = genericHelpers.getDateEndOfDay(
+      localizationHelper.getDateStartOfDay(data.startDate) : (
+        this.generateFollowUpsDateOfLastContact ?
+          localizationHelper.today() :
+          localizationHelper.today().add(1, 'days')
+      );
+    let followupEndDate = localizationHelper.getDateEndOfDay(
       data.endDate ?
         data.endDate :
         followupStartDate.clone().add(
@@ -901,11 +903,8 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get current date
-    let now = genericHelpers.getDate();
-
     // get date from noDaysNotSeen days ago
-    let xDaysAgo = now.clone().subtract(noDaysNotSeen, 'day');
+    let xDaysAgo = localizationHelper.getDateStartOfDay().subtract(noDaysNotSeen, 'day');
 
     // get contact query
     let contactQuery = app.utils.remote.searchByRelationProperty
@@ -1033,7 +1032,7 @@ module.exports = function (Outbreak) {
               {
                 // get follow-ups that were scheduled in the past noDaysNotSeen days
                 date: {
-                  between: [xDaysAgo, now]
+                  between: [xDaysAgo, localizationHelper.getDateEndOfDay()]
                 }
               },
               app.models.followUp.notSeenFilter
@@ -1415,8 +1414,8 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = genericHelpers.getDate().toString();
-      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+      let today = localizationHelper.getDateStartOfDay().toDate();
+      let todayEndOfDay = localizationHelper.getDateEndOfDay().toDate();
 
       defaultFilter.where.date = {
         between: [today, todayEndOfDay]
@@ -1489,8 +1488,8 @@ module.exports = function (Outbreak) {
             teamId = null;
           }
 
-          // get date; format it to UTC 00:00:00
-          const date = genericHelpers.getDate(followup.date).toString();
+          // get date
+          const date = localizationHelper.getDateStartOfDay(followup.date).format('YYYY-MM-DD');
 
           // initialize team entry if not already initialized
           if (!teamsMap[teamId]) {
@@ -1574,8 +1573,8 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = genericHelpers.getDate().toString();
-      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+      let today = localizationHelper.getDateStartOfDay().toDate();
+      let todayEndOfDay = localizationHelper.getDateEndOfDay().toDate();
 
       defaultFilter.where.date = {
         between: [today, todayEndOfDay]
@@ -1648,8 +1647,8 @@ module.exports = function (Outbreak) {
             responsibleUserId = null;
           }
 
-          // get date; format it to UTC 00:00:00
-          const date = genericHelpers.getDate(followup.date).toString();
+          // get date
+          const date = localizationHelper.getDateStartOfDay(followup.date).format('YYYY-MM-DD');
 
           // initialize user entry if not already initialized
           if (!usersMap[responsibleUserId]) {

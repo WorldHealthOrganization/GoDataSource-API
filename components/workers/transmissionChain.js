@@ -1,5 +1,7 @@
 'use strict';
 
+const localizationHelper = require('../localizationHelper');
+
 const worker = {
   /**
    * Build or count transmission chains
@@ -11,7 +13,7 @@ const worker = {
    */
   buildOrCount: function (relationships, followUpPeriod, countOnly, options) {
     // default active chain start date starts from today
-    let activeChainStartDate = new Date(options.activeChainStartDate);
+    let activeChainStartDate = localizationHelper.toMoment(options.activeChainStartDate).toDate();
     // define the start date of active chains (today - (the follow-up period + 1))
     activeChainStartDate.setDate(activeChainStartDate.getDate() - (followUpPeriod + 1));
     // keep a list o chains
@@ -95,7 +97,7 @@ const worker = {
       let relationship = relationships[relationsIndex];
 
       // check if the relation is active
-      let isRelationActive = ((new Date(relationship.contactDate)) > activeChainStartDate);
+      let isRelationActive = (localizationHelper.toMoment(relationship.contactDate).toDate() > activeChainStartDate);
 
       // build a list of (two) person ids
       let personIds = [relationship.persons[0].id, relationship.persons[1].id];
@@ -377,7 +379,7 @@ const worker = {
           // get edge data
           edgesMap[`${edge[0]}:${edge[1]}`].forEach(function (edgeData) {
             // get contact date
-            const contactDate = new Date(edgeData.contactDate);
+            const contactDate = localizationHelper.toMoment(edgeData.contactDate).toDate();
             // keep a flag for changing data (to know when to re-calculate duration)
             let hadChanges = false;
             // start building period

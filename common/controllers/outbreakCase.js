@@ -13,12 +13,12 @@ const _ = require('lodash');
 const tmp = require('tmp');
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-const moment = require('moment');
 const Config = require('../../server/config.json');
 const Platform = require('../../components/platform');
 const importableFile = require('./../../components/importableFile');
 const apiError = require('../../components/apiError');
 const exportHelper = require('./../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 // used in getCaseCountMap function
 const caseCountMapBatchSize = _.get(Config, 'jobSettings.caseCountMap.batchSize', 10000);
@@ -653,12 +653,9 @@ module.exports = function (Outbreak) {
       noDaysAmongContacts = this.noDaysAmongContacts;
     }
 
-    // get now date
-    let now = new Date();
-
     // get from noDaysAmongContacts ago
-    let xDaysAgo = new Date((new Date()).setHours(0, 0, 0, 0));
-    xDaysAgo.setDate(now.getDate() - noDaysAmongContacts);
+    let xDaysAgo = localizationHelper.getDateStartOfDay().toDate();
+    xDaysAgo.setDate(localizationHelper.now().toDate().getDate() - noDaysAmongContacts);
 
     // get outbreakId
     let outbreakId = this.id;
@@ -702,7 +699,7 @@ module.exports = function (Outbreak) {
         };
 
         // get the newCasesAmongKnownContactsIDs
-        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && new Date(item.dateBecomeCase) >= xDaysAgo).map(item => item.id);
+        result.newCasesAmongKnownContactsIDs = cases.filter(item => item.wasContact && localizationHelper.toMoment(item.dateBecomeCase).toDate() >= xDaysAgo).map(item => item.id);
         result.newCasesAmongKnownContactsCount = result.newCasesAmongKnownContactsIDs.length;
 
         // send response
@@ -880,16 +877,16 @@ module.exports = function (Outbreak) {
       // normalize periodInterval dates
       // let empty if start date is not provided
       if (periodInterval[0]) {
-        periodInterval[0] = genericHelpers.getDate(periodInterval[0]).toISOString();
+        periodInterval[0] = localizationHelper.getDateStartOfDay(periodInterval[0]).toISOString();
       }
 
       // and current date if end date is not provided
       periodInterval[1] = periodInterval[1] ?
-        genericHelpers.getDateEndOfDay(periodInterval[1]).toISOString() :
-        genericHelpers.getDateEndOfDay().toISOString();
+        localizationHelper.getDateEndOfDay(periodInterval[1]).toISOString() :
+        localizationHelper.getDateEndOfDay().toISOString();
     } else {
       // set default periodInterval depending on periodType
-      periodInterval = genericHelpers.getPeriodIntervalForDate(undefined, periodType);
+      periodInterval = localizationHelper.getPeriodIntervalForDate(undefined, periodType);
     }
 
     // create date condition
@@ -990,12 +987,12 @@ module.exports = function (Outbreak) {
         if (!periodInterval[0]) {
           periodInterval[0] = cases.length > 0 &&
           cases[0].dateOfReporting ?
-            genericHelpers.getDate(cases[0].dateOfReporting).toISOString() :
-            genericHelpers.getDateEndOfDay().toISOString();
+            localizationHelper.getDateStartOfDay(cases[0].dateOfReporting).toISOString() :
+            localizationHelper.getDateEndOfDay().toISOString();
         }
 
         // get periodMap for interval
-        let periodMap = genericHelpers.getChunksForInterval(periodInterval, periodType);
+        let periodMap = localizationHelper.getChunksForInterval(periodInterval, periodType);
         // fill additional details for each entry in the periodMap
         Object.keys(periodMap).forEach(function (entry) {
           Object.assign(periodMap[entry], {
@@ -1016,7 +1013,7 @@ module.exports = function (Outbreak) {
           let caseDate = item.dateBecomeCase || item.dateOfReporting;
 
           // get interval based on date of onset
-          const casePeriodInterval = genericHelpers.getPeriodIntervalForDate(periodInterval, periodType, caseDate);
+          const casePeriodInterval = localizationHelper.getPeriodIntervalForDate(periodInterval, periodType, caseDate);
 
           // create a period identifier
           let casePeriodIdentifier = casePeriodInterval.join(' - ');
@@ -1401,7 +1398,7 @@ module.exports = function (Outbreak) {
                     return Promise.all(pdfPromises);
                   })
                   .then(() => {
-                    let archiveName = `caseDossiers_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+                    let archiveName = `caseDossiers_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
                     let archivePath = `${tmpDirName}/${archiveName}`;
                     let zip = new AdmZip();
 
@@ -1757,7 +1754,7 @@ module.exports = function (Outbreak) {
 
         // define the attributes for update
         const attributes = {
-          dateBecomeContact: app.utils.helpers.getDate().toDate(),
+          dateBecomeContact: localizationHelper.today().toDate(),
           wasCase: true,
           type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
         };

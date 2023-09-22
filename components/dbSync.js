@@ -11,6 +11,7 @@ const baseTransmissionChainModel = require('./baseModelOptions/transmissionChain
 const apiError = require('./apiError');
 const bcrypt = require('bcrypt');
 const Config = require('./../server/config.json');
+const localizationHelper = require('./localizationHelper');
 
 const alternateUniqueIdentifierQueryOptions = Config.alternateUniqueIdentifierQueryOnImport || {};
 
@@ -638,7 +639,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
             _.set(obj, prop, propValue);
           }
           if (propValue) {
-            const convertedDate = helpers.getDate(propValue);
+            const convertedDate = localizationHelper.toMoment(propValue);
             if (!convertedDate.isValid()) {
               _.set(obj, prop, null);
             }
@@ -661,7 +662,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
             }
             if (recordPropValue) {
               // try to convert the string value to date, if valid, replace the old value
-              let convertedDate = helpers.getDate(recordPropValue);
+              let convertedDate = localizationHelper.getDateStartOfDay(recordPropValue);
               if (convertedDate.isValid()) {
                 _.set(obj, prop, convertedDate.toDate());
               }
@@ -836,7 +837,7 @@ const syncRecord = function (app, logger, model, record, options, done) {
 
       // if updated timestamp is greater than the one in the main database, update
       // also make sure that if the record is soft deleted, it stays that way
-      if (new Date(dbRecord.updatedAt).getTime() < new Date(record.updatedAt).getTime()) {
+      if (localizationHelper.toMoment(dbRecord.updatedAt).toDate().getTime() < localizationHelper.toMoment(record.updatedAt).toDate().getTime()) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
 

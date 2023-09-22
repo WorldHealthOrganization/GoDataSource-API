@@ -2,6 +2,7 @@
 
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Helpers = require('../../../../../components/helpers');
+const localizationHelper = require('../../../../../components/localizationHelper');
 
 // Number of find requests at the same time
 // Don't set this value to high so we don't exceed Mongo 16MB limit
@@ -160,7 +161,7 @@ const removeTokensOfDeletedOutbreak = (options, callback) => {
         }, {
           '$set': {
             deleted: true,
-            deletedAt: new Date()
+            deletedAt: localizationHelper.now().toDate()
           }
         })
         .then(result => {

@@ -2,7 +2,6 @@
 
 const app = require('../../server/server');
 const uuid = require('uuid');
-const moment = require('moment');
 const config = require('../../server/config');
 const _ = require('lodash');
 const path = require('path');
@@ -151,19 +150,6 @@ module.exports = function (SystemSettings) {
         splitFactor: splitFactor
       }]
     });
-  };
-
-  /**
-   * Generate current UTC date of the server
-   * @param callback
-   */
-  SystemSettings.getServerUTCDate = function (callback) {
-    return callback(
-      null,
-      {
-        date: moment.utc()
-      }
-    );
   };
 
   /**

@@ -26,6 +26,7 @@ const baseReferenceDataModel = require('./baseModelOptions/referenceData');
 const convertLoopbackFilterToMongo = require('./convertLoopbackFilterToMongo');
 const MongoDBHelper = require('./mongoDBHelper');
 const WorkerRunner = require('./workerRunner');
+const localizationHelper = require('./localizationHelper');
 
 // Note: should be kept in sync with the extension used in exportHelper
 const zipExtension = '.zip';
@@ -56,6 +57,7 @@ const utils = require('exceljs/lib/utils/utils');
 const colCache = require('exceljs/lib/utils/col-cache');
 const Row = require('exceljs/lib/doc/row');
 const Column = require('exceljs/lib/doc/column');
+
 const parseWorksheet = async function *parse() {
   const {iterator, options} = this;
   let emitSheet = false;
@@ -2020,7 +2022,7 @@ const processImportableFileData = function (app, options, formatterOptions, batc
 
     // initialize update payload
     let updatePayload = {
-      actionCompletionDate: new Date(),
+      actionCompletionDate: localizationHelper.now().toDate(),
       processedNo: total
     };
 
@@ -2144,7 +2146,7 @@ const processImportableFileData = function (app, options, formatterOptions, batc
         // create import log entry
         app.models.importLog
           .create({
-            actionStartDate: new Date(),
+            actionStartDate: localizationHelper.now().toDate(),
             status: 'LNG_SYNC_STATUS_IN_PROGRESS',
             resourceType: options.modelName,
             totalNo: total,

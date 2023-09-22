@@ -2,6 +2,7 @@
 
 const MongoDBHelper = require('../../../../../components/mongoDBHelper');
 const Helpers = require('../../../../../components/helpers');
+const localizationHelper = require('../../../../../components/localizationHelper');
 
 // Number of find requests at the same time
 // Don't set this value to high so we don't exceed Mongo 16MB limit
@@ -64,8 +65,8 @@ const replaceFollowUpStatus = (callback) => {
           }, {
             $set: {
               'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_FOLLOW_UP_COMPLETED',
-              updateAt: new Date(),
-              dbUpdatedAt: new Date()
+              updateAt: localizationHelper.now().toDate(),
+              dbUpdatedAt: localizationHelper.now().toDate()
             }
           });
       };
@@ -128,9 +129,9 @@ const deleteFollowUpStatus = (callback) => {
         }, {
           $set: {
             deleted: true,
-            deletedAt: new Date(),
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            deletedAt: localizationHelper.now().toDate(),
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           }
         });
     })
@@ -181,8 +182,8 @@ const disableFollowUpStatus = (callback) => {
         }, {
           $set: {
             active: false,
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           }
         });
     })

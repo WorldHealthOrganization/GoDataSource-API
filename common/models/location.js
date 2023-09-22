@@ -7,6 +7,7 @@ const escapeRegExp = require('../../components/escapeRegExp');
 const Config = require('./../../server/config.json');
 const Helpers = require('./../../components/helpers');
 const clusterHelpers = require('./../../components/clusterHelpers');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Location) {
 
@@ -729,7 +730,7 @@ module.exports = function (Location) {
     locationsList.forEach(function (location) {
       // replace "Updated at" as current date ?
       if (replaceUpdatedAtAsCurrentDate) {
-        location.updatedAt = new Date();
+        location.updatedAt = localizationHelper.now().toDate();
       }
 
       // if the location is an instance
@@ -878,7 +879,7 @@ module.exports = function (Location) {
         let _location = Object.assign({parentLocationId: parentLocationId}, location.location);
         // updatedAt is required for syncs
         if (!_location.updatedAt) {
-          _location.updatedAt = new Date();
+          _location.updatedAt = localizationHelper.now().toDate();
         }
         // add sync location operation
         syncLocationOperations.push(function (cb) {

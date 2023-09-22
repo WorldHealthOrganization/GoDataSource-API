@@ -2,6 +2,7 @@
 
 const app = require('../../server/server');
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (HelpCategory) {
 
@@ -33,7 +34,7 @@ module.exports = function (HelpCategory) {
         return helpItem.updateAttributes({
           approved: true,
           approvedBy: options.accessToken.userId,
-          approvedDate: Date.now()
+          approvedDate: localizationHelper.now().toDate()
         }, options);
       })
       .then((helpItem) => {

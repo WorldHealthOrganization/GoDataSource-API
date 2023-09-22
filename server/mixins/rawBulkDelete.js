@@ -4,6 +4,7 @@ const _ = require('lodash');
 const App = require('../server');
 const Timer = require('../../components/Timer');
 const Uuid = require('uuid');
+const localizationHelper = require('../../components/localizationHelper');
 
 /**
  * Raw Bulk Remove (avoid loopback ODM)
@@ -30,8 +31,8 @@ module.exports = function (Model) {
     const op = {
       $set: {
         deleted: true,
-        deletedAt: new Date(),
-        dbUpdatedAt: new Date()
+        deletedAt: localizationHelper.now().toDate(),
+        dbUpdatedAt: localizationHelper.now().toDate()
       }
     };
 

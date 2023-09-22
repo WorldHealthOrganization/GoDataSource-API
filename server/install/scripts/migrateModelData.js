@@ -5,6 +5,7 @@ const DataSources = require('../../datasources');
 const Path = require('path');
 const Async = require('async');
 const Uuid = require('uuid');
+const localizationHelper = require('../../../components/localizationHelper');
 
 const migrationVersionsFoldersPath = Path.resolve(__dirname, './migrations');
 
@@ -551,7 +552,7 @@ const run = function (cb) {
         .insert({
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
-          startDate: new Date(),
+          startDate: localizationHelper.now().toDate(),
           executionMap: executionMap,
           deleted: false
         });
@@ -622,7 +623,7 @@ const run = function (cb) {
           '$set': {
             status: migrationLogStatusMap.success,
             executionMap: executionMap,
-            endDate: new Date()
+            endDate: localizationHelper.now().toDate()
           }
         })
         .then(updateResult => {
@@ -661,7 +662,7 @@ const run = function (cb) {
           '$set': {
             status: migrationLogStatusMap.failed,
             executionMap: executionMap,
-            endDate: new Date(),
+            endDate: localizationHelper.now().toDate(),
             error: err.toString ? err.toString() : JSON.stringify(err)
           }
         })

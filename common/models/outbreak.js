@@ -11,8 +11,8 @@ const async = require('async');
 const fs = require('fs');
 const Platform = require('./../../components/platform');
 // used to manipulate dates
-const moment = require('moment');
 const apiError = require('./../../components/apiError');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
 
@@ -1192,7 +1192,7 @@ module.exports = function (Outbreak) {
                 // go trough their relationships
                 caseRecord.relationships.forEach(function (relationship) {
                   // store only the relationships that are newer than their conversion date
-                  if (app.utils.helpers.getDate(relationship.contactDate) >= app.utils.helpers.getDate(caseRecord.dateBecomeCase)) {
+                  if (localizationHelper.getDateStartOfDay(relationship.contactDate) >= localizationHelper.getDateStartOfDay(caseRecord.dateBecomeCase)) {
                     relationshipIds.push(relationship.id);
                   }
                 });
@@ -1545,7 +1545,7 @@ module.exports = function (Outbreak) {
       qAnswer.length &&
       qAnswer[0].date) {
       // find the answer that matches the date the question has
-      qAnswer = qAnswer.find(a => genericHelpers.getDate(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
+      qAnswer = qAnswer.find(a => localizationHelper.toMoment(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
     } else {
       if (Array.isArray(qAnswer) && qAnswer.length) {
         qAnswer = qAnswer[0];
@@ -1565,8 +1565,8 @@ module.exports = function (Outbreak) {
         }
       });
     } else {
-      if (qAnswer instanceof Date || genericHelpers.isValidDate(qAnswer)) {
-        question.value = genericHelpers.getDateDisplayValue(qAnswer);
+      if (qAnswer instanceof Date || localizationHelper.isValidDate(qAnswer)) {
+        question.value = localizationHelper.getDateDisplayValue(qAnswer);
       } else {
         question.value = qAnswer;
       }
@@ -1589,7 +1589,7 @@ module.exports = function (Outbreak) {
           qAnswer.forEach(answer => {
             const clonedQ = _.cloneDeep(question);
             clonedQ.value = null;
-            clonedQ.multiAnswerDate = genericHelpers.getDate(answer.date).format('YYYY-MM-DD');
+            clonedQ.multiAnswerDate = localizationHelper.toMoment(answer.date).format('YYYY-MM-DD');
             mapStandardAnswerToQuestion(answers, answer, clonedQ);
             question.multiAnswers.push({
               date: clonedQ.multiAnswerDate,
@@ -1743,10 +1743,7 @@ module.exports = function (Outbreak) {
     // initialize parameters for handleActionsInBatches call
     const getActionsCount = () => {
       return app.models.contact
-        .count(Object.assign({}, where, { includeDeletedRecords: true }))
-        .then(count => {
-          return Promise.resolve(count);
-        });
+        .count(Object.assign({}, where, { includeDeletedRecords: true }));
     };
 
     // get records in batches
@@ -1771,27 +1768,24 @@ module.exports = function (Outbreak) {
 
     // update contact
     const itemAction = (contact) => {
-      return app.models.contact.updateFollowUpDatesIfNeeded(
+      const contactOptions = Object.assign({}, context.options);
+      return app.models.contact.determineFollowUpDates(
+        () => Promise.resolve(context.instance),
         contact.id,
-        contact.outbreakId,
-        contact.type,
         contact.deleted,
         contact.followUp,
-        Object.assign({}, context.options)
+        contactOptions
       )
         .then((data) => {
           // no property to update ?
-          if (
-            !data ||
-            Object.keys(data).length === 0
-          ) {
+          if (!data) {
             return;
           }
 
           // update contact
           return contact.updateAttributes(
             data,
-            Object.assign({}, context.options)
+            contactOptions
           );
         });
     };
@@ -2097,7 +2091,7 @@ module.exports = function (Outbreak) {
         if (err) {
           callback(err);
         } else {
-          let archiveName = `caseInvestigationTemplates_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+          let archiveName = `caseInvestigationTemplates_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
           let archivePath = `${tmpDirName}/${archiveName}`;
           let zip = new AdmZip();
 
@@ -2831,7 +2825,7 @@ module.exports = function (Outbreak) {
                   // update isolated nodes filter depending on active filter value
                   let followUpPeriod = outbreak.periodOfFollowup;
                   // get day of the start of the follow-up period starting from specified end date (by default, today)
-                  let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
+                  let followUpStartDate = localizationHelper.getDateStartOfDay(endDate).subtract(followUpPeriod, 'days');
 
                   if (activeFilter) {
                     // get cases/events reported in the last followUpPeriod days
@@ -2839,7 +2833,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            gte: new Date(followUpStartDate)
+                            gte: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);
@@ -2849,7 +2843,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            lt: new Date(followUpStartDate)
+                            lt: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);
