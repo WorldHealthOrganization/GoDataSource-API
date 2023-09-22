@@ -220,7 +220,7 @@ module.exports = function (app) {
           // create new backup record with pending status
           backupModel
             .create({
-              date: Date.now(),
+              date: localizationHelper.now().toDate(),
               modules: backupSettings.modules,
               location: null,
               userId: null,

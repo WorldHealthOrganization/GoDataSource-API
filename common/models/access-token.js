@@ -3,6 +3,7 @@
 const assert = require('assert');
 const authTokenConfig = require('../../server/config').authToken;
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (AccessToken) {
   // set flag to not get controller
@@ -53,7 +54,7 @@ module.exports = function (AccessToken) {
         }
       }
 
-      const now = Date.now();
+      const now = localizationHelper.now().toDate();
       const created = this.created.getTime();
       const elapsedSeconds = (now - created) / 1000;
       const secondsToLive = this.ttl;

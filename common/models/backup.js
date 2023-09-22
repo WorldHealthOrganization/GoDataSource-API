@@ -66,7 +66,7 @@ module.exports = function (Backup) {
     // create new backup record with pending status
     let createBackup = Backup
       .create({
-        date: Date.now(),
+        date: localizationHelper.now().toDate(),
         modules: modules,
         location: null,
         userId: userId,
