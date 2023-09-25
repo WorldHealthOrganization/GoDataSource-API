@@ -69,6 +69,7 @@
     "sharp": "0.28.3",
     "strong-error-handler": "4.0.0",
     "svg-captcha": "1.4.0",
+    "moment-timezone": "0.5.43",
     "tmp": "0.2.1",
     "uuid": "8.3.2",
     "voilab-pdf-table": "0.5.1",
