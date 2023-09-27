@@ -1,10 +1,14 @@
 'use strict';
 
 // dependencies
-const momentLib = require('moment');
+const momentLib = require('moment-timezone');
 const momentRange = require('moment-range');
 const moment = momentRange.extendMoment(momentLib);
 const EpiWeek = require('epi-week');
+const timezone = require('../server/config.json').timezone || 'UTC';
+
+// default timezone
+moment.tz.setDefault(timezone);
 
 /**
  * Now (date + time)
@@ -27,7 +31,7 @@ const today = function () {
  * @param dayOfWeek If not sent the day of the week will not be changed
  */
 const getDateStartOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).startOf('day') : moment.utc(moment().format('YYYY-MM-DD')).startOf('day');
+  let momentDate = date ? toMoment(date).startOf('day') : today();
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -38,7 +42,7 @@ const getDateStartOfDay = function (date, dayOfWeek) {
  * @param dayOfWeek If not sent the date will not be changed
  */
 const getDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? moment.utc(date).endOf('day') : moment.utc(moment().format('YYYY-MM-DD')).endOf('day');
+  let momentDate = date ? toMoment(date).endOf('day') : moment().endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -64,7 +68,7 @@ const getRange = function (start, end) {
  * @returns {string}
  */
 const getDateDisplayValue = function (dateString) {
-  return dateString && moment(dateString).isValid() ? new Date(dateString).toISOString() : dateString;
+  return dateString && toMoment(dateString).isValid() ? toMoment(dateString).toISOString() : dateString;
 };
 
 /**
@@ -76,7 +80,7 @@ const getDateDisplayValue = function (dateString) {
 const formatDate = function (value) {
   let result = '';
   if (value) {
-    let tmpDate = moment(getDateDisplayValue(value));
+    let tmpDate = toMoment(value);
     if (tmpDate.isValid()) {
       result = tmpDate.format('YYYY-MM-DD');
     }
@@ -96,8 +100,8 @@ const toMoment = function (
     moment(
       date,
       format
-    ) :
-    moment(date);
+    ).tz(timezone) :
+    moment(date).tz(timezone);
 };
 
 /**
@@ -343,6 +347,7 @@ const excelDateToJSDate = function (serial) {
 module.exports = {
   // needs to be moment and NOT moment.Moment
   Moment: moment,
+  timezone,
   now,
   today,
   getDateStartOfDay,
