@@ -35,6 +35,7 @@
     "protocol": "http",
     "port": 3000
   },
+  "timezone": "UTC",
   "passwordReset": {
     "ttl": 900,
     "path": "/auth/reset-password",

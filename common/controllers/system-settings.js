@@ -6,6 +6,7 @@ const config = require('../../server/config');
 const _ = require('lodash');
 const path = require('path');
 const fork = require('child_process').fork;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (SystemSettings) {
 
@@ -162,6 +163,7 @@ module.exports = function (SystemSettings) {
       Object.assign(
         {},
         app.utils.helpers.getBuildInformation(), {
+          timezone: localizationHelper.timezone,
           tokenTTL: config.authToken && config.authToken.ttl ?
             config.authToken.ttl :
             app.models.user.settings.ttl,
