@@ -24,17 +24,28 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    Outbreak.generateFollowupsForOutbreak(this, data, options, callback);
+  };
+
+  /**
+   * Generate list of follow ups for a specific outbreak
+   */
+  Outbreak.generateFollowupsForOutbreak = function (outbreak, data, options, callback) {
+    // luam outbreak din options.instance ???
+
     // inject platform identifier
-    options.platform = Platform.BULK;
+    options.platform = options.platform ?
+      options.platform :
+      Platform.BULK;
 
     let errorMessage = '';
 
     // outbreak follow up generate params sanity checks
     let invalidOutbreakParams = [];
-    if (this.frequencyOfFollowUp <= 0) {
+    if (outbreak.frequencyOfFollowUp <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUp');
     }
-    if (this.frequencyOfFollowUpPerDay <= 0) {
+    if (outbreak.frequencyOfFollowUpPerDay <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
     }
     if (invalidOutbreakParams.length) {
@@ -48,7 +59,7 @@ module.exports = function (Outbreak) {
     // if end date is not provided, use outbreak follow-up period
     let followupStartDate = data.startDate ?
       localizationHelper.getDateStartOfDay(data.startDate) : (
-        this.generateFollowUpsDateOfLastContact ?
+        outbreak.generateFollowUpsDateOfLastContact ?
           localizationHelper.today() :
           localizationHelper.today().add(1, 'days')
       );
@@ -56,8 +67,8 @@ module.exports = function (Outbreak) {
       data.endDate ?
         data.endDate :
         followupStartDate.clone().add(
-          this.periodOfFollowup > 0 ?
-            this.periodOfFollowup - 1 :
+          outbreak.periodOfFollowup > 0 ?
+            outbreak.periodOfFollowup - 1 :
             0,
           'days'
         )
@@ -104,26 +115,25 @@ module.exports = function (Outbreak) {
     }
 
     // cache outbreak's follow up options
-    let outbreakFollowUpFreq = this.frequencyOfFollowUp;
-    let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
-    let outbreakTeamAssignmentAlgorithm = this.generateFollowUpsTeamAssignmentAlgorithm;
+    let outbreakFollowUpFreq = outbreak.frequencyOfFollowUp;
+    let outbreakFollowUpPerDay = outbreak.frequencyOfFollowUpPerDay;
+    let outbreakTeamAssignmentAlgorithm = outbreak.generateFollowUpsTeamAssignmentAlgorithm;
 
     // get other generate follow-ups options
     let overwriteExistingFollowUps = typeof data.overwriteExistingFollowUps === 'boolean' ?
       data.overwriteExistingFollowUps :
-      this.generateFollowUpsOverwriteExisting;
+      outbreak.generateFollowUpsOverwriteExisting;
     let keepTeamAssignment = typeof data.keepTeamAssignment === 'boolean' ?
       data.keepTeamAssignment :
-      this.generateFollowUpsKeepTeamAssignment;
+      outbreak.generateFollowUpsKeepTeamAssignment;
 
     // get other generate follow-ups options
     let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
       data.intervalOfFollowUp :
-      this.intervalOfFollowUp;
+      outbreak.intervalOfFollowUp;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
-    let outbreakId = this.id;
 
     // initialize generated followups count
     let followUpsCount = 0;
@@ -133,7 +143,7 @@ module.exports = function (Outbreak) {
       .countContactsEligibleForFollowup(
         followupStartDate.toDate(),
         followupEndDate.toDate(),
-        outbreakId,
+        outbreak.id,
         contactIds,
         options
       )
@@ -163,7 +173,7 @@ module.exports = function (Outbreak) {
                 .getContactsEligibleForFollowup(
                   followupStartDate.toDate(),
                   followupEndDate.toDate(),
-                  outbreakId,
+                  outbreak.id,
                   contactIds,
                   (batchNo - 1) * batchSize,
                   batchSize,

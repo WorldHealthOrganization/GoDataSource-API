@@ -1548,9 +1548,17 @@ module.exports = function (Person) {
    */
   Person.addGeographicalRestrictions = (context, where) => {
     let loggedInUser = context.req.authData.user;
-    let outbreak = context.instance;
+    // for sync, outbreak model is added in a custom property
+    let outbreak = context.outbreakModelInstance ?
+      context.outbreakModelInstance :
+      context.instance;
 
-    if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+    // apply geographic restrictions ?
+    // for mobile sync, we dont't have a logged user
+    if (
+      loggedInUser === undefined ||
+      !app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)
+    ) {
       // no need to apply geographic restrictions
       return Promise.resolve();
     }

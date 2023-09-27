@@ -9,6 +9,7 @@ const SyncClient = require('../../components/syncClient');
 const syncConfig = require('../../server/config.json').sync;
 const asyncActionsSettings = syncConfig.asyncActionsSettings;
 const _ = require('lodash');
+const Platform = require('../../components/platform');
 const syncWorker = require('./../../components/workerRunner').sync;
 
 module.exports = function (Sync) {
@@ -143,6 +144,9 @@ module.exports = function (Sync) {
     // add snapshotFromClient flag in reqOptions; default false
     reqOptions.snapshotFromClient = options.snapshotFromClient !== undefined ? options.snapshotFromClient : false;
 
+    // get the list of outbreaks for which follow-ups must be generated
+    let outbreakList = {};
+
     // check if backup should be triggered
     app.models.systemSettings
       .findOne()
@@ -162,7 +166,23 @@ module.exports = function (Sync) {
         }
 
         app.logger.debug(`Sync ${syncLogEntry.id}: Importing the DB at ${filePath}`);
+      })
+      .then(() => {
+        // for optimization, get all outbreaks before checking the records
+        return app.models.outbreak
+          .find({
+            where: {
+              generateFollowUpsWhenCreatingContacts: true
+            }
+          });
+      })
+      .then((outbreaks) => {
+        // get outbreaks
+        outbreaks.forEach((outbreakData) => {
+          outbreakList[outbreakData.id] = outbreakData;
+        });
 
+        // extract snapshot
         return syncWorker.extractAndDecryptSnapshotArchive(filePath, options)
           .then(function (result) {
             let collectionFilesDirName = result.collectionFilesDirName;
@@ -201,6 +221,7 @@ module.exports = function (Sync) {
               let collectionsToImport = [];
               let failedCollections = {};
               let failedCollectionsRelatedFiles = {};
+              let createdContactIds = {};
 
               // read each file's contents and sync with database
               // not syncing in parallel to not load all collections in memory at once
@@ -274,7 +295,21 @@ module.exports = function (Sync) {
                             }
 
                             // sync the record with the main database
-                            dbSync.syncRecord(app, app.logger, syncModel, collectionRecord, reqOptions, (err) => {
+                            dbSync.syncRecord(app, app.logger, syncModel, collectionRecord, reqOptions, (err, syncResult) => {
+                              // generate follow-ups ?
+                              if (
+                                syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED &&
+                                syncResult.record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                                outbreakList[syncResult.record.outbreakId]
+                              ) {
+                                // keep the contact ids per outbreak
+                                if (!createdContactIds[syncResult.record.outbreakId]) {
+                                  createdContactIds[syncResult.record.outbreakId] = [];
+                                }
+                                createdContactIds[syncResult.record.outbreakId].push(syncResult.record.id);
+                              }
+
+                              // error ?
                               if (err) {
                                 app.logger.debug(`Sync ${syncLogEntry.id}: Failed syncing record (collection: ${collectionName}, id: ${collectionRecord.id}). Error: ${err.message}`);
                                 failedIds[collectionName].push(`ID: "${collectionRecord.id}". Error: ${err.message}`);
@@ -380,7 +415,55 @@ module.exports = function (Sync) {
                     }
                   }
 
-                  return callback(err ? Sync.getPartialError(err) : null);
+                  // error ?
+                  if (err) {
+                    callback(err);
+                  }
+
+                  // generate follow-ups ?
+                  if (Object.keys(createdContactIds).length === 0) {
+                    callback();
+                    return;
+                  }
+
+                  // generate follow-ups per outbreak
+                  new Promise((resolve, reject) => {
+                    async.parallelLimit(
+                      Object.keys(createdContactIds).map((outbreakId) => {
+                        const outbreak =  outbreakList[outbreakId];
+                        return (generateFollowUpsCallback) => app.controllers.outbreak.generateFollowupsForOutbreak(
+                          outbreak,
+                          {
+                            contactIds: createdContactIds[outbreakId]
+                          },
+                          {
+                            ...reqOptions,
+                            remotingContext: {
+                              ...reqOptions.remotingContext,
+                              outbreakModelInstance: outbreak
+                            },
+                            platform: Platform.SYNC
+                          },
+                          generateFollowUpsCallback
+                        );
+                      }),
+                      10,
+                      (error) => {
+                        if (error) {
+                          reject(Sync.getFatalError(error));
+                        }
+                        resolve();
+                      }
+                    );
+                  })
+                    .then(() => {
+                      callback();
+                      return;
+                    })
+                    .catch((error) => {
+                      callback(Sync.getFatalError(error));
+                      return;
+                    });
                 }
               );
             });
