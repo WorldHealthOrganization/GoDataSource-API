@@ -427,41 +427,38 @@ module.exports = function (Sync) {
                   }
 
                   // generate follow-ups per outbreak
-                  const promiseArray = Object.keys(createdContactIds).map((outbreakId) => {
-                    const outbreak = outbreakList[outbreakId];
-                    return () => new Promise((resolve, reject) => {
-                      app.controllers.outbreak.generateFollowupsForOutbreak(
-                        outbreak,
-                        {
-                          contactIds: createdContactIds[outbreakId]
-                        },
-                        {
-                          ...reqOptions,
-                          remotingContext: {
-                            ...reqOptions.remotingContext,
-                            outbreakModelInstance: outbreak
-                          },
-                          platform: Platform.SYNC
-                        },
-                        (error) => {
-                          if (error) {
-                            reject(error);
-                          } else {
-                            resolve();
-                          }
-                        }
-                      );
-                    });
-                  });
-
-                  // wait for result
                   new Promise((resolve, reject) => {
                     async.parallelLimit(
-                      promiseArray.map((fn) => fn()),
+                      Object.keys(createdContactIds).map((outbreakId) => {
+                        const outbreak = outbreakList[outbreakId];
+                        return (parallelCallback) => {
+                          app.controllers.outbreak.generateFollowupsForOutbreak(
+                            outbreak,
+                            {
+                              contactIds: createdContactIds[outbreakId]
+                            },
+                            {
+                              ...reqOptions,
+                              remotingContext: {
+                                ...reqOptions.remotingContext,
+                                outbreakModelInstance: outbreak
+                              },
+                              platform: Platform.SYNC
+                            },
+                            (generateFollowupError) => {
+                              if (generateFollowupError) {
+                                parallelCallback(generateFollowupError);
+                              } else {
+                                parallelCallback();
+                              }
+                            }
+                          );
+                        };
+                      }),
                       10,
-                      (error) => {
-                        if (error) {
-                          reject(error);
+                      (parallelError) => {
+                        if (parallelError) {
+                          reject(parallelError);
                         } else {
                           resolve();
                         }
