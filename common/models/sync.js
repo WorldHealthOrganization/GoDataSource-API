@@ -427,32 +427,44 @@ module.exports = function (Sync) {
                   }
 
                   // generate follow-ups per outbreak
+                  const promiseArray = Object.keys(createdContactIds).map((outbreakId) => {
+                    const outbreak = outbreakList[outbreakId];
+                    return () => new Promise((resolve, reject) => {
+                      app.controllers.outbreak.generateFollowupsForOutbreak(
+                        outbreak,
+                        {
+                          contactIds: createdContactIds[outbreakId]
+                        },
+                        {
+                          ...reqOptions,
+                          remotingContext: {
+                            ...reqOptions.remotingContext,
+                            outbreakModelInstance: outbreak
+                          },
+                          platform: Platform.SYNC
+                        },
+                        (error) => {
+                          if (error) {
+                            reject(error);
+                          } else {
+                            resolve();
+                          }
+                        }
+                      );
+                    });
+                  });
+
+                  // wait for result
                   new Promise((resolve, reject) => {
                     async.parallelLimit(
-                      Object.keys(createdContactIds).map((outbreakId) => {
-                        const outbreak =  outbreakList[outbreakId];
-                        return (generateFollowUpsCallback) => app.controllers.outbreak.generateFollowupsForOutbreak(
-                          outbreak,
-                          {
-                            contactIds: createdContactIds[outbreakId]
-                          },
-                          {
-                            ...reqOptions,
-                            remotingContext: {
-                              ...reqOptions.remotingContext,
-                              outbreakModelInstance: outbreak
-                            },
-                            platform: Platform.SYNC
-                          },
-                          generateFollowUpsCallback
-                        );
-                      }),
+                      promiseArray.map((fn) => fn()),
                       10,
                       (error) => {
                         if (error) {
-                          reject(Sync.getFatalError(error));
+                          reject(error);
+                        } else {
+                          resolve();
                         }
-                        resolve();
                       }
                     );
                   })
