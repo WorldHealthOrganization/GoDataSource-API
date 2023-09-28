@@ -113,10 +113,6 @@
       "translation": "* You cannot edit the follow-up because this person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a contact",
       "section": "uiModifyFollowUpPage"
     },
-    "LNG_PAGE_LIST_CONTACTS_OF_CONTACTS_ACTION_VIEW_FOLLOW_UPS": {
-      "translation": "View follow-ups for related contacts",
-      "section": "uiContactOfContactListPage"
-    },
     "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_CONTACT_OF_CONTACT_BUTTON": {
       "translation": "Contact of contact",
       "section": "uiFollowUpsListPage"
