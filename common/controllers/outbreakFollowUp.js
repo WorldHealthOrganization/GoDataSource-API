@@ -31,8 +31,6 @@ module.exports = function (Outbreak) {
    * Generate list of follow ups for a specific outbreak
    */
   Outbreak.generateFollowupsForOutbreak = function (outbreak, data, options, callback) {
-    // luam outbreak din options.instance ???
-
     // inject platform identifier
     options.platform = options.platform ?
       options.platform :
