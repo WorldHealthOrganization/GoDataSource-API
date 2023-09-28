@@ -145,7 +145,7 @@ module.exports = function (Sync) {
     reqOptions.snapshotFromClient = options.snapshotFromClient !== undefined ? options.snapshotFromClient : false;
 
     // get the list of outbreaks for which follow-ups must be generated
-    let outbreakList = {};
+    let automaticGenFollowupOutbreaks = {};
 
     // check if backup should be triggered
     app.models.systemSettings
@@ -170,16 +170,18 @@ module.exports = function (Sync) {
       .then(() => {
         // for optimization, get all outbreaks before checking the records
         return app.models.outbreak
-          .find({
-            where: {
-              generateFollowUpsWhenCreatingContacts: true
+          .rawFind({
+            generateFollowUpsWhenCreatingContacts: true
+          }, {
+            projection: {
+              _id: 1
             }
           });
       })
       .then((outbreaks) => {
         // get outbreaks
         outbreaks.forEach((outbreakData) => {
-          outbreakList[outbreakData.id] = outbreakData;
+          automaticGenFollowupOutbreaks[outbreakData.id] = true;
         });
 
         // extract snapshot
@@ -221,7 +223,8 @@ module.exports = function (Sync) {
               let collectionsToImport = [];
               let failedCollections = {};
               let failedCollectionsRelatedFiles = {};
-              let createdContactIds = {};
+              let automaticGenFollowupCreatedContacts = {};
+              let automaticGenFollowupCreatedByUsers = {};
 
               // read each file's contents and sync with database
               // not syncing in parallel to not load all collections in memory at once
@@ -300,13 +303,17 @@ module.exports = function (Sync) {
                               if (
                                 syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED &&
                                 syncResult.record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-                                outbreakList[syncResult.record.outbreakId]
+                                automaticGenFollowupOutbreaks[syncResult.record.outbreakId]
                               ) {
-                                // keep the contact ids per outbreak
-                                if (!createdContactIds[syncResult.record.outbreakId]) {
-                                  createdContactIds[syncResult.record.outbreakId] = [];
+                                // keep the contact ids per outbreak and createdBy user
+                                if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId]) {
+                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId] = [];
                                 }
-                                createdContactIds[syncResult.record.outbreakId].push(syncResult.record.id);
+                                if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy]) {
+                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy] = [];
+                                }
+                                automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy].push(syncResult.record.id);
+                                automaticGenFollowupCreatedByUsers[syncResult.record.createdBy] = true;
                               }
 
                               // error ?
@@ -415,63 +422,97 @@ module.exports = function (Sync) {
                     }
                   }
 
-                  // error ?
-                  if (err) {
-                    callback(err);
-                  }
-
                   // generate follow-ups ?
-                  if (Object.keys(createdContactIds).length === 0) {
-                    callback();
-                    return;
+                  const automaticGenFollowupOutbreakIds = Object.keys(automaticGenFollowupCreatedContacts);
+                  if (automaticGenFollowupOutbreakIds.length === 0) {
+                    callback(err ? Sync.getPartialError(err) : null);
                   }
 
-                  // generate follow-ups per outbreak
-                  new Promise((resolve, reject) => {
-                    async.parallelLimit(
-                      Object.keys(createdContactIds).map((outbreakId) => {
-                        const outbreak = outbreakList[outbreakId];
-                        return (parallelCallback) => {
-                          app.controllers.outbreak.generateFollowupsForOutbreak(
-                            outbreak,
-                            {
-                              contactIds: createdContactIds[outbreakId]
-                            },
-                            {
-                              ...reqOptions,
-                              remotingContext: {
-                                ...reqOptions.remotingContext,
-                                outbreakModelInstance: outbreak
-                              },
-                              platform: Platform.SYNC
-                            },
-                            (generateFollowupError) => {
-                              if (generateFollowupError) {
-                                parallelCallback(generateFollowupError);
-                              } else {
-                                parallelCallback();
-                              }
-                            }
-                          );
-                        };
-                      }),
-                      10,
-                      (parallelError) => {
-                        if (parallelError) {
-                          reject(parallelError);
-                        } else {
-                          resolve();
+                  // get the outbreaks data
+                  let automaticGenFollowupOutbreaksData = {};
+                  let automaticGenFollowupCreatedByData = {};
+                  app.models.outbreak
+                    .find({
+                      where: {
+                        id: {
+                          $in: automaticGenFollowupOutbreakIds
                         }
                       }
-                    );
-                  })
-                    .then(() => {
-                      callback();
-                      return;
                     })
-                    .catch((error) => {
-                      callback(Sync.getFatalError(error));
-                      return;
+                    .then((outbreaks) => {
+                      // return if no outbreak found
+                      if (!outbreaks) {
+                        callback(err ? Sync.getPartialError(err) : null);
+                      }
+
+                      // get outbreak data
+                      outbreaks.forEach((outbreakData) => {
+                        automaticGenFollowupOutbreaksData[outbreakData.id] = outbreakData;
+                      });
+
+                      // get the created by users
+                      return app.models.user
+                        .find({
+                          where: {
+                            id: {
+                              $in: Object.keys(automaticGenFollowupCreatedByUsers)
+                            }
+                          }
+                        });
+                    })
+                    .then((users) => {
+                      // get users data
+                      users.forEach((userData) => {
+                        automaticGenFollowupCreatedByData[userData.id] = userData;
+                      });
+
+                      // generate follow-ups per outbreak and user
+                      const jobs = [];
+                      for (const outbreakId in automaticGenFollowupCreatedContacts) {
+                        const createdByUsers = automaticGenFollowupCreatedContacts[outbreakId];
+                        for (const userId in createdByUsers) {
+                          const contactIds = createdByUsers[userId];
+                          const outbreakModelInstance = automaticGenFollowupOutbreaksData[outbreakId];
+
+                          // create jobs to generate follow-ups
+                          // clone request context
+                          let reqOptionsClone = {...reqOptions};
+                          reqOptionsClone.platform = reqOptionsClone.platform ?
+                            reqOptionsClone.platform :
+                            Platform.SYNC;
+                          reqOptionsClone.remotingContext.outbreakModelInstance = outbreakModelInstance;
+                          // if the created by user was not found, the current logged user will be used
+                          if (automaticGenFollowupCreatedByData[userId]) {
+                            reqOptionsClone.remotingContext.req.authData.userModelInstance = automaticGenFollowupCreatedByData[userId];
+                          }
+                          jobs.push((generateFollowupsCallback) => {
+                            app.controllers.outbreak.generateFollowupsForOutbreak(
+                              outbreakModelInstance,
+                              {
+                                contactIds: contactIds
+                              },
+                              reqOptionsClone,
+                              (generateFollowupError) => {
+                                // collect errors in the global variable
+                                if (generateFollowupError) {
+                                  err = err || '';
+                                  err += `Failed generating follow-ups: Outbreak ${outbreakId}, User:  ${userId}, Error: ${generateFollowupError.message} `;
+                                }
+                                generateFollowupsCallback();
+                              }
+                            );
+                          });
+                        }
+                      }
+
+                      async.parallelLimit(
+                        jobs,
+                        10,
+                        () => {
+                          // error ?
+                          callback(err ? Sync.getPartialError(err) : null);
+                        }
+                      );
                     });
                 }
               );
