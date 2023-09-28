@@ -48,7 +48,7 @@ const buildTableForContact = function (headers, partialRecord, followUpStatusMap
   }
 
   // resort follow ups by date
-  partialRecord.followUps = partialRecord.followUps.sort((left, right) => localizationHelper.now().utc(left.date).diff(localizationHelper.now().utc(right.date)));
+  partialRecord.followUps = partialRecord.followUps.sort((left, right) => localizationHelper.toMoment(left.date).diff(localizationHelper.toMoment(right.date)));
 
   partialRecord.followUps.forEach((followUp) => {
     let date = localizationHelper.toMoment(followUp.date);
