@@ -163,7 +163,7 @@ module.exports = function (SystemSettings) {
       Object.assign(
         {},
         app.utils.helpers.getBuildInformation(), {
-          timezone: localizationHelper.timezone,
+          timezone: localizationHelper.getTimezone(),
           tokenTTL: config.authToken && config.authToken.ttl ?
             config.authToken.ttl :
             app.models.user.settings.ttl,
