@@ -46,7 +46,7 @@
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_AT": {
-      "translation": "Created at (UTC)",
+      "translation": "Created at",
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_BY": {
@@ -54,7 +54,7 @@
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_UPDATED_AT": {
-      "translation": "Updated at (UTC)",
+      "translation": "Updated at",
       "section": "uiOutbreakTemplateFields"
     },
     "LNG_CLUSTER_FIELD_LABEL_CREATED_BY": {
@@ -62,7 +62,7 @@
       "section": "uiClusterFields"
     },
     "LNG_CLUSTER_FIELD_LABEL_CREATED_AT": {
-      "translation": "Created at (UTC)",
+      "translation": "Created at",
       "section": "uiClusterFields"
     },
     "LNG_CLUSTER_FIELD_LABEL_UPDATED_BY": {
@@ -70,7 +70,7 @@
       "section": "uiClusterFields"
     },
     "LNG_CLUSTER_FIELD_LABEL_UPDATED_AT": {
-      "translation": "Updated at (UTC)",
+      "translation": "Updated at",
       "section": "uiClusterFields"
     },
     "LNG_USER_FIELD_LABEL_CREATED_BY": {
@@ -78,7 +78,7 @@
       "section": "uiUserFields"
     },
     "LNG_USER_FIELD_LABEL_CREATED_AT": {
-      "translation": "Created at (UTC)",
+      "translation": "Created at",
       "section": "uiUserFields"
     },
     "LNG_USER_FIELD_LABEL_UPDATED_BY": {
@@ -86,7 +86,7 @@
       "section": "uiUserFields"
     },
     "LNG_USER_FIELD_LABEL_UPDATED_AT": {
-      "translation": "Updated at (UTC)",
+      "translation": "Updated at",
       "section": "uiUserFields"
     },
     "LNG_USER_ROLE_FIELD_LABEL_CREATED_BY": {
@@ -94,7 +94,7 @@
       "section": "uiUserRoleFields"
     },
     "LNG_USER_ROLE_FIELD_LABEL_CREATED_AT": {
-      "translation": "Created at (UTC)",
+      "translation": "Created at",
       "section": "uiUserRoleFields"
     },
     "LNG_USER_ROLE_FIELD_LABEL_UPDATED_BY": {
@@ -102,7 +102,7 @@
       "section": "uiUserRoleFields"
     },
     "LNG_USER_ROLE_FIELD_LABEL_UPDATED_AT": {
-      "translation": "Updated at (UTC)",
+      "translation": "Updated at",
       "section": "uiUserRoleFields"
     },
     "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
@@ -541,6 +541,69 @@
     "LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_EVENT_ISOLATED_CONTACTS_DESCRIPTION": {
       "translation": "This permission allows determining which contacts are isolated",
       "section": "availablePermissions"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_BACKUP_FIELD_LABEL_DATE": {
+      "translation": "Start time"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_CASE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_CASE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_CONTACT_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_CONTACT_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_EVENT_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_EVENT_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_LOCATION_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_LOCATION_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
     }
   }
 }

@@ -190,7 +190,7 @@ const verifyStep2Data = (data, options) => {
         twoFADisabled: true,
         twoFACode: code,
         twoFACodeExpirationDate: {
-          gte: localizationHelper.now().utc().toDate()
+          gte: localizationHelper.now().toDate()
         }
       }
     })

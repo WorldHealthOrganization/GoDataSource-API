@@ -266,7 +266,7 @@ const worker = {
                     const percentage = (currentDay.followedUp * 100) / (currentDay.followedUp + currentDay.notFollowedUp);
                     currentDay.percentage = percentage || 0;
 
-                    // convert date back to UTC
+                    // convert date back
                     result.days[localizationHelper.getDateStartOfDay(d).format()] = currentDay;
                     delete result.days[d];
                   }
