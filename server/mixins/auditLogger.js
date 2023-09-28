@@ -210,7 +210,7 @@ module.exports = function (Model) {
               ) {
                 // parse new value as for Moment instances Loopback doesn't parse them to date
                 let newValue = _.cloneDeepWith(context.data[field], function (value) {
-                  if (value instanceof localizationHelper.Moment) {
+                  if (localizationHelper.isInstanceOfMoment(value)) {
                     return value.toDate();
                   }
                 });

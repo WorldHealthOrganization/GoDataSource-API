@@ -302,7 +302,7 @@ const convertPropsToDate = function (obj) {
         // we're only looking for strings properties that have a date format to convert
         if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
           // try to convert the string value to date, if valid, replace the old value
-          let convertedDate = moment(obj[prop]);
+          let convertedDate = toMoment(obj[prop]);
           if (convertedDate.isValid()) {
             obj[prop] = convertedDate.toDate();
           }
@@ -322,7 +322,7 @@ const excelDateToJSDate = function (serial) {
   const SECONDS_IN_DAY = 86400; // 24 * 60 * 60
   const DIFF_NUMBER_OF_DAYS = 25569; // (25567 + 2) - number of days between: Jan 1, 1900 and Jan 1, 1970, plus 2 ("excel leap year bug")
 
-  // get date in utc
+  // get date in utc - unix epoch
   const utcDays = Math.floor(serial - DIFF_NUMBER_OF_DAYS);
   const utcValue = utcDays * SECONDS_IN_DAY;
   const dateInfo = moment(utcValue * 1000);
@@ -343,11 +343,25 @@ const excelDateToJSDate = function (serial) {
     .toISOString();
 };
 
+/**
+ * Is instance of moment ?
+ */
+const isInstanceOfMoment = function (value) {
+  // needs to be moment and NOT moment.Moment
+  return value instanceof moment;
+};
+
+/**
+ * Retrieve timezone
+ */
+const getTimezone = function () {
+  return timezone;
+};
+
 // exports
 module.exports = {
-  // needs to be moment and NOT moment.Moment
-  Moment: moment,
-  timezone,
+  getTimezone,
+  isInstanceOfMoment,
   now,
   today,
   getDateStartOfDay,
