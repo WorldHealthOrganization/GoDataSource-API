@@ -507,7 +507,7 @@ module.exports = function (Sync) {
 
                       async.parallelLimit(
                         jobs,
-                        10,
+                        2,
                         () => {
                           // error ?
                           callback(err ? Sync.getPartialError(err) : null);
