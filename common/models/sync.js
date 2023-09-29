@@ -487,23 +487,25 @@ module.exports = function (Sync) {
                           if (automaticGenFollowupCreatedByData[userId]) {
                             reqOptionsClone.remotingContext.req.authData.userModelInstance = automaticGenFollowupCreatedByData[userId];
                           }
-                          jobs.push((generateFollowupsCallback) => {
-                            app.controllers.outbreak.generateFollowupsForOutbreak(
-                              outbreakModelInstance,
-                              {
-                                contactIds: contactIds
-                              },
-                              reqOptionsClone,
-                              (generateFollowupError) => {
-                                // collect errors in the global variable
-                                if (generateFollowupError) {
-                                  err = err || '';
-                                  err += `Failed generating follow-ups: Outbreak ${outbreakId}, User:  ${userId}, Error: ${generateFollowupError.message} `;
+                          jobs.push((function (generateFollowupsOptions, generateFollowupsOutbreak, generateFollowupsContacts, generateFollowupsUserId) {
+                            return (generateFollowupsCallback) => {
+                              app.controllers.outbreak.generateFollowupsForOutbreak(
+                                generateFollowupsOutbreak,
+                                {
+                                  contactIds: generateFollowupsContacts
+                                },
+                                generateFollowupsOptions,
+                                (generateFollowupError) => {
+                                  // collect errors in the global variable
+                                  if (generateFollowupError) {
+                                    err = err || '';
+                                    err += `Failed generating follow-ups: Outbreak ${generateFollowupsOutbreak.id}, User:  ${generateFollowupsUserId}, Error: ${generateFollowupError.message} `;
+                                  }
+                                  generateFollowupsCallback();
                                 }
-                                generateFollowupsCallback();
-                              }
-                            );
-                          });
+                              );
+                            };
+                          })(reqOptionsClone, outbreakModelInstance, contactIds, userId));
                         }
                       }
 
