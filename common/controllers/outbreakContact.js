@@ -3373,7 +3373,7 @@ module.exports = function (Outbreak) {
                         .then(function () {
                           // check if follow-ups should be generated
                           if (
-                            !self.generateFollowUpsWhenCreatingContacts &&
+                            !self.generateFollowUpsWhenCreatingContacts ||
                             syncResult.flag !== app.utils.dbSync.syncRecordFlags.CREATED
                           ) {
                             // relationship successfully created, move to tne next one

@@ -307,7 +307,7 @@ module.exports = function (Sync) {
                               ) {
                                 // keep the contact ids per outbreak and createdBy user
                                 if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId]) {
-                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId] = [];
+                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId] = {};
                                 }
                                 if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy]) {
                                   automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy] = [];
@@ -426,6 +426,7 @@ module.exports = function (Sync) {
                   const automaticGenFollowupOutbreakIds = Object.keys(automaticGenFollowupCreatedContacts);
                   if (automaticGenFollowupOutbreakIds.length === 0) {
                     callback(err ? Sync.getPartialError(err) : null);
+                    return;
                   }
 
                   // get the outbreaks data
@@ -441,8 +442,9 @@ module.exports = function (Sync) {
                     })
                     .then((outbreaks) => {
                       // return if no outbreak found
-                      if (!outbreaks) {
+                      if (!outbreaks.length) {
                         callback(err ? Sync.getPartialError(err) : null);
+                        return;
                       }
 
                       // get outbreak data
@@ -511,8 +513,16 @@ module.exports = function (Sync) {
                         () => {
                           // error ?
                           callback(err ? Sync.getPartialError(err) : null);
+                          return;
                         }
                       );
+                    })
+                    .catch(function (error) {
+                      // error ?
+                      err = err || '';
+                      err += error.message;
+                      callback(err ? Sync.getPartialError(err) : null);
+                      return;
                     });
                 }
               );
