@@ -466,11 +466,9 @@ module.exports = function (Sync) {
                         }
 
                         // get users data
-                        if (!users.length) {
-                          users.forEach((userData) => {
-                            automaticGenFollowupCreatedByData[userData.id] = userData;
-                          });
-                        }
+                        users.forEach((userData) => {
+                          automaticGenFollowupCreatedByData[userData.id] = userData;
+                        });
 
                         // generate follow-ups per outbreak and user
                         const jobs = [];
