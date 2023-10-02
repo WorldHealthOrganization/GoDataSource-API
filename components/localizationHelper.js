@@ -21,7 +21,7 @@ const now = function () {
  * Today (date + start of day time)
  */
 const today = function () {
-  return moment().startOf('day');
+  return now().startOf('day');
 };
 
 /**
@@ -42,7 +42,7 @@ const getDateStartOfDay = function (date, dayOfWeek) {
  * @param dayOfWeek If not sent the date will not be changed
  */
 const getDateEndOfDay = function (date, dayOfWeek) {
-  let momentDate = date ? toMoment(date).endOf('day') : moment().endOf('day');
+  let momentDate = date ? toMoment(date).endOf('day') : now().endOf('day');
   return !dayOfWeek ? momentDate : momentDate.day(dayOfWeek);
 };
 
@@ -110,7 +110,7 @@ const toMoment = function (
  * @return {boolean}
  */
 const isValidDate = function (date) {
-  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(\.\d{3})?Z*)?$/.test(date);
+  return /^\d{4}-\d{2}-\d{2}[\sT]?(?:\d{2}:\d{2}:\d{2}(((\+|-)\d{2}:\d{2})|((\.\d{3})?Z*)))?$/.test(date);
 };
 
 /**
@@ -290,6 +290,24 @@ const getPeriodIntervalForDate = function (
 };
 
 /**
+ * Check if a property is in date format, if so, convert it to date object
+ * @param prop
+ * @returns {*}
+ */
+const checkIfDateAndConvert = function (prop) {
+  // check if the property is in date format
+  if (typeof prop === 'string' && isValidDate(prop)) {
+    // try to convert the string value to date, if valid, replace the old value
+    let convertedDate = toMoment(prop);
+    if (convertedDate.isValid()) {
+      prop = convertedDate.toDate();
+    }
+  }
+  // return prop
+  return prop;
+};
+
+/**
  * Convert filter date attributes from string to date
  * @param obj
  */
@@ -300,13 +318,7 @@ const convertPropsToDate = function (obj) {
         convertPropsToDate(obj[prop]);
       } else {
         // we're only looking for strings properties that have a date format to convert
-        if (typeof obj[prop] === 'string' && isValidDate(obj[prop])) {
-          // try to convert the string value to date, if valid, replace the old value
-          let convertedDate = toMoment(obj[prop]);
-          if (convertedDate.isValid()) {
-            obj[prop] = convertedDate.toDate();
-          }
-        }
+        obj[prop] = checkIfDateAndConvert(obj[prop]);
       }
     }
   }
@@ -325,7 +337,7 @@ const excelDateToJSDate = function (serial) {
   // get date in utc - unix epoch
   const utcDays = Math.floor(serial - DIFF_NUMBER_OF_DAYS);
   const utcValue = utcDays * SECONDS_IN_DAY;
-  const dateInfo = moment(utcValue * 1000);
+  const dateInfo = toMoment(utcValue * 1000);
 
   // calculate hours, minutes and seconds
   const fractionalDay = serial - Math.floor(serial) + 0.0000001;
@@ -374,6 +386,7 @@ module.exports = {
   isValidDate,
   getChunksForInterval,
   getPeriodIntervalForDate,
+  checkIfDateAndConvert,
   convertPropsToDate,
   excelDateToJSDate
 };
