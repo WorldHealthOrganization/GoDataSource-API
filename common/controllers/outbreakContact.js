@@ -3377,7 +3377,6 @@ module.exports = function (Outbreak) {
                             syncResult.flag !== app.utils.dbSync.syncRecordFlags.CREATED
                           ) {
                             // relationship successfully created, move to tne next one
-                            resolve();
                             return;
                           }
 
