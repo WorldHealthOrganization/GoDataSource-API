@@ -2,31 +2,13 @@
 
 const localizationHelper = require('./localizationHelper');
 
-/**
- * Check if a property is in date format, if so, convert it to date object
- * @param prop
- * @returns {*}
- */
-const checkIfDateAndConvert = function (prop) {
-  // check if the property is in date format
-  if (typeof prop === 'string' && localizationHelper.isValidDate(prop)) {
-    // try to convert the string value to date, if valid, replace the old value
-    let convertedDate = localizationHelper.toMoment(prop);
-    if (convertedDate.isValid()) {
-      prop = convertedDate.toDate();
-    }
-  }
-  // return prop
-  return prop;
-};
-
 const convertProps = function (obj) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       if (prop === 'between') {
         if (Array.isArray(obj[prop])) {
-          obj.$gte = checkIfDateAndConvert(obj[prop][0]);
-          obj.$lte = checkIfDateAndConvert(obj[prop][1]);
+          obj.$gte = localizationHelper.checkIfDateAndConvert(obj[prop][0]);
+          obj.$lte = localizationHelper.checkIfDateAndConvert(obj[prop][1]);
         }
         delete obj[prop];
       } else if (prop === '$regex') {
@@ -37,7 +19,7 @@ const convertProps = function (obj) {
       } else if (typeof obj[prop] == 'object' && obj[prop] !== null) {
         convertProps(obj[prop]);
       } else {
-        obj[prop] = checkIfDateAndConvert(obj[prop]);
+        obj[prop] = localizationHelper.checkIfDateAndConvert(obj[prop]);
       }
     }
   }

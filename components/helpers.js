@@ -1821,7 +1821,7 @@ const convertQuestionStringDatesToDates = function (
 
               // must convert to date ?
               // handled partially above by calling convertPropsToDate
-              // for now there is no need to over-complicate things
+              // for now this is how it is implemented all over the website, including where we use convertQuestionnairePropsToDate
             }
           }
         );
