@@ -515,7 +515,6 @@ module.exports = function (Sync) {
                         () => {
                           // error ?
                           callback(err ? Sync.getPartialError(err) : null);
-                          return;
                         }
                       );
                     })
@@ -524,7 +523,6 @@ module.exports = function (Sync) {
                       err = err || '';
                       err += error.message;
                       callback(err ? Sync.getPartialError(err) : null);
-                      return;
                     });
                 }
               );
