@@ -3371,7 +3371,34 @@ module.exports = function (Outbreak) {
                       // sync relationship
                       return app.utils.dbSync.syncRecord(app, logger, app.models.relationship, dataToSave.relationship, options)
                         .then(function () {
-                          // relationship successfully created, move to tne next one
+                          // check if follow-ups should be generated
+                          if (
+                            !self.generateFollowUpsWhenCreatingContacts ||
+                            syncResult.flag !== app.utils.dbSync.syncRecordFlags.CREATED
+                          ) {
+                            // relationship successfully created, move to tne next one
+                            return;
+                          }
+
+                          // generate follow-ups
+                          return new Promise((cufResolve, cufReject) => {
+                            Outbreak.generateFollowupsForOutbreak(
+                              self,
+                              {
+                                contactIds: [syncResult.record.id]
+                              },
+                              options,
+                              (err, response) => {
+                                if (err) {
+                                  cufReject(err);
+                                } else {
+                                  cufResolve(response);
+                                }
+                              }
+                            );
+                          });
+                        })
+                        .then(() => {
                           resolve();
                         })
                         .catch(function (error) {
