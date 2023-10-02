@@ -425,105 +425,121 @@ module.exports = function (Sync) {
                   // generate follow-ups ?
                   const automaticGenFollowupOutbreakIds = Object.keys(automaticGenFollowupCreatedContacts);
                   if (automaticGenFollowupOutbreakIds.length === 0) {
-                    callback(err ? Sync.getPartialError(err) : null);
-                    return;
-                  }
-
-                  // get the outbreaks data
-                  let automaticGenFollowupOutbreaksData = {};
-                  let automaticGenFollowupCreatedByData = {};
-                  app.models.outbreak
-                    .find({
-                      where: {
-                        id: {
-                          $in: automaticGenFollowupOutbreakIds
-                        }
-                      }
-                    })
-                    .then((outbreaks) => {
-                      // return if no outbreak found
-                      if (!outbreaks.length) {
-                        callback(err ? Sync.getPartialError(err) : null);
-                        return;
-                      }
-
-                      // get outbreak data
-                      outbreaks.forEach((outbreakData) => {
-                        automaticGenFollowupOutbreaksData[outbreakData.id] = outbreakData;
-                      });
-
-                      // get the created by users
-                      return app.models.user
-                        .find({
-                          where: {
-                            id: {
-                              $in: Object.keys(automaticGenFollowupCreatedByUsers)
-                            }
+                    return callback(err ? Sync.getPartialError(err) : null);
+                  } else {
+                    // get the outbreaks data
+                    let automaticGenFollowupOutbreaksData = {};
+                    let automaticGenFollowupCreatedByData = {};
+                    app.models.outbreak
+                      .find({
+                        where: {
+                          id: {
+                            $in: automaticGenFollowupOutbreakIds
                           }
+                        }
+                      })
+                      .then((outbreaks) => {
+                        // return if no outbreak found
+                        if (!outbreaks.length) {
+                          return [];
+                        }
+
+                        // get outbreak data
+                        outbreaks.forEach((outbreakData) => {
+                          automaticGenFollowupOutbreaksData[outbreakData.id] = outbreakData;
                         });
-                    })
-                    .then((users) => {
-                      // get users data
-                      users.forEach((userData) => {
-                        automaticGenFollowupCreatedByData[userData.id] = userData;
-                      });
 
-                      // generate follow-ups per outbreak and user
-                      const jobs = [];
-                      for (const outbreakId in automaticGenFollowupCreatedContacts) {
-                        const createdByUsers = automaticGenFollowupCreatedContacts[outbreakId];
-                        for (const userId in createdByUsers) {
-                          const contactIds = createdByUsers[userId];
-                          const outbreakModelInstance = automaticGenFollowupOutbreaksData[outbreakId];
+                        // get the created by users
+                        return app.models.user
+                          .find({
+                            where: {
+                              id: {
+                                $in: Object.keys(automaticGenFollowupCreatedByUsers)
+                              }
+                            }
+                          });
+                      })
+                      .then((users) => {
+                        // return if there is no outbreak
+                        if (!Object.keys(automaticGenFollowupOutbreaksData).length) {
+                          return [];
+                        }
 
-                          // create jobs to generate follow-ups
-                          // clone request context
-                          let reqOptionsClone = {...reqOptions};
-                          reqOptionsClone.platform = reqOptionsClone.platform ?
-                            reqOptionsClone.platform :
-                            Platform.SYNC;
-                          reqOptionsClone.remotingContext.outbreakModelInstance = outbreakModelInstance;
-                          // if the created by user was not found, the current logged user will be used
-                          if (automaticGenFollowupCreatedByData[userId]) {
-                            reqOptionsClone.remotingContext.req.authData.userModelInstance = automaticGenFollowupCreatedByData[userId];
-                          }
-                          jobs.push((function (generateFollowupsOptions, generateFollowupsOutbreak, generateFollowupsContacts, generateFollowupsUserId) {
-                            return (generateFollowupsCallback) => {
-                              app.controllers.outbreak.generateFollowupsForOutbreak(
-                                generateFollowupsOutbreak,
-                                {
-                                  contactIds: generateFollowupsContacts
-                                },
-                                generateFollowupsOptions,
-                                (generateFollowupError) => {
-                                  // collect errors in the global variable
-                                  if (generateFollowupError) {
-                                    err = err || '';
-                                    err += `Failed generating follow-ups: Outbreak ${generateFollowupsOutbreak.id}, User:  ${generateFollowupsUserId}, Error: ${generateFollowupError.message} `;
+                        // get users data
+                        if (!users.length) {
+                          users.forEach((userData) => {
+                            automaticGenFollowupCreatedByData[userData.id] = userData;
+                          });
+                        }
+
+                        // generate follow-ups per outbreak and user
+                        const jobs = [];
+                        for (const outbreakId in automaticGenFollowupCreatedContacts) {
+                          const createdByUsers = automaticGenFollowupCreatedContacts[outbreakId];
+                          for (const userId in createdByUsers) {
+                            const contactIds = createdByUsers[userId];
+                            const outbreakModelInstance = automaticGenFollowupOutbreaksData[outbreakId];
+
+                            // create jobs to generate follow-ups
+                            // clone request context
+                            let reqOptionsClone = {...reqOptions};
+                            reqOptionsClone.platform = reqOptionsClone.platform ?
+                              reqOptionsClone.platform :
+                              Platform.SYNC;
+                            reqOptionsClone.remotingContext.outbreakModelInstance = outbreakModelInstance;
+                            // if the created by user was not found, the current logged user will be used
+                            if (automaticGenFollowupCreatedByData[userId]) {
+                              reqOptionsClone.remotingContext.req.authData.userModelInstance = automaticGenFollowupCreatedByData[userId];
+                            }
+                            jobs.push((function (generateFollowupsOptions, generateFollowupsOutbreak, generateFollowupsContacts, generateFollowupsUserId) {
+                              return (generateFollowupsCallback) => {
+                                app.controllers.outbreak.generateFollowupsForOutbreak(
+                                  generateFollowupsOutbreak,
+                                  {
+                                    contactIds: generateFollowupsContacts
+                                  },
+                                  generateFollowupsOptions,
+                                  (generateFollowupError) => {
+                                    // collect errors in the global variable
+                                    if (generateFollowupError) {
+                                      err = err || '';
+                                      err += `Failed generating follow-ups: Outbreak ${generateFollowupsOutbreak.id}, User:  ${generateFollowupsUserId}, Error: ${generateFollowupError.message} `;
+                                    }
+                                    generateFollowupsCallback();
                                   }
-                                  generateFollowupsCallback();
-                                }
-                              );
-                            };
-                          })(reqOptionsClone, outbreakModelInstance, contactIds, userId));
+                                );
+                              };
+                            })(reqOptionsClone, outbreakModelInstance, contactIds, userId));
+                          }
                         }
-                      }
 
-                      async.parallelLimit(
-                        jobs,
-                        2,
-                        () => {
-                          // error ?
-                          callback(err ? Sync.getPartialError(err) : null);
-                        }
-                      );
-                    })
-                    .catch(function (error) {
-                      // error ?
-                      err = err || '';
-                      err += error.message;
-                      callback(err ? Sync.getPartialError(err) : null);
-                    });
+                        // generate follow-ups in parallel
+                        return new Promise((resolve) => {
+                          async.parallelLimit(
+                            jobs,
+                            2,
+                            (parallelError) => {
+                              // all errors are collected in generate followups, but we can have other type of errors
+                              if (parallelError) {
+                                err = err || '';
+                                err += parallelError.message;
+                              }
+                              resolve();
+                            }
+                          );
+                        });
+                      })
+                      .then(() => {
+                        // finish
+                        return callback(err ? Sync.getPartialError(err) : null);
+                      })
+                      .catch(function (error) {
+                        // error ?
+                        err = err || '';
+                        err += error.message;
+                        return callback(err ? Sync.getPartialError(err) : null);
+                      });
+                  }
                 }
               );
             });
