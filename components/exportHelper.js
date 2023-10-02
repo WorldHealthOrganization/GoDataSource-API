@@ -4949,7 +4949,11 @@ function exportFilteredModelsList(
                                     } else {
                                       // date value
                                       childValue = childValue instanceof Date ?
-                                        localizationHelper.toMoment(childValue).toISOString() :
+                                        (
+                                          sheetHandler.dontTranslateValues ?
+                                            localizationHelper.toMoment(childValue).toISOString() :
+                                            localizationHelper.toMoment(childValue).format()
+                                        ) :
                                         childValue;
 
                                       // normal value
@@ -6025,7 +6029,9 @@ function exportFilteredModelsList(
                     cellValue instanceof Date
                   ) {
                     // format date as string
-                    cellValue = localizationHelper.toMoment(cellValue).toISOString();
+                    cellValue = sheetHandler.dontTranslateValues ?
+                      localizationHelper.toMoment(cellValue).toISOString() :
+                      localizationHelper.toMoment(cellValue).format();
 
                     // remove new lines since these might break files like csv and others
                   } else if (
