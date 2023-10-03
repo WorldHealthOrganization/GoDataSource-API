@@ -227,7 +227,6 @@ module.exports = function (User) {
         };
 
         // check if other field was modified
-
         for (let i = 0; i < ctx.options.changedFields.length; i++) {
           if (!ignoreChangedFields[ctx.options.changedFields[i].field]) {
             // stop and if at least one field was found
@@ -248,7 +247,7 @@ module.exports = function (User) {
       } else {
         // password changed ?
         if (
-          !ctx.isNewInstance &&
+          ctx.isNewInstance ||
           ctx.instance.passwordChange
         ) {
           emailTemplate = helpers.EmailTemplates.PASSWORD_CHANGE;
