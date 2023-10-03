@@ -4,10 +4,7 @@
 const app = require('../server/server');
 const _ = require('lodash');
 const randomize = require('randomatic');
-const fs = require('fs');
-const path = require('path');
 const config = _.get(require('../server/config'), 'login.twoFactorAuthentication', {});
-const baseLanguageModel = require('./baseModelOptions/language');
 const localizationHelper = require('./localizationHelper');
 
 /**
@@ -77,74 +74,6 @@ const setInfoInAccessToken = (accessToken) => {
  */
 const isAccessTokenDisabled = (accessToken) => {
   return !!accessToken.twoFADisabled;
-};
-
-/**
- * Send 2FA code via email
- * @param user
- * @param accessToken
- * @returns {*}
- */
-const sendEmail = (user, accessToken) => {
-  return baseLanguageModel.helpers
-    .getLanguageDictionary(user.languageId, {
-      token: {
-        $in: [
-          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING',
-          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT',
-          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH1',
-          'LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH2'
-        ]
-      }
-    })
-    .then(dictionary => {
-      // translate email body params
-      let heading = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_HEADING');
-      let subject = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_SUBJECT');
-      let paragraph1 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH1');
-      let paragraph2 = dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_TWO_FACTOR_AUTHENTICATION_PARAGRAPH2');
-
-      // load the html email template
-      const htmlTemplate = _.template(fs.readFileSync(path.resolve(`${__dirname}/../server/views/twoFactorAuthenticationCodeEmail.ejs`)));
-
-      // resolve template params
-      const html = htmlTemplate({
-        heading: heading,
-        paragraph1: paragraph1,
-        paragraph2: paragraph2
-      });
-
-      // resolve variables from html
-      const emailBody = _.template(html, {interpolate: /{{([\s\S]+?)}}/g})({
-        twoFACode: accessToken.twoFACode,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName
-      });
-
-      // resolve variables from subject
-      const emailSubject = _.template(subject, {interpolate: /{{([\s\S]+?)}}/g})({
-        twoFACode: accessToken.twoFACode,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName
-      });
-
-      return new Promise((resolve, reject) => {
-        app.models.Email.send({
-          to: user.email,
-          from: config.emailFrom,
-          subject: emailSubject,
-          html: emailBody
-        }, err => {
-          if (err) {
-            return reject(err);
-          }
-
-          resolve();
-        });
-      });
-    });
 };
 
 /**
@@ -240,7 +169,6 @@ module.exports = {
   getConfig,
   setInfoInAccessToken,
   isAccessTokenDisabled,
-  sendEmail,
   verifyStep2Data,
   getStep1Response
 };

@@ -97,8 +97,16 @@ module.exports = function (OAuth) {
             lastLoginDate: null
           }).then(user => {
             if (twoFactorAuthenticationEnabled) {
-              return twoFactorAuthentication
-                .sendEmail(user, token)
+              return App.models.user.helpers.sendEmail(
+                Object.assign(
+                  {}, {
+                    user: user
+                  }, {
+                    email: user.email,
+                    twoFACode: token.twoFACode
+                  }),
+                App.models.user.helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION
+              )
                 .then(() => {
                   // update response
                   return next(null, twoFactorAuthentication.getStep1Response());
