@@ -55,28 +55,27 @@ module.exports = function (User) {
     // generate a random password
     const randomPassword = bcrypt.hashSync(app.utils.helpers.randomString('all', 20, 30), 10);
 
-    // check for import action
-    if (
-      ctx.options &&
-      ctx.options.platform === Platform.IMPORT
-    ) {
-      // force reset password if it's a new user or the password was generated
-      if (ctx.isNewInstance) {
-        // create user
-        if (ctx.instance) {
-          ctx.instance.passwordChange = true;
-          if (!ctx.instance.password) {
-            ctx.instance.password = randomPassword;
-          }
+    // make sure that the password is a string
+    if (ctx.isNewInstance) {
+      // new user
+      if (ctx.instance.password) {
+        ctx.instance.password = ctx.instance.password.toString();
+      }
+
+      // at import, force reset password and generate a new password if it's not provided
+      if (
+        ctx.options &&
+        ctx.options.platform === Platform.IMPORT
+      ) {
+        ctx.instance.passwordChange = true;
+        if (!ctx.instance.password) {
+          ctx.instance.password = randomPassword;
         }
-      } else {
-        // update user
-        if (
-          ctx.data &&
-          ctx.data.password
-        ) {
-          ctx.data.passwordChange = true;
-        }
+      }
+    } else {
+      // old user
+      if (ctx.data.password) {
+        ctx.data.password = ctx.data.password.toString();
       }
     }
 
@@ -167,12 +166,29 @@ module.exports = function (User) {
             return;
           }
           return new Promise((resolve, reject) => {
+            // on import, if the password is hashed, ignore the password check
+            if (
+              ctx.options.platform === Platform.IMPORT &&
+              helpers.isPasswordHashed(ctx.data.password)
+            ) {
+              ctx.data.passwordChange = false;
+              return resolve();
+            }
+
+            // check plain password
             ctx.currentInstance.hasPassword(ctx.data.password, (err, isMatch) => {
               if (err) {
                 return reject(err);
               }
-              if (isMatch) {
-                return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
+
+              // at import, if the password is new, force a password change
+              // also, do not return error if it's the same password
+              if (ctx.options.platform === Platform.IMPORT) {
+                ctx.data.passwordChange = !isMatch;
+              } else {
+                if (isMatch) {
+                  return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
+                }
               }
               return resolve();
             });
@@ -186,13 +202,52 @@ module.exports = function (User) {
   });
 
   User.observe('after save', (ctx, next) => {
-    // check for import action to send reset email
+    // check for import action to send email
     if (
       ctx.options &&
+      ctx.options.changedFields.length &&
       ctx.options.platform === Platform.IMPORT &&
-      ctx.instance &&
-      ctx.instance.passwordChange
+      ctx.instance
     ) {
+      // do not send any email if only the base fields were modified
+      // also, the password was marked as changed ("passwordChange" field) in the 'before save' trigger
+      const ignoreChangedFields = {
+        'createdAt': true,
+        'createdBy': true,
+        'updatedBy': true,
+        'deletedAt': true,
+        'createdOn': true,
+        'password': true
+      };
+
+      // check if other field was modified
+      let otherFieldChanged = false;
+      for (let i = 0; i < ctx.options.changedFields.length; i++) {
+        if (!ignoreChangedFields[ctx.options.changedFields[i].field]) {
+          // stop and if at least one field was found
+          otherFieldChanged = true;
+          break;
+        }
+      }
+
+      // get email template
+      let emailTemplate = '';
+      if (
+        !otherFieldChanged &&
+        !ctx.instance.passwordChange
+      ) {
+        // only base fields modified ?
+        return next();
+      } else {
+        // password changed ?
+        if (ctx.instance.passwordChange) {
+          emailTemplate = helpers.EmailTemplates.PASSWORD_CHANGE;
+        } else {
+          // informative
+          emailTemplate = helpers.EmailTemplates.USER_UPDATE;
+        }
+      }
+
       // generate a password reset token
       ctx.instance.createAccessToken(
         {
@@ -205,20 +260,24 @@ module.exports = function (User) {
         })
         .then((accessToken) => {
           // send email
-          app.models.user.sendEmail(
+          return helpers.sendEmail(
             {
               email: ctx.instance.email,
               user: ctx.instance,
               accessToken: accessToken
             },
-            true
+            emailTemplate
           );
         })
+        .then(() => next())
         .catch((err) => {
-          app.logger.warn('Failed to generate reset password token', err);
+          // do not return/display any error
+          app.logger.warn(`Failed to send email, template: ${emailTemplate}, error: `, err);
+          return next();
         });
+    } else {
+      next();
     }
-    next();
   });
 
   /**
@@ -310,8 +369,14 @@ module.exports = function (User) {
           })
           .then(() => {
             if (twoFactorAuthentication.isEnabled()) {
-              return twoFactorAuthentication
-                .sendEmail(user, instance)
+              return helpers.sendEmail(
+                Object.assign({}, {
+                  user: user
+                }, {
+                  email: user.email, twoFACode: instance.twoFACode
+                }),
+                helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION
+              )
                 .then(() => {
                   // update response
                   ctx.result = twoFactorAuthentication.getStep1Response();

@@ -15,6 +15,14 @@ module.exports = function (User) {
   // initialize model helpers
   User.helpers = {};
 
+  // define email templates
+  User.helpers.EmailTemplates = {
+    USER_UPDATE: 'update_user',
+    PASSWORD_RESET: 'reset_password',
+    PASSWORD_CHANGE: 'change_password',
+    TWO_FACTOR_AUTHENTICATION: 'two_factor_authentication'
+  };
+
   // define a list of custom (non-loopback-supported) relations
   User.customRelations = {
     roles: {
@@ -22,6 +30,18 @@ module.exports = function (User) {
       model: 'role',
       foreignKey: 'roleIds'
     }
+  };
+
+  /**
+   * Checks if a password is hashed
+   */
+  User.helpers.isPasswordHashed = function (password) {
+    return (
+      password.indexOf('$2a$') === 0 ||
+      // additional check
+      password.indexOf('$2b$') === 0
+    ) &&
+    password.length === 60;
   };
 
   /**
@@ -34,13 +54,7 @@ module.exports = function (User) {
     if (typeof plain !== 'string') {
       return;
     }
-    if (
-      (
-        plain.indexOf('$2a$') === 0 ||
-        // additional check
-        plain.indexOf('$2b$') === 0
-      ) && plain.length === 60
-    ) {
+    if (User.helpers.isPasswordHashed(plain)) {
       // The password is already hashed. It can be the case
       // when the instance is loaded from DB
       this.$password = plain;
@@ -336,20 +350,16 @@ module.exports = function (User) {
 
   /**
    * Create and send an email
-   * @param info User info
-   * @param importActio Import/reset password tokens
    */
-  User.createAndSendEmail = function(info, importAction) {
+  User.helpers.createAndSendEmail = function(info, emailTemplate) {
     // validate the inputs
     if (
       !info ||
-      !info.accessToken ||
-      !info.accessToken.id ||
       !info.email ||
       !info.user
     ) {
       app.logger.error('No valid user data to send email');
-      return false;
+      return;
     }
 
     // use the default language if the user has no preferred language
@@ -358,15 +368,36 @@ module.exports = function (User) {
     }
 
     // get email tokens
-    const emailSubjectToken = importAction ?
-      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_IMPORT_ACTION' :
-      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_SUBJECT_FORGOT_ACTION';
-    const emailBodyToken = importAction ?
-      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_IMPORT_ACTION' :
-      'LNG_REFERENCE_DATA_CATEGORY_PASSWORD_RESET_BODY_FORGOT_ACTION';
+    let emailSubjectToken ='';
+    let emailBodyToken =  '';
+    switch(emailTemplate){
+      case User.helpers.EmailTemplates.PASSWORD_RESET:
+        emailSubjectToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_PASSWORD_RESET_SUBJECT';
+        emailBodyToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_PASSWORD_RESET_BODY';
+
+        break;
+      case User.helpers.EmailTemplates.PASSWORD_CHANGE:
+        emailSubjectToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_PASSWORD_CHANGE_SUBJECT';
+        emailBodyToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_PASSWORD_CHANGE_BODY';
+
+        break;
+      case User.helpers.EmailTemplates.USER_UPDATE:
+        emailSubjectToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_USER_UPDATE_SUBJECT';
+        emailBodyToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_USER_UPDATE_BODY';
+
+        break;
+      case User.helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION:
+        emailSubjectToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_TWO_FACTOR_AUTHENTICATION_SUBJECT';
+        emailBodyToken = 'LNG_REFERENCE_DATA_CATEGORY_EMAIL_TEMPLATE_TWO_FACTOR_AUTHENTICATION_BODY';
+
+        break;
+      default:
+        app.logger.error('No valid email template to send email');
+        return;
+    }
 
     // get tokens for the user language and also for the default language
-    app.models.languageToken
+    return app.models.languageToken
       .rawFind({
         languageId: {
           $in: [
@@ -424,37 +455,55 @@ module.exports = function (User) {
         const publicHost = _.get(Config, 'public.host', 'localhost');
         const publicProtocol = _.get(Config, 'public.protocol', 'http');
         const publicPort = _.get(Config, 'public.port', '');
+        let serverLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}`;
+        serverLink = `<a href="${serverLink}">${serverLink}</a>`;
         let changePasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordChangePath}`;
         changePasswordLink = `<a href="${changePasswordLink}">${changePasswordLink}</a>`;
         const passwordResetPath = _.get(Config, 'passwordReset.path', '/auth/reset-password');
         const passwordResetFrom = _.get(Config, 'passwordReset.from', 'no-reply@who.int');
-        let resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
-        resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
+
+        // accessToken is used by password change and password reset
+        let resetPasswordLink = '';
+        if (
+          info.accessToken &&
+          info.accessToken.id
+        ) {
+          resetPasswordLink = `${publicProtocol}://${publicHost}${publicPort ? ':' + publicPort : ''}${passwordResetPath}?token=${info.accessToken.id}`;
+          resetPasswordLink = `<a href="${resetPasswordLink}">${resetPasswordLink}</a>`;
+        }
 
         // resolve variables from translations
         emailBody = _.template(emailBody, {interpolate: /{{([\s\S]+?)}}/g})({
-          name: [info.user.firstName, info.user.lastName].filter(Boolean).join(' '),
+          code: info.twoFACode ? info.twoFACode : '',
+          firstName: info.user.firstName,
+          serverLink: serverLink,
           changePasswordLink: changePasswordLink,
           resetPasswordLink: resetPasswordLink
         });
 
         // send email
-        app.models.Email.send({
-          to: info.email,
-          from: passwordResetFrom,
-          subject: emailSubject,
-          html: emailBody
+        return new Promise((resolve, reject) => {
+          app.models.Email.send({
+            to: info.email,
+            from: passwordResetFrom,
+            subject: emailSubject,
+            html: emailBody
+          }, (err) => {
+            if (err) {
+              return reject(err);
+            }
+
+            resolve();
+          });
         });
       });
   };
 
   /**
    * Send custom email
-   * @param info User info
-   * @param importActio Import/reset password tokens
    */
-  User.sendEmail = function (info, importAction) {
-    User.createAndSendEmail(info, importAction);
+  User.helpers.sendEmail = function (info, emailTemplate) {
+    return User.helpers.createAndSendEmail(info, emailTemplate);
   };
 
   /**
@@ -462,7 +511,10 @@ module.exports = function (User) {
    */
   User.on('resetPasswordRequest', function (info) {
     // use the reset password tokens
-    User.createAndSendEmail(info, false);
+    User.helpers.createAndSendEmail(
+      info,
+      User.helpers.EmailTemplates.PASSWORD_RESET
+    );
   });
 
   /**
