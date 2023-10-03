@@ -208,7 +208,6 @@ module.exports = function (User) {
       ctx.options.platform === Platform.IMPORT &&
       ctx.instance
     ) {
-
       let otherFieldChanged = false;
       // send email ?
       if (ctx.isNewInstance) {
