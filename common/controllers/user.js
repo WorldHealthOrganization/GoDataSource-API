@@ -205,28 +205,35 @@ module.exports = function (User) {
     // check for import action to send email
     if (
       ctx.options &&
-      ctx.options.changedFields.length &&
       ctx.options.platform === Platform.IMPORT &&
       ctx.instance
     ) {
-      // do not send any email if only the base fields were modified
-      // also, the password was marked as changed ("passwordChange" field) in the 'before save' trigger
-      const ignoreChangedFields = {
-        'createdAt': true,
-        'createdBy': true,
-        'updatedBy': true,
-        'deletedAt': true,
-        'createdOn': true,
-        'password': true
-      };
 
-      // check if other field was modified
       let otherFieldChanged = false;
-      for (let i = 0; i < ctx.options.changedFields.length; i++) {
-        if (!ignoreChangedFields[ctx.options.changedFields[i].field]) {
-          // stop and if at least one field was found
-          otherFieldChanged = true;
-          break;
+      // send email ?
+      if (ctx.isNewInstance) {
+        // if it's a new instance, send email always
+        otherFieldChanged = true;
+      } else {
+        // do not send any email if only the base fields were modified
+        // also, the password was marked as changed ("passwordChange" field) in the 'before save' trigger
+        const ignoreChangedFields = {
+          'createdAt': true,
+          'createdBy': true,
+          'updatedBy': true,
+          'deletedAt': true,
+          'createdOn': true,
+          'password': true
+        };
+
+        // check if other field was modified
+
+        for (let i = 0; i < ctx.options.changedFields.length; i++) {
+          if (!ignoreChangedFields[ctx.options.changedFields[i].field]) {
+            // stop and if at least one field was found
+            otherFieldChanged = true;
+            break;
+          }
         }
       }
 
@@ -240,7 +247,10 @@ module.exports = function (User) {
         return next();
       } else {
         // password changed ?
-        if (ctx.instance.passwordChange) {
+        if (
+          !ctx.isNewInstance &&
+          ctx.instance.passwordChange
+        ) {
           emailTemplate = helpers.EmailTemplates.PASSWORD_CHANGE;
         } else {
           // informative
@@ -273,7 +283,7 @@ module.exports = function (User) {
         .catch((err) => {
           // do not return/display any error
           app.logger.warn(`Failed to send email, template: ${emailTemplate}, error: `, err);
-          return next();
+          next();
         });
     } else {
       next();
@@ -373,7 +383,8 @@ module.exports = function (User) {
                 Object.assign({}, {
                   user: user
                 }, {
-                  email: user.email, twoFACode: instance.twoFACode
+                  email: user.email,
+                  twoFACode: instance.twoFACode
                 }),
                 helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION
               )
