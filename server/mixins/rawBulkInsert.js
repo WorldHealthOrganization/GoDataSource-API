@@ -33,7 +33,11 @@ module.exports = function (Model) {
     }
 
     // get logged in user from request options in order to create author fields
-    let userId = _.get(reqOpts, 'accessToken.userId', 'unavailable');
+    // for sync, logged user model is added in a custom property
+    const userModelInstanceId = _.get(reqOpts, 'remotingContext.req.authData.userModelInstance.id');
+    let userId = userModelInstanceId ?
+      userModelInstanceId :
+      _.get(reqOpts, 'accessToken.userId', 'unavailable');
 
     // get platform from request options in order to set the "created on" field
     const platform = _.get(reqOpts, 'platform');
