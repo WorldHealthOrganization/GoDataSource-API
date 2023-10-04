@@ -356,7 +356,8 @@ module.exports = function (User) {
     if (
       !info ||
       !info.email ||
-      !info.user
+      !info.user ||
+      info.user.deleted
     ) {
       app.logger.error('No valid user data to send email');
       return;
