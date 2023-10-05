@@ -47,6 +47,14 @@ module.exports = function (Outbreak) {
       ]
     };
 
+    // fix for some filter options received from web ( e.g $elemMatch search in array properties )
+    Object.assign(
+      filter,
+      app.utils.remote.convertLoopbackFilterToMongo({
+        where: filter.where || {}
+      })
+    );
+
     // add geographical restriction to filter if needed
     app.models.event
       .addGeographicalRestrictions(options.remotingContext, filter.where)
@@ -141,6 +149,13 @@ module.exports = function (Outbreak) {
     filter.where = filter.where || {};
     filter.where.outbreakId = this.id;
 
+    // parse useQuestionVariable query param
+    let useQuestionVariable = false;
+    if (filter.where.hasOwnProperty('useQuestionVariable')) {
+      useQuestionVariable = filter.where.useQuestionVariable;
+      delete filter.where.useQuestionVariable;
+    }
+
     // parse useDbColumns query param
     let useDbColumns = false;
     if (filter.where.hasOwnProperty('useDbColumns')) {
@@ -206,8 +221,10 @@ module.exports = function (Outbreak) {
           {
             userId: _.get(options, 'accessToken.userId'),
             outbreakId: this.id,
-            questionnaire: undefined,
-            useQuestionVariable: false,
+            questionnaire: this.eventInvestigationTemplate ?
+              this.eventInvestigationTemplate.toJSON() :
+              undefined,
+            useQuestionVariable,
             useDbColumns,
             dontTranslateValues,
             jsonReplaceUndefinedWithNull,
@@ -306,10 +323,20 @@ module.exports = function (Outbreak) {
     );
 
     // model date properties
-    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+    let modelDateProperties = genericHelpers.getModelPropertiesByDataType(
       app.models.event,
       genericHelpers.DATA_TYPE.DATE
     );
+
+    // add the "date" properties of the questionnaire
+    const questionnaireDateProperties = [];
+    genericHelpers.getQuestionnaireDateProperties(
+      questionnaireDateProperties,
+      self.eventInvestigationTemplate ?
+        self.eventInvestigationTemplate.toJSON() :
+        undefined
+    );
+    modelDateProperties = modelDateProperties.concat(questionnaireDateProperties);
 
     // options for the formatting method
     const formatterOptions = Object.assign({

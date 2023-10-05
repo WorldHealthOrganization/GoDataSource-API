@@ -2,7 +2,7 @@
 
 const app = require('../server');
 const _ = require('lodash');
-const moment = require('moment');
+const localizationHelper = require('../../components/localizationHelper');
 
 // default obfuscate fields
 const obfuscateDefault = {
@@ -210,7 +210,7 @@ module.exports = function (Model) {
               ) {
                 // parse new value as for Moment instances Loopback doesn't parse them to date
                 let newValue = _.cloneDeepWith(context.data[field], function (value) {
-                  if (value instanceof moment) {
+                  if (localizationHelper.isInstanceOfMoment(value)) {
                     return value.toDate();
                   }
                 });

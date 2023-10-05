@@ -3336,7 +3336,6 @@
       "labResultsTemplate": [],
       "isContactLabResultsActive": true,
       "isContactsOfContactsActive": false,
-      "isDateOfOnsetRequired": true,
       "applyGeographicRestrictions": false
     }
   ]

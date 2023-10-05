@@ -120,8 +120,7 @@
       "readOnly": true
     },
     "firstName": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "gender": {
       "type": "string"
@@ -134,6 +133,13 @@
     },
     "outcomeId": {
       "type": "string"
+    },
+    "dateOfOutcome": {
+      "type": "date"
+    },
+    "transferRefused": {
+      "type": "boolean",
+      "default": false
     },
     "safeBurial": {
       "type": "boolean",

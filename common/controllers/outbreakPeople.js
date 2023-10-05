@@ -1,9 +1,9 @@
 'use strict';
 
 const app = require('../../server/server');
-const moment = require('moment');
 const Config = require('../../server/config.json');
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 /**
  * Note: It is not exposed as an actual controller
@@ -212,12 +212,12 @@ module.exports = function (Outbreak) {
           let inconsistencies = [];
 
           // get dob since it is used in the majority of comparisons
-          let dob = person.dob ? moment(person.dob) : null;
+          let dob = person.dob ? localizationHelper.toMoment(person.dob) : null;
           // also get the other dates
-          let dateOfInfection = person.dateOfInfection ? moment(person.dateOfInfection) : null;
-          let dateOfOnset = person.dateOfOnset ? moment(person.dateOfOnset) : null;
-          let dateBecomeCase = person.dateBecomeCase ? moment(person.dateBecomeCase) : null;
-          let dateOfOutcome = person.dateOfOutcome ? moment(person.dateOfOutcome) : null;
+          let dateOfInfection = person.dateOfInfection ? localizationHelper.toMoment(person.dateOfInfection) : null;
+          let dateOfOnset = person.dateOfOnset ? localizationHelper.toMoment(person.dateOfOnset) : null;
+          let dateBecomeCase = person.dateBecomeCase ? localizationHelper.toMoment(person.dateBecomeCase) : null;
+          let dateOfOutcome = person.dateOfOutcome ? localizationHelper.toMoment(person.dateOfOutcome) : null;
 
           // for case:
           if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE') {
@@ -373,8 +373,8 @@ module.exports = function (Outbreak) {
                 // loop through the dates to find inconsistencies
                 person[datesContainer].forEach(function (dateEntry, dateEntryIndex) {
                   // get startDate and endDate
-                  let startDate = dateEntry.startDate ? moment(dateEntry.startDate) : null;
-                  let endDate = dateEntry.endDate ? moment(dateEntry.endDate) : null;
+                  let startDate = dateEntry.startDate ? localizationHelper.toMoment(dateEntry.startDate) : null;
+                  let endDate = dateEntry.endDate ? localizationHelper.toMoment(dateEntry.endDate) : null;
 
                   // compare startDate with endDate
                   if (

@@ -15,6 +15,20 @@ module.exports = function (SecurityQuestion) {
   ]);
 
   SecurityQuestion.getQuestions = function (callback) {
-    return callback(null, SecurityQuestion.questions);
+    // get available security questions categories
+    app.models.referenceData
+      .find({
+        where: {
+          categoryId: 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION'
+        },
+        fields: {
+          id: true
+        }
+      })
+      .then(function (questions) {
+        // return question ids
+        callback(null, questions.map((item => item.id)));
+      })
+      .catch(callback);
   };
 };

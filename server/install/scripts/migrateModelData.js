@@ -5,6 +5,7 @@ const DataSources = require('../../datasources');
 const Path = require('path');
 const Async = require('async');
 const Uuid = require('uuid');
+const localizationHelper = require('../../../components/localizationHelper');
 
 const migrationVersionsFoldersPath = Path.resolve(__dirname, './migrations');
 
@@ -379,6 +380,48 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.48.0',
+  scripts: [{
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'addMissingDefaultValues',
+      buildNo: 3
+    }]
+  }, {
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 29
+    }]
+  }, {
+    fileName: 'referenceData.js',
+    actions: [{
+      name: 'createUpdateDefaultReferenceData',
+      buildNo: 1
+    }, {
+      name: 'updateHospitalizationIsolationType',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'followUpStatus.js',
+    actions: [{
+      name: 'replaceFollowUpStatus',
+      buildNo: 1
+    }, {
+      name: 'deleteFollowUpStatus',
+      buildNo: 1
+    }, {
+      name: 'disableFollowUpStatus',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**
@@ -509,7 +552,7 @@ const run = function (cb) {
         .insert({
           _id: migrationLogInstanceId,
           status: migrationLogStatusMap.started,
-          startDate: new Date(),
+          startDate: localizationHelper.now().toDate(),
           executionMap: executionMap,
           deleted: false
         });
@@ -580,7 +623,7 @@ const run = function (cb) {
           '$set': {
             status: migrationLogStatusMap.success,
             executionMap: executionMap,
-            endDate: new Date()
+            endDate: localizationHelper.now().toDate()
           }
         })
         .then(updateResult => {
@@ -619,7 +662,7 @@ const run = function (cb) {
           '$set': {
             status: migrationLogStatusMap.failed,
             executionMap: executionMap,
-            endDate: new Date(),
+            endDate: localizationHelper.now().toDate(),
             error: err.toString ? err.toString() : JSON.stringify(err)
           }
         })

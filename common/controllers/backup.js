@@ -5,6 +5,7 @@ const app = require('../../server/server');
 const backup = require('../../components/backup');
 const helpers = require('../../components/helpers');
 const path = require('path');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Backup) {
 
@@ -97,16 +98,16 @@ module.exports = function (Backup) {
       .create({
         type: 'restore-db',
         backupId: this.id,
-        actionStartDate: new Date(),
+        actionStartDate: localizationHelper.now().toDate(),
         status: 'LNG_SYNC_STATUS_IN_PROGRESS',
         statusStep: 'LNG_STATUS_STEP_PREPARING_RESTORE',
         totalNo: 0,
         processedNo: 0,
         deleted: false,
-        createdAt: new Date(),
+        createdAt: localizationHelper.now().toDate(),
         createdBy: requestOptions.accessToken.userId,
-        updatedAt: new Date(),
-        dbUpdatedAt: new Date(),
+        updatedAt: localizationHelper.now().toDate(),
+        dbUpdatedAt: localizationHelper.now().toDate(),
         updatedBy: requestOptions.accessToken.userId
       })
       .then((actionLog) => {
@@ -122,8 +123,8 @@ module.exports = function (Backup) {
                   status: 'LNG_SYNC_STATUS_FAILED',
                   error: err.message,
                   errStack: err.stack,
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
 
                 // finished
@@ -134,9 +135,9 @@ module.exports = function (Backup) {
               actionLog.updateAttributes({
                 status: 'LNG_SYNC_STATUS_SUCCESS',
                 statusStep: 'LNG_STATUS_STEP_RESTORE_FINISHED',
-                updatedAt: new Date(),
-                dbUpdatedAt: new Date(),
-                actionCompletionDate: new Date()
+                updatedAt: localizationHelper.now().toDate(),
+                dbUpdatedAt: localizationHelper.now().toDate(),
+                actionCompletionDate: localizationHelper.now().toDate()
               });
             }
           );
@@ -157,8 +158,8 @@ module.exports = function (Backup) {
                   status: 'LNG_SYNC_STATUS_FAILED',
                   error: err.message,
                   errStack: err.stack,
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
 
                 // finished
@@ -169,9 +170,9 @@ module.exports = function (Backup) {
               actionLog.updateAttributes({
                 status: 'LNG_SYNC_STATUS_SUCCESS',
                 statusStep: 'LNG_STATUS_STEP_RESTORE_FINISHED',
-                updatedAt: new Date(),
-                dbUpdatedAt: new Date(),
-                actionCompletionDate: new Date()
+                updatedAt: localizationHelper.now().toDate(),
+                dbUpdatedAt: localizationHelper.now().toDate(),
+                actionCompletionDate: localizationHelper.now().toDate()
               });
 
               // finished

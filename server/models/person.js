@@ -7,6 +7,7 @@ const helpers = require('../../components/helpers');
 const _ = require('lodash');
 const personConstants = require('../../components/baseModelOptions/person').constants;
 const addressConstants = require('../../components/baseModelOptions/address').constants;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Person) {
 
@@ -509,7 +510,7 @@ module.exports = function (Person) {
               })
               .then((languages) => {
                 // prepare reference data items that we need to create
-                const now = new Date();
+                const now = localizationHelper.now().toDate();
                 const authorInfo = {
                   createdBy: 'system',
                   updatedBy: 'system',
@@ -887,11 +888,11 @@ module.exports = function (Person) {
         }
         // make sure lastContactDate is a Date
         if (lastContactDate && !(lastContactDate instanceof Date)) {
-          lastContactDate = new Date(lastContactDate);
+          lastContactDate = localizationHelper.toMoment(lastContactDate).toDate();
         }
         // make sure dateOfLastContact is a Date
         if (personRecord.dateOfLastContact && !(personRecord.dateOfLastContact instanceof Date)) {
-          personRecord.dateOfLastContact = new Date(personRecord.dateOfLastContact);
+          personRecord.dateOfLastContact = localizationHelper.toMoment(personRecord.dateOfLastContact).toDate();
         }
         // check if there are any differences between date of last contact and last contact date
         if (
@@ -1042,13 +1043,13 @@ module.exports = function (Person) {
 
                   if (filter) {
                     if (filter.dateOfFollowUp) {
-                      dateInterval = [helpers.getDate(filter.dateOfFollowUp), helpers.getDateEndOfDay(filter.dateOfFollowUp)];
+                      dateInterval = [localizationHelper.getDateStartOfDay(filter.dateOfFollowUp), localizationHelper.getDateEndOfDay(filter.dateOfFollowUp)];
                       delete filter.dateOfFollowUp;
                     } else if (filter.startDate && filter.endDate) {
-                      dateInterval = [helpers.getDate(filter.startDate), helpers.getDateEndOfDay(filter.endDate)];
+                      dateInterval = [localizationHelper.getDateStartOfDay(filter.startDate), localizationHelper.getDateEndOfDay(filter.endDate)];
                     }
                   } else {
-                    dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
+                    dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
                   }
 
                   // For contacts, we also need the follow up from either the required date or today so the filter is
@@ -1235,7 +1236,7 @@ module.exports = function (Person) {
         } else if (!a.date && !b.date) {
           return 0;
         } else {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
+          return localizationHelper.toMoment(a.date).toDate().getTime() - localizationHelper.toMoment(b.date).toDate().getTime();
         }
       });
     }
@@ -1546,10 +1547,20 @@ module.exports = function (Person) {
    * @returns {Promise<unknown>|Promise<T>|Promise<void>}
    */
   Person.addGeographicalRestrictions = (context, where) => {
-    let loggedInUser = context.req.authData.user;
-    let outbreak = context.instance;
+    // for sync, logged user model and outbreak model are added in custom properties
+    let loggedInUser = context.req.authData.userModelInstance ?
+      context.req.authData.userModelInstance :
+      context.req.authData.user;
+    let outbreak = context.outbreakModelInstance ?
+      context.outbreakModelInstance :
+      context.instance;
 
-    if (!app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)) {
+    // apply geographic restrictions ?
+    // for mobile sync, the contact createdBy user will be used
+    if (
+      loggedInUser === undefined ||
+      !app.models.user.helpers.applyGeographicRestrictions(loggedInUser, outbreak)
+    ) {
       // no need to apply geographic restrictions
       return Promise.resolve();
     }
@@ -1782,7 +1793,7 @@ module.exports = function (Person) {
             return -1;
           } else {
             // compare dates
-            return helpers.getDate(date1).diff(helpers.getDate(date2));
+            return localizationHelper.getDateStartOfDay(date1).diff(localizationHelper.getDateStartOfDay(date2));
           }
         };
 
@@ -1844,13 +1855,13 @@ module.exports = function (Person) {
           // determine lastGraphDate
           // - should be the most recent date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
           recordData.lastGraphDate = recordData.date ?
-            helpers.getDate(recordData.date) :
+            localizationHelper.getDateStartOfDay(recordData.date) :
             undefined;
 
           // determine firstGraphDate
           // - should be the oldest date from case.dateOfOnset / case.dateRanges.endDate / case.labResults.dateSampleTaken / event.date
           recordData.firstGraphDate = recordData.date ?
-            helpers.getDate(recordData.date) :
+            localizationHelper.getDateStartOfDay(recordData.date) :
             undefined;
 
           // determine lastGraphDate starting with lab results
@@ -1870,7 +1881,7 @@ module.exports = function (Person) {
               // actions only if we have date of result
               if (lab.dateOfResult) {
                 // determine lastGraphDate
-                const dateOfResult = helpers.getDate(lab.dateOfResult);
+                const dateOfResult = localizationHelper.getDateStartOfDay(lab.dateOfResult);
                 recordData.lastGraphDate = !recordData.lastGraphDate ?
                   dateOfResult : (
                     dateOfResult.isAfter(recordData.lastGraphDate) ?
@@ -1889,7 +1900,7 @@ module.exports = function (Person) {
                 // fallback to dateSampleTaken
               } else if (lab.dateSampleTaken) {
                 // determine lastGraphDate
-                const dateSampleTaken = helpers.getDate(lab.dateSampleTaken);
+                const dateSampleTaken = localizationHelper.getDateStartOfDay(lab.dateSampleTaken);
                 recordData.lastGraphDate = !recordData.lastGraphDate ?
                   dateSampleTaken : (
                     dateSampleTaken.isAfter(recordData.lastGraphDate) ?
@@ -1923,10 +1934,10 @@ module.exports = function (Person) {
               }
 
               // make sure we have start date
-              dateRange.startDate = dateRange.startDate ? helpers.getDate(dateRange.startDate) : helpers.getDate(recordData.date);
+              dateRange.startDate = dateRange.startDate ? localizationHelper.getDateStartOfDay(dateRange.startDate) : localizationHelper.getDateStartOfDay(recordData.date);
 
               // if we don't have an end date then we need to set the current date since this is still in progress
-              dateRange.endDate = dateRange.endDate ? helpers.getDate(dateRange.endDate) : helpers.getDate();
+              dateRange.endDate = dateRange.endDate ? localizationHelper.getDateStartOfDay(dateRange.endDate) : localizationHelper.getDateStartOfDay();
 
               // determine min graph date
               if (dateRange.startDate) {
@@ -1963,7 +1974,7 @@ module.exports = function (Person) {
           // determine min & max dates taking in consideration dateOfOutcome
           if (recordData.dateOfOutcome) {
             // determine dateOfOutcome
-            const dateOfOutcome = helpers.getDate(recordData.dateOfOutcome);
+            const dateOfOutcome = localizationHelper.getDateStartOfDay(recordData.dateOfOutcome);
 
             // determine min graph date
             recordData.firstGraphDate = !recordData.firstGraphDate ?
@@ -1985,7 +1996,7 @@ module.exports = function (Person) {
           // determine min & max dates taking in consideration dateOfBurial
           if (recordData.dateOfBurial) {
             // determine dateOfBurial
-            const dateOfBurial = helpers.getDate(recordData.dateOfBurial);
+            const dateOfBurial = localizationHelper.getDateStartOfDay(recordData.dateOfBurial);
 
             // determine min graph date
             recordData.firstGraphDate = !recordData.firstGraphDate ?
@@ -2305,21 +2316,20 @@ module.exports = function (Person) {
         // convert to mongo filter
         const mongoFilter = app.utils.remote.convertLoopbackFilterToMongo(filter);
 
-        // construct aggregate filter
-        const aggregateFilters = [];
-
         // filter by relationship ?
         // - case, contact ...
         let relationshipQuery;
         if (!_.isEmpty(mongoFilter.where.relationship)) {
           // get conditions
           relationshipQuery = mongoFilter.where.relationship;
-          delete mongoFilter.where.relationship;
         }
 
-        // filter by lab result ?
-        // - case
-        // #TODO - not needed for now since UI doesn't use it, but API find supports it, if someone uses it..then too bad
+        // filter by case ?
+        let relationshipCaseQuery;
+        if (!_.isEmpty(mongoFilter.where.case)) {
+          // get conditions
+          relationshipCaseQuery = mongoFilter.where.case;
+        }
 
         // filter by follow-up ?
         // - case, contact ...
@@ -2327,98 +2337,166 @@ module.exports = function (Person) {
         if (!_.isEmpty(mongoFilter.where.followUp)) {
           // get conditions
           followUpQuery = mongoFilter.where.followUp;
-          delete mongoFilter.where.followUp;
         }
 
-        // filter by case ?
-        // - contact
-        // #TODO - kinda complicated to implement at this point, contact - relationship - case (implement after mongo upgrade)
+        // cleanup
+        delete mongoFilter.where.relationship;
+        delete mongoFilter.where.case;
+        delete mongoFilter.where.followUp;
 
-        // filter by contact ?
-        // - contact of contact
-        // #TODO - kinda complicated to implement at this point, contact of contact - relationship - contact (implement after mongo upgrade)
+        // start creating aggregate filters
+        return Promise.resolve()
+          // main query
+          .then(() => {
+            // construct aggregate filter
+            return [{
+              $match: mongoFilter.where
+            }];
+          })
 
-        // query
-        aggregateFilters.push({
-          $match: mongoFilter.where
-        });
+          // relationship query
+          .then((aggregateFilters) => {
+            // filter by relationship ?
+            if (
+              relationshipQuery ||
+              relationshipCaseQuery
+            ) {
+              // lookup
+              aggregateFilters.push({
+                $lookup: {
+                  from: 'relationship',
+                  localField: '_id',
+                  foreignField: 'persons.id',
+                  as: 'relationships'
+                }
+              });
 
-        // filter by relationship ?
-        if (relationshipQuery) {
-          // lookup
-          aggregateFilters.push({
-            $lookup: {
-              from: 'relationship',
-              localField: '_id',
-              foreignField: 'persons.id',
-              as: 'relationships'
+              // search
+              aggregateFilters.push({
+                $match: {
+                  relationships: {
+                    $elemMatch: relationshipQuery ?
+                      Object.assign(
+                        {
+                          deleted: false
+                        },
+                        relationshipQuery
+                      ) : {
+                        deleted: false
+                      }
+                  }
+                }
+              });
             }
-          });
 
-          // search
-          aggregateFilters.push({
-            $match: {
-              relationships: {
-                $elemMatch: Object.assign({
-                  deleted: false,
+            // finished
+            return aggregateFilters;
+          })
 
-                }, relationshipQuery)
+          // case query
+          .then((aggregateFilters) => {
+            // filter by relationship ?
+            if (relationshipCaseQuery) {
+              // add extra filters
+              relationshipCaseQuery = app.utils.remote.mergeFilters(
+                { where: relationshipCaseQuery },
+                {
+                  where: {
+                    outbreakId
+                  }
+                }
+              ).where;
+
+              // filter
+              return app.models.case
+                .rawFind(
+                  relationshipCaseQuery, {
+                    projection: {
+                      _id: 1
+                    }
+                  }
+                )
+                .then((cases) => {
+                  // attach condition
+                  aggregateFilters.push({
+                    $match: {
+                      'relationships.persons.id': {
+                        $in: cases.map((caseItem) => caseItem.id)
+                      }
+                    }
+                  });
+
+                  // finished
+                  return aggregateFilters;
+                });
+            }
+
+            // finished
+            return aggregateFilters;
+          })
+
+          // follow-up
+          .then((aggregateFilters) => {
+            // filter by follow-up ?
+            if (followUpQuery) {
+              // lookup
+              aggregateFilters.push({
+                $lookup: {
+                  from: 'followUp',
+                  localField: '_id',
+                  foreignField: 'personId',
+                  as: 'followUps'
+                }
+              });
+
+              // search
+              aggregateFilters.push({
+                $match: {
+                  followUps: {
+                    $elemMatch: Object.assign({
+                      deleted: false,
+
+                    }, followUpQuery)
+                  }
+                }
+              });
+            }
+
+            // finished
+            return aggregateFilters;
+          })
+
+          // finishing touches
+          .then((aggregateFilters) => {
+            // group by classification
+            aggregateFilters.push({
+              $group: {
+                _id: `$${groupByProperty}`,
+                count: {
+                  $sum: 1
+                }
               }
-            }
-          });
-        }
+            });
 
-        // filter by follow-up ?
-        if (followUpQuery) {
-          // lookup
-          aggregateFilters.push({
-            $lookup: {
-              from: 'followUp',
-              localField: '_id',
-              foreignField: 'personId',
-              as: 'followUps'
-            }
-          });
-
-          // search
-          aggregateFilters.push({
-            $match: {
-              followUps: {
-                $elemMatch: Object.assign({
-                  deleted: false,
-
-                }, followUpQuery)
+            // sort by group size
+            aggregateFilters.push({
+              $sort: {
+                count: 1
               }
-            }
-          });
-        }
+            });
 
-        // group by classification
-        aggregateFilters.push({
-          $group: {
-            _id: `$${groupByProperty}`,
-            count: {
-              $sum: 1
-            }
-          }
-        });
+            // retrieve data
+            return app.dataSources.mongoDb.connector
+              .collection('person')
+              .aggregate(
+                aggregateFilters, {
+                  allowDiskUse: true
+                }
+              )
+              .toArray();
+          })
 
-        // sort by group size
-        aggregateFilters.push({
-          $sort: {
-            count: 1
-          }
-        });
-
-        // retrieve data
-        return app.dataSources.mongoDb.connector
-          .collection('person')
-          .aggregate(
-            aggregateFilters, {
-              allowDiskUse: true
-            }
-          )
-          .toArray()
+          // process data
           .then((data) => {
             // result
             const result = {

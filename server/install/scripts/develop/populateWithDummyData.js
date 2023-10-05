@@ -4,9 +4,9 @@
 
 const app = require('../../../../server/server');
 const async = require('async');
-const moment = require('moment');
 const _ = require('lodash');
 const randomize = require('randomatic');
+const localizationHelper = require('../../../../components/localizationHelper');
 
 // initialize action options; set _init, _sync flags to prevent execution of some after save scripts
 let options = {
@@ -121,8 +121,8 @@ const getTimestamps = function () {
   let noDaysUpdated = Math.ceil(Math.random() * noDaysCreated);
 
   return {
-    createdAt: moment().utc().subtract(noDaysCreated, 'days'),
-    updatedAt: moment().utc().subtract(noDaysUpdated, 'days')
+    createdAt: localizationHelper.now().subtract(noDaysCreated, 'days'),
+    updatedAt: localizationHelper.now().subtract(noDaysUpdated, 'days')
   };
 };
 
@@ -283,7 +283,7 @@ function run(callback) {
   };
 
   // default number of things
-  const today = moment.utc().startOf('day');
+  const today = localizationHelper.now().startOf('day');
   const todayString = today.toISOString();
   const defaultCitiesNo = 10;
   const defaultAddressLineNo = 5;
@@ -294,7 +294,7 @@ function run(callback) {
   const defaultPhoneNo = 10;
 
   // default outbreak template
-  const outbreakStartDate = moment().utc().add(-outbreakStartDatePastMonths, 'months').startOf('day');
+  const outbreakStartDate = localizationHelper.now().add(-outbreakStartDatePastMonths, 'months').startOf('day');
   const outbreakAdminLevel = 'LNG_REFERENCE_DATA_CATEGORY_LOCATION_GEOGRAPHICAL_LEVEL_ADMIN_LEVEL_0';
   const defaultOutbreakTemplate = {
     description: 'Created by populate script',
@@ -725,7 +725,7 @@ function run(callback) {
           // generate dob
           let dob, age;
           if (Math.random() >= 0.3) {
-            dob = moment().utc()
+            dob = localizationHelper.now()
               .startOf('day')
               .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
               .add(randomFloatBetween(0, 10, 0), 'months')
@@ -733,7 +733,7 @@ function run(callback) {
 
             // determine age
             age = {
-              years: moment().utc().startOf('day').diff(dob, 'years'),
+              years: localizationHelper.now().startOf('day').diff(dob, 'years'),
               months: 0
             };
           }
@@ -914,7 +914,7 @@ function run(callback) {
           // generate dob
           let dob, age;
           if (Math.random() >= 0.3) {
-            dob = moment().utc()
+            dob = localizationHelper.now()
               .startOf('day')
               .add(-randomFloatBetween(ageRange.min, ageRange.max, 0), 'years')
               .add(randomFloatBetween(0, 10, 0), 'months')
@@ -922,7 +922,7 @@ function run(callback) {
 
             // determine age
             age = {
-              years: moment().utc().startOf('day').diff(dob, 'years'),
+              years: localizationHelper.now().startOf('day').diff(dob, 'years'),
               months: 0
             };
           }

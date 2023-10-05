@@ -4,6 +4,7 @@ const transmissionChain = require('../../components/workerRunner').transmissionC
 const app = require('../../server/server');
 const _ = require('lodash');
 const async = require('async');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Relationship) {
   // set flag to not get controller
@@ -263,7 +264,7 @@ module.exports = function (Relationship) {
     // no end date filter provided
     if (!endDate) {
       // end date is current date
-      endDate = new Date();
+      endDate = localizationHelper.now().toDate();
     }
 
     // build a filter: get all relations between non-discarded cases and contacts + events from current outbreak

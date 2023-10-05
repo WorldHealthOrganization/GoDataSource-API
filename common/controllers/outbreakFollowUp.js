@@ -14,6 +14,7 @@ const genericHelpers = require('../../components/helpers');
 const Platform = require('../../components/platform');
 const WorkerRunner = require('./../../components/workerRunner');
 const exportHelper = require('./../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
   /**
@@ -23,17 +24,26 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.generateFollowups = function (data, options, callback) {
+    Outbreak.generateFollowupsForOutbreak(this, data, options, callback);
+  };
+
+  /**
+   * Generate list of follow ups for a specific outbreak
+   */
+  Outbreak.generateFollowupsForOutbreak = function (outbreak, data, options, callback) {
     // inject platform identifier
-    options.platform = Platform.BULK;
+    options.platform = options.platform ?
+      options.platform :
+      Platform.BULK;
 
     let errorMessage = '';
 
     // outbreak follow up generate params sanity checks
     let invalidOutbreakParams = [];
-    if (this.frequencyOfFollowUp <= 0) {
+    if (outbreak.frequencyOfFollowUp <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUp');
     }
-    if (this.frequencyOfFollowUpPerDay <= 0) {
+    if (outbreak.frequencyOfFollowUpPerDay <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
     }
     if (invalidOutbreakParams.length) {
@@ -41,8 +51,26 @@ module.exports = function (Outbreak) {
     }
 
     // parse start/end dates from request
-    let followupStartDate = genericHelpers.getDate(data.startDate);
-    let followupEndDate = genericHelpers.getDateEndOfDay(data.endDate);
+    // if start date is not provided:
+    // - use "today" if contact tracing should start with the date of the last contact
+    // - otherwise, use "tomorrow"
+    // if end date is not provided, use outbreak follow-up period
+    let followupStartDate = data.startDate ?
+      localizationHelper.getDateStartOfDay(data.startDate) : (
+        outbreak.generateFollowUpsDateOfLastContact ?
+          localizationHelper.today() :
+          localizationHelper.today().add(1, 'days')
+      );
+    let followupEndDate = localizationHelper.getDateEndOfDay(
+      data.endDate ?
+        data.endDate :
+        followupStartDate.clone().add(
+          outbreak.periodOfFollowup > 0 ?
+            outbreak.periodOfFollowup - 1 :
+            0,
+          'days'
+        )
+    );
 
     // sanity checks for dates
     let invalidFollowUpDates = [];
@@ -68,6 +96,15 @@ module.exports = function (Outbreak) {
       );
     }
 
+    // check if the follow-ups should be generated only for specific contacts.
+    const contactIds = !data.contactIds ?
+      [] :
+      (
+        Array.isArray(data.contactIds) ?
+          data.contactIds :
+          [data.contactIds]
+      );
+
     // check if 'targeted' flag exists in the request, if not default to true
     // this flag will be set upon all generated follow ups
     let targeted = true;
@@ -76,29 +113,25 @@ module.exports = function (Outbreak) {
     }
 
     // cache outbreak's follow up options
-    let outbreakFollowUpFreq = this.frequencyOfFollowUp;
-    let outbreakFollowUpPerDay = this.frequencyOfFollowUpPerDay;
-    let outbreakTeamAssignmentAlgorithm = this.generateFollowUpsTeamAssignmentAlgorithm;
+    let outbreakFollowUpFreq = outbreak.frequencyOfFollowUp;
+    let outbreakFollowUpPerDay = outbreak.frequencyOfFollowUpPerDay;
+    let outbreakTeamAssignmentAlgorithm = outbreak.generateFollowUpsTeamAssignmentAlgorithm;
 
     // get other generate follow-ups options
     let overwriteExistingFollowUps = typeof data.overwriteExistingFollowUps === 'boolean' ?
       data.overwriteExistingFollowUps :
-      this.generateFollowUpsOverwriteExisting;
+      outbreak.generateFollowUpsOverwriteExisting;
     let keepTeamAssignment = typeof data.keepTeamAssignment === 'boolean' ?
       data.keepTeamAssignment :
-      this.generateFollowUpsKeepTeamAssignment;
+      outbreak.generateFollowUpsKeepTeamAssignment;
 
     // get other generate follow-ups options
     let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
       data.intervalOfFollowUp :
-      this.intervalOfFollowUp;
-
-    // check if contact tracing should start on the date of the last contact
-    const generateFollowUpsDateOfLastContact = this.generateFollowUpsDateOfLastContact;
+      outbreak.intervalOfFollowUp;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
-    let outbreakId = this.id;
 
     // initialize generated followups count
     let followUpsCount = 0;
@@ -108,7 +141,8 @@ module.exports = function (Outbreak) {
       .countContactsEligibleForFollowup(
         followupStartDate.toDate(),
         followupEndDate.toDate(),
-        outbreakId,
+        outbreak.id,
+        contactIds,
         options
       )
       .then(contactsCount => {
@@ -137,7 +171,8 @@ module.exports = function (Outbreak) {
                 .getContactsEligibleForFollowup(
                   followupStartDate.toDate(),
                   followupEndDate.toDate(),
-                  outbreakId,
+                  outbreak.id,
+                  contactIds,
                   (batchNo - 1) * batchSize,
                   batchSize,
                   options
@@ -184,8 +219,7 @@ module.exports = function (Outbreak) {
                             targeted,
                             overwriteExistingFollowUps,
                             teamAssignmentPerDay,
-                            intervalOfFollowUp,
-                            generateFollowUpsDateOfLastContact
+                            intervalOfFollowUp
                           );
 
                           dbOpsQueue.enqueueForInsert(generateResult.add);
@@ -877,11 +911,8 @@ module.exports = function (Outbreak) {
     // get outbreakId
     let outbreakId = this.id;
 
-    // get current date
-    let now = genericHelpers.getDate();
-
     // get date from noDaysNotSeen days ago
-    let xDaysAgo = now.clone().subtract(noDaysNotSeen, 'day');
+    let xDaysAgo = localizationHelper.getDateStartOfDay().subtract(noDaysNotSeen, 'day');
 
     // get contact query
     let contactQuery = app.utils.remote.searchByRelationProperty
@@ -1009,7 +1040,7 @@ module.exports = function (Outbreak) {
               {
                 // get follow-ups that were scheduled in the past noDaysNotSeen days
                 date: {
-                  between: [xDaysAgo, now]
+                  between: [xDaysAgo, localizationHelper.getDateEndOfDay()]
                 }
               },
               app.models.followUp.notSeenFilter
@@ -1391,8 +1422,8 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = genericHelpers.getDate().toString();
-      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+      let today = localizationHelper.getDateStartOfDay().toDate();
+      let todayEndOfDay = localizationHelper.getDateEndOfDay().toDate();
 
       defaultFilter.where.date = {
         between: [today, todayEndOfDay]
@@ -1465,8 +1496,8 @@ module.exports = function (Outbreak) {
             teamId = null;
           }
 
-          // get date; format it to UTC 00:00:00
-          const date = genericHelpers.getDate(followup.date).toString();
+          // get date
+          const date = localizationHelper.getDateStartOfDay(followup.date).format('YYYY-MM-DD');
 
           // initialize team entry if not already initialized
           if (!teamsMap[teamId]) {
@@ -1550,8 +1581,8 @@ module.exports = function (Outbreak) {
     // check if the filter includes date; if not, set the filter to get all the follow-ups from today by default
     if (!filter || !filter.where || JSON.stringify(filter.where).indexOf('date') === -1) {
       // to get the entire day today, filter between today 00:00 and tomorrow 00:00
-      let today = genericHelpers.getDate().toString();
-      let todayEndOfDay = genericHelpers.getDateEndOfDay().toString();
+      let today = localizationHelper.getDateStartOfDay().toDate();
+      let todayEndOfDay = localizationHelper.getDateEndOfDay().toDate();
 
       defaultFilter.where.date = {
         between: [today, todayEndOfDay]
@@ -1624,8 +1655,8 @@ module.exports = function (Outbreak) {
             responsibleUserId = null;
           }
 
-          // get date; format it to UTC 00:00:00
-          const date = genericHelpers.getDate(followup.date).toString();
+          // get date
+          const date = localizationHelper.getDateStartOfDay(followup.date).format('YYYY-MM-DD');
 
           // initialize user entry if not already initialized
           if (!usersMap[responsibleUserId]) {

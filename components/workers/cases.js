@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const helpers = require('../helpers');
+const localizationHelper = require('../localizationHelper');
 
 /**
  * Count category over time
@@ -20,7 +20,7 @@ function countCategoryOverTime(cases, periodInterval, periodType, weekType, peri
   // go through all the cases
   cases.forEach(function (caseRecord) {
     // get interval based on date of onset
-    const caseOnsetInterval = helpers.getPeriodIntervalForDate(
+    const caseOnsetInterval = localizationHelper.getPeriodIntervalForDate(
       periodInterval,
       periodType,
       _.get(caseRecord, timePropertyName),

@@ -1,7 +1,7 @@
 'use strict';
 
 const app = require('../../server/server');
-const dateParser = app.utils.helpers.getDateDisplayValue;
+const localizationHelper = require('../../components/localizationHelper');
 const _ = require('lodash');
 const async = require('async');
 const helpers = require('../../components/helpers');
@@ -107,6 +107,7 @@ module.exports = function (Contact) {
     'riskReason': 'LNG_CONTACT_FIELD_LABEL_RISK_REASON',
     'outcomeId': 'LNG_CONTACT_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CONTACT_FIELD_LABEL_DATE_OF_OUTCOME',
+    'transferRefused': 'LNG_CONTACT_FIELD_LABEL_TRANSFER_REFUSED',
     'visualId': 'LNG_CONTACT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_CONTACT_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_CONTACT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
@@ -384,11 +385,11 @@ module.exports = function (Contact) {
 
   // add parsers for field values that require parsing when displayed (eg. in pdf)
   Contact.fieldToValueParsersMap = {
-    dob: dateParser,
-    dateOfOutcome: dateParser,
-    dateOfBurial: dateParser,
-    'addresses[].date': dateParser,
-    'followUps[].date': dateParser
+    dob: localizationHelper.getDateDisplayValue,
+    dateOfOutcome: localizationHelper.getDateDisplayValue,
+    dateOfBurial: localizationHelper.getDateDisplayValue,
+    'addresses[].date': localizationHelper.getDateDisplayValue,
+    'followUps[].date': localizationHelper.getDateDisplayValue
   };
   Contact.fieldsToParse = Object.keys(Contact.fieldToValueParsersMap);
 
@@ -404,11 +405,13 @@ module.exports = function (Contact) {
     'occupation',
     'addresses',
     'documents',
+    'outcomeId',
+    'dateOfOutcome',
+    'transferRefused',
     'riskLevel',
     'riskReason',
     'wasCase',
     'outcomeId',
-    'dateOfOutcome',
     'dateBecomeContact',
     'safeBurial',
     'dateOfBurial',
@@ -485,92 +488,121 @@ module.exports = function (Contact) {
   ];
 
   /**
-   * Update Follow-Up dates if needed (if conditions are met)
-   * @param context
-   * @return {*|void|Promise<T | never>}
+   * Determine Follow-Up dates if we need to update this data
    */
-  Contact.updateFollowUpDatesIfNeeded = function (context) {
+  Contact.determineFollowUpDates = function (
+    retrieveOutbreak,
+    id,
+    deleted,
+    followUp,
+    options
+  ) {
     // prevent infinite loops
-    if (app.utils.helpers.getValueFromContextOptions(context, 'updateFollowUpDatesIfNeeded')) {
+    if (app.utils.helpers.getValueFromOptions(
+      options,
+      app.models.contact.modelName,
+      id,
+      'determineFollowUpDates'
+    )) {
       return Promise.resolve();
     }
-    let relationshipInstance;
-    // get contact instance
-    let contactInstance = context.instance;
+    // create filter to get the newest relationship, if any
+    const filter = {
+      order: 'contactDate DESC',
+      where: {
+        'persons.id': id,
+        'persons.type': {
+          inq: ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
+        },
+        active: true
+      }
+    };
+
+    // get deleted relationship if the contact is deleted
+    if (
+      deleted &&
+      options.updateDeletedRecords
+    ) {
+      filter.deleted = true;
+    }
+
     // get newest relationship, if any
+    let outbreak;
     return app.models.relationship
-      .findOne({
-        order: 'contactDate DESC',
-        where: {
-          'persons.id': contactInstance.id,
-          'persons.type': {
-            inq: contactInstance.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT' ?
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'] :
-              ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT']
-          },
-          active: true
-        }
+      .findOne(filter)
+      .then((relationshipInstance) => {
+        return retrieveOutbreak().then((outbreakModel) => {
+          // set data
+          outbreak = outbreakModel;
+
+          // finished
+          return relationshipInstance;
+        });
       })
-      .then(function (relationshipRecord) {
-        // get relationship instance, if any
-        relationshipInstance = relationshipRecord;
-        // get the outbreak as we need the followUpPeriod
-        return app.models.outbreak.findById(contactInstance.outbreakId);
-      })
-      .then(function (outbreak) {
-        // check for found outbreak
-        if (!outbreak) {
-          throw app.logger.error(`Error when updating contact (id: ${contactInstance.id}) follow-up dates. Outbreak (id: ${contactInstance.outbreakId}) was not found.`);
-        }
+      .then(function (relationshipInstance) {
         // keep a flag for updating contact
         let shouldUpdate = false;
         // build a list of properties that need to be updated
         // & preserve previous value
-        const previousStatusValue = _.get(contactInstance, 'followUp.status');
+        const previousStatusValue = _.get(followUp, 'status');
         const propsToUpdate = {
           status: previousStatusValue ?
             previousStatusValue :
             'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
         };
         // preserve original startDate, if any
-        if (contactInstance.followUp && contactInstance.followUp.originalStartDate) {
-          propsToUpdate.originalStartDate = contactInstance.followUp.originalStartDate;
+        if (followUp && followUp.originalStartDate) {
+          propsToUpdate.originalStartDate = followUp.originalStartDate;
         }
         // if active relationships found
         if (relationshipInstance) {
           // set follow-up start date to be the same as relationship contact date
-          propsToUpdate.startDate = helpers.getDate(relationshipInstance.contactDate).add(1, 'days');
+          // check also if contact tracing should start on the date of the last contact
+          propsToUpdate.startDate = outbreak.generateFollowUpsDateOfLastContact ?
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate) :
+            localizationHelper.getDateStartOfDay(relationshipInstance.contactDate).add(1, 'days');
+
           // if follow-up original start date was not previously set
           if (!propsToUpdate.originalStartDate) {
             // flag as an update
             shouldUpdate = true;
             // set it as follow-up start date
-            propsToUpdate.originalStartDate = helpers.getDate(propsToUpdate.startDate);
+            propsToUpdate.originalStartDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate);
           }
           // set follow-up end date
-          propsToUpdate.endDate = helpers.getDate(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+          propsToUpdate.endDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate).add(outbreak.periodOfFollowup - 1, 'days');
+
+          // set generateFollowUpsDateOfLastContact if only the outbreak feature is enabled
+          if (outbreak.generateFollowUpsDateOfLastContact) {
+            propsToUpdate.generateFollowUpsDateOfLastContact = true;
+          }
         }
         // check if contact instance should be updated (check if any property changed value)
         !shouldUpdate && ['startDate', 'endDate']
           .forEach(function (updatePropName) {
             // if the property is missing (probably never, but lets be safe)
-            if (!contactInstance.followUp) {
+            if (!followUp) {
               // flag as an update
               return shouldUpdate = true;
             }
             // if either original or new value was not set (when the other was present)
             if (
-              !contactInstance.followUp[updatePropName] && propsToUpdate[updatePropName] ||
-              contactInstance.followUp[updatePropName] && !propsToUpdate[updatePropName]
+              (
+                !followUp[updatePropName] &&
+                propsToUpdate[updatePropName]
+              ) || (
+                followUp[updatePropName] &&
+                !propsToUpdate[updatePropName]
+              )
             ) {
               // flag as an update
               return shouldUpdate = true;
             }
             // both original and new values are present, but the new values are different than the old ones
             if (
-              contactInstance.followUp[updatePropName] &&
+              followUp[updatePropName] &&
               propsToUpdate[updatePropName] &&
-              ((new Date(contactInstance.followUp[updatePropName])).getTime() !== (new Date(propsToUpdate[updatePropName])).getTime())
+              (localizationHelper.toMoment(followUp[updatePropName]).toDate().getTime() !== localizationHelper.toMoment(propsToUpdate[updatePropName]).toDate().getTime())
             ) {
               // flag as an update
               return shouldUpdate = true;
@@ -585,13 +617,20 @@ module.exports = function (Contact) {
         // if updates are required
         if (shouldUpdate) {
           // set a flag for this operation so we prevent infinite loops
-          app.utils.helpers.setValueInContextOptions(context, 'updateFollowUpDatesIfNeeded', true);
-          // update contact
-          return contactInstance.updateAttributes({
+          app.utils.helpers.setValueInOptions(
+            options,
+            app.models.contact.modelName,
+            id,
+            'determineFollowUpDates',
+            true
+          );
+
+          // return new data
+          return {
             followUp: propsToUpdate,
             // contact is active if it has valid follow-up interval
             active: !!propsToUpdate.startDate
-          }, context.options);
+          };
         }
       });
   };
@@ -692,7 +731,25 @@ module.exports = function (Contact) {
     // if this is an exiting record
     if (!context.isNewInstance) {
       // update follow-up dates, if needed
-      Contact.updateFollowUpDatesIfNeeded(context)
+      Contact.determineFollowUpDates(
+        () => app.models.outbreak.findById(context.instance.outbreakId),
+        context.instance.id,
+        context.instance.deleted,
+        context.instance.followUp,
+        context.options
+      )
+        .then(function (data) {
+          // no property to update ?
+          if (!data) {
+            return;
+          }
+
+          // update contact
+          return context.instance.updateAttributes(
+            data,
+            context.options
+          );
+        })
         .then(function () {
           next();
         })
@@ -700,6 +757,50 @@ module.exports = function (Contact) {
     } else {
       next();
     }
+  });
+
+  /**
+   * Contact after delete
+   * Actions:
+   * Remove any contacts of contacts that remain isolated after the contact deletion
+   */
+  Contact.observe('after delete', (context, next) => {
+    if (context.options.mergeDuplicatesAction) {
+      // don't remove isolated contacts of contacts when merging two contacts
+      return next();
+    }
+
+    const contactId = context.instance.id;
+    Contact.getIsolatedContacts(contactId, (err, isolatedContacts) => {
+      if (err) {
+        return next(err);
+      }
+
+      // construct the list of contacts of contacts that we need to remove
+      const contactsOfContactsJobs = [];
+      isolatedContacts.forEach((isolatedContact) => {
+        if (isolatedContact.isValid) {
+          // remove contact job
+          contactsOfContactsJobs.push((function (contactOfContactModel) {
+            return (callback) => {
+              contactOfContactModel.destroy(
+                {
+                  extraProps: {
+                    deletedByParent: contactId
+                  }
+                },
+                callback
+              );
+            };
+          })(isolatedContact.contact));
+        }
+      });
+
+      // delete each isolated contact of contact & and its relationship
+      async.parallelLimit(contactsOfContactsJobs, 10, function (error) {
+        next(error);
+      });
+    });
   });
 
   /**
@@ -715,11 +816,11 @@ module.exports = function (Contact) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
-      dateInterval = [helpers.getDate(date.startDate), helpers.getDateEndOfDay(date.endDate)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date.startDate), localizationHelper.getDateEndOfDay(date.endDate)];
     } else if (typeof date === 'string') {
-      dateInterval = [helpers.getDate(date), helpers.getDateEndOfDay(date)];
+      dateInterval = [localizationHelper.getDateStartOfDay(date), localizationHelper.getDateEndOfDay(date)];
     } else {
-      dateInterval = [helpers.getDate(), helpers.getDateEndOfDay()];
+      dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
     }
 
     // check for geographical restriction
@@ -1164,7 +1265,7 @@ module.exports = function (Contact) {
       // if it's different than current followUp status
       if (dataSource.followUp.status !== lastKnownFollowStatus.status) {
         // end last known followUp status entry
-        lastKnownFollowStatus.endDate = new Date();
+        lastKnownFollowStatus.endDate = localizationHelper.now().toDate();
 
         // add the new followUp status in the history
         dataSource.followUpHistory.push({
@@ -1189,7 +1290,7 @@ module.exports = function (Contact) {
       // add current followUp status to history
       data.target.followUpHistory.push({
         status: dataSource.followUp.status,
-        startDate: new Date()
+        startDate: localizationHelper.now().toDate()
       });
     }
   }

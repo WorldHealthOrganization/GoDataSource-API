@@ -1,0 +1,146 @@
+{
+  "translations": {
+    "LNG_SECURITY_QUESTION_1": {
+      "translation": "What was your childhood nickname?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_10": {
+      "translation": "In what town or city did you meet your spouse/partner?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_2": {
+      "translation": "In what city or town did your mother and father meet?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_3": {
+      "translation": "What is your favourite team?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_4": {
+      "translation": "What was your favourite sport in high school?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_5": {
+      "translation": "What was the house number and street name you lived in as a child?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_6": {
+      "translation": "What primary school did you attend?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_7": {
+      "translation": "What is your spouse or partner's mother's maiden name?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_8": {
+      "translation": "What is the middle name of your oldest child?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    },
+    "LNG_SECURITY_QUESTION_9": {
+      "translation": "In what town or city was your first full time job?",
+      "modules": [
+        "unauthenticated",
+        "referenceData"
+      ],
+      "section": "referenceDataCategorySecurityQuestionsQuestion"
+    }
+  },
+  "referenceData": [
+    {
+      "id": "LNG_SECURITY_QUESTION_1",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_1",
+      "code": "sq1"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_10",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_10",
+      "code": "sq10"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_2",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_2",
+      "code": "sq2"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_3",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_3",
+      "code": "sq3"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_4",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_4",
+      "code": "sq4"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_5",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_5",
+      "code": "sq5"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_6",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_6",
+      "code": "sq6"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_7",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_7",
+      "code": "sq7"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_8",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_8",
+      "code": "sq8"
+    },
+    {
+      "id": "LNG_SECURITY_QUESTION_9",
+      "categoryId": "LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION",
+      "value": "LNG_SECURITY_QUESTION_9",
+      "code": "sq9"
+    }
+  ]
+}

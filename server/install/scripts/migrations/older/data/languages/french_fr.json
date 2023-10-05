@@ -5587,12 +5587,6 @@
       "LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": {
         "translation": ""
       },
-      "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
-        "translation": "La date d'apparition des symptômes est-elle requise ?"
-      },
-      "LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
-        "translation": ""
-      },
       "LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {
         "translation": "Appliquer des restrictions géographiques dans cette épidémie"
       },
@@ -12132,12 +12126,6 @@
         "translation": "Autoriser la collecte de donnée pour des prélèvements effectués sur les contacts"
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_IS_CONTACT_LAB_RESULTS_ACTIVE_DESCRIPTION": {
-        "translation": ""
-      },
-      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED": {
-        "translation": "La date d'apparition des symptômes est-elle requise ?"
-      },
-      "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED_DESCRIPTION": {
         "translation": ""
       },
       "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS": {

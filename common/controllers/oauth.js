@@ -2,8 +2,8 @@
 
 // deps
 const App = require('../../server/server');
-const Moment = require('moment');
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (OAuth) {
   OAuth.createToken = function (data, opts, next) {
@@ -43,8 +43,8 @@ module.exports = function (OAuth) {
         }
         currentUser = user;
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const lastLoginDate = Moment(user.lastLoginDate);
-          const now = Moment();
+          const lastLoginDate = localizationHelper.toMoment(user.lastLoginDate);
+          const now = localizationHelper.now();
           const isValidForReset = lastLoginDate.add(loginSettings.resetTime, loginSettings.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= loginSettings.maxRetries;
           if (isValidForReset) {
@@ -75,7 +75,7 @@ module.exports = function (OAuth) {
 
         userModel.login(loginPayload, (err, token) => {
           if (err) {
-            const now = Moment().toDate();
+            const now = localizationHelper.now().toDate();
             const userAttributesToUpdate = {};
             if (currentUser.loginRetriesCount >= 0 && currentUser.lastLoginDate) {
               if (currentUser.loginRetriesCount < loginSettings.maxRetries) {
@@ -97,8 +97,16 @@ module.exports = function (OAuth) {
             lastLoginDate: null
           }).then(user => {
             if (twoFactorAuthenticationEnabled) {
-              return twoFactorAuthentication
-                .sendEmail(user, token)
+              return App.models.user.helpers.sendEmail(
+                Object.assign(
+                  {}, {
+                    user: user
+                  }, {
+                    email: user.email,
+                    twoFACode: token.twoFACode
+                  }),
+                App.models.user.helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION
+              )
                 .then(() => {
                   // update response
                   return next(null, twoFactorAuthentication.getStep1Response());

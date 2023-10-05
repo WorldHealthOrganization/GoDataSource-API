@@ -51,6 +51,11 @@
       "type": "boolean",
       "default": false
     },
+    "generateFollowUpsWhenCreatingContacts": {
+      "description": "Flag that specifies whether follow ups are automatically generated when creating contacts. Default: false",
+      "type": "boolean",
+      "default": false
+    },
     "intervalOfFollowUp": {
       "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
       "type": "string"
@@ -88,6 +93,11 @@
         "templateQuestion"
       ]
     },
+    "eventInvestigationTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
@@ -106,11 +116,6 @@
       "type": "boolean",
       "default": false
     },
-    "isDateOfOnsetRequired": {
-      "description": "Flag specifying whether the case dateOfOnset property is required. Default: true",
-      "type": "boolean",
-      "default": true
-    },
     "applyGeographicRestrictions": {
       "description": "Flag specifying whether the team assignment concept (geographical restriction o data) will be applied on the web app.",
       "type": "boolean",
@@ -128,6 +133,9 @@
     },
     "allowedRefDataItems": {
       "type": "allowedRefData"
+    },
+    "visibleAndMandatoryFields": {
+      "type": "visibleAndMandatory"
     }
   },
   "validations": [],

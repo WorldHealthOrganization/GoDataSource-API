@@ -6,9 +6,18 @@ const config = require('../../server/config.json');
 const bcrypt = require('bcrypt');
 const async = require('async');
 const _ = require('lodash');
-const Moment = require('moment');
 const uuid = require('uuid').v4;
 const twoFactorAuthentication = require('./../../components/twoFactorAuthentication');
+const WorkerRunner = require('../../components/workerRunner');
+const Platform = require('../../components/platform');
+const genericHelpers = require('../../components/helpers');
+const importableFile = require('../../components/importableFile');
+const Config = require('../../server/config.json');
+const exportHelper = require('../../components/exportHelper');
+const localizationHelper = require('../../components/localizationHelper');
+
+// used in user import
+const userImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
 module.exports = function (User) {
 
@@ -25,6 +34,7 @@ module.exports = function (User) {
   app.utils.remote.disableRemoteMethods(User, ['prototype.verify', 'confirm']);
 
   User.afterRemote('setPassword', (ctx, modelInstance, next) => {
+    // update user details so next time it's not required to change its password again
     User
       .findById(ctx.args.id)
       .then(user => {
@@ -35,12 +45,40 @@ module.exports = function (User) {
           loginRetriesCount: 0,
           lastLoginDate: null,
           resetPasswordRetriesCount: 0,
-          lastResetPasswordDate: null
+          lastResetPasswordDate: null,
+          passwordChange: false
         }).then(() => next());
       });
   });
 
   User.observe('before save', (ctx, next) => {
+    // generate a random password
+    const randomPassword = bcrypt.hashSync(app.utils.helpers.randomString('all', 20, 30), 10);
+
+    // make sure that the password is a string
+    if (ctx.isNewInstance) {
+      // new user
+      if (ctx.instance.password) {
+        ctx.instance.password = ctx.instance.password.toString();
+      }
+
+      // at import, force reset password and generate a new password if it's not provided
+      if (
+        ctx.options &&
+        ctx.options.platform === Platform.IMPORT
+      ) {
+        ctx.instance.passwordChange = true;
+        if (!ctx.instance.password) {
+          ctx.instance.password = randomPassword;
+        }
+      }
+    } else {
+      // old user
+      if (ctx.data.password) {
+        ctx.data.password = ctx.data.password.toString();
+      }
+    }
+
     // check for sync action
     if (ctx.options && ctx.options._sync) {
       // on sync from another Go.Data instance we need to import users with same email
@@ -51,7 +89,7 @@ module.exports = function (User) {
         // no roles
         data.target.roleIds = [''];
         // random password
-        data.target.password = bcrypt.hashSync(app.utils.helpers.randomString('all', 20, 30), 10);
+        data.target.password = randomPassword;
 
         // search for similar email
         return User
@@ -90,14 +128,15 @@ module.exports = function (User) {
     if (!ctx.isNewInstance && ctx.data.password) {
       Promise.resolve()
         .then(() => {
-          // if this is a reset/change password don't check the old password
+          // if this is a reset/change password or it's the import action, don't check the old password
           if (
             ctx.options.setPassword ||
             ctx.options.skipOldPasswordCheck || (
               ctx.options.remotingContext &&
               ctx.options.remotingContext.options &&
               ctx.options.remotingContext.options.skipOldPasswordCheck
-            )
+            ) ||
+              ctx.options.platform === Platform.IMPORT
           ) {
             return;
           }
@@ -127,12 +166,29 @@ module.exports = function (User) {
             return;
           }
           return new Promise((resolve, reject) => {
+            // on import, if the password is hashed, ignore the password check
+            if (
+              ctx.options.platform === Platform.IMPORT &&
+              helpers.isPasswordHashed(ctx.data.password)
+            ) {
+              ctx.data.passwordChange = false;
+              return resolve();
+            }
+
+            // check plain password
             ctx.currentInstance.hasPassword(ctx.data.password, (err, isMatch) => {
               if (err) {
                 return reject(err);
               }
-              if (isMatch) {
-                return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
+
+              // at import, if the password is new, force a password change
+              // also, do not return error if it's the same password
+              if (ctx.options.platform === Platform.IMPORT) {
+                ctx.data.passwordChange = !isMatch;
+              } else {
+                if (isMatch) {
+                  return reject(app.utils.apiError.getError('REUSING_PASSWORDS_ERROR'));
+                }
               }
               return resolve();
             });
@@ -142,6 +198,93 @@ module.exports = function (User) {
         .catch(err => next(err));
     } else {
       return next();
+    }
+  });
+
+  User.observe('after save', (ctx, next) => {
+    // check for import action to send email
+    if (
+      ctx.options &&
+      ctx.options.platform === Platform.IMPORT &&
+      ctx.instance
+    ) {
+      let otherFieldChanged = false;
+      // send email ?
+      if (ctx.isNewInstance) {
+        // if it's a new instance, send email always
+        otherFieldChanged = true;
+      } else {
+        // do not send any email if only the base fields were modified
+        // also, the password was marked as changed ("passwordChange" field) in the 'before save' trigger
+        const ignoreChangedFields = {
+          'createdAt': true,
+          'createdBy': true,
+          'updatedBy': true,
+          'deletedAt': true,
+          'createdOn': true,
+          'password': true
+        };
+
+        // check if other field was modified
+        for (let i = 0; i < ctx.options.changedFields.length; i++) {
+          if (!ignoreChangedFields[ctx.options.changedFields[i].field]) {
+            // stop and if at least one field was found
+            otherFieldChanged = true;
+            break;
+          }
+        }
+      }
+
+      // get email template
+      let emailTemplate = '';
+      if (
+        !otherFieldChanged &&
+        !ctx.instance.passwordChange
+      ) {
+        // only base fields modified ?
+        return next();
+      } else {
+        // password changed ?
+        if (
+          ctx.isNewInstance ||
+          ctx.instance.passwordChange
+        ) {
+          emailTemplate = helpers.EmailTemplates.PASSWORD_CHANGE;
+        } else {
+          // informative
+          emailTemplate = helpers.EmailTemplates.USER_UPDATE;
+        }
+      }
+
+      // generate a password reset token
+      ctx.instance.createAccessToken(
+        {
+          email: ctx.instance.email,
+          password: ctx.instance.password
+        },
+        {
+          ttl: config.passwordReset.ttl,
+          scopes: ['reset-password']
+        })
+        .then((accessToken) => {
+          // send email
+          return helpers.sendEmail(
+            {
+              email: ctx.instance.email,
+              user: ctx.instance,
+              accessToken: accessToken
+            },
+            emailTemplate
+          );
+        })
+        .then(() => next())
+        .catch((err) => {
+          // do not return/display any error
+          app.logger.warn(`Failed to send email, template: ${emailTemplate}, error: `, err);
+          next();
+        });
+    } else {
+      next();
     }
   });
 
@@ -184,8 +327,8 @@ module.exports = function (User) {
           return next();
         }
         if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const lastLoginDate = Moment(user.lastLoginDate);
-          const now = Moment();
+          const lastLoginDate = localizationHelper.toMoment(user.lastLoginDate);
+          const now = localizationHelper.now();
           const isValidForReset = lastLoginDate.add(config.login.resetTime, config.login.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= config.login.maxRetries;
           if (isValidForReset) {
@@ -234,8 +377,15 @@ module.exports = function (User) {
           })
           .then(() => {
             if (twoFactorAuthentication.isEnabled()) {
-              return twoFactorAuthentication
-                .sendEmail(user, instance)
+              return helpers.sendEmail(
+                Object.assign({}, {
+                  user: user
+                }, {
+                  email: user.email,
+                  twoFACode: instance.twoFACode
+                }),
+                helpers.EmailTemplates.TWO_FACTOR_AUTHENTICATION
+              )
                 .then(() => {
                   // update response
                   ctx.result = twoFactorAuthentication.getStep1Response();
@@ -294,7 +444,7 @@ module.exports = function (User) {
             return next();
           }
 
-          const now = Moment().toDate();
+          const now = localizationHelper.now().toDate();
           const userAttributesToUpdate = {};
           if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
             if (user.loginRetriesCount >= config.login.maxRetries) {
@@ -415,7 +565,9 @@ module.exports = function (User) {
     // cache request body ref
     let reqBody = context.args.data;
 
-    context.options.skipOldPasswordCheck = config.skipOldPasswordForUserModify;
+    // skip old password checking if feature is disabled or on import
+    context.options.skipOldPasswordCheck = config.skipOldPasswordForUserModify ||
+      context.options.platform === Platform.IMPORT;
 
     if (context.instance.id === context.req.authData.user.id) {
       delete reqBody.roleIds;
@@ -581,8 +733,8 @@ module.exports = function (User) {
           user.lastResetPasswordDate
         ) {
           // check if then number of failed attempts has been reached
-          const lastResetPasswordDate = Moment(user.lastResetPasswordDate);
-          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(Moment());
+          const lastResetPasswordDate = localizationHelper.toMoment(user.lastResetPasswordDate);
+          const isValidForReset = lastResetPasswordDate.add(resetPasswordSettings.resetTime, resetPasswordSettings.resetTimeUnit).isBefore(localizationHelper.now());
           if (
             user.resetPasswordRetriesCount >= resetPasswordSettings.maxRetries &&
             !isValidForReset
@@ -636,7 +788,7 @@ module.exports = function (User) {
             ) {
               return user.updateAttributes({
                 resetPasswordRetriesCount: user.resetPasswordRetriesCount ? ++user.resetPasswordRetriesCount : 1,
-                lastResetPasswordDate: Moment().toDate()
+                lastResetPasswordDate: localizationHelper.now().toDate()
               });
             }
           })
@@ -693,7 +845,7 @@ module.exports = function (User) {
   });
 
   /**
-   * Export filtered cases to file
+   * Export filtered users to file
    * @param filter
    * @param exportType json, csv, xls, xlsx, ods, pdf or csv. Default: json
    * @param encryptPassword
@@ -702,7 +854,7 @@ module.exports = function (User) {
    * @param options
    * @param callback
    */
-  User.export = function (
+  User.exportFilteredUsers = function (
     filter,
     exportType,
     encryptPassword,
@@ -711,175 +863,305 @@ module.exports = function (User) {
     options,
     callback
   ) {
-    // disabled until implemented properly - ticket was de-prioritized a long time ago
-    callback();
+    // set a default filter
+    filter = filter || {};
+    filter.where = filter.where || {};
 
-    // // defensive checks
-    // filter = filter || {};
-    // filter.where = filter.where || {};
-    //
-    // new Promise((resolve, reject) => {
-    //   const contextUser = app.utils.remote.getUserFromOptions(options);
-    //   app.models.language.getLanguageDictionary(contextUser.languageId, (err, dictionary) => {
-    //     if (err) {
-    //       return reject(err);
-    //     }
-    //     return resolve(dictionary);
-    //   });
-    // }).then(dictionary => {
-    //   if (!Array.isArray(anonymizeFields)) {
-    //     anonymizeFields = [];
-    //   }
-    //   if (anonymizeFields.indexOf('password') === -1) {
-    //     anonymizeFields.push('password');
-    //   }
-    //
-    //   options.dictionary = dictionary;
-    //   // #TODO - must replace with exportHelper - see other exports (cases, contact, ...)
-    //   return app.utils.remote.helpers.exportFilteredModelsList(
-    //     app,
-    //     app.models.user,
-    //     {},
-    //     filter,
-    //     exportType,
-    //     'Users List',
-    //     (typeof encryptPassword !== 'string' || !encryptPassword.length) ? null : encryptPassword,
-    //     anonymizeFields,
-    //     fieldsGroupList,
-    //     options,
-    //     results => Promise.resolve(results),
-    //     callback
-    //   );
-    // }).catch(callback);
+    // parse useDbColumns query param
+    let useDbColumns = false;
+    if (filter.where.hasOwnProperty('useDbColumns')) {
+      useDbColumns = filter.where.useDbColumns;
+      delete filter.where.useDbColumns;
+    }
+
+    // parse dontTranslateValues query param
+    let dontTranslateValues = false;
+    if (filter.where.hasOwnProperty('dontTranslateValues')) {
+      dontTranslateValues = filter.where.dontTranslateValues;
+      delete filter.where.dontTranslateValues;
+    }
+
+    // parse jsonReplaceUndefinedWithNull query param
+    let jsonReplaceUndefinedWithNull = false;
+    if (filter.where.hasOwnProperty('jsonReplaceUndefinedWithNull')) {
+      jsonReplaceUndefinedWithNull = filter.where.jsonReplaceUndefinedWithNull;
+      delete filter.where.jsonReplaceUndefinedWithNull;
+    }
+
+    // if encrypt password is not valid, remove it
+    if (typeof encryptPassword !== 'string' || !encryptPassword.length) {
+      encryptPassword = null;
+    }
+
+    // make sure anonymizeFields is valid
+    if (!Array.isArray(anonymizeFields)) {
+      anonymizeFields = [];
+    }
+
+    // ignore the default sys admin user
+    filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          id: {
+            neq: genericHelpers.DEFAULT_SYSTEM_ADMIN_ID
+          },
+        }
+      }, filter || {});
+
+    // export
+    WorkerRunner.helpers.exportFilteredModelsList(
+      {
+        collectionName: 'user',
+        modelName: app.models.user.modelName,
+        scopeQuery: app.models.user.definition.settings.scope,
+        arrayProps: app.models.user.arrayProps,
+        fieldLabelsMap: app.models.user.fieldLabelsMap,
+        exportFieldsOrder: app.models.user.exportFieldsOrder,
+
+        // fields that we need to bring from db, but we might not include in the export (you can still include it since we need it on import)
+        // - roleIds, outbreakIds and activeOutbreakId might be included since it is used on import, otherwise we won't have the ability to map this field
+        projection: [
+          'roleIds',
+          'outbreakIds',
+          'activeOutbreakId'
+        ]
+      },
+      filter,
+      exportType,
+      encryptPassword,
+      anonymizeFields,
+      undefined,
+      {
+        userId: _.get(options, 'accessToken.userId'),
+        questionnaire: undefined,
+        useQuestionVariable: false,
+        useDbColumns,
+        dontTranslateValues,
+        jsonReplaceUndefinedWithNull,
+        contextUserLanguageId: app.utils.remote.getUserFromOptions(options).languageId
+      },
+      undefined, {
+        roleIds: {
+          type: exportHelper.RELATION_TYPE.HAS_MANY,
+          collection: 'role',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValues: `(item) => {
+            return item && item.roleIds ?
+              item.roleIds :
+              undefined;
+          }`,
+          format: `(item, dontTranslateValues) => {
+            return dontTranslateValues ?
+              item.id :
+              item.name;
+          }`
+        },
+        outbreakIds: {
+          type: exportHelper.RELATION_TYPE.HAS_MANY,
+          collection: 'outbreak',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValues: `(item) => {
+            return item && item.outbreakIds ?
+              item.outbreakIds :
+              undefined;
+          }`,
+          format: `(item, dontTranslateValues) => {
+            return dontTranslateValues ?
+              item.id :
+              item.name;
+          }`
+        },
+        activeOutbreak: {
+          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          collection: 'outbreak',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.activeOutbreakId ?
+              item.activeOutbreakId :
+              undefined;
+          }`,
+          replace: {
+            'activeOutbreakId': {
+              value: 'activeOutbreak.name'
+            }
+          }
+        },
+        language: {
+          type: exportHelper.RELATION_TYPE.HAS_ONE,
+          collection: 'language',
+          project: [
+            '_id',
+            'name'
+          ],
+          key: '_id',
+          keyValue: `(item) => {
+            return item && item.languageId ?
+              item.languageId :
+              undefined;
+          }`,
+          replace: {
+            'languageId': {
+              value: 'language.name'
+            }
+          }
+        }
+      })
+      .then((exportData) => {
+        // send export id further
+        callback(
+          null,
+          exportData
+        );
+      })
+      .catch(callback);
   };
 
-  User.import = function (data, options, callback) {
-    // disabled until implemented properly - ticket was de-prioritized a long time ago
-    callback();
+  /**
+   * Import an importable file using file ID and a map to remap parameters
+   * @param body
+   * @param options
+   * @param callback
+   */
+  User.importImportableUsersFileUsingMap = function (body, options, callback) {
+    // create a transaction logger as the one on the req will be destroyed once the response is sent
+    const logger = app.logger.getTransactionLogger(options.remotingContext.req.transactionId);
 
-    // options._sync = false;
-    //
-    // importableFileHelpers
-    //   .getTemporaryFileById(data.fileId)
-    //   .then(file => {
-    //     const rawUsersList = file.data;
-    //     const usersList = app.utils.helpers.convertPropertiesNoModelByType(
-    //       app.models.user,
-    //       app.utils.helpers.remapProperties(rawUsersList, data.map, data.valuesMap));
-    //
-    //     const asyncOps = [];
-    //     const asyncOpsErrors = [];
-    //
-    //     asyncOpsErrors.toString = function () {
-    //       return JSON.stringify(this);
-    //     };
-    //
-    //     // role, outbreak name <-> id mappings
-    //     const resourceMaps = {};
-    //
-    //     let roleNames = [];
-    //     let outbreakNames = [];
-    //     usersList.forEach(user => {
-    //       roleNames.push(...user.roleIds);
-    //       outbreakNames.push(...user.outbreakIds.concat([user.activeOutbreakId]));
-    //     });
-    //     roleNames = [...new Set(roleNames)];
-    //     outbreakNames = [...new Set(outbreakNames)];
-    //
-    //     return Promise.all([
-    //       new Promise((resolve, reject) => {
-    //         const rolesMap = {};
-    //         app.models.role
-    //           .rawFind({
-    //             name: {
-    //               inq: roleNames
-    //             }
-    //           })
-    //           .then(roles => {
-    //             roles.forEach(role => {
-    //               rolesMap[role.name] = role.id;
-    //             });
-    //             resourceMaps.roles = rolesMap;
-    //             return resolve();
-    //           })
-    //           .catch(reject);
-    //       }),
-    //       new Promise((resolve, reject) => {
-    //         const outbreaksMap = {};
-    //         app.models.outbreak
-    //           .rawFind({
-    //             name: {
-    //               inq: outbreakNames
-    //             }
-    //           })
-    //           .then(outbreaks => {
-    //             outbreaks.forEach(outbreak => {
-    //               outbreaksMap[outbreak.name] = outbreak.id;
-    //             });
-    //             resourceMaps.outbreaks = outbreaksMap;
-    //             return resolve();
-    //           })
-    //           .catch(reject);
-    //       })
-    //     ]).then(() => {
-    //       usersList.forEach((user, index) => {
-    //         asyncOps.push(cb => {
-    //           user.roleIds = user.roleIds.map(roleName => {
-    //             return resourceMaps.roles[roleName] || roleName;
-    //           });
-    //           user.outbreakIds = user.outbreakIds.map(outbreakName => {
-    //             return resourceMaps.outbreaks[outbreakName] || outbreakName;
-    //           });
-    //           user.activeOutbreakId = resourceMaps.outbreaks[user.activeOutbreakId] || user.activeOutbreakId;
-    //
-    //           return app.utils.dbSync.syncRecord(
-    //             app,
-    //             options.remotingContext.req.logger,
-    //             app.models.user,
-    //             user,
-    //             options)
-    //             .then(result => cb(null, result.record))
-    //             .catch(err => {
-    //               // on error, store the error, but don't stop, continue with other items
-    //               asyncOpsErrors.push({
-    //                 message: `Failed to import user ${index + 1}`,
-    //                 error: err,
-    //                 recordNo: index + 1,
-    //                 data: {
-    //                   file: rawUsersList[index],
-    //                   save: user
-    //                 }
-    //               });
-    //               return cb(null, null);
-    //             });
-    //         });
-    //       });
-    //
-    //       async.parallelLimit(asyncOps, 10, (err, results) => {
-    //         if (err) {
-    //           return callback(err);
-    //         }
-    //         // if import errors were found
-    //         if (asyncOpsErrors.length) {
-    //           // remove results that failed to be added
-    //           results = results.filter(result => result !== null);
-    //           // overload toString function to be used by error handler
-    //           results.toString = function () {
-    //             return JSON.stringify(this);
-    //           };
-    //           // return error with partial success
-    //           return callback(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS', {
-    //             model: app.models.user.modelName,
-    //             failed: asyncOpsErrors,
-    //             success: results
-    //           }));
-    //         }
-    //         // send the result
-    //         return callback(null, results);
-    //       });
-    //     });
-    //   })
-    //   .catch(callback);
+    // treat the sync as a regular operation, not really a sync
+    options._sync = false;
+
+    // inject platform identifier
+    options.platform = Platform.IMPORT;
+
+    // Create array of actions that will be executed in series/parallel for each batch
+    // Note: Failed items need to have success: false and any other data that needs to be saved on error needs to be added in a error container
+    const createBatchActions = function (batchData) {
+      // build a list of sync operations
+      const syncUser = [];
+
+      // get the logged user
+      const loggedUser = options &&
+      options.remotingContext &&
+      options.remotingContext.req &&
+      options.remotingContext.req.authData ?
+        options.remotingContext.req.authData.user :
+        undefined;
+
+      // go through all entries
+      batchData.forEach(function (userItem) {
+        // ignore default sys admin user and also the current user to prevent override the password
+        if (
+          loggedUser &&
+          userItem.save && (
+            userItem.save.id === genericHelpers.DEFAULT_SYSTEM_ADMIN_ID ||
+            userItem.save.email === loggedUser.email ||
+            userItem.save.id === loggedUser.id
+          )
+        ) {
+          return;
+        }
+
+        syncUser.push(function (asyncCallback) {
+          // sync user
+          return app.utils.dbSync.syncRecord(app, logger, app.models.user, userItem.save, options)
+            .then(function () {
+              asyncCallback();
+            })
+            .catch(function (error) {
+              // on error, store the error, but don't stop, continue with other items
+              asyncCallback(null, {
+                success: false,
+                error: {
+                  error: error,
+                  data: {
+                    file: userItem.raw,
+                    save: userItem.save
+                  }
+                }
+              });
+            });
+        });
+      });
+
+      return syncUser;
+    };
+
+    // construct options needed by the formatter worker
+    // model boolean properties
+    const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.user,
+      genericHelpers.DATA_TYPE.BOOLEAN
+    );
+
+    // model date properties
+    const modelDateProperties = genericHelpers.getModelPropertiesByDataType(
+      app.models.user,
+      genericHelpers.DATA_TYPE.DATE
+    );
+
+    // options for the formatting method
+    let formatterOptions = Object.assign({
+      dataType: 'user',
+      batchSize: userImportBatchSize,
+      modelBooleanProperties: modelBooleanProperties,
+      modelDateProperties: modelDateProperties
+    }, body);
+
+    // retrieve all languages
+    app.models.language
+      .find({
+        _id: true
+      })
+      .then((languages) => {
+        const mappedLanguages = {};
+        languages.forEach((language) => {
+          mappedLanguages[language.id] = true;
+        });
+
+        // send language list to validate the user's language
+        formatterOptions.availableLanguages = mappedLanguages;
+
+        // start import
+        importableFile.processImportableFileData(app, {
+          modelName: app.models.user.modelName,
+          logger: logger
+        }, formatterOptions, createBatchActions, callback);
+      });
+  };
+
+  /**
+   * Find for filters
+   */
+  User.findForFilters = function (where, callback) {
+    app.models.user
+      .find({
+        where: where || {},
+        fields: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true
+        },
+        order: ['firstName ASC', 'lastName ASC']
+      })
+      .then((users) => {
+        callback(
+          null,
+          users
+        );
+      })
+      .catch(callback);
   };
 
   /**

@@ -5,7 +5,6 @@ const path = require('path');
 const csvStringify = require('csv-stringify');
 const _ = require('lodash');
 const fs = require('fs');
-const moment = require('moment');
 const archiver = require('archiver');
 const xlsx = require('xlsx');
 const pdfkit = require('pdfkit');
@@ -16,10 +15,7 @@ const mergeFilters = require('./mergeFilters');
 const genericHelpers = require('./helpers');
 const aesCrypto = require('./aesCrypto');
 const convertLoopbackQueryToMongo = require('./convertLoopbackFilterToMongo');
-
-// default language - in case we don't have user language
-// - or if user language token translations are missing then they are replaced by default language tokens which should have all tokens...
-const DEFAULT_LANGUAGE = 'english_us';
+const localizationHelper = require('./localizationHelper');
 
 // temporary database prefix
 const TEMPORARY_DATABASE_PREFIX = 'zExport_';
@@ -114,6 +110,7 @@ const REPLACE_NEW_LINE_EXPR = /\r?\n|\r/g;
 // relations types
 const RELATION_TYPE = {
   HAS_ONE: 'HAS_ONE',
+  HAS_MANY: 'HAS_MANY',
   GET_ONE: 'GET_ONE'
 };
 
@@ -370,6 +367,87 @@ function exportFilteredModelsList(
                     );
                   }
                 });
+              }
+
+              // finished
+              break;
+
+            case RELATION_TYPE.HAS_MANY:
+              // must have key
+              if (
+                !relationData.key ||
+                typeof relationData.key !== 'string'
+              ) {
+                throwError(
+                  relationName,
+                  `invalid key name (${typeof relationData.key})`
+                );
+              }
+
+              // must have keyValues
+              if (
+                !relationData.keyValues ||
+                typeof relationData.keyValues !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid key values (${typeof relationData.keyValues})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.keyValues = eval(relationData.keyValues);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid key values method content'
+                  );
+                }
+              }
+
+              // must have format
+              if (
+                !relationData.format ||
+                typeof relationData.format !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid format (${typeof relationData.format})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.format = eval(relationData.format);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid format method content'
+                  );
+                }
+              }
+
+              // after is optional
+              if (
+                relationData.after &&
+                typeof relationData.after !== 'string'
+              ) {
+                // invalid content
+                throwError(
+                  relationName,
+                  `invalid after (${typeof relationData.after})`
+                );
+              } else {
+                // transform to method
+                try {
+                  relationData.after = eval(relationData.after);
+                } catch (e) {
+                  throwError(
+                    relationName,
+                    'invalid after method content'
+                  );
+                }
               }
 
               // finished
@@ -850,7 +928,8 @@ function exportFilteredModelsList(
             if (
               dataFilter &&
               !_.isEmpty(dataFilter.projection) &&
-              !dataFilter.projection[arrayField]
+              !dataFilter.projection[arrayField] &&
+              typeof modelOptions.arrayProps[arrayField] === 'object'
             ) {
               Object.keys(modelOptions.arrayProps[arrayField]).forEach((arrayFieldProperty) => {
                 if (
@@ -2174,8 +2253,8 @@ function exportFilteredModelsList(
         return sheetHandler
           .updateExportLog({
             processedNo: sheetHandler.processedNo,
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           })
           .then(() => {
             switch (exportType) {
@@ -2354,7 +2433,7 @@ function exportFilteredModelsList(
 
       // finished
       return {
-        languageId: options.contextUserLanguageId || DEFAULT_LANGUAGE,
+        languageId: options.contextUserLanguageId || genericHelpers.DEFAULT_LANGUAGE,
         exportLogId,
         temporaryCollectionName: `${TEMPORARY_DATABASE_PREFIX}${exportLogId}`,
         temporaryDistinctLocationsKey: 'allUsedLocationIds',
@@ -2576,8 +2655,8 @@ function exportFilteredModelsList(
       return sheetHandler
         .updateExportLog({
           statusStep: 'LNG_STATUS_STEP_ENCRYPT',
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date()
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate()
         })
         .then(() => {
           // single file to encrypt ?
@@ -2636,8 +2715,8 @@ function exportFilteredModelsList(
             statusStep: 'LNG_STATUS_STEP_ARCHIVE',
             extension: zipExtension,
             mimeType: 'application/zip',
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           })
           .then(() => {
             // handle archive async
@@ -2708,7 +2787,7 @@ function exportFilteredModelsList(
             .insertOne({
               _id: sheetHandler.exportLogId,
               type: 'export-data',
-              actionStartDate: new Date(),
+              actionStartDate: localizationHelper.now().toDate(),
               status: 'LNG_SYNC_STATUS_IN_PROGRESS',
               statusStep: 'LNG_STATUS_STEP_RETRIEVING_LANGUAGE_TOKENS',
               resourceType: modelOptions.modelName,
@@ -2716,10 +2795,10 @@ function exportFilteredModelsList(
               processedNo: 0,
               outbreakIDs: [options.outbreakId],
               deleted: false,
-              createdAt: new Date(),
+              createdAt: localizationHelper.now().toDate(),
               createdBy: options.userId,
-              updatedAt: new Date(),
-              dbUpdatedAt: new Date(),
+              updatedAt: localizationHelper.now().toDate(),
+              dbUpdatedAt: localizationHelper.now().toDate(),
               updatedBy: options.userId,
               mimeType: sheetHandler.mimeType,
               extension: exportType,
@@ -2767,7 +2846,7 @@ function exportFilteredModelsList(
 
               // if records not found in current language try english
               if (
-                languageId !== DEFAULT_LANGUAGE &&
+                languageId !== genericHelpers.DEFAULT_LANGUAGE &&
                 tokenIds.length !== tokens.length
               ) {
                 // find tokens that are missing
@@ -2786,7 +2865,7 @@ function exportFilteredModelsList(
 
                 // retrieve missing tokens
                 return retrieveMissingTokens(
-                  DEFAULT_LANGUAGE,
+                  genericHelpers.DEFAULT_LANGUAGE,
                   missingTokenIds
                 );
               }
@@ -3007,8 +3086,8 @@ function exportFilteredModelsList(
                     [`aggregateFilter${prefixPath ? '_' + prefixPath : ''}_${prefilter.name}`]: sheetHandler.saveAggregateFilter ?
                       JSON.stringify(aggregateFilter) :
                       null,
-                    updatedAt: new Date(),
-                    dbUpdatedAt: new Date()
+                    updatedAt: localizationHelper.now().toDate(),
+                    dbUpdatedAt: localizationHelper.now().toDate()
                   })
                   .then(() => {
                     // prepare records that will be exported
@@ -3652,8 +3731,8 @@ function exportFilteredModelsList(
               return sheetHandler.saveAggregateFilter ?
                 sheetHandler.updateExportLog({
                   aggregateFilter: JSON.stringify(aggregateFilter),
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 }) :
                 null;
             })
@@ -4219,78 +4298,91 @@ function exportFilteredModelsList(
                   // go through each child property and create proper header columns
                   if (sheetHandler.columns.arrayColumnMaxValues[propertyName]) {
                     for (let arrayIndex = 0; arrayIndex < sheetHandler.columns.arrayColumnMaxValues[propertyName]; arrayIndex++) {
-                      for (let childProperty in arrayProps[propertyName]) {
-                        // determine child property information
-                        const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
-                          childProperty :
-                          sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
+                      if (typeof arrayProps[propertyName] === 'object') {
+                        for (let childProperty in arrayProps[propertyName]) {
+                          // determine child property information
+                          const childPropertyTokenTranslation = sheetHandler.useDbColumns ?
+                            childProperty :
+                            sheetHandler.dictionaryMap[arrayProps[propertyName][childProperty]];
 
-                        // child property contains parent info ?
-                        const propertyOfAnObjectIndex = childProperty.indexOf('.');
-                        if (propertyOfAnObjectIndex > -1) {
-                          // determine parent property
-                          const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
+                          // child property contains parent info ?
+                          const propertyOfAnObjectIndex = childProperty.indexOf('.');
+                          if (propertyOfAnObjectIndex > -1) {
+                            // determine parent property
+                            const parentProperty = childProperty.substr(0, propertyOfAnObjectIndex);
 
-                          // remove previous column if it was a parent column
-                          if (parentProperty) {
-                            removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            // remove previous column if it was a parent column
+                            if (parentProperty) {
+                              removeLastColumnIfSamePath(`${propertyName}[${arrayIndex}].${parentProperty}`);
+                            }
+                          }
+
+                          // add columns
+                          const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
+                          const childColumn = addHeaderColumn(
+                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
+                            `${propertyName}[${arrayIndex}].${childProperty}`,
+                            childPathWithoutIndexes,
+                            uuid.v4(),
+                            undefined,
+                            undefined,
+                            !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          );
+
+                          // if location column we need to push some extra columns
+                          if (
+                            sheetHandler.columns.includeParentLocationData &&
+                            sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
+                          ) {
+                            // attach location guid
+                            if (!sheetHandler.dontTranslateValues) {
+                              addHeaderColumn(
+                                `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
+                                childColumn.path,
+                                childColumn.pathWithoutIndexes,
+                                uuid.v4(),
+                                (value) => {
+                                  return value;
+                                },
+                                undefined,
+                                true
+                              );
+                            }
+
+                            // attach location identifiers
+                            attachLocationIdentifiers(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
+                              sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent location geographical level details
+                            attachParentLocationGeographicalLevelDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
+
+                            // attach parent locations name details
+                            attachParentLocationsNameDetails(
+                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
+                              childColumn.path,
+                              childColumn.pathWithoutIndexes
+                            );
                           }
                         }
-
-                        // add columns
-                        const childPathWithoutIndexes = `${propertyName}[].${childProperty}`;
-                        const childColumn = addHeaderColumn(
-                          `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}]`,
-                          `${propertyName}[${arrayIndex}].${childProperty}`,
-                          childPathWithoutIndexes,
+                      } else {
+                        // add column
+                        addHeaderColumn(
+                          `${propertyLabelTokenTranslation} [${arrayIndex + 1}]`,
+                          `${propertyName}[${arrayIndex}]`,
+                          `${propertyName}[]`,
                           uuid.v4(),
                           undefined,
                           undefined,
-                          !!sheetHandler.columns.locationsFieldsMap[childPathWithoutIndexes]
+                          false
                         );
-
-                        // if location column we need to push some extra columns
-                        if (
-                          sheetHandler.columns.includeParentLocationData &&
-                          sheetHandler.columns.locationsFieldsMap[childColumn.pathWithoutIndexes]
-                        ) {
-                          // attach location guid
-                          if (!sheetHandler.dontTranslateValues) {
-                            addHeaderColumn(
-                              `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_ID']} [${arrayIndex + 1}]`,
-                              childColumn.path,
-                              childColumn.pathWithoutIndexes,
-                              uuid.v4(),
-                              (value) => {
-                                return value;
-                              },
-                              undefined,
-                              true
-                            );
-                          }
-
-                          // attach location identifiers
-                          attachLocationIdentifiers(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIERS']} [${arrayIndex + 1}]`,
-                            sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_IDENTIFIER'],
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent location geographical level details
-                          attachParentLocationGeographicalLevelDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_OUTBREAK_FIELD_LABEL_LOCATION_GEOGRAPHICAL_LEVEL']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-
-                          // attach parent locations name details
-                          attachParentLocationsNameDetails(
-                            `${propertyLabelTokenTranslation ? propertyLabelTokenTranslation + ' ' : ''}${childPropertyTokenTranslation} [${arrayIndex + 1}] ${sheetHandler.dictionaryMap['LNG_LOCATION_FIELD_LABEL_PARENT_LOCATION']}`,
-                            childColumn.path,
-                            childColumn.pathWithoutIndexes
-                          );
-                        }
                       }
                     }
                   }
@@ -4626,7 +4718,7 @@ function exportFilteredModelsList(
                                         const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
 
                                         // find answer
-                                        value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                        value = (value || []).find((item) => item.date && localizationHelper.toMoment(item.date).isSame(multiAnswerDate, 'day'));
                                         value = value ?
                                           (
                                             value.value ?
@@ -4670,7 +4762,7 @@ function exportFilteredModelsList(
                                       const multiAnswerDate = _.get(record, localMultiAnswerParentDatePath);
 
                                       // find answer
-                                      value = (value || []).find((item) => item.date && moment(item.date).isSame(multiAnswerDate, 'day'));
+                                      value = (value || []).find((item) => item.date && localizationHelper.toMoment(item.date).isSame(multiAnswerDate, 'day'));
                                       value = value ?
                                         value.value :
                                         value;
@@ -4857,7 +4949,11 @@ function exportFilteredModelsList(
                                     } else {
                                       // date value
                                       childValue = childValue instanceof Date ?
-                                        moment(childValue).toISOString() :
+                                        (
+                                          sheetHandler.dontTranslateValues ?
+                                            localizationHelper.toMoment(childValue).toISOString() :
+                                            localizationHelper.toMoment(childValue).format()
+                                        ) :
                                         childValue;
 
                                       // normal value
@@ -5114,6 +5210,53 @@ function exportFilteredModelsList(
 
                 // attach value to list of records to retrieve
                 relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].values[keyValue] = true;
+
+                // finished
+                break;
+
+              // has many
+              case RELATION_TYPE.HAS_MANY:
+
+                // determine if we have something to retrieve
+                const keyValues = relation.data.keyValues(record);
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  continue;
+                }
+
+                // initialize retrieval if necessary
+                if (!relationsAccumulator[relation.data.collection]) {
+                  relationsAccumulator[relation.data.collection] = {};
+                }
+
+                // specific type of retrieval
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN] = {};
+                }
+
+                // attach request for our key if necessary
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key] = {
+                    relations: {},
+                    values: {}
+                  };
+                }
+
+                // attach relation if necessary, for identification
+                if (!relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name]) {
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name] = {};
+                }
+
+                // map ids
+                keyValues.forEach((keyValue) => {
+                  // map id with our relation
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].relations[relation.name][keyValue] = true;
+
+                  // attach value to list of records to retrieve
+                  relationsAccumulator[relation.data.collection][RELATION_RETRIEVAL_TYPE.KEY_IN][relation.data.key].values[keyValue] = true;
+                });
 
                 // finished
                 break;
@@ -5458,6 +5601,40 @@ function exportFilteredModelsList(
                 // finished
                 break;
 
+              case RELATION_TYPE.HAS_MANY:
+                // relationship value
+                const keyValues = relation.data.keyValues(record);
+
+                // set value for this relationship
+                if (
+                  !keyValues ||
+                  !keyValues.length
+                ) {
+                  record[relation.name] = undefined;
+                } else {
+                  record[relation.name] = [];
+                  keyValues.forEach((keyValue) => {
+                    // nothing to do ?
+                    if (!relationsData[relation.name][keyValue]) {
+                      return;
+                    }
+
+                    // add
+                    record[relation.name].push(relation.data.format(
+                      _.cloneDeep(relationsData[relation.name][keyValue]),
+                      sheetHandler.dontTranslateValues
+                    ));
+                  });
+                }
+
+                // do we have an after method ?
+                if (relation.data.after) {
+                  relation.data.after(record);
+                }
+
+                // finished
+                break;
+
               case RELATION_TYPE.GET_ONE:
                 // set value for this relationship
                 record[relation.name] = relationsData[relation.name][record._id];
@@ -5756,7 +5933,7 @@ function exportFilteredModelsList(
                   // get data
                   const column = sheetHandler.columns.headerColumns[columnIndex];
 
-                  // if column is anonymize then there is no need to retrieve data for this cell
+                  // if column is anonymized then there is no need to retrieve data for this cell
                   if (column.anonymize) {
                     // non flat data ?
                     if (sheetHandler.process.exportIsNonFlat) {
@@ -5852,7 +6029,9 @@ function exportFilteredModelsList(
                     cellValue instanceof Date
                   ) {
                     // format date as string
-                    cellValue = moment(cellValue).toISOString();
+                    cellValue = sheetHandler.dontTranslateValues ?
+                      localizationHelper.toMoment(cellValue).toISOString() :
+                      localizationHelper.toMoment(cellValue).format();
 
                     // remove new lines since these might break files like csv and others
                   } else if (
@@ -5898,8 +6077,8 @@ function exportFilteredModelsList(
                   // update export log
                   return sheetHandler.updateExportLog({
                     processedNo: sheetHandler.processedNo,
-                    updatedAt: new Date(),
-                    dbUpdatedAt: new Date()
+                    updatedAt: localizationHelper.now().toDate(),
+                    dbUpdatedAt: localizationHelper.now().toDate()
                   });
                 });
             });
@@ -5917,8 +6096,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_PREFILTERS',
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
               })
 
@@ -5941,8 +6120,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_RECORDS',
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
               })
 
@@ -5953,9 +6132,9 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_PREPARING_LOCATIONS',
-                  aggregateCompletionDate: new Date(),
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  aggregateCompletionDate: localizationHelper.now().toDate(),
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
               })
 
@@ -5966,8 +6145,8 @@ function exportFilteredModelsList(
               .then(() => {
                 return sheetHandler.updateExportLog({
                   statusStep: 'LNG_STATUS_STEP_CONFIGURE_HEADERS',
-                  updatedAt: new Date(),
-                  dbUpdatedAt: new Date()
+                  updatedAt: localizationHelper.now().toDate(),
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 });
               })
 
@@ -5984,8 +6163,8 @@ function exportFilteredModelsList(
                   {
                     totalNo: counted,
                     statusStep: 'LNG_STATUS_STEP_EXPORTING_RECORDS',
-                    updatedAt: new Date(),
-                    dbUpdatedAt: new Date()
+                    updatedAt: localizationHelper.now().toDate(),
+                    dbUpdatedAt: localizationHelper.now().toDate()
                   })
                   .then(() => {
                     // start the actual exporting of data
@@ -6035,9 +6214,9 @@ function exportFilteredModelsList(
         return sheetHandler.updateExportLog({
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_EXPORT_FINISHED',
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date(),
-          actionCompletionDate: new Date(),
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate(),
+          actionCompletionDate: localizationHelper.now().toDate(),
           sizeBytes
         });
       })
@@ -6059,8 +6238,8 @@ function exportFilteredModelsList(
             // statusStep - keep as it is because it could help to know where it failed, on what step
             error: err.message,
             errStack: err.stack,
-            updatedAt: new Date(),
-            dbUpdatedAt: new Date()
+            updatedAt: localizationHelper.now().toDate(),
+            dbUpdatedAt: localizationHelper.now().toDate()
           })
 
           // remove temporary collection if it was created ?

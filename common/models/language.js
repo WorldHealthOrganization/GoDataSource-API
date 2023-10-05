@@ -4,6 +4,7 @@ const app = require('../../server/server');
 const async = require('async');
 const _ = require('lodash');
 const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Language) {
 
@@ -77,7 +78,7 @@ module.exports = function (Language) {
                   modules: modules,
                   createdAt: languageToken.createdAt,
                   updatedAt: languageToken.updatedAt,
-                  dbUpdatedAt: new Date()
+                  dbUpdatedAt: localizationHelper.now().toDate()
                 };
 
                 // add is default language token ?

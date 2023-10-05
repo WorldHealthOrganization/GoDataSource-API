@@ -111,12 +111,6 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "getServerUTCDate"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
       "property": "getBackupLocation"
     },
     {
@@ -264,27 +258,6 @@
         "path": "/image-to-pdf"
       }
     },
-    "getServerUTCDate": {
-      "accepts": [],
-      "returns": [
-        {
-          "arg": "date",
-          "type": {
-            "date": {
-              "type": "string"
-            }
-          },
-          "description": "Current server UTC date",
-          "root": true,
-          "required": true
-        }
-      ],
-      "description": "Generates server current UTC date.",
-      "http": {
-        "verb": "get",
-        "path": "/utc-date"
-      }
-    },
     "getVersion": {
       "accepts": [],
       "returns": [
@@ -293,6 +266,7 @@
           "type": {
             "arch": "string",
             "build": "string",
+            "timezone": "string",
             "captcha": {
               "type": {
                 "forgotPassword": "boolean",

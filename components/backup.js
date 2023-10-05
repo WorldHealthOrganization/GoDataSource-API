@@ -8,12 +8,12 @@ const async = require('async');
 const dbSync = require('./dbSync');
 const helpers = require('../components/helpers');
 const _ = require('lodash');
-const moment = require('moment');
 const config = require('../server/config');
 const syncWorker = require('./workerRunner').sync;
 const apiError = require('./apiError');
 const WorkerRunner = require('./../components/workerRunner');
 const uuid = require('uuid');
+const localizationHelper = require('./localizationHelper');
 
 /**
  * Get backup password
@@ -153,15 +153,15 @@ const restoreBackupFromFile = function (
         return connection.collection('databaseActionLog').insertOne({
           _id: restoreLogId,
           type: 'restore-db',
-          actionStartDate: new Date(),
+          actionStartDate: localizationHelper.now().toDate(),
           status: 'LNG_SYNC_STATUS_IN_PROGRESS',
           statusStep: 'LNG_STATUS_STEP_PREPARING_RESTORE',
           totalNo: 0,
           processedNo: 0,
           deleted: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date()
+          createdAt: localizationHelper.now().toDate(),
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate()
         });
       }
 
@@ -178,8 +178,8 @@ const restoreBackupFromFile = function (
     // initialize restore log if necessary
     return updateRestoreLog(
       {
-        updatedAt: new Date(),
-        dbUpdatedAt: new Date(),
+        updatedAt: localizationHelper.now().toDate(),
+        dbUpdatedAt: localizationHelper.now().toDate(),
       })
       .then(() => {
         const options = {
@@ -270,7 +270,7 @@ const restoreBackupFromFile = function (
                             // custom properties should be checked property by property
                             // we can't know exactly the types
                             if (record.questionnaireAnswers) {
-                              helpers.convertPropsToDate(record.questionnaireAnswers);
+                              localizationHelper.convertPropsToDate(record.questionnaireAnswers);
                             }
 
                             let specialDatePropsMap = null;
@@ -296,7 +296,7 @@ const restoreBackupFromFile = function (
                                     let recordPropValue = _.get(obj, prop);
                                     if (recordPropValue) {
                                       // try to convert the string value to date, if valid, replace the old value
-                                      let convertedDate = moment(recordPropValue);
+                                      let convertedDate = localizationHelper.toMoment(recordPropValue);
                                       if (convertedDate.isValid()) {
                                         _.set(obj, prop, convertedDate.toDate());
                                       }
@@ -316,8 +316,8 @@ const restoreBackupFromFile = function (
                               if (!collectionRecords.length) {
                                 app.logger.debug(`Collection ${collectionName} has no records in the file. Skipping it`);
                                 updateRestoreLog({
-                                  updatedAt: new Date(),
-                                  dbUpdatedAt: new Date(),
+                                  updatedAt: localizationHelper.now().toDate(),
+                                  dbUpdatedAt: localizationHelper.now().toDate(),
                                   processedNo
                                 }).then(() => {
                                   // remove collection json file
@@ -334,7 +334,7 @@ const restoreBackupFromFile = function (
                               // insert all entries from the file in the collection
                               collectionRecords.forEach((record) => {
                                 // consider that each record was inserted now
-                                record.dbUpdatedAt = new Date();
+                                record.dbUpdatedAt = localizationHelper.now().toDate();
 
                                 // insert record
                                 bulk.insert(record);
@@ -349,8 +349,8 @@ const restoreBackupFromFile = function (
                                 }
                                 app.logger.debug(`Restoring Collection ${collectionName} complete.`);
                                 updateRestoreLog({
-                                  updatedAt: new Date(),
-                                  dbUpdatedAt: new Date(),
+                                  updatedAt: localizationHelper.now().toDate(),
+                                  dbUpdatedAt: localizationHelper.now().toDate(),
                                   processedNo
                                 }).then(() => {
                                   // remove collection json file
@@ -415,8 +415,8 @@ const restoreBackupFromFile = function (
       .then(() => {
         return updateRestoreLog({
           statusStep: 'LNG_STATUS_STEP_MIGRATING_DATABASE',
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date()
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate()
         });
       })
       .then(() => {
@@ -438,9 +438,9 @@ const restoreBackupFromFile = function (
         return updateRestoreLog({
           status: 'LNG_SYNC_STATUS_SUCCESS',
           statusStep: 'LNG_STATUS_STEP_RESTORE_FINISHED',
-          updatedAt: new Date(),
-          dbUpdatedAt: new Date(),
-          actionCompletionDate: new Date()
+          updatedAt: localizationHelper.now().toDate(),
+          dbUpdatedAt: localizationHelper.now().toDate(),
+          actionCompletionDate: localizationHelper.now().toDate()
         });
       })
       .then(() => {

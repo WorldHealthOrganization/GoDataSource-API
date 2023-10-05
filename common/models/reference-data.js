@@ -191,6 +191,11 @@ module.exports = function (ReferenceData) {
       'id': 'LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE',
       'name': 'LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE',
       'description': 'LNG_REFERENCE_DATA_OUTBREAK_MAP_SERVER_TYPE_DESCRIPTION'
+    },
+    {
+      'id': 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION',
+      'name': 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION',
+      'description': 'LNG_REFERENCE_DATA_CATEGORY_SECURITY_QUESTIONS_QUESTION_DESCRIPTION'
     }
   ];
 
@@ -679,15 +684,10 @@ module.exports = function (ReferenceData) {
                 }
 
                 // allow customizing some safe properties
-                const customizableProperties = ['iconId', 'colorCode', 'order', 'code', 'geoLocation', 'isSystemWide', 'allowedRefDataItems'];
+                const customizableProperties = ['active', 'value', 'description', 'iconId', 'colorCode', 'order', 'code', 'geoLocation', 'isSystemWide', 'allowedRefDataItems'];
 
-                // if model is editable but in use, also let it change the 'active', 'value', 'description' fields
-                if (error.code === 'MODEL_IN_USE') {
-                  customizableProperties.push('active', 'value', 'description');
-                }
-
-                const data = {};
                 // exclude all unsafe properties from request
+                const data = {};
                 Object.keys(context.data).forEach(function (property) {
                   if (customizableProperties.indexOf(property) !== -1) {
                     data[property] = context.data[property];

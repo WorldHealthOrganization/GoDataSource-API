@@ -2,8 +2,7 @@
 
 // dependencies
 const App = require('../server/server');
-const Helpers = require('./helpers');
-const Moment = require('moment');
+const localizationHelper = require('./localizationHelper');
 const PromiseQueue = require('p-queue');
 
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
@@ -11,7 +10,7 @@ const PromiseQueue = require('p-queue');
 const _createFollowUpEntry = function (props, contact) {
   // set index based on the difference in days from start date until the follow up set date
   // index is incremented by 1 because if follow up is on exact start day, the counter starts with 0
-  props.index = Helpers.getDaysSince(Moment(contact.followUp.startDate), props.date) + 1;
+  props.index = localizationHelper.getDaysSince(contact.followUp.startDate, props.date) + 1;
 
   // set follow up address to match contact's current address
   props.address = App.models.person.getCurrentAddress(contact);
@@ -23,7 +22,7 @@ const _createFollowUpEntry = function (props, contact) {
 };
 
 // count contacts that have follow up period between the passed start/end dates
-module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, options) {
+module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, options) {
   // where condition used to count eligible contacts
   let where = {
     $and: [
@@ -116,6 +115,26 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
       }
     ]
   };
+
+  // check if the follow-ups should be generated only for specific contacts.
+  if (contactIds.length) {
+    // let filter = { where: where};
+    const filter = App.utils.remote
+      .mergeFilters(
+        {
+          where: {
+            _id: {
+              $in: contactIds
+            }
+          }
+        }, {
+          where: where
+        }
+      );
+
+    // use the merged conditions
+    where = filter.where;
+  }
 
   // add geographical restriction to filter if needed
   return App.models.person
@@ -131,7 +150,7 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, skip, limit, options) {
+module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, skip, limit, options) {
   // where condition used to count eligible contacts
   let where = {
     $and: [
@@ -224,6 +243,26 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
       }
     ]
   };
+
+  // check if the follow-ups should be generated only for specific contacts.
+  if (contactIds.length) {
+    // let filter = { where: where};
+    const filter = App.utils.remote
+      .mergeFilters(
+        {
+          where: {
+            _id: {
+              $in: contactIds
+            }
+          }
+        }, {
+          where: where
+        }
+      );
+
+    // use the merged conditions
+    where = filter.where;
+  }
 
   // add geographical restriction to filter if needed
   return App.models.person
@@ -521,7 +560,6 @@ module.exports.getContactFollowupEligibleTeams = function (contact, teams, useLa
  * @param overwriteExistingFollowUps flag specifying whether exiting follow-ups should be overwritten
  * @param teamAssignmentPerDay map of team assignment per day; used to not rely only on round-robin as we may reach odd scenarios
  * @param intervalOfFollowUp Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')
- * @param generateFollowUpsDateOfLastContact flag specifying if contact tracing should start on the date of the last contact
  * @returns {{add: [], update: {}}}
  */
 module.exports.generateFollowupsForContact = function (
@@ -533,8 +571,7 @@ module.exports.generateFollowupsForContact = function (
   targeted,
   overwriteExistingFollowUps,
   teamAssignmentPerDay,
-  intervalOfFollowUp,
-  generateFollowUpsDateOfLastContact
+  intervalOfFollowUp
 ) {
 
   // process follow-up interval restrictions
@@ -605,11 +642,8 @@ module.exports.generateFollowupsForContact = function (
 
   // if passed period is higher than contact's follow up period
   // restrict follow up start/date to a maximum of contact's follow up period
-  // check also if contact tracing should start on the date of the last contact
-  let firstIncubationDay = generateFollowUpsDateOfLastContact ?
-    Helpers.getDate(contact.followUp.startDate).subtract(1, 'days') :
-    Helpers.getDate(contact.followUp.startDate);
-  let lastIncubationDay = Helpers.getDate(contact.followUp.endDate);
+  let firstIncubationDay = localizationHelper.getDateStartOfDay(contact.followUp.startDate);
+  let lastIncubationDay = localizationHelper.getDateStartOfDay(contact.followUp.endDate);
   if (period.endDate.isAfter(lastIncubationDay)) {
     period.endDate = lastIncubationDay.clone();
   }
@@ -629,7 +663,7 @@ module.exports.generateFollowupsForContact = function (
     let followUpIdsToUpdateForDate = [];
 
     // get list of follow ups that are on the same day as the day we want to generate
-    let followUpsInThisDay = contact.followUpsList.filter((followUp) => Helpers.getDate(followUp.date).isSame(followUpDate, 'd'));
+    let followUpsInThisDay = contact.followUpsList.filter((followUp) => localizationHelper.getDateStartOfDay(followUp.date).isSame(followUpDate, 'd'));
     let followUpsInThisDayCount = followUpsInThisDay.length;
 
     // do not generate over the daily quota
@@ -638,7 +672,7 @@ module.exports.generateFollowupsForContact = function (
     // for today and in the future,
     // if overwriteExistingFollowUps is true
     // recreate the follow ups that are not performed
-    if (overwriteExistingFollowUps && followUpDate.isSameOrAfter(Helpers.getDateEndOfDay(), 'day')) {
+    if (overwriteExistingFollowUps && followUpDate.isSameOrAfter(localizationHelper.getDateEndOfDay(), 'day')) {
       followUpIdsToUpdateForDate.push(...followUpsInThisDay
         .filter(f => {
           if (f.statusId !== 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED') {

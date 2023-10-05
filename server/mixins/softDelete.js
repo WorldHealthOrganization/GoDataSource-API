@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const localizationHelper = require('../../components/localizationHelper');
 
 /**
  * Check if a model is monitored for logging
@@ -167,7 +168,7 @@ module.exports = function (Model) {
     let nextStep = next.bind({callback: cb});
 
     const promise = Model
-      .updateAll(where, {[deletedFlag]: true, [deletedAt]: new Date()})
+      .updateAll(where, {[deletedFlag]: true, [deletedAt]: localizationHelper.now().toDate()})
       .then(function (result) {
         return nextStep(null, result);
       })
@@ -219,7 +220,7 @@ module.exports = function (Model) {
 
           // update the deletedAt property only if the action is not a sync or the property is missing from the instance
           if (!hasOptions || !options._sync || !instance[deletedAt]) {
-            props[deletedAt] = new Date();
+            props[deletedAt] = localizationHelper.now().toDate();
           }
 
           return instance
@@ -279,7 +280,7 @@ module.exports = function (Model) {
 
     // update the deletedAt property only if the action is not a sync or the property is missing from the instance
     if (!hasOptions || !options._sync || !this[deletedAt]) {
-      props[deletedAt] = new Date();
+      props[deletedAt] = localizationHelper.now().toDate();
     }
 
     // do we need to add update extra properties on soft deletion

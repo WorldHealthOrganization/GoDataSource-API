@@ -70,8 +70,7 @@
       "address"
     ],
     "dateOfReporting": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "isDateOfReportingApproximate": {
       "type": "boolean",
@@ -153,6 +152,10 @@
         "status": {
           "description": "Follow-up status",
           "type": "string"
+        },
+        "generateFollowUpsDateOfLastContact": {
+          "description": "Flag specifying if contact tracing should start on the date of the last contact",
+          "type": "boolean"
         }
       }
     },

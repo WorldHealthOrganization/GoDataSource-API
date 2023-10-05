@@ -5,8 +5,8 @@ const formidable = require('formidable');
 const app = require('../../server/server');
 const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
-const moment = require('moment');
 const syncConfig = require('../../server/config.json').sync;
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Sync) {
 
@@ -54,7 +54,7 @@ module.exports = function (Sync) {
      */
     function exportCallback(err, fileName, exportLogEntry, options, done) {
       // update exportLogEntry
-      exportLogEntry.actionCompletionDate = new Date();
+      exportLogEntry.actionCompletionDate = localizationHelper.now().toDate();
 
       if (err) {
         if (err.code === 'NO-DATA') {
@@ -339,7 +339,7 @@ module.exports = function (Sync) {
         return app.models.databaseExportLog
           .create({
             syncClientId: _.get(options, 'remotingContext.req.authData.client.credentials.clientId', `webUser: ${_.get(options, 'remotingContext.req.authData.user.id', 'unavailable')}`),
-            actionStartDate: new Date(),
+            actionStartDate: localizationHelper.now().toDate(),
             status: 'LNG_SYNC_STATUS_IN_PROGRESS',
             outbreakIDs: exportedOutbreakIDs
           }, options)
@@ -547,7 +547,7 @@ module.exports = function (Sync) {
       app.models.user.cache.reset();
 
       // update syncLogEntry
-      syncLogEntry.actionCompletionDate = new Date();
+      syncLogEntry.actionCompletionDate = localizationHelper.now().toDate();
 
       if (err) {
         app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
@@ -682,7 +682,7 @@ module.exports = function (Sync) {
       app.models.syncLog
         .create({
           syncClientId: _.get(req, 'authData.client.credentials.clientId', `webUser: ${_.get(req, 'authData.user.id', 'unavailable')}`),
-          actionStartDate: new Date(),
+          actionStartDate: localizationHelper.now().toDate(),
           status: 'LNG_SYNC_STATUS_IN_PROGRESS',
           outbreakIDs: outbreakIDs
         }, requestOptions)
@@ -812,7 +812,7 @@ module.exports = function (Sync) {
         // create syncLog entry in the DB
         return app.models.syncLog.create({
           syncServerUrl: upstreamServerEntry.url,
-          actionStartDate: new Date(),
+          actionStartDate: localizationHelper.now().toDate(),
           status: 'LNG_SYNC_STATUS_IN_PROGRESS'
         }, options);
       })
@@ -856,9 +856,9 @@ module.exports = function (Sync) {
             } else {
               // get date from which we will sync the data
               // in order to prevent data loss from the moment where the sync was started to the moment when the actionStartDate was set, get data from 1 minute earlier
-              let syncDate = moment(lastSyncLogEntry.actionStartDate).subtract(1, 'minutes');
+              let syncDate = localizationHelper.toMoment(lastSyncLogEntry.actionStartDate).subtract(1, 'minutes');
               syncLogEntry.informationStartDate = syncDate;
-              app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${new Date(syncLogEntry.informationStartDate).toISOString()}'. Syncing data from that date onwards`);
+              app.logger.debug(`Sync ${syncLogEntry.id}: Latest successful sync with the upstream server (${upstreamServerEntry.url}) was done on '${localizationHelper.toMoment(syncLogEntry.informationStartDate).toISOString()}'. Syncing data from that date onwards`);
             }
 
             // save added details in the sync log entry
@@ -921,7 +921,7 @@ module.exports = function (Sync) {
       .then(function () {
         // sync was successful
         // update syncLogEntry
-        syncLogEntry.actionCompletionDate = new Date();
+        syncLogEntry.actionCompletionDate = localizationHelper.now().toDate();
 
         // check for partial success
         if (syncLogEntry.error) {
@@ -961,7 +961,7 @@ module.exports = function (Sync) {
         } else {
           app.logger.debug(`Sync ${syncLogEntry.id}: Error ${err}`);
           // update sync log status
-          syncLogEntry.actionCompletionDate = new Date();
+          syncLogEntry.actionCompletionDate = localizationHelper.now().toDate();
           syncLogEntry.status = 'LNG_SYNC_STATUS_FAILED';
           syncLogEntry.addError(err);
           syncLogEntry

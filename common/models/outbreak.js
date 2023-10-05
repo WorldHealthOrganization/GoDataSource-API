@@ -11,8 +11,8 @@ const async = require('async');
 const fs = require('fs');
 const Platform = require('./../../components/platform');
 // used to manipulate dates
-const moment = require('moment');
 const apiError = require('./../../components/apiError');
+const localizationHelper = require('../../components/localizationHelper');
 
 module.exports = function (Outbreak) {
 
@@ -32,6 +32,7 @@ module.exports = function (Outbreak) {
     generateFollowUpsKeepTeamAssignment: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT',
     generateFollowUpsTeamAssignmentAlgorithm: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM',
     generateFollowUpsDateOfLastContact: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_LAST_CONTACT',
+    generateFollowUpsWhenCreatingContacts: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CONTACTS',
     intervalOfFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS',
     noDaysAmongContacts: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_AMONG_KNOWN_CONTACTS',
     noDaysInChains: 'LNG_OUTBREAK_FIELD_LABEL_DAYS_IN_KNOWN_TRANSMISSION_CHAINS',
@@ -41,6 +42,7 @@ module.exports = function (Outbreak) {
     'fieldsToDisplayNode[]': 'LNG_OUTBREAK_FIELD_LABEL_FIELDS_TO_DISPLAY_NODE',
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
+    eventInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
@@ -52,11 +54,11 @@ module.exports = function (Outbreak) {
     'arcGisServers[].url': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_URL',
     'arcGisServers[].type': 'LNG_OUTBREAK_FIELD_LABEL_ARC_GIS_SERVER_TYPE',
     isContactLabResultsActive: 'LNG_OUTBREAK_FIELD_LABEL_IS_CONTACT_LAB_RESULTS_ACTIVE',
-    isDateOfOnsetRequired: 'LNG_OUTBREAK_FIELD_LABEL_IS_CASE_DATE_OF_ONSET_REQUIRED',
     applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
     checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET',
     disableModifyingLegacyQuestionnaire: 'LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE',
-    allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS'
+    allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS',
+    visibleAndMandatoryFields: 'LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS'
   });
 
   Outbreak.locationFields = [
@@ -1189,7 +1191,7 @@ module.exports = function (Outbreak) {
                 // go trough their relationships
                 caseRecord.relationships.forEach(function (relationship) {
                   // store only the relationships that are newer than their conversion date
-                  if (app.utils.helpers.getDate(relationship.contactDate) >= app.utils.helpers.getDate(caseRecord.dateBecomeCase)) {
+                  if (localizationHelper.getDateStartOfDay(relationship.contactDate) >= localizationHelper.getDateStartOfDay(caseRecord.dateBecomeCase)) {
                     relationshipIds.push(relationship.id);
                   }
                 });
@@ -1542,7 +1544,7 @@ module.exports = function (Outbreak) {
       qAnswer.length &&
       qAnswer[0].date) {
       // find the answer that matches the date the question has
-      qAnswer = qAnswer.find(a => genericHelpers.getDate(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
+      qAnswer = qAnswer.find(a => localizationHelper.toMoment(a.date).format('YYYY-MM-DD') === question.multiAnswerDate);
     } else {
       if (Array.isArray(qAnswer) && qAnswer.length) {
         qAnswer = qAnswer[0];
@@ -1562,8 +1564,8 @@ module.exports = function (Outbreak) {
         }
       });
     } else {
-      if (qAnswer instanceof Date || genericHelpers.isValidDate(qAnswer)) {
-        question.value = genericHelpers.getDateDisplayValue(qAnswer);
+      if (qAnswer instanceof Date || localizationHelper.isValidDate(qAnswer)) {
+        question.value = localizationHelper.getDateDisplayValue(qAnswer);
       } else {
         question.value = qAnswer;
       }
@@ -1586,7 +1588,7 @@ module.exports = function (Outbreak) {
           qAnswer.forEach(answer => {
             const clonedQ = _.cloneDeep(question);
             clonedQ.value = null;
-            clonedQ.multiAnswerDate = genericHelpers.getDate(answer.date).format('YYYY-MM-DD');
+            clonedQ.multiAnswerDate = localizationHelper.toMoment(answer.date).format('YYYY-MM-DD');
             mapStandardAnswerToQuestion(answers, answer, clonedQ);
             question.multiAnswers.push({
               date: clonedQ.multiAnswerDate,
@@ -1693,6 +1695,116 @@ module.exports = function (Outbreak) {
     );
   });
 
+  /**
+   * On update, update contact followup start date, end date
+   */
+  Outbreak.observe('after save', function (context, next) {
+    // return if it's a new record or there is no changed field
+    if (
+      context.isNewInstance ||
+      !context.options.changedFields ||
+      context.options.changedFields.length === 0
+    ) {
+      return next();
+    }
+
+    // return if the changed fields are not 'Duration for the follow-up period in days' or 'Contact tracing should start on the date of the last contact'"
+    let followUpFieldsChanged = false;
+    for (let i = 0; i < context.options.changedFields.length; i++) {
+      if (
+        context.options.changedFields[i].field === 'periodOfFollowup' ||
+        context.options.changedFields[i].field === 'generateFollowUpsDateOfLastContact'
+      ) {
+        followUpFieldsChanged = true;
+        break;
+      }
+    }
+    if (!followUpFieldsChanged) {
+      return next();
+    }
+
+    // since the query can return many results we will do the update in batches
+    // Note: Updating each contact one by one in order for the "before/after save" hooks to be executed for each entry
+    // Number of find requests at the same time
+    // Don't set this value to high so we don't exceed Mongo 16MB limit
+    const findBatchSize = 1000;
+
+    // set how many item update actions to run in parallel
+    const updateBatchSize = 10;
+
+    // update all contacts (including deleted)
+    // set a flag in context.options needed for triggers
+    context.options.updateDeletedRecords = true;
+    const where = {
+      outbreakId: context.instance.id
+    };
+
+    // initialize parameters for handleActionsInBatches call
+    const getActionsCount = () => {
+      return app.models.contact
+        .count(Object.assign({}, where, { includeDeletedRecords: true }));
+    };
+
+    // get records in batches
+    const getBatchData = (batchNo, batchSize) => {
+      // get contacts for batch
+      return app.models.contact
+        .find({
+          deleted: true,
+          where: where,
+          fields: {
+            id: true,
+            deleted: true,
+            outbreakId: true,
+            type: true,
+            followUp: true
+          },
+          skip: (batchNo - 1) * batchSize,
+          limit: batchSize,
+          order: 'createdAt ASC'
+        });
+    };
+
+    // update contact
+    const itemAction = (contact) => {
+      const contactOptions = Object.assign({}, context.options);
+      return app.models.contact.determineFollowUpDates(
+        () => Promise.resolve(context.instance),
+        contact.id,
+        contact.deleted,
+        contact.followUp,
+        contactOptions
+      )
+        .then((data) => {
+          // no property to update ?
+          if (!data) {
+            return;
+          }
+
+          // update contact
+          return contact.updateAttributes(
+            data,
+            contactOptions
+          );
+        });
+    };
+
+    // process data in batches
+    genericHelpers.handleActionsInBatches(
+      getActionsCount,
+      getBatchData,
+      null,
+      itemAction,
+      findBatchSize,
+      updateBatchSize,
+      context.options.remotingContext.req.logger
+    )
+      .then(() => {
+        next();
+      })
+      .catch((err) => next(err));
+  });
+
   // on load, include default ArcGis servers
   Outbreak.observe('loaded', function (context, next) {
     // if the outbreak does not have ArcGis servers defined
@@ -1708,7 +1820,7 @@ module.exports = function (Outbreak) {
     // make sure the questions are ordered on load. This was made on on-load vs before save for simplicity
     // even though it will perform better on before save, there is a lot of logic that can be broken by affecting that code now
     // and a refactoring is already planned for questionnaires
-    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
+    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
       templateParser.orderQuestions(context.data[template]);
     });
 
@@ -1978,7 +2090,7 @@ module.exports = function (Outbreak) {
         if (err) {
           callback(err);
         } else {
-          let archiveName = `caseInvestigationTemplates_${moment().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
+          let archiveName = `caseInvestigationTemplates_${localizationHelper.now().format('YYYY-MM-DD_HH-mm-ss')}.zip`;
           let archivePath = `${tmpDirName}/${archiveName}`;
           let zip = new AdmZip();
 
@@ -2712,7 +2824,7 @@ module.exports = function (Outbreak) {
                   // update isolated nodes filter depending on active filter value
                   let followUpPeriod = outbreak.periodOfFollowup;
                   // get day of the start of the follow-up period starting from specified end date (by default, today)
-                  let followUpStartDate = genericHelpers.getDate(endDate).subtract(followUpPeriod, 'days');
+                  let followUpStartDate = localizationHelper.getDateStartOfDay(endDate).subtract(followUpPeriod, 'days');
 
                   if (activeFilter) {
                     // get cases/events reported in the last followUpPeriod days
@@ -2720,7 +2832,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            gte: new Date(followUpStartDate)
+                            gte: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);
@@ -2730,7 +2842,7 @@ module.exports = function (Outbreak) {
                       .mergeFilters({
                         where: {
                           dateOfReporting: {
-                            lt: new Date(followUpStartDate)
+                            lt: localizationHelper.toMoment(followUpStartDate).toDate()
                           }
                         }
                       }, isolatedNodesFilter);

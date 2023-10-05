@@ -76,7 +76,108 @@
       "principalId": "team_delete",
       "permission": "ALLOW",
       "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "team_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredTeams"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "team_import",
+      "permission": "ALLOW",
+      "property": "importImportableTeamsFileUsingMap"
     }
   ],
-  "methods": {}
+  "methods": {
+    "exportFilteredTeams": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export filtered list of teams",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
+    },
+    "importImportableTeamsFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "importLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Import a list of teams from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
+      }
+    }
+  }
 }

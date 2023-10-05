@@ -14,7 +14,8 @@
       "id": true,
       "defaultFn": "uuidv4",
       "readOnly": true,
-      "unique": true
+      "unique": true,
+      "safeForImport": true
     },
     "name": {
       "type": "string",
@@ -29,6 +30,9 @@
     },
     "migrateDate": {
       "type": "string"
+    },
+    "description": {
+      "type": "string"
     }
   },
   "indexes": {
@@ -37,16 +41,16 @@
     }
   },
   "mixins": {
-    "ReadOnlyProperty": true,
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
+    "ReadOnlyProperty": true,
     "AttachController": true,
     "IncludeCustomRelations": true,
     "DateProperty": true,
-    "RawFindAggregate": true,
-    "RawFind": true
+    "RawFind": true,
+    "RawFindAggregate": true
   },
   "validations": [],
   "relations": {},
@@ -97,6 +101,18 @@
       "principalId": "user_role_delete",
       "permission": "ALLOW",
       "property": "deleteById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_role_export",
+      "permission": "ALLOW",
+      "property": "exportFilteredUserRoles"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "user_role_import",
+      "permission": "ALLOW",
+      "property": "importImportableUserRolesFileUsingMap"
     }
   ],
   "methods": {
@@ -180,6 +196,94 @@
       "http": {
         "verb": "get",
         "path": "/count"
+      }
+    },
+    "exportFilteredUserRoles": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, order, offset, limit, where.useDbColumns, where.dontTranslateValues and where.jsonReplaceUndefinedWithNull - must be a JSON-encoded string ({\"something\":\"value\"}). Params 'where.useDbColumns' and 'where.dontTranslateValues' are used to display db properties and values instead of label translations (useful for scripts since translation can change). A zip file will be provided in case number of records exceed file type limits (e.g. xls (biff8) has a limit of 65536 rows). Also, if number of columns exceed file limits they will be split into multiple sheets per file (e.g. xls (biff8) has a limit of 255 columns)."
+        },
+        {
+          "arg": "type",
+          "type": "string",
+          "enum": [
+            "json",
+            "csv",
+            "xls",
+            "xlsx",
+            "ods",
+            "pdf"
+          ],
+          "description": "Export type; can be: json, csv, xls, xlsx, ods, pdf or csv. Default: json"
+        },
+        {
+          "arg": "anonymizeFields",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields will be anonymized in the exported file"
+        },
+        {
+          "arg": "fieldsGroupList",
+          "type": [
+            "string"
+          ],
+          "description": "If provided, mentioned fields groups will be included in the exported file"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "exportLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Export filtered list of user roles",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/export"
+        }, {
+          "verb": "post",
+          "path": "/export"
+        }
+      ]
+    },
+    "importImportableUserRolesFileUsingMap": {
+      "accepts": [
+        {
+          "arg": "body",
+          "type": "object",
+          "model": "importableFileWithFieldAndReferenceDataMap",
+          "http": {
+            "source": "body"
+          },
+          "root": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "importLogId",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "description": "Import a list of users from a file that was previously uploaded as an importable file",
+      "http": {
+        "verb": "post",
+        "path": "/import-importable-file-using-map"
       }
     }
   }

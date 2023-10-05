@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const App = require('../server');
 const Timer = require('../../components/Timer');
+const localizationHelper = require('../../components/localizationHelper');
 const Uuid = require('uuid').v4;
 
 /**
@@ -32,13 +33,17 @@ module.exports = function (Model) {
     }
 
     // get logged in user from request options in order to create author fields
-    let userId = _.get(reqOpts, 'accessToken.userId', 'unavailable');
+    // for sync, logged user model is added in a custom property
+    const userModelInstanceId = _.get(reqOpts, 'remotingContext.req.authData.userModelInstance.id');
+    let userId = userModelInstanceId ?
+      userModelInstanceId :
+      _.get(reqOpts, 'accessToken.userId', 'unavailable');
 
     // get platform from request options in order to set the "created on" field
     const platform = _.get(reqOpts, 'platform');
 
     // used for author timestamps
-    let now = new Date();
+    let now = localizationHelper.now().toDate();
 
     // get through each record and attach author fields (timestamps and 'by' fields)
     data = data.map((record) => {
