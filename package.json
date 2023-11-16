@@ -67,7 +67,7 @@
     "randomatic": "3.1.1",
     "rr": "0.1.0",
     "serve-favicon": "2.5.0",
-    "sharp": "0.28.3",
+    "sharp": "0.32.6",
     "strong-error-handler": "4.0.0",
     "svg-captcha": "1.4.0",
     "tmp": "0.2.1",
