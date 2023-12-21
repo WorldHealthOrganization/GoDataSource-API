@@ -265,6 +265,13 @@ module.exports = function (Case) {
         'classification',
         'dateOfInfection',
         'dateOfOnset',
+        'followUp',
+        'followUp.originalStartDate',
+        'followUp.startDate',
+        'followUp.endDate',
+        'followUp.status',
+        'followUp.generateFollowUpsDateOfLastContact',
+        'followUpTeamId',
         'isDateOfOnsetApproximate',
         'riskLevel',
         'riskReason',
@@ -396,6 +403,11 @@ module.exports = function (Case) {
 
   // used on importable file logic
   Case.foreignKeyFields = {
+    'followUpTeamId': {
+      modelName: 'team',
+      collectionName: 'team',
+      labelProperty: 'name'
+    },
     'responsibleUserId': {
       modelName: 'user',
       collectionName: 'user',
@@ -502,6 +514,193 @@ module.exports = function (Case) {
         next();
       })
       .catch(next);
+  });
+
+  /**
+   * Determine Follow-Up dates if we need to update this data
+   */
+  Case.determineFollowUpDates = function (
+    retrieveOutbreak,
+    id,
+    dateOfOnset,
+    followUp,
+    options
+  ) {
+    // prevent infinite loops
+    if (app.utils.helpers.getValueFromOptions(
+      options,
+      app.models.case.modelName,
+      id,
+      'determineFollowUpDates'
+    )) {
+      return Promise.resolve();
+    }
+
+    // get outbreak
+    let outbreak;
+    return Promise.resolve()
+      .then(() => {
+        return retrieveOutbreak().then((outbreakModel) => {
+          // set data
+          outbreak = outbreakModel;
+
+          // finished
+          return;
+        });
+      })
+      .then(function () {
+        // keep a flag for updating case
+        let shouldUpdate = false;
+
+        // build a list of properties that need to be updated
+        // & preserve previous value
+        const previousStatusValue = _.get(followUp, 'status');
+        const propsToUpdate = {
+          status: previousStatusValue ?
+            previousStatusValue :
+            'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP'
+        };
+
+        // preserve original startDate, if any
+        if (followUp && followUp.originalStartDate) {
+          propsToUpdate.originalStartDate = followUp.originalStartDate;
+        }
+
+        // update startDate and endDate if only dateOfOnset is set
+        // otherwise, remove them
+        if (!dateOfOnset) {
+          shouldUpdate = true;
+        } else {
+          // set follow-up start date to be the date of onset
+          // check also if case tracing should start on the date of onset
+          propsToUpdate.startDate = outbreak.generateFollowUpsDateOfOnset ?
+            localizationHelper.getDateStartOfDay(dateOfOnset) :
+            localizationHelper.getDateStartOfDay(dateOfOnset).add(1, 'days');
+
+          // if follow-up original start date was not previously set
+          if (!propsToUpdate.originalStartDate) {
+            // flag as an update
+            shouldUpdate = true;
+            // set it as follow-up start date
+            propsToUpdate.originalStartDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate);
+          }
+
+          // set follow-up end date
+          propsToUpdate.endDate = localizationHelper.getDateStartOfDay(propsToUpdate.startDate).add(outbreak.periodOfFollowupCases - 1, 'days');
+
+          // set generateFollowUpsDateOfOnset if only the outbreak feature is enabled
+          if (outbreak.generateFollowUpsDateOfOnset) {
+            propsToUpdate.generateFollowUpsDateOfOnset = true;
+          }
+
+          // check if case instance should be updated (check if any property changed value)
+          !shouldUpdate && ['startDate', 'endDate']
+            .forEach(function (updatePropName) {
+              // if the property is missing (probably never, but lets be safe)
+              if (!followUp) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+
+              // if either original or new value was not set (when the other was present)
+              if (
+                (
+                  !followUp[updatePropName] &&
+                  propsToUpdate[updatePropName]
+                ) || (
+                  followUp[updatePropName] &&
+                  !propsToUpdate[updatePropName]
+                )
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+              // both original and new values are present, but the new values are different than the old ones
+              if (
+                followUp[updatePropName] &&
+                propsToUpdate[updatePropName] &&
+                (localizationHelper.toMoment(followUp[updatePropName]).toDate().getTime() !== localizationHelper.toMoment(propsToUpdate[updatePropName]).toDate().getTime())
+              ) {
+                // flag as an update
+                return shouldUpdate = true;
+              }
+            });
+        }
+
+        // if dates are the same, but there is no previous status set, we may need to set the default status
+        // this case might occur during import
+        if (!shouldUpdate && !previousStatusValue) {
+          shouldUpdate = true;
+        }
+        // if updates are required
+        if (shouldUpdate) {
+          // set a flag for this operation so we prevent infinite loops
+          app.utils.helpers.setValueInOptions(
+            options,
+            app.models.case.modelName,
+            id,
+            'determineFollowUpDates',
+            true
+          );
+
+          // return new data
+          return {
+            followUp: propsToUpdate,
+            // case is active if there is no dateOfOnset or it has valid follow-up interval
+            active: !dateOfOnset || !!propsToUpdate.startDate
+          };
+        }
+      });
+  };
+
+
+  /**
+   * After save hooks
+   */
+  Case.observe('after save', function (context, next) {
+    // update follow-up dates, if dateOfOnset was changed
+    let dateOfOnsetChanged = false;
+    if (
+      context.isNewInstance &&
+      context.instance.dateOfOnset
+    ) {
+      dateOfOnsetChanged = true;
+    } else {
+      for (let i = 0; i < context.options.changedFields.length; i++) {
+        if (context.options.changedFields[i].field === 'dateOfOnset') {
+          // stop and if at least one field was found
+          dateOfOnsetChanged = true;
+          break;
+        }
+      }
+    }
+    if (dateOfOnsetChanged) {
+      Case.determineFollowUpDates(
+        () => app.models.outbreak.findById(context.instance.outbreakId),
+        context.instance.id,
+        context.instance.dateOfOnset,
+        context.instance.followUp,
+        context.options
+      )
+        .then(function (data) {
+          // no property to update ?
+          if (!data) {
+            return;
+          }
+
+          // update case
+          return context.instance.updateAttributes(
+            data,
+            context.options
+          );
+        })
+        .then(function () {
+          next();
+        })
+        .catch(next);
+    } else {
+      next();
+    }
   });
 
   /**

@@ -13,7 +13,10 @@ const migrateSystemSettings = function (next) {
     const collection = db.collection('systemSettings');
     return collection.findOne()
       .then((instance) => {
-        if (instance) {
+        if (
+          instance &&
+          instance.clientApplications
+        ) {
           // get through system settings client apps
           // make sure each client has an id
           let clientApplicationsChanged = false;

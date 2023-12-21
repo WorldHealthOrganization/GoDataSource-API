@@ -74,7 +74,7 @@
     "loginRetriesCount": {
       "type": "number"
     },
-    "lastLoginDate": {
+    "bruteForceLoginDate": {
       "type": "date"
     },
     "resetPasswordRetriesCount": {
@@ -91,6 +91,9 @@
     "dontCacheFilters": {
       "type": "boolean",
       "default": false
+    },
+    "lastLogin": {
+      "type": "date"
     }
   },
   "indexes": {

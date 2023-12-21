@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const common = require('./_common');
 const uuid = require('uuid');
+const Platform = require('../../../components/platform');
 
 /**
  * Create / Update default reference data
@@ -317,7 +318,8 @@ const createUpdateDefaultReferenceData = (referenceDataDirPath) => {
                           createdAt: common.install.timestamps.createdAt,
                           createdBy: 'system',
                           updatedAt: common.install.timestamps.updatedAt,
-                          updatedBy: 'system'
+                          updatedBy: 'system',
+                          createdOn: Platform.API
                         })
                     );
                   });

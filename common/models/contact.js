@@ -40,13 +40,13 @@ module.exports = function (Contact) {
       'clusterId': 'LNG_RELATIONSHIP_FIELD_LABEL_CLUSTER',
       'comment': 'LNG_RELATIONSHIP_FIELD_LABEL_COMMENT',
       'id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-      'createdAt': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
-      'createdBy': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
-      'updatedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
-      'updatedBy': 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
-      'deleted': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-      'deletedAt': 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
-      'createdOn': 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON'
+      'createdAt': 'LNG_RELATIONSHIP_FIELD_LABEL_CREATED_AT',
+      'createdBy': 'LNG_RELATIONSHIP_FIELD_LABEL_CREATED_BY',
+      'updatedAt': 'LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_AT',
+      'updatedBy': 'LNG_RELATIONSHIP_FIELD_LABEL_UPDATED_BY',
+      'deleted': 'LNG_RELATIONSHIP_FIELD_LABEL_DELETED',
+      'deletedAt': 'LNG_RELATIONSHIP_FIELD_LABEL_DELETED_AT',
+      'createdOn': 'LNG_RELATIONSHIP_FIELD_LABEL_CREATED_ON'
     };
 
     // append source export fields
@@ -90,6 +90,7 @@ module.exports = function (Contact) {
     'followUp.startDate': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE',
     'followUp.endDate': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_END_DATE',
     'followUp.status': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_STATUS',
+    'followUp.generateFollowUpsDateOfLastContact': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_GENERATE_FOLLOW_UPS_DATE_OF_LAST_CONTACT',
     'followUpTeamId': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID',
     'dob': 'LNG_CONTACT_FIELD_LABEL_DOB',
     'documents': 'LNG_CONTACT_FIELD_LABEL_DOCUMENTS',
@@ -192,6 +193,7 @@ module.exports = function (Contact) {
         'followUp.startDate',
         'followUp.endDate',
         'followUp.status',
+        'followUp.generateFollowUpsDateOfLastContact',
         'followUpTeamId',
         'riskLevel',
         'riskReason',
@@ -804,7 +806,7 @@ module.exports = function (Contact) {
   });
 
   /**
-   * Retrieve all contact's that have follow ups on the given date
+   * Retrieve all case/contact's that have follow ups on the given date
    * Group them by place/case/riskLevel
    * If group by place is set, placeLevel property is required
    * @param outbreak
@@ -812,7 +814,13 @@ module.exports = function (Contact) {
    * @param groupBy
    * @param options Options from request
    */
-  Contact.getGroupedByDate = function (outbreak, date, groupBy, options) {
+  Contact.getGroupedByDate = function (
+    outbreak,
+    personType,
+    date,
+    groupBy,
+    options
+  ) {
     // process date interval
     let dateInterval = [];
     if (typeof date === 'object' && date.startDate && date.endDate) {
@@ -822,6 +830,9 @@ module.exports = function (Contact) {
     } else {
       dateInterval = [localizationHelper.getDateStartOfDay(), localizationHelper.getDateEndOfDay()];
     }
+    const personModelName = personType === helpers.PERSON_TYPE.CASE ?
+      'case' :
+      'contact';
 
     // check for geographical restriction
     return Contact.addGeographicalRestrictions(options.remotingContext)
@@ -922,13 +933,16 @@ module.exports = function (Contact) {
         if (groupBy === 'riskLevel') {
           // find follow-ups for specified date interval
           return app.models.followUp
-            .rawFind({
-              date: {
-                between: dateInterval
+            .findAggregate({
+              where: {
+                date: {
+                  between: dateInterval
+                },
+                outbreakId: outbreak.id,
+                // restrict the list of follow-ups by person type
+                'contact.type': personType
               },
-              outbreakId: outbreak.id,
-            }, {
-              order: {date: 1}
+              order: ['date ASC']
             })
             .then(function (followUps) {
               // build a followUp map, to easily link them to contacts later
@@ -956,7 +970,7 @@ module.exports = function (Contact) {
                 ]
               });
 
-              return app.models.contact
+              return app.models.person
                 .rawFind(contactQuery)
                 .then(function (contacts) {
                   // build contact groups
@@ -996,7 +1010,7 @@ module.exports = function (Contact) {
 
         // return contacts grouped by location that have follow ups in the given day
         return app.models.person
-          .getPeoplePerLocation('contact', dateFilter, outbreak, options)
+          .getPeoplePerLocation(personModelName, true, dateFilter, outbreak, options)
           .then((groups) => {
             // rebuild the result to match the structure resulted from 'case' grouping
             // doing this because we're reusing existing functionality that does not build the result the same way

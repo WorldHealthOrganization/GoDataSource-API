@@ -7,6 +7,7 @@ const _ = require('lodash');
 const path = require('path');
 const fork = require('child_process').fork;
 const localizationHelper = require('../../components/localizationHelper');
+const platform = require('../../components/platform');
 
 module.exports = function (SystemSettings) {
 
@@ -199,32 +200,6 @@ module.exports = function (SystemSettings) {
         });
       })
       .catch(callback);
-  };
-
-  /**
-   * Generate a JSON or a QR-Code (PNG) file that encodes a JSON
-   * @param type
-   * @param data Data to be encoded
-   * @param callback
-   */
-  SystemSettings.generateFile = function (type, data, callback) {
-    // be more permissive on capitalisation
-    type = type.toLowerCase();
-    // handle each type individually
-    switch (type) {
-      case 'json':
-        app.utils.remote.helpers
-          .offerFileToDownload(JSON.stringify(data), 'application/json', `${uuid.v4()}.json`, callback);
-        break;
-      case 'qr':
-        app.utils.remote.helpers
-          .offerFileToDownload(app.utils.qrCode.encodeDataInQr(data), 'image/png', `${uuid.v4()}.png`, callback);
-        break;
-      default:
-        // send error for invalid types
-        callback(app.utils.apiError.getError('REQUEST_VALIDATION_ERROR', {errorMessages: `Invalid File Type: ${type}. Supported options: json, qr`}));
-        break;
-    }
   };
 
   /**
@@ -526,6 +501,19 @@ module.exports = function (SystemSettings) {
     callback(
       null,
       definition
+    );
+  };
+
+  /**
+   * Retrieve created on values
+   */
+  SystemSettings.getCreatedOnValues = function (callback) {
+    callback(
+      null,
+      Object.values(platform).map((id) => ({
+        id,
+        name: `LNG_PLATFORM_LABEL_${id}`
+      }))
     );
   };
 };

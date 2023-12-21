@@ -38,12 +38,46 @@ module.exports = function (Outbreak) {
 
     let errorMessage = '';
 
+    // get entity type for which the follow-ups are generated
+    const personType = data.personType === genericHelpers.PERSON_TYPE.CASE ?
+      genericHelpers.PERSON_TYPE.CASE :
+      genericHelpers.PERSON_TYPE.CONTACT;
+
+    // cache outbreak's follow up options
+    let outbreakGenerateFollowUpsCurrentDate;
+    let outbreakFrequencyOfFollowUp;
+    let outbreakFrequencyOfFollowUpPerDay;
+    let outbreakTeamAssignmentAlgorithm;
+    let outbreakGenerateFollowUpsOverwriteExisting;
+    let outbreakGenerateFollowUpsKeepTeamAssignment;
+    let outbreakIntervalOfFollowUp;
+    let outbreakPeriodOfFollowup;
+    if (personType === genericHelpers.PERSON_TYPE.CASE) {
+      outbreakGenerateFollowUpsCurrentDate = outbreak.generateFollowUpsDateOfOnset;
+      outbreakFrequencyOfFollowUp = outbreak.frequencyOfFollowUpCases;
+      outbreakFrequencyOfFollowUpPerDay = outbreak.frequencyOfFollowUpPerDayCases;
+      outbreakTeamAssignmentAlgorithm = outbreak.generateFollowUpsTeamAssignmentAlgorithmCases;
+      outbreakGenerateFollowUpsOverwriteExisting = outbreak.generateFollowUpsOverwriteExistingCases;
+      outbreakGenerateFollowUpsKeepTeamAssignment = outbreak.generateFollowUpsKeepTeamAssignmentCases;
+      outbreakIntervalOfFollowUp = outbreak.intervalOfFollowUpCases;
+      outbreakPeriodOfFollowup = outbreak.periodOfFollowupCases;
+    } else {
+      outbreakGenerateFollowUpsCurrentDate = outbreak.generateFollowUpsDateOfLastContact;
+      outbreakFrequencyOfFollowUp = outbreak.frequencyOfFollowUp;
+      outbreakFrequencyOfFollowUpPerDay = outbreak.frequencyOfFollowUpPerDay;
+      outbreakTeamAssignmentAlgorithm = outbreak.generateFollowUpsTeamAssignmentAlgorithm;
+      outbreakGenerateFollowUpsOverwriteExisting = outbreak.generateFollowUpsOverwriteExisting;
+      outbreakGenerateFollowUpsKeepTeamAssignment = outbreak.generateFollowUpsKeepTeamAssignment;
+      outbreakIntervalOfFollowUp = outbreak.intervalOfFollowUp;
+      outbreakPeriodOfFollowup = outbreak.periodOfFollowup;
+    }
+
     // outbreak follow up generate params sanity checks
     let invalidOutbreakParams = [];
-    if (outbreak.frequencyOfFollowUp <= 0) {
+    if (outbreakFrequencyOfFollowUp <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUp');
     }
-    if (outbreak.frequencyOfFollowUpPerDay <= 0) {
+    if (outbreakFrequencyOfFollowUpPerDay <= 0) {
       invalidOutbreakParams.push('frequencyOfFollowUpPerDay');
     }
     if (invalidOutbreakParams.length) {
@@ -57,7 +91,7 @@ module.exports = function (Outbreak) {
     // if end date is not provided, use outbreak follow-up period
     let followupStartDate = data.startDate ?
       localizationHelper.getDateStartOfDay(data.startDate) : (
-        outbreak.generateFollowUpsDateOfLastContact ?
+        outbreakGenerateFollowUpsCurrentDate ?
           localizationHelper.today() :
           localizationHelper.today().add(1, 'days')
       );
@@ -65,8 +99,8 @@ module.exports = function (Outbreak) {
       data.endDate ?
         data.endDate :
         followupStartDate.clone().add(
-          outbreak.periodOfFollowup > 0 ?
-            outbreak.periodOfFollowup - 1 :
+          outbreakPeriodOfFollowup > 0 ?
+            outbreakPeriodOfFollowup - 1 :
             0,
           'days'
         )
@@ -112,23 +146,18 @@ module.exports = function (Outbreak) {
       targeted = data.targeted;
     }
 
-    // cache outbreak's follow up options
-    let outbreakFollowUpFreq = outbreak.frequencyOfFollowUp;
-    let outbreakFollowUpPerDay = outbreak.frequencyOfFollowUpPerDay;
-    let outbreakTeamAssignmentAlgorithm = outbreak.generateFollowUpsTeamAssignmentAlgorithm;
-
     // get other generate follow-ups options
     let overwriteExistingFollowUps = typeof data.overwriteExistingFollowUps === 'boolean' ?
       data.overwriteExistingFollowUps :
-      outbreak.generateFollowUpsOverwriteExisting;
+      outbreakGenerateFollowUpsOverwriteExisting;
     let keepTeamAssignment = typeof data.keepTeamAssignment === 'boolean' ?
       data.keepTeamAssignment :
-      outbreak.generateFollowUpsKeepTeamAssignment;
+      outbreakGenerateFollowUpsKeepTeamAssignment;
 
     // get other generate follow-ups options
     let intervalOfFollowUp = typeof data.intervalOfFollowUp === 'string' ?
       data.intervalOfFollowUp :
-      outbreak.intervalOfFollowUp;
+      outbreakIntervalOfFollowUp;
 
     // retrieve list of contacts that are eligible for follow up generation
     // and those that have last follow up inconclusive
@@ -139,6 +168,7 @@ module.exports = function (Outbreak) {
     // get number of contacts for which followups need to be generated
     FollowupGeneration
       .countContactsEligibleForFollowup(
+        personType,
         followupStartDate.toDate(),
         followupEndDate.toDate(),
         outbreak.id,
@@ -169,6 +199,7 @@ module.exports = function (Outbreak) {
             const getBatchData = function (batchNo, batchSize) {
               return FollowupGeneration
                 .getContactsEligibleForFollowup(
+                  personType,
                   followupStartDate.toDate(),
                   followupEndDate.toDate(),
                   outbreak.id,
@@ -214,8 +245,8 @@ module.exports = function (Outbreak) {
                               startDate: followupStartDate,
                               endDate: followupEndDate
                             },
-                            outbreakFollowUpFreq,
-                            outbreakFollowUpPerDay,
+                            outbreakFrequencyOfFollowUp,
+                            outbreakFrequencyOfFollowUpPerDay,
                             targeted,
                             overwriteExistingFollowUps,
                             teamAssignmentPerDay,
@@ -762,124 +793,49 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Count the cases that are lost to follow-up
+   * Note: The cases are counted in total and per team. If a case is lost to follow-up by 2 teams it will be counted once in total and once per each team.
+   * @param options
+   * @param filter
+   */
+  Outbreak.prototype.countCasesLostToFollowup = function (filter, options) {
+    return Outbreak.helpers.countPersonsLostToFollowup(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      filter,
+      options
+    );
+  };
+
+  /**
    * Count the contacts that are lost to follow-up
    * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
    * @param options
    * @param filter
    */
   Outbreak.prototype.countContactsLostToFollowup = function (filter, options) {
-    // get outbreakId
-    let outbreakId = this.id;
+    return Outbreak.helpers.countPersonsLostToFollowup(
+      this,
+      genericHelpers.PERSON_TYPE.CONTACT,
+      filter,
+      options
+    );
+  };
 
-    // filter by classification ?
-    const classification = _.get(filter, 'where.classification');
-    if (classification) {
-      delete filter.where.classification;
-    }
-
-    // create filter as we need to use it also after the relationships are found
-    let _filter = app.utils.remote
-      .mergeFilters({
-        where: {
-          outbreakId: outbreakId,
-          followUp: {
-            neq: null
-          },
-          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
-        }
-      }, filter || {});
-
-    // do we need to filter contacts by case classification ?
-    let promise = Promise.resolve();
-    if (classification) {
-      // retrieve cases
-      promise = promise
-        .then(() => {
-          return app.models.case
-            .rawFind({
-              outbreakId: this.id,
-              deleted: false,
-              classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
-            }, {projection: {'_id': 1}});
-        })
-        .then((caseData) => {
-          // no case data, so there is no need to retrieve relationships
-          if (_.isEmpty(caseData)) {
-            return [];
-          }
-
-          // retrieve list of cases for which we need to retrieve contacts relationships
-          const caseIds = caseData.map((caseModel) => caseModel.id);
-
-          // retrieve relationships
-          return app.models.relationship
-            .rawFind({
-              outbreakId: this.id,
-              deleted: false,
-              $or: [
-                {
-                  'persons.0.source': true,
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.0.id': {
-                    $in: caseIds
-                  }
-                }, {
-                  'persons.1.source': true,
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.1.id': {
-                    $in: caseIds
-                  }
-                }
-              ]
-            }, {projection: {persons: 1}});
-        })
-        .then((relationshipData) => {
-          // determine contacts which can be retrieved
-          let contactIds = {};
-          (relationshipData || []).forEach((contact) => {
-            const id = contact.persons[0].target ?
-              contact.persons[0].id :
-              contact.persons[1].id;
-            contactIds[id] = true;
-          });
-          contactIds = Object.keys(contactIds);
-
-          // filter contacts
-          _filter.where = {
-            $and: [
-              _filter.where, {
-                _id: {
-                  $in: contactIds
-                }
-              }
-            ]
-          };
-        });
-    }
-
-    // get contacts that are available for follow up generation
-    return promise
-      .then(() => {
-        // add geographical restriction to filter if needed
-        return app.models.person
-          .addGeographicalRestrictions(options.remotingContext, _filter.where)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (_filter.where = updatedFilter);
-
-            // get all relationships between events and contacts, where the contacts were created sooner than 'noDaysNewContacts' ago
-            return app.models.contact
-              .rawFind(_filter.where)
-              .then(function (contacts) {
-                return {
-                  contactsLostToFollowupCount: contacts.length,
-                  contactIDs: contacts.map((contact) => contact.id)
-                };
-              });
-          });
-      });
+  /**
+   * Count the cases not seen in the past X days
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNotSeen': number on the first level in 'where'
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesNotSeenInXDays = function (filter, options, callback) {
+    Outbreak.helpers.countPersonsNotSeenInXDays(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      filter,
+      options,
+      callback
+    );
   };
 
   /**
@@ -889,201 +845,33 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsNotSeenInXDays = function (filter, options, callback) {
-    filter = filter || {};
-    // initialize noDaysNotSeen filter
-    let noDaysNotSeen;
-    // check if the noDaysNotSeen filter was sent; accepting it only on the first level
-    noDaysNotSeen = _.get(filter, 'where.noDaysNotSeen');
-    if (typeof noDaysNotSeen !== 'undefined') {
-      // noDaysNotSeen was sent; remove it from the filter as it shouldn't reach DB
-      delete filter.where.noDaysNotSeen;
-    } else {
-      // get the outbreak noDaysNotSeen as the default noDaysNotSeen value
-      noDaysNotSeen = this.noDaysNotSeen;
-    }
+    Outbreak.helpers.countPersonsNotSeenInXDays(
+      this,
+      genericHelpers.PERSON_TYPE.CONTACT,
+      filter,
+      options,
+      callback
+    );
+  };
 
-    // filter by classification ?
-    const classification = _.get(filter, 'where.classification');
-    if (classification) {
-      delete filter.where.classification;
-    }
-
-    // get outbreakId
-    let outbreakId = this.id;
-
-    // get date from noDaysNotSeen days ago
-    let xDaysAgo = localizationHelper.getDateStartOfDay().subtract(noDaysNotSeen, 'day');
-
-    // get contact query
-    let contactQuery = app.utils.remote.searchByRelationProperty
-      .convertIncludeQueryToFilterQuery(filter).contact;
-
-    // by default, find contacts does not perform any task
-    let findContacts = Promise.resolve();
-
-    // do we need to filter contacts by case classification ?
-    if (classification) {
-      // retrieve cases
-      findContacts = findContacts
-        .then(() => {
-          return app.models.case
-            .rawFind({
-              outbreakId: outbreakId,
-              deleted: false,
-              classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
-            }, {projection: {'_id': 1}});
-        })
-        .then((caseData) => {
-          // no case data, so there is no need to retrieve relationships
-          if (_.isEmpty(caseData)) {
-            return [];
-          }
-
-          // retrieve list of cases for which we need to retrieve contacts relationships
-          const caseIds = caseData.map((caseModel) => caseModel.id);
-
-          // retrieve relationships
-          return app.models.relationship
-            .rawFind({
-              outbreakId: this.id,
-              deleted: false,
-              $or: [
-                {
-                  'persons.0.source': true,
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.0.id': {
-                    $in: caseIds
-                  }
-                }, {
-                  'persons.1.source': true,
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.1.id': {
-                    $in: caseIds
-                  }
-                }
-              ]
-            }, {projection: {persons: 1}});
-        })
-        .then((relationshipData) => {
-          // determine contacts which can be retrieved
-          let contactIds = {};
-          (relationshipData || []).forEach((contact) => {
-            const id = contact.persons[0].target ?
-              contact.persons[0].id :
-              contact.persons[1].id;
-            contactIds[id] = true;
-          });
-          contactIds = Object.keys(contactIds);
-
-          // filter contacts
-          if (contactQuery) {
-            contactQuery = {
-              and: [
-                contactQuery, {
-                  id: {
-                    inq: contactIds
-                  }
-                }
-              ]
-            };
-          } else {
-            contactQuery = {
-              id: {
-                inq: contactIds
-              }
-            };
-          }
-        });
-    }
-
-    // find the contacts
-    findContacts = findContacts
-      .then(() => {
-        // add geographical restriction to filter if needed
-        return app.models.person
-          .addGeographicalRestrictions(options.remotingContext, contactQuery)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (contactQuery = updatedFilter);
-
-            // no contact query
-            if (!contactQuery) {
-              return;
-            }
-
-            // if a contact query was specified
-            return app.models.contact
-              .rawFind({
-                and: [
-                  {outbreakId: outbreakId},
-                  contactQuery
-                ]
-              }, {projection: {'_id': 1}})
-              .then(function (contacts) {
-                // return a list of contact ids
-                return contacts.map(contact => contact.id);
-              });
-          });
-      });
-
-    // find contacts
-    findContacts
-      .then(function (contactIds) {
-        let followUpQuery = {
-          where: {
-            and: [
-              {
-                outbreakId: outbreakId
-              },
-              {
-                // get follow-ups that were scheduled in the past noDaysNotSeen days
-                date: {
-                  between: [xDaysAgo, localizationHelper.getDateEndOfDay()]
-                }
-              },
-              app.models.followUp.notSeenFilter
-            ]
-          }
-        };
-
-        // if a list of contact ids was specified
-        if (contactIds) {
-          // restrict list of follow-ups to the list fo contact ids
-          followUpQuery.where.and.push({
-            personId: {
-              inq: contactIds
-            }
-          });
-        }
-
-        // get follow-ups
-        return app.models.followUp.rawFind(
-          app.utils.remote.mergeFilters(followUpQuery, filter || {}).where,
-          {
-            // order by date as we need to check the follow-ups from the oldest to the most new
-            order: {date: 1}
-          })
-          .then(followUps => {
-            const resultContactsList = [];
-            // group follow ups per contact
-            const groupedByContact = _.groupBy(followUps, (f) => f.personId);
-            for (let contactId in groupedByContact) {
-              // keep one follow up per day
-              const contactFollowUps = [...new Set(groupedByContact[contactId].map((f) => f.index))];
-              if (contactFollowUps.length === noDaysNotSeen) {
-                resultContactsList.push(contactId);
-              }
-            }
-            // send response
-            return callback(null, {
-              contactsCount: resultContactsList.length,
-              contactIDs: resultContactsList
-            });
-          });
-      })
-      .catch(callback);
+  /**
+   * Count the seen cases
+   * Note: The cases are counted in total and per team. If a case is seen by 2 teams it will be counted once in total and once per each team.
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesSeen = function (filter, options, callback) {
+    Outbreak.helpers.countPersonsByFollowUpFilter({
+      outbreakId: this.id,
+      personType: genericHelpers.PERSON_TYPE.CASE,
+      followUpFilter: app.models.followUp.seenFilter,
+      resultProperty: 'casesSeenCount'
+    },
+    filter,
+    options,
+    callback
+    );
   };
 
   /**
@@ -1094,11 +882,32 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsSeen = function (filter, options, callback) {
-    Outbreak.helpers.countContactsByFollowUpFilter({
+    Outbreak.helpers.countPersonsByFollowUpFilter({
       outbreakId: this.id,
+      personType: genericHelpers.PERSON_TYPE.CONTACT,
       followUpFilter: app.models.followUp.seenFilter,
       resultProperty: 'contactsSeenCount'
-    }, filter, options, callback);
+    },
+    filter,
+    options,
+    callback
+    );
+  };
+
+  /**
+   * Count the cases that have followups scheduled and the cases with successful followups
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.countCasesWithSuccessfulFollowups = function (filter, options, callback) {
+    Outbreak.helpers.countPersonsWithSuccessfulFollowups(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      filter,
+      options,
+      callback
+    );
   };
 
   /**
@@ -1108,292 +917,15 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.countContactsWithSuccessfulFollowups = function (filter, options, callback) {
-    filter = filter || {};
-    const FollowUp = app.models.followUp;
-
-    // initialize result
-    let result = {
-      totalContactsWithFollowupsCount: 0,
-      contactsWithSuccessfulFollowupsCount: 0,
-      teams: [],
-      contacts: []
-    };
-
-    // get outbreakId
-    let outbreakId = this.id;
-
-    // retrieve relations queries
-    const relationsQueries = app.utils.remote.searchByRelationProperty
-      .convertIncludeQueryToFilterQuery(filter);
-
-    // get contact query, if any
-    let contactQuery = relationsQueries.contact;
-
-    // get case query, if any
-    const caseQuery = relationsQueries.case;
-
-    // by default, find contacts does not perform any task
-    let findContacts = Promise.resolve();
-
-    // do we need to filter contacts by case classification ?
-    if (caseQuery) {
-      // retrieve cases
-      findContacts = findContacts
-        .then(() => {
-          return app.models.case
-            .rawFind({
-              and: [
-                caseQuery, {
-                  outbreakId: outbreakId,
-                  deleted: false
-                }
-              ]
-            }, {projection: {'_id': 1}});
-        })
-        .then((caseData) => {
-          // no case data, so there is no need to retrieve relationships
-          if (_.isEmpty(caseData)) {
-            return [];
-          }
-
-          // retrieve list of cases for which we need to retrieve contacts relationships
-          const caseIds = caseData.map((caseModel) => caseModel.id);
-
-          // retrieve relationships
-          return app.models.relationship
-            .rawFind({
-              outbreakId: outbreakId,
-              deleted: false,
-              $or: [
-                {
-                  'persons.0.source': true,
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.0.id': {
-                    $in: caseIds
-                  }
-                }, {
-                  'persons.1.source': true,
-                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
-                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
-                  'persons.1.id': {
-                    $in: caseIds
-                  }
-                }
-              ]
-            }, {projection: {persons: 1}});
-        })
-        .then((relationshipData) => {
-          // determine contacts which can be retrieved
-          let contactIds = {};
-          (relationshipData || []).forEach((contact) => {
-            const id = contact.persons[0].target ?
-              contact.persons[0].id :
-              contact.persons[1].id;
-            contactIds[id] = true;
-          });
-          contactIds = Object.keys(contactIds);
-
-          // filter contacts
-          if (contactQuery) {
-            contactQuery = {
-              and: [
-                contactQuery, {
-                  id: {
-                    inq: contactIds
-                  }
-                }
-              ]
-            };
-          } else {
-            contactQuery = {
-              id: {
-                inq: contactIds
-              }
-            };
-          }
-        });
-    }
-
-    // find the contacts
-    findContacts = findContacts
-      .then(() => {
-        // add geographical restriction to filter if needed
-        return app.models.person
-          .addGeographicalRestrictions(options.remotingContext, contactQuery)
-          .then(updatedFilter => {
-            // update where if needed
-            updatedFilter && (contactQuery = updatedFilter);
-
-            // no contact query
-            if (!contactQuery) {
-              return;
-            }
-
-            // if a contact query was specified
-            return app.models.contact
-              .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
-              .then(function (contacts) {
-                // return a list of contact ids
-                return contacts.map(contact => contact.id);
-              });
-          });
-      });
-
-    // find contacts
-    findContacts
-      .then(function (contactIds) {
-        // build follow-up filter
-        let _filter = {
-          where: {
-            outbreakId: outbreakId
-          }
-        };
-        // if contact ids were specified
-        if (contactIds) {
-          // restrict follow-up query to those ids
-          _filter.where.personId = {
-            inq: contactIds
-          };
-        }
-        // get all the followups for the filtered period
-        return FollowUp.rawFind(app.utils.remote
-          .mergeFilters(_filter, filter || {}).where)
-          .then(function (followups) {
-            // filter by relation properties
-            followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
-
-            // initialize teams map and contacts map as the request needs to count contacts
-            let teamsMap = {};
-            let contactsMap = {};
-            // initialize helper contacts to team map
-            let contactsTeamMap = {};
-
-            followups.forEach(function (followup) {
-              // get contactId
-              let contactId = followup.personId;
-              // get teamId; there might be no team id, set null
-              let teamId = followup.teamId || null;
-
-              // check if a followup for the same contact was already parsed
-              if (contactsTeamMap[contactId]) {
-                // check if there was another followup for the same team
-                // if so check for the performed flag;
-                // if the previous followup was performed there is no need to update any team contacts counter;
-                // total and successful counters were already updated
-                if (contactsTeamMap[contactId].teams[teamId]) {
-                  // new follow-up for the contact from the same team is performed; update flag and increase successful counter
-                  if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
-                    // update performed flag
-                    contactsTeamMap[contactId].teams[teamId].performed = true;
-                    // increase successful counter for team
-                    teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                    // update followedUpContactsIDs/missedContactsIDs lists
-                    teamsMap[teamId].followedUpContactsIDs.push(contactId);
-                    teamsMap[teamId].missedContactsIDs.splice(teamsMap[teamId].missedContactsIDs.indexOf(contactId), 1);
-                  }
-                } else {
-                  // new teamId
-                  // cache followup performed information for contact in team
-                  contactsTeamMap[contactId].teams[teamId] = {
-                    performed: FollowUp.isPerformed(followup)
-                  };
-
-                  // initialize team entry if doesn't already exist
-                  if (!teamsMap[teamId]) {
-                    teamsMap[teamId] = {
-                      id: teamId,
-                      totalContactsWithFollowupsCount: 0,
-                      contactsWithSuccessfulFollowupsCount: 0,
-                      followedUpContactsIDs: [],
-                      missedContactsIDs: []
-                    };
-                  }
-
-                  // increase team counters
-                  teamsMap[teamId].totalContactsWithFollowupsCount++;
-                  if (FollowUp.isPerformed(followup)) {
-                    teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                    // keep contactId in the followedUpContactsIDs list
-                    teamsMap[teamId].followedUpContactsIDs.push(contactId);
-                  } else {
-                    // keep contactId in the missedContactsIDs list
-                    teamsMap[teamId].missedContactsIDs.push(contactId);
-                  }
-                }
-              } else {
-                // first followup for the contact; add it in the contactsMap
-                contactsMap[contactId] = {
-                  id: contactId,
-                  totalFollowupsCount: 0,
-                  successfulFollowupsCount: 0
-                };
-
-                // cache followup performed information for contact in team and overall
-                contactsTeamMap[contactId] = {
-                  teams: {
-                    [teamId]: {
-                      performed: FollowUp.isPerformed(followup)
-                    }
-                  },
-                  performed: FollowUp.isPerformed(followup),
-                };
-
-                // increase overall counters
-                result.totalContactsWithFollowupsCount++;
-
-                // initialize team entry if doesn't already exist
-                if (!teamsMap[teamId]) {
-                  teamsMap[teamId] = {
-                    id: teamId,
-                    totalContactsWithFollowupsCount: 0,
-                    contactsWithSuccessfulFollowupsCount: 0,
-                    followedUpContactsIDs: [],
-                    missedContactsIDs: []
-                  };
-                }
-
-                // increase team counters
-                teamsMap[teamId].totalContactsWithFollowupsCount++;
-                if (FollowUp.isPerformed(followup)) {
-                  teamsMap[teamId].contactsWithSuccessfulFollowupsCount++;
-                  // keep contactId in the followedUpContactsIDs list
-                  teamsMap[teamId].followedUpContactsIDs.push(contactId);
-                  // increase total successful total counter
-                  result.contactsWithSuccessfulFollowupsCount++;
-                } else {
-                  // keep contactId in the missedContactsIDs list
-                  teamsMap[teamId].missedContactsIDs.push(contactId);
-                }
-              }
-
-              // update total follow-ups counter for contact
-              contactsMap[contactId].totalFollowupsCount++;
-              if (FollowUp.isPerformed(followup)) {
-                // update counter for contact successful follow-ups
-                contactsMap[contactId].successfulFollowupsCount++;
-
-                // check if contact didn't have a successful followup and the current one was performed
-                // as specified above for teams this is the only case where updates are needed
-                if (!contactsTeamMap[contactId].performed) {
-                  // update overall performed flag
-                  contactsTeamMap[contactId].performed = true;
-                  // increase total successful total counter
-                  result.contactsWithSuccessfulFollowupsCount++;
-                }
-              }
-            });
-
-            // update results; sending array with teams and contacts information
-            result.teams = Object.values(teamsMap);
-            result.contacts = Object.values(contactsMap);
-
-            // send response
-            callback(null, result);
-          });
-      })
-      .catch(callback);
+    Outbreak.helpers.countPersonsWithSuccessfulFollowups(
+      this,
+      genericHelpers.PERSON_TYPE.CONTACT,
+      filter,
+      options,
+      callback
+    );
   };
+
 
   /**
    * Count the followups per team per day

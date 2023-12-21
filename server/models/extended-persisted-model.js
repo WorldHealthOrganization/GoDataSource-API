@@ -483,7 +483,8 @@ module.exports = function (ExtendedPersistedModel) {
               id: true,
               firstName: true,
               lastName: true,
-              email: true
+              email: true,
+              deleted: true
             }
           })
           .then((users) => {

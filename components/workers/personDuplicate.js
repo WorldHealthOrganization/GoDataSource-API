@@ -113,7 +113,11 @@ const worker = {
     };
 
     // go through the list of people
+    const peopleIdsMap = {};
     people.forEach(function (person) {
+      // map person by id
+      peopleIdsMap[person._id] = person;
+
       // if person has name (type event)
       if (
         person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_EVENT' &&
@@ -150,6 +154,10 @@ const worker = {
         if (index[indexType][groupId].records.length > 1) {
           // remove duplicates
           const peopleRecords = index[indexType][groupId].records;
+          const peopleRecordsWithIds = Object.values(peopleRecords).reduce((acc, person) => {
+            acc[person._id] = person;
+            return acc;
+          }, {});
 
           // determine group key used to remove duplicates
           // - we could use a hashing function, but since there shouldn't be more than 2 - 3 duplicate ids per group it shouldn't matter
@@ -161,11 +169,110 @@ const worker = {
             // mark as found
             alreadyFoundKey[peopleKey] = true;
 
-            // add the list of possible duplicates group to the result
-            results.push({
-              duplicateKey: indexType,
-              indexKey: groupId,
-              people: peopleRecords
+            // find all subgroups of possible duplicates, based on the records marked as "Not a duplicate"
+            // get only the subgroups with the highest number of records
+            const findPossibleDuplicatesSubGroups = ((peopleData) => {
+              // recursive method to determine the persons marked as "Not a duplicate"
+              function findNotDuplicatePersons(personId, markedIds = {}) {
+                // ignore deleted/invalid persons or the person is already visited (marked as duplicate)
+                if (
+                  !peopleIdsMap[personId] ||
+                  markedIds[personId]
+                ) {
+                  return [];
+                }
+
+                // mark the current person as visited
+                markedIds[personId] = true;
+
+                // initialize an array with the current person
+                const notDuplicatePersons = [personId];
+
+                // determine not duplicate persons for each person marked as "Not a duplicate"
+                if (peopleIdsMap[personId].notDuplicatesIds) {
+                  peopleIdsMap[personId].notDuplicatesIds.forEach((id) => {
+                    notDuplicatePersons.push(...findNotDuplicatePersons(id, markedIds));
+                  });
+                }
+
+                // return the array of non-duplicate persons
+                return notDuplicatePersons;
+              }
+
+              // go through each person to find non-duplicate persons
+              const notDuplicatesPersonMap = {};
+              peopleData.forEach(person => {
+                const notDuplicatePersons = findNotDuplicatePersons(person._id);
+                // ignore the persons that were not found as possible duplicate
+                notDuplicatesPersonMap[person._id] = notDuplicatePersons.filter(id => !!peopleRecordsWithIds[id]);
+              });
+
+              // get the distinct sub-groups
+              const notDuplicateGroupPersons = {};
+              Object.keys(notDuplicatesPersonMap).forEach((personId) => {
+
+                const subGroupPersons = notDuplicatesPersonMap[personId].sort();
+                const subGroupPersonsKey = subGroupPersons.join();
+                if (!notDuplicateGroupPersons[subGroupPersonsKey]) {
+                  notDuplicateGroupPersons[subGroupPersonsKey] = subGroupPersons;
+                }
+              });
+
+              // get all combinations
+              const findGroupCombinations = ((possibleDuplicatesGroup, currentIndex = 0, currentCombination = {}) => {
+                const keys = Object.keys(possibleDuplicatesGroup);
+                const combinations = [];
+
+                // if currentIndex reaches the number of keys, we have a complete combination
+                if (currentIndex === keys.length) {
+                  // add the currentCombination to the combinations array
+                  combinations.push({...currentCombination});
+                } else {
+                  const currentKey = keys[currentIndex];
+                  const currentSubGroup = possibleDuplicatesGroup[currentKey];
+
+                  // parse current subgroup
+                  for (let i = 0; i < currentSubGroup.length; i++) {
+                    // create a copy of the currentCombination and add the current key-value pair to it
+                    const newCombination = {...currentCombination};
+                    newCombination[currentKey] = currentSubGroup[i];
+
+                    // call the function for the next key
+                    combinations.push(...findGroupCombinations(possibleDuplicatesGroup, currentIndex + 1, newCombination));
+                  }
+                }
+
+                // return
+                return combinations;
+              });
+
+              // return all combinations
+              return findGroupCombinations(notDuplicateGroupPersons);
+            });
+
+            // get sub-groups of possible duplicates
+            const possibleDuplicatesSubGroups = findPossibleDuplicatesSubGroups(peopleRecords);
+
+            // create the result
+            possibleDuplicatesSubGroups.forEach((subGroupPersons, index) => {
+              // ignore subgroups with less than 2 elements
+              const personIds = Object.values(subGroupPersons);
+              if (personIds.length < 2) {
+                return;
+              }
+
+              // add the list of possible duplicates sub-group to the result
+              // create a unique index key from group id and subGroup index
+              // extract the subgroup persons
+              const persons = [];
+              personIds.forEach((personId) => {
+                persons.push(peopleRecordsWithIds[personId]);
+              });
+              results.push({
+                duplicateKey: indexType,
+                indexKey: groupId + index,
+                people: persons
+              });
             });
           }
         }

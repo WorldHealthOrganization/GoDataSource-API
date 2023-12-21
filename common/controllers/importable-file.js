@@ -100,10 +100,29 @@ module.exports = function (ImportableFile) {
                   return acc;
                 }
 
+                // determine model options
+                const fieldLabelsMap = Object.assign({}, app.models[modelName].fieldLabelsMap || {});
+                let importableProperties = app.models[modelName]._importableProperties;
+
+                // remove properties that should be excluded from import
+                if (
+                  fieldLabelsMap &&
+                  fieldLabelsMap.createdOn
+                ) {
+                  delete fieldLabelsMap.createdOn;
+                }
+                if (
+                  importableProperties &&
+                  importableProperties.length > 0
+                ) {
+                  // create shallow copy
+                  importableProperties = importableProperties.filter((prop) => prop !== 'createdOn');
+                }
+
                 // gather model options
                 acc[modelName] = {
-                  fieldLabelsMap: app.models[modelName].fieldLabelsMap || {},
-                  importableProperties: app.models[modelName]._importableProperties,
+                  fieldLabelsMap,
+                  importableProperties,
                   referenceDataFieldsToCategoryMap: app.models[modelName].referenceDataFieldsToCategoryMap,
                   extendedForm: app.models[modelName].extendedForm,
                   foreignKeyFields: app.models[modelName].foreignKeyFields

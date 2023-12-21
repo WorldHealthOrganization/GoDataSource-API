@@ -13,6 +13,8 @@ const Platform = require('./../../components/platform');
 // used to manipulate dates
 const apiError = require('./../../components/apiError');
 const localizationHelper = require('../../components/localizationHelper');
+const fork = require('child_process').fork;
+const pdfUtils = app.utils.pdfDoc;
 
 module.exports = function (Outbreak) {
 
@@ -43,6 +45,7 @@ module.exports = function (Outbreak) {
     caseInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_INVESTIGATION_TEMPLATE',
     contactInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_INVESTIGATION_TEMPLATE',
     eventInvestigationTemplate: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_INVESTIGATION_TEMPLATE',
+    caseFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CASE_FOLLOWUP_TEMPLATE',
     contactFollowUpTemplate: 'LNG_OUTBREAK_FIELD_LABEL_CONTACT_FOLLOWUP_TEMPLATE',
     labResultsTemplate: 'LNG_OUTBREAK_FIELD_LABEL_LAB_RESULTS_TEMPLATE',
     eventIdMask: 'LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK',
@@ -57,6 +60,16 @@ module.exports = function (Outbreak) {
     applyGeographicRestrictions: 'LNG_OUTBREAK_FIELD_LABEL_APPLY_GEOGRAPHIC_RESTRICTIONS',
     checkLastContactDateAgainstDateOnSet: 'LNG_OUTBREAK_FIELD_LABEL_CHECK_LAST_CONTACT_DATE_AGAINST_DATE_OF_ONSET',
     disableModifyingLegacyQuestionnaire: 'LNG_OUTBREAK_FIELD_LABEL_DISABLE_MODIFYING_LEGACY_QUESTIONNAIRE',
+    allowCasesFollowUp: 'LNG_OUTBREAK_FIELD_LABEL_ALLOW_CASES_FOLLOW_UP',
+    periodOfFollowupCases: 'LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_CASES',
+    frequencyOfFollowUpCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FREQUENCY_CASES',
+    frequencyOfFollowUpPerDayCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FREQUENCY_PER_DAY_CASES',
+    intervalOfFollowUpCases: 'LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_CASES',
+    generateFollowUpsOverwriteExistingCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_CASES',
+    generateFollowUpsKeepTeamAssignmentCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_CASES',
+    generateFollowUpsTeamAssignmentAlgorithmCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_CASES',
+    generateFollowUpsDateOfOnset: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_ONSET',
+    generateFollowUpsWhenCreatingCases: 'LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CASES',
     allowedRefDataItems: 'LNG_OUTBREAK_FIELD_LABEL_ALLOWED_REF_DATA_ITEMS',
     visibleAndMandatoryFields: 'LNG_OUTBREAK_FIELD_LABEL_VISIBLE_AND_MANDATORY_FIELDS'
   });
@@ -886,14 +899,28 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Count the contacts by follow-up filter
-   * Note: The contacts are counted in total and per team. If a contact is lost to follow-up by 2 teams it will be counted once in total and once per each team.
+   * Count the persons by follow-up filter
+   * Note: The persons are counted in total and per team. If a person is lost to follow-up by 2 teams it will be counted once in total and once per each team.
    * @param data Object containing outbreakId, follow-up flag name and result property
    * @param filter
    * @param options
    * @param callback
    */
-  Outbreak.helpers.countContactsByFollowUpFilter = function (data, filter, options, callback) {
+  Outbreak.helpers.countPersonsByFollowUpFilter = function (
+    data,
+    filter,
+    options,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    if (data.personType === genericHelpers.PERSON_TYPE.CASE) {
+      personModel = app.models.case;
+    } else {
+      // contact
+      personModel = app.models.contact;
+    }
+
     filter = filter || {};
     // get options
     let resultProperty = data.resultProperty;
@@ -1014,7 +1041,7 @@ module.exports = function (Outbreak) {
             }
 
             // if a contact query was specified
-            return app.models.contact
+            return personModel
               .rawFind({and: [contactQuery, {outbreakId: data.outbreakId}]}, {projection: {_id: 1}})
               .then(function (contacts) {
                 // return a list of contact ids
@@ -1033,7 +1060,11 @@ module.exports = function (Outbreak) {
               {
                 outbreakId: data.outbreakId
               },
-              data.followUpFilter
+              data.followUpFilter,
+              // restrict the list of follow-ups by person type
+              {
+                'contact.type': data.personType
+              }
             ]
           }
         };
@@ -1046,9 +1077,10 @@ module.exports = function (Outbreak) {
             }
           });
         }
+
         // get all the followups for the filtered period
-        return app.models.followUp.rawFind(app.utils.remote
-          .mergeFilters(followUpQuery, filter || {}).where)
+        return app.models.followUp.findAggregate(app.utils.remote
+          .mergeFilters(followUpQuery, filter || {}))
           .then(function (followups) {
             // get contact ids (duplicates are removed) from all follow ups
             results.contactIDs = [...new Set(followups.map((followup) => followup.personId))];
@@ -1805,6 +1837,117 @@ module.exports = function (Outbreak) {
       .catch((err) => next(err));
   });
 
+  /**
+   * On update, update case followup start date, end date
+   */
+  Outbreak.observe('after save', function (context, next) {
+    // return if it's a new record or there is no changed field
+    if (
+      context.isNewInstance ||
+      !context.options.changedFields ||
+      context.options.changedFields.length === 0
+    ) {
+      return next();
+    }
+
+    // return if the changed fields are not 'Duration for the follow-up period in days' or 'Case tracing should start on the date of onset'"
+    let followUpFieldsChanged = false;
+    for (let i = 0; i < context.options.changedFields.length; i++) {
+      if (
+        context.options.changedFields[i].field === 'periodOfFollowupCases' ||
+        context.options.changedFields[i].field === 'generateFollowUpsDateOfOnset'
+      ) {
+        followUpFieldsChanged = true;
+        break;
+      }
+    }
+    if (!followUpFieldsChanged) {
+      return next();
+    }
+
+    // since the query can return many results we will do the update in batches
+    // Note: Updating each case one by one in order for the "before/after save" hooks to be executed for each entry
+    // Number of find requests at the same time
+    // Don't set this value to high so we don't exceed Mongo 16MB limit
+    const findBatchSize = 1000;
+
+    // set how many item update actions to run in parallel
+    const updateBatchSize = 10;
+
+    // update all cases (including deleted)
+    // set a flag in context.options needed for triggers
+    context.options.updateDeletedRecords = true;
+    const where = {
+      outbreakId: context.instance.id
+    };
+
+    // initialize parameters for handleActionsInBatches call
+    const getActionsCount = () => {
+      return app.models.case
+        .count(Object.assign({}, where, { includeDeletedRecords: true }));
+    };
+
+    // get records in batches
+    const getBatchData = (batchNo, batchSize) => {
+      // get cases for batch
+      return app.models.case
+        .find({
+          deleted: true,
+          where: where,
+          fields: {
+            id: true,
+            deleted: true,
+            outbreakId: true,
+            type: true,
+            dateOfOnset: true,
+            followUp: true
+          },
+          skip: (batchNo - 1) * batchSize,
+          limit: batchSize,
+          order: 'createdAt ASC'
+        });
+    };
+
+    // update case
+    const itemAction = (record) => {
+      const caseOptions = Object.assign({}, context.options);
+      return app.models.case.determineFollowUpDates(
+        () => Promise.resolve(context.instance),
+        record.id,
+        record.dateOfOnset,
+        record.followUp,
+        caseOptions
+      )
+        .then((data) => {
+          // no property to update ?
+          if (!data) {
+            return;
+          }
+
+          // update contact
+          return record.updateAttributes(
+            data,
+            caseOptions
+          );
+        });
+    };
+
+    // process data in batches
+    genericHelpers.handleActionsInBatches(
+      getActionsCount,
+      getBatchData,
+      null,
+      itemAction,
+      findBatchSize,
+      updateBatchSize,
+      context.options.remotingContext.req.logger
+    )
+      .then(() => {
+        next();
+      })
+      .catch((err) => next(err));
+  });
+
   // on load, include default ArcGis servers
   Outbreak.observe('loaded', function (context, next) {
     // if the outbreak does not have ArcGis servers defined
@@ -1820,9 +1963,17 @@ module.exports = function (Outbreak) {
     // make sure the questions are ordered on load. This was made on on-load vs before save for simplicity
     // even though it will perform better on before save, there is a lot of logic that can be broken by affecting that code now
     // and a refactoring is already planned for questionnaires
-    ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'].forEach(function (template) {
-      templateParser.orderQuestions(context.data[template]);
-    });
+    [
+      'caseInvestigationTemplate',
+      'contactInvestigationTemplate',
+      'eventInvestigationTemplate',
+      'caseFollowUpTemplate',
+      'contactFollowUpTemplate',
+      'labResultsTemplate'
+    ]
+      .forEach(function (template) {
+        templateParser.orderQuestions(context.data[template]);
+      });
 
     next();
   });
@@ -2418,16 +2569,24 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Modify multiple contacts or contacts of contacts
-   * @param {Array} existingContacts - List of contacts payloads
-   * @param {boolean} isContactOfContact - Flag specifying whether the resources updated are contact/contactOfContact
+   * Modify multiple persons
+   * @param {Array} existingContacts - List of persons payloads
+   * @param {string} personTYpe - String specifying whether the resources updated are case/contact/contactOfContact
    * @param {Object} options - Options from request
    * @return {Promise<any>}
    */
-  Outbreak.modifyMultipleContacts = function (existingContacts, isContactOfContact, options) {
+  Outbreak.modifyMultiplePersons = function (
+    existingContacts,
+    personType,
+    options
+  ) {
     // reference shortcuts
     const getError = app.utils.apiError.getError;
-    const contactModel = isContactOfContact ? app.models.contactOfContact : app.models.contact;
+    const contactModel = personType === genericHelpers.PERSON_TYPE.CASE ?
+      app.models.case :
+      personType === genericHelpers.PERSON_TYPE.CONTACT_OF_CONTACT ?
+        app.models.contactOfContact :
+        app.models.contact;
 
     // promisify the result
     return new Promise((resolve, reject) => {
@@ -2540,6 +2699,9 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.createContactMultipleContactsOfContacts = function (outbreak, contactId, data, options, callback) {
+    // inject platform identifier
+    options.platform = Platform.BULK;
+
     // check if pairs of contacts of contacts + relationship were sent
     if (!data.length) {
       return callback(app.utils.apiError.getError('CONTACT_OF_CONTACT_AND_RELATIONSHIP_REQUIRED'));
@@ -2897,5 +3059,2017 @@ module.exports = function (Outbreak) {
 
         return result;
       });
+  };
+
+  /**
+   * Export a daily person follow-up form for every person.
+   */
+  Outbreak.helpers.exportDailyPersonFollowUpList = function (
+    outbreak,
+    personType,
+    res,
+    groupBy,
+    filter,
+    options,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    let documentTitleToken;
+    let fileName;
+    if (personType === genericHelpers.PERSON_TYPE.CASE) {
+      personModel = app.models.case;
+      documentTitleToken = 'LNG_PAGE_TITLE_DAILY_CASES_LIST';
+      fileName = 'Daily Case List.pdf';
+    } else {
+      // contact
+      personModel = app.models.contact;
+      documentTitleToken = 'LNG_PAGE_TITLE_DAILY_CONTACTS_LIST';
+      fileName = 'Daily Contact List.pdf';
+    }
+
+    // generate report
+    personModel
+      .preFilterForOutbreak(outbreak, filter, options)
+      .then(function (filter) {
+        // get language id
+        const languageId = options.remotingContext.req.authData.user.languageId;
+        if (!['place', 'case'].includes(groupBy)) {
+          groupBy = 'place';
+        }
+
+        /**
+         * Flow control, make sure callback is not called multiple times
+         * @param error
+         * @param result
+         */
+        function cb(error, result) {
+          // execute callback
+          callback(error, result);
+          // replace callback with no-op to prevent calling it multiple times
+          callback = function noOp() {
+          };
+        }
+
+        // load language dictionary
+        app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+          // handle errors
+          if (error) {
+            return cb(error);
+          }
+
+          // start the builder
+          const dailyFollowUpListBuilder = fork(`${__dirname}../../../components/workers/buildDailyContactList`,
+            [], {
+              execArgv: [],
+              windowsHide: true
+            }
+          );
+
+          /**
+           * Event listener handler
+           */
+          function eventListener() {
+            const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
+            res.req.logger.error(JSON.stringify(error));
+            cb(error);
+          }
+
+          // listen to exit events
+          ['error', 'exit'].forEach(function (event) {
+            dailyFollowUpListBuilder.on(event, eventListener);
+          });
+
+          // listen to builder messages
+          dailyFollowUpListBuilder.on('message', function (args) {
+            // first argument is an error
+            if (args[0]) {
+              // handle it
+              cb(args[0]);
+            }
+            // if the message is a chunk
+            if (args[1] && args[1].chunk) {
+              // write it on the response
+              res.write(Buffer.from(args[1].chunk.data));
+            }
+            // if the worker finished
+            if (args[1] && args[1].end) {
+              // end the response
+              res.end();
+              // process will be closed gracefully, remove listeners
+              ['error', 'exit'].forEach(function (event) {
+                dailyFollowUpListBuilder.removeListener(event, eventListener);
+              });
+              // stop the builder
+              dailyFollowUpListBuilder.kill();
+            }
+          });
+
+          // set appropriate headers
+          res.set('Content-type', 'application/pdf');
+          res.set('Content-disposition', `attachment;filename=${fileName}`);
+
+          // keep a list of locations to resolve
+          const locationsToResolve = [];
+          // find persons for the found follow-ups
+          // exclude entities with no valid followUp data
+          const _filter = app.utils.remote
+            .mergeFilters(filter, {
+              where: {
+                'followUp.startDate': {
+                  $exists: true
+                },
+                'followUp.endDate': {
+                  $exists: true
+                }
+              }
+            });
+          return personModel
+            .rawFind(_filter.where, {
+              projection: {
+                followUp: 1,
+                firstName: 1,
+                middleName: 1,
+                lastName: 1,
+                gender: 1,
+                age: 1,
+                dateOfLastContact: 1,
+                addresses: 1
+              }
+            })
+            .then(function (contacts) {
+              // map the contacts to easily reference them after
+              const contactsMap = {};
+              contacts.forEach(function (contact) {
+                contactsMap[contact.id] = contact;
+              });
+
+              // find all follow ups for all contacts and group them by contact
+              return app.models.followUp
+                .rawFind({
+                  personId: {
+                    $in: Object.keys(contactsMap)
+                  }
+                })
+                .then((followUps) => {
+                  const groupedFollowups = _.groupBy(followUps, (f) => f.personId);
+
+                  contacts = contacts.map((contact) => {
+                    // sort by index and remove duplicates from the same day
+                    let contactFollowUps = groupedFollowups[contact.id] || [];
+                    contactFollowUps = _.uniqBy(contactFollowUps, 'index').sort((a, b) => a.index - b.index);
+                    contact.followUps = contactFollowUps;
+                    return contact;
+                  });
+
+                  // build groups (grouped by place/case)
+                  const groups = {};
+                  if (groupBy === 'place') {
+                    // group contacts by place (location)
+                    contacts.forEach((contact) => {
+                      // assume unknown location
+                      let locationId = 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+
+                      // try to get location from the person
+                      let currentAddress = app.models.person.getCurrentAddress(contact);
+
+                      // if location was found
+                      if (currentAddress) {
+                        // use it
+                        currentAddress.locationId = currentAddress.locationId ?
+                          currentAddress.locationId :
+                          'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION';
+                        locationId = currentAddress.locationId;
+                      }
+
+                      // init group (if not present)
+                      if (!groups[locationId]) {
+                        groups[locationId] = {
+                          records: []
+                        };
+                      }
+
+                      // to easily resolve it
+                      contact.currentAddress = currentAddress || {
+                        locationId: locationId
+                      };
+
+                      // add contact to the group
+                      groups[locationId].records.push(contact);
+                    });
+
+                    // no need to return locations grouped by outbreak admin level locations
+                    // that is how it was the old logic, which was removed after discussing with WHO in WGD-2000
+                    return groups;
+                  } else {
+                    // group by case, first find relationships
+                    return app.models.relationship
+                      .rawFind({
+                        outbreakId: outbreak.id,
+                        'persons.id': {
+                          inq: Object.keys(contactsMap)
+                        }
+                      }, {
+                        projection: {
+                          persons: 1
+                        },
+                        order: {contactDate: 1}
+                      })
+                      .then(function (relationships) {
+                        // map contacts to cases
+                        const contactToCaseMap = {};
+                        relationships.forEach(function (relationship) {
+                          let contactId;
+                          let caseId;
+                          // find contact and case
+                          Array.isArray(relationship.persons) && relationship.persons.forEach(function (person) {
+                            if (person.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT') {
+                              contactId = person.id;
+                            } else {
+                              caseId = person.id;
+                            }
+                          });
+                          // if found, add them to the map
+                          if (contactId && caseId) {
+                            contactToCaseMap[contactId] = caseId;
+                          }
+                        });
+                        // find people (cases)
+                        return app.models.person
+                          .rawFind({
+                            _id: {
+                              inq: Object.values(contactToCaseMap)
+                            },
+                            outbreakId: outbreak.id,
+                          }, {
+                            projection: {
+                              type: 1,
+                              firstName: 1,
+                              middleName: 1,
+                              lastName: 1,
+                              name: 1
+                            }
+                          })
+                          .then(function (cases) {
+                            // build people map to easily reference people by id
+                            const casesMap = {};
+                            cases.forEach(function (caseItem) {
+                              casesMap[caseItem.id] = caseItem;
+                            });
+
+                            // go through all contacts
+                            contacts.forEach((contact) => {
+                              // init group if not already initiated
+                              if (!groups[contactToCaseMap[contact.id]]) {
+                                // get person information from the map
+                                const person = casesMap[contactToCaseMap[contact.id]] || {};
+                                // add group information
+                                groups[contactToCaseMap[contact.id]] = {
+                                  name: `${person.firstName || ''} ${person.middleName || ''} ${person.lastName || ''}`.trim(),
+                                  records: []
+                                };
+                              }
+                              // add follow-up to the group
+                              groups[contactToCaseMap[contact.id]].records.push(contact);
+                            });
+                            return groups;
+                          });
+                      });
+                  }
+                })
+                .then(function (groups) {
+                  // if the grouping is done by place
+                  if (groupBy === 'place') {
+                    // add group ids to the list of locations that need to be resolved
+                    locationsToResolve.push(...Object.keys(groups));
+                  } else {
+                    const locationsToRetrieve = {};
+                    Object.keys(groups).forEach(function (groupId) {
+                      groups[groupId].records.forEach(function (record) {
+                        if (!record.currentAddress) {
+                          record.currentAddress = app.models.person.getCurrentAddress(record);
+                          if (
+                            record.currentAddress &&
+                            record.currentAddress.locationId &&
+                            record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION'
+                          ) {
+                            locationsToRetrieve[record.currentAddress.locationId] = true;
+                          }
+                        }
+                      });
+                    });
+                    locationsToResolve.push(...Object.keys(locationsToRetrieve));
+                  }
+
+                  // find locations
+                  return app.models.location
+                    .rawFind({
+                      id: {
+                        inq: locationsToResolve,
+                      }
+                    }, {
+                      projection: {
+                        name: 1
+                      }
+                    })
+                    .then(function (locations) {
+                      // build a map of locations to easily reference them by id
+                      const locationsMap = {};
+                      const data = {};
+                      locations.forEach(function (location) {
+                        locationsMap[location.id] = location;
+                      });
+
+                      // store unknown location translation
+                      const unknownLocationTranslation = dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION');
+
+                      // go through the groups
+                      Object.keys(groups).forEach(function (groupId) {
+                        // build data sets
+                        data[groupId] = {
+                          name: groups[groupId].name,
+                          records: [],
+                        };
+                        // if the grouping is by place
+                        if (groupBy === 'place') {
+                          // and group id contains a location id
+                          if (groupId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION') {
+                            // resolve group name
+                            data[groupId].name = _.get(locationsMap, `${groupId}.name`);
+                          } else {
+                            // otherwise add Unknown Location label
+                            data[groupId].name = unknownLocationTranslation;
+                          }
+                        }
+
+                        // go through all records
+                        groups[groupId].records.forEach(function (record) {
+                          if (!record.currentAddress) {
+                            record.currentAddress = app.models.person.getCurrentAddress(record) || {
+                              locationId: 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION'
+                            };
+                          }
+
+                          // build record entry
+                          const recordEntry = {
+                            lastName: _.get(record, 'lastName', ''),
+                            firstName: _.get(record, 'firstName', ''),
+                            middleName: _.get(record, 'middleName', ''),
+                            age: pdfUtils.displayAge(record, dictionary),
+                            gender: dictionary.getTranslation(_.get(record, 'gender')),
+                            location: record.currentAddress && record.currentAddress.locationId && record.currentAddress.locationId !== 'LNG_REPORT_DAILY_FOLLOW_UP_LIST_UNKNOWN_LOCATION' && locationsMap[record.currentAddress.locationId] ?
+                              locationsMap[record.currentAddress.locationId].name :
+                              unknownLocationTranslation,
+                            address: app.models.address.getHumanReadableAddress(record.currentAddress),
+                            from: localizationHelper.toMoment(_.get(record, 'followUp.startDate')).format('YYYY-MM-DD'),
+                            to: localizationHelper.toMoment(_.get(record, 'followUp.endDate')).format('YYYY-MM-DD'),
+                            // needed for building tables
+                            followUps: record.followUps,
+                            followUp: record.followUp
+                          };
+
+                          // add record entry to dataset
+                          data[groupId].records.push(recordEntry);
+                        });
+                      });
+                      return data;
+                    });
+                })
+                .then(function (groups) {
+                  // translate follow ups status acronyms here
+                  // to pass it to the worker
+                  const followUpStatusAcronyms = app.models.followUp.statusAcronymMap;
+                  const translatedFollowUpAcronyms = {};
+                  const translatedFollowUpAcronymsAndIds = {};
+                  for (let prop in followUpStatusAcronyms) {
+                    const translatedProp = dictionary.getTranslation(prop);
+                    const translatedValue = dictionary.getTranslation(followUpStatusAcronyms[prop]);
+                    translatedFollowUpAcronyms[prop] = translatedValue;
+                    translatedFollowUpAcronymsAndIds[translatedProp] = translatedValue;
+                  }
+
+                  // used to fit the table on one page
+                  const standardHeaderSize = 40;
+
+                  // build table headers
+                  const headers = [
+                    ...([{
+                      id: 'firstName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FIRST_NAME'),
+                      width: standardHeaderSize
+                    }, {
+                      id: 'lastName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LAST_NAME'),
+                      width: standardHeaderSize
+                    }, {
+                      id: 'middleName',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_MIDDLE_NAME'),
+                      width: standardHeaderSize + 10
+                    }, {
+                      id: 'age',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_AGE'),
+                      width: standardHeaderSize
+                    }, {
+                      id: 'gender',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_GENDER'),
+                      width: standardHeaderSize
+                    }]),
+                    ...(groupBy === 'case' ? [{
+                      id: 'location',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_LOCATION'),
+                      width: standardHeaderSize
+                    }] : []),
+                    ...([{
+                      id: 'address',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_ADDRESS'),
+                      width: standardHeaderSize
+                    }, {
+                      id: 'from',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_FROM'),
+                      width: standardHeaderSize - 5
+                    }, {
+                      id: 'to',
+                      header: dictionary.getTranslation('LNG_REPORT_DAILY_FOLLOW_UP_LIST_TO'),
+                      width: standardHeaderSize - 5
+                    }])
+                  ];
+
+
+                  // group by title translation
+                  const groupTitle = dictionary.getTranslation(groupBy === 'place' ?
+                    'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_LOCATION' :
+                    'LNG_REPORT_DAILY_FOLLOW_UP_LIST_GROUP_TITLE_CASE');
+
+                  // total title translation
+                  const totalTitle = dictionary.getTranslation('LNG_LIST_HEADER_TOTAL');
+
+                  // start document title
+                  const pdfTitle = dictionary.getTranslation(documentTitleToken);
+                  const legendTitle = dictionary.getTranslation('LNG_FOLLOW_UP_STATUS_LEGEND');
+
+                  // flag that indicates that start document props were added
+                  let startDocumentAdded = false;
+
+                  // process groups in batches
+                  (function processInBatches(defaultHeaders, groups) {
+                    // we process the first group always
+                    const groupsKeys = Object.keys(groups);
+                    if (!groupsKeys.length) {
+                      // all records processed, inform the worker that is time to finish
+                      return dailyFollowUpListBuilder.send({fn: 'finish', args: []});
+                    }
+
+                    const targetGroup = groups[groupsKeys[0]];
+                    delete groups[groupsKeys[0]];
+
+                    const listener = function (args) {
+                      // first argument is an error
+                      if (args[0]) {
+                        // handle it
+                        return cb(args[0]);
+                      }
+                      // if the worker is ready for the next batch
+                      if (args[1] && args[1].readyForNextBatch) {
+                        // remove current listener
+                        dailyFollowUpListBuilder.removeListener('message', listener);
+                        // send move to next step
+                        processInBatches(headers, groups);
+                      }
+                    };
+
+                    // listen to worker messages
+                    dailyFollowUpListBuilder.on('message', listener);
+
+                    // custom options to be sent over to the worker
+                    const customOpts = {
+                      groupTitle: groupTitle,
+                      totalTitle: totalTitle
+                    };
+
+                    if (!startDocumentAdded) {
+                      customOpts.startDocument = {
+                        title: pdfTitle,
+                        legend: {
+                          title: legendTitle,
+                          values: translatedFollowUpAcronymsAndIds
+                        }
+                      };
+                    }
+
+                    // build the group
+                    dailyFollowUpListBuilder.send({
+                      fn: 'sendData',
+                      args: [
+                        customOpts,
+                        defaultHeaders,
+                        targetGroup,
+                        translatedFollowUpAcronyms
+                      ]
+                    });
+
+                    // do not add start document opts on next call
+                    startDocumentAdded = true;
+
+                  })(headers, groups);
+                });
+            })
+            .catch(cb);
+        });
+      });
+  };
+
+  /**
+   * Export list of persons where each person has a page with follow up questionnaire and answers
+   */
+  Outbreak.helpers.exportDailyPersonFollowUpForm = function (
+    outbreak,
+    personType,
+    response,
+    filter,
+    reqOptions,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    let followUpTemplate;
+    let pageTitleToken;
+    let contactTitleToken;
+    let firstFollowUpDayToken;
+    if (personType === genericHelpers.PERSON_TYPE.CASE) {
+      personModel = app.models.case;
+      followUpTemplate = outbreak.caseFollowUpTemplate;
+      pageTitleToken = 'LNG_PAGE_LIST_CASES_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE';
+      contactTitleToken = 'LNG_PAGE_TITLE_CASE_DETAILS';
+      firstFollowUpDayToken = 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_START_DATE';
+    } else {
+      // contact
+      personModel = app.models.contact;
+      followUpTemplate = outbreak.contactFollowUpTemplate;
+      pageTitleToken = 'LNG_PAGE_LIST_CONTACTS_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE';
+      contactTitleToken = 'LNG_PAGE_TITLE_CONTACT_DETAILS';
+      firstFollowUpDayToken = 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_START_DATE';
+    }
+
+
+    /**
+     * Flow control, make sure callback is not called multiple times
+     * @param error
+     * @param result
+     */
+    const responseCallback = function (error, result) {
+      // execute callback
+      callback(error, result);
+      // replace callback with no-op to prevent calling it multiple times
+      callback = () => {
+      };
+    };
+
+    // construct contacts query
+    let contactQuery = app.utils.remote.mergeFilters({
+      where: {
+        outbreakId: outbreak.id
+      }
+    }, filter || {}).where;
+
+    // add geographical restriction to filter if needed
+    personModel
+      .addGeographicalRestrictions(reqOptions.remotingContext, contactQuery)
+      .then(updatedFilter => {
+        // update contactQuery if needed
+        updatedFilter && (contactQuery = updatedFilter);
+
+        // get list of contacts based on the filter passed on request
+        return personModel
+          .rawFind(contactQuery, {
+            projection: {
+              id: 1,
+              firstName: 1,
+              middleName: 1,
+              lastName: 1,
+              gender: 1,
+              age: 1,
+              addresses: 1,
+              followUp: 1
+            }
+          });
+      })
+      .then((contacts) => {
+        // map contacts
+        const contactsMap = {};
+        (contacts || []).forEach((contact) => {
+          contactsMap[contact.id] = contact;
+        });
+
+        // finished
+        return contactsMap;
+      })
+      .then((contactsMap) => {
+        // get all follow ups belonging to any of the contacts that matched the filter
+        const followUpsFilter = app.utils.remote.convertLoopbackFilterToMongo(
+          {
+            $and: [
+              // make sure we're only retrieving follow ups from the current outbreak
+              // and for the contacts desired
+              // retrieve only non-deleted records
+              {
+                outbreakId: outbreak.id,
+                personId: {
+                  $in: Object.keys(contactsMap)
+                },
+                deleted: false
+              }
+            ]
+          });
+
+        // run the aggregation against database
+        return app.dataSources.mongoDb.connector
+          .collection('followUp')
+          .aggregate([
+            {
+              $match: followUpsFilter
+            }, {
+              $sort: {
+                date: -1
+              }
+            },
+            // group follow ups by person id
+            // structure after grouping (_id -> personId, followUps -> list of follow ups)
+            {
+              $group: {
+                _id: '$personId',
+                followUps: {
+                  $push: '$$ROOT'
+                }
+              }
+            }
+          ], {
+            allowDiskUse: true
+          })
+          .toArray()
+          .then((followUpData) => {
+            // go through each group of follow-ups and assign it to the proper contact
+            (followUpData || []).forEach((groupData) => {
+              if (
+                !contactsMap[groupData._id] ||
+                !contactsMap[groupData._id].followUp ||
+                !contactsMap[groupData._id].followUp.startDate ||
+                !contactsMap[groupData._id].followUp.endDate
+              ) {
+                return;
+              }
+
+              // determine relevant follow-ups
+              // those that are in our period of interest
+              const firstFollowUpDay = localizationHelper.getDateStartOfDay(contactsMap[groupData._id].followUp.startDate);
+              const lastFollowUpDay =  localizationHelper.getDateEndOfDay(contactsMap[groupData._id].followUp.endDate);
+              contactsMap[groupData._id].followUps = _.filter(groupData.followUps, (followUpData) => {
+                return followUpData.date &&
+                  localizationHelper.toMoment(followUpData.date).isBetween(firstFollowUpDay, lastFollowUpDay, undefined, '[]');
+              });
+            });
+
+            // finished
+            return contactsMap;
+          });
+      })
+      .then((contactsMap) => {
+        // generate pdf
+        return new Promise((resolve, reject) => {
+          const languageId = reqOptions.remotingContext.req.authData.user.languageId;
+          app.models.language.getLanguageDictionary(languageId, (err, dictionary) => {
+            // error ?
+            if (err) {
+              return reject(err);
+            }
+
+            // build common labels (page title, comments title, contact details title)
+            const commonLabels = {
+              pageTitle: dictionary.getTranslation(pageTitleToken),
+              contactTitle: dictionary.getTranslation(contactTitleToken),
+              commentsTitle: dictionary.getTranslation('LNG_DATE_FIELD_LABEL_COMMENTS')
+            };
+
+            // build table data and contact details section properties
+            const entries = [];
+            _.each(contactsMap, (contactData) => {
+              // table headers, first header has no name (it contains the questions)
+              const tableHeaders = [
+                {
+                  id: 'description',
+                  header: ''
+                }
+              ];
+
+              // do we have followUp period ?
+              let firstFollowUpDay;
+              if (
+                contactData.followUp &&
+                contactData.followUp.startDate &&
+                contactData.followUp.endDate
+              ) {
+                // get follow-up interval
+                firstFollowUpDay = localizationHelper.getDateStartOfDay(contactData.followUp.startDate);
+                const lastFollowUpDay = localizationHelper.getDateEndOfDay(contactData.followUp.endDate);
+
+                // dates headers
+                let dayIndex = 1;
+                for (let date = firstFollowUpDay.clone(); date.isSameOrBefore(lastFollowUpDay); date.add(1, 'day')) {
+                  tableHeaders.push({
+                    id: date.format('YYYY-MM-DD'),
+                    header: dayIndex
+                  });
+                  dayIndex++;
+                }
+              }
+
+              // table data, each index is a row
+              const tableData = [];
+
+              // build the contact name, doing this to avoid unnecessary spaces, where a name is not defined
+              const names = [
+                contactData.firstName,
+                contactData.middleName,
+                contactData.lastName
+              ];
+
+              // final construct name structure that is displayed
+              let displayedName = '';
+              names.forEach((name) => {
+                if (name) {
+                  displayedName = displayedName + ' ' + pdfUtils.displayValue(name);
+                }
+              });
+
+              // contact details section
+              // will be displayed in the order they are defined
+              const contactDetails = [
+                {
+                  label: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_NAME'),
+                  value: displayedName
+                },
+                {
+                  label: dictionary.getTranslation('LNG_REFERENCE_DATA_CATEGORY_GENDER'),
+                  value: dictionary.getTranslation(contactData.gender)
+                },
+                {
+                  label: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_AGE'),
+                  value: pdfUtils.displayAge(contactData, dictionary)
+                },
+                {
+                  label: dictionary.getTranslation(firstFollowUpDayToken),
+                  value: firstFollowUpDay ?
+                    localizationHelper.toMoment(firstFollowUpDay).format('YYYY-MM-DD') :
+                    ''
+                },
+                {
+                  label: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_ADDRESS'),
+                  value: app.models.address.getHumanReadableAddress(app.models.person.getCurrentAddress(contactData))
+                },
+                {
+                  label: dictionary.getTranslation('LNG_ENTITY_FIELD_LABEL_PHONE_NUMBER'),
+                  value: app.models.person.getCurrentAddress(contactData) ? app.models.person.getCurrentAddress(contactData).phoneNumber : ''
+                }
+              ];
+
+              // add question to pdf form
+              const addQuestionToForm = (question) => {
+                // ignore irrelevant questions
+                if (
+                  [
+                    'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_FILE_UPLOAD'
+                  ].indexOf(question.answerType) >= 0
+                ) {
+                  return;
+                }
+
+                // add question texts as first row
+                tableData.push({
+                  description: dictionary.getTranslation(question.text)
+                });
+
+                // add answers for each follow up day
+                (contactData.followUps || []).forEach((followUp) => {
+                  // add follow-up only if there isn't already one on that date
+                  // if there is, it means that that one is newer since follow-ups are sorted by date DESC and we don't need to set this one
+                  const dateFormatted = localizationHelper.toMoment(followUp.date).format('YYYY-MM-DD');
+                  if (!tableData[tableData.length - 1][dateFormatted]) {
+                    // format questionnaire answers to old format so we can use the old functionality & also use the latest value
+                    followUp.questionnaireAnswers = followUp.questionnaireAnswers || {};
+                    followUp.questionnaireAnswers = genericHelpers.convertQuestionnaireAnswersToOldFormat(followUp.questionnaireAnswers);
+
+                    // add cell data
+                    tableData[tableData.length - 1][dateFormatted] = genericHelpers.translateQuestionAnswers(
+                      question,
+                      question.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME' ?
+                        (followUp.questionnaireAnswers[question.variable] ? localizationHelper.toMoment(followUp.questionnaireAnswers[question.variable]).format('YYYY-MM-DD') : '') :
+                        followUp.questionnaireAnswers[question.variable],
+                      dictionary
+                    );
+                  }
+                });
+
+                // add additional questions
+                (question.answers || []).forEach((answer) => {
+                  (answer.additionalQuestions || []).forEach((childQuestion) => {
+                    // add child question
+                    addQuestionToForm(childQuestion);
+                  });
+                });
+              };
+
+              // add all questions as rows
+              followUpTemplate.forEach((question) => {
+                // add main question
+                addQuestionToForm(question);
+              });
+
+              // add to list of pages
+              entries.push({
+                contactDetails: contactDetails,
+                tableHeaders: tableHeaders,
+                tableData: tableData
+              });
+            });
+
+            // finished
+            resolve({
+              commonLabels: commonLabels,
+              entries: entries
+            });
+          });
+        });
+      })
+      .then((data) => {
+        const pdfBuilder = fork(`${__dirname}../../../components/workers/buildDailyFollowUpForm`,
+          [], {
+            execArgv: [],
+            windowsHide: true
+          }
+        );
+
+        // error event listener, stop the whole request cycle
+        const eventListener = function () {
+          const error = new Error(`Processing failed. Worker stopped. Event Details: ${JSON.stringify(arguments)}`);
+          response.req.logger.error(JSON.stringify(error));
+          return responseCallback(error);
+        };
+
+        // listen to exit/error events
+        ['error', 'exit'].forEach((event) => {
+          pdfBuilder.on(event, eventListener);
+        });
+
+        // listen to builder messages
+        pdfBuilder.on('message', (args) => {
+          // first argument is an error
+          if (args[0]) {
+            return responseCallback(args[0]);
+          }
+          // if the message is a chunk
+          if (args[1] && args[1].chunk) {
+            // write it on the response
+            response.write(Buffer.from(args[1].chunk.data));
+          }
+          // if the worker finished, end the response as well
+          if (args[1] && args[1].end) {
+            // end the response
+            response.end();
+
+            // process will be closed gracefully, remove listeners
+            ['error', 'exit'].forEach(function (event) {
+              pdfBuilder.removeListener(event, eventListener);
+            });
+
+            // kill the builder process
+            pdfBuilder.kill();
+          }
+        });
+
+        // set headers related to files download
+        response.set('Content-type', 'application/pdf');
+        response.set('Content-disposition', `attachment;filename=${data.commonLabels.pageTitle}.pdf`);
+
+        // process contacts in batches
+        (function nextBatch(commonLabels, data) {
+          // get current set size
+          let currentSetSize = data.length;
+          // no records left to be processed
+          if (currentSetSize === 0) {
+            // all records processed, inform the worker that is time to finish
+            return pdfBuilder.send({fn: 'finish', args: []});
+          } else if (currentSetSize > 100) {
+            // too many records left, limit batch size to 100
+            currentSetSize = 100;
+          }
+          // build a subset of data
+          const dataSubset = data.splice(0, currentSetSize);
+
+          // worker communicates via messages, listen to them
+          const messageListener = function (args) {
+            // first argument is an error
+            if (args[0]) {
+              return responseCallback(args[0]);
+            }
+            // if the worker is ready for the next batch
+            if (args[1] && args[1].readyForNextBatch) {
+              // remove current listener
+              pdfBuilder.removeListener('message', messageListener);
+              // send move to next step
+              nextBatch(commonLabels, data);
+            }
+          };
+
+          // listen to worker messages
+          pdfBuilder.on('message', messageListener);
+
+          // build pdf
+          pdfBuilder.send({
+            fn: 'sendData',
+            args: [commonLabels, dataSubset, !data.length]
+          });
+        })(data.commonLabels, data.entries);
+      })
+      .catch(responseCallback);
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's cases/contacts, distributed by location and follow-up status
+   */
+  Outbreak.helpers.downloadPersonTracingPerLocationLevelReport = function (
+    outbreak,
+    personType,
+    filter,
+    options,
+    callback
+  ) {
+
+    // define specific variables
+    let personModelName;
+    let reportTitle;
+    if (personType === genericHelpers.PERSON_TYPE.CASE) {
+      personModelName = 'case';
+      reportTitle = 'Case';
+    } else {
+      // contact
+      personModelName = 'contact';
+      reportTitle = 'Contact';
+    }
+
+    // language
+    const languageId = options.remotingContext.req.authData.user.languageId;
+
+    // set default filter values
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // set default dateOfFollowUp
+    if (
+      !filter.dateOfFollowUp &&
+      !filter.where.dateOfFollowUp
+    ) {
+      filter.dateOfFollowUp = localizationHelper.now().toDate();
+    }
+
+    // got dateOfFollowUp in where as it should be and not under filter ?
+    if (filter.where.dateOfFollowUp) {
+      filter.dateOfFollowUp = filter.where.dateOfFollowUp;
+      delete filter.where.dateOfFollowUp;
+    }
+
+    // Get the date of the selected day for report to add to the pdf title (by default, current day)
+    let selectedDayForReport = localizationHelper.toMoment(filter.dateOfFollowUp).format('ll');
+
+    // Get the dictionary so we can translate the case classifications and other necessary fields
+    app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
+      app.models.person.getPeoplePerLocation(personModelName, true, filter, outbreak, options)
+        .then((result) => {
+          // Initiate the headers for the entity tracing per location pdf list
+          let headers = [
+            {
+              id: 'location',
+              header: dictionary.getTranslation(outbreak.reportingGeographicalLevelId)
+            },
+            {
+              id: 'underFollowUp',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_UNDER_FOLLOWUP')
+            },
+            {
+              id: 'seenOnDay',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_SEEN_ON_DAY')
+            },
+            {
+              id: 'coverage',
+              header: '%'
+            },
+            {
+              id: 'registered',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_REGISTERED')
+            },
+            {
+              id: 'released',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_RELEASED')
+            },
+            {
+              id: 'expectedRelease',
+              header: dictionary.getTranslation('LNG_LIST_HEADER_EXPECTED_RELEASE')
+            }
+          ];
+
+          let data = [];
+          result.peopleDistribution.forEach((dataObj) => {
+            // Define the base form of the data for one row of the pdf list
+            // Keep the values as strings so that 0 actually gets displayed in the table
+            let row = {
+              location: dataObj.location.name,
+              underFollowUp: '0',
+              seenOnDay: '0',
+              coverage: '0',
+              registered: '0',
+              released: '0',
+              expectedRelease: dataObj.people.length && dataObj.people[0].followUp ? localizationHelper.toMoment(dataObj.people[0].followUp.endDate).format('ll') : '-'
+            };
+
+            // Update the row's values according to each entity's details
+            dataObj.people.forEach((item) => {
+              row.registered = +row.registered + 1;
+
+              // Any status other than under follow-up will make the entity be considered as released.
+              if (item.followUp && item.followUp.status === 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP') {
+                row.underFollowUp = +row.underFollowUp + 1;
+
+                // The contact can be seen only if he is under follow
+                if (item.followUps.length) {
+                  let completedFollowUp = _.find(item.followUps, function (followUp) {
+                    return ['LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+                      'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'].includes(followUp.statusId);
+                  });
+                  if (completedFollowUp) {
+                    row.seenOnDay = +row.seenOnDay + 1;
+                  }
+
+                  // What percentage of the contacts under followUp have been seen on the specified date.
+                  row.coverage = +row.seenOnDay / +row.underFollowUp * 100;
+                }
+
+              } else {
+                row.released = +row.released + 1;
+              }
+            });
+            data.push(row);
+          });
+
+          // Create the pdf list file
+          return app.utils.helpers.exportListFile(headers, data, 'pdf', `${reportTitle} tracing ${selectedDayForReport}`);
+        })
+        .then(function (file) {
+          // and offer it for download
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `${reportTitle} tracing report.${file.extension}`, callback);
+        })
+        .catch((error) => {
+          callback(error);
+        });
+    });
+  };
+
+  /**
+   * Count persons that are on the follow up list when generating
+   * Also custom filtered
+   */
+  Outbreak.helpers.filteredCountPersonsOnFollowUpList = function (
+    outbreak,
+    personType,
+    filter = {},
+    options,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    const isCaseType = personType === genericHelpers.PERSON_TYPE.CASE;
+    if (isCaseType) {
+      personModel = app.models.case;
+    } else {
+      // contact
+      personModel = app.models.contact;
+    }
+
+    // defensive checks
+    filter.where = filter.where || {};
+    let startDate = localizationHelper.getDateStartOfDay().toDate();
+    let endDate = localizationHelper.getDateEndOfDay().toDate();
+    if (filter.where.startDate) {
+      startDate = localizationHelper.getDateStartOfDay(filter.where.startDate).toDate();
+      delete filter.where.startDate;
+    }
+    if (filter.where.endDate) {
+      endDate = localizationHelper.getDateEndOfDay(filter.where.endDate).toDate();
+      delete filter.where.endDate;
+    }
+
+    // filter by classification ?
+    const classification = _.get(filter, 'where.classification');
+    if (
+      classification &&
+      !isCaseType
+    ) {
+      // for contacts, the filtering by classification is performed later
+      delete filter.where.classification;
+    }
+
+    // merge filter props from request with the built-in filter
+    // there is no way to reuse the filter from follow up generation filter
+    // this is slightly modified to accustom the needs and also inconclusive/valid persons are merged in one op here
+    const mergedFilter = app.utils.remote.mergeFilters({
+      where: {
+        outbreakId: outbreak.id,
+        followUp: {
+          $ne: null
+        },
+        // only persons that are under follow up
+        'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+        $or: [
+          {
+            // eligible for follow ups
+            $and: [
+              {
+                $or: [
+                  {
+                    // follow up period is inside person's follow up period
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before person's start date but ends before person's end date
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.startDate': {
+                          $lte: endDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // period starts before person's end date and after person's start date
+                    // but stops after person's end date
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $lte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $lte: endDate
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    // person's period is inside follow up period
+                    $and: [
+                      {
+                        'followUp.startDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $gte: startDate
+                        }
+                      },
+                      {
+                        'followUp.endDate': {
+                          $lte: endDate
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }, filter);
+
+    // add geographical restriction to filter if needed
+    let promise = personModel
+      .addGeographicalRestrictions(options.remotingContext, mergedFilter.where)
+      .then(updatedFilter => {
+        updatedFilter && (mergedFilter.where = updatedFilter);
+      });
+
+    // do we need to filter contacts by case classification ?
+    if (
+      classification &&
+      personType === genericHelpers.PERSON_TYPE.CONTACT
+    ) {
+      // retrieve cases
+      promise = promise
+        .then(() => {
+          return app.models.case
+            .rawFind({
+              outbreakId: outbreak.id,
+              deleted: false,
+              classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
+            }, {projection: {'_id': 1}});
+        })
+        .then((caseData) => {
+          // no case data, so there is no need to retrieve relationships
+          if (_.isEmpty(caseData)) {
+            return [];
+          }
+
+          // retrieve list of cases for which we need to retrieve contacts relationships
+          const caseIds = caseData.map((caseModel) => caseModel.id);
+
+          // retrieve relationships
+          return app.models.relationship
+            .rawFind({
+              outbreakId: outbreak.id,
+              deleted: false,
+              $or: [
+                {
+                  'persons.0.source': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.0.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  'persons.1.source': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.1.id': {
+                    $in: caseIds
+                  }
+                }
+              ]
+            }, {projection: {persons: 1}});
+        })
+        .then((relationshipData) => {
+          // determine contacts which can be retrieved
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
+              contact.persons[0].id :
+              contact.persons[1].id;
+            contactIds[id] = true;
+          });
+          contactIds = Object.keys(contactIds);
+
+          // filter contacts
+          mergedFilter.where = {
+            $and: [
+              mergedFilter.where, {
+                _id: {
+                  $in: contactIds
+                }
+              }
+            ]
+          };
+        });
+    }
+
+    // get cases that are available for follow up generation
+    promise
+      .then(() => {
+        return personModel
+          .rawFind(mergedFilter.where, {projection: {'_id': 1}})
+          .then((ids) => callback(null, ids.length, ids.map(obj => obj.id)))
+          .catch(callback);
+      });
+  };
+
+  /**
+   * Count the persons that are lost to follow-up
+   */
+  Outbreak.helpers.countPersonsLostToFollowup = function (
+    outbreak,
+    personType,
+    filter,
+    options
+  ) {
+    // define specific variables
+    let personModel;
+    let contactsLostToFollowupCountProperty;
+    let contactIDsProperty;
+    const isCaseType = personType === genericHelpers.PERSON_TYPE.CASE;
+    if (isCaseType) {
+      personModel = app.models.case;
+      contactsLostToFollowupCountProperty = 'casesLostToFollowupCount';
+      contactIDsProperty = 'caseIDs';
+    } else {
+      // contact
+      personModel = app.models.contact;
+      contactsLostToFollowupCountProperty = 'contactsLostToFollowupCount';
+      contactIDsProperty = 'contactIDs';
+    }
+
+    // get outbreakId
+    let outbreakId = outbreak.id;
+
+    // filter by classification ?
+    const classification = _.get(filter, 'where.classification');
+    if (
+      classification &&
+      !isCaseType
+    ) {
+      delete filter.where.classification;
+    }
+
+    // create filter as we need to use it also after the relationships are found
+    let _filter = app.utils.remote
+      .mergeFilters({
+        where: {
+          outbreakId: outbreakId,
+          followUp: {
+            neq: null
+          },
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_LOST_TO_FOLLOW_UP'
+        }
+      }, filter || {});
+
+    // do we need to filter contacts by case classification ?
+    let promise = Promise.resolve();
+    if (
+      classification &&
+      !isCaseType
+    ) {
+      // retrieve cases
+      promise = promise
+        .then(() => {
+          return app.models.case
+            .rawFind({
+              outbreakId: outbreakId,
+              deleted: false,
+              classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
+            }, {projection: {'_id': 1}});
+        })
+        .then((caseData) => {
+          // no case data, so there is no need to retrieve relationships
+          if (_.isEmpty(caseData)) {
+            return [];
+          }
+
+          // retrieve list of cases for which we need to retrieve contacts relationships
+          const caseIds = caseData.map((caseModel) => caseModel.id);
+
+          // retrieve relationships
+          return app.models.relationship
+            .rawFind({
+              outbreakId: outbreakId,
+              deleted: false,
+              $or: [
+                {
+                  'persons.0.source': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.0.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  'persons.1.source': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.1.id': {
+                    $in: caseIds
+                  }
+                }
+              ]
+            }, {projection: {persons: 1}});
+        })
+        .then((relationshipData) => {
+          // determine contacts which can be retrieved
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
+              contact.persons[0].id :
+              contact.persons[1].id;
+            contactIds[id] = true;
+          });
+          contactIds = Object.keys(contactIds);
+
+          // filter contacts
+          _filter.where = {
+            $and: [
+              _filter.where, {
+                _id: {
+                  $in: contactIds
+                }
+              }
+            ]
+          };
+        });
+    }
+
+    // get contacts that are available for follow up generation
+    return promise
+      .then(() => {
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, _filter.where)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (_filter.where = updatedFilter);
+
+            // get all relationships between events and contacts, where the persons were created sooner than 'noDaysNewContacts' ago
+            return personModel
+              .rawFind(_filter.where)
+              .then(function (contacts) {
+                return {
+                  [contactsLostToFollowupCountProperty]: contacts.length,
+                  [contactIDsProperty]: contacts.map((contact) => contact.id)
+                };
+              });
+          });
+      });
+  };
+
+  /**
+   * Count the persons not seen in the past X days
+   * @param filter Besides the default filter properties this request also accepts 'noDaysNotSeen': number on the first level in 'where'
+   */
+  Outbreak.helpers.countPersonsNotSeenInXDays = function (
+    outbreak,
+    personType,
+    filter,
+    options,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    let contactsCountProperty;
+    let contactIDsProperty;
+    const isCaseType = personType === genericHelpers.PERSON_TYPE.CASE;
+    if (isCaseType) {
+      personModel = app.models.case;
+      contactsCountProperty = 'casesCount';
+      contactIDsProperty = 'caseIDs';
+    } else {
+      // contact
+      personModel = app.models.contact;
+      contactsCountProperty = 'contactsCount';
+      contactIDsProperty = 'contactIDs';
+    }
+
+    filter = filter || {};
+    // initialize noDaysNotSeen filter
+    let noDaysNotSeen;
+    // check if the noDaysNotSeen filter was sent; accepting it only on the first level
+    noDaysNotSeen = _.get(filter, 'where.noDaysNotSeen');
+    if (typeof noDaysNotSeen !== 'undefined') {
+      // noDaysNotSeen was sent; remove it from the filter as it shouldn't reach DB
+      delete filter.where.noDaysNotSeen;
+    } else {
+      // get the outbreak noDaysNotSeen as the default noDaysNotSeen value
+      noDaysNotSeen = outbreak.noDaysNotSeen;
+    }
+
+    // filter by classification ?
+    const classification = _.get(filter, 'where.classification');
+    if (classification) {
+      delete filter.where.classification;
+    }
+
+    // get outbreakId
+    let outbreakId = outbreak.id;
+
+    // get date from noDaysNotSeen days ago
+    let xDaysAgo = localizationHelper.getDateStartOfDay().subtract(noDaysNotSeen, 'day');
+
+    // get contact query
+    let contactQuery = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter).contact;
+
+    // // make sure that only specified person types are fetched
+    // contactQuery = contactQuery || {};
+    // contactQuery.type = personType;
+
+    // by default, find contacts does not perform any task
+    let findContacts = Promise.resolve();
+
+    // do we need to filter contacts by case classification ?
+    if (classification) {
+      if (isCaseType) {
+        contactQuery.classification = app.utils.remote.convertLoopbackFilterToMongo(classification);
+      } else {
+        // retrieve cases
+        findContacts = findContacts
+          .then(() => {
+            return app.models.case
+              .rawFind({
+                outbreakId: outbreakId,
+                deleted: false,
+                classification: app.utils.remote.convertLoopbackFilterToMongo(classification)
+              }, {projection: {'_id': 1}});
+          })
+          .then((caseData) => {
+            // no case data, so there is no need to retrieve relationships
+            if (_.isEmpty(caseData)) {
+              return [];
+            }
+
+            // retrieve list of cases for which we need to retrieve contacts relationships
+            const caseIds = caseData.map((caseModel) => caseModel.id);
+
+            // retrieve relationships
+            return app.models.relationship
+              .rawFind({
+                outbreakId: outbreakId,
+                deleted: false,
+                $or: [
+                  {
+                    'persons.0.source': true,
+                    'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                    'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                    'persons.0.id': {
+                      $in: caseIds
+                    }
+                  }, {
+                    'persons.1.source': true,
+                    'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                    'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                    'persons.1.id': {
+                      $in: caseIds
+                    }
+                  }
+                ]
+              }, {projection: {persons: 1}});
+          })
+          .then((relationshipData) => {
+            // determine contacts which can be retrieved
+            let contactIds = {};
+            (relationshipData || []).forEach((contact) => {
+              const id = contact.persons[0].target ?
+                contact.persons[0].id :
+                contact.persons[1].id;
+              contactIds[id] = true;
+            });
+            contactIds = Object.keys(contactIds);
+
+            // filter contacts
+            if (contactQuery) {
+              contactQuery = {
+                and: [
+                  contactQuery, {
+                    id: {
+                      inq: contactIds
+                    }
+                  }
+                ]
+              };
+            } else {
+              contactQuery = {
+                id: {
+                  inq: contactIds
+                }
+              };
+            }
+          });
+      }
+    }
+
+    // find the contacts
+    findContacts = findContacts
+      .then(() => {
+        // add geographical restriction to filter if needed
+        return personModel
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
+
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return personModel
+              .rawFind({
+                and: [
+                  {outbreakId: outbreakId},
+                  contactQuery
+                ]
+              }, {projection: {'_id': 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
+          });
+      });
+
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        let followUpQuery = {
+          where: {
+            and: [
+              {
+                outbreakId: outbreakId
+              },
+              {
+                // get follow-ups that were scheduled in the past noDaysNotSeen days
+                date: {
+                  between: [xDaysAgo, localizationHelper.getDateEndOfDay()]
+                }
+              },
+              // restrict the list of follow-ups by person type
+              {
+                'contact.type': personType
+              },
+              app.models.followUp.notSeenFilter
+            ]
+          },
+          // order by date as we need to check the follow-ups from the oldest to the most new
+          order: {
+            date: 1
+          }
+        };
+
+        // if a list of contact ids was specified
+        if (contactIds) {
+          // restrict list of follow-ups to the list fo contact ids
+          followUpQuery.where.and.push({
+            personId: {
+              inq: contactIds
+            }
+          });
+        }
+
+        // get follow-ups
+        return app.models.followUp.findAggregate(
+          app.utils.remote.mergeFilters(followUpQuery, filter || {})
+        )
+          .then(followUps => {
+            const resultContactsList = [];
+            // group follow ups per contact
+            const groupedByContact = _.groupBy(followUps, (f) => f.personId);
+            for (let contactId in groupedByContact) {
+              // keep one follow up per day
+              const contactFollowUps = [...new Set(groupedByContact[contactId].map((f) => f.index))];
+              if (contactFollowUps.length === noDaysNotSeen) {
+                resultContactsList.push(contactId);
+              }
+            }
+            // send response
+            return callback(null, {
+              [contactsCountProperty]: resultContactsList.length,
+              [contactIDsProperty]: resultContactsList
+            });
+          });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Count the person that have followups scheduled and the persons with successful followups
+   */
+  Outbreak.helpers.countPersonsWithSuccessfulFollowups = function (
+    outbreak,
+    personType,
+    filter,
+    options,
+    callback
+  ) {
+    // define specific variables
+    let personModel;
+    let totalContactsWithFollowupsCountProperty;
+    let contactsWithSuccessfulFollowupsCountProperty;
+    let contactsProperty;
+    let missedContactsIDsProperty;
+    let followedUpContactsIDsProperty;
+    const isCaseType = personType === genericHelpers.PERSON_TYPE.CASE;
+    if (isCaseType) {
+      personModel = app.models.case;
+      totalContactsWithFollowupsCountProperty = 'totalCasesWithFollowupsCount';
+      contactsWithSuccessfulFollowupsCountProperty = 'casesWithSuccessfulFollowupsCount';
+      contactsProperty = 'cases';
+      missedContactsIDsProperty = 'missedCasesIDs';
+      followedUpContactsIDsProperty = 'followedUpCasesIDs';
+    } else {
+      // contact
+      personModel = app.models.contact;
+      totalContactsWithFollowupsCountProperty = 'totalContactsWithFollowupsCount';
+      contactsWithSuccessfulFollowupsCountProperty = 'contactsWithSuccessfulFollowupsCount';
+      contactsProperty = 'contacts';
+      missedContactsIDsProperty = 'missedContactsIDs';
+      followedUpContactsIDsProperty = 'followedUpContactsIDs';
+    }
+
+    filter = filter || {};
+    const FollowUp = app.models.followUp;
+
+    // initialize result
+    let result = {
+      [totalContactsWithFollowupsCountProperty]: 0,
+      [contactsWithSuccessfulFollowupsCountProperty]: 0,
+      teams: [],
+      [contactsProperty]: []
+    };
+
+    // get outbreakId
+    let outbreakId = outbreak.id;
+
+    // retrieve relations queries
+    const relationsQueries = app.utils.remote.searchByRelationProperty
+      .convertIncludeQueryToFilterQuery(filter);
+
+    // get contact query, if any
+    let contactQuery = relationsQueries.contact;
+
+    // get case query, if any
+    const caseQuery = relationsQueries.case;
+
+    // by default, find contacts does not perform any task
+    let findContacts = Promise.resolve();
+
+    // do we need to filter contacts by case classification ?
+    if (caseQuery) {
+      // retrieve cases
+      findContacts = findContacts
+        .then(() => {
+          return app.models.case
+            .rawFind({
+              and: [
+                caseQuery, {
+                  outbreakId: outbreakId,
+                  deleted: false
+                }
+              ]
+            }, {projection: {'_id': 1}});
+        })
+        .then((caseData) => {
+          // no case data, so there is no need to retrieve relationships
+          if (_.isEmpty(caseData)) {
+            return [];
+          }
+
+          // retrieve list of cases for which we need to retrieve contacts relationships
+          const caseIds = caseData.map((caseModel) => caseModel.id);
+
+          // retrieve relationships
+          return app.models.relationship
+            .rawFind({
+              outbreakId: outbreakId,
+              deleted: false,
+              $or: [
+                {
+                  'persons.0.source': true,
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.0.id': {
+                    $in: caseIds
+                  }
+                }, {
+                  'persons.1.source': true,
+                  'persons.1.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+                  'persons.0.type': 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+                  'persons.1.id': {
+                    $in: caseIds
+                  }
+                }
+              ]
+            }, {projection: {persons: 1}});
+        })
+        .then((relationshipData) => {
+          // determine contacts which can be retrieved
+          let contactIds = {};
+          (relationshipData || []).forEach((contact) => {
+            const id = contact.persons[0].target ?
+              contact.persons[0].id :
+              contact.persons[1].id;
+            contactIds[id] = true;
+          });
+          contactIds = Object.keys(contactIds);
+
+          // filter contacts
+          if (contactQuery) {
+            contactQuery = {
+              and: [
+                contactQuery, {
+                  id: {
+                    inq: contactIds
+                  }
+                }
+              ]
+            };
+          } else {
+            contactQuery = {
+              id: {
+                inq: contactIds
+              }
+            };
+          }
+        });
+    }
+
+    // find the contacts
+    findContacts = findContacts
+      .then(() => {
+        // add geographical restriction to filter if needed
+        return app.models.person
+          .addGeographicalRestrictions(options.remotingContext, contactQuery)
+          .then(updatedFilter => {
+            // update where if needed
+            updatedFilter && (contactQuery = updatedFilter);
+
+            // no contact query
+            if (!contactQuery) {
+              return;
+            }
+
+            // if a contact query was specified
+            return personModel
+              .rawFind({and: [contactQuery, {outbreakId: outbreakId}]}, {projection: {_id: 1}})
+              .then(function (contacts) {
+                // return a list of contact ids
+                return contacts.map(contact => contact.id);
+              });
+          });
+      });
+
+    // find contacts
+    findContacts
+      .then(function (contactIds) {
+        // build follow-up filter
+        let _filter = {
+          where: {
+            outbreakId: outbreakId,
+            // restrict the list of follow-ups by person type
+            'contact.type': personType
+          }
+        };
+
+        // if contact ids were specified
+        if (contactIds) {
+          // restrict follow-up query to those ids
+          _filter.where.personId = {
+            inq: contactIds
+          };
+        }
+
+        // get all the followups for the filtered period
+        return app.models.followUp.findAggregate(app.utils.remote
+          .mergeFilters(_filter, filter || {}))
+          .then(function (followups) {
+            // filter by relation properties
+            followups = app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(followups, filter);
+
+            // initialize teams map and contacts map as the request needs to count contacts
+            let teamsMap = {};
+            let contactsMap = {};
+            // initialize helper contacts to team map
+            let contactsTeamMap = {};
+
+            followups.forEach(function (followup) {
+              // get contactId
+              let contactId = followup.personId;
+              // get teamId; there might be no team id, set null
+              let teamId = followup.teamId || null;
+
+              // check if a followup for the same contact was already parsed
+              if (contactsTeamMap[contactId]) {
+                // check if there was another followup for the same team
+                // if so check for the performed flag;
+                // if the previous followup was performed there is no need to update any team contacts counter;
+                // total and successful counters were already updated
+                if (contactsTeamMap[contactId].teams[teamId]) {
+                  // new follow-up for the contact from the same team is performed; update flag and increase successful counter
+                  if (!contactsTeamMap[contactId].teams[teamId].performed && FollowUp.isPerformed(followup) === true) {
+                    // update performed flag
+                    contactsTeamMap[contactId].teams[teamId].performed = true;
+                    // increase successful counter for team
+                    teamsMap[teamId][contactsWithSuccessfulFollowupsCountProperty]++;
+                    // update followedUpContactsIDs/missedContactsIDs lists
+                    teamsMap[teamId][followedUpContactsIDsProperty].push(contactId);
+                    teamsMap[teamId][missedContactsIDsProperty].splice(teamsMap[teamId][missedContactsIDsProperty].indexOf(contactId), 1);
+                  }
+                } else {
+                  // new teamId
+                  // cache followup performed information for contact in team
+                  contactsTeamMap[contactId].teams[teamId] = {
+                    performed: FollowUp.isPerformed(followup)
+                  };
+
+                  // initialize team entry if doesn't already exist
+                  if (!teamsMap[teamId]) {
+                    teamsMap[teamId] = {
+                      id: teamId,
+                      [totalContactsWithFollowupsCountProperty]: 0,
+                      [contactsWithSuccessfulFollowupsCountProperty]: 0,
+                      [followedUpContactsIDsProperty]: [],
+                      [missedContactsIDsProperty]: []
+                    };
+                  }
+
+                  // increase team counters
+                  teamsMap[teamId][totalContactsWithFollowupsCountProperty]++;
+                  if (FollowUp.isPerformed(followup)) {
+                    teamsMap[teamId][contactsWithSuccessfulFollowupsCountProperty]++;
+                    // keep contactId in the followedUpContactsIDs list
+                    teamsMap[teamId][followedUpContactsIDsProperty].push(contactId);
+                  } else {
+                    // keep contactId in the missedContactsIDs list
+                    teamsMap[teamId][missedContactsIDsProperty].push(contactId);
+                  }
+                }
+              } else {
+                // first followup for the contact; add it in the contactsMap
+                contactsMap[contactId] = {
+                  id: contactId,
+                  totalFollowupsCount: 0,
+                  successfulFollowupsCount: 0
+                };
+
+                // cache followup performed information for contact in team and overall
+                contactsTeamMap[contactId] = {
+                  teams: {
+                    [teamId]: {
+                      performed: FollowUp.isPerformed(followup)
+                    }
+                  },
+                  performed: FollowUp.isPerformed(followup),
+                };
+
+                // increase overall counters
+                result[totalContactsWithFollowupsCountProperty]++;
+
+                // initialize team entry if doesn't already exist
+                if (!teamsMap[teamId]) {
+                  teamsMap[teamId] = {
+                    id: teamId,
+                    [totalContactsWithFollowupsCountProperty]: 0,
+                    [contactsWithSuccessfulFollowupsCountProperty]: 0,
+                    [followedUpContactsIDsProperty]: [],
+                    [missedContactsIDsProperty]: []
+                  };
+                }
+
+                // increase team counters
+                teamsMap[teamId][totalContactsWithFollowupsCountProperty]++;
+                if (FollowUp.isPerformed(followup)) {
+                  teamsMap[teamId][contactsWithSuccessfulFollowupsCountProperty]++;
+                  // keep contactId in the followedUpContactsIDs list
+                  teamsMap[teamId][followedUpContactsIDsProperty].push(contactId);
+                  // increase total successful total counter
+                  result[contactsWithSuccessfulFollowupsCountProperty]++;
+                } else {
+                  // keep contactId in the missedContactsIDs list
+                  teamsMap[teamId][missedContactsIDsProperty].push(contactId);
+                }
+              }
+
+              // update total follow-ups counter for contact
+              contactsMap[contactId].totalFollowupsCount++;
+              if (FollowUp.isPerformed(followup)) {
+                // update counter for contact successful follow-ups
+                contactsMap[contactId].successfulFollowupsCount++;
+
+                // check if contact didn't have a successful followup and the current one was performed
+                // as specified above for teams this is the only case where updates are needed
+                if (!contactsTeamMap[contactId].performed) {
+                  // update overall performed flag
+                  contactsTeamMap[contactId].performed = true;
+                  // increase total successful total counter
+                  result[contactsWithSuccessfulFollowupsCountProperty]++;
+                }
+              }
+            });
+
+            // update results; sending array with teams and contacts information
+            result.teams = Object.values(teamsMap);
+            result[contactsProperty] = Object.values(contactsMap);
+
+            // send response
+            callback(null, result);
+          });
+      })
+      .catch(callback);
   };
 };

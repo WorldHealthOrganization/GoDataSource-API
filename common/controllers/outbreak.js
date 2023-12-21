@@ -108,6 +108,32 @@ module.exports = function (Outbreak) {
   /**
    * Allow changing follow-up status (only status property)
    */
+  Outbreak.beforeRemote('prototype.__updateById__cases', function (context, modelInstance, next) {
+    // get follow-up status property
+    const followUpStatus = _.get(context, 'args.data.followUp.status');
+
+    // if status was provided
+    if (followUpStatus) {
+      // load case instance
+      app.models.case
+        .findById(context.args.fk)
+        .then(function (record) {
+          // get instance data
+          const instance = record.toJSON();
+
+          // update follow-up status
+          Object.assign(context.args.data.followUp, instance.followUp, {status: followUpStatus});
+          // move along
+          next();
+        });
+    } else {
+      next();
+    }
+  });
+
+  /**
+   * Allow changing follow-up status (only status property)
+   */
   Outbreak.beforeRemote('prototype.__updateById__contacts', function (context, modelInstance, next) {
     // get follow-up status property
     const followUpStatus = _.get(context, 'args.data.followUp.status');
@@ -774,6 +800,40 @@ module.exports = function (Outbreak) {
             },
             options
           );
+      })
+      .then(function () {
+        // delete all future follow-ups
+        return app.models.followUp
+          .rawBulkDelete(
+            {
+              personId: contactId,
+              date: {
+                $gte: localizationHelper.today().add(1, 'days')
+              }
+            },
+            options
+          );
+      })
+      .then(function () {
+        // determine follow-up dates
+        const caseOptions = Object.assign({}, options);
+        return app.models.case.determineFollowUpDates(
+          () => app.models.outbreak.findById(convertedCase.outbreakId),
+          convertedCase.id,
+          convertedCase.dateOfOnset,
+          convertedCase.followUp,
+          caseOptions
+        );
+      })
+      .then(function (attributes) {
+        // update follow-up dates
+        return app.models.person.rawUpdateOne(
+          {
+            _id: convertedCase.id
+          },
+          attributes,
+          options
+        );
       })
       .then(function () {
         callback(null, convertedCase);
@@ -1558,11 +1618,30 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Set outbreakId for created follow-ups
+   * Set outbreakId and createdAs for created case follow-ups
+   */
+  Outbreak.beforeRemote('prototype.__create__cases__followUps', function (context, modelInstance, next) {
+    // set outbreakId
+    context.args.data.outbreakId = context.instance.id;
+
+    // set created as
+    context.args.data.createdAs = genericHelpers.PERSON_TYPE.CASE;
+
+    // continue
+    next();
+  });
+
+  /**
+   * Set outbreakId and createdAs for created contact follow-ups
    */
   Outbreak.beforeRemote('prototype.__create__contacts__followUps', function (context, modelInstance, next) {
     // set outbreakId
     context.args.data.outbreakId = context.instance.id;
+
+    // set created as
+    context.args.data.createdAs = genericHelpers.PERSON_TYPE.CONTACT;
+
+    // continue
     next();
   });
 
@@ -2276,6 +2355,8 @@ module.exports = function (Outbreak) {
     }
     // execute same hooks as for sync (data should already exist)
     options._sync = true;
+    // inject platform identifier
+    options.platform = Platform.MERGE;
     // disable visual id validation for record merging
     options._disableVisualIdValidation = true;
     // defensive checks
@@ -2284,6 +2365,10 @@ module.exports = function (Outbreak) {
     // default model type to case
     data.type = data.type || 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE';
     data.model = data.model || {};
+
+    // merged person Ids and migrated not duplicates Ids
+    let mergedPersonIdsMap = {};
+    let migratedNotDuplicatesIdsMap = {};
 
     // reference to application models
     const appModels = app.models;
@@ -2371,6 +2456,18 @@ module.exports = function (Outbreak) {
         // skip relations between merge candidates
         let relationsToAdd = [];
         models.forEach((model) => {
+          // keep the person id that will be merged and migrate his legacy merged Ids
+          mergedPersonIdsMap[model.id] = true;
+          (model.mergedDuplicatesIds || []).forEach((personId) => {
+            mergedPersonIdsMap[personId] = true;
+          });
+
+          // migrate the legacy not duplicates Ids
+          (model.notDuplicatesIds || []).forEach((personId) => {
+            migratedNotDuplicatesIdsMap[personId] = true;
+          });
+
+          // check relationships
           model.relationships.forEach((relation) => {
             let people = relation.persons;
 
@@ -2510,7 +2607,13 @@ module.exports = function (Outbreak) {
         }
 
         // attach generated own and outbreak ids to the model
-        data.model = Object.assign({}, data.model, {id: winnerId, outbreakId: outbreakId});
+        // attach also the ids of the persons merged and the migrated not duplicates Ids
+        data.model = Object.assign({}, data.model, {
+          id: winnerId,
+          outbreakId: outbreakId,
+          mergedDuplicatesIds: Object.keys(mergedPersonIdsMap),
+          notDuplicatesIds: Object.keys(migratedNotDuplicatesIdsMap)
+        });
 
         // make changes into database
         // set flag to not remove isolated contacts when removing the cases that are being merged
@@ -2529,6 +2632,52 @@ module.exports = function (Outbreak) {
             // follow ups
             Promise.all(followUpsToAdd.map((followUp) => appModels.followUp.create(followUp, options)))
           ]))
+          .then(() => {
+            // save the new record id in all related records of the merged persons that were previously marked as "Not a duplicate"
+            const migratedNotDuplicatesIds = Object.keys(migratedNotDuplicatesIdsMap);
+            if (migratedNotDuplicatesIds.length === 0) {
+              return [];
+            }
+
+            // find persons
+            // the "type" and "deleted: fields are required to work updateAttributes
+            // update also the deleted records
+            return app.models.person
+              .find({
+                deleted: true,
+                where: {
+                  id: {
+                    $in: migratedNotDuplicatesIds
+                  }
+                },
+                fields: {
+                  id: true,
+                  outbreakId: true,
+                  type: true,
+                  deleted: true,
+                  notDuplicatesIds: true
+                }
+              });
+          })
+          .then((persons) => {
+            // check if there are persons
+            if (persons.length === 0) {
+              return;
+            }
+
+            // collect update persons
+            const updatePersons = [];
+            persons.forEach(function (person) {
+              let notDuplicatesIds = [winnerId];
+              if (person.notDuplicatesIds) {
+                notDuplicatesIds.push(...person.notDuplicatesIds);
+              }
+
+              // add action
+              updatePersons.push(person.updateAttributes({notDuplicatesIds: notDuplicatesIds}, options));
+            });
+            return Promise.all(updatePersons);
+          })
           .then(() => targetModel.findById(winnerId).then((winnerModel) => callback(null, winnerModel)))
           .catch((err) => {
             // make sure the newly created instance is deleted
@@ -2908,13 +3057,33 @@ module.exports = function (Outbreak) {
   };
 
   /**
+   * Bulk modify cases
+   * @param existingCases
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.bulkModifyCases = function (existingCases, options, callback) {
+    Outbreak.modifyMultiplePersons(
+      existingCases,
+      genericHelpers.PERSON_TYPE.CASE,
+      options
+    )
+      .then((results) => callback(null, results))
+      .catch(callback);
+  };
+
+  /**
    * Bulk modify contacts
    * @param existingContacts
    * @param options
    * @param callback
    */
   Outbreak.prototype.bulkModifyContacts = function (existingContacts, options, callback) {
-    Outbreak.modifyMultipleContacts(existingContacts, false, options)
+    Outbreak.modifyMultiplePersons(
+      existingContacts,
+      genericHelpers.PERSON_TYPE.CONTACT,
+      options
+    )
       .then((results) => callback(null, results))
       .catch(callback);
   };
@@ -4221,7 +4390,11 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.bulkModifyContactsOfContacts = function (records, options, callback) {
-    Outbreak.modifyMultipleContacts(records, true, options)
+    Outbreak.modifyMultiplePersons(
+      records,
+      genericHelpers.PERSON_TYPE.CONTACT_OF_CONTACT,
+      options
+    )
       .then((results) => callback(null, results))
       .catch(callback);
   };
@@ -4238,7 +4411,7 @@ module.exports = function (Outbreak) {
   };
 
   /**
-   * Update a contact's follow-ups or a case that was contact
+   * Update a contact's follow-ups
    * @param personId
    * @param followUpId
    * @param data
@@ -4249,26 +4422,71 @@ module.exports = function (Outbreak) {
     const outbreakId = this.id;
     data = data || {};
 
-    // make sure person is either a contact or was a contact
-    app.models.person
+    // make sure person is a contact
+    app.models.contact
       .findOne({
         where: {
           id: personId,
-          outbreakId: outbreakId,
-          or: [
-            {
-              type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'
-            },
-            {
-              wasContact: true
-            }
-          ]
+          outbreakId: outbreakId
         }
       })
       .then((contact) => {
         if (!contact) {
           throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
             model: app.models.contact.modelName,
+            id: personId
+          });
+        }
+
+        // find the desired follow-up and modify it
+        return app.models.followUp
+          .findOne({
+            where: {
+              id: followUpId,
+              outbreakId: outbreakId,
+              personId: personId
+            }
+          })
+          .then((followUp) => {
+            if (!followUp) {
+              throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+                model: app.models.followUp.modelName,
+                id: followUpId
+              });
+            }
+
+            return followUp
+              .updateAttributes(data, options)
+              .then(updatedFollowUp => callback(null, updatedFollowUp));
+          });
+      })
+      .catch(callback);
+  };
+
+  /**
+   * Update a case's follow-ups
+   * @param personId
+   * @param followUpId
+   * @param data
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.modifyCaseFollowUp = function (personId, followUpId, data, options, callback) {
+    const outbreakId = this.id;
+    data = data || {};
+
+    // make sure person is a case
+    app.models.case
+      .findOne({
+        where: {
+          id: personId,
+          outbreakId: outbreakId
+        }
+      })
+      .then((item) => {
+        if (!item) {
+          throw app.utils.apiError.getError('MODEL_NOT_FOUND', {
+            model: app.models.case.modelName,
             id: personId
           });
         }

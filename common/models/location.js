@@ -8,6 +8,7 @@ const Config = require('./../../server/config.json');
 const Helpers = require('./../../components/helpers');
 const clusterHelpers = require('./../../components/clusterHelpers');
 const localizationHelper = require('../../components/localizationHelper');
+const uuid = require('uuid').v4;
 
 module.exports = function (Location) {
 
@@ -911,6 +912,614 @@ module.exports = function (Location) {
   };
 
   /**
+   * Pre-validate before import and return partial errors if validation fails
+   * processedLocationsMap => {
+   *   [locationId]: {
+   *     locations: [{ recordNo, location }] // array of locations with the same id,
+   *     parent // parent processed location
+   *     childrenIds: ['childUUID'] // array of children uuids
+   *   }
+   * }
+   * groupsMap => {
+   *   [locationId]: {
+   *     childrenIds: ['childUUID'] // array of children uuids
+   *   }
+   * }
+   */
+  Location.preImportValidation = (
+    processedLocationsMap,
+    groupsMap
+  ) => {
+    return new Promise((resolve, reject) => {
+      // gather errors
+      const alreadyAdded = {};
+      const failed = [];
+      const namesMap = {};
+      const synonymsMap = {};
+      const pushFailed = (
+        recordNo,
+        message,
+        data
+      ) => {
+        // process records number
+        recordNo = Array.isArray(recordNo) ?
+          recordNo.sort().join(' & ') :
+          recordNo;
+
+        // don't add twice the same error but from the other perspective
+        const key = `${recordNo}${message}`;
+        if (alreadyAdded[key]) {
+          return;
+        }
+
+        // add error
+        alreadyAdded[key] = true;
+        failed.push({
+          error: {
+            code: 'PRE_VALIDATION'
+          },
+          recordNo,
+          message,
+          data
+        });
+      };
+
+      // go through each location and validate
+      for (const locationId in processedLocationsMap) {
+        // retrieve processed location data
+        const processedLocation = processedLocationsMap[locationId];
+
+        // same uuid used multiple times in the same file !?
+        if (processedLocation.locations.length > 1) {
+          pushFailed(
+            processedLocation.locations.map((item) => `'${item.recordNo}'`),
+            'LNG_PAGE_IMPORT_DATA_ERROR_SAME_ID',
+            {
+              file: processedLocation.locations
+            }
+          );
+        } else {
+          // there is no point in validating names and other things if there is a same id conflict
+
+          // retrieve the actual location and record no
+          const recordNo = processedLocation.locations[0].recordNo;
+          const location = processedLocation.locations[0].location;
+
+          // if it has parent make sure parentLocationId and parent.id match
+          // for hierarchical
+          if (
+            processedLocation.parent &&
+            processedLocation.parent.locations[0].location.id &&
+            location.parentLocationId &&
+            processedLocation.parent.locations[0].location.id !== location.parentLocationId
+          ) {
+            pushFailed(
+              `'${recordNo}'`,
+              'LNG_PAGE_IMPORT_DATA_ERROR_WRONG_PARENT',
+              {
+                file: location
+              }
+            );
+          }
+
+          // validate location name
+          const locationName = location.name;
+          if (
+            !locationName ||
+            typeof locationName !== 'string'
+          ) {
+            pushFailed(
+              `'${recordNo}'`,
+              'LNG_PAGE_IMPORT_DATA_ERROR_INVALID_NAME',
+              {
+                file: location
+              }
+            );
+          } else if (
+            location.synonyms &&
+            !Array.isArray(location.synonyms)
+          ) {
+            pushFailed(
+              `'${recordNo}'`,
+              'LNG_PAGE_IMPORT_DATA_ERROR_INVALID_SYNONYMS',
+              {
+                file: location
+              }
+            );
+          } else {
+            // case insensitive
+            const locationNameLower = locationName.toLowerCase();
+
+            // add name to list of names
+            namesMap[locationNameLower] = true;
+
+            // add synonyms to list
+            if (
+              location.synonyms &&
+              location.synonyms.length > 0
+            ) {
+              for (const synonym of location.synonyms) {
+                // case insensitive
+                synonymsMap[synonym.toLowerCase()] = true;
+              }
+            }
+
+            // check for duplicates in file
+            // same name under the same parent with a different uuid or no uuid (file)
+            // there is no point in checking the file if there is only one child
+            const childrenIds = processedLocation.parent && processedLocation.parent.childrenIds ?
+              processedLocation.parent.childrenIds : (
+                location.parentLocationId &&
+                groupsMap &&
+                groupsMap[location.parentLocationId] &&
+                groupsMap[location.parentLocationId].childrenIds ?
+                  groupsMap[location.parentLocationId].childrenIds : (
+                    !location.parentLocationId &&
+                    groupsMap &&
+                    groupsMap[null] &&
+                    groupsMap[null].childrenIds ?
+                      groupsMap[null].childrenIds :
+                      undefined
+                  )
+              );
+            if (
+              childrenIds &&
+              childrenIds.length > 1
+            ) {
+              // check all other locations
+              const duplicateNameIds = [];
+              const duplicateSynonymsIds = [];
+              childrenIds.forEach((childId) => {
+                // something went wrong or same location ?
+                // nothing to do
+                if (
+                  !processedLocationsMap[childId] ||
+                  childId === location.id
+                ) {
+                  return;
+                }
+
+                // otherwise check name
+                if (
+                  processedLocationsMap[childId].locations[0].location.name &&
+                  typeof processedLocationsMap[childId].locations[0].location.name === 'string' &&
+                  processedLocationsMap[childId].locations[0].location.name.toLowerCase() === locationNameLower
+                ) {
+                  duplicateNameIds.push(childId);
+                }
+
+                // check synonyms
+                if (
+                  location.synonyms &&
+                  location.synonyms.length > 0 &&
+                  processedLocationsMap[childId].locations[0].location.synonyms &&
+                  processedLocationsMap[childId].locations[0].location.synonyms.length > 0
+                ) {
+                  let foundDuplicate = false;
+                  for (const synonym1 of location.synonyms) {
+                    // check
+                    for (const synonym2 of processedLocationsMap[childId].locations[0].location.synonyms) {
+                      if (synonym1.toLowerCase() === synonym2.toLowerCase()) {
+                        foundDuplicate = true;
+                        break;
+                      }
+                    }
+
+                    // found duplicate ?
+                    if (foundDuplicate) {
+                      break;
+                    }
+                  }
+
+                  // found duplicate ?
+                  if (foundDuplicate) {
+                    duplicateSynonymsIds.push(childId);
+                  }
+                }
+              });
+
+              // do we have duplicate names ?
+              if (duplicateNameIds.length > 0) {
+                // duplicate locations
+                const duplicateProcessedLocations = [
+                  processedLocation,
+                  ...duplicateNameIds.map((childId) => processedLocationsMap[childId])
+                ];
+
+                // locations
+                pushFailed(
+                  duplicateProcessedLocations.map((item) => `'${item.locations[0].recordNo}'`),
+                  'LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_FILE_NAME',
+                  {
+                    file: duplicateProcessedLocations.map((item) => item.locations[0])
+                  }
+                );
+              }
+
+              // do we have duplicate synonyms ?
+              if (duplicateSynonymsIds.length > 0) {
+                // duplicate locations
+                const duplicateProcessedLocations = [
+                  processedLocation,
+                  ...duplicateSynonymsIds.map((childId) => processedLocationsMap[childId])
+                ];
+
+                // locations
+                pushFailed(
+                  duplicateProcessedLocations.map((item) => `'${item.locations[0].recordNo}'`),
+                  'LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_FILE_SYNONYMS',
+                  {
+                    file: duplicateProcessedLocations.map((item) => item.locations[0])
+                  }
+                );
+              }
+            }
+          }
+        }
+      }
+
+      // do we have errors, then there is no need to check for now the db ?
+      if (failed.length > 0) {
+        // return pre-validation errors
+        reject(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS_WITH_DETAILS', {
+          failed
+        }));
+
+        //finished
+        return;
+      }
+
+      // if there are no file errors, we should check the db
+      // first things check names and synonyms
+
+      // construct list of regex checks
+      const nameInConditions = Object.keys(namesMap).map((name) => new RegExp(`^${escapeRegExp(name)}$`, 'i'));
+      const synonymInConditions = Object.keys(synonymsMap).map((synonym) => new RegExp(`^${escapeRegExp(synonym)}$`, 'i'));
+      const nameSynCondition = {
+        deleted: false,
+        $or: []
+      };
+      if (nameInConditions.length > 0) {
+        nameSynCondition.$or.push({
+          name: {
+            $in: nameInConditions
+          }
+        });
+      }
+      if (synonymInConditions.length > 0) {
+        nameSynCondition.$or.push({
+          synonyms: {
+            $in: synonymInConditions
+          }
+        });
+      }
+
+      // do we need to check location names ?
+      Promise.resolve()
+        .then(() => {
+          // no location match
+          if (nameSynCondition.$or.length < 1) {
+            return [];
+          }
+
+          // retrieve locations
+          return app.dataSources.mongoDb.connector
+            .collection('location')
+            .find(
+              nameSynCondition, {
+                projection: {
+                  _id: 1,
+                  name: 1,
+                  synonyms: 1,
+                  parentLocationId: 1
+                }
+              }
+            )
+            .toArray();
+        })
+        .then((dbLocations) => {
+          // nothing to check ?
+          if (dbLocations.length < 1) {
+            return;
+          }
+
+          // map
+          const dbNamesMap = {};
+          const dbSynonymsMap = {};
+          dbLocations.forEach((locationData) => {
+            // names
+            if (
+              locationData.name &&
+              typeof locationData.name === 'string'
+            ) {
+              // initialize ?
+              const nameLowered = locationData.name.toLowerCase();
+              if (!dbNamesMap[nameLowered]) {
+                dbNamesMap[nameLowered] = [locationData];
+              } else  {
+                dbNamesMap[nameLowered].push(locationData);
+              }
+            }
+
+            // synonyms
+            if (
+              locationData.synonyms &&
+              locationData.synonyms.length > 0
+            ) {
+              locationData.synonyms.forEach((synonym) => {
+                // nothing to do ?
+                if (typeof synonym !== 'string') {
+                  return;
+                }
+
+                // initialize ?
+                const synonymLowered = synonym.toLowerCase();
+                if (!dbSynonymsMap[synonymLowered]) {
+                  dbSynonymsMap[synonymLowered] = [locationData];
+                } else  {
+                  dbSynonymsMap[synonymLowered].push(locationData);
+                }
+              });
+            }
+          });
+
+          // go through each location again and validate
+          for (const locationId in processedLocationsMap) {
+            // retrieve processed location data
+            const processedLocation = processedLocationsMap[locationId];
+
+            // retrieve the actual location and record no
+            const recordNo = processedLocation.locations[0].recordNo;
+            const location = processedLocation.locations[0].location;
+
+            // validate name
+            if (
+              location.name &&
+              typeof location.name === 'string'
+            ) {
+              // case insensitive
+              const locationNameLower = location.name.toLowerCase();
+              if (dbNamesMap[locationNameLower]) {
+                for (const locationData of dbNamesMap[locationNameLower]) {
+                  // otherwise check name
+                  if (
+                    location.id !== locationData._id && (
+                      location.parentLocationId === locationData.parentLocationId || (
+                        !location.parentLocationId &&
+                        !locationData.parentLocationId
+                      )
+                    )
+                  ) {
+                    // found
+                    pushFailed(
+                      `'${recordNo}'`,
+                      'LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_DB_NAME',
+                      {
+                        file: location
+                      }
+                    );
+
+                    // stop
+                    break;
+                  }
+                }
+              }
+            }
+
+            // validate synonym
+            if (
+              location.synonyms &&
+              location.synonyms.length > 0
+            ) {
+              for (const synonym of location.synonyms) {
+                // case insensitive
+                const locationSynonymLower = synonym.toLowerCase();
+                if (dbSynonymsMap[locationSynonymLower]) {
+                  for (const locationData of dbSynonymsMap[locationSynonymLower]) {
+                    // otherwise check name
+                    if (
+                      location.id !== locationData._id && (
+                        location.parentLocationId === locationData.parentLocationId || (
+                          !location.parentLocationId &&
+                          !locationData.parentLocationId
+                        )
+                      )
+                    ) {
+                      // found
+                      pushFailed(
+                        `'${recordNo}'`,
+                        'LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_DB_SYNONYMS',
+                        {
+                          file: location
+                        }
+                      );
+
+                      // stop
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        })
+        .then(() => {
+          // do we have errors so far, then there is no point to do loop validation since it is the most costly ?
+          if (failed.length > 0) {
+            return;
+          }
+
+          // gather all used parent locations
+          const parentLocationIdsMap = {};
+          const missingLocationsMap = {};
+          for (const locationId in processedLocationsMap) {
+            // retrieve processed location data
+            const processedLocation = processedLocationsMap[locationId];
+            const location = processedLocation.locations[0].location;
+            if (
+              location.parentLocationId &&
+              !processedLocationsMap[location.parentLocationId]
+            ) {
+              parentLocationIdsMap[location.parentLocationId] = true;
+            }
+          }
+
+          // prepare for loop and missing parentLocationId from db validations
+          // retrieve missing locations
+          return Promise.resolve()
+            .then(() => {
+              // parents to retrieve
+              const parentLocationIds = Object.keys(parentLocationIdsMap);
+
+              // nothing to retrieve ?
+              if (parentLocationIds.length < 1) {
+                return [];
+              }
+
+              // retrieve locations
+              const retrieveNextBatch = (ids) => {
+                return app.dataSources.mongoDb.connector
+                  .collection('location')
+                  .find(
+                    {
+                      _id: {
+                        $in: ids
+                      }
+                    }, {
+                      projection: {
+                        _id: 1,
+                        parentLocationId: 1
+                      }
+                    }
+                  )
+                  .toArray()
+                  .then((missingLocations) => {
+                    // add missing locations
+                    const mustRetrieveMap = {};
+                    missingLocations.forEach((missingLocation) => {
+                      // add to map
+                      missingLocationsMap[missingLocation._id] = missingLocation;
+
+                      // determine the next batch that we need to retrieve
+                      if (
+                        missingLocation.parentLocationId &&
+                        !parentLocationIdsMap[missingLocation.parentLocationId] &&
+                        !missingLocationsMap[missingLocation.parentLocationId] &&
+                        !processedLocationsMap[missingLocation.parentLocationId]
+                      ) {
+                        // don't try to retrieve again if still missing
+                        parentLocationIdsMap[missingLocation.parentLocationId] = true;
+
+                        // retrieve
+                        mustRetrieveMap[missingLocation.parentLocationId] = true;
+                      }
+                    });
+
+                    // do we still have data to retrieve ?
+                    const retrieveIds = Object.keys(mustRetrieveMap);
+                    if (retrieveIds.length < 1) {
+                      return;
+                    }
+
+                    // retrieve next batch
+                    return retrieveNextBatch(retrieveIds);
+                  });
+              };
+
+              // start with first batch
+              return retrieveNextBatch(parentLocationIds);
+            })
+            .then(() => {
+              // check for missing locations
+              for (const locationId in processedLocationsMap) {
+                // retrieve processed location data
+                const processedLocation = processedLocationsMap[locationId];
+                const recordNo = processedLocation.locations[0].recordNo;
+                const location = processedLocation.locations[0].location;
+                if (
+                  location.parentLocationId &&
+                  !processedLocationsMap[location.parentLocationId] &&
+                  !missingLocationsMap[location.parentLocationId]
+                ) {
+                  // found
+                  pushFailed(
+                    `'${recordNo}'`,
+                    'LNG_PAGE_IMPORT_DATA_ERROR_PARENT_MISSING',
+                    {
+                      file: location
+                    }
+                  );
+                }
+              }
+
+              // check for loops only of we have all parents
+              if (failed.length > 0) {
+                return;
+              }
+
+              // check for loops
+              for (const locationId in processedLocationsMap) {
+                // check for loop
+                const idUsed = {};
+                const hasLoop = (record) => {
+                  // reached root ?
+                  if (!record.parentLocationId) {
+                    return false;
+                  }
+
+                  // loop ?
+                  if (idUsed[record.parentLocationId]) {
+                    return true;
+                  }
+
+                  // mark as used
+                  idUsed[record.parentLocationId] = true;
+
+                  // check next one
+                  return hasLoop(
+                    processedLocationsMap[record.parentLocationId] ?
+                      processedLocationsMap[record.parentLocationId].locations[0].location :
+                      missingLocationsMap[record.parentLocationId]
+                  );
+                };
+
+                // loop found ?
+                const processedLocation = processedLocationsMap[locationId];
+                const location = processedLocation.locations[0].location;
+                if (hasLoop(location)) {
+                  const recordNo = processedLocation.locations[0].recordNo;
+                  pushFailed(
+                    `'${recordNo}'`,
+                    'LNG_PAGE_IMPORT_DATA_ERROR_PARENT_LOOP',
+                    {
+                      file: location
+                    }
+                  );
+                }
+              }
+            });
+        })
+        .then(() => {
+          // do we have errors from db validation ?
+          if (failed.length > 0) {
+            // return pre-validation errors
+            reject(app.utils.apiError.getError('IMPORT_PARTIAL_SUCCESS_WITH_DETAILS', {
+              failed
+            }));
+
+            //finished
+            return;
+          }
+
+          // everything seems to be valid, uhuu!
+          resolve();
+        })
+        .catch(reject);
+    });
+
+  };
+
+  /**
    * Import hierarchical locations list from JSON file
    * @param fileContent
    * @param options
@@ -929,12 +1538,105 @@ module.exports = function (Location) {
           details: 'it should contain an array'
         }));
       }
-      // create locations from the hierarchical list
+
+      // nothing to do ?
       if (!locations.length) {
         callback();
-      } else {
-        Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+        return;
       }
+
+      // flatten data for validation
+      const processedLocationsMap = {};
+      const groupsMap = {};
+      const flatten = (
+        hierarchies,
+        parent,
+        parentRecordNo
+      ) => {
+        // nothing to do ?
+        if (
+          !hierarchies ||
+          !hierarchies.length
+        ) {
+          return;
+        }
+
+        // go through hierarchical locations and flatten them
+        hierarchies.forEach((
+          hierarchy,
+          hierarchyIndex
+        ) => {
+          // if no location id is assign just use a new one
+          const hLocation = hierarchy.location;
+          if (!hLocation.id) {
+            hLocation.id = uuid();
+          }
+
+          // add it to parent ?
+          if (parent) {
+            // add child
+            parent.childrenIds.push(hLocation.id);
+
+            // attach parent location id if not in file for later validations
+            if (!hLocation.parentLocationId) {
+              hLocation.parentLocationId = parent.locations[0].location.id;
+            }
+          } else {
+            // root location ?
+            if (!hLocation.parentLocationId) {
+              if (!groupsMap[null]) {
+                // we need it to check for duplicate names && synonyms
+                groupsMap[null] = {
+                  childrenIds: [hLocation.id]
+                };
+              } else {
+                groupsMap[null].childrenIds.push(hLocation.id);
+              }
+            }
+          }
+
+          // initialize ?
+          const recordNo = parentRecordNo ?
+            `${parentRecordNo} - ${hierarchyIndex + 1}` :
+            `${hierarchyIndex + 1}`;
+          if (!processedLocationsMap[hLocation.id]) {
+            processedLocationsMap[hLocation.id] = {
+              locations: [{
+                recordNo,
+                location: hLocation
+              }],
+              parent,
+              childrenIds: []
+            };
+          } else {
+            // used to determine if multiple times in the same file ... .length
+            processedLocationsMap[hLocation.id].locations.push({
+              recordNo,
+              location: hLocation
+            });
+          }
+
+          // go deeper
+          flatten(
+            hierarchy.children,
+            processedLocationsMap[hLocation.id],
+            recordNo
+          );
+        });
+      };
+
+      // start from root
+      flatten(locations);
+
+      // pre-validate
+      Location.preImportValidation(
+        processedLocationsMap,
+        groupsMap
+      )
+        .then(() => {
+          Location.createLocationsFromHierarchicalLocationsList(undefined, locations, options, callback);
+        })
+        .catch(callback);
     } catch (error) {
       // handle JSON.parse errors
       callback(app.utils.apiError.getError('INVALID_CONTENT_OF_TYPE', {

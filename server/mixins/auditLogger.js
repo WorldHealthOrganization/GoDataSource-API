@@ -113,37 +113,28 @@ function obfuscateFieldValue(
       // access token specific fields
       return obfuscateAccessToken[field] ? obfuscateString : value;
 
-    // system settings
-    case app.models.systemSettings.modelName:
+    // client applications
+    case app.models.clientApplication.modelName:
       // system settings specific fields
       if (
-        field === 'clientApplications' &&
-        value &&
-        value.length > 0
+        field === 'credentials' &&
+        value
       ) {
         // clone so we don't alter the original one and replace critical keys
         value = JSON.parse(JSON.stringify(value));
-        value.forEach((item, index) => {
-          // no credentials ?
-          if (!item.credentials) {
-            return;
-          }
 
-          // client secret
-          if (item.credentials.clientSecret) {
-            if (
-              compareValue &&
-              compareValue[index] &&
-              compareValue[index].credentials &&
-              compareValue[index].credentials.clientSecret &&
-              compareValue[index].credentials.clientSecret === item.credentials.clientSecret
-            ) {
-              item.credentials.clientSecret = compareValueSameObfuscateString;
-            } else {
-              item.credentials.clientSecret = obfuscateString;
-            }
+        // client secret
+        if (value.clientSecret) {
+          if (
+            compareValue &&
+            compareValue.clientSecret &&
+            compareValue.clientSecret === value.clientSecret
+          ) {
+            value.clientSecret = compareValueSameObfuscateString;
+          } else {
+            value.clientSecret = obfuscateString;
           }
-        });
+        }
       }
 
       // finished

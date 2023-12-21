@@ -43,7 +43,7 @@ module.exports = function (User) {
         }
         return user.updateAttributes({
           loginRetriesCount: 0,
-          lastLoginDate: null,
+          bruteForceLoginDate: null,
           resetPasswordRetriesCount: 0,
           lastResetPasswordDate: null,
           passwordChange: false
@@ -326,16 +326,16 @@ module.exports = function (User) {
         if (!user) {
           return next();
         }
-        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const lastLoginDate = localizationHelper.toMoment(user.lastLoginDate);
+        if (user.loginRetriesCount >= 0 && user.bruteForceLoginDate) {
+          const bruteForceLoginDate = localizationHelper.toMoment(user.bruteForceLoginDate);
           const now = localizationHelper.now();
-          const isValidForReset = lastLoginDate.add(config.login.resetTime, config.login.resetTimeUnit).isBefore(now);
+          const isValidForReset = bruteForceLoginDate.add(config.login.resetTime, config.login.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= config.login.maxRetries;
           if (isValidForReset) {
             // reset login retries
             return user.updateAttributes({
               loginRetriesCount: 0,
-              lastLoginDate: null
+              bruteForceLoginDate: null
             }).then(() => next());
           }
           if (isBanned && !isValidForReset) {
@@ -373,7 +373,7 @@ module.exports = function (User) {
         return user
           .updateAttributes({
             loginRetriesCount: 0,
-            lastLoginDate: null
+            bruteForceLoginDate: null
           })
           .then(() => {
             if (twoFactorAuthentication.isEnabled()) {
@@ -446,15 +446,15 @@ module.exports = function (User) {
 
           const now = localizationHelper.now().toDate();
           const userAttributesToUpdate = {};
-          if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
+          if (user.loginRetriesCount >= 0 && user.bruteForceLoginDate) {
             if (user.loginRetriesCount >= config.login.maxRetries) {
               return next();
             }
             userAttributesToUpdate.loginRetriesCount = ++user.loginRetriesCount;
-            userAttributesToUpdate.lastLoginDate = now;
+            userAttributesToUpdate.bruteForceLoginDate = now;
           } else {
             userAttributesToUpdate.loginRetriesCount = 1;
-            userAttributesToUpdate.lastLoginDate = now;
+            userAttributesToUpdate.bruteForceLoginDate = now;
           }
 
           return user.updateAttributes(userAttributesToUpdate).then(() => next());
@@ -1144,15 +1144,28 @@ module.exports = function (User) {
    * Find for filters
    */
   User.findForFilters = function (where, callback) {
+    // handle deleted special case
+    where = where || {};
+    const deleted = !!where.includeDeletedRecords;
+    delete where.includeDeletedRecords;
+
+    // fields
+    const fields = {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true
+    };
+    if (deleted) {
+      fields.deleted = true;
+    }
+
+    // filter
     app.models.user
       .find({
-        where: where || {},
-        fields: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true
-        },
+        deleted,
+        where,
+        fields,
         order: ['firstName ASC', 'lastName ASC']
       })
       .then((users) => {

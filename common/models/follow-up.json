@@ -52,6 +52,9 @@
     },
     "personId": {
       "type": "string"
+    },
+    "createdAs": {
+      "type": "string"
     }
   },
   "indexes": {

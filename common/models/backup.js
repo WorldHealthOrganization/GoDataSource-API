@@ -19,6 +19,7 @@ module.exports = function (Backup) {
   // a module can group one or more collections
   Backup.modules = {
     'System Configuration': [
+      'clientApplication',
       'systemSettings',
       'language',
       'languageToken',

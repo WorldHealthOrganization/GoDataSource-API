@@ -4570,6 +4570,14 @@ function exportFilteredModelsList(
                                           answer.value[multipleDropdownAnswerIndex];
                                       }
                                     }
+                                  } else if (questionData.answerType === 'LNG_REFERENCE_DATA_CATEGORY_QUESTION_ANSWER_TYPE_DATE_TIME') {
+                                    // format accordingly to timezone ?
+                                    if (
+                                      answer.value &&
+                                      !sheetHandler.dontTranslateValues
+                                    ) {
+                                      answer.value = localizationHelper.toMoment(answer.value).format();
+                                    }
                                   }
 
                                   // replace value
@@ -4585,15 +4593,23 @@ function exportFilteredModelsList(
                                   }
 
                                   // replace date
-                                  if (
-                                    !sheetHandler.useDbColumns &&
-                                    answer.hasOwnProperty('date')
-                                  ) {
-                                    answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] ?
-                                      sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] :
-                                      'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
-                                    ] = answer.date;
-                                    delete answer.date;
+                                  if (answer.hasOwnProperty('date')) {
+                                    // format accordingly to timezone ?
+                                    if (
+                                      answer.date &&
+                                      !sheetHandler.dontTranslateValues
+                                    ) {
+                                      answer.date = localizationHelper.toMoment(answer.date).format();
+                                    }
+
+                                    // replace property with translation !?
+                                    if (!sheetHandler.useDbColumns) {
+                                      answer[sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] ?
+                                        sheetHandler.dictionaryMap['LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'] :
+                                        'LNG_PAGE_IMPORT_DATA_LABEL_QUESTIONNAIRE_ANSWERS_DATE'
+                                      ] = answer.date;
+                                      delete answer.date;
+                                    }
                                   }
                                 }
                               }

@@ -115,6 +115,7 @@ module.exports = function (FollowUp) {
     'responsibleUser.id': 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
     'responsibleUser.firstName': 'LNG_USER_FIELD_LABEL_FIRST_NAME',
     'responsibleUser.lastName': 'LNG_USER_FIELD_LABEL_LAST_NAME',
+    'createdAs': 'LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AS',
 
     // must be last item from the list
     'questionnaireAnswers': 'LNG_FOLLOW_UP_FIELD_LABEL_QUESTIONNAIRE_ANSWERS'
@@ -174,6 +175,7 @@ module.exports = function (FollowUp) {
         'responsibleUser.id',
         'responsibleUser.firstName',
         'responsibleUser.lastName',
+        'createdAs'
       ]
     },
     'LNG_COMMON_LABEL_EXPORT_GROUP_ADDRESS_AND_LOCATION_DATA': {
@@ -896,17 +898,21 @@ module.exports = function (FollowUp) {
       buildQuery = buildQuery
         .then(function () {
           // find people that were seen pass the specified date
-          return app.models.followUp
-            .rawFind({
+          return app.dataSources.mongoDb.connector
+            .collection(FollowUp.modelName)
+            .distinct('personId', {
               outbreakId: outbreak.id,
-              performed: true,
+              statusId: {
+                $in: [
+                  'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_OK',
+                  'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_SEEN_NOT_OK'
+                ]
+              },
               date: {
                 $gt: timeLastSeen
               }
-            }, {
-              projection: {personId: 1}
             })
-            .then(function (followUps) {
+            .then(function (personIds) {
               if (!contactQuery) {
                 contactQuery = {};
               }
@@ -916,7 +922,7 @@ module.exports = function (FollowUp) {
                   contactQuery,
                   {
                     _id: {
-                      $nin: followUps.map(followUp => followUp.personId)
+                      $nin: personIds
                     }
                   }
                 ]

@@ -441,7 +441,17 @@ const worker = {
                                       typeId: 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
                                       $or: [
                                         {
-                                          locationId: null
+                                          locationId: {
+                                            $exists: false
+                                          }
+                                        }, {
+                                          locationId: {
+                                            $eq: null
+                                          }
+                                        }, {
+                                          locationId: {
+                                            $eq: ''
+                                          }
                                         }, {
                                           locationId: {
                                             $in: locationsIds
@@ -467,7 +477,17 @@ const worker = {
                                   'address.typeId': 'LNG_REFERENCE_DATA_CATEGORY_ADDRESS_TYPE_USUAL_PLACE_OF_RESIDENCE',
                                   $or: [
                                     {
-                                      'address.locationId': null
+                                      'address.locationId': {
+                                        $exists: false
+                                      }
+                                    }, {
+                                      'address.locationId': {
+                                        $eq: null
+                                      }
+                                    }, {
+                                      'address.locationId': {
+                                        $eq: ''
+                                      }
                                     }, {
                                       'address.locationId': {
                                         $in: locationsIds

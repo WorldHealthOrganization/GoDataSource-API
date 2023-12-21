@@ -7,6 +7,7 @@ const dbSync = require('../../components/dbSync');
 const _ = require('lodash');
 const syncConfig = require('../../server/config.json').sync;
 const localizationHelper = require('../../components/localizationHelper');
+const Platform = require('../../components/platform');
 
 module.exports = function (Sync) {
 
@@ -127,6 +128,24 @@ module.exports = function (Sync) {
           // cache user information
           userModel = user;
 
+          // if user was updated then remove any date constrains since available outbreaks might've changed
+          // we can retrieve everything
+          if (
+            filter &&
+            filter.where &&
+            filter.where.fromDate && (
+              (
+                userModel.updatedAt &&
+                localizationHelper.toMoment(userModel.updatedAt).isSameOrAfter(localizationHelper.toMoment(filter.where.fromDate))
+              ) || (
+                userModel.dbUpdatedAt &&
+                localizationHelper.toMoment(userModel.dbUpdatedAt).isSameOrAfter(localizationHelper.toMoment(filter.where.fromDate))
+              )
+            )
+          ) {
+            delete filter.where.fromDate;
+          }
+
           // get user teams
           return app.models.team
             .find({
@@ -166,6 +185,17 @@ module.exports = function (Sync) {
 
                 return resolve();
               });
+          });
+        })
+        .then(() => {
+          // nothing to do ?
+          if (!userModel) {
+            return;
+          }
+
+          // update lastLogin
+          return userModel.updateAttributes({
+            lastLogin: localizationHelper.now().toDate()
           });
         });
     }
@@ -533,6 +563,15 @@ module.exports = function (Sync) {
    */
   Sync.importDatabaseSnapshot = function (req, snapshot, asynchronous, triggerBackupBeforeSync, password, autoEncrypt, generatePersonVisualId, snapshotFromClient, done) {
     const buildError = app.utils.apiError.getError;
+
+    // default should be sync
+    req.headers = req.headers || {};
+    if (!req.headers['platform']) {
+      // only mobile uses basic auth
+      req.headers['platform'] = req.authData && req.authData.credentials ?
+        Platform.MOBILE :
+        Platform.SYNC;
+    }
 
     /**
      * Import action callback; Depending on the asynchronous it can be called with/without the callback

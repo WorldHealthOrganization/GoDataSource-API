@@ -234,6 +234,7 @@
     }
   },
   "alternateUniqueIdentifierQueryOnImport": {
+    "event": false,
     "case": false,
     "contact": false,
     "contactOfContact": false,

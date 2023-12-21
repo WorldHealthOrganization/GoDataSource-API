@@ -719,7 +719,8 @@ module.exports = function (Outbreak) {
     const languageId = options.remotingContext.req.authData.user.languageId;
     // Get the dictionary so we can translate the case classifications and other necessary fields
     app.models.language.getLanguageDictionary(languageId, function (error, dictionary) {
-      app.models.person.getPeoplePerLocation('case', filter, self, options)
+      const reportTitle = dictionary.getTranslation('LNG_PAGE_DASHBOARD_CASES_BY_CLASSIFICATION_LOCATION_REPORT_LABEL');
+      app.models.person.getPeoplePerLocation('case', false, filter, self, options)
         .then((result) => {
           // Get all existing case classification so we know how many rows the list will have
           return app.models.referenceData
@@ -826,11 +827,11 @@ module.exports = function (Outbreak) {
           });
 
           // Create the pdf list file
-          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf', 'Case distribution per location');
+          return app.utils.helpers.exportListFile(headers, Object.values(data), 'pdf', reportTitle);
         })
         .then(function (file) {
           // and offer it for download
-          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `Case distribution per location.${file.extension}`, callback);
+          app.utils.remote.helpers.offerFileToDownload(file.data, file.mimeType, `${reportTitle}.${file.extension}`, callback);
         })
         .catch(callback);
     });
@@ -1442,7 +1443,7 @@ module.exports = function (Outbreak) {
     const _filter = app.utils.remote.mergeFilters(additionalFilter, filter || {});
 
     // count people per location
-    app.models.person.getPeoplePerLocation('case', _filter, this, options)
+    app.models.person.getPeoplePerLocation('case', false, _filter, this, options)
       .then((result) => {
         let response = {locations: []};
         let allCasesCount = 0;
@@ -1840,6 +1841,19 @@ module.exports = function (Outbreak) {
           );
       })
       .then(function () {
+        // delete all future follow-ups
+        return app.models.followUp
+          .rawBulkDelete(
+            {
+              personId: caseId,
+              date: {
+                $gte: localizationHelper.today().add(1, 'days')
+              }
+            },
+            options
+          );
+      })
+      .then(function () {
         callback(null, convertedContact);
       })
       .catch(callback);
@@ -1879,6 +1893,35 @@ module.exports = function (Outbreak) {
             createCases.push(function (asyncCallback) {
               // sync the case
               return app.utils.dbSync.syncRecord(app, logger, app.models.case, caseData.save, options)
+                .then(function (syncResult) {
+                  // check if follow-ups should be generated
+                  if (
+                    !self.allowCasesFollowUp ||
+                    !self.generateFollowUpsWhenCreatingCases ||
+                    syncResult.flag !== app.utils.dbSync.syncRecordFlags.CREATED
+                  ) {
+                    return;
+                  }
+
+                  // generate follow-ups
+                  return new Promise((cufResolve, cufReject) => {
+                    Outbreak.generateFollowupsForOutbreak(
+                      self,
+                      {
+                        personType: genericHelpers.PERSON_TYPE.CASE,
+                        contactIds: [syncResult.record.id]
+                      },
+                      options,
+                      (err, response) => {
+                        if (err) {
+                          cufReject(err);
+                        } else {
+                          cufResolve(response);
+                        }
+                      }
+                    );
+                  });
+                })
                 .then(function () {
                   asyncCallback();
                 })
@@ -1939,5 +1982,83 @@ module.exports = function (Outbreak) {
       outbreakId: self.id,
       logger: logger
     }, formatterOptions, createBatchActions, callback);
+  };
+
+  /**
+   * Before remote hook fot GET /cases/daily-list/export
+   */
+  Outbreak.beforeRemote('prototype.exportDailyCaseFollowUpList', function (context, modelInstance, next) {
+    Outbreak.helpers.findAndFilteredCountCasesBackCompat(context, modelInstance, next);
+  });
+
+  /**
+   * Export a daily case follow-up form for every case.
+   * @param res
+   * @param groupBy
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyCaseFollowUpList = function (res, groupBy, filter, options, callback) {
+    Outbreak.helpers.exportDailyPersonFollowUpList(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      res,
+      groupBy,
+      filter,
+      options,
+      callback
+    );
+  };
+
+  /**
+   * Export list of cases where each case has a page with follow up questionnaire and answers
+   * @param response
+   * @param filter
+   * @param reqOptions
+   * @param callback
+   */
+  Outbreak.prototype.exportDailyCaseFollowUpForm = function (response, filter, reqOptions, callback) {
+    Outbreak.helpers.exportDailyPersonFollowUpForm(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      response,
+      filter,
+      reqOptions,
+      callback
+    );
+  };
+
+  /**
+   * Returns a pdf list, containing the outbreak's cases, distributed by location and follow-up status
+   * @param filter -> accepts custom parameter <dateOfFollowUp>. It mentions the date for which we are checking if the case has been seen or not
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.downloadCaseTracingPerLocationLevelReport = function (filter, options, callback) {
+    Outbreak.helpers.downloadPersonTracingPerLocationLevelReport(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      filter,
+      options,
+      callback
+    );
+  };
+
+  /**
+   * Count contacts that are on the follow up list when generating
+   * Also custom filtered
+   * @param filter
+   * @param options
+   * @param callback
+   */
+  Outbreak.prototype.filteredCountCasesOnFollowUpList = function (filter = {}, options, callback) {
+    Outbreak.helpers.filteredCountPersonsOnFollowUpList(
+      this,
+      genericHelpers.PERSON_TYPE.CASE,
+      filter,
+      options,
+      callback
+    );
   };
 };

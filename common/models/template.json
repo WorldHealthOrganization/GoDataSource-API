@@ -98,6 +98,11 @@
         "templateQuestion"
       ]
     },
+    "caseFollowUpTemplate": {
+      "type": [
+        "templateQuestion"
+      ]
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
@@ -136,7 +141,53 @@
     },
     "visibleAndMandatoryFields": {
       "type": "visibleAndMandatory"
-    }
+    },
+    "allowCasesFollowUp": {
+      "description": "Flag specifying if the cases follow-up is allowed. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "periodOfFollowupCases": {
+      "type": "number",
+      "description": "Duration for the follow-up period in days"
+    },
+    "frequencyOfFollowUpCases": {
+      "type": "number",
+      "default": 1,
+      "description": "Frequency of follow ups in days (once every X days/daily)"
+    },
+    "frequencyOfFollowUpPerDayCases": {
+      "type": "number",
+      "description": "Number of follow ups to be generated per day"
+    },
+    "intervalOfFollowUpCases": {
+      "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
+      "type": "string"
+    },
+    "generateFollowUpsKeepTeamAssignmentCases": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a case or the team assignment will be made through round-robin (can be true only if 'generateFollowUpsOverwriteExisting' is false)",
+      "type": "boolean",
+      "default": true
+    },
+    "generateFollowUpsTeamAssignmentAlgorithmCases": {
+      "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the case's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the case's location",
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
+      ],
+      "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
+    "generateFollowUpsDateOfOnset": {
+      "description": "Flag specifying if case tracing should start on the date of onset",
+      "type": "boolean",
+      "default": false
+    },
+    "generateFollowUpsWhenCreatingCases": {
+      "description": "Flag that specifies whether follow ups are automatically generated when creating cases. Default: false",
+      "type": "boolean",
+      "default": false
+     }
   },
   "validations": [],
   "relations": {},

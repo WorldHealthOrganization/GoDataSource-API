@@ -18,13 +18,13 @@ module.exports = function (Model) {
   Model.observe('before save', function (context, next) {
     // get platform identifier from context
     // if not found there, then take it directly from request headers
-    // if its missing here still, default to API
+    // if missing here still, default to API
+    // context.options.platform takes precedence since we need to overwrite what comes from WEB
     context.options = context.options || {};
     let platformId = Platform.API;
     if (context.options.platform) {
       platformId = context.options.platform;
-    }
-    if (context.options.remotingContext && context.options.remotingContext.req) {
+    } else if (context.options.remotingContext && context.options.remotingContext.req) {
       let platformHeader = context.options.remotingContext.req.headers['platform'];
       if (platformHeader) {
         platformHeader = platformHeader.toUpperCase();
@@ -36,13 +36,7 @@ module.exports = function (Model) {
 
     if (context.instance) {
       if (context.isNewInstance) {
-        if (context.options._sync) {
-          if (!context.instance.createdOn) {
-            context.instance.createdOn = Platform.SYNC;
-          }
-        } else {
-          context.instance.createdOn = platformId;
-        }
+        context.instance.createdOn = platformId;
       }
     }
 

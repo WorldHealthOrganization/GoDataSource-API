@@ -16,13 +16,6 @@
         }
       ]
     },
-    "clientApplications": {
-      "type": [
-        {
-          "type": "clientApplication"
-        }
-      ]
-    },
     "sync": {
       "type": {
         "triggerBackupBeforeSync": {
@@ -105,12 +98,6 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "generateFile"
-    },
-    {
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
       "property": "getBackupLocation"
     },
     {
@@ -130,6 +117,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "getModelDefinition"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "getCreatedOnValues"
     }
   ],
   "methods": {
@@ -333,49 +326,6 @@
         "path": "/backup-location"
       }
     },
-    "generateFile": {
-      "accepts": [
-        {
-          "arg": "type",
-          "type": "string",
-          "enum": ["json", "qr"],
-          "required": true,
-          "description": "Generate file type. Enum: ['json', 'qr']"
-        },
-        {
-          "arg": "data",
-          "type": "object",
-          "required": true
-        }
-      ],
-      "returns": [
-        {
-          "arg": "body",
-          "type": "file",
-          "root": true,
-          "required": true
-        },
-        {
-          "arg": "Content-Type",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        },
-        {
-          "arg": "Content-Disposition",
-          "type": "string",
-          "http": {
-            "target": "header"
-          }
-        }
-      ],
-      "description": "Generate and download a JSON/(QR-Code)PNG file.",
-      "http": {
-        "verb": "post",
-        "path": "/generate-file"
-      }
-    },
     "getModelDefinition": {
       "accepts": [
         {
@@ -398,6 +348,30 @@
       "http": {
         "verb": "get",
         "path": "/model-definition"
+      }
+    },
+    "getCreatedOnValues": {
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "response",
+          "description": "Created on values",
+          "type": [
+            {
+              "type": {
+                "id": "string",
+                "name": "string"
+              }
+            }
+          ],
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Get created on values.",
+      "http": {
+        "verb": "get",
+        "path": "/created-on"
       }
     }
   }

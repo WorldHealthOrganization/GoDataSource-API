@@ -4,6 +4,7 @@
 const App = require('../server/server');
 const localizationHelper = require('./localizationHelper');
 const PromiseQueue = require('p-queue');
+const helpers = require('./helpers');
 
 // attach author timestamps (createdAt, updatedAt, createdBy, updatedBy)
 // attach follow up index and address
@@ -21,104 +22,195 @@ const _createFollowUpEntry = function (props, contact) {
   return props;
 };
 
-// count contacts that have follow up period between the passed start/end dates
-module.exports.countContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, options) {
-  // where condition used to count eligible contacts
-  let where = {
-    $and: [
-      {
-        outbreakId: outbreakId,
-        // should have relationships
-        hasRelationships: true,
-        // at least one of the relationships needs to be active
-        'relationshipsRepresentation.active': true,
-        // only contacts that are under follow up
-        'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
-        $or: [
-          {
-            // follow up period is inside contact's follow up period
-            $and: [
-              {
-                'followUp.startDate': {
-                  $lte: startDate
+const getEligibleForFollowupConditions = function (personType, startDate, endDate, outbreakId, contactIds) {
+  // create conditions by person type
+  let where;
+  if (personType === helpers.PERSON_TYPE.CASE) {
+    where = {
+      $and: [
+        {
+          outbreakId: outbreakId,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+          // only cases that are under follow up
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+          $or: [
+            {
+              // follow up period is inside contact's follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
                 }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: endDate
+              ]
+            },
+            {
+              // period starts before contact's start date but ends before contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.startDate': {
+                    $lte: endDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
                 }
-              }
-            ]
-          },
-          {
-            // period starts before contact's start date but ends before contact's end date
-            $and: [
-              {
-                'followUp.startDate': {
-                  $gte: startDate
+              ]
+            },
+            {
+              // period starts before contact's end date and after contact's start date
+              // but stops after contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
                 }
-              },
-              {
-                'followUp.startDate': {
-                  $lte: endDate
+              ]
+            },
+            {
+              // contact's period is inside follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
                 }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: endDate
+              ]
+            }
+          ]
+        }
+      ]
+    };
+  } else {
+    where = {
+      $and: [
+        {
+          outbreakId: outbreakId,
+          type: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+          // should have relationships
+          hasRelationships: true,
+          // at least one of the relationships needs to be active
+          'relationshipsRepresentation.active': true,
+          // only contacts that are under follow up
+          'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
+          $or: [
+            {
+              // follow up period is inside contact's follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
                 }
-              }
-            ]
-          },
-          {
-            // period starts before contact's end date and after contact's start date
-            // but stops after contact's end date
-            $and: [
-              {
-                'followUp.startDate': {
-                  $lte: startDate
+              ]
+            },
+            {
+              // period starts before contact's start date but ends before contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.startDate': {
+                    $lte: endDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: endDate
+                  }
                 }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: startDate
+              ]
+            },
+            {
+              // period starts before contact's end date and after contact's start date
+              // but stops after contact's end date
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $lte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
                 }
-              },
-              {
-                'followUp.endDate': {
-                  $lte: endDate
+              ]
+            },
+            {
+              // contact's period is inside follow up period
+              $and: [
+                {
+                  'followUp.startDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $gte: startDate
+                  }
+                },
+                {
+                  'followUp.endDate': {
+                    $lte: endDate
+                  }
                 }
-              }
-            ]
-          },
-          {
-            // contact's period is inside follow up period
-            $and: [
-              {
-                'followUp.startDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $lte: endDate
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  };
+              ]
+            }
+          ]
+        }
+      ]
+    };
+  }
 
   // check if the follow-ups should be generated only for specific contacts.
   if (contactIds.length) {
-    // let filter = { where: where};
     const filter = App.utils.remote
       .mergeFilters(
         {
@@ -135,6 +227,15 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
     // use the merged conditions
     where = filter.where;
   }
+
+  // return conditions
+  return where;
+};
+
+// count contacts that have follow up period between the passed start/end dates
+module.exports.countContactsEligibleForFollowup = function (personType, startDate, endDate, outbreakId, contactIds, options) {
+  // where condition used to count eligible cases/contacts
+  let where = getEligibleForFollowupConditions(personType, startDate, endDate, outbreakId, contactIds);
 
   // add geographical restriction to filter if needed
   return App.models.person
@@ -144,125 +245,15 @@ module.exports.countContactsEligibleForFollowup = function (startDate, endDate, 
       updatedFilter && (where = updatedFilter);
 
       // count
-      return App.models.contact
+      return App.models.person
         .count(where);
     });
 };
 
 // get contacts that have follow up period between the passed start/end dates
-module.exports.getContactsEligibleForFollowup = function (startDate, endDate, outbreakId, contactIds, skip, limit, options) {
-  // where condition used to count eligible contacts
-  let where = {
-    $and: [
-      {
-        outbreakId: outbreakId,
-        // should have relationships
-        hasRelationships: true,
-        // at least one of the relationships needs to be active
-        'relationshipsRepresentation.active': true,
-        // only contacts that are under follow up
-        'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE_UNDER_FOLLOW_UP',
-        $or: [
-          {
-            // follow up period is inside contact's follow up period
-            $and: [
-              {
-                'followUp.startDate': {
-                  $lte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: endDate
-                }
-              }
-            ]
-          },
-          {
-            // period starts before contact's start date but ends before contact's end date
-            $and: [
-              {
-                'followUp.startDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.startDate': {
-                  $lte: endDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: endDate
-                }
-              }
-            ]
-          },
-          {
-            // period starts before contact's end date and after contact's start date
-            // but stops after contact's end date
-            $and: [
-              {
-                'followUp.startDate': {
-                  $lte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $lte: endDate
-                }
-              }
-            ]
-          },
-          {
-            // contact's period is inside follow up period
-            $and: [
-              {
-                'followUp.startDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $gte: startDate
-                }
-              },
-              {
-                'followUp.endDate': {
-                  $lte: endDate
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  };
-
-  // check if the follow-ups should be generated only for specific contacts.
-  if (contactIds.length) {
-    // let filter = { where: where};
-    const filter = App.utils.remote
-      .mergeFilters(
-        {
-          where: {
-            _id: {
-              $in: contactIds
-            }
-          }
-        }, {
-          where: where
-        }
-      );
-
-    // use the merged conditions
-    where = filter.where;
-  }
+module.exports.getContactsEligibleForFollowup = function (personType, startDate, endDate, outbreakId, contactIds, skip, limit, options) {
+  // where condition used to count eligible cases/contacts
+  let where = getEligibleForFollowupConditions(personType, startDate, endDate, outbreakId, contactIds);
 
   // add geographical restriction to filter if needed
   return App.models.person
@@ -272,7 +263,7 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
       updatedFilter && (where = updatedFilter);
 
       // retrieve contacts
-      return App.models.contact
+      return App.models.person
         .rawFind(where, {
           skip: skip,
           limit: limit,
@@ -281,6 +272,7 @@ module.exports.getContactsEligibleForFollowup = function (startDate, endDate, ou
           },
           projection: {
             outbreakId: 1,
+            type: 1,
             addresses: 1,
             followUp: 1,
             followUpTeamId: 1,
@@ -703,7 +695,8 @@ module.exports.generateFollowupsForContact = function (
         // split the follow ups work equally across teams
         teamId: getTeamIdToAssign(followUpDate),
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED',
-        responsibleUserId: contact.responsibleUserId
+        responsibleUserId: contact.responsibleUserId,
+        createdAs: contact.type
       }, contact);
 
       // do we need to update this follow-ups ?
@@ -728,7 +721,8 @@ module.exports.generateFollowupsForContact = function (
         // split the follow ups work equally across teams
         teamId: getTeamIdToAssign(followUpDate),
         statusId: 'LNG_REFERENCE_DATA_CONTACT_DAILY_FOLLOW_UP_STATUS_TYPE_NOT_PERFORMED',
-        responsibleUserId: contact.responsibleUserId
+        responsibleUserId: contact.responsibleUserId,
+        createdAs: contact.type
       }, contact);
 
       // do we need to create this follow-ups ?

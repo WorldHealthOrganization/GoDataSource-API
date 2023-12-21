@@ -49,274 +49,6 @@ const supportedFileExtensionsInZip = [
   '.ods'
 ];
 
-// #TODO - ugly hack until new version of excelljs is provided to include fix (4.3.0 didn't include this fix even if code is merged):
-// - https://github.com/exceljs/exceljs/pull/1576
-// MUST DELETE ONCE FIX PROVIDE - BEGIN
-const parseSax = require('exceljs/lib/utils/parse-sax');
-const utils = require('exceljs/lib/utils/utils');
-const colCache = require('exceljs/lib/utils/col-cache');
-const Row = require('exceljs/lib/doc/row');
-const Column = require('exceljs/lib/doc/column');
-
-const parseWorksheet = async function *parse() {
-  const {iterator, options} = this;
-  let emitSheet = false;
-  let emitHyperlinks = false;
-  let hyperlinks = null;
-  switch (options.worksheets) {
-    case 'emit':
-      emitSheet = true;
-      break;
-    case 'prep':
-      break;
-    default:
-      break;
-  }
-  switch (options.hyperlinks) {
-    case 'emit':
-      emitHyperlinks = true;
-      break;
-    case 'cache':
-      this.hyperlinks = hyperlinks = {};
-      break;
-    default:
-      break;
-  }
-  if (!emitSheet && !emitHyperlinks && !hyperlinks) {
-    return;
-  }
-
-  // references
-  const {sharedStrings, styles, properties} = this.workbook;
-
-  // xml position
-  let inCols = false;
-  let inRows = false;
-  let inHyperlinks = false;
-
-  // parse state
-  let cols = null;
-  let row = null;
-  let c = null;
-  let current = null;
-  for await (const events of parseSax(iterator)) {
-    const worksheetEvents = [];
-    for (const {eventType, value} of events) {
-      if (eventType === 'opentag') {
-        const node = value;
-        if (emitSheet) {
-          switch (node.name) {
-            case 'cols':
-              inCols = true;
-              cols = [];
-              break;
-            case 'sheetData':
-              inRows = true;
-              break;
-
-            case 'col':
-              if (inCols) {
-                cols.push({
-                  min: parseInt(node.attributes.min, 10),
-                  max: parseInt(node.attributes.max, 10),
-                  width: parseFloat(node.attributes.width),
-                  styleId: parseInt(node.attributes.style || '0', 10),
-                });
-              }
-              break;
-
-            case 'row':
-              if (inRows) {
-                const r = parseInt(node.attributes.r, 10);
-                row = new Row(this, r);
-                if (node.attributes.ht) {
-                  row.height = parseFloat(node.attributes.ht);
-                }
-                if (node.attributes.s) {
-                  const styleId = parseInt(node.attributes.s, 10);
-                  const style = styles.getStyleModel(styleId);
-                  if (style) {
-                    row.style = style;
-                  }
-                }
-              }
-              break;
-            case 'c':
-              if (row) {
-                c = {
-                  ref: node.attributes.r,
-                  s: parseInt(node.attributes.s, 10),
-                  t: node.attributes.t,
-                };
-              }
-              break;
-            case 'f':
-              if (c) {
-                current = c.f = {text: ''};
-              }
-              break;
-            case 'v':
-              if (c) {
-                current = c.v = {text: ''};
-              }
-              break;
-            case 'is':
-            case 't':
-              if (c) {
-                current = c.v = {text: ''};
-              }
-              break;
-            case 'mergeCell':
-              break;
-            default:
-              break;
-          }
-        }
-
-        // =================================================================
-        //
-        if (emitHyperlinks || hyperlinks) {
-          switch (node.name) {
-            case 'hyperlinks':
-              inHyperlinks = true;
-              break;
-            case 'hyperlink':
-              if (inHyperlinks) {
-                const hyperlink = {
-                  ref: node.attributes.ref,
-                  rId: node.attributes['r:id'],
-                };
-                if (emitHyperlinks) {
-                  worksheetEvents.push({eventType: 'hyperlink', value: hyperlink});
-                } else {
-                  hyperlinks[hyperlink.ref] = hyperlink;
-                }
-              }
-              break;
-            default:
-              break;
-          }
-        }
-      } else if (eventType === 'text') {
-        // only text data is for sheet values
-        if (emitSheet) {
-          if (current) {
-            current.text += value;
-          }
-        }
-      } else if (eventType === 'closetag') {
-        const node = value;
-        if (emitSheet) {
-          switch (node.name) {
-            case 'cols':
-              inCols = false;
-              this._columns = Column.fromModel(cols);
-              break;
-            case 'sheetData':
-              inRows = false;
-              break;
-
-            case 'row':
-              this._dimensions.expandRow(row);
-              worksheetEvents.push({eventType: 'row', value: row});
-              row = null;
-              break;
-
-            case 'c':
-              if (row && c) {
-                const address = colCache.decodeAddress(c.ref);
-                const cell = row.getCell(address.col);
-                if (c.s) {
-                  const style = styles.getStyleModel(c.s);
-                  if (style) {
-                    cell.style = style;
-                  }
-                }
-
-                if (c.f) {
-                  const cellValue = {
-                    formula: c.f.text,
-                  };
-                  if (c.v) {
-                    if (c.t === 'str') {
-                      cellValue.result = utils.xmlDecode(c.v.text);
-                    } else {
-                      cellValue.result = parseFloat(c.v.text);
-                    }
-                  }
-                  cell.value = cellValue;
-                } else if (c.v) {
-                  switch (c.t) {
-                    case 's': {
-                      const index = parseInt(c.v.text, 10);
-                      if (sharedStrings) {
-                        cell.value = sharedStrings[index];
-                      } else {
-                        cell.value = {
-                          sharedString: index,
-                        };
-                      }
-                      break;
-                    }
-
-                    case 'inlineStr':
-                    case 'str':
-                      cell.value = utils.xmlDecode(c.v.text);
-                      break;
-
-                    case 'e':
-                      cell.value = {error: c.v.text};
-                      break;
-
-                    case 'b':
-                      cell.value = parseInt(c.v.text, 10) !== 0;
-                      break;
-
-                    default:
-                      if (utils.isDateFmt(cell.numFmt)) {
-                        cell.value = utils.excelToDate(
-                          parseFloat(c.v.text),
-                          properties.model && properties.model.date1904
-                        );
-                      } else {
-                        cell.value = parseFloat(c.v.text);
-                      }
-                      break;
-                  }
-                }
-                if (hyperlinks) {
-                  const hyperlink = hyperlinks[c.ref];
-                  if (hyperlink) {
-                    cell.text = cell.value;
-                    cell.value = undefined;
-                    cell.hyperlink = hyperlink;
-                  }
-                }
-                c = null;
-              }
-              break;
-            default:
-              break;
-          }
-        }
-        if (emitHyperlinks || hyperlinks) {
-          switch (node.name) {
-            case 'hyperlinks':
-              inHyperlinks = false;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    }
-    if (worksheetEvents.length > 0) {
-      yield worksheetEvents;
-    }
-  }
-};
-// MUST DELETE ONCE FIX PROVIDE - END
-
 /**
  * Remove special chars and then lowercase the string
  * @param string
@@ -955,12 +687,6 @@ const getXlsxHeaders = function (filesToParse, extension) {
           });
           workbookReader.read();
           workbookReader.on('worksheet', worksheet => {
-            // #TODO - ugly hack until new version of excelljs is provided to include fix (4.3.0 didn't include this fix even if code is merged):
-            // - https://github.com/exceljs/exceljs/pull/1576
-            // MUST DELETE ONCE FIX PROVIDE - BEGIN
-            worksheet.parse = parseWorksheet;
-            // MUST DELETE ONCE FIX PROVIDE - END
-
             // parse rows
             worksheet.on('row', row => {
               // check for headers row
@@ -1555,14 +1281,17 @@ const getMappingSuggestionsForModelExtendedForm = function (outbreak, importType
 
   // if variables are present
   if (variables.length) {
-    // normalize them
+    // normalize them (by property names and labels)
     const normalizedVariables = variables.map(function (variable) {
       result.modelProperties[modelExtendedForm.containerProperty][getVarName(variable)] = variable.text;
-      return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(variable.text));
+      return {
+        [stripSpecialCharsToLowerCase(getVarName(variable))]: true,
+        [stripSpecialCharsToLowerCase(languageDictionary.getTranslation(variable.text))]: true
+      };
     });
     // try to find mapping suggestions
     normalizedHeaders.forEach(function (normalizedHeader, index) {
-      let propIndex = normalizedVariables.indexOf(normalizedHeader);
+      let propIndex = normalizedVariables.findIndex(obj => obj[normalizedHeader]);
       if (propIndex !== -1) {
         result.suggestedFieldMapping[headers[index]] = `${modelExtendedForm.containerProperty}.${variables[propIndex].name}`;
       }
@@ -1786,7 +1515,7 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
           // if the model has importable properties, get their headers and try to suggest some mappings
           if (assocModelOptions.importableProperties && assocModelOptions.importableProperties.length) {
             steps.push(function (callback) {
-              // normalize model headers (property labels)
+              // normalize model headers (property names and labels)
               const normalizedModelProperties = assocModelOptions.importableProperties.map(function (property) {
                 // split the property in sub components
                 const propertyComponents = property.split('.');
@@ -1816,12 +1545,17 @@ const upload = function (file, decryptPassword, outbreak, languageId, options) {
                   // no sub components, store property directly
                   results[modelName].modelProperties[property] = normalizedToken;
                 }
-                return stripSpecialCharsToLowerCase(languageDictionary.getTranslation(normalizedToken));
+
+                // return normalized property name and label
+                return {
+                  [stripSpecialCharsToLowerCase(property)]: true,
+                  [stripSpecialCharsToLowerCase(languageDictionary.getTranslation(normalizedToken))]: true
+                };
               });
 
-              // try to find mapping suggestions between file headers and model headers (property labels)
+              // try to find mapping suggestions between file headers and model headers (property names or labels)
               normalizedHeaders.forEach(function (normalizedHeader, index) {
-                let propIndex = normalizedModelProperties.indexOf(normalizedHeader);
+                let propIndex = normalizedModelProperties.findIndex(obj => obj[normalizedHeader]);
                 if (propIndex !== -1) {
                   results[modelName].suggestedFieldMapping[result.fileHeaders[index]] = assocModelOptions.importableProperties[propIndex];
                 }
@@ -1971,7 +1705,7 @@ const getDistinctValuesForHeaders = function (fileId, headers) {
  * @param options
  * @param callback
  */
-const processImportableFileData = function (app, options, formatterOptions, batchHandler, callback) {
+const processImportableFileData = function (app, options, formatterOptions, batchHandler, callback, preBatchValidator) {
   // initialize functions containers for child process communication
   let sendMessageToWorker, stopWorker;
 
@@ -2000,9 +1734,12 @@ const processImportableFileData = function (app, options, formatterOptions, batc
    * Handles premature failure of import; Can happen when the worked stops before sending all data
    * @returns {*}
    */
-  const updateImportLogEntry = function () {
+  const updateImportLogEntry = function (dontGenerateRemainingRowsErrors) {
     // check for premature failure
-    if (processed !== total) {
+    if (
+      !dontGenerateRemainingRowsErrors &&
+      processed !== total
+    ) {
       // add errors for all rows not processed
       const createErrors = [];
       const notProcessedError = app.utils.apiError.getError('IMPORT_DATA_NOT_PROCESSED');
@@ -2189,6 +1926,18 @@ const processImportableFileData = function (app, options, formatterOptions, batc
         // get operations to be executed for batch
         Promise.resolve()
           .then(() => {
+            // nothing to do ?
+            if (!preBatchValidator) {
+              return;
+            }
+
+            // pre-validate batch
+            return preBatchValidator(
+              batchData,
+              processed
+            );
+          })
+          .then(() => {
             return batchHandler(batchData);
           })
           .then(operations => {
@@ -2272,6 +2021,53 @@ const processImportableFileData = function (app, options, formatterOptions, batc
 
               updateImportLogEntry();
             });
+          })
+          .catch((err) => {
+            if (
+              err &&
+              err.code === 'IMPORT_PARTIAL_SUCCESS_WITH_DETAILS'
+            ) {
+              // generate errors
+              const createErrors = [];
+              err.details.failed.forEach((failErr) => {
+                importErrors++;
+                createErrors.push({
+                  _id: uuid.v4(),
+                  importLogId: importLogEntry.id,
+                  error: failErr,
+                  recordNo: failErr.recordNo,
+                  deleted: false
+                });
+              });
+
+              // save errors
+              saveErrorsFromBatch(createErrors)
+                .then(() => {
+                  // save
+                  updateImportLogEntry(true)
+                    .then(() => {
+                      // stop child process if not already stopped
+                      if (!stoppedWorker) {
+                        stopWorker();
+                      }
+                    })
+                    .catch(() => {
+                      // stop child process if not already stopped
+                      if (!stoppedWorker) {
+                        stopWorker();
+                      }
+                    });
+                })
+                .catch(() => {
+                  // stop child process if not already stopped
+                  if (!stoppedWorker) {
+                    stopWorker();
+                  }
+                });
+            }
+
+            // else
+            // nothing was done before, so we won't change this behaviour for now
           });
 
         break;

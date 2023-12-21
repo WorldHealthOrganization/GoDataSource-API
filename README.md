@@ -1,14 +1,11 @@
 # Go.Data v2.0 API
 
-This project was built using Loopback 3.x using Node 8.x (latest LTS at the time of the development) and MongoDb 3.2.
+This project was built using Loopback 3.x using Node 14.17.5 and MongoDb 5.0.x.
 
 ## Installation (Development Environment)
 
 ### Pre-requisites
-Install latest Node 8.x (https://nodejs.org/dist) and MongoDB 3.2 (https://www.mongodb.com/download-center/community).
-
-We used MongoDB 3.2 because the product was required to run on Windows 32bit and MongoDB version 3.2 was the latest
-version to support 32bit OSes.
+Install latest Node 14.17.5 (https://nodejs.org/dist) and MongoDB 5.0.x (https://www.mongodb.com/download-center/community).
 
 ### Installation steps
 
