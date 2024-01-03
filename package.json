@@ -59,7 +59,7 @@
     "moment": "2.29.4",
     "moment-range": "4.0.2",
     "moment-timezone": "0.5.43",
-    "mongodb": "4.1.4",
+    "mongodb": "4.17.0",
     "p-queue": "3.0.0",
     "parse": "3.3.0",
     "pdfkit": "0.12.3",
