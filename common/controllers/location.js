@@ -9,6 +9,7 @@ const Platform = require('../../components/platform');
 const Config = require('../../server/config.json');
 const importableFile = require('./../../components/importableFile');
 const genericHelpers = require('../../components/helpers');
+const uuid = require('uuid').v4;
 
 const locationImportBatchSize = _.get(Config, 'jobSettings.importResources.batchSize', 100);
 
@@ -153,6 +154,10 @@ module.exports = function (Location) {
    * @param callback
    */
   Location.importHierarchicalList = function (req, file, options, callback) {
+    // inject platform identifier
+    options = options || {};
+    options.platform = Platform.IMPORT;
+
     // loopback cannot parse multipart requests
     app.utils.remote.helpers.parseMultipartRequest(req, [], ['file'], Location, [], function (error, fields, files) {
       if (error) {
@@ -218,6 +223,127 @@ module.exports = function (Location) {
       return syncLocation;
     };
 
+    // pre-validate
+    const preBatchValidator = (
+      batchData,
+      processed
+    ) => {
+      return Promise.resolve()
+        .then(() => {
+          // determine missing parentLocationId for those records that might be updates
+          const missingParentsForLocationIds = [];
+          batchData.forEach((data) => {
+            if (
+              data.save.id &&
+              !data.save.parentLocationId
+            ) {
+              missingParentsForLocationIds.push(data.save.id);
+            }
+          });
+
+          // nothing to do ?
+          if (missingParentsForLocationIds.length < 1) {
+            return;
+          }
+
+          // retrieve locations
+          return app.dataSources.mongoDb.connector
+            .collection('location')
+            .find(
+              {
+                _id: {
+                  $in: missingParentsForLocationIds
+                }
+              }, {
+                projection: {
+                  _id: 1,
+                  parentLocationId: 1
+                }
+              }
+            )
+            .toArray()
+            .then((missingParentsLocations) => {
+              // map locations
+              const missingParentsLocationMap = {};
+              missingParentsLocations.forEach((locationData) => {
+                missingParentsLocationMap[locationData._id] = locationData;
+              });
+
+              // add missing parent ids
+              batchData.forEach((data) => {
+                // nothing to do ?
+                if (
+                  !data.save.id ||
+                  data.save.parentLocationId ||
+                  !missingParentsLocationMap[data.save.id] ||
+                  !missingParentsLocationMap[data.save.id].parentLocationId
+                ) {
+                  return;
+                }
+
+                // set parent
+                data.save.parentLocationId = missingParentsLocationMap[data.save.id].parentLocationId;
+              });
+            });
+        })
+        .then(() => {
+          // convert to expected format
+          const processedLocationsMap = {};
+          const groupsMap = {};
+          batchData.forEach((data, index) => {
+            // initialize ID ?
+            if (!data.save.id) {
+              data.save.id = uuid();
+            }
+
+            // attach to parent
+            if (data.save.parentLocationId) {
+              // must initialize parent ?
+              if (!groupsMap[data.save.parentLocationId]) {
+                // we need it to check for duplicate names && synonyms
+                groupsMap[data.save.parentLocationId] = {
+                  childrenIds: [data.save.id]
+                };
+              } else {
+                groupsMap[data.save.parentLocationId].childrenIds.push(data.save.id);
+              }
+            } else {
+              // root location
+              if (!groupsMap[null]) {
+                // we need it to check for duplicate names && synonyms
+                groupsMap[null] = {
+                  childrenIds: [data.save.id]
+                };
+              } else {
+                groupsMap[null].childrenIds.push(data.save.id);
+              }
+            }
+
+            // initialize processed location ?
+            const recordNo = processed + index + 1;
+            if (!processedLocationsMap[data.save.id]) {
+              processedLocationsMap[data.save.id] = {
+                locations: [{
+                  recordNo,
+                  location: data.save
+                }]
+              };
+            } else {
+              processedLocationsMap[data.save.id].locations.push({
+                recordNo,
+                location: data.save
+              });
+            }
+          });
+
+          // validate
+          return app.models.location.preImportValidation(
+            processedLocationsMap,
+            groupsMap
+          );
+        });
+    };
+
     // construct options needed by the formatter worker
     // model boolean properties
     const modelBooleanProperties = genericHelpers.getModelPropertiesByDataType(
@@ -244,7 +370,7 @@ module.exports = function (Location) {
       modelName: app.models.location.modelName,
       logger: logger,
       parallelActionsLimit: 10
-    }, formatterOptions, createBatchActions, callback);
+    }, formatterOptions, createBatchActions, callback, preBatchValidator);
   };
 
   /**

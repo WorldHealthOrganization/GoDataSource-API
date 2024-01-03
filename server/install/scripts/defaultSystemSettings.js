@@ -5,7 +5,6 @@ const common = require('./_common');
 const SystemSettings = app.models.systemSettings;
 const defaultSettings = {
   'upstreamServers': [],
-  'clientApplications': [],
   'sync': {
     'triggerBackupBeforeSync': false
   },

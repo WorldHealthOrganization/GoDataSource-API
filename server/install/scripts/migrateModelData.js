@@ -422,6 +422,60 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
+}, {
+  version: '2.49.0',
+  scripts: [{
+    fileName: 'languageToken.js',
+    actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 80
+    }]
+  }, {
+    fileName: 'user.js',
+    actions: [{
+      name: 'renameLastLoginDate',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'systemSettings.js',
+    actions: [{
+      name: 'migrateClientApplications',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'addMissingPermission',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'followUp.js',
+    actions: [{
+      name: 'deleteFutureFollowups',
+      buildNo: 1
+    }, {
+      name: 'setCreatedAs',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'outbreak.js',
+    actions: [{
+      name: 'updateCaseFollowUpSettings',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'case.js',
+    actions: [{
+      name: 'updateFollowUpData',
+      buildNo: 1
+    }]
+  }, {
+    fileName: 'role.js',
+    actions: [{
+      name: 'updateFollowUpPermissions',
+      buildNo: 1
+    }]
+  }]
 }];
 
 /**

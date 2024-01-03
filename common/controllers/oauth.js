@@ -42,16 +42,16 @@ module.exports = function (OAuth) {
           throw App.utils.apiError.getError('LOGIN_FAILED');
         }
         currentUser = user;
-        if (user.loginRetriesCount >= 0 && user.lastLoginDate) {
-          const lastLoginDate = localizationHelper.toMoment(user.lastLoginDate);
+        if (user.loginRetriesCount >= 0 && user.bruteForceLoginDate) {
+          const bruteForceLoginDate = localizationHelper.toMoment(user.bruteForceLoginDate);
           const now = localizationHelper.now();
-          const isValidForReset = lastLoginDate.add(loginSettings.resetTime, loginSettings.resetTimeUnit).isBefore(now);
+          const isValidForReset = bruteForceLoginDate.add(loginSettings.resetTime, loginSettings.resetTimeUnit).isBefore(now);
           const isBanned = user.loginRetriesCount >= loginSettings.maxRetries;
           if (isValidForReset) {
             // reset login retries
             return user.updateAttributes({
               loginRetriesCount: 0,
-              lastLoginDate: null
+              bruteForceLoginDate: null
             });
           }
           if (isBanned && !isValidForReset) {
@@ -77,14 +77,14 @@ module.exports = function (OAuth) {
           if (err) {
             const now = localizationHelper.now().toDate();
             const userAttributesToUpdate = {};
-            if (currentUser.loginRetriesCount >= 0 && currentUser.lastLoginDate) {
+            if (currentUser.loginRetriesCount >= 0 && currentUser.bruteForceLoginDate) {
               if (currentUser.loginRetriesCount < loginSettings.maxRetries) {
                 userAttributesToUpdate.loginRetriesCount = ++currentUser.loginRetriesCount;
-                userAttributesToUpdate.lastLoginDate = now;
+                userAttributesToUpdate.bruteForceLoginDate = now;
               }
             } else {
               userAttributesToUpdate.loginRetriesCount = 1;
-              userAttributesToUpdate.lastLoginDate = now;
+              userAttributesToUpdate.bruteForceLoginDate = now;
             }
 
             return currentUser.updateAttributes(userAttributesToUpdate)
@@ -94,7 +94,7 @@ module.exports = function (OAuth) {
 
           currentUser.updateAttributes({
             loginRetriesCount: 0,
-            lastLoginDate: null
+            bruteForceLoginDate: null
           }).then(user => {
             if (twoFactorAuthenticationEnabled) {
               return App.models.user.helpers.sendEmail(

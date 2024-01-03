@@ -159,6 +159,10 @@
     "defaultStatusCode": 422,
     "messagePattern": "Import partial success. Some `<%= model %>` instances failed to be imported. Successfully imported: <%= success %> \nFailed to be imported: <%= failed %>"
   },
+  "IMPORT_PARTIAL_SUCCESS_WITH_DETAILS": {
+    "defaultStatusCode": 422,
+    "messagePattern": "Pre-validation failed"
+  },
   "INVALID_SNAPSHOT_FILE": {
     "defaultStatusCode": 400,
     "messagePattern": "The provided database snapshot is invalid."
@@ -302,6 +306,10 @@
   "INVALID_DATES": {
     "defaultStatusCode": 400,
     "messagePattern": "Invalid date properties"
+  },
+  "MODEL_PROPERTY_CONFLICT": {
+    "defaultStatusCode": 409,
+    "messagePattern": "Model with `<%= propertyName %>`: `<%= propertyValue %>` already exists"
   },
   "LOCATION_NO_GEOLOCATION_INFORMATION": {
     "defaultStatusCode": 425,

@@ -122,10 +122,6 @@
       "type": "date",
       "description": "Case/Contact property; Defining it here as on sync we use the person model and not the case/contact model"
     },
-    "dateBecomeCase": {
-      "type": "date",
-      "description": "Case property; Defining it here as on sync we use the person model and not the case model"
-    },
     "dateBecomeContact": {
       "type": "date",
       "description": "Contact property; Defining it here as on sync we use the person model and not the contact model"
@@ -155,6 +151,10 @@
         },
         "generateFollowUpsDateOfLastContact": {
           "description": "Flag specifying if contact tracing should start on the date of the last contact",
+          "type": "boolean"
+        },
+        "generateFollowUpsDateOfOnset": {
+          "description": "Flag specifying if case tracing should start on the date of onset",
           "type": "boolean"
         }
       }
@@ -199,6 +199,12 @@
     },
     "notDuplicatesIds": {
       "description": "Array containing IDs for persons that system detected as possible duplicates but they aren't duplicates",
+      "type": [
+        "string"
+      ]
+    },
+    "mergedDuplicatesIds": {
+      "description": "Array containing IDs for persons that the system detected as possible duplicates and manually merged",
       "type": [
         "string"
       ]
@@ -315,6 +321,9 @@
     },
     "notDuplicatesIds_index": {
       "notDuplicatesIds": 1
+    },
+    "mergedDuplicatesIds_index": {
+      "mergedDuplicatesIds": 1
     },
     "usualPlaceOfResidenceLocationId_index": {
       "usualPlaceOfResidenceLocationId": 1

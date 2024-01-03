@@ -8,6 +8,7 @@ const subTemplates = [
   'caseInvestigationTemplate',
   'contactInvestigationTemplate',
   'eventInvestigationTemplate',
+  'caseFollowUpTemplate',
   'contactFollowUpTemplate',
   'labResultsTemplate'
 ];

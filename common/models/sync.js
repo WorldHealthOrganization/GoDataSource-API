@@ -171,17 +171,25 @@ module.exports = function (Sync) {
         // for optimization, get all outbreaks before checking the records
         return app.models.outbreak
           .rawFind({
-            generateFollowUpsWhenCreatingContacts: true
+            $or: [{
+              allowCasesFollowUp: true,
+              generateFollowUpsWhenCreatingCases: true,
+            }, {
+              generateFollowUpsWhenCreatingContacts: true
+            }]
           }, {
             projection: {
-              _id: 1
+              _id: 1,
+              allowCasesFollowUp: 1,
+              generateFollowUpsWhenCreatingCases: 1,
+              generateFollowUpsWhenCreatingContacts: 1
             }
           });
       })
       .then((outbreaks) => {
         // get outbreaks
         outbreaks.forEach((outbreakData) => {
-          automaticGenFollowupOutbreaks[outbreakData.id] = true;
+          automaticGenFollowupOutbreaks[outbreakData.id] = outbreakData;
         });
 
         // extract snapshot
@@ -302,17 +310,28 @@ module.exports = function (Sync) {
                               // generate follow-ups ?
                               if (
                                 syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED &&
-                                syncResult.record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
-                                automaticGenFollowupOutbreaks[syncResult.record.outbreakId]
+                                automaticGenFollowupOutbreaks[syncResult.record.outbreakId] && (
+                                  (
+                                    syncResult.record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE' &&
+                                    automaticGenFollowupOutbreaks[syncResult.record.outbreakId]['allowCasesFollowUp'] &&
+                                    automaticGenFollowupOutbreaks[syncResult.record.outbreakId]['generateFollowUpsWhenCreatingCases']
+                                  )  || (
+                                    syncResult.record.type === 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT' &&
+                                    automaticGenFollowupOutbreaks[syncResult.record.outbreakId]['generateFollowUpsWhenCreatingContacts']
+                                  )
+                                )
                               ) {
                                 // keep the contact ids per outbreak and createdBy user
                                 if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId]) {
                                   automaticGenFollowupCreatedContacts[syncResult.record.outbreakId] = {};
                                 }
                                 if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy]) {
-                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy] = [];
+                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy] = {};
                                 }
-                                automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy].push(syncResult.record.id);
+                                if (!automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy][syncResult.record.type]) {
+                                  automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy][syncResult.record.type] = [];
+                                }
+                                automaticGenFollowupCreatedContacts[syncResult.record.outbreakId][syncResult.record.createdBy][syncResult.record.type].push(syncResult.record.id);
                                 automaticGenFollowupCreatedByUsers[syncResult.record.createdBy] = true;
                               }
 
@@ -475,7 +494,6 @@ module.exports = function (Sync) {
                         for (const outbreakId in automaticGenFollowupCreatedContacts) {
                           const createdByUsers = automaticGenFollowupCreatedContacts[outbreakId];
                           for (const userId in createdByUsers) {
-                            const contactIds = createdByUsers[userId];
                             const outbreakModelInstance = automaticGenFollowupOutbreaksData[outbreakId];
 
                             // create jobs to generate follow-ups
@@ -483,31 +501,37 @@ module.exports = function (Sync) {
                             let reqOptionsClone = {...reqOptions};
                             reqOptionsClone.platform = reqOptionsClone.platform ?
                               reqOptionsClone.platform :
-                              Platform.SYNC;
+                              Platform.BULK;
                             reqOptionsClone.remotingContext.outbreakModelInstance = outbreakModelInstance;
                             // if the created by user was not found, the current logged user will be used
                             if (automaticGenFollowupCreatedByData[userId]) {
                               reqOptionsClone.remotingContext.req.authData.userModelInstance = automaticGenFollowupCreatedByData[userId];
                             }
-                            jobs.push((function (generateFollowupsOptions, generateFollowupsOutbreak, generateFollowupsContacts, generateFollowupsUserId) {
-                              return (generateFollowupsCallback) => {
-                                app.controllers.outbreak.generateFollowupsForOutbreak(
-                                  generateFollowupsOutbreak,
-                                  {
-                                    contactIds: generateFollowupsContacts
-                                  },
-                                  generateFollowupsOptions,
-                                  (generateFollowupError) => {
-                                    // collect errors in the global variable
-                                    if (generateFollowupError) {
-                                      err = err || '';
-                                      err += `Failed generating follow-ups: Outbreak ${generateFollowupsOutbreak.id}, User:  ${generateFollowupsUserId}, Error: ${generateFollowupError.message} `;
-                                    }
-                                    generateFollowupsCallback();
-                                  }
-                                );
-                              };
-                            })(reqOptionsClone, outbreakModelInstance, contactIds, userId));
+                            ['LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE', 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT'].forEach((personType) => {
+                              if (createdByUsers[userId][personType]) {
+                                const contactIds = createdByUsers[userId][personType];
+                                jobs.push((function (generateFollowupsOptions, generateFollowupsOutbreak, generateFollowupsContacts, generateFollowupsUserId) {
+                                  return (generateFollowupsCallback) => {
+                                    app.controllers.outbreak.generateFollowupsForOutbreak(
+                                      generateFollowupsOutbreak,
+                                      {
+                                        personType: personType,
+                                        contactIds: generateFollowupsContacts
+                                      },
+                                      generateFollowupsOptions,
+                                      (generateFollowupError) => {
+                                        // collect errors in the global variable
+                                        if (generateFollowupError) {
+                                          err = err || '';
+                                          err += `Failed generating follow-ups: Outbreak ${generateFollowupsOutbreak.id}, User:  ${generateFollowupsUserId}, Error: ${generateFollowupError.message} `;
+                                        }
+                                        generateFollowupsCallback();
+                                      }
+                                    );
+                                  };
+                                })(reqOptionsClone, outbreakModelInstance, contactIds, userId));
+                              }
+                            });
                           }
                         }
 

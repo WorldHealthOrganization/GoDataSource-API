@@ -91,6 +91,37 @@
     }
   ],
   "methods": {
+    "find": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        }
+      ],
+      "returns": [
+        {
+          "arg": "teams",
+          "type": [
+            "team"
+          ],
+          "description": "List of team that match the search criteria",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Queries teams.",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/"
+        },
+        {
+          "verb": "post",
+          "path": "/filter"
+        }
+      ]
+    },
     "exportFilteredTeams": {
       "accepts": [
         {

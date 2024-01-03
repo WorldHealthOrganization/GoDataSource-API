@@ -71,6 +71,13 @@ const constants = {
     'outcomeId': 'LNG_CASE_FIELD_LABEL_OUTCOME_ID',
     'dateOfOutcome': 'LNG_CASE_FIELD_LABEL_DATE_OF_OUTCOME',
     'type': 'LNG_CASE_FIELD_LABEL_TYPE',
+    'followUp': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP',
+    'followUp.originalStartDate': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE',
+    'followUp.startDate': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_START_DATE',
+    'followUp.endDate': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_END_DATE',
+    'followUp.status': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_STATUS',
+    'followUp.generateFollowUpsDateOfOnset': 'LNG_CASE_FIELD_LABEL_FOLLOW_UP_GENERATE_FOLLOW_UPS_DATE_OF_ONSET',
+    'followUpTeamId': 'LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_TEAM_ID',
     'numberOfExposures': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_EXPOSURES',
     'numberOfContacts': 'LNG_CASE_FIELD_LABEL_NUMBER_OF_CONTACTS',
     'dateRanges': 'LNG_CASE_FIELD_LABEL_DATE_RANGES',
@@ -193,7 +200,8 @@ const constants = {
     'dateRanges[].centerName': 'LNG_REFERENCE_DATA_CATEGORY_CENTRE_NAME',
     'vaccinesReceived[].vaccine': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE',
     'vaccinesReceived[].status': 'LNG_REFERENCE_DATA_CATEGORY_VACCINE_STATUS',
-    pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS'
+    pregnancyStatus: 'LNG_REFERENCE_DATA_CATEGORY_PREGNANCY_STATUS',
+    'followUp.status': 'LNG_REFERENCE_DATA_CONTACT_FINAL_FOLLOW_UP_STATUS_TYPE'
   },
   get referenceDataFields() {
     return Object.keys(this.referenceDataFieldsToCategoryMap);

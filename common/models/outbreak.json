@@ -142,6 +142,13 @@
       "default": [],
       "importTopLevelOnly": true
     },
+    "caseFollowUpTemplate": {
+      "type": [
+        "templateQuestion"
+      ],
+      "default": [],
+      "importTopLevelOnly": true
+    },
     "contactFollowUpTemplate": {
       "type": [
         "templateQuestion"
@@ -215,6 +222,52 @@
     },
     "visibleAndMandatoryFields": {
       "type": "visibleAndMandatory"
+    },
+    "allowCasesFollowUp": {
+      "description": "Flag specifying if the cases follow-up is allowed. Default: false",
+      "type": "boolean",
+      "default": false
+    },
+    "periodOfFollowupCases": {
+      "type": "number",
+      "description": "Duration for the follow-up period in days"
+    },
+    "frequencyOfFollowUpCases": {
+      "type": "number",
+      "default": 1,
+      "description": "Frequency of follow ups in days (once every X days/daily)"
+    },
+    "frequencyOfFollowUpPerDayCases": {
+      "type": "number",
+      "description": "Number of follow ups to be generated per day"
+    },
+    "intervalOfFollowUpCases": {
+      "description": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5')",
+      "type": "string"
+    },
+    "generateFollowUpsKeepTeamAssignmentCases": {
+      "description": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a case or the team assignment will be made through round-robin (can be true only if 'generateFollowUpsOverwriteExisting' is false)",
+      "type": "boolean",
+      "default": true
+    },
+    "generateFollowUpsTeamAssignmentAlgorithmCases": {
+      "description": "Option specifying whether the round-robin team assignment should be done taking in consideration all teams activating in the case's location (via that location or parents) or just the nearest teams. Default: round-robin of all teams activating in the case's location",
+      "type": "string",
+      "enum": [
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS",
+        "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_NEAREST_FIT"
+      ],
+      "default": "LNG_REFERENCE_DATA_CATEGORY_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_ROUND_ROBIN_ALL_TEAMS"
+    },
+    "generateFollowUpsDateOfOnset": {
+      "description": "Flag specifying if case tracing should start on the date of onset",
+      "type": "boolean",
+      "default": false
+    },
+    "generateFollowUpsWhenCreatingCases": {
+      "description": "Flag that specifies whether follow ups are automatically generated when creating cases. Default: false",
+      "type": "boolean",
+      "default": false
     }
   },
   "indexes": {
@@ -432,6 +485,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_bulk_modify",
+      "permission": "ALLOW",
+      "property": "bulkModifyCases"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "case_bulk_delete",
       "permission": "ALLOW",
       "property": "__destroyById__cases"
@@ -565,11 +624,23 @@
       "principalType": "ROLE",
       "principalId": "follow_up_list",
       "permission": "ALLOW",
+      "property": "__count__cases__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_list",
+      "permission": "ALLOW",
       "property": "__count__contacts__followUps"
     },
     {
       "principalType": "ROLE",
-      "principalId": "follow_up_create",
+      "principalId": "case_follow_up_create",
+      "permission": "ALLOW",
+      "property": "__create__cases__followUps"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "contact_follow_up_create",
       "permission": "ALLOW",
       "property": "__create__contacts__followUps"
     },
@@ -1277,9 +1348,21 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_export_daily_follow_up_list",
+      "permission": "ALLOW",
+      "property": "exportDailyCaseFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_export_daily_follow_up_list",
       "permission": "ALLOW",
       "property": "exportDailyContactFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_daily_follow_up_form",
+      "permission": "ALLOW",
+      "property": "exportDailyCaseFollowUpForm"
     },
     {
       "principalType": "ROLE",
@@ -1703,9 +1786,21 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_count_from_follow_up",
+      "permission": "ALLOW",
+      "property": "filteredCountCasesOnFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_count_from_follow_up",
       "permission": "ALLOW",
       "property": "filteredCountContactsOnFollowUpList"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_count_lost_to_follow_up",
+      "permission": "ALLOW",
+      "property": "countCasesLostToFollowup"
     },
     {
       "principalType": "ROLE",
@@ -1715,9 +1810,21 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "case_count_not_seen_in_x_days",
+      "permission": "ALLOW",
+      "property": "countCasesNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "contact_count_not_seen_in_x_days",
       "permission": "ALLOW",
       "property": "countContactsNotSeenInXDays"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_count_seen",
+      "permission": "ALLOW",
+      "property": "countCasesSeen"
     },
     {
       "principalType": "ROLE",
@@ -1730,6 +1837,12 @@
       "principalId": "contact_count_successful_follow_ups",
       "permission": "ALLOW",
       "property": "countContactsWithSuccessfulFollowups"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_count_successful_follow_ups",
+      "permission": "ALLOW",
+      "property": "countCasesWithSuccessfulFollowups"
     },
     {
       "principalType": "ROLE",
@@ -1748,6 +1861,12 @@
       "principalId": "case_export_classification_per_location_report",
       "permission": "ALLOW",
       "property": "downloadCaseClassificationPerLocationLevelReport"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "case_export_follow_up_success_rate_report",
+      "permission": "ALLOW",
+      "property": "downloadCaseTracingPerLocationLevelReport"
     },
     {
       "principalType": "ROLE",
@@ -2036,6 +2155,12 @@
       "principalId": "contact_of_contact_delete_lab_result",
       "permission": "ALLOW",
       "property": "__destroyById__contactsOfContacts__labResults"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "follow_up_modify",
+      "permission": "ALLOW",
+      "property": "modifyCaseFollowUp"
     },
     {
       "principalType": "ROLE",
@@ -3757,7 +3882,7 @@
           "arg": "body",
           "type": "object",
           "model": "generateFollowup",
-          "description": "Follow up period start/end dates and targeted optional flag. contactIds optional array containing the contact IDs for which to generate follow ups.",
+          "description": "Follow up period start/end dates and targeted optional flag. contactIds optional array containing the contact/case IDs for which to generate follow ups.",
           "http": {
             "source": "body"
           },
@@ -4077,6 +4202,110 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts-seen/count"
+      }
+    },
+    "prototype.countCasesSeen": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsSeenCount": "number",
+            "contactIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of cases that are seen",
+              "required": true
+            },
+            "teams": [
+              {
+                "type": {
+                  "id": "string",
+                  "contactsSeenCount": "number",
+                  "contactIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of cases that are seen",
+                    "required": true
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Object containing counters for seen cases",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of seen cases as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/cases-seen/count"
+      }
+    },
+    "prototype.countCasesLostToFollowup": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "casesLostToFollowupCount": "number",
+            "caseIDs": {
+              "type": [
+                "string"
+              ],
+              "description": "Array with IDs of cases that are lost to follow-up",
+              "required": true
+            },
+            "teams": [
+              {
+                "type": {
+                  "id": "string",
+                  "casesLostToFollowupCount": "number",
+                  "caseIDs": {
+                    "type": [
+                      "string"
+                    ],
+                    "description": "Array with IDs of cases that are lost to follow-up",
+                    "required": true
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Object containing counters for cases lost to follow-up",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of cases lost to follow-up as well as per team",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/cases-lost-to-follow-up/count"
       }
     },
     "prototype.countContactsLostToFollowup": {
@@ -4533,6 +4762,43 @@
         "path": "/cases/new-among-known-contacts/count"
       }
     },
+    "prototype.countCasesNotSeenInXDays": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}); Note: this request also accepts 'noDaysNotSeen' number on the first level in 'where'"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "contactsCount": {
+              "type": "number",
+              "description": "Number of cases not seen in the past X days",
+              "required": true
+            },
+            "contactIDs": [
+              "string"
+            ]
+          },
+          "description": "Object containing counters for cases not seen in the past X days",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the number of cases not seen in the past X days",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/cases-not-seen/count"
+      }
+    },
     "prototype.countContactsNotSeenInXDays": {
       "accepts": [
         {
@@ -4627,6 +4893,65 @@
       "http": {
         "verb": "get",
         "path": "/follow-ups/contacts-with-successful-follow-ups/count"
+      }
+    },
+    "prototype.countCasesWithSuccessfulFollowups": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "counters",
+          "type": {
+            "totalCasesWithFollowupsCount": "number",
+            "casesWithSuccessfulFollowupsCount": "number",
+            "teams": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalCasesWithFollowupsCount": "number",
+                    "casesWithSuccessfulFollowupsCount": "number",
+                    "followedUpCasesIDs": [
+                      "string"
+                    ],
+                    "missedCasesIDs": [
+                      "string"
+                    ]
+                  }
+                }
+              ]
+            },
+            "contacts": {
+              "type": [
+                {
+                  "type": {
+                    "id": "string",
+                    "totalFollowupsCount": "number",
+                    "successfulFollowupsCount": "number"
+                  }
+                }
+              ]
+            }
+          },
+          "description": "Object containing counters for cases with follow-ups and cases with successful follow-ups",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Count the total number of cases with follow-ups and cases with successful follow-ups",
+      "http": {
+        "verb": "get",
+        "path": "/follow-ups/cases-with-successful-follow-ups/count"
       }
     },
     "prototype.countFollowUpsPerTeamPerDay": {
@@ -6937,6 +7262,47 @@
         "path": "/cases/per-location-level/count"
       }
     },
+    "prototype.downloadCaseTracingPerLocationLevelReport": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export a case tracing per location report for an outbreak",
+      "http": {
+        "verb": "get",
+        "path": "/cases/per-location-level-tracing-report/download"
+      }
+    },
     "prototype.downloadContactTracingPerLocationLevelReport": {
       "accepts": [
         {
@@ -7403,6 +7769,63 @@
         "path": "/cases/:nk/lab-results/:fk/restore"
       }
     },
+    "prototype.exportDailyCaseFollowUpList": {
+      "accepts": [
+        {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
+          "arg": "groupBy",
+          "type": "string"
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"}). Note: filter supports 'where.case', 'where.followUp' MongoDB compatible queries"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing cases to be seen by place",
+      "http": [
+        {
+          "verb": "get",
+          "path": "/cases/daily-list/export"
+        }, {
+          "verb": "post",
+          "path": "/cases/daily-list/export"
+        }
+      ]
+    },
     "prototype.exportDailyContactFollowUpList": {
       "accepts": [
         {
@@ -7541,6 +7964,41 @@
       "http": {
         "verb": "get",
         "path": "/contacts/on-follow-up-list/count"
+      }
+    },
+    "prototype.filteredCountCasesOnFollowUpList": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})."
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "casesCount",
+          "type": "number",
+          "description": "Number of cases (that pass the filter) on the follow up list",
+          "required": true
+        },
+        {
+          "arg": "caseIDs",
+          "type": [
+            "string"
+          ],
+          "description": "Ids of cases (that pass the filter) on the follow up list",
+          "required": true
+        }
+      ],
+      "description": "Counts the cases that are on the follow up list, that pass a filter.",
+      "http": {
+        "verb": "get",
+        "path": "/cases/on-follow-up-list/count"
       }
     },
     "prototype.getContactPossibleDuplicates": {
@@ -7898,6 +8356,43 @@
         "path": "/contacts/follow-up-report"
       }
     },
+    "prototype.bulkModifyCases": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": [
+            "case"
+          ],
+          "description": "Array containing cases",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "createResponse",
+          "type": [
+            "contact"
+          ],
+          "description": "Array of updated cases",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update multiple cases",
+      "http": {
+        "verb": "put",
+        "path": "/cases/bulk"
+      }
+    },
     "prototype.bulkModifyContacts": {
       "accepts": [
         {
@@ -8139,6 +8634,54 @@
       "http": {
         "verb": "get",
         "path": "/cases/per-period-per-contact-status/count"
+      }
+    },
+    "prototype.exportDailyCaseFollowUpForm": {
+      "accepts": [
+        {
+          "arg": "res",
+          "type": "object",
+          "http": {
+            "source": "res"
+          }
+        },
+        {
+          "arg": "filter",
+          "type": "object",
+          "description": "Filter defining fields, where, include, order, offset, and limit - must be a JSON-encoded string ({\"something\":\"value\"})"
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "body",
+          "type": "file",
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "Content-Type",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        },
+        {
+          "arg": "Content-Disposition",
+          "type": "string",
+          "http": {
+            "target": "header"
+          }
+        }
+      ],
+      "description": "Export pdf containing daily follow up form",
+      "http": {
+        "verb": "get",
+        "path": "/cases/export-daily-follow-up-form"
       }
     },
     "prototype.exportDailyContactFollowUpForm": {
@@ -9572,6 +10115,50 @@
       "http": {
         "verb": "post",
         "path": "/contacts/:nk/contacts-of-contacts"
+      }
+    },
+    "prototype.modifyCaseFollowUp": {
+      "accepts": [
+        {
+          "arg": "nk",
+          "type": "string",
+          "description": "Foreign key for case"
+        },
+        {
+          "arg": "fk",
+          "type": "string",
+          "description": "Foreign key for follow-ups."
+        },
+        {
+          "arg": "data",
+          "type": "object",
+          "model": "followUp",
+          "description": "Model instance data",
+          "http": {
+            "source": "body"
+          },
+          "root": true,
+          "required": true
+        },
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "followUp",
+          "type": "followUp",
+          "description": "Updated Followup",
+          "root": true,
+          "required": true
+        }
+      ],
+      "description": "Update a case's follow-up.",
+      "http": {
+        "verb": "put",
+        "path": "/cases/:nk/follow-ups/:fk"
       }
     },
     "prototype.modifyContactFollowUp": {

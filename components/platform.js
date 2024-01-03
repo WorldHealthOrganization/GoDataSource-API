@@ -4,5 +4,6 @@ module.exports = {
   MOBILE: 'MOBILE',
   SYNC: 'SYNC',
   IMPORT: 'IMPORT',
-  BULK: 'BULK'
+  BULK: 'BULK',
+  MERGE: 'MERGE'
 };

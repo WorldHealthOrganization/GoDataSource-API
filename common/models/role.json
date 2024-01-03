@@ -43,6 +43,7 @@
   "mixins": {
     "UniqueValidator": true,
     "AuthorTimeStamp": true,
+    "PlatformStamp": true,
     "AuditLogger": true,
     "SoftDelete": true,
     "ReadOnlyProperty": true,

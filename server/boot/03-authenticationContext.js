@@ -71,30 +71,31 @@ module.exports = function (app) {
             let [clientId, clientSecret] = decodedCredentialsStr.split(':');
 
             // get the client information from the system settings
-            return app.models.systemSettings
-              .findOne()
-              .then((systemSettings) => {
-                let clients = systemSettings.toJSON().clientApplications;
-
-                // try to find a match by client identifier
-                let clientIndex = clients.findIndex((client) => {
-                  return client.credentials && client.credentials.clientId === clientId;
-                });
-
+            return app.models.clientApplication
+              .findOne({
+                where: {
+                  'credentials.clientId': clientId
+                }
+              })
+              .then((clientApplication) => {
                 // if no client was found with the given id, or the client is inactive, stop with error
-                if (clientIndex !== -1) {
-                  // cache client information on the context
-                  context.req.authData = {
-                    // cache used credentials
-                    credentials: {
-                      clientId: clientId,
-                      clientSecret: clientSecret
-                    },
-                    client: clients[clientIndex]
-                  };
+                if (!clientApplication) {
+                  next();
+                  return;
                 }
 
-                return next();
+                // cache client information on the context
+                context.req.authData = {
+                  // cache used credentials
+                  credentials: {
+                    clientId: clientId,
+                    clientSecret: clientSecret
+                  },
+                  client: clientApplication.toJSON()
+                };
+
+                // finished
+                next();
               })
               .catch(next);
           }

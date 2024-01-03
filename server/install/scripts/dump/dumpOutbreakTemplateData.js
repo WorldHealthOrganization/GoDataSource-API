@@ -95,7 +95,17 @@ function run(callback) {
           isContactsOfContactsActive: item.isContactsOfContactsActive,
           applyGeographicRestrictions: item.applyGeographicRestrictions,
           checkLastContactDateAgainstDateOnSet: item.checkLastContactDateAgainstDateOnSet,
-          disableModifyingLegacyQuestionnaire: item.disableModifyingLegacyQuestionnaire
+          disableModifyingLegacyQuestionnaire: item.disableModifyingLegacyQuestionnaire,
+          allowCasesFollowUp: item.allowCasesFollowUp,
+          periodOfFollowupCases: item.periodOfFollowupCases,
+          frequencyOfFollowUpCases: item.frequencyOfFollowUpCases,
+          frequencyOfFollowUpPerDayCases: item.frequencyOfFollowUpPerDayCases,
+          intervalOfFollowUpCases: item.intervalOfFollowUpCases,
+          generateFollowUpsOverwriteExistingCases: item.generateFollowUpsOverwriteExistingCases,
+          generateFollowUpsKeepTeamAssignmentCases: item.generateFollowUpsKeepTeamAssignmentCases,
+          generateFollowUpsTeamAssignmentAlgorithmCases: item.generateFollowUpsTeamAssignmentAlgorithmCases,
+          generateFollowUpsDateOfOnset: item.generateFollowUpsDateOfOnset,
+          generateFollowUpsWhenCreatingCases: item.generateFollowUpsWhenCreatingCases
         });
 
         // translate tokens

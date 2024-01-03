@@ -79,7 +79,7 @@ const addMissingPermission = (callback) => {
 
         // add missing permission to resulted roles
         return roleCollection
-          .updateMany({
+          .updateOne({
             _id: data._id
           }, {
             '$push': {

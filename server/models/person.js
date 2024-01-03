@@ -936,7 +936,7 @@ module.exports = function (Person) {
    * @param options Options from request
    * @returns {Promise} Returns => { peopleDistribution: [...], locationCorelationMap: { ... } }. People without an address are grouped under a dummy location with name '-'
    */
-  Person.getPeoplePerLocation = function (personModel, filter, outbreak, options) {
+  Person.getPeoplePerLocation = function (personModel, isPersonTracingReport, filter, outbreak, options) {
     // get user allowed locations IDs
     return app.models.user.helpers
       .getUserAllowedLocationsIds(options.remotingContext)
@@ -1031,7 +1031,10 @@ module.exports = function (Person) {
                 app.models.location.createLocationCorelationMap(locationHierarchy, reportingLocationIds, locationCorelationMap);
                 let additionalFilter = {};
 
-                if (personModel === 'case') {
+                if (
+                  !isPersonTracingReport &&
+                  personModel === 'case'
+                ) {
                   // For cases, we just make sure that the cases are from the required outbreak
                   additionalFilter = {
                     where: {
@@ -1101,7 +1104,10 @@ module.exports = function (Person) {
                 return new Promise(function (resolve) {
                   // We do not apply filterParent logic to contacts because we are interested in the total number of contacts,
                   // whether they have follow-ups or not.
-                  if (personModel === 'case') {
+                  if (
+                    !isPersonTracingReport &&
+                    personModel === 'case'
+                  ) {
                     resolve(app.utils.remote.searchByRelationProperty.deepSearchByRelationProperty(results[0], results[3]));
                   } else {
                     // build a map of people

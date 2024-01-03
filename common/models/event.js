@@ -12,13 +12,13 @@ module.exports = function (Event) {
   // important => DON'T use "Event.fieldLabelsMap = Object.assign({}, Event.fieldLabelsMap, {" since it gets all fields from person and we don't want that
   Event.fieldLabelsMap = {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
-    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
-    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
-    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
-    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
-    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
+    createdAt: 'LNG_EVENT_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_EVENT_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_EVENT_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_EVENT_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_EVENT_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_EVENT_FIELD_LABEL_DELETED_AT',
+    createdOn: 'LNG_EVENT_FIELD_LABEL_CREATED_ON',
     'visualId': 'LNG_EVENT_FIELD_LABEL_VISUAL_ID',
     'type': 'LNG_ENTITY_FIELD_LABEL_TYPE',
     'numberOfExposures': 'LNG_EVENT_FIELD_LABEL_NUMBER_OF_EXPOSURES',
@@ -184,15 +184,6 @@ module.exports = function (Event) {
   };
 
   Event.referenceDataFields = Object.keys(Event.referenceDataFieldsToCategoryMap);
-
-  /**
-   * Get alternate unique identifier query for sync/import actions
-   * Note: Event records don't have an alternate unique identifier. Overwriting Person model function
-   * @returns {null}
-   */
-  Event.getAlternateUniqueIdentifierQueryForSync = () => {
-    return null;
-  };
 
   Event.getIsolatedContacts = function (eventId, callback) {
     // get all relations with a contact

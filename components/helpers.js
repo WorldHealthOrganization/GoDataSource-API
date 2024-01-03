@@ -18,6 +18,12 @@ const config = require('../server/config');
 const {performance} = require('perf_hooks');
 const randomize = require('randomatic');
 
+const PERSON_TYPE = {
+  CASE: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CASE',
+  CONTACT: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT',
+  CONTACT_OF_CONTACT: 'LNG_REFERENCE_DATA_CATEGORY_PERSON_TYPE_CONTACT_OF_CONTACT'
+};
+
 const DATA_TYPE = {
   BOOLEAN: 'Boolean',
   DATE: 'Date'
@@ -1760,7 +1766,7 @@ const sortMultiAnswerQuestions = function (model) {
 /**
  * Convert questionnaire questions string date answers to date answers
  * @param modelChanges ( changed keys )
- * @param template ( Outbreak questionnaire template => caseInvestigationTemplate / contactFollowUpTemplate / labResultsTemplate )
+ * @param template ( Outbreak questionnaire template => caseInvestigationTemplate / caseFollowUpTemplate / contactFollowUpTemplate / labResultsTemplate )
  */
 const convertQuestionStringDatesToDates = function (
   modelChanges,
@@ -2605,6 +2611,7 @@ Object.assign(module.exports, {
   fillGeoLocationInformation,
   countPeopleContactsAndExposures,
   randomString,
+  PERSON_TYPE: PERSON_TYPE,
   DATA_TYPE: DATA_TYPE,
   DEFAULT_LANGUAGE: DEFAULT_LANGUAGE,
   DEFAULT_SYSTEM_ADMIN_ID: DEFAULT_SYSTEM_ADMIN_ID

@@ -153,8 +153,8 @@
     "public": false
   },
   "clientApplication": {
-    "dataSource": null,
-    "public": false
+    "dataSource": "mongoDb",
+    "public": true
   },
   "dataBackup": {
     "dataSource": null,

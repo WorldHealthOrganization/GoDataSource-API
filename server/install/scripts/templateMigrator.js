@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const common = require('./_common');
 const uuid = require('uuid');
+const Platform = require('../../../components/platform');
 
 /**
  * Create / Update default outbreak templates
@@ -280,7 +281,8 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                           createdAt: common.install.timestamps.createdAt,
                           createdBy: 'system',
                           updatedAt: common.install.timestamps.updatedAt,
-                          updatedBy: 'system'
+                          updatedBy: 'system',
+                          createdOn: Platform.API
                         })
                     );
                   });
@@ -351,6 +353,7 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                             caseInvestigationTemplate: refItem.caseInvestigationTemplate,
                             contactInvestigationTemplate: refItem.contactInvestigationTemplate,
                             eventInvestigationTemplate: refItem.eventInvestigationTemplate,
+                            caseFollowUpTemplate: refItem.caseFollowUpTemplate,
                             contactFollowUpTemplate: refItem.contactFollowUpTemplate,
                             labResultsTemplate: refItem.labResultsTemplate,
                             isContactLabResultsActive: refItem.isContactLabResultsActive,
@@ -358,6 +361,16 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                             applyGeographicRestrictions: refItem.applyGeographicRestrictions,
                             checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
                             disableModifyingLegacyQuestionnaire: refItem.disableModifyingLegacyQuestionnaire,
+                            allowCasesFollowUp: refItem.allowCasesFollowUp,
+                            periodOfFollowupCases: refItem.periodOfFollowupCases,
+                            frequencyOfFollowUpCases: refItem.frequencyOfFollowUpCases,
+                            frequencyOfFollowUpPerDayCases: refItem.frequencyOfFollowUpPerDayCases,
+                            intervalOfFollowUpCases: refItem.intervalOfFollowUpCases,
+                            generateFollowUpsOverwriteExistingCases: refItem.generateFollowUpsOverwriteExistingCases,
+                            generateFollowUpsKeepTeamAssignmentCases: refItem.generateFollowUpsKeepTeamAssignmentCases,
+                            generateFollowUpsTeamAssignmentAlgorithmCases: refItem.generateFollowUpsTeamAssignmentAlgorithmCases,
+                            generateFollowUpsDateOfOnset: refItem.generateFollowUpsDateOfOnset,
+                            generateFollowUpsWhenCreatingCases: refItem.generateFollowUpsWhenCreatingCases,
                             deleted: false,
                             deletedAt: null
                           }
@@ -403,6 +416,7 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                           caseInvestigationTemplate: refItem.caseInvestigationTemplate,
                           contactInvestigationTemplate: refItem.contactInvestigationTemplate,
                           eventInvestigationTemplate: refItem.eventInvestigationTemplate,
+                          caseFollowUpTemplate: refItem.caseFollowUpTemplate,
                           contactFollowUpTemplate: refItem.contactFollowUpTemplate,
                           labResultsTemplate: refItem.labResultsTemplate,
                           isContactLabResultsActive: refItem.isContactLabResultsActive,
@@ -410,6 +424,16 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                           applyGeographicRestrictions: refItem.applyGeographicRestrictions,
                           checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
                           disableEditingLegacyQuestionnaire: refItem.disableEditingLegacyQuestionnaire,
+                          allowCasesFollowUp: refItem.allowCasesFollowUp,
+                          periodOfFollowupCases: refItem.periodOfFollowupCases,
+                          frequencyOfFollowUpCases: refItem.frequencyOfFollowUpCases,
+                          frequencyOfFollowUpPerDayCases: refItem.frequencyOfFollowUpPerDayCases,
+                          intervalOfFollowUpCases: refItem.intervalOfFollowUpCases,
+                          generateFollowUpsOverwriteExistingCases: refItem.generateFollowUpsOverwriteExistingCases,
+                          generateFollowUpsKeepTeamAssignmentCases: refItem.generateFollowUpsKeepTeamAssignmentCases,
+                          generateFollowUpsTeamAssignmentAlgorithmCases: refItem.generateFollowUpsTeamAssignmentAlgorithmCases,
+                          generateFollowUpsDateOfOnset: refItem.generateFollowUpsDateOfOnset,
+                          generateFollowUpsWhenCreatingCases: refItem.generateFollowUpsWhenCreatingCases,
                           deleted: false,
                           createdAt: common.install.timestamps.createdAt,
                           createdBy: 'system',

@@ -7,6 +7,7 @@ const _ = require('lodash');
 const localizationHelper = require('./../../components/localizationHelper');
 const apiError = require('../../components/apiError');
 const addMissingLanguageTokens = require('../../server/install/scripts/addMissingLanguageTokens');
+const Platform = require('../../components/platform');
 
 module.exports = function (Language) {
 
@@ -36,6 +37,10 @@ module.exports = function (Language) {
    * @param callback
    */
   Language.prototype.importLanguageTokensFile = function (req, languageFile, options, callback) {
+    // inject platform identifier
+    options = options || {};
+    options.platform = Platform.IMPORT;
+
     // make context available
     const self = this;
     // loopback cannot parse multipart requests

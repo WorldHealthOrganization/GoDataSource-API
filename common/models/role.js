@@ -399,6 +399,14 @@ module.exports = function (Role) {
           requires: []
         },
         {
+          id: 'user_bulk_delete',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_USER',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_USER_DESCRIPTION',
+          requires: [
+            'user_delete'
+          ]
+        },
+        {
           id: 'user_list_workload',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_USER_WORKLOAD_DESCRIPTION',
@@ -665,30 +673,36 @@ module.exports = function (Role) {
       groupDescription: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GROUP_CLIENT_APPLICATION_DESCRIPTION',
       permissions: [
         {
+          id: 'client_application_view',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLIENT_APPLICATION_DESCRIPTION',
+          requires: []
+        },
+        {
           id: 'client_application_list',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_LIST_CLIENT_APPLICATION_DESCRIPTION',
-          requires: [
-            'system_settings_view'
-          ]
+          requires: []
         },
         {
           id: 'client_application_create',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLIENT_APPLICATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_CLIENT_APPLICATION_DESCRIPTION',
+          requires: []
+        },
+        {
+          id: 'client_application_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLIENT_APPLICATION',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLIENT_APPLICATION_DESCRIPTION',
           requires: [
-            'system_settings_view',
-            'system_settings_modify'
+            'client_application_view'
           ]
         },
         {
           id: 'client_application_delete',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLIENT_APPLICATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DELETE_CLIENT_APPLICATION_DESCRIPTION',
-          requires: [
-            'system_settings_view',
-            'system_settings_modify'
-          ]
+          requires: []
         },
         {
           id: 'client_application_download_conf_file',
@@ -701,8 +715,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_ENABLE_CLIENT_APPLICATION_DESCRIPTION',
           requires: [
-            'system_settings_view',
-            'system_settings_modify'
+            'client_application_modify'
           ]
         },
         {
@@ -710,8 +723,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_DISABLE_CLIENT_APPLICATION_DESCRIPTION',
           requires: [
-            'system_settings_view',
-            'system_settings_modify'
+            'client_application_modify'
           ]
         }
       ]
@@ -925,6 +937,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'outbreak_modify_case_follow_up_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_FOLLOW_UP_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'outbreak_modify'
+          ]
+        },
+        {
           id: 'outbreak_modify_contact_follow_up_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CONTACT_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
@@ -1014,6 +1035,15 @@ module.exports = function (Role) {
           id: 'outbreak_template_modify_event_questionnaire',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_EVENT_QUESTIONNAIRE_DESCRIPTION',
+          requires: [
+            'outbreak_template_view',
+            'outbreak_template_modify'
+          ]
+        },
+        {
+          id: 'outbreak_template_modify_case_follow_up_questionnaire',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_FOLLOW_UP_QUESTIONNAIRE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_TEMPLATE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION',
           requires: [
             'outbreak_template_view',
             'outbreak_template_modify'
@@ -1810,6 +1840,16 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'contact_follow_up_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONTACT_CREATE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CONTACT_CREATE_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'follow_up_create',
+            'contact_view'
+          ]
+        },
+        {
           id: 'contact_export_daily_follow_up_list',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DAILY_FOLLOW_UP_LIST',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CONTACT_DAILY_FOLLOW_UP_LIST_DESCRIPTION',
@@ -2072,6 +2112,14 @@ module.exports = function (Role) {
           requires: []
         },
         {
+          id: 'case_export_follow_up_success_rate_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
           id: 'case_import',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_IMPORT_CASE_DESCRIPTION',
@@ -2109,6 +2157,16 @@ module.exports = function (Role) {
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_GENERATE_CASE_VISUAL_ID_DESCRIPTION',
           requires: [
             'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_bulk_modify',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CASE',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CASE_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_list',
+            'case_generate_visual_id'
           ]
         },
         {
@@ -2528,7 +2586,73 @@ module.exports = function (Role) {
           requires: [
             'lab_result_export'
           ]
-        }
+        },
+        {
+          id: 'case_follow_up_create',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CASE_CREATE_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CASE_CREATE_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'follow_up_create',
+            'case_view'
+          ]
+        },
+        {
+          id: 'case_export_daily_follow_up_list',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_LIST',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_LIST_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_export_daily_follow_up_form',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_FORM',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_FORM_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_from_follow_up',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_FROM_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_FROM_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_lost_to_follow_up',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_LOST_TO_FOLLOW_UP',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CASE_CONTACT_LOST_TO_FOLLOW_UP_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_not_seen_in_x_days',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_NOT_SEEN_IN_X_DAYS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_NOT_SEEN_IN_X_DAYS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_seen',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SEEN',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SEEN_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
+        {
+          id: 'case_count_successful_follow_ups',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SUCCESSFUL_FOLLOW_UPS',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SUCCESSFUL_FOLLOW_UPS_DESCRIPTION',
+          requires: [
+            'outbreak_view'
+          ]
+        },
       ]
     },
 
@@ -2659,8 +2783,7 @@ module.exports = function (Role) {
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_CREATE_FOLLOW_UP_DESCRIPTION',
           requires: [
-            'outbreak_view',
-            'contact_view'
+            'outbreak_view'
           ]
         },
         {
@@ -3367,6 +3490,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'dashboard_view_case_from_follow_up_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_FROM_FOLLOW_UP_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_FROM_FOLLOW_UP_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_from_follow_up'
+          ]
+        },
+        {
           id: 'dashboard_view_contacts_per_case_mean_dashlet',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEAN_DASHLET',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACTS_PER_CASE_MEAN_DASHLET_DESCRIPTION',
@@ -3394,6 +3526,15 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'dashboard_view_case_lost_to_follow_up_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_LOST_TO_FOLLOW_UP_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_LOST_TO_FOLLOW_UP_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_lost_to_follow_up'
+          ]
+        },
+        {
           id: 'dashboard_view_contact_lost_to_follow_up_dashlet',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_LOST_TO_FOLLOW_UP_DASHLET_DESCRIPTION',
@@ -3409,6 +3550,15 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'contact_count_not_seen_in_x_days'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_not_seen_in_x_days_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_SEEN_IN_X_DAYS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_SEEN_IN_X_DAYS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_not_seen_in_x_days'
           ]
         },
         {
@@ -3430,12 +3580,30 @@ module.exports = function (Role) {
           ]
         },
         {
+          id: 'dashboard_view_case_seen_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SEEN_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SEEN_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_seen'
+          ]
+        },
+        {
           id: 'dashboard_view_contact_successful_follow_ups_dashlet',
           label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET',
           description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CONTACT_SUCCESSFUL_FOLLOW_UPS_DASHLET_DESCRIPTION',
           requires: [
             'outbreak_view',
             'contact_count_successful_follow_ups'
+          ]
+        },
+        {
+          id: 'dashboard_view_case_successful_follow_ups_dashlet',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUCCESSFUL_FOLLOW_UPS_DASHLET',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUCCESSFUL_FOLLOW_UPS_DASHLET_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_count_successful_follow_ups'
           ]
         },
         {
@@ -3472,6 +3640,15 @@ module.exports = function (Role) {
           requires: [
             'outbreak_view',
             'case_export_classification_per_location_report'
+          ]
+        },
+        {
+          id: 'dashboard_export_case_follow_up_success_rate_report',
+          label: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT',
+          description: 'LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION',
+          requires: [
+            'outbreak_view',
+            'case_export_follow_up_success_rate_report'
           ]
         },
         {
@@ -3995,13 +4172,13 @@ module.exports = function (Role) {
 
   Role.fieldLabelsMap = Object.assign({}, Role.fieldLabelsMap, {
     id: 'LNG_COMMON_MODEL_FIELD_LABEL_ID',
-    createdOn: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_ON',
-    createdAt: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_AT',
-    createdBy: 'LNG_COMMON_MODEL_FIELD_LABEL_CREATED_BY',
-    updatedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_AT',
-    updatedBy: 'LNG_COMMON_MODEL_FIELD_LABEL_UPDATED_BY',
-    deleted: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED',
-    deletedAt: 'LNG_COMMON_MODEL_FIELD_LABEL_DELETED_AT',
+    createdOn: 'LNG_USER_ROLE_FIELD_LABEL_CREATED_ON',
+    createdAt: 'LNG_USER_ROLE_FIELD_LABEL_CREATED_AT',
+    createdBy: 'LNG_USER_ROLE_FIELD_LABEL_CREATED_BY',
+    updatedAt: 'LNG_USER_ROLE_FIELD_LABEL_UPDATED_AT',
+    updatedBy: 'LNG_USER_ROLE_FIELD_LABEL_UPDATED_BY',
+    deleted: 'LNG_USER_ROLE_FIELD_LABEL_DELETED',
+    deletedAt: 'LNG_USER_ROLE_FIELD_LABEL_DELETED_AT',
     name: 'LNG_USER_ROLE_FIELD_LABEL_NAME',
     permissionIds: 'LNG_USER_ROLE_FIELD_LABEL_PERMISSIONS',
     description: 'LNG_USER_ROLE_FIELD_LABEL_DESCRIPTION'

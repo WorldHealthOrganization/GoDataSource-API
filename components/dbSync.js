@@ -40,6 +40,7 @@ const collectionsWithFiles = {
 
 // map of collections and their given corresponding collection name in database
 const collectionsMap = {
+  clientApplication: 'clientApplication',
   systemSettings: 'systemSettings',
   template: 'template',
   icon: 'icon',
@@ -75,24 +76,27 @@ const userCollections = ['team', 'user', 'role'];
 const collectionsForExportTypeMap = {
   system: ['template', 'icon', 'helpCategory', 'helpItem', 'language', 'languageToken', 'referenceData', 'location']
 };
-collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat(['outbreak']);
+collectionsForExportTypeMap.outbreak = collectionsForExportTypeMap.system.concat([
+  'outbreak',
+  'importMapping'
+]);
 collectionsForExportTypeMap.full = collectionsForExportTypeMap.outbreak.concat([
   'person',
   'labResult',
   'followUp',
   'relationship',
   'cluster',
-  'fileAttachment',
-  'importMapping'
+  'fileAttachment'
 ]);
 collectionsForExportTypeMap.mobile = collectionsForExportTypeMap.full.concat(userCollections);
 // mobile export doesn't need to include template, icon, helpCategory, helpItem, fileAttachment
-['template', 'icon', 'fileAttachment'].forEach(function (model) {
+['template', 'icon', 'fileAttachment', 'importMapping'].forEach(function (model) {
   collectionsForExportTypeMap.mobile.splice(collectionsForExportTypeMap.mobile.indexOf(model), 1);
 });
 
 // on sync we need get all collections except the following
 let syncExcludeList = [
+  'clientApplication',
   'systemSettings',
   'role',
   'auditLog',
@@ -366,7 +370,15 @@ function addLanguageTokenMongoFilter(collectionName, baseFilter, filter) {
   // update filter only if languageTokenFilter is an array
   if (Array.isArray(languageTokenFilter)) {
     // Note: should be in sync with the subTemplates names from templateParser.js
-    const subTemplates = ['caseInvestigationTemplate', 'contactInvestigationTemplate', 'eventInvestigationTemplate', 'contactFollowUpTemplate', 'labResultsTemplate'];
+    const subTemplates = [
+      'caseInvestigationTemplate',
+      'contactInvestigationTemplate',
+      'eventInvestigationTemplate',
+      'caseFollowUpTemplate',
+      'contactFollowUpTemplate',
+      'contactFollowUpTemplate',
+      'labResultsTemplate'
+    ];
 
     // create language token mongo filter; creating it as an '$or' filter
     let languageTokenMongoFilter = {
