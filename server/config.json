@@ -39,7 +39,7 @@
   "passwordReset": {
     "ttl": 900,
     "path": "/auth/reset-password",
-    "from": "no-reply@who.int"
+    "from": ""
   },
   "passwordChange": {
     "path": "/account/change-password"
@@ -71,12 +71,12 @@
     "maxPackageSize": 5242880000
   },
   "pushNotifications": {
-    "serverURL": "http://whocd.clarisoft.com:1337/api",
-    "appId": "b61f5946-1af3-4e07-9986-9ffd1e36ae93",
-    "masterKey": "KlYddh2OdVycHuVBhXv2"
+    "serverURL": "",
+    "appId": "",
+    "masterKey": ""
   },
   "backUp": {
-    "password": "x$^56fwm173s1a#2@oaxlnbk0z541lsd",
+    "password": "",
     "disabled": false
   },
   "defaultArcGisServers": [
@@ -113,7 +113,7 @@
   },
   "session": {
     "appSId": "GoData",
-    "secret": "5d854dbc-5d5b-11ea-bc55-0242ac130003"
+    "secret": ""
   },
   "login": {
     "maxRetries": 10,
@@ -131,7 +131,7 @@
         "charset": "0123456789",
         "ttlMinutes": 30
       },
-      "emailFrom": "no-reply@who.int"
+      "emailFrom": ""
     }
   },
   "bruteForce": {
@@ -204,7 +204,7 @@
       "fontSize": "40px"
     }
   },
-  "adminEmail": "admin@who.int",
+  "adminEmail": "",
   "duplicate": {
     "disableCaseDuplicateCheck": false,
     "disableContactDuplicateCheck": false,
