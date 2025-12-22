@@ -4,7 +4,7 @@ const gulp = require('gulp');
 const uglify = require('gulp-uglify-es').default;
 const clean = require('gulp-clean');
 const pump = require('pump');
-const run = require('gulp-run-command').default;
+const { exec } = require('child_process');
 const fs = require('fs');
 const moment = require('moment');
 
@@ -104,10 +104,13 @@ gulp.task('compress', gulp.series('copy', function (callback) {
 /**
  * Install dependencies
  */
-gulp.task('install-dependencies', gulp.series('compress', async () => run('npm install --production', {
-  cwd: `${__dirname}/build`
-})()));
-
+gulp.task('install-dependencies', gulp.series('compress', function (done) {
+  exec('npm install --production', { cwd: `${__dirname}/build` }, (err, stdout, stderr) => {
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+    done(err);
+  });
+}));
 /**
  * Update build information
  */

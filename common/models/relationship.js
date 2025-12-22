@@ -773,7 +773,8 @@ module.exports = function (Relationship) {
           },
           hint: {
             '_id': 1
-          }
+          },
+          includeDeletedRecords:1
         })
         .then((records) => {
           if (
@@ -782,7 +783,8 @@ module.exports = function (Relationship) {
           ) {
             const recordIds = records.map(record => record.id);
             const idsNotFound = personIds.filter(personId => !recordIds.includes(personId)).join(', ');
-            throw app.logger.error(`Failed to trigger person record updates. Persons (ids: ${idsNotFound}) not found.`);
+            app.logger.error(`Failed to trigger person record updates. Persons (ids: ${idsNotFound}) not found.`);
+            throw new Error(`Failed to trigger person record updates. Persons (ids: ${idsNotFound}) not found.`);
           }
 
           // map records found
@@ -843,7 +845,9 @@ module.exports = function (Relationship) {
           .then(function (personRecord) {
             // if the record is not found, stop with err
             if (!personRecord) {
-              throw app.logger.error(`Failed to trigger person record updates. Person (id: ${person.id}) not found.`);
+              const error = `Failed to trigger person record updates. Person (id: ${person.id} not found.`;
+              app.logger.error(error);
+              throw new Error(error);
             }
             personRecord.systemTriggeredUpdate = true;
 
@@ -935,7 +939,9 @@ module.exports = function (Relationship) {
               .then(function (personRecord) {
                 // if the record is not found, stop with err
                 if (!personRecord) {
-                  throw app.logger.error(`Failed to trigger person record updates. Person (id: ${oldPerson.id}) not found.`);
+                  const error = `Failed to trigger person record updates. Contact (id: ${oldPerson.id} not found.)`;
+                  app.logger.error(error);
+                  throw new Error(error);
                 }
                 personRecord.systemTriggeredUpdate = true;
 
@@ -1050,7 +1056,9 @@ module.exports = function (Relationship) {
             .then(function (contactRecord) {
               // if the record is not found, stop with err
               if (!contactRecord) {
-                throw app.logger.error(`Failed to trigger contact record updates. Contact (id: ${contactInPersons.id}) not found.`);
+                const error = `Failed to trigger person record updates. Contact (id: ${contactInPersons.id} not found.)`;
+                app.logger.error(error);
+                throw new Error(error);
               }
               contactRecord.systemTriggeredUpdate = true;
               // trigger record update

@@ -252,7 +252,15 @@
       }
     },
     "getVersion": {
-      "accepts": [],
+       "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
       "returns": [
         {
           "arg": "version",

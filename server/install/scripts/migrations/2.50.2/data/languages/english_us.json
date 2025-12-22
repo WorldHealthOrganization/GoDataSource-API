@@ -1,0 +1,1039 @@
+{
+  "id": "english_us",
+  "tokens": {
+    "LNG_OUTBREAK_FIELD_LABEL_EVENT_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9)<br/>9 – Digit (auto-generated sequence number)<br/>Y – Year (Using year from the date when a case has been reported)<br/>@ – Letter (A through Z)<br/>& – Any character (including spaces)<br/>* – any character with no limitations in ID length"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CASE_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9)<br/>9 – Digit (auto-generated sequence number)<br/>Y – Year (Using year from the date when a case has been reported)<br/>@ – Letter (A through Z)<br/>& – Any character (including spaces)<br/>* – any character with no limitations in ID length"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CONTACT_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9)<br/>9 – Digit (auto-generated sequence number)<br/>Y – Year (Using year from the date when a case has been reported)<br/>@ – Letter (A through Z)<br/>& – Any character (including spaces)<br/>* – any character with no limitations in ID length"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CONTACT_OF_CONTACT_ID_MASK_DESCRIPTION": {
+      "translation": "0 – Digit (0 through 9)<br/>9 – Digit (auto-generated sequence number)<br/>Y – Year (Using year from the date when a case has been reported)<br/>@ – Letter (A through Z)<br/>& – Any character (including spaces)<br/>* – any character with no limitations in ID length"
+    },
+    "LNG_CONTACT_FIELD_LABEL_FOLLOW_UP_GENERATE_FOLLOW_UPS_DATE_OF_LAST_CONTACT": {
+      "translation": "Start contact follow-up on the date of last contact",
+      "section": "uiContactFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at"
+    },
+    "LNG_CASE_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiCaseFields"
+    },
+    "LNG_CLUSTER_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiClusterFields"
+    },
+    "LNG_LANGUAGE_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiLanguageFields"
+    },
+    "LNG_LANGUAGE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiLanguageFields"
+    },
+    "LNG_LANGUAGE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiLanguageFields"
+    },
+    "LNG_LANGUAGE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiLanguageFields"
+    },
+    "LNG_LANGUAGE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiLanguageFields"
+    },
+    "LNG_CONTACT_OF_CONTACT_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiContactOfContactFields"
+    },
+    "LNG_CONTACT_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiContactFields"
+    },
+    "LNG_RELATIONSHIP_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiRelationshipFields"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_EVENT_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiEventFields"
+    },
+    "LNG_LAB_RESULT_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiLabResultsFields"
+    },
+    "LNG_LOCATION_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiLocationFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_REFERENCE_DATA_ENTRY_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiReferenceDataEntryFields",
+      "modules": [
+        "referenceData"
+      ]
+    },
+    "LNG_TEAM_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "section": "uiTeamsFields"
+    },
+    "LNG_TEAM_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiTeamsFields"
+    },
+    "LNG_USER_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiUserFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_DELETED": {
+      "translation": "Deleted",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_USER_ROLE_FIELD_LABEL_DELETED_AT": {
+      "translation": "Deleted at",
+      "section": "uiUserRoleFields"
+    },
+    "LNG_PLATFORM_LABEL_WEB": {
+      "translation": "Web",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_API": {
+      "translation": "API",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_MOBILE": {
+      "translation": "Mobile",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_SYNC": {
+      "translation": "Sync",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_IMPORT": {
+      "translation": "Import",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_BULK": {
+      "translation": "Bulk",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_PLATFORM_LABEL_MERGE": {
+      "translation": "Merge",
+      "section": "uiPlatformLabels"
+    },
+    "LNG_SYNC_PACKAGE_EXPORT_TYPE_FIELD_LABEL_SYSTEM_DESCRIPTION": {
+      "translation": "Synced collections: Outbreak templates, Icons, Help categories, Help items, Languages, Language tokens, Reference data, Locations. Users, Roles and Teams can be included by checking 'Include users, roles and teams' checkbox. Further filters are applied on each one of these collections.",
+      "section": "uiSyncPackageExportTypes"
+    },
+    "LNG_SYNC_PACKAGE_EXPORT_TYPE_FIELD_LABEL_OUTBREAK_DESCRIPTION": {
+      "translation": "Synced collections: Outbreaks, Outbreak templates, Icons, Help categories, Help items, Languages, Language tokens, Reference data, Locations, Import mappings. Users, Roles and Teams can be included by checking 'Include users, roles and teams' checkbox. Further filters are applied on each one of these collections.",
+      "section": "uiSyncPackageExportTypes"
+    },
+    "LNG_SYNC_PACKAGE_EXPORT_TYPE_FIELD_LABEL_FULL_DESCRIPTION": {
+      "translation": "Synced collections: Outbreaks, Outbreak templates, Icons, Help categories, Help items, Languages, Language tokens, Reference data, Locations, Cases, Contacts, Contact of contacts, Events, Lab results, Follow-ups, Relationships (exposures, contacts), Clusters, File attachments, Import mappings. Users, Roles and Teams can be included by checking 'Include users, roles and teams' checkbox. Further filters are applied on each one of these collections.",
+      "section": "uiSyncPackageExportTypes"
+    },
+    "LNG_SYNC_PACKAGE_EXPORT_TYPE_FIELD_LABEL_MOBILE_DESCRIPTION": {
+      "translation": "Synced collections: Outbreaks, Help categories, Help items, Languages, Language tokens, Reference data, Locations, Cases, Contacts, Contact of contacts, Events, Lab results, Follow-ups, Relationships (exposures, contacts), Clusters, Users, Roles, Teams. Further filters are applied on each one of these collections.",
+      "section": "uiSyncPackageExportTypes"
+    },
+    "LNG_SYNC_PACKAGE_FIELD_LABEL_INCLUDE_USERS": {
+      "translation": "Include users, roles and teams"
+    },
+    "LNG_USER_FIELD_LABEL_LAST_LOGIN": {
+      "translation": "Last login",
+      "section": "uiUserFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_USER": {
+      "translation": "User - bulk delete",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_DELETE_USER_DESCRIPTION": {
+      "translation": "This permission allows bulk deleting user information",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_USERS_GROUP_ACTION_DELETE_SELECTED_USERS": {
+      "translation": "Delete selected users",
+      "section": "uiListUsersPage"
+    },
+    "LNG_PAGE_LIST_USERS_GROUP_ACTION_DELETE_SELECTED_USERS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted, current user and super admin shouldn't be selected",
+      "section": "uiListUsersPage"
+    },
+    "LNG_DIALOG_CONFIRM_DELETE_MULTIPLE_USERS": {
+      "translation": "Are you sure you want to delete selected users?",
+      "section": "uiDialogs"
+    },
+    "LNG_PAGE_LIST_USERS_ACTION_DELETE_SELECTED_USERS_WAIT_MESSAGE": {
+      "translation": "Please wait..Deleting users<br />{{no}} / {{total}}",
+      "section": "uiListUsersPage"
+    },
+    "LNG_PAGE_LIST_USERS_ACTION_DELETE_SELECTED_USERS_SUCCESS_MESSAGE": {
+      "translation": "Users deleted",
+      "section": "uiListUsersPage"
+    },
+    "LNG_ICON_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiIconFields"
+    },
+    "LNG_ICON_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiIconFields"
+    },
+    "LNG_ICON_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiIconFields"
+    },
+    "LNG_ICON_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiIconFields"
+    },
+    "LNG_ICON_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiIconFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_SAVED_IMPORT_MAPPING_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiSavedImportMappingsFields"
+    },
+    "LNG_HELP_CATEGORY_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiHelpCategoryFields"
+    },
+    "LNG_HELP_CATEGORY_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiHelpCategoryFields"
+    },
+    "LNG_HELP_CATEGORY_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiHelpCategoryFields"
+    },
+    "LNG_HELP_CATEGORY_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiHelpCategoryFields"
+    },
+    "LNG_HELP_CATEGORY_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiHelpCategoryFields"
+    },
+    "LNG_HELP_ITEM_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiHelpItemFields"
+    },
+    "LNG_HELP_ITEM_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiHelpItemFields"
+    },
+    "LNG_HELP_ITEM_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiHelpItemFields"
+    },
+    "LNG_HELP_ITEM_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiHelpItemFields"
+    },
+    "LNG_HELP_ITEM_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiHelpItemFields"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiDeviceFields"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiDeviceFields"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiDeviceFields"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiDeviceFields"
+    },
+    "LNG_SYSTEM_DEVICE_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiDeviceFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_SAVED_FILTERS_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiSavedFiltersFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLIENT_APPLICATION": {
+      "translation": "Client application - view",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_CLIENT_APPLICATION_DESCRIPTION": {
+      "translation": "This permission allows viewing client applications",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLIENT_APPLICATION": {
+      "translation": "Client application - modify",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_CLIENT_APPLICATION_DESCRIPTION": {
+      "translation": "This permission allows modifying client applications",
+      "section": "availablePermissions"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CREATED_ON": {
+      "translation": "Created on",
+      "section": "uiClientApplicationFields"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CREATED_BY": {
+      "translation": "Created by",
+      "section": "uiClientApplicationFields"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_CREATED_AT": {
+      "translation": "Created at",
+      "section": "uiClientApplicationFields"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_UPDATED_BY": {
+      "translation": "Updated by",
+      "section": "uiClientApplicationFields"
+    },
+    "LNG_SYSTEM_CLIENT_APPLICATION_FIELD_LABEL_UPDATED_AT": {
+      "translation": "Updated at",
+      "section": "uiClientApplicationFields"
+    },
+    "LNG_PAGE_LIST_SYSTEM_CLIENT_APPLICATIONS_ACTION_ENABLE_DISABLE": {
+      "translation": "Enable/Disable client application",
+      "section": "uiSyncClientApplicationsListPage"
+    },
+    "LNG_PAGE_LIST_SYSTEM_CLIENT_APPLICATIONS_ACTION_DELETE": {
+      "translation": "Delete client application"
+    },
+    "LNG_PAGE_LIST_SYSTEM_CLIENT_APPLICATIONS_ACTION_VIEW": {
+      "translation": "View client application",
+      "section": "uiSyncClientApplicationsListPage"
+    },
+    "LNG_PAGE_LIST_SYSTEM_CLIENT_APPLICATIONS_ACTION_MODIFY": {
+      "translation": "Modify client application",
+      "section": "uiSyncClientApplicationsListPage"
+    },
+    "LNG_PAGE_MODIFY_SYSTEM_CLIENT_APPLICATION_TITLE": {
+      "translation": "Modify {{name}}",
+      "section": "uiModifyClientApplicationPage"
+    },
+    "LNG_PAGE_VIEW_SYSTEM_CLIENT_APPLICATION_TITLE": {
+      "translation": "View {{name}}",
+      "section": "uiModifyClientApplicationPage"
+    },
+    "LNG_APP_PAGE_SYSTEM_CLIENT_APPLICATIONS": {
+      "translation": "Client applications",
+      "section": "uiSavedFiltersForPagesLabels"
+    },
+    "LNG_PAGE_MODIFY_SYSTEM_CLIENT_APPLICATION_ACTION_MODIFY_CLIENT_APPLICATION_SUCCESS_MESSAGE": {
+      "translation": "Client application saved",
+      "section": "uiModifyClientApplicationPage"
+    },
+    "LNG_API_ERROR_CODE_MODEL_PROPERTY_CONFLICT": {
+      "translation": "An instance with the same property value already exists",
+      "section": "uiAPIErrors"
+    },
+    "LNG_PAGE_MODIFY_SYSTEM_CLIENT_APPLICATIONS_ACTION_DOWNLOAD_CONF_FILE": {
+      "translation": "Download configuration file",
+      "section": "uiModifyClientApplicationPage"
+    },
+    "LNG_MODULE_LABEL_CLIENT_APPLICATION": {
+      "translation": "Client application",
+      "section": "uiModules"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_GROUP_ACTION_DELETE_SELECTED_FOLLOW_UPS_DESCRIPTION": {
+      "translation": "All selected records shouldn't be deleted",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Contact follow-up form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_PAGE_LIST_OUTBREAKS_ACTION_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Contact follow-up form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Contact follow-up form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Contact follow-up form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_ACTION_CASE_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Case follow-up form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_PAGE_LIST_OUTBREAKS_ACTION_CASE_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Case follow-up form",
+      "section": "uiModifyOutbreakPage"
+    },
+    "LNG_PAGE_LIST_OUTBREAK_TEMPLATES_ACTION_CASE_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Case follow-up form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+    "LNG_PAGE_MODIFY_OUTBREAK_TEMPLATE_ACTION_CASE_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Case follow-up form",
+      "section": "uiModifyOutbreakTemplatePage"
+    },
+
+    "LNG_OUTBREAK_FIELD_LABEL_ALLOW_CASES_FOLLOW_UP_DESCRIPTION": {
+      "translation": "",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Outbreak - modify case follow-up questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_CASE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak case follow-up questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CONTACT_FOLLOW_UP_QUESTIONNAIRE": {
+      "translation": "Outbreak template - modify contact follow-up questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_MODIFY_OUTBREAK_TEMPLATE_CASE_FOLLOW_UP_QUESTIONNAIRE_DESCRIPTION": {
+      "translation": "This permission allows modifying outbreak case follow-up questionnaire",
+      "section": "availablePermissions"
+    },
+    "LNG_FOLLOW_UP_FIELD_LABEL_CREATED_AS": {
+      "translation": "Created as",
+      "section": "uiFollowUpFields"
+    },
+    "LNG_PAGE_MODIFY_CASE_TAB_FOLLOW_UPS_TITLE": {
+      "translation": "Follow-ups",
+      "section": "uiModifyCasePage"
+    },
+    "LNG_PAGE_MODIFY_CONTACT_OF_CONTACT_TAB_FOLLOW_UPS_TITLE": {
+      "translation": "Follow-ups",
+      "section": "uiModifyContactOfContactPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_VIEW_FOLLOW_UPS": {
+      "translation": "View follow-ups",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_MODIFY_FOLLOW_UP_FIELD_LABEL_FOLLOW_UP_WITH_INFO": {
+      "translation": "* This person is now a {{personType}} and follow-up was performed at the time when '{{personName}}' was registered as a {{createdAs}}",
+      "section": "uiModifyFollowUpPage"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOW_UP_CONTACTS": {
+      "translation": "Contacts follow-ups",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOW_UP_CASES": {
+      "translation": "Cases follow-ups",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Follow-ups",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_ALLOW_CASES_FOLLOW_UP": {
+      "translation": "Allow follow-up of cases",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_CASES": {
+      "translation": "Team assignment algorithm",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION_CASES": {
+      "translation": "<div style='color: #FFF; padding-bottom: 10px'><span style='font-weight: bold;'>[Option 1]</span> - If Team1 has 'Argentina' assigned and Team2 has 'Buenos Aires' assigned (sublocation of Argentina). Case has 'Buenos Aires' as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Option 2]</span> - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Case has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done.</div>",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_CASES": {
+      "translation": "Overwrite existing follow-ups",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION_CASES": {
+      "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_CASES": {
+      "translation": "Keep team assignment",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION_CASES": {
+      "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a case or the team assignment will be made through round-robin.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_CASES": {
+      "translation": "Duration for the follow-up (day)",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_DESCRIPTION_CASES": {
+      "translation": "How many days should follow-up be performed for cases in this outbreak from the date of onset?",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FREQUENCY_PER_DAY_CASES": {
+      "translation": "Follow-up frequency per day",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_FREQUENCY_PER_DAY_DESCRIPTION_CASES": {
+      "translation": "How many times should follow-up be performed per day? Set this to 1 for a single follow-up per day.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_CASES": {
+      "translation": "Follow-ups interval",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION_CASES": {
+      "translation": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5'). Leave empty if you want to use the old behaviour.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_ONSET": {
+      "translation": "Start case follow-up on the date of onset",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "Flag specifying if case tracing should start on the date of onset.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CASES": {
+      "translation": "Create follow-ups automatically when creating cases",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_DESCRIPTION_CASES": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating cases.",
+      "section": "uiOutbreakFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Contacts follow-ups",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOW_UP_CASES": {
+      "translation": "Cases follow-ups",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_ALLOW_CASES_FOLLOW_UP": {
+      "translation": "Allow follow-up of cases",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_CASES": {
+      "translation": "Team assignment algorithm",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_TEAM_ASSIGNMENT_ALGORITHM_DESCRIPTION_CASES": {
+      "translation": "<div style='color: #FFF; padding-bottom: 10px'><span style='font-weight: bold;'>[Option 1]</span> - If Team1 has 'Argentina' assigned and Team2 has 'Buenos Aires' assigned (sublocation of Argentina). Case has 'Buenos Aires' as the usual place of residence location. Only Team2 will be added to the assignment pool from where the choosing will be done.</div><div style='padding-bottom: 10px'><span style='font-weight: bold;'>[Option 2]</span> - If Team1 has 'Argentina' assigned and team2 has 'Buenos Aires' assigned (sublocation of Argentina). Case has 'Buenos Aires' as the usual place of residence location. Both Team1 and Team2 will be added to the assignment pool from where the choosing will be done.</div>",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_CASES": {
+      "translation": "Overwrite existing follow-ups",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_OVERWRITE_EXISTING_DESCRIPTION_CASES": {
+      "translation": "Flag specifying whether existing follow-ups in the specified period will be overwritten or not. Applies only to not performed follow-ups.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_CASES": {
+      "translation": "Keep team assignment",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_KEEP_TEAM_ASSIGNMENT_DESCRIPTION_CASES": {
+      "translation": "Flag specifying whether new generated follow-ups will be assigned to the same team as the last follow-up for a case or the team assignment will be made through round-robin.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_CASES": {
+      "translation": "Duration for the follow-up (day)",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_DURATION_FOLLOWUP_DAYS_DESCRIPTION_CASES": {
+      "translation": "How many days should follow-up be performed for cases in this outbreak from the date of onset?",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_FREQUENCY_PER_DAY_CASES": {
+      "translation": "Follow-up frequency per day",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_FREQUENCY_PER_DAY_DESCRIPTION_CASES": {
+      "translation": "How many times should follow-up be performed per day? Set this to 1 for a single follow-up per day.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_CASES": {
+      "translation": "Follow-ups interval",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_INTERVAL_OF_FOLLOW_UPS_DESCRIPTION_CASES": {
+      "translation": "Option specifying the interval when follow-ups should be generated. If empty then no restrictions will be applied, otherwise it will generate follow-ups only on specific days (interval sample: '1, 3, 5'). Leave empty if you want to use the old behaviour.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_ONSET": {
+      "translation": "Start case follow-up on the date of onset",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "Flag specifying if case tracing should start on the date of onset.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_CASES": {
+      "translation": "Create follow-ups automatically when creating cases",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_OUTBREAK_TEMPLATE_FIELD_LABEL_FOLLOWUP_GENERATION_WHEN_CREATING_DESCRIPTION_CASES": {
+      "translation": "Flag that specifies whether follow-ups are automatically generated when creating cases.",
+      "section": "uiOutbreakTemplateFields"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_GENERATE_FOR_CASES_BUTTON": {
+      "translation": "Generate follow-up for cases",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_FOR_CASES_DIALOG_TITLE": {
+      "translation": "Generate follow-ups for cases",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_GENERATE_FOR_CONTACTS_BUTTON": {
+      "translation": "Generate follow-up for contacts",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_ACTION_GENERATE_FOLLOW_UPS_FOR_CONTACTS_DIALOG_TITLE": {
+      "translation": "Generate follow-ups for contacts",
+      "section": "uiFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_EXPORT_FOR_CASES_BUTTON": {
+      "translation": "Export data for cases",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_EXPORT_FOR_CASES_TITLE": {
+      "translation": "Export data for cases",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_EXPORT_FOR_CONTACTS_BUTTON": {
+      "translation": "Export data for contacts",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_PAGE_LIST_RANGE_FOLLOW_UPS_EXPORT_FOR_CONTACTS_TITLE": {
+      "translation": "Export data for contacts",
+      "section": "uiRangeFollowUpsListPage"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP": {
+      "translation": "Follow-up",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE": {
+      "translation": "Original Start of the followup",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_ORIGINAL_START_DATE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_START_DATE": {
+      "translation": "Start of the followup",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_START_DATE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_END_DATE": {
+      "translation": "End of the followup",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_END_DATE_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_STATUS": {
+      "translation": "Follow-up final status",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_STATUS_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_GENERATE_FOLLOW_UPS_ONSET_CONTACT": {
+      "translation": "Start case follow-up on the date of onset",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_GENERATE_FOLLOW_UPS_DATE_OF_ONSET_DESCRIPTION": {
+      "translation": "",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_TEAM_ID": {
+      "translation": "Follow-up assigned team",
+      "section": "uiCaseFields"
+    },
+    "LNG_CASE_FIELD_LABEL_FOLLOW_UP_TEAM_ID_DESCRIPTION": {
+      "translation": "Follow-up team should be set only if you want all generated follow-ups to be assigned to a specific team (instead of using the nearest location auto-assign system)",
+      "section": "uiCaseFields"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CASE": {
+      "translation": "Case - bulk modify",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_BULK_MODIFY_CASE_DESCRIPTION": {
+      "translation": "This permission allows modifying cases in bulk",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONTACT_CREATE_FOLLOW_UP": {
+      "translation": "Contact - create follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CONTACT_CREATE_FOLLOW_UP_DESCRIPTION": {
+      "translation": "This permission allows creating contact follow-ups",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CASE_CREATE_FOLLOW_UP": {
+      "translation": "Case - create follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_CASE_CREATE_FOLLOW_UP_DESCRIPTION": {
+      "translation": "This permission allows creating case follow-ups",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_CHANGE_CASE_FINAL_FOLLOW_UP_STATUS": {
+      "translation": "Change case final follow-up status",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_CHANGE_CASE_FINAL_FOLLOW_UP_STATUS_DIALOG_TITLE": {
+      "translation": "Are you sure you want to change the 'Final follow-up status' for {{count}} case(s)?",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_CHANGE_CASE_FINAL_FOLLOW_UP_STATUS_DIALOG_SUCCESS_MSG": {
+      "translation": "Final status updated for {{count}} case(s)",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_ACTION_ADD_FOLLOW_UP": {
+      "translation": "Add follow-up",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_BULK_MODIFY_CASES_ACTION_MODIFY_CASES_SUCCESS_MESSAGE": {
+      "translation": "Cases modified",
+      "section": "uiBulkModifyCasesPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_FOLLOW_UPS_GROUP_BY_BUTTON": {
+      "translation": "Group by"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_DAILY_FOLLOW_UP_LIST_BUTTON": {
+      "translation": "Print daily follow-ups status",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_DAILY_FOLLOW_UP_LIST_TITLE": {
+      "translation": "Daily case follow-ups status",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_DAILY_FOLLOW_UPS_FORM_BUTTON": {
+      "translation": "Print daily follow-ups form",
+      "section": "uiCasesListPage"
+    },
+    "LNG_PAGE_LIST_CASES_EXPORT_DAILY_FOLLOW_UPS_FORM_TITLE": {
+      "translation": "Daily case follow-ups form",
+      "section": "uiCasesListPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_LIST": {
+      "translation": "Case - export follow-up list",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_LIST_DESCRIPTION": {
+      "translation": "This permission allows export of case follow-up list pdf document",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_FORM": {
+      "translation": "Case - export follow-up form",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_DAILY_FOLLOW_UP_FORM_DESCRIPTION": {
+      "translation": "This permission allows export of case follow-up form pdf document",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT": {
+      "translation": "Dashboard - export case follow-up success rate report",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_DASHBOARD_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION": {
+      "translation": "This permission allows export of case follow-up success rate report.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT": {
+      "translation": "Case - export follow-up success rate report"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_EXPORT_CASE_FOLLOW_UP_SUCCESS_RATE_REPORT_DESCRIPTION": {
+      "translation": "This permission allows export of case follow-up success rate report"
+    },
+    "LNG_PAGE_TITLE_DAILY_CASES_LIST": {
+      "translation": "Daily cases",
+      "section": "pdfExport"
+    },
+    "LNG_PAGE_DASHBOARD_CASES_FOLLOWUP_SUCCESS_RATE_REPORT_LABEL": {
+      "translation": "Cases follow up success rate",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_FOLLOWUP_LIST_TITLE": {
+      "translation": "Cases on the follow-up list ({{date}})",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_FOLLOWUP_LIST_TITLE_DESCRIPTION": {
+      "translation": "Shows the number of cases on follow-up list.",
+      "section": "uiDashboardPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_FROM_FOLLOW_UP_DASHLET": {
+      "translation": "Dashboard - view case from follow-up dashlet",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_FROM_FOLLOW_UP_DASHLET_DESCRIPTION": {
+      "translation": "This permission allows view of case from follow-up dashlet. If you have 'Case - list' permission then you will be able to click any option to see the records.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_FROM_FOLLOW_UP": {
+      "translation": "Case - count from follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_FROM_FOLLOW_UP_DESCRIPTION": {
+      "translation": "This permission allows counting cases from follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_LOST_TO_FOLLOW_UP": {
+      "translation": "Cases lost to follow-up",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_LOST_TO_FOLLOW_UP_DESCRIPTION": {
+      "translation": "Shows the number of cases who are lost to follow-up.",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_LIST_FILTER_CASES_LOST_TO_FOLLOW_UP": {
+      "translation": "Cases lost to follow-up",
+      "section": "uiListFiltersPageTitles"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_LOST_TO_FOLLOW_UP_DASHLET": {
+      "translation": "Dashboard - view case lost to follow-up dashlet",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_LOST_TO_FOLLOW_UP_DASHLET_DESCRIPTION": {
+      "translation": "This permission allows view of case lost to follow-up dashlet. If you have 'Case - list' permission then you will be able to click any option to see the records.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_LOST_TO_FOLLOW_UP": {
+      "translation": "Case - count lost to follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_LOST_TO_FOLLOW_UP_DESCRIPTION": {
+      "translation": "This permission allows counting cases lost to follow-up",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_NOT_SEEN_TITLE_AFTER_VALUE": {
+      "translation": "days",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_NOT_SEEN_TITLE_BEFORE_VALUE": {
+      "translation": "Cases not seen in",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_NOT_SEEN_TITLE_BEFORE_VALUE_DESCRIPTION": {
+      "translation": "Shows the number of cases not seen in X days.",
+      "section": "uiDashboardPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_SEEN_IN_X_DAYS_DASHLET": {
+      "translation": "Dashboard - view case not seen in x days dashlet",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_NOT_SEEN_IN_X_DAYS_DASHLET_DESCRIPTION": {
+      "translation": "This permission allows view of case not seen in x days dashlet. If you have 'Case - list' permission then you will be able to click any option to see the records.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_NOT_SEEN_IN_X_DAYS": {
+      "translation": "Case - count not seen in x days",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_NOT_SEEN_IN_X_DAYS_DESCRIPTION": {
+      "translation": "This permission allows counting cases not seen in x days",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_SEEN_EACH_DAY": {
+      "translation": "Cases seen ({{date}})",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_SEEN_EACH_DAY_DESCRIPTION": {
+      "translation": "Shows the number of cases seen each day.",
+      "section": "uiDashboardPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SEEN_DASHLET": {
+      "translation": "Dashboard - view seen cases dashlet",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SEEN_DASHLET_DESCRIPTION": {
+      "translation": "This permission allows view of caset that were seen dashlet. If you have 'Case - list' permission then you will be able to click any option to see the records.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SEEN": {
+      "translation": "Case - count seen",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SEEN_DESCRIPTION": {
+      "translation": "This permission allows counting seen cases",
+      "section": "availablePermissions"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_WITH_SUCCESSFUL_FOLLOW_UP": {
+      "translation": "Cases with successful follow-up ({{date}})",
+      "section": "uiDashboardPage"
+    },
+    "LNG_PAGE_DASHBOARD_KPI_CASES_WITH_SUCCESSFUL_FOLLOW_UP_DESCRIPTION": {
+      "translation": "Shows the proportion of cases successfully followed-up each day.",
+      "section": "uiDashboardPage"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUCCESSFUL_FOLLOW_UPS_DASHLET": {
+      "translation": "Dashboard - view cases with successful follow-ups dashlet",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_VIEW_DASHBOARD_CASE_SUCCESSFUL_FOLLOW_UPS_DASHLET_DESCRIPTION": {
+      "translation": "This permission allows view of case that have successful follow-ups dashlet. If you have 'Case - list' permission then you will be able to click any option to see the records.",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SUCCESSFUL_FOLLOW_UPS": {
+      "translation": "Case - count successful follow-ups",
+      "section": "availablePermissions"
+    },
+    "LNG_ROLE_AVAILABLE_PERMISSIONS_COUNT_CASE_SUCCESSFUL_FOLLOW_UPS_DESCRIPTION": {
+      "translation": "This permission allows counting successful follow-ups cases",
+      "section": "availablePermissions"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CONTACT_OF_CONTACT": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to contact of contact?<br>Notes:<br> * All existing relationships will be kept.<br> * All future follow-ups will be deleted.{{isolatedContacts}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CONTACT_TO_CASE": {
+      "translation": "Are you sure you want to convert contact: '{{name}}' to case?<br>Notes:<br> * All existing relationships will be kept.<br> * All future follow-ups will be deleted.{{warning}}",
+      "section": "uiDialogs"
+    },
+    "LNG_DIALOG_CONFIRM_CONVERT_CASE_TO_CONTACT": {
+      "translation": "Are you sure you want to convert this case: '{{name}}' to contact?<br>Notes:<br> * All existing relationships will be kept.<br> * All future follow-ups will be deleted.{{isolatedContacts}}",
+      "section": "uiDialogs"
+    },
+    "LNG_FILE_NAME_RANGE_CASES_LIST": {
+      "translation": "Range_cases",
+      "section": "pdfExport"
+    },
+    "LNG_PAGE_TITLE_RANGE_CASES_LIST": {
+      "translation": "Range list of cases",
+      "section": "pdfExport"
+    },
+    "LNG_RANGE_FOLLOW_UPS_EXPORT_LIST_HEADER_ENTITY_TYPE_CASE": {
+      "translation": "Case",
+      "section": "pdfExport"
+    },
+    "LNG_RANGE_FOLLOW_UPS_EXPORT_LIST_HEADER_ENTITY_TYPE_CONTACT": {
+      "translation": "Contact",
+      "section": "pdfExport"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_ALL_RECORDS_NOT_IMPORTED": {
+      "translation": "All records weren't imported because of the following issues:",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PRE_VALIDATION": {
+      "translation": "Record {{recordNo}} didn't pass validation due to: {{message}}",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_SAME_ID": {
+      "translation": "Same UUID used multiple times",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_INVALID_NAME": {
+      "translation": "Invalid name",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_WRONG_PARENT": {
+      "translation": "Wrong parent, check that parentLocationId and parent.id match",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_FILE_NAME": {
+      "translation": "The same location with the same name already exists in file under the same parent",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_EXPORT_BUTTON": {
+      "translation": "Export follow-up data"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_INVALID_SYNONYMS": {
+      "translation": "Invalid synonyms",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_FILE_SYNONYMS": {
+      "translation": "Duplicate synonyms in file under the same parent",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_DB_NAME": {
+      "translation": "The same location with the same name already exists in database under the same parent",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_DUPLICATE_DB_SYNONYMS": {
+      "translation": "Duplicate synonyms in db under the same parent",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PARENT_MISSING": {
+      "translation": "Parent location missing from both the file and the database. If you have parent location in file, make sure the record is before the child location",
+      "section": "uiImportData"
+    },
+    "LNG_PAGE_IMPORT_DATA_ERROR_PARENT_LOOP": {
+      "translation": "Location is inside a loop. Please check the entire chain (both file data and database data)",
+      "section": "uiImportData"
+    },
+    "LNG_LAYOUT_MENU_ITEM_FOLLOW_UPS_LABEL": {
+      "translation": "Follow-ups"
+    },
+    "LNG_PAGE_LIST_FOLLOW_UPS_TITLE": {
+      "translation": "Follow-ups"
+    }
+  }
+}

@@ -11,7 +11,7 @@ const clusterHelpers = require('./../components/clusterHelpers');
  */
 const startServer = function (logger, startScheduler) {
   // load dependencies
-  const ip = require('ip');
+  const localIpAddress = require('local-ip-address');
   const _ = require('lodash');
   const got = require('got');
   const config = require('./config');
@@ -91,10 +91,19 @@ const startServer = function (logger, startScheduler) {
     const server = app.listen(function () {
       app.emit('started');
 
+      let baseUrl = `http://${localIpAddress()}:${config.port}`;
+       const corsUrl = `${localIpAddress()}:${config.port}`;
+            const whitelist = _.get(config, 'cors.whitelist', []);
+            const urlsToAdd = [`http://${corsUrl}`, `https://${corsUrl}`];
+            urlsToAdd.forEach(url => {
+              if (!whitelist.includes(url)) {
+                whitelist.push(url);
+              }
+            });
+            _.set(config, 'cors.whitelist', whitelist);
+
       if (config.enableConfigRewrite) {
         // try and figure out IP address
-        let baseUrl = `http://${ip.address()}:${config.port}`;
-
         app.logger.debug(`Trying to find server address. Testing: ${baseUrl}`);
 
         // test if that IP address is actually the correct one by making a status request

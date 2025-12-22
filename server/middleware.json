@@ -1,8 +1,14 @@
 {
-  "initial:before": {},
+  "initial:before": {
+    "./middleware/sanitizeLimit.js": {}
+  },
   "initial": {
     "compression": {},
-    "helmet#xssFilter": {},
+    "helmet#xssFilter": {
+      "params": {
+        "setOnOldIE": true
+      }
+    },
     "helmet#frameguard": {
       "params": [
         "deny"
@@ -10,8 +16,9 @@
     },
     "helmet#hsts": {
       "params": {
-        "maxAge": 0,
-        "includeSubDomains": true
+        "maxAge": 63072000,
+        "includeSubDomains": true,
+        "preload": true
       }
     },
     "helmet#hidePoweredBy": {},
@@ -19,7 +26,11 @@
     "helmet#noSniff": {}
   },
   "session": {},
-  "auth": {},
+  "auth": {
+    "loopback#token": {
+      "params": { "accessTokenId": "accessToken", "model": "accessToken" }
+    }
+  },
   "parse": {
     "body-parser#json": {
       "params": {

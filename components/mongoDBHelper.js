@@ -91,8 +91,10 @@ function getMongoDBOptionsFromLoopbackFilter(filter = {}) {
   filter.skip && (parsedFilter.skip = filter.skip);
 
   // limit
-  filter.limit && (parsedFilter.limit = filter.limit);
-
+  if ('limit' in filter) {
+    const limit = parseInt(filter.limit, 10);
+    parsedFilter.limit = isNaN(limit) ? 0 : Math.max(0, limit);
+  }
   // projection
   if (filter.fields) {
     parsedFilter.projection = getMongoDBProjectionFromLoopbackFields(filter.fields);

@@ -1154,7 +1154,9 @@ module.exports = function (User) {
       id: true,
       firstName: true,
       lastName: true,
-      email: true
+      email: true,
+      outbreakIds: true,
+      activeOutbreakId: true
     };
     if (deleted) {
       fields.deleted = true;

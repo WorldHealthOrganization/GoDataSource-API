@@ -356,9 +356,40 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.findFollowUps = function (filter, options, callback) {
-    // pre-filter using related data (case, contact)
-    app.models.followUp
-      .preFilterForOutbreak(this, filter)
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // handle contact filter like range API
+    let buildQuery = Promise.resolve();
+
+    if (!_.isEmpty(filter.where.contact)) {
+      const contactQuery = {
+        $and: [{ outbreakId: this.id }, filter.where.contact],
+      };
+
+      buildQuery = buildQuery
+        .then(() => {
+          // query person model (same as range API)
+          return app.models.person.rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
+            { projection: { _id: 1 } }
+          );
+        })
+        .then((contacts) => {
+          if (contacts && contacts.length > 0) {
+            filter.where.personId = { inq: contacts.map((c) => c.id) };
+          } else {
+            filter.where.personId = { inq: [] };
+          }
+          delete filter.where.contact;
+        });
+    }
+
+    buildQuery
+      .then(() => {
+        // pre-filter using related data (case, contact)
+        return app.models.followUp.preFilterForOutbreak(this, filter);
+      })
       .then(function (filter) {
         // replace nested geo points filters
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
@@ -399,9 +430,41 @@ module.exports = function (Outbreak) {
    * @param callback
    */
   Outbreak.prototype.filteredCountFollowUps = function (filter, options, callback) {
-    // pre-filter using related data (case, contact)
-    app.models.followUp
-      .preFilterForOutbreak(this, filter)
+    filter = filter || {};
+    filter.where = filter.where || {};
+
+    // handle contact filter same as in findFollowUps
+    let buildQuery = Promise.resolve();
+
+    if (!_.isEmpty(filter.where.contact)) {
+      const contactQuery = {
+        $and: [{ outbreakId: this.id }, filter.where.contact],
+      };
+
+      buildQuery = buildQuery
+        .then(() => {
+          // query person model (same as range API)
+          return app.models.person.rawFind(
+            app.utils.remote.convertLoopbackFilterToMongo(contactQuery),
+            { projection: { _id: 1 } }
+          );
+        })
+        .then((contacts) => {
+          if (contacts && contacts.length > 0) {
+            filter.where.personId = { inq: contacts.map((c) => c.id) };
+          } else {
+            filter.where.personId = { inq: [] };
+          }
+          delete filter.where.contact; // remove to prevent duplication
+        });
+    }
+
+    // wrap original logic inside buildQuery chain
+    buildQuery
+      .then(() => {
+        // pre-filter using related data (case, contact)
+        return app.models.followUp.preFilterForOutbreak(this, filter);
+      })
       .then(function (filter) {
         // replace nested geo points filters
         filter.where = app.utils.remote.convertNestedGeoPointsFilterToMongo(
