@@ -308,7 +308,7 @@ module.exports = function (Sync) {
                             // sync the record with the main database
                             dbSync.syncRecord(app, app.logger, syncModel, collectionRecord, reqOptions, (err, syncResult) => {
                               // generate follow-ups ?
-                              if (
+                              if (syncResult &&
                                 syncResult.flag === app.utils.dbSync.syncRecordFlags.CREATED &&
                                 automaticGenFollowupOutbreaks[syncResult.record.outbreakId] && (
                                   (

@@ -158,7 +158,16 @@ module.exports = function (SystemSettings) {
    * Expose build information via API
    * @param callback
    */
-  SystemSettings.getVersion = function (callback) {
+  SystemSettings.getVersion = function(req, callback) {
+    const STATIC_API_KEY = config.apiKey;
+
+    const receivedApiKey = req.headers['api-key'];
+    
+    if (receivedApiKey !== STATIC_API_KEY) {
+      const error = new Error('Unauthorized: Invalid API Key');
+      error.statusCode = 401;
+      return callback(error);
+    }
     callback(
       null,
       Object.assign(

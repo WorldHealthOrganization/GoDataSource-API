@@ -299,39 +299,120 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
 
             // create update outbreak template
             const createUpdateOutbreakTemplate = () => {
-              // create list of templates that we need to retrieve
-              const templateItemsMap = {};
-              templateData.outbreakTemplates.forEach((tempData) => {
-                templateItemsMap[tempData.id] = tempData;
-              });
 
-              // check if template exists or we need to create it
-              const jobs = [];
-              const templatesAlreadyHandled = {};
-              return outbreakTemplate
-                .find({
-                  _id: {
-                    $in: Object.keys(templateItemsMap)
-                  }
+              //delete old monkeypox template(s) to avoid confusion with new updated one in v2.50.2
+              const deleteOldMonkeypox = outbreakTemplate
+                .deleteMany({
+                  name: { $regex: /^\s*monkeypox\s*$/i },
                 })
-                .toArray()
-                .then((templateDataModels) => {
-                  // create update jobs if necessary
-                  templateDataModels.forEach((templateDataModel) => {
-                    // remove from create
-                    templatesAlreadyHandled[templateDataModel._id] = true;
+                .then((result) => {
+                  if (result.deletedCount > 0) {
+                    console.log(
+                      `Deleted ${result.deletedCount} existing 'Monkeypox' template(s).`
+                    );
+                  } else {
+                    console.log('No existing Monkeypox templates found.');
+                  }
+                });
 
-                    // log
-                    const refItem = templateItemsMap[templateDataModel._id];
-                    console.log(`Updating default template '${refItem.name}'`);
+              return deleteOldMonkeypox.then(() => {
+              // create list of templates that we need to retrieve
+                const templateItemsMap = {};
+                templateData.outbreakTemplates.forEach((tempData) => {
+                  templateItemsMap[tempData.id] = tempData;
+                });
 
-                    // update
-                    jobs.push(
-                      outbreakTemplate
-                        .updateOne({
-                          _id: templateDataModel._id
-                        }, {
-                          $set: {
+                // check if template exists or we need to create it
+                const jobs = [];
+                const templatesAlreadyHandled = {};
+                return outbreakTemplate
+                  .find({
+                    _id: {
+                      $in: Object.keys(templateItemsMap)
+                    }
+                  })
+                  .toArray()
+                  .then((templateDataModels) => {
+                    // create update jobs if necessary
+                    templateDataModels.forEach((templateDataModel) => {
+                      // remove from create
+                      templatesAlreadyHandled[templateDataModel._id] = true;
+
+                      // log
+                      const refItem = templateItemsMap[templateDataModel._id];
+                      console.log(`Updating default template '${refItem.name}'`);
+
+                      // update
+                      jobs.push(
+                        outbreakTemplate
+                          .updateOne({
+                            _id: templateDataModel._id
+                          }, {
+                            $set: {
+                              name: refItem.name,
+                              description: refItem.description,
+                              disease: refItem.disease,
+                              periodOfFollowup: refItem.periodOfFollowup,
+                              frequencyOfFollowUp: refItem.frequencyOfFollowUp,
+                              frequencyOfFollowUpPerDay: refItem.frequencyOfFollowUpPerDay,
+                              generateFollowUpsOverwriteExisting: refItem.generateFollowUpsOverwriteExisting,
+                              generateFollowUpsKeepTeamAssignment: refItem.generateFollowUpsKeepTeamAssignment,
+                              generateFollowUpsTeamAssignmentAlgorithm: refItem.generateFollowUpsTeamAssignmentAlgorithm,
+                              generateFollowUpsDateOfLastContact: refItem.generateFollowUpsDateOfLastContact,
+                              generateFollowUpsWhenCreatingContacts: refItem.generateFollowUpsWhenCreatingContacts,
+                              intervalOfFollowUp: refItem.intervalOfFollowUp,
+                              noDaysAmongContacts: refItem.noDaysAmongContacts,
+                              noDaysInChains: refItem.noDaysInChains,
+                              noDaysNotSeen: refItem.noDaysNotSeen,
+                              noLessContacts: refItem.noLessContacts,
+                              longPeriodsBetweenCaseOnset: refItem.longPeriodsBetweenCaseOnset,
+                              noDaysNewContacts: refItem.noDaysNewContacts,
+                              caseInvestigationTemplate: refItem.caseInvestigationTemplate,
+                              contactInvestigationTemplate: refItem.contactInvestigationTemplate,
+                              eventInvestigationTemplate: refItem.eventInvestigationTemplate,
+                              caseFollowUpTemplate: refItem.caseFollowUpTemplate,
+                              contactFollowUpTemplate: refItem.contactFollowUpTemplate,
+                              labResultsTemplate: refItem.labResultsTemplate,
+                              isContactLabResultsActive: refItem.isContactLabResultsActive,
+                              isContactsOfContactsActive: refItem.isContactsOfContactsActive,
+                              applyGeographicRestrictions: refItem.applyGeographicRestrictions,
+                              checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
+                              disableModifyingLegacyQuestionnaire: refItem.disableModifyingLegacyQuestionnaire,
+                              allowCasesFollowUp: refItem.allowCasesFollowUp,
+                              periodOfFollowupCases: refItem.periodOfFollowupCases,
+                              frequencyOfFollowUpCases: refItem.frequencyOfFollowUpCases,
+                              frequencyOfFollowUpPerDayCases: refItem.frequencyOfFollowUpPerDayCases,
+                              intervalOfFollowUpCases: refItem.intervalOfFollowUpCases,
+                              generateFollowUpsOverwriteExistingCases: refItem.generateFollowUpsOverwriteExistingCases,
+                              generateFollowUpsKeepTeamAssignmentCases: refItem.generateFollowUpsKeepTeamAssignmentCases,
+                              generateFollowUpsTeamAssignmentAlgorithmCases: refItem.generateFollowUpsTeamAssignmentAlgorithmCases,
+                              generateFollowUpsDateOfOnset: refItem.generateFollowUpsDateOfOnset,
+                              generateFollowUpsWhenCreatingCases: refItem.generateFollowUpsWhenCreatingCases,
+                              visibleAndMandatoryFields: refItem.visibleAndMandatoryFields,
+                              deleted: false,
+                              deletedAt: null
+                            }
+                          })
+                      );
+                    });
+                  })
+                  .then(() => {
+                    // create item that weren't updated
+                    Object.keys(templateItemsMap).forEach((tempItemId) => {
+                      // handled ?
+                      if (templatesAlreadyHandled[tempItemId]) {
+                        return;
+                      }
+
+                      // log
+                      const refItem = templateItemsMap[tempItemId];
+                      console.log(`Creating default template '${refItem.name}'`);
+
+                      // create
+                      jobs.push(
+                        outbreakTemplate
+                          .insert({
+                            _id: tempItemId,
                             name: refItem.name,
                             description: refItem.description,
                             disease: refItem.disease,
@@ -360,7 +441,7 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                             isContactsOfContactsActive: refItem.isContactsOfContactsActive,
                             applyGeographicRestrictions: refItem.applyGeographicRestrictions,
                             checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
-                            disableModifyingLegacyQuestionnaire: refItem.disableModifyingLegacyQuestionnaire,
+                            disableEditingLegacyQuestionnaire: refItem.disableEditingLegacyQuestionnaire,
                             allowCasesFollowUp: refItem.allowCasesFollowUp,
                             periodOfFollowupCases: refItem.periodOfFollowupCases,
                             frequencyOfFollowUpCases: refItem.frequencyOfFollowUpCases,
@@ -371,86 +452,25 @@ const createUpdateDefaultOutbreakTemplates = (outbreakTemplatesDirPath) => {
                             generateFollowUpsTeamAssignmentAlgorithmCases: refItem.generateFollowUpsTeamAssignmentAlgorithmCases,
                             generateFollowUpsDateOfOnset: refItem.generateFollowUpsDateOfOnset,
                             generateFollowUpsWhenCreatingCases: refItem.generateFollowUpsWhenCreatingCases,
+                            visibleAndMandatoryFields: refItem.visibleAndMandatoryFields,
                             deleted: false,
-                            deletedAt: null
-                          }
-                        })
-                    );
-                  });
-                })
-                .then(() => {
-                  // create item that weren't updated
-                  Object.keys(templateItemsMap).forEach((tempItemId) => {
-                    // handled ?
-                    if (templatesAlreadyHandled[tempItemId]) {
-                      return;
-                    }
-
-                    // log
-                    const refItem = templateItemsMap[tempItemId];
-                    console.log(`Creating default template '${refItem.name}'`);
-
-                    // create
-                    jobs.push(
-                      outbreakTemplate
-                        .insert({
-                          _id: tempItemId,
-                          name: refItem.name,
-                          description: refItem.description,
-                          disease: refItem.disease,
-                          periodOfFollowup: refItem.periodOfFollowup,
-                          frequencyOfFollowUp: refItem.frequencyOfFollowUp,
-                          frequencyOfFollowUpPerDay: refItem.frequencyOfFollowUpPerDay,
-                          generateFollowUpsOverwriteExisting: refItem.generateFollowUpsOverwriteExisting,
-                          generateFollowUpsKeepTeamAssignment: refItem.generateFollowUpsKeepTeamAssignment,
-                          generateFollowUpsTeamAssignmentAlgorithm: refItem.generateFollowUpsTeamAssignmentAlgorithm,
-                          generateFollowUpsDateOfLastContact: refItem.generateFollowUpsDateOfLastContact,
-                          generateFollowUpsWhenCreatingContacts: refItem.generateFollowUpsWhenCreatingContacts,
-                          intervalOfFollowUp: refItem.intervalOfFollowUp,
-                          noDaysAmongContacts: refItem.noDaysAmongContacts,
-                          noDaysInChains: refItem.noDaysInChains,
-                          noDaysNotSeen: refItem.noDaysNotSeen,
-                          noLessContacts: refItem.noLessContacts,
-                          longPeriodsBetweenCaseOnset: refItem.longPeriodsBetweenCaseOnset,
-                          noDaysNewContacts: refItem.noDaysNewContacts,
-                          caseInvestigationTemplate: refItem.caseInvestigationTemplate,
-                          contactInvestigationTemplate: refItem.contactInvestigationTemplate,
-                          eventInvestigationTemplate: refItem.eventInvestigationTemplate,
-                          caseFollowUpTemplate: refItem.caseFollowUpTemplate,
-                          contactFollowUpTemplate: refItem.contactFollowUpTemplate,
-                          labResultsTemplate: refItem.labResultsTemplate,
-                          isContactLabResultsActive: refItem.isContactLabResultsActive,
-                          isContactsOfContactsActive: refItem.isContactsOfContactsActive,
-                          applyGeographicRestrictions: refItem.applyGeographicRestrictions,
-                          checkLastContactDateAgainstDateOnSet: refItem.checkLastContactDateAgainstDateOnSet,
-                          disableEditingLegacyQuestionnaire: refItem.disableEditingLegacyQuestionnaire,
-                          allowCasesFollowUp: refItem.allowCasesFollowUp,
-                          periodOfFollowupCases: refItem.periodOfFollowupCases,
-                          frequencyOfFollowUpCases: refItem.frequencyOfFollowUpCases,
-                          frequencyOfFollowUpPerDayCases: refItem.frequencyOfFollowUpPerDayCases,
-                          intervalOfFollowUpCases: refItem.intervalOfFollowUpCases,
-                          generateFollowUpsOverwriteExistingCases: refItem.generateFollowUpsOverwriteExistingCases,
-                          generateFollowUpsKeepTeamAssignmentCases: refItem.generateFollowUpsKeepTeamAssignmentCases,
-                          generateFollowUpsTeamAssignmentAlgorithmCases: refItem.generateFollowUpsTeamAssignmentAlgorithmCases,
-                          generateFollowUpsDateOfOnset: refItem.generateFollowUpsDateOfOnset,
-                          generateFollowUpsWhenCreatingCases: refItem.generateFollowUpsWhenCreatingCases,
-                          deleted: false,
-                          createdAt: common.install.timestamps.createdAt,
-                          createdBy: 'system',
-                          updatedAt: common.install.timestamps.updatedAt,
-                          updatedBy: 'system'
-                        })
-                    );
-                  });
-                })
-                .then(() => {
-                  return Promise
-                    .all(jobs)
-                    .then(() => {
-                      // log
-                      console.log('Finished creating / updating default template');
+                            createdAt: common.install.timestamps.createdAt,
+                            createdBy: 'system',
+                            updatedAt: common.install.timestamps.updatedAt,
+                            updatedBy: 'system'
+                          })
+                      );
                     });
-                });
+                  })
+                  .then(() => {
+                    return Promise
+                      .all(jobs)
+                      .then(() => {
+                        // log
+                        console.log('Finished creating / updating default template');
+                      });
+                  });
+              });
             };
 
             // start creating / updating

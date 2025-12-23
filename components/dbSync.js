@@ -817,6 +817,13 @@ const syncRecord = function (app, logger, model, record, options, done) {
         // update geopoint properties
         convertGeoPointToLoopbackFormat(record, model);
 
+        if(model.modelName ==='template' && record.name &&  record.name.trim().toLowerCase() === 'monkeypox'){
+          return Promise.resolve({
+            record: 'dbRecord',
+            flag: syncRecordFlags.UNTOUCHED
+          });
+        } 
+
         log('debug', `Record not found (id: ${record.id}), creating record.`);
         return model
           .create(record, options)

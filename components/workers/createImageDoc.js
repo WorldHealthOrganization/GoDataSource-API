@@ -12,6 +12,7 @@ try {
   // !!!!!!!!!!!!!!!!!!
   // Note: Updating sharp library over version 0.28.3 will break current functionality in case of error as sharp will close the process and no longer throw error
   // See /lib/sharp.js in 0.29+ versions of sharp
+  // Now we can upgrade sharp to >=0.29.2 as the process exiting instead of throwing error is fixed from this version.
   // !!!!!!!!!!!!!!!!!!
   Sharp = require('sharp');
 

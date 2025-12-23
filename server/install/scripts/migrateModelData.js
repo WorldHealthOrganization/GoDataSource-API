@@ -251,12 +251,6 @@ const migrationVersions = [{
 }, {
   version: '2.42.0',
   scripts: [{
-    fileName: 'template.js',
-    actions: [{
-      name: 'createUpdateDefaultOutbreakTemplates',
-      buildNo: 1
-    }]
-  }, {
     fileName: 'languageToken.js',
     actions: [{
       name: 'createUpdateLanguageTokens',
@@ -476,7 +470,23 @@ const migrationVersions = [{
       buildNo: 1
     }]
   }]
-}];
+},
+{
+  version: '2.50.2',
+  scripts: [{
+    fileName: 'template.js',
+    actions: [{
+      name: 'createUpdateDefaultOutbreakTemplates',
+      buildNo: 1
+    }]
+  },{
+      fileName: 'languageToken.js',
+      actions: [{
+      name: 'createUpdateLanguageTokens',
+      buildNo: 9
+    }]
+  }]
+},];
 
 /**
  * Walk through the migrationVersions and get actions that need to be executed based on the last execution map
